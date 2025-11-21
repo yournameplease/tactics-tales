@@ -276,7 +276,7 @@ function draw_shadow(c, draw, x, y)
 	pal()
 end
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-20 14:42:32",revision=33]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-21 02:33:38",revision=36]]
 -- tactics game
 -- ynp
 
@@ -303,14 +303,14 @@ include "tactics.lua"
 include "tasks.lua"
 
 function _init()
-  setup_battle({
-  	width=20, height=15
+  Battle:create({
+  	width=15, height=10
   })
 end
  
 function _draw()
   cls(22)
-  draw_tactics()
+  Battle:draw()
 end
  
 function get_joypad()
@@ -330,11 +330,14 @@ end
  
 function _update()
 	local joy = get_joypad()
-	update_tactics(joy)
+	Battle:update(joy)
 	update_tasks()
 end
+:: menu.lua
+--[[pod_format="raw",created="2025-11-21 02:41:45",modified="2025-11-21 02:42:24",revision=1]]
+
 :: tactics.lua
---[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-20 19:15:51",revision=293]]
+--[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-21 03:01:25",revision=335]]
 include "util.lua"
 include "tiles.lua"
 include "character.lua"
@@ -362,11 +365,37 @@ local TEXT_HEIGHT = 7
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
-local units = {}
--- ensure units have unique ids
-local index_counter = 1
--- map of [x][y] for each entity in the map
-local tile_contents = {}
+Battle = {}
+
+function Battle:create(map_info)
+	self.units = {}
+	self.index_counter = 1
+	-- map of [x][y] for each entity in the map
+	self.tile_contents = {}
+	for i=0,map_info.width do
+		self.tile_contents[i] = {}
+	end
+	
+	set_menu("MENU_PLAYER_TURN")
+	
+	for i = 0,3 do
+		self:spawn_unit(generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
+	end
+	for i = 0,3 do
+		self:spawn_unit(generate_character(), 7 + i%2, 3+i*2, SIDE_ENEMY)
+	end
+end
+
+function Battle:get_unit_by_id(id)
+	return self.units[id]
+end
+
+function Battle:get_unit_at_coordinates(x, y)
+	local unit_id = self.tile_contents[x][y]
+	if unit_id == nil then return nil end
+	return self:get_unit_by_id(unit_id)
+end
+
 
 -- map_info
 -- width
@@ -379,7 +408,7 @@ local CURSOR_HORIZONTAL_LIST = 2
 -- step data helpers
 
 function get_unit_from_step(menu_state, step)
-	return units[menu_state.selections[step].unit]
+	return Battle:get_unit_by_id(menu_state.selections[step].unit)
 end
 
 -- unit filters
@@ -472,8 +501,8 @@ function tiles_with_distance_from_unit(position_step, min_distance, max_distance
 end
 
 function tiles_in_movement_range(menu_state)
-	local unit = menu_state.selections["SELECT_UNIT"].unit
-	local unit_data = units[unit].tactics_data
+	local unit = Battle:get_unit_by_id(menu_state.selections["SELECT_UNIT"].unit)
+	local unit_data = unit.tactics_data
 	
 	return find_reachable_tiles(unit_data.x, unit_data.y, 6)
 end
@@ -497,16 +526,17 @@ end
 
 function selected_unit_mapper(filter)
 	return function (active_cursor)
-		local selected_unit = tile_contents[active_cursor.x][active_cursor.y]
+		local selected_unit = 
+			Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
 		if selected_unit == nil then
 			return false, nil
 		end
 		if filter ~= nil then
-			if not filter(units[selected_unit]) then
+			if not filter(selected_unit) then
 				return false, nil
 			end
 		end
-		return true, {unit = selected_unit}
+		return true, {unit = selected_unit.tactics_data.id}
 	end
 end
 
@@ -515,7 +545,7 @@ function selected_tile_mapper (active_cursor)
 end
 
 function selected_empty_tile_mapper (active_cursor)
-	local selected_unit = tile_contents[active_cursor.x][active_cursor.y]
+	local selected_unit = Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
 	if selected_unit == nil then
 		return true, {x = active_cursor.x, y = active_cursor.y}
 	end
@@ -524,20 +554,24 @@ end
 
 -- handlers
 
-function handle_move_unit(menu_state, active_cursor)
+function Battle:handle_move_unit(menu_state, active_cursor)
 	local selections = menu_state.selections
 
 	local unit = get_unit_from_step(menu_state, "SELECT_UNIT")
 	local x = selections["SELECT_DESTINATION"].x
 	local y = selections["SELECT_DESTINATION"].y
 	
-	move_unit(unit, x, y)
+	self:move_unit(unit, x, y)
 	unit.tactics_data.has_acted = true
 	
 	set_menu("MENU_PLAYER_TURN")
 end
 
-function handle_move_and_attack(menu_state, active_cursor)
+function handle_move_unit(menu_state, active_cursor)
+	Battle:handle_move_unit(menu_state, active_cursor)
+end
+
+function Battle:handle_move_and_attack(menu_state, active_cursor)
 	local selections = menu_state.selections
 
 	local unit = get_unit_from_step(menu_state, "SELECT_UNIT")
@@ -545,11 +579,15 @@ function handle_move_and_attack(menu_state, active_cursor)
 	local y = selections["SELECT_DESTINATION"].y
 	local target = get_unit_from_step(menu_state, "SELECT_TARGET")
 	
-	move_unit(unit, x, y)
+	self:move_unit(unit, x, y)
 	do_combat(unit, target)
 	unit.tactics_data.has_acted = true
 	
 	set_menu("MENU_PLAYER_TURN")
+end
+
+function handle_move_and_attack(menu_state, active_cursor)
+	Battle:handle_move_and_attack(menu_state, active_cursor)
 end
 
 -- kind
@@ -597,6 +635,7 @@ local MENU_DATA = {
 function handle_menu_select(menu_state, active_cursor)
 	local menu_data = MENU_DATA[menu_state.menu_id]
 	local step_data = menu_data.steps[menu_state.menu_step]
+	printh("Hi:"..menu_state.menu_step)
 	
 	if step_data.validator ~= nil then
 		local validation = step_data.validator(menu_state, active_cursor)
@@ -665,21 +704,6 @@ local update_cursor = {
 	end,
 }
 
-function setup_battle(map_info)
-	tile_contents = {}
-	for i=0,map_info.width do
-		tile_contents[i] = {}
-	end
-	
-	set_menu("MENU_PLAYER_TURN")
-	
-	for i = 0,3 do
-		spawn_unit(generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
-	end
-	for i = 0,3 do
-		spawn_unit(generate_character(), 7 + i%2, 3+i*2, SIDE_ENEMY)
-	end
-end
 
 function set_menu(menu_id)
 	-- TODO: make functional?
@@ -699,14 +723,20 @@ function set_menu(menu_id)
 	}
 end
 
-function spawn_unit(unit, x, y, side)
-	if tile_contents[x][y] ~= nil then
+function Battle:get_index()	
+	local index = self.index_counter
+	self.index_counter = self.index_counter + 1
+	return index
+end
+
+function Battle:spawn_unit(unit, x, y, side)
+	if self.tile_contents[x][y] ~= nil then
 		error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
 	end
 	
-	local id = index_counter
-	index_counter = index_counter + 1
+	local id = self:get_index()
 	
+	local unit_copy = deepcopy(unit)
 	local tactics_data = {
 		id = id,
 		x = x,
@@ -714,20 +744,21 @@ function spawn_unit(unit, x, y, side)
 		side = side,
 		has_acted = false
 	}
-	unit.tactics_data = tactics_data
-	units[id] = unit
-	tile_contents[x][y] = id
+	unit_copy.tactics_data = tactics_data
+	
+	self.units[id] = unit_copy
+	self.tile_contents[x][y] = id
 end
 
 function handle_select_grid_unit(active_cursor)
-	local selected_tile = tile_contents[active_cursor.x][active_cursor.y]
+	local selected_tile = Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
 	if selected_tile ~= nil then
 		error(selected_tile)
 	end
 end
 
-function update_tactics(joy)
-	for unit in all(units) do
+function Battle:update(joy)
+	for unit in all(self.units) do
 		unit:update_animation()
 	end
 
@@ -740,18 +771,18 @@ function update_tactics(joy)
 	end
 end
 
-function move_unit(unit, x, y)
-	assert(tile_contents[x][y] == nil)
+function Battle:move_unit(unit, x, y)
+	assert(self.tile_contents[x][y] == nil)
 	
 	-- TODO: animated movement
 	
-	tile_contents[unit.tactics_data.x][unit.tactics_data.y] = nil
-	tile_contents[x][y] = unit.tactics_data.id
+	self.tile_contents[unit.tactics_data.x][unit.tactics_data.y] = nil
+	self.tile_contents[x][y] = unit.tactics_data.id
 	unit.tactics_data.x = x
 	unit.tactics_data.y = y
 end
 
-function draw_tactics()
+function Battle:draw()
 	camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
 	
 	map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
@@ -784,7 +815,7 @@ function draw_tactics()
 		color()
 	end
 	
-	for unit in all(units) do
+	for unit in all(self.units) do
 		draw_unit(unit)
 	end
 	
@@ -817,7 +848,7 @@ function draw_tactics()
 	
 	camera()
 	
-	draw_tactics_debug()
+	self:draw_tactics_debug()
 end
 
 function draw_unit(unit)
@@ -856,7 +887,7 @@ function draw_health_bar(hp_current, hp_max, x, y, width, height)
 	rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-function draw_tactics_debug()
+function Battle:draw_tactics_debug()
 	print(menu_state.menu_id, 3, 3, 1)
 	print(menu_state.menu_step, 3, 11, 1)
 	print("x: "..(active_cursor.x or "nil"), 3, 19, 1)
@@ -1064,9 +1095,9 @@ function choose_random_from_list(list)
 	return list[i]
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-20 23:29:00",runtime=24,workspaces={{location="main.lua#20",workspace_index=1},{location="tactics.lua#62",workspace_index=1},{location="util.lua#29",workspace_index=1},{location="tiles.lua#38",workspace_index=1},{location="character.lua#57",workspace_index=1},{location="combat.lua#47",workspace_index=1},{location="draw.lua#10",workspace_index=1},{location="animation.lua#18",workspace_index=1},{location="tasks.lua#11",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25",runtime=24,workspaces={{location="main.lua#54",workspace_index=1},{location="tactics.lua#250",workspace_index=1},{location="util.lua#29",workspace_index=1},{location="tiles.lua#38",workspace_index=1},{location="character.lua#57",workspace_index=1},{location="combat.lua#47",workspace_index=1},{location="draw.lua#10",workspace_index=1},{location="animation.lua#18",workspace_index=1},{location="tasks.lua#11",workspace_index=1},{location="menu.lua#1",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-20 23:29:00"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0xOCAxNDowODowNyIscmV2aXNpb249OF1dbHo0ALcAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1134,14 +1165,14 @@ PvGgsQAfMk8AFPMZ-w9tSm4qLlpOai4q-lE6Llo_Kn4qXjouOv6AOi5KPjp_Kk46Pjr_OFgAHzRX
 ABRO8P--MtkADzMA--------------86XxAQBPDwMQD---------------------------------
 --------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-20 23:29:00"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAwMTo1MDo0NCIscmV2aXNpb249MTZdXWx6NAB-AAAAZAEAAP8Ge3tibXA9cHh1AEyADwoA
 AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEJ
 AwUCLGhpZGRlbj1mYWxzZSxwYW5feD0wCAC1eT0xNix0aWxlX2gKABB3CgCAem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-20 23:29:00"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
