@@ -1,5 +1,3 @@
-include "src/tasks.lua"
-
 function is_in_combat_range(attacker, defender)
     local a_x = attacker.x
     local a_y = attacker.y

@@ -21,9 +21,9 @@
 -- class progression
 -- inheritence?
 
-include "src/tasks.lua"
+include "src/systems/tasks.lua"
 
-BUS = include "src/event_bus.lua"
+BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
