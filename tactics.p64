@@ -70,10 +70,56 @@ function get_x_y_from_animation(animation_data)
 	local offset = track[animation_data.frame]
 	return offset * cos(direction), offset * sin(direction)
 end
+:: battle_unit.lua
+--[[pod_format="raw",created="2025-11-22 01:19:25",modified="2025-11-22 01:40:25",revision=9,xstickers={}]]
+
+local BattleUnit = {}
+
+local function access_fallback(table, key)
+    if table.source.stats[key] then
+        return table.source.stats[key]
+    end
+    
+    return table.source[key]
+end
+
+function BattleUnit.spawn(permanent_unit, x, y, side)
+    local instance = {
+		x = x,
+		y = y,
+		side = side,
+		hp_current = permanent_unit.stats.hp_max,
+		has_acted = false,
+		source = permanent_unit
+    }
+    
+    setmetatable(instance, {
+        __index = function(t, k)
+            if BattleUnit[k] then return BattleUnit[k] end
+            
+            return access_fallback(t, k)
+        end
+    })
+    
+    return instance
+end
+
+function BattleUnit:is_alive()
+    return self.hp_current > 0
+end
+
+return BattleUnit
 :: character.lua
---[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-20 01:20:55",revision=71]]
+--[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-22 01:45:48",revision=87,xstickers={}]]
 include "util.lua"
 include "animation.lua"
+
+local id_counter = IdCounter.new()
+local characters = {}
+
+local CharacterManager = {}
+
+
 
 local COLOR_SKIN = 4
 local COLOR_SKIN_SHADOW = 20
@@ -102,8 +148,8 @@ local BASE_WEAPON_SPRITE = 256 + 104
 Character = {}
 
 function Character:take_damage(amount)
-	local new_hp = mid(0, self.stats.hp_current - amount, self.stats.hp_max)
-	self.stats.hp_current = new_hp
+	local new_hp = mid(0, self.hp_current - amount, self.hp_max)
+	self.hp_current = new_hp
 end
 
 function Character:die()
@@ -186,34 +232,37 @@ function generate_appearance()
 	return appearance
 end
 
-function generate_character()
+function CharacterManager.generate_character()
 	local character = {
+		id = id_counter:get_id(),
 		appearance = generate_appearance(),
 		s = 264,
 		stats = {
 			hp_max = 10,
-			hp_current = 10,
 			damage = 5,
 			min_range = 1,
 			max_range = 1
-		},
-		animation_playing = false
+		}
 	}
 	
 	setmetatable(character, { __index = Character })
 	
+	characters[character.id] = character
+	
 	return character
 end
 
+
+return CharacterManager
 :: combat.lua
---[[pod_format="raw",created="2025-11-18 04:56:26",modified="2025-11-20 01:37:12",revision=31]]
+--[[pod_format="raw",created="2025-11-18 04:56:26",modified="2025-11-22 01:43:12",revision=35,xstickers={}]]
 include "tasks.lua"
 
 function is_in_combat_range(attacker, defender)
-	local a_x = attacker.tactics_data.x
-	local a_y = attacker.tactics_data.y
-	local d_x = defender.tactics_data.x
-	local d_y = defender.tactics_data.y
+	local a_x = attacker.x
+	local a_y = attacker.y
+	local d_x = defender.x
+	local d_y = defender.y
 	local min_range = attacker.stats.min_range
 	local max_range = attacker.stats.max_range
 	local dist = abs(a_x-d_x)+abs(a_y-d_y)
@@ -225,20 +274,16 @@ function deal_damage(attacker, defender)
 	defender:take_damage(attacker.stats.damage)
 end
 
-function is_alive(unit)
-	return unit.stats.hp_current > 0
-end
-
 function can_counterattack(defender, attacker)
 	return is_in_combat_range(defender, attacker)
-			and is_alive(defender)
-			and is_alive(attacker)
+			and defender:is_alive()
+			and attacker:is_alive()
 end
 
 function try_attack(attacker, defender)
 	local direction = atan2(
-		attacker.tactics_data.x - defender.tactics_data.x,
-		attacker.tactics_data.y - defender.tactics_data.y
+		attacker.x - defender.x,
+		attacker.y - defender.y
 	)		
 	attacker:start_animation("BUMP", direction)
 	while attacker.animation_playing do
@@ -256,6 +301,7 @@ function do_combat(attacker, defender)
 		assert(is_in_combat_range(attacker, defender))
 		
 		try_attack(attacker, defender)
+		printh("did attack")
 		
 		if can_counterattack(defender, attacker) then
 			try_attack(defender, attacker)
@@ -277,7 +323,7 @@ function draw_shadow(c, draw, x, y)
 	pal()
 end
 :: event_bus.lua
---[[pod_format="raw",created="2025-11-21 03:46:48",modified="2025-11-21 13:44:39",revision=9]]
+--[[pod_format="raw",created="2025-11-21 03:46:48",modified="2025-11-22 01:42:58",revision=10,xstickers={}]]
 
 local listeners = {}
 local event_bus = {}
@@ -292,7 +338,6 @@ end
 function event_bus.emit(event_name, args)
 	local slots = listeners[event_name]
 	if slots then
-		printh("event callback!")
 		for callback in all(slots) do
 			callback(args)
 		end
@@ -301,7 +346,7 @@ end
 
 return event_bus
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-21 14:27:03",revision=45]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-22 01:16:50",revision=46,xstickers={}]]
 -- tactics game
 -- ynp
 
@@ -329,6 +374,7 @@ include "tasks.lua"
 BUS = include "event_bus.lua"
 TACTICS = include "tactics.lua"
 TURN_MANAGER = include "turn_manager.lua"
+CHARACTER_MANAGER = include "character.lua"
 
 function _init()
   Battle:create({
@@ -365,12 +411,12 @@ end
 --[[pod_format="raw",created="2025-11-21 02:41:45",modified="2025-11-21 02:42:24",revision=1]]
 
 :: tactics.lua
---[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-21 14:27:49",revision=445]]
+--[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-22 01:38:28",revision=460,xstickers={}]]
 include "util.lua"
 include "tiles.lua"
-include "character.lua"
 include "combat.lua"
 include "draw.lua"
+local BattleUnit = include "battle_unit.lua"
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7
@@ -407,10 +453,10 @@ function Battle:create(map_info)
 	set_menu("MENU_PLAYER_TURN")
 	
 	for i = 0,3 do
-		self:spawn_unit(generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
+		self:spawn_unit(CHARACTER_MANAGER.generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
 	end
 	for i = 0,3 do
-		self:spawn_unit(generate_character(), 7 + i%2, 3+i*2, SIDE_ENEMY)
+		self:spawn_unit(CHARACTER_MANAGER.generate_character(), 7 + i%2, 3+i*2, SIDE_ENEMY)
 	end
 end
 
@@ -430,10 +476,10 @@ function Battle:get_targets_in_range(unit_id, x, y)
 	local min_range = attacker.stats.min_range
 	local max_range = attacker.stats.max_range
 	for target in all(self.units) do
-		if target.tactics_data.id ~= attacker.tactics_data.id then
+		if target.id ~= attacker.id then
 			if tile_has_distance_from_unit(
 					x, y,
-					target.tactics_data.x, target.tactics_data.y,
+					target.x, target.y,
 					min_range, max_range
 			) then
 				add(targets, target)		
@@ -458,7 +504,7 @@ function Battle:refresh_units(filter)
 	local units_to_refresh = self:get_units(filter)
 	
 	for unit in all(units_to_refresh) do
-		unit.tactics_data.has_acted = false
+		unit.has_acted = false
 	end
 end
 
@@ -480,11 +526,11 @@ end
 -- unit filters
 
 function unit_is_player(unit)
-	return unit.tactics_data.side == SIDE_PLAYER
+	return unit.side == SIDE_PLAYER
 end
 
 function unit_is_enemy(unit)
-	return unit.tactics_data.side == SIDE_ENEMY
+	return unit.side == SIDE_ENEMY
 end
 
 -- grid filters
@@ -516,10 +562,10 @@ function validate_tile_is_in_unit_attack_range(selection, ctx)
 	printh("target: ("..target_x..","..target_y..")")
 			
 	local target_unit = Battle:get_unit_at_coordinates(target_x, target_y)
-	printh(target_unit.tactics_data.side)
-	printh(unit.tactics_data.side)
+	printh(target_unit.side)
+	printh(unit.side)
 	if target_unit == nil then return false end
-	if target_unit.tactics_data.side == unit.tactics_data.side then return false end
+	if target_unit.side == unit.side then return false end
 	
 	return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
 end
@@ -530,7 +576,7 @@ function any_target_in_range(ctx)
 	local unit_x = destination.x
 	local unit_y = destination.y
 		
-	local units_in_range = Battle:get_targets_in_range(unit.tactics_data.id, unit_x, unit_y)
+	local units_in_range = Battle:get_targets_in_range(unit.id, unit_x, unit_y)
 	return #units_in_range > 0
 end
 
@@ -586,9 +632,8 @@ end
 
 function tiles_in_movement_range(ctx)
 	local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
-	local unit_data = unit.tactics_data
 	
-	return find_reachable_tiles(unit_data.x, unit_data.y, unit_data.side, 6)
+	return find_reachable_tiles(unit.x, unit.y, unit.side, 6)
 end
 
 function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
@@ -597,7 +642,7 @@ function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
 		return true
 	end
 	local acting_unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
-	return destination_unit.tactics_data.id == acting_unit.tactics_data.id
+	return destination_unit.id == acting_unit.id
 end
 
 function selected_empty_tile_mapper (active_cursor)
@@ -616,7 +661,7 @@ function Battle:handle_move_unit(ctx)
 	local y = ctx["destination"].y
 	
 	self:move_unit(unit, x, y)
-	unit.tactics_data.has_acted = true
+	unit.has_acted = true
 	
 	set_menu("MENU_PLAYER_TURN")
 end
@@ -631,7 +676,7 @@ function Battle:handle_move_and_attack(ctx)
 	
 	self:move_unit(unit, x, y)
 	do_combat(unit, target)
-	unit.tactics_data.has_acted = true
+	unit.has_acted = true
 	
 	set_menu("MENU_PLAYER_TURN")
 end
@@ -642,8 +687,8 @@ function grid_selection_is_available_player(grid_selection, ctx)
 	local unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
 	
 	if unit == nil then return false end
-	if unit.tactics_data.side ~= SIDE_PLAYER then return false end
-	if unit.tactics_data.has_acted then return false end
+	if unit.side ~= SIDE_PLAYER then return false end
+	if unit.has_acted then return false end
 	
 	return true
 end
@@ -726,7 +771,7 @@ function handle_menu_select()
 	printh("unit getting")
 		local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
 		if selected_unit ~= nil then
-			menu_selection.unit_id = selected_unit.tactics_data.id
+			menu_selection.unit_id = selected_unit.id
 		end
 	end
 	
@@ -810,30 +855,15 @@ function set_menu(menu_id)
 	}
 end
 
-function Battle:get_index()	
-	local index = self.index_counter
-	self.index_counter = self.index_counter + 1
-	return index
-end
-
 function Battle:spawn_unit(unit, x, y, side)
 	if self.tile_contents[x][y] ~= nil then
 		error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
 	end
 	
-	local id = self:get_index()
+	local battle_unit = BattleUnit.spawn(unit, x, y, side)
 	
-	local unit_copy = deepcopy(unit)
-	local tactics_data = {
-		id = id,
-		x = x,
-		y = y,
-		side = side,
-		has_acted = false
-	}
-	unit_copy.tactics_data = tactics_data
-	
-	self.units[id] = unit_copy
+	local id = battle_unit.id
+	self.units[id] = battle_unit
 	self.tile_contents[x][y] = id
 end
 
@@ -846,7 +876,7 @@ function Battle:update(joy)
 		if unit.animation_playing then
 			blocking_animation = true
 		end
-		if unit.tactics_data.side == SIDE_PLAYER and not unit.tactics_data.has_acted then
+		if unit.side == SIDE_PLAYER and not unit.has_acted then
 			all_players_acted = false
 		end
 	end
@@ -868,14 +898,14 @@ end
 function Battle:move_unit(unit, x, y)
 	local unit_id_at_destination = self.tile_contents[x][y]
 	assert(unit_id_at_destination == nil 
-		or unit_id_at_destination == unit.tactics_data.id)
+		or unit_id_at_destination == unit.id)
 	
 	-- TODO: animated movement
 	
-	self.tile_contents[unit.tactics_data.x][unit.tactics_data.y] = nil
-	self.tile_contents[x][y] = unit.tactics_data.id
-	unit.tactics_data.x = x
-	unit.tactics_data.y = y
+	self.tile_contents[unit.x][unit.y] = nil
+	self.tile_contents[x][y] = unit.id
+	unit.x = x
+	unit.y = y
 end
 
 function Battle:draw()
@@ -948,12 +978,12 @@ function Battle:draw()
 end
 
 function draw_unit(unit)
-	local side = unit.tactics_data.side
-	local x = unit.tactics_data.x
-	local y = unit.tactics_data.y
+	local side = unit.side
+	local x = unit.x
+	local y = unit.y
 	local s = unit.s
-	local s = unit.tactics_data.side
-	local has_acted = unit.tactics_data.has_acted
+	local s = unit.side
+	local has_acted = unit.has_acted
 	
 	local tile_x = x * TILE_WIDTH
 	local tile_y = y * TILE_HEIGHT
@@ -967,11 +997,11 @@ function draw_unit(unit)
 	end
 	draw_shadow(shadow_color, 
 		function(x,y) unit:draw(x, y, side, false) end,
-		tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)		
+		tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)	
 	
 	unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
 	
-	local hp_current = unit.stats.hp_current
+	local hp_current = unit.hp_current
 	local hp_max = unit.stats.hp_max
 	draw_health_bar(hp_current, hp_max, tile_x+1, tile_y+1, TILE_WIDTH-2, 4)
 end
@@ -993,7 +1023,7 @@ end
 
 return Battle
 :: tasks.lua
---[[pod_format="raw",created="2025-11-20 00:37:21",modified="2025-11-20 01:34:02",revision=3]]
+--[[pod_format="raw",created="2025-11-20 00:37:21",modified="2025-11-22 01:41:32",revision=5,xstickers={}]]
 local tasks = {}
 
 function start_routine(func)
@@ -1012,7 +1042,7 @@ function update_tasks()
     end
 end
 :: tiles.lua
---[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-21 04:33:55",revision=35]]
+--[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-22 01:38:43",revision=36,xstickers={}]]
 -- tile flags:
 -- 0: empty/solid
 -- 1-3: terrain type
@@ -1044,7 +1074,7 @@ function movement_cost(x, y, side)
 	
 	local unit = Battle:get_unit_at_coordinates(x, y)
 	if unit ~= nil then
-		if unit.tactics_data.side ~= side then return 999 end
+		if unit.side ~= side then return 999 end
 	end
 	
 	local flags = fget(tile)
@@ -1195,7 +1225,7 @@ end)
 
 return TurnManager
 :: util.lua
---[[pod_format="raw",created="2025-11-16 19:20:13",modified="2025-11-22 00:51:22",revision=5]]
+--[[pod_format="raw",created="2025-11-16 19:20:13",modified="2025-11-22 01:13:37",revision=10,xstickers={}]]
 
 -- http://lua-users.org/wiki/CopyTable
 function deepcopy(orig)
@@ -1230,10 +1260,25 @@ end
 function fn_true()
 	return true
 end
+
+
+IdCounter = {}
+
+function IdCounter:get_id()
+	local id = self.id_count
+	self.id_count = self.id_count + 1
+	return id
+end
+
+function IdCounter.new()
+	local counter = { id_count = 1 }
+	setmetatable(counter, { __index = IdCounter })
+	return counter
+end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22",runtime=24,workspaces={{location="main.lua#27",workspace_index=1},{location="tactics.lua#90",workspace_index=1},{location="tiles.lua#26",workspace_index=1},{location="character.lua#57",workspace_index=1},{location="combat.lua#47",workspace_index=1},{location="draw.lua#10",workspace_index=1},{location="animation.lua#18",workspace_index=1},{location="tasks.lua#11",workspace_index=1},{location="menu.lua#1",workspace_index=1},{location="event_bus.lua#17",workspace_index=1},{location="turn_manager.lua#2",workspace_index=1},{location="util.lua#33",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33",runtime=24,workspaces={{location="main.lua#59",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4},{location="main.lua#59",workspace_index=7},{location="character.lua#38,55",workspace_index=7},{location="battle_unit.lua#34,27",workspace_index=7},{location="tactics.lua#222,50",workspace_index=7},{location="tiles.lua#34,2",workspace_index=7},{location="tasks.lua#11,49",workspace_index=7},{location="combat.lua#30,45",workspace_index=7},{location="event_bus.lua#14,15",workspace_index=7}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0xOCAxNDowODowNyIscmV2aXNpb249OF1dbHo0ALcAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1301,14 +1346,14 @@ PvGgsQAfMk8AFPMZ-w9tSm4qLlpOai4q-lE6Llo_Kn4qXjouOv6AOi5KPjp_Kk46Pjr_OFgAHzRX
 ABRO8P--MtkADzMA--------------86XxAQBPDwMQD---------------------------------
 --------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAwMTo1MDo0NCIscmV2aXNpb249MTZdXWx6NAB-AAAAZAEAAP8Ge3tibXA9cHh1AEyADwoA
 AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEJ
 AwUCLGhpZGRlbj1mYWxzZSxwYW5feD0wCAC1eT0xNix0aWxlX2gKABB3CgCAem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1316,5 +1361,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: systems/.info.pod
---[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 00:51:22"]]
+--[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 01:49:33"]]
 :: [eoc]
