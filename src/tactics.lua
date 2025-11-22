@@ -557,14 +557,24 @@ function Battle:draw()
         -- highlight legal tiles
         if menu_state.legal_tiles ~= nil then
             fillp(
-                    0x66,
-                    0xCC,
-                    0x99,
-                    0x33,
-                    0x66,
-                    0xCC,
-                    0x99,
-                    0x33
+            -- 1:2 diagonal slashes
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111,
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111
+            -- 1:2 checkerboard
+                0x33,
+                0xCC,
+                0x33,
+                0xCC,
+                0x33,
+                0xCC,
+                0x33,
+                0xCC
             )
             poke(0x550b,0x3f)
             palt()
