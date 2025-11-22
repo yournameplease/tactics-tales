@@ -10,8 +10,17 @@ local COLOR_MENU_TEXT = 7
 local COLOR_MENU_HIGHLIGHT = 6
 local COLOR_MENU_HIGHLIGHT_TEXT = 32
 
+local COLOR_SCREEN_DECORATION_PRIMARY = 22
+local COLOR_SCREEN_DECORATION_HIGHLIGHT = 6
+local COLOR_SCREEN_DECORATION_SHADOW = 5
+local COLOR_SCREEN_DECORATION_INTERIOR = 21
+
+local SCREEN_WIDTH = 480
+local SCREEN_HEIGHT = 270
+local SCREEN_DECORATION_PADDING = 3
+
 local MAP_OFFSET_X = 154
-local MAP_OFFSET_Y = 9
+local MAP_OFFSET_Y = 11
 local MAP_WIDTH = 16
 local MAP_HEIGHT = 16
 local TILE_WIDTH = 20
@@ -538,7 +547,30 @@ function Battle:kill_unit(unit)
     unit:die()
 end
 
+function draw_menu_overlay()
+    local menu_boxes = {
+        {
+            x = SCREEN_DECORATION_PADDING, y = SCREEN_DECORATION_PADDING,
+            w = SCREEN_WIDTH - MAP_WIDTH * TILE_WIDTH - 4 * SCREEN_DECORATION_PADDING,
+            h = SCREEN_HEIGHT - 2 * SCREEN_DECORATION_PADDING
+        },
+        {
+            x = MAP_OFFSET_X, y = MAP_OFFSET_Y,
+            w = MAP_WIDTH * TILE_WIDTH,
+            h = MAP_HEIGHT * TILE_HEIGHT
+        },
+    }
+
+    for box in all(menu_boxes) do
+        rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
+        rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
+        rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
+    end
+end
+
 function Battle:draw()
+    draw_menu_overlay()
+
     camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
 
     -- draw row-by row, top to bottom aka back to front
@@ -665,11 +697,23 @@ function draw_health_bar(hp_current, hp_max, x, y, width, height)
 end
 
 function Battle:draw_tactics_debug()
-    print(menu_state.menu_id, 3, 3, 1)
-    print(menu_state.menu_step, 3, 11, 1)
-    print("x: "..(menu_selection.x or "nil"), 3, 19, 1)
-    print("y: "..(menu_selection.y or "nil"), 3, 27, 1)
-    print("i: "..(menu_selection.i or "nil"), 3, 35, 1)
+    --print(menu_state.menu_id, 3 + 3, 3-1 + 3, 7)
+    --print(menu_state.menu_id, 3 + 3+1, 3 + 3, 5)
+    print(menu_state.menu_id, 3 + 3, 3 + 3, 6)
+    --print(menu_state.menu_step, 3 + 3, 11-1 + 3, 7)
+    --print(menu_state.menu_step, 3 + 3+1, 11 + 3, 5)
+    print(menu_state.menu_step, 3 + 3, 11 + 3, 6)
+    --print("x: "..(menu_selection.x or "nil"), 3 + 3, 19-1 + 3, 7)
+    --print("x: "..(menu_selection.x or "nil"), 3 + 3+1, 19 + 3, 5)
+    print("x: "..(menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
+    --print("y: "..(menu_selection.y or "nil"), 3 + 3, 27-1 + 3, 7)
+    --print("y: "..(menu_selection.y or "nil"), 3 + 3+1, 27 + 3, 5)
+    print("y: "..(menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
+    --print("i: "..(menu_selection.i or "nil"), 3 + 3, 35-1 + 3, 7)
+    --print("i: "..(menu_selection.i or "nil"), 3 + 3+1, 35 + 3, 5)
+    print("i: "..(menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
+
+    print("ABCDEFGHIJKLMNOPQRSTUVWXYZABC", 4, 50, 6)
 end
 
 return Battle
