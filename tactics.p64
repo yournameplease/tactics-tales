@@ -7,33 +7,59 @@ version 2
 :: systems/
 :: tactics/
 :: animation.lua
---[[pod_format="raw",created="2025-11-19 14:13:42",modified="2025-11-20 01:41:01",revision=25]]
+--[[pod_format="raw",created="2025-11-19 14:13:42",modified="2025-11-22 04:48:01",revision=56,xstickers={}]]
+local ANIMATIONS = {}
 
+local function lerp_animation_handler(animation_data)
+	local d = animation_data.duration
+	local t = animation_data.frame
+	local x = animation_data.target_x
+	local y = animation_data.target_y
+	
+	
+	return t * (x) / d, t * (y) / d
+end
 
-local ANIMATIONS = {
+local function directional_offsets_animation_handler(animation_data)
+	local track = ANIMATIONS[animation_data.id].track
+	assert(animation_data.frame <= #track)
+	
+	local direction = animation_data.direction
+	local offset = track[animation_data.frame]
+	return offset * cos(direction), offset * sin(direction)
+end
+
+ANIMATIONS = {
+	["WALK"] = {
+		handler = lerp_animation_handler
+	},
 	["BUMP"] = {
 		duration = 10,
 		track = { -- list of offsets
 			0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
-		}
+		},
+		handler = directional_offsets_animation_handler
 	},
 	["DODGE"] = {
 		duration = 10,
 		track = { -- list of offsets
 			0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
-		}
+		},
+		handler = directional_offsets_animation_handler
 	},
 	["HURT"] = {
 		duration = 10,
 		track = { -- list of offsets
 			0, 0, 0, 0, 4, 6, 6, 6, 4, 2, 0
-		}
+		},
+		handler = directional_offsets_animation_handler
 	},
 	["DEATH"] = {
 		duration = 10,
 		track = { -- list of offsets
 			0, 1, 4,12, 12, 12, 12, 12, 12, 12, 12
-		}
+		},
+		handler = directional_offsets_animation_handler
 	}
 }
 
@@ -50,11 +76,29 @@ function create_animation(animation_id, direction)
 		playing = true
 	}
 	
+	setmetatable(animation_data, { __index = ANIMATIONS[animation_id] } )
+	
+	return animation_data
+end
+
+function create_walk_animation(target_x, target_y)
+	-- TODO: make this grid aligned animation
+	local animation_data = {
+		id = "WALK",
+		frame = 1,
+		target_x = target_x,
+		target_y = target_y,
+		duration = 40,
+		playing = true
+	}
+	
+	setmetatable(animation_data, { __index = ANIMATIONS["WALK"] } )
+	
 	return animation_data
 end
 
 function update_animation(animation_data)
-	if animation_data.frame >= #(ANIMATIONS[animation_data.id].track) then
+	if animation_data.frame >= animation_data.duration then
 		animation_data.playing = false
 	else
 		animation_data.frame = animation_data.frame + 1
@@ -64,12 +108,7 @@ end
 function get_x_y_from_animation(animation_data)
 	if animation_data == nil then return 0, 0 end
 
-	local track = ANIMATIONS[animation_data.id].track
-	assert(animation_data.frame <= #track)
-	
-	local direction = animation_data.direction
-	local offset = track[animation_data.frame]
-	return offset * cos(direction), offset * sin(direction)
+	return animation_data.handler(animation_data)
 end
 :: battle_unit.lua
 --[[pod_format="raw",created="2025-11-22 01:19:25",modified="2025-11-22 01:50:37",revision=10,xstickers={}]]
@@ -120,7 +159,7 @@ end
 
 return BattleUnit
 :: character.lua
---[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-22 02:22:08",revision=90,xstickers={}]]
+--[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-22 04:44:22",revision=95,xstickers={}]]
 include "util.lua"
 include "animation.lua"
 
@@ -160,6 +199,16 @@ Character = {}
 function Character:start_animation(animation_id, direction)
 	self.animation_data = create_animation(animation_id, direction)
 	self.animation_playing = true
+end
+
+function Character:start_walk_animation(target_x, target_y)
+	self.animation_data = create_walk_animation(target_x, target_y)
+	self.animation_playing = true
+end
+
+function Character:end_animation()
+	self.animation_data = nil
+	self.animation_playing = false
 end
 
 function Character:update_animation()
@@ -257,7 +306,7 @@ end
 
 return CharacterManager
 :: combat.lua
---[[pod_format="raw",created="2025-11-18 04:56:26",modified="2025-11-22 01:43:12",revision=35,xstickers={}]]
+--[[pod_format="raw",created="2025-11-18 04:56:26",modified="2025-11-22 04:30:05",revision=36,xstickers={}]]
 include "tasks.lua"
 
 function is_in_combat_range(attacker, defender)
@@ -299,7 +348,7 @@ function try_attack(attacker, defender)
 end
 
 function do_combat(attacker, defender)
-	start_routine(function()
+--	start_routine(function()
 		assert(is_in_combat_range(attacker, defender))
 		
 		try_attack(attacker, defender)
@@ -308,7 +357,7 @@ function do_combat(attacker, defender)
 		if can_counterattack(defender, attacker) then
 			try_attack(defender, attacker)
 		end
-	end)
+--	end)
 end
 :: draw.lua
 --[[pod_format="raw",created="2025-11-19 02:54:58",modified="2025-11-19 04:30:10",revision=4]]
@@ -414,7 +463,7 @@ end
 --[[pod_format="raw",created="2025-11-21 02:41:45",modified="2025-11-21 02:42:24",revision=1]]
 
 :: tactics.lua
---[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-22 03:48:42",revision=469,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-22 04:49:39",revision=481,xstickers={}]]
 include "util.lua"
 include "tiles.lua"
 include "combat.lua"
@@ -665,10 +714,18 @@ function Battle:handle_move_unit(ctx)
 	local x = ctx["destination"].x
 	local y = ctx["destination"].y
 	
-	self:move_unit(unit, x, y)
-	unit.has_acted = true
-	
-	set_menu("MENU_PLAYER_TURN")
+	start_routine(function()
+		unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+		while unit.animation_playing do
+			yield()
+		end
+		unit:end_animation()
+		
+		self:move_unit(unit, x, y)
+		unit.has_acted = true
+		
+		set_menu("MENU_PLAYER_TURN")
+	end)
 end
 
 BUS.on("MOVE_AND_WAIT", function(ctx) Battle:handle_move_unit(ctx) end)
@@ -679,11 +736,19 @@ function Battle:handle_move_and_attack(ctx)
 	local y = ctx["destination"].y
 	local target = get_unit_from_step(ctx, "target")
 	
-	self:move_unit(unit, x, y)
-	do_combat(unit, target)
-	unit.has_acted = true
+	start_routine(function()
+		unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+		while unit.animation_playing do
+			yield()
+		end
+		unit:end_animation()
+		
+		self:move_unit(unit, x, y)
+		do_combat(unit, target)
+		unit.has_acted = true
 	
-	set_menu("MENU_PLAYER_TURN")
+		set_menu("MENU_PLAYER_TURN")
+	end)
 end
 
 BUS.on("MOVE_AND_ATTACK", function(ctx) Battle:handle_move_and_attack(ctx) end)
@@ -1028,7 +1093,7 @@ end
 
 return Battle
 :: tactics/enemy_ai.lua
---[[pod_format="raw",created="2025-11-22 01:56:14",modified="2025-11-22 04:00:43",revision=34,xstickers={}]]
+--[[pod_format="raw",created="2025-11-22 01:56:14",modified="2025-11-22 04:06:33",revision=39,xstickers={}]]
 include "tiles.lua"
 
 --[[
@@ -1046,6 +1111,8 @@ function compute_enemy_ai(unit)
 	local enemies = Battle:get_units(unit_is_player)
 	
 	local potential_attacks = {}
+	local deep_moves = {}
+	
 	for e in all(enemies) do
 		local tiles_in_range = 
 			tiles_with_distance_from_tile(e.x, e.y, unit.stats.min_range, unit.stats.max_range)
@@ -1057,6 +1124,8 @@ function compute_enemy_ai(unit)
 				printh(x..","..y..":"..(reachable and "t" or "f").." cost: "..all_tile_costs[x][y].cost)
 						if all_tile_costs[x][y].cost <= unit.stats.movement then
 							add(potential_attacks, {x = x, y = y, target = e})
+						else
+							add(deep_moves, {x = x, y = y})
 						end
 					end
 				end
@@ -1073,6 +1142,10 @@ function compute_enemy_ai(unit)
 		}
 		printh(unit.id .. " will attack "..choice.target.id)
 		BUS.emit("MOVE_AND_ATTACK", action_ctx)
+	elseif #deep_moves > 0 then
+		-- todo, find closest and follow back until in range
+	else
+		printh("WARN: No valid moves for "..unit.id.. "!")
 	end
 end
 
@@ -1350,9 +1423,9 @@ function IdCounter.new()
 	return counter
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:00:43",runtime=24,workspaces={{location="main.lua#59",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4},{location="main.lua#29,18",workspace_index=7},{location="character.lua#122,17",workspace_index=7},{location="tactics/enemy_ai.lua#43,14",workspace_index=7},{location="tiles.lua#138,38",workspace_index=7},{location="tactics.lua#66,20",workspace_index=7},{location="turn_manager.lua#17,2",workspace_index=7}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:49:39",runtime=24,workspaces={{location="main.lua#59",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4},{location="main.lua#29,18",workspace_index=7},{location="character.lua#48,27",workspace_index=7},{location="tactics/enemy_ai.lua#50,55",workspace_index=7},{location="tiles.lua#138,38",workspace_index=7},{location="tactics.lua#252,79",workspace_index=7},{location="turn_manager.lua#17,2",workspace_index=7},{location="animation.lua#101,23",workspace_index=7},{location="combat.lua#51,3",workspace_index=7},{location="battle_unit.lua",workspace_index=7}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:00:43"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:49:39"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0xOCAxNDowODowNyIscmV2aXNpb249OF1dbHo0ALcAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1420,14 +1493,14 @@ PvGgsQAfMk8AFPMZ-w9tSm4qLlpOai4q-lE6Llo_Kn4qXjouOv6AOi5KPjp_Kk46Pjr_OFgAHzRX
 ABRO8P--MtkADzMA--------------86XxAQBPDwMQD---------------------------------
 --------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:00:43"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:49:39"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAwMTo1MDo0NCIscmV2aXNpb249MTZdXWx6NAB-AAAAZAEAAP8Ge3tibXA9cHh1AEyADwoA
 AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEJ
 AwUCLGhpZGRlbj1mYWxzZSxwYW5feD0wCAC1eT0xNix0aWxlX2gKABB3CgCAem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:00:43"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 04:49:39"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1435,7 +1508,7 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: systems/.info.pod
---[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 04:00:43"]]
+--[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 04:49:39"]]
 :: tactics/.info.pod
---[[pod,created="2025-11-22 01:55:57",modified="2025-11-22 04:00:43"]]
+--[[pod,created="2025-11-22 01:55:57",modified="2025-11-22 04:49:39"]]
 :: [eoc]
