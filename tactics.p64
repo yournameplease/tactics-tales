@@ -4,6 +4,7 @@ version 2
 :: gfx/
 :: map/
 :: sfx/
+:: systems/
 :: animation.lua
 --[[pod_format="raw",created="2025-11-19 14:13:42",modified="2025-11-20 01:41:01",revision=25]]
 
@@ -275,18 +276,42 @@ function draw_shadow(c, draw, x, y)
 	draw(x, y+1)
 	pal()
 end
+:: event_bus.lua
+--[[pod_format="raw",created="2025-11-21 03:46:48",modified="2025-11-21 13:44:39",revision=9]]
+
+local listeners = {}
+local event_bus = {}
+
+function event_bus.on(event_name, callback)
+	if not listeners[event_name] then
+		listeners[event_name] = {}
+	end
+	add(listeners[event_name], callback)
+end
+
+function event_bus.emit(event_name, args)
+	local slots = listeners[event_name]
+	if slots then
+		printh("event callback!")
+		for callback in all(slots) do
+			callback(args)
+		end
+	end
+end
+
+return event_bus
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-21 02:33:38",revision=36]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-21 14:27:03",revision=45]]
 -- tactics game
 -- ynp
+
+-- MAJOR NEXT:  Finish menuing.  Send event messages on wait/attack
 
 -- TODO LIST
 -- unit stuff
 --   enemy ai
 -- animations
 -- - walk to destination
--- - combat "bumps" + screenshake
--- opposing units are solid in dijkstra
 
 -- PROTOTYPE GOALS
 -- Fully random characters, no story
@@ -299,8 +324,11 @@ end
 -- class progression
 -- inheritence?
 
-include "tactics.lua"
 include "tasks.lua"
+
+BUS = include "event_bus.lua"
+TACTICS = include "tactics.lua"
+TURN_MANAGER = include "turn_manager.lua"
 
 function _init()
   Battle:create({
@@ -337,7 +365,7 @@ end
 --[[pod_format="raw",created="2025-11-21 02:41:45",modified="2025-11-21 02:42:24",revision=1]]
 
 :: tactics.lua
---[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-21 03:01:25",revision=335]]
+--[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-21 14:27:49",revision=445]]
 include "util.lua"
 include "tiles.lua"
 include "character.lua"
@@ -396,6 +424,44 @@ function Battle:get_unit_at_coordinates(x, y)
 	return self:get_unit_by_id(unit_id)
 end
 
+function Battle:get_targets_in_range(unit_id, x, y)
+	local targets = {}
+	local attacker = self.units[unit_id]
+	local min_range = attacker.stats.min_range
+	local max_range = attacker.stats.max_range
+	for target in all(self.units) do
+		if target.tactics_data.id ~= attacker.tactics_data.id then
+			if tile_has_distance_from_unit(
+					x, y,
+					target.tactics_data.x, target.tactics_data.y,
+					min_range, max_range
+			) then
+				add(targets, target)		
+			end
+		end
+	end
+	return targets
+end
+
+function Battle:get_units(filter)
+	filter = filter or fn_true
+	local units = {}
+	for unit in all(self.units) do
+		if filter(unit) then
+			add(units, unit)
+		end
+	end
+	return units
+end
+
+function Battle:refresh_units(filter)
+	local units_to_refresh = self:get_units(filter)
+	
+	for unit in all(units_to_refresh) do
+		unit.tactics_data.has_acted = false
+	end
+end
+
 
 -- map_info
 -- width
@@ -407,8 +473,8 @@ local CURSOR_HORIZONTAL_LIST = 2
 
 -- step data helpers
 
-function get_unit_from_step(menu_state, step)
-	return Battle:get_unit_by_id(menu_state.selections[step].unit)
+function get_unit_from_step(ctx, step)
+	return Battle:get_unit_by_id(ctx[step].unit_id)
 end
 
 -- unit filters
@@ -430,43 +496,61 @@ end
 function tile_has_distance_from_unit(x1, y1, x2, y2, min_distance, max_distance)
 	max_distance = max_distance or min_distance
 	local distance = abs(x1-x2)+abs(y1-y2)
+	printh("distance: "..distance)
 	return distance >= min_distance and distance <= max_distance
 end
 
 -- validators
 
-function validate_tile_is_in_unit_attack_range(unit_step, position_step)
-	return function(menu_state, active_cursor)
-		local unit = get_unit_from_step(menu_state, unit_step)
-		local min_distance = unit.stats.min_range
-		local max_distance = unit.stats.max_range
-		local destination = menu_state.selections[position_step]
-		local unit_x = destination.x
-		local unit_y = destination.y
-		local target_x = active_cursor.x
-		local target_y = active_cursor.y
-		return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
-	end
+function validate_tile_is_in_unit_attack_range(selection, ctx)
+	local unit = get_unit_from_step(ctx, "acting_unit")
+	local min_distance = unit.stats.min_range
+	local max_distance = unit.stats.max_range
+	local destination = ctx["destination"]
+	local unit_x = destination.x
+	local unit_y = destination.y
+	local target_x = selection.x
+	local target_y = selection.y
+
+	printh("unit: ("..unit_x..","..unit_y..")")
+	printh("target: ("..target_x..","..target_y..")")
+			
+	local target_unit = Battle:get_unit_at_coordinates(target_x, target_y)
+	printh(target_unit.tactics_data.side)
+	printh(unit.tactics_data.side)
+	if target_unit == nil then return false end
+	if target_unit.tactics_data.side == unit.tactics_data.side then return false end
+	
+	return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
+end
+
+function any_target_in_range(ctx)
+	local unit = get_unit_from_step(ctx, "acting_unit")
+	local destination = ctx["destination"]
+	local unit_x = destination.x
+	local unit_y = destination.y
+		
+	local units_in_range = Battle:get_targets_in_range(unit.tactics_data.id, unit_x, unit_y)
+	return #units_in_range > 0
 end
 
 -- legal tile getters
 
-function tiles_with_distance_from_unit_attacks(unit_step, position_step)
-	return function(menu_state)
-		local unit = get_unit_from_step(menu_state, unit_step)
-		local min_distance = unit.stats.min_range
-		local max_distance = unit.stats.max_range
-		
-		return tiles_with_distance_from_unit
-			(position_step, min_distance, max_distance)
-			(menu_state)
-	end
+function tiles_with_distance_from_unit_attacks(ctx)
+	local unit = get_unit_from_step(ctx, "acting_unit")
+	local min_distance = unit.stats.min_range
+	local max_distance = unit.stats.max_range
+	
+	return tiles_with_distance_from_unit
+		(min_distance, max_distance)
+		(ctx)
+
 end
 
-function tiles_with_distance_from_unit(position_step, min_distance, max_distance)
+function tiles_with_distance_from_unit(min_distance, max_distance)
 	max_distance = max_distance or min_distance
-	return function(menu_state)
-		local destination = menu_state.selections[position_step]
+	return function(ctx)
+		local destination = ctx["destination"]
 		local dest_x = destination.x
 		local dest_y = destination.y
 		
@@ -500,48 +584,20 @@ function tiles_with_distance_from_unit(position_step, min_distance, max_distance
 	end
 end
 
-function tiles_in_movement_range(menu_state)
-	local unit = Battle:get_unit_by_id(menu_state.selections["SELECT_UNIT"].unit)
+function tiles_in_movement_range(ctx)
+	local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
 	local unit_data = unit.tactics_data
 	
-	return find_reachable_tiles(unit_data.x, unit_data.y, 6)
+	return find_reachable_tiles(unit_data.x, unit_data.y, unit_data.side, 6)
 end
 
--- select transitions
-
-function no_change_transition(next_step)
-	return function (menu_state, active_cursor)
-		menu_state.menu_step = next_step
+function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
+	local destination_unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
+	if destination_unit == nil then
+		return true
 	end
-end
-
-function new_list_transition(next_step, next_kind)
-	return function (menu_state, active_cursor)
-		menu_state.menu_step = next_step
-		active_cursor.i = 0
-	end
-end
-
--- selected data mappers
-
-function selected_unit_mapper(filter)
-	return function (active_cursor)
-		local selected_unit = 
-			Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
-		if selected_unit == nil then
-			return false, nil
-		end
-		if filter ~= nil then
-			if not filter(selected_unit) then
-				return false, nil
-			end
-		end
-		return true, {unit = selected_unit.tactics_data.id}
-	end
-end
-
-function selected_tile_mapper (active_cursor)
-	return true, {x = active_cursor.x, y = active_cursor.y}
+	local acting_unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
+	return destination_unit.tactics_data.id == acting_unit.tactics_data.id
 end
 
 function selected_empty_tile_mapper (active_cursor)
@@ -554,12 +610,10 @@ end
 
 -- handlers
 
-function Battle:handle_move_unit(menu_state, active_cursor)
-	local selections = menu_state.selections
-
-	local unit = get_unit_from_step(menu_state, "SELECT_UNIT")
-	local x = selections["SELECT_DESTINATION"].x
-	local y = selections["SELECT_DESTINATION"].y
+function Battle:handle_move_unit(ctx)
+	local unit = get_unit_from_step(ctx, "acting_unit")
+	local x = ctx["destination"].x
+	local y = ctx["destination"].y
 	
 	self:move_unit(unit, x, y)
 	unit.tactics_data.has_acted = true
@@ -567,17 +621,13 @@ function Battle:handle_move_unit(menu_state, active_cursor)
 	set_menu("MENU_PLAYER_TURN")
 end
 
-function handle_move_unit(menu_state, active_cursor)
-	Battle:handle_move_unit(menu_state, active_cursor)
-end
+BUS.on("MOVE_AND_WAIT", function(ctx) Battle:handle_move_unit(ctx) end)
 
-function Battle:handle_move_and_attack(menu_state, active_cursor)
-	local selections = menu_state.selections
-
-	local unit = get_unit_from_step(menu_state, "SELECT_UNIT")
-	local x = selections["SELECT_DESTINATION"].x
-	local y = selections["SELECT_DESTINATION"].y
-	local target = get_unit_from_step(menu_state, "SELECT_TARGET")
+function Battle:handle_move_and_attack(ctx)
+	local unit = get_unit_from_step(ctx, "acting_unit")
+	local x = ctx["destination"].x
+	local y = ctx["destination"].y
+	local target = get_unit_from_step(ctx, "target")
 	
 	self:move_unit(unit, x, y)
 	do_combat(unit, target)
@@ -586,8 +636,16 @@ function Battle:handle_move_and_attack(menu_state, active_cursor)
 	set_menu("MENU_PLAYER_TURN")
 end
 
-function handle_move_and_attack(menu_state, active_cursor)
-	Battle:handle_move_and_attack(menu_state, active_cursor)
+BUS.on("MOVE_AND_ATTACK", function(ctx) Battle:handle_move_and_attack(ctx) end)
+
+function grid_selection_is_available_player(grid_selection, ctx)
+	local unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
+	
+	if unit == nil then return false end
+	if unit.tactics_data.side ~= SIDE_PLAYER then return false end
+	if unit.tactics_data.has_acted then return false end
+	
+	return true
 end
 
 -- kind
@@ -599,108 +657,138 @@ local MENU_DATA = {
 		steps = {
 			["SELECT_UNIT"] = {
 				kind = CURSOR_GRID,
-				selected_data_mapper = selected_unit_mapper(unit_is_player),
-				select_transition = no_change_transition("SELECT_DESTINATION")
+				store_key = "acting_unit",
+				validator = grid_selection_is_available_player,
+				next_state = "SELECT_DESTINATION"
 			},
 			["SELECT_DESTINATION"] = {
 				kind = CURSOR_GRID,
-				selected_data_mapper = selected_empty_tile_mapper,
-				select_transition = new_list_transition("SELECT_ACTION"),
+				store_key = "destination",
+				validator = grid_selection_is_empty_or_acting_unit,
+				next_state = "SELECT_ACTION",
 				get_legal_tiles = tiles_in_movement_range
 			},
 			["SELECT_ACTION"] = {
 				kind = CURSOR_VERTICAL_LIST,
-				options = {
-					[1] = {
+				options_generator = function(ctx)
+					local options = {}
+					-- if target in range
+					if any_target_in_range(ctx) then
+						add(options, {
+							text = "Attack",
+							next_state = "SELECT_TARGET"
+						})
+					end
+					
+					add(options, {
 						text = "Wait",
-						select_transition = handle_move_unit
-					},
-					[2] = {
-						text = "Attack",
-						select_transition = no_change_transition("SELECT_TARGET")
-					}
-				}
+						finish_command = { kind = "MOVE_AND_WAIT" }
+					})
+					
+					return options
+				end
 			},
 			["SELECT_TARGET"] = {
 				kind = CURSOR_GRID,
-				validator = validate_tile_is_in_unit_attack_range("SELECT_UNIT", "SELECT_DESTINATION"),
-				selected_data_mapper = selected_unit_mapper(unit_is_enemy),
-				select_transition = handle_move_and_attack,
-				get_legal_tiles = tiles_with_distance_from_unit_attacks("SELECT_UNIT", "SELECT_DESTINATION")
+				store_key = "target",
+				validator = validate_tile_is_in_unit_attack_range,
+				finish_command = { kind = "MOVE_AND_ATTACK" },
+				get_legal_tiles = tiles_with_distance_from_unit_attacks
 			},
 		}
 	}
 }
 
-function handle_menu_select(menu_state, active_cursor)
+local menu_state = {}
+local menu_ctx = {}
+local menu_selection = {}
+local selection_history = {}
+
+function handle_menu_select()
 	local menu_data = MENU_DATA[menu_state.menu_id]
 	local step_data = menu_data.steps[menu_state.menu_step]
-	printh("Hi:"..menu_state.menu_step)
 	
 	if step_data.validator ~= nil then
-		local validation = step_data.validator(menu_state, active_cursor)
+		local validation = step_data.validator(menu_selection, menu_ctx)
 		if not validation then return end
 	end
 	
-	if step_data.options == nil then -- non-list transitions
-		local success, data = step_data.selected_data_mapper(active_cursor)
+	if menu_state.options ~= nil then
+		step_data = menu_state.options[menu_selection.i]
+	end	
 	
-		if not success then return end
-		
-		add(menu_state.step_history, menu_state.menu_step)
-		menu_state.selections[menu_state.menu_step] = data
+	add(selection_history, {
+		step = menu_state.menu_step, 
+		selection = menu_selection
+	})
 	
-		step_data.select_transition(menu_state, active_cursor)
-	else -- list transitions
-		add(menu_state.step_history, menu_state.menu_step)
-		menu_state.selections[menu_state.menu_step] = {i = active_cursor.i}
-	
-		step_data.options[active_cursor.i].select_transition(menu_state, active_cursor)
+	if step_data.kind == CURSOR_GRID then
+	printh("unit getting")
+		local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
+		if selected_unit ~= nil then
+			menu_selection.unit_id = selected_unit.tactics_data.id
+		end
 	end
-	populate_menu_state(menu_state)
+	
+	if step_data.store_key ~= nil then
+		printh("writing to "..step_data.store_key.."...")
+		printh("x="..(menu_selection.x or "nil"))
+		printh("y="..(menu_selection.y or "nil"))
+		printh("i="..(menu_selection.i or "nil"))
+		printh("unit_id="..(menu_selection.unit_id or "nil"))
+		menu_ctx[step_data.store_key] = deepcopy(menu_selection)
+	end
+	
+	if step_data.next_state ~= nil then
+		populate_menu_state(step_data.next_state, menu_ctx)
+	end
+	
+	if step_data.finish_command ~= nil then
+		printh("emitting "..step_data.finish_command.kind)
+		BUS.emit(step_data.finish_command.kind, menu_ctx)
+	end
 end
 
-function populate_menu_state(menu_state)
+function populate_menu_state(new_step, ctx)
+	menu_state.menu_step = new_step
+	
 	local menu_data = MENU_DATA[menu_state.menu_id]
 	local new_step_data = menu_data.steps[menu_state.menu_step]
 	menu_state.kind = new_step_data.kind
-	if new_step_data.options ~= nil then
-		menu_state.options = {}
-		for k,o in pairs(new_step_data.options) do
-			menu_state.options[k] = o.text
-		end 
+	if new_step_data.options_generator ~= nil then
+		menu_state.options = new_step_data.options_generator(ctx)
+		printh ("generated "..#menu_state.options.." options") 
+	else
+		menu_state.options = nil
 	end
 	if new_step_data.get_legal_tiles ~= nil then
-		menu_state.legal_tiles = new_step_data.get_legal_tiles(menu_state)
+		menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
+	else
+		menu_state.legal_tiles = nil
 	end
 end
 
-function handle_menu_back(menu_state, active_cursor)
-	local step_history = menu_state.step_history
-	if #step_history == 0 then return end
+function handle_menu_back()
+	if #selection_history == 0 then return end
 	
-	local previous_state = step_history[#step_history]
+	local previous_step = selection_history[#selection_history]
 	-- TODO: use this to get last cursor position
 	-- or, just push the entire active cursor onto a list
-	menu_state.selections[previous_state] = nil
-	menu_state.step_history[#step_history] = nil
-	no_change_transition(previous_state)(menu_state, active_cursor)
-	populate_menu_state(menu_state)
+	selection_history[#selection_history] = nil
+	populate_menu_state(previous_step.step, menu_ctx)
+	selection = previous_step.selection
 end
 
-local active_cursor = {}
-local menu_state = {}
-
 local update_cursor = {
-	[CURSOR_GRID] = function (menu_state, active_cursor, joy)
-		active_cursor.x = mid(0, active_cursor.x + joy.dxp, menu_state.x_max - 1)
-		active_cursor.y = mid(0, active_cursor.y + joy.dyp, menu_state.y_max - 1)
+	[CURSOR_GRID] = function (joy)
+		menu_selection.x = mid(0, menu_selection.x + joy.dxp, menu_state.x_max - 1)
+		menu_selection.y = mid(0, menu_selection.y + joy.dyp, menu_state.y_max - 1)
 	end,
-	[CURSOR_VERTICAL_LIST] = function (menu_state, active_cursor, joy)
-		active_cursor.i = mid(1, active_cursor.i + joy.dyp, #menu_state.options)
+	[CURSOR_VERTICAL_LIST] = function (joy)
+		menu_selection.i = mid(1, menu_selection.i + joy.dyp, #menu_state.options)
 	end,
-	[CURSOR_HORIZONTAL_LIST] = function (menu_state, active_cursor, joy)
-		active_cursor.i = mid(1, active_cursor.i + joy.dxp, #menu_state.options)
+	[CURSOR_HORIZONTAL_LIST] = function (joy)
+		menu_selection.i = mid(1, menu_selection.i + joy.dxp, #menu_state.options)
 	end,
 }
 
@@ -713,13 +801,12 @@ function set_menu(menu_id)
 		x_max = 20, -- TODO
 		y_max = 15, -- TODO
 		menu_id = menu_id,
-		menu_step = MENU_DATA[menu_id].initial_step,
-		selections = {},
-		step_history = {}
+		menu_step = MENU_DATA[menu_id].initial_step
 	}
-	active_cursor = {
+	menu_selection = {
 		x = 0,
-		y = 0
+		y = 0,
+		i = 0
 	}
 end
 
@@ -750,29 +837,38 @@ function Battle:spawn_unit(unit, x, y, side)
 	self.tile_contents[x][y] = id
 end
 
-function handle_select_grid_unit(active_cursor)
-	local selected_tile = Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
-	if selected_tile ~= nil then
-		error(selected_tile)
-	end
-end
-
 function Battle:update(joy)
+	local blocking_animation = false
+	local all_players_acted = true
+	
 	for unit in all(self.units) do
 		unit:update_animation()
+		if unit.animation_playing then
+			blocking_animation = true
+		end
+		if unit.tactics_data.side == SIDE_PLAYER and not unit.tactics_data.has_acted then
+			all_players_acted = false
+		end
+	end
+	
+	if blocking_animation then return end
+	if all_players_acted then
+		BUS.emit("TACTICS_END_PLAYER_TURN")
 	end
 
 	if joy.bp then
-		handle_menu_back(menu_state, active_cursor)
+		handle_menu_back()
 	elseif joy.ap then
-		handle_menu_select(menu_state, active_cursor)
+		handle_menu_select()
 	else
-		update_cursor[menu_state.kind](menu_state, active_cursor, joy)
+		update_cursor[menu_state.kind](joy)
 	end
 end
 
 function Battle:move_unit(unit, x, y)
-	assert(self.tile_contents[x][y] == nil)
+	local unit_id_at_destination = self.tile_contents[x][y]
+	assert(unit_id_at_destination == nil 
+		or unit_id_at_destination == unit.tactics_data.id)
 	
 	-- TODO: animated movement
 	
@@ -819,13 +915,13 @@ function Battle:draw()
 		draw_unit(unit)
 	end
 	
-	if active_cursor.x ~= nil and active_cursor.y ~= nil then
-		local x = active_cursor.x * TILE_WIDTH
-		local y = active_cursor.y * TILE_HEIGHT
+	if menu_selection.x ~= nil and menu_selection.y ~= nil then
+		local x = menu_selection.x * TILE_WIDTH
+		local y = menu_selection.y * TILE_HEIGHT
 		spr(CURSOR_SPRITE, x, y)
 		
 		if menu_state.kind == CURSOR_VERTICAL_LIST then
-			local selected_i = active_cursor.i
+			local selected_i = menu_selection.i
 			local options = menu_state.options
 			local PADDING = 2
 			
@@ -837,9 +933,9 @@ function Battle:draw()
 			for i,opt in ipairs(options) do
 				if i == selected_i then
 					rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-					print(opt, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+					print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
 				else
-					print(opt, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)				
+					print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)				
 				end
 			end
 			rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
@@ -890,10 +986,12 @@ end
 function Battle:draw_tactics_debug()
 	print(menu_state.menu_id, 3, 3, 1)
 	print(menu_state.menu_step, 3, 11, 1)
-	print("x: "..(active_cursor.x or "nil"), 3, 19, 1)
-	print("y: "..(active_cursor.y or "nil"), 3, 27, 1)
-	print("i: "..(active_cursor.i or "nil"), 3, 35, 1)
+	print("x: "..(menu_selection.x or "nil"), 3, 19, 1)
+	print("y: "..(menu_selection.y or "nil"), 3, 27, 1)
+	print("i: "..(menu_selection.i or "nil"), 3, 35, 1)
 end
+
+return Battle
 :: tasks.lua
 --[[pod_format="raw",created="2025-11-20 00:37:21",modified="2025-11-20 01:34:02",revision=3]]
 local tasks = {}
@@ -914,7 +1012,7 @@ function update_tasks()
     end
 end
 :: tiles.lua
---[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-20 14:28:18",revision=28]]
+--[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-21 04:33:55",revision=35]]
 -- tile flags:
 -- 0: empty/solid
 -- 1-3: terrain type
@@ -940,9 +1038,14 @@ local terrain_costs = {
 }
 
 -- cost to move onto x,y from any neighbor
-function movement_cost(x, y)
+function movement_cost(x, y, side)
 	local tile = mget(x,y)
 	if tile == nil then return 999 end
+	
+	local unit = Battle:get_unit_at_coordinates(x, y)
+	if unit ~= nil then
+		if unit.tactics_data.side ~= side then return 999 end
+	end
 	
 	local flags = fget(tile)
 	local solid = (flags & 0b0001) == 0b0001
@@ -960,7 +1063,7 @@ end
 -- @param total_cost The maximum cumulative cost allowed.
 -- @return A table 'reachable' where reachable[x][y] = true for all reachable
 --         tiles. Unreachable tiles will be nil.
-function find_reachable_tiles(start_x, start_y, total_cost)
+function find_reachable_tiles(start_x, start_y, side, total_cost)
     -- min_cost[x][y] = cost: Stores the minimum cost found *so far* to reach (x, y).
     local min_cost = {}
 
@@ -1039,7 +1142,7 @@ function find_reachable_tiles(start_x, start_y, total_cost)
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate the cost to enter the neighbor tile...
-                local cost_to_enter_v = movement_cost(vx, vy)
+                local cost_to_enter_v = movement_cost(vx, vy, side)
                 -- ...and the new total cost to reach it from our current path.
                 local new_cost_for_v = ucost + cost_to_enter_v
 
@@ -1062,8 +1165,37 @@ function find_reachable_tiles(start_x, start_y, total_cost)
     -- 6. Return the completed table of reachable tiles.
     return reachable
 end
+:: turn_manager.lua
+--[[pod_format="raw",created="2025-11-21 14:02:44",modified="2025-11-21 14:27:29",revision=8]]
+
+local TurnManager = {}
+
+BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
+	printh("Begin player turn!")
+	TACTICS:refresh_units()
+end)
+
+BUS.on("TACTICS_END_PLAYER_TURN", function()
+	printh("End player turn!")
+
+	BUS.emit("TACTICS_BEGIN_ENEMY_TURN")
+end)
+
+BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
+	printh("Begin enemy turn!")
+	
+	BUS.emit("TACTICS_END_ENEMY_TURN")
+end)
+
+BUS.on("TACTICS_END_ENEMY_TURN", function()
+	printh("End enemy turn!")
+	
+	BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
+end)
+
+return TurnManager
 :: util.lua
---[[pod_format="raw",created="2025-11-16 19:20:13",modified="2025-11-20 14:42:34",revision=3]]
+--[[pod_format="raw",created="2025-11-16 19:20:13",modified="2025-11-22 00:51:22",revision=5]]
 
 -- http://lua-users.org/wiki/CopyTable
 function deepcopy(orig)
@@ -1094,10 +1226,14 @@ function choose_random_from_list(list)
 	local i = rndi(#list)+1
 	return list[i]
 end
+
+function fn_true()
+	return true
+end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25",runtime=24,workspaces={{location="main.lua#54",workspace_index=1},{location="tactics.lua#250",workspace_index=1},{location="util.lua#29",workspace_index=1},{location="tiles.lua#38",workspace_index=1},{location="character.lua#57",workspace_index=1},{location="combat.lua#47",workspace_index=1},{location="draw.lua#10",workspace_index=1},{location="animation.lua#18",workspace_index=1},{location="tasks.lua#11",workspace_index=1},{location="menu.lua#1",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22",runtime=24,workspaces={{location="main.lua#27",workspace_index=1},{location="tactics.lua#90",workspace_index=1},{location="tiles.lua#26",workspace_index=1},{location="character.lua#57",workspace_index=1},{location="combat.lua#47",workspace_index=1},{location="draw.lua#10",workspace_index=1},{location="animation.lua#18",workspace_index=1},{location="tasks.lua#11",workspace_index=1},{location="menu.lua#1",workspace_index=1},{location="event_bus.lua#17",workspace_index=1},{location="turn_manager.lua#2",workspace_index=1},{location="util.lua#33",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0xOCAxNDowODowNyIscmV2aXNpb249OF1dbHo0ALcAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1165,18 +1301,20 @@ PvGgsQAfMk8AFPMZ-w9tSm4qLlpOai4q-lE6Llo_Kn4qXjouOv6AOi5KPjp_Kk46Pjr_OFgAHzRX
 ABRO8P--MtkADzMA--------------86XxAQBPDwMQD---------------------------------
 --------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAwMTo1MDo0NCIscmV2aXNpb249MTZdXWx6NAB-AAAAZAEAAP8Ge3tibXA9cHh1AEyADwoA
 AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEJ
 AwUCLGhpZGRlbj1mYWxzZSxwYW5feD0wCAC1eT0xNix0aWxlX2gKABB3CgCAem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-21 03:01:25"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 00:51:22"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
 AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
+:: systems/.info.pod
+--[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 00:51:22"]]
 :: [eoc]
