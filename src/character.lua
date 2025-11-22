@@ -8,8 +8,8 @@ local CharacterManager = {}
 
 
 
-local COLOR_SKIN = 4
-local COLOR_SKIN_SHADOW = 20
+local COLOR_SKIN = 29
+local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23
 local COLOR_BEARD = 22
 local COLOR_EYE = 21
@@ -106,15 +106,15 @@ function generate_appearance()
     end
 
     if appearance.sex == 0 then -- male
-        appearance.body = flr(rnd(6)/5)
-        appearance.beard = rndi(6)
+        appearance.body = rndi(4)
+        appearance.beard = rndi(7)
         if rnd(6) <= 1 then
             appearance.beard_color = choose_random_from_list(HAIR_COLORS)
         else
             appearance.beard_color = appearance.hair_color
         end
     else -- female
-        appearance.body = rndi(2)
+        appearance.body = rndi(4)
     end
 
     return appearance

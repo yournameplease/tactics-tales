@@ -13,7 +13,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = 32
 local MAP_OFFSET_X = 104
 local MAP_OFFSET_Y = 12
 local MAP_WIDTH = 15
-local MAP_HEIGHT = 10
+local MAP_HEIGHT = 15
 local TILE_WIDTH = 24
 local TILE_HEIGHT = 16
 local WALL_HEIGHT = 24
@@ -275,30 +275,29 @@ end
 BUS.on("MOVE_AND_WAIT", function(ctx) Battle:handle_move_unit(ctx) end)
 
 function Battle:handle_move_and_attack(ctx)
-    printh("here1")
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
     local target = get_unit_from_step(ctx, "target")
 
-    printh("here2")
     battle_is_blocked = true
     start_routine(function()
-        printh("here3")
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
         while unit.animation_playing do
             yield()
         end
         unit:end_animation()
-        printh("here4")
 
-        self:move_unit(unit, x, y)
         printh("here1")
+        self:move_unit(unit, x, y)
         do_combat(unit, target)
         unit.has_acted = true
+        printh("here2")
 
         set_menu("MENU_PLAYER_TURN")
+        printh("here3")
         battle_is_blocked = false
+        printh("here4")
     end)
 end
 
@@ -547,8 +546,8 @@ function Battle:draw()
         --map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
     -- TODO: preload layers
     local layers = fetch("map/0.map")
-    local layer_ground = layers[1].bmp
-    local layer_wall = layers[2].bmp
+    local layer_ground = layers[2].bmp
+    local layer_wall = layers[1].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
     for y = 0, MAP_HEIGHT-1 do
         map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)

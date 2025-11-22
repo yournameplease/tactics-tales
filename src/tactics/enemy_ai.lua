@@ -49,7 +49,28 @@ function compute_enemy_ai(unit)
         printh(unit.id .. " will attack "..choice.target.id)
         BUS.emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
-        -- todo, find closest and follow back until in range
+        local min_cost_deep_move = deep_moves[1]
+        local min_cost = 999
+        for deep_move in all(deep_moves) do
+            if all_tile_costs[deep_move.x][deep_move.y].cost < min_cost then
+                min_cost = all_tile_costs[deep_move.x][deep_move.y].cost
+                min_cost_deep_move = deep_move
+            end
+        end
+        -- follow until first tile in range
+        local x = min_cost_deep_move.x
+        local y = min_cost_deep_move.y
+        while all_tile_costs[x][y].cost > unit.stats.movement do
+            x = all_tile_costs[x][y].prev.x
+            y = all_tile_costs[x][y].prev.y
+        end
+
+        local action_ctx = {
+            acting_unit = { unit_id = unit.id },
+            destination = { x = x, y = y }
+        }
+        printh(unit.id .. " will move to "..x..","..y)
+        BUS.emit("MOVE_AND_WAIT", action_ctx)
     else
         printh("WARN: No valid moves for "..unit.id.. "!")
     end

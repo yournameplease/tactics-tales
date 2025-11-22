@@ -6,6 +6,7 @@ version 2
 :: sfx/
 :: src/
 :: src/combat/
+:: src/systems/
 :: src/tactics/
 :: main.lua
 --[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-22 17:27:48",revision=55,xstickers={}]]
@@ -118,53 +119,6 @@ function get_x_y_from_animation(animation_data)
 
     return animation_data.handler(animation_data)
 end
-:: src/battle_unit.lua
-
-local BattleUnit = {}
-
-local function access_fallback(table, key)
-    if table.source.stats[key] then
-        return table.source.stats[key]
-    end
-
-    return table.source[key]
-end
-
-function BattleUnit.spawn(permanent_unit, x, y, side)
-    local instance = {
-        x = x,
-        y = y,
-        side = side,
-        hp_current = permanent_unit.stats.hp_max,
-        has_acted = false,
-        source = permanent_unit
-    }
-
-    setmetatable(instance, {
-        __index = function(t, k)
-            if BattleUnit[k] then return BattleUnit[k] end
-
-            return access_fallback(t, k)
-        end
-    })
-
-    return instance
-end
-
-function BattleUnit:is_alive()
-    return self.hp_current > 0
-end
-
-function BattleUnit:take_damage(amount)
-    local new_hp = mid(0, self.hp_current - amount, self.stats.hp_max)
-    self.hp_current = new_hp
-end
-
-function BattleUnit:die()
-    printh("unit "..self.id.." is now dead")
-end
-
-return BattleUnit
 :: src/character.lua
 include "src/util.lua"
 include "src/animation.lua"
@@ -176,8 +130,8 @@ local CharacterManager = {}
 
 
 
-local COLOR_SKIN = 4
-local COLOR_SKIN_SHADOW = 20
+local COLOR_SKIN = 29
+local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23
 local COLOR_BEARD = 22
 local COLOR_EYE = 21
@@ -274,15 +228,15 @@ function generate_appearance()
     end
 
     if appearance.sex == 0 then -- male
-        appearance.body = flr(rnd(6)/5)
-        appearance.beard = rndi(6)
+        appearance.body = rndi(4)
+        appearance.beard = rndi(7)
         if rnd(6) <= 1 then
             appearance.beard_color = choose_random_from_list(HAIR_COLORS)
         else
             appearance.beard_color = appearance.hair_color
         end
     else -- female
-        appearance.body = rndi(2)
+        appearance.body = rndi(4)
     end
 
     return appearance
@@ -317,8 +271,6 @@ end
 
 return CharacterManager
 :: src/combat.lua
-include "src/tasks.lua"
-
 function is_in_combat_range(attacker, defender)
     local a_x = attacker.x
     local a_y = attacker.y
@@ -329,10 +281,6 @@ function is_in_combat_range(attacker, defender)
     local dist = abs(a_x-d_x)+abs(a_y-d_y)
 
     return dist >= min_range and dist <= max_range
-end
-
-function deal_damage(attacker, defender)
-    defender:take_damage(attacker.stats.damage)
 end
 
 function can_counterattack(defender, attacker)
@@ -351,15 +299,15 @@ function apply_combat_step(step)
     )
 
     attacker:start_animation("BUMP", direction)
-    --	if not step.hit then
-    --		defender:start_animation("DODGE", direction)
-    --	end
+    if not step.is_hit then
+        defender:start_animation("DODGE", direction)
+    end
     while attacker.animation_playing or defender.animation_playing do
         yield()
     end
 
-    if step.hit then
-        deal_damage(attacker, defender)
+    if step.is_hit then
+        defender:take_damage(step.dmg)
         defender:start_animation("HURT", direction + 0.5)
     end
 
@@ -376,6 +324,7 @@ function do_combat(attacker, defender)
     local combat_result = COMBAT_CALCULATOR.compute_combat(attacker, defender)
 
     for i,combat_step in ipairs(combat_result.steps) do
+        printh("step: "..i)
         apply_combat_step(combat_step)
     end
 end
@@ -414,6 +363,7 @@ function Calculator.compute_combat(attacker, defender)
 
     local virtual_hp = defender.hp_current
     if step1.is_hit then virtual_hp = virtual_hp - step1.dmg end
+    printh("virtual hp for " .. defender.id .. ": " .. virtual_hp)
 
     -- defender counterattack
     if virtual_hp > 0 then
@@ -445,28 +395,6 @@ function draw_shadow(c, draw, x, y)
     draw(x, y+1)
     pal()
 end
-:: src/event_bus.lua
-
-local listeners = {}
-local event_bus = {}
-
-function event_bus.on(event_name, callback)
-    if not listeners[event_name] then
-        listeners[event_name] = {}
-    end
-    add(listeners[event_name], callback)
-end
-
-function event_bus.emit(event_name, args)
-    local slots = listeners[event_name]
-    if slots then
-        for callback in all(slots) do
-            callback(args)
-        end
-    end
-end
-
-return event_bus
 :: src/main.lua
 -- tactics game
 -- ynp
@@ -491,9 +419,9 @@ return event_bus
 -- class progression
 -- inheritence?
 
-include "src/tasks.lua"
+include "src/systems/tasks.lua"
 
-BUS = include "src/event_bus.lua"
+BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
@@ -533,13 +461,55 @@ function _update()
     Battle:update(joy)
     update_tasks()
 end
+:: src/systems/event_bus.lua
+
+local listeners = {}
+local event_bus = {}
+
+function event_bus.on(event_name, callback)
+    if not listeners[event_name] then
+        listeners[event_name] = {}
+    end
+    add(listeners[event_name], callback)
+end
+
+function event_bus.emit(event_name, args)
+    local slots = listeners[event_name]
+    if slots then
+        for callback in all(slots) do
+            callback(args)
+        end
+    end
+end
+
+return event_bus
+:: src/systems/tasks.lua
+local tasks = {}
+
+function start_routine(func)
+    local co = cocreate(func)
+    add(tasks, co)
+end
+
+function update_tasks()
+    for co in all(tasks) do
+        if costatus(co) == "suspended" then
+            local ok, err = coresume(co)
+            if not ok then
+                printh("Task Error: "..err)
+                assert(ok)
+            end
+        elseif costatus(co) == "dead" then
+            del(tasks, co)
+        end
+    end
+end
 :: src/tactics.lua
---[[pod_format="raw",created="2025-11-22 18:09:54",modified="2025-11-22 18:09:54",revision=0]]
 include "src/util.lua"
 include "src/tiles.lua"
 include "src/combat.lua"
 include "src/draw.lua"
-local BattleUnit = include "src/battle_unit.lua"
+local BattleUnit = include "src/tactics//battle_unit.lua"
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7
@@ -550,7 +520,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = 32
 local MAP_OFFSET_X = 104
 local MAP_OFFSET_Y = 12
 local MAP_WIDTH = 15
-local MAP_HEIGHT = 10
+local MAP_HEIGHT = 15
 local TILE_WIDTH = 24
 local TILE_HEIGHT = 16
 local WALL_HEIGHT = 24
@@ -812,30 +782,29 @@ end
 BUS.on("MOVE_AND_WAIT", function(ctx) Battle:handle_move_unit(ctx) end)
 
 function Battle:handle_move_and_attack(ctx)
-    printh("here1")
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
     local target = get_unit_from_step(ctx, "target")
 
-    printh("here2")
     battle_is_blocked = true
     start_routine(function()
-        printh("here3")
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
         while unit.animation_playing do
             yield()
         end
         unit:end_animation()
-        printh("here4")
 
-        self:move_unit(unit, x, y)
         printh("here1")
+        self:move_unit(unit, x, y)
         do_combat(unit, target)
         unit.has_acted = true
+        printh("here2")
 
         set_menu("MENU_PLAYER_TURN")
+        printh("here3")
         battle_is_blocked = false
+        printh("here4")
     end)
 end
 
@@ -1104,14 +1073,14 @@ function Battle:draw()
             --0b11110011,
             --0b11001111
             -- 1:2 checkerboard
-                0b00110011,
-                0b11001100,
-                0b00110011,
-                0b11001100,
-                0b00110011,
-                0b11001100,
-                0b00110011,
-                0b11001100
+                0x33,
+                0xCC,
+                0x33,
+                0xCC,
+                0x33,
+                0xCC,
+                0x33,
+                0xCC
             )
             poke(0x550b,0x3f)
             palt()
@@ -1211,6 +1180,53 @@ function Battle:draw_tactics_debug()
 end
 
 return Battle
+:: src/tactics/battle_unit.lua
+
+local BattleUnit = {}
+
+local function access_fallback(table, key)
+    if table.source.stats[key] then
+        return table.source.stats[key]
+    end
+
+    return table.source[key]
+end
+
+function BattleUnit.spawn(permanent_unit, x, y, side)
+    local instance = {
+        x = x,
+        y = y,
+        side = side,
+        hp_current = permanent_unit.stats.hp_max,
+        has_acted = false,
+        source = permanent_unit
+    }
+
+    setmetatable(instance, {
+        __index = function(t, k)
+            if BattleUnit[k] then return BattleUnit[k] end
+
+            return access_fallback(t, k)
+        end
+    })
+
+    return instance
+end
+
+function BattleUnit:is_alive()
+    return self.hp_current > 0
+end
+
+function BattleUnit:take_damage(amount)
+    local new_hp = mid(0, self.hp_current - amount, self.stats.hp_max)
+    self.hp_current = new_hp
+end
+
+function BattleUnit:die()
+    printh("unit "..self.id.." is now dead")
+end
+
+return BattleUnit
 :: src/tactics/enemy_ai.lua
 include "src/tiles.lua"
 
@@ -1263,7 +1279,28 @@ function compute_enemy_ai(unit)
         printh(unit.id .. " will attack "..choice.target.id)
         BUS.emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
-        -- todo, find closest and follow back until in range
+        local min_cost_deep_move = deep_moves[1]
+        local min_cost = 999
+        for deep_move in all(deep_moves) do
+            if all_tile_costs[deep_move.x][deep_move.y].cost < min_cost then
+                min_cost = all_tile_costs[deep_move.x][deep_move.y].cost
+                min_cost_deep_move = deep_move
+            end
+        end
+        -- follow until first tile in range
+        local x = min_cost_deep_move.x
+        local y = min_cost_deep_move.y
+        while all_tile_costs[x][y].cost > unit.stats.movement do
+            x = all_tile_costs[x][y].prev.x
+            y = all_tile_costs[x][y].prev.y
+        end
+
+        local action_ctx = {
+            acting_unit = { unit_id = unit.id },
+            destination = { x = x, y = y }
+        }
+        printh(unit.id .. " will move to "..x..","..y)
+        BUS.emit("MOVE_AND_WAIT", action_ctx)
     else
         printh("WARN: No valid moves for "..unit.id.. "!")
     end
@@ -1286,27 +1323,6 @@ function handle_enemy_turn()
 end
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", handle_enemy_turn)
-:: src/tasks.lua
-local tasks = {}
-
-function start_routine(func)
-    local co = cocreate(func)
-    add(tasks, co)
-end
-
-function update_tasks()
-    for co in all(tasks) do
-        if costatus(co) == "suspended" then
-            local ok, err = coresume(co)
-            if not ok then
-                printh("Task Error: "..err)
-                assert(ok)
-            end
-        elseif costatus(co) == "dead" then
-            del(tasks, co)
-        end
-    end
-end
 :: src/tiles.lua
 -- tile flags:
 -- 0: empty/solid
@@ -1585,9 +1601,9 @@ function IdCounter.new()
     return counter
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 18:09:54",runtime=24,workspaces={{location="main.lua#29,35",workspace_index=1},{location="character.lua#134,7",workspace_index=1},{location="tactics/enemy_ai.lua#32,11",workspace_index=1},{location="tiles.lua#56,26",workspace_index=1},{location="tactics.lua#20,25",workspace_index=1},{location="turn_manager.lua#17,2",workspace_index=1},{location="animation.lua#7,35",workspace_index=1},{location="combat.lua#47,37",workspace_index=1},{location="battle_unit.lua#43,42",workspace_index=1},{location="tasks.lua#14",workspace_index=1},{location="combat/combat_calculator.lua#43,28",workspace_index=1},{location="main.lua#4",workspace_index=1},{location="src/tactics.lua#633",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44",runtime=24,workspaces={{location="gfx/0.gfx",workspace_index=1},{location="gfx/1_units.gfx",workspace_index=1},{location="gfx/2_tiles.gfx",workspace_index=1},{location="gfx/3_walls.gfx",workspace_index=1},{location="map/0.map",workspace_index=2},{location="sfx/0.sfx",workspace_index=3}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAxNDowNDoxOCIscmV2aXNpb249OV1dbHo0ALgAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1596,55 +1612,61 @@ GBgEABHwAhEAARcB8AABFxEHAfACAQcBAAHwBAHwsgYAIgABFAASESIAEQEwAC-wsZcAHg8xAP--
 ------------------------------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMCAwMTo0NDowOCIscmV2aXNpb249ODRdXWx6NACKCgAA80MAAPMhe1swXT17Ym1wPXB4dQBD
-IBAQBPBWBxAHwBfQF8AHEAfwVixmbGFncz0wLHBhbl94CADbeT0wLHpvb209MTJ9LD8AH-AyAP9K
-8hDADxQgBpAeIAYwfiAWEH4wFhAeVDAWEA4EBw8VFA0HCwD-JQ0UDQcgNRBkMBQQDxBkDCAkLEQc
-DxMQBR4LjBtAC2wLHlAbPAsAHlBhAA5QMRARYCEwESC7AB7QDA8UYAYgTmAGEB4kYHcA9RUPFQQN
-YBYgNGAWEF8QQCYAfEAFEAQAPAAEMAQFFBA8EAQwBTAGAO_AMQAEgBEQAZARIAGAEYAAIPIIQA8U
-oAYgHpAGIH4wFiB_IBYgVB4gFiAHASAEDgsAAAcBHwQIARSfYBEQMXARMCEACAEejwEG4AYwXxRA
-jgENQQ4UHhSJADAuFB6LAB9OkwE-AYsAkG8UMBYQPhQuII0ALw4gjgAEEySNAE8EHhQeIQJDQFBf
-FECdAWAGEJ4gFgAEAG8uVDAWAB4cAQIhRA6OAD8ORA6NAEMBGwFyQERAFiBkMAQAAYcAIQ4HCgAw
-DhQOhgAxDxRUhgChLxQUHQ8QICQsTYgAEx2IABEdiABfHVBhAA2IACyxDxQEDgQOQBYgDgQCAAiT
-ABINkwALpwFQFA4UDgQbAS8EPhwBP-ALGg8U0B5wfmB_cB5UcA4EHxUUHXAOBB0UHXA2A-8SUBxk
-DA8TQAscRBwLQAQLbAsOQBQbPAseQBRxUBQxECEwJwVQ0AEGQE8UQAYwbjAWEI7ZAjgEPgTbAiUO
-IE4CoA4QNQAOZA4gFCBVAlUkTxAULDEBdRtMGx5QC0wxAX8AIXAtIC0QjwAqPz4UHvcDCSAADn4E
-Hx6LAE4ADgZAPhQ_EIsAJh4QjAA-AA4QjgAUIGALSgKPYFEADmAhEBEZAS4gIE7YAk8QPiQeqAEO
-D48ASA-1Aw9gZDAUMERAgAAQLYAA8QcfFA8TjRxAHE0cHxRQDE0MABtQYQALoAFPLiAuEAUFKz9O
-FC4HBQkBngFPIA5EQA4BQx8NOwga8wgVIGQwJC8QRBwgBR4fE2wbYAtMCx5gYYEALyEgaAQgH-Aq
-BFIPjgce-xsODx4PEA8eECQvEE4vHhAFHg8TXxBPHjC8IMwgvCA8ISwBHCA8ARAsARwdCB-xAVkG
-MAaQVgAPFlAeBgcPFQaRA0FeBgcNCgDyBwBuZgCOViB_BVAuFRAeBVAeAAUgHhUHAC8FIG0APl9W
-EI42QG0AAw-NAYIakJgGAsYBE3DEASKAZJ4G8QYsRCwwTAVsIA4kFZYAHhQFdkARBTGmAl8hYC0w
-LZ4GHh_gdQAL8glgHxBkUDxEHDDMIAwEHAVcHiAOFBWWEA55AH8gIVAtMC1A6AJS8AAwbxAwBjAO
-XxMwFiANXjBYBAD5BSEPFLQAMgwHMAwAMgwUDNEDIBQQbwX0BSQuRB4NEAUbDY4dQA1uDRtQHT4N
-5AQP1AgnAYwAICCO3QT2AF8TDiAWAB4NVA0gFgANDo0AHw2MAAUvHxSNADgPIA0GMBwUHAgAkA8V
-HB0cDRA1EOAIAQEEcWQLICQrRBtvBcQKixpACmsKHlAaOwqaBw_JACTwBJAvEDAGQF4wBjAuHxMe
-MBYgHj0KB0EeDTQNBgcSDRkBEg0MAAAaAUANEDUAHwDfMBQQLTQdICQuHRQdDiABPQ8hBRYfZD0O
-Sh-wMgCCFBauBx8gxw0f0CwLDAssG0ALLAssCx4HADQcCwAIABAOCAB-PFALLAtcEJUAIBQQlQAi
-XxM7AmIPFQccBww7AhAMCwBQIDUAHVxWAzANTg1YAxNNWAPQLg0ODS4dQA0uDS4NGwcANB4NAAgA
-EAsIAG8_UA0uDV6VAB5QEAbgFtDnD3BQFgB_QBUAmgA2MBUAmgAUFZoAPzAVEJoACDIAFRCcAAIJ
-AACeACMVIJ8AAhMATj4gFQCjAA_YD0cAeAn3AU4rEAUOK3QbQA5kLlAeNA7tAj8kMBTtAh-xBRMG
-EF8ZQCYAfjAmAB5fDzAFAAYAAARgHQwHMAUg-wMBCgD3DDBtMB0QjSDNDx8QBSuNGwAFIAttKwAF
-MBs9C-YDPy0wHXADtIFATxCwTqBeQNoCQDAGEC00Bg-BBgUwCxQbpwFADisUG0gCEkvGBg-hAkUN
-mwAnXxVvAxgweQMgDg3gAoAeDTwNDiBuPZcAJC1OlAATLYsALx8UlAAwL-DwBANU-wVEDE4MHhAF
-LgRsLkAObC5QHxM8CwQDLfQGAAbgNhBfFDA2AH4gBhAFAB5UUAUAjAACCwAAjAAzQAUgjADzFAQu
-FB4EIFROJRAFLlQFDxMPEA8TBQAFIA5EBS8QBQAFMB4kFgBRFUBRBQ8TAH8xEBEFEAUgoQAhPMAP
-HjgIIF8PJAEEqAMjFhCoAzAgNRCoA4EPEG0LIC0rTTkIQh8fDxM7CCEfHzwIXhlQYQAJHwcPjQAo
-Hx_NABYTFMYIERSKAF8UUGEABIoAOQ8yCBcATA8CNAghHxQ1CF8aUGEAChYBOh8UFgEWExwWAREc
-FgFfHFBhAAyKACbyFM8aDxkvGgaeHxkuBj59LhYefT4WHh1fDz4WHg0MBw8VHAsHCwDxCAscCwcu
-NR5sPhweDxBsCi4sKkwaDxMeMAL-DIoZTglqCR8fXhk6CQ4YXmEOCF4xHhFuIT4RLpAANB8fkAAW
-IhQJjgARFI0AXxReYQ4EjQA8EFSBAAPZBQILAAANDHAuNR5kPhQehQsSLoULER42AjCLGk5MA78U
-Xho7Cg4ZXmEOCRwBPR8UHAEWExscAREbHAFfG15hDguNACaD8BdEkGSAZICIEhKAhhKPgGSAZJBE
-8FQRBh8PMgCCD_QABG_QRMAU8FWyAIIf8IsEHxQXJRBv0A7gDvCK1gsgLxeAPgAov28XcD4QLmAe
-UA5gQgAiEFB-AI5gnlCeUC7AHoMADxgCQ5EPFwAOAA6QDgACAC-ws3QAUA8yAB-nB08XkG5wjmAe
-AD4ADmACAG9wDkAO8GNQACQyPhAe7QFP4A7gHkgAJu9_YD4QPlAeUB5QDnAOUEwAK75ugE4ADnA_
-IB5gDuQAD2YBTpIFfxdgnlBOEC6AAn-gDvAADvBpeQAfDzIAgr9mDxYQHqAuEB6QTtUFIJ9pHxaw
-HhAe8GN4ACE-QA6AwwEjT2YPFuCyACiPwA4QDrA_8FSQAYLQZ08QQBQQjiAkng8TIF8IAk8TIR8U
-UBMGCwpfLxUwGyBeAB-fREAUEIQgxA8UIC6EHjQQAG8UDjAEDiAaAYJocRQwTxBAGAGFHU4dHxRQ
-DU4YAY8AIXAvFSArEFwANSBgDXQBQWBRAAxJGg5cAA8cAXUxIQbg5hKvwDXAFdAV0BXwTX8PIgBD
-AB-QRwAr1xMGwCbAJsAFAAbABeACAC-wLrgTIyDQFokAAo8ABAIAAw4AD9gPIlGwNrAGEJIAHdAG
-AB-g3AEfD90S-08v8PAyAP--qgBUBXJAR0AWIGcwBABABx8VF2Ab9wcHHhceIDUQZzAUEC8QBicG
-DSAkTSYd1CGFDG0MHxRQHD3UIQ-_ESQv8PAyAP-------------------------------75QPTEy
-fX0=
+MS0yMiAxOToxNToyOSIscmV2aXNpb249MTAxXV1sejQA_gsAAKxGAADzIXtbMF09e2JtcD1weHUA
+QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEyfSw-AB-wMgD-
+SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
+HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
+DWAWIDRgFhBfEEAmAHxABRAEADwABDAEBRQQPBAEMAUwBgDvgDEABIAREAGQESABgBGAACDyCEAP
+FKAGIB6QBiB_MBYgfiAWIFQeIBYgBwEgBA4LAAAHAR8ECAEUn2AREDFwETAhAAgBHo8BBuAGMF8U
+QI4BDUEOFB4UiQAwLhQeiwAfTpMBPwGLAJBvFDAWED4ULiCNAC8OII4ABBMkjQBPBB4UHiECQ0BQ
+XxRAnQFgBhCeIBYABABvLlQwFgAeHAECIUQOjgA-DkQOjQBDARsBckBEQBYgZDAEAAGHACEOBwoA
+MA4UDoYAMQ8UVIYAoS8UFB0PECAkLE2IABMdiAARHYgAXx1QYQANiAAssQ8UBA4EDkAWIA4EAgAI
+kwASDZMAC6cBUBQOFA4EGwEvBD4cAT-wCxoPFNAecH5gfnAeVHAOBB8VFB1wDgQdFB1wNgP-ElAc
+ZAwPE0ALHEQcC0AEC2wLDkAUGzwLHkAUcVAUMRAhMCcFUNABBkBPFEAGMG4wFhCO2QI4BD4E2wIl
+DiBOAqAOEDUADmQOIBQgVQJVJE8QFCwxAXUbTBseUAtMMQF-ACFwLSAtEI8AKj8_FB73AwkgAA5_
+BB8eiwBOAA4GQD4UPhCLACYeEIwAPwAOEI4AFCBgC0oCj2BRAA5gIRARGQEuICBO2AJPED4kHqgB
+Dg_PAEgP9QMPYGQwFDBEQIAAEC2AAPEHHxQPE40cQBxNHB8UUAxNDAAbUGEAC6ABTy4gLhAFBSs-
+ThQuBwUJAZ4BTyAOREAOAUMfDTsIGvMIFSBkMCQvEEQcIAUeHxNsG2ALTAseYGGBAC8hIGgEIB-w
+KgRSD44HHv8bDg8eDxAPHhAkLxBOLx4QBR4PE18QTx4wvCDMILwgPCEsARwgPAEQLAEcHQgf8QFZ
+BjAGkFYADxZQHgYHDxUGkQNBXgYHDQoA8gcAbmYAjlYgfgVQLhUQHgVQHgAFIB4VBwAvBSBtAD5f
+VhCONkBtAAMPzQGCGpCYBgLGARNwxAEigGSeBvEGLEQsMEwFbCAOJBWWAB4UBXZAEQUxpgJfIWAt
+MC2eBh4foHUAC-IJYB8QZFA8RBwwzCAMBBwFXB4gDhQVlhAOeQB-ICFQLTAtQOgCUvAAMG8QMAYw
+Dl8TMBYgDV4wWAQA_QUhDxS0ADIMBzAMADIMFAzRAyAUEG8F9AUkLkQeDRAFGw2OHUANbg0bUB0_
+DeQED9QIJwGMACAgjt0E9gBfEw4gFgAeDVQNIBYADQ6NAB8NjAAFLx8UjQA4DyANBjAcFBwIAJAP
+FRwdHA0QNRDgCAEBBHFkCyAkK0QbbwXECosaQAprCh5QGjsKmgcPiQAk8ASQLxAwBkBeMAYwLh8T
+HjAWIB49CgdBHg00DQYHEg0ZARINDAAAGgFADRA1AB8A3zAUEC00HSAkLh0UHQ4gAT0PIQUWH2Q9
+DknxDcAPFBAkgB4QNBB_ECQOAH4gDhQOAB5fDzAUDgAaAVEdDAcwFBkBAQoA0CBtMB0QDxBtCyAt
+K02rAVIOHx8PE60BIR8frgFfGVBhAAmRACr2BwUWBXAeEDYQfhA2AH4gBRYFAB5UMBUeARQVHgEB
+HAcPHgFIDw8EIBQWaAgfIIEOH9AsCwwLLBtACywLLAseBwA0HAsACAAQDggAfzxQCywLXBCVACAU
+EJUAIl8T9QJiDxUHHAcM9QIQDAsAUSA1AB1c6wEgTg0SBBNNEgTQLg0ODS4dQA0uDS4NGwcANB4N
+AAgAEAsIAG8_UA0uDV6VAB5QEAbgFtChEHBQFgB_QBUAmgA2MBUAmgAUFZoAPzAVEJoACDIAFRCc
+AAIJAACeACMVIJ8AAhMATj4gFQCjAA9SEEcAMgr3AU4rEAUOK3QbQA5kLlAeNA6JAj8kMBSJAh_x
+EwYQXxlAJgB_MCafAzYFAAagAyQFIKADIAUwoAP3B40gzQ8fEAUrjRsABSALbSsABTAbPQuwBE8t
+MB0gBAhG38wgDiSFJgAeFGUmMGEACCgFcQC0ABRAHl8PAAYABDDzAEQABhAE9QBgAAYQDjBtBgAQ
+IJkE8AwGEA4QK00bBh0PHwCrBh0OAAotawYQBBAaHUtDAFBAYQAUUJMATywwLDAQBE_BQE8QsE6g
+XkB6A0AwBhAtjgcPGwgFMAsUG0cCQA4rFBvoAhJLIAgPgQNFDZsAJ18VDwQYMBkEIA4NgAOAHg08
+DQ4gbj2XACQtTpQAEy2LAC8fFJQAMC-w8KQDVP8FRAxODB4QBS4EbC5ADmwuUB8TPAukAy2AAAbg
+NhBfFDC1BiAGELUGNFAFAIwAAgsAAIwAM0AFIIwA8xQELhQeBCBUTiUQBS5UBQ8TDxAPEwUABSAO
+RAUvEAUABTAeJBYAURVAUQUPEwB-MRARBRAFIKEAITzADx6SCSBfDyQBBEgEIxYQUwM8IDUQ6Acf
+BegHPg6NAB8fjQAWExQgChEUigBfFFBhAASKADkPjAkXAKYQAnAIIR8UcQhfGlBhAAoWATofFBYB
+FhMcFgERHBYBXxxQYQAMigAm8hTPGg8ZLxoGnh8ZLgY_fS4WHn0_Fh4dXw8_Fh4NDAcPFRwLBwsA
+8QgLHAsHLjUebD4cHg8QbAouLCpMGg8THjAC-wyKGU4JagkfH14ZOgkOGF5hDgheMR4RbiE_ES6Q
+ADQfH5AAFiIUCY4AERSNAF8UXmEOBI0APBBUgQAD2QUCCwAAZw1wLjUeZD4UHt8MEi7fDBEeNgIw
+ixpOTAO-FF4aOwoOGV5hDgkcAT0fFBwBFhMbHAERGxwBXxteYQ4LjQAm8AXwF08dkG6AboAOBw8V
+Hg0HgA4HDQcAf26AbpBO8FQSBh8PMgCCD_UABW_QTsAe8FWzAIIf8I0EHxQX8glv0A7gDvCKeAwg
+LxeAPgAov28XcD4QLmAeUA5gQgAiEFB-AI5gnlCeUC7AHoMADxkCQ5EPFwAOAA6QDgACAC-ws3QA
+UA8yAB-nB08XkG5wjmAeAD4ADmACAG9wDkAO8GNQACQyPhAe7QFP4A7gHkgAJu9_YD4QPlAeUB5Q
+DnAOUEwAK75ugE4ADnA_IB5gDuQAD2YBTpIFfxdgnlBOEC6AAn-gDvAADvBpeQAfDzIAgp9mDxYQ
+HqAuEB7WBSKfaR8WsB4QHvBjeAAhP0AOgMMBI09mDxbgsgAoj8AOEA6wPvBULAEjTgAOgC7yAA_c
+AUL3GGcPEC8dDxBAHx0QLxAvHS8QIC8dnxAPEyAdDo8QHkAObA4dUB48DkMfXy8VMBsgaAAw-wZP
+HX8QDSAtDx1vEC1ADW4tUB8TPgxoAC_xTx1AHhCOIM4NIC2CFREtgRUGVwBfHg0wDg3AACoAZg0C
+DgAACAAQIM0AAAkAEQ8RABIfPAHgLxAODA4sHkAOLA4sDh0HADQcDgAIABANCABfPFAOLA6hEyBD
+cR8dMIwACaoBdR5MHh1QDkyqAX8AIXAvFSArYQA7IGAOCwJBYFEADVIcD2EALgoEArsPE08QDxMt
+UA5PEMcAHyzHACoPogFcMSEG4LEUr8A1wBXQFdAV8E2qECIAQwAf0EcAK9cTBsAmwCbABQAGwAXg
+AgAv8C6DFSMg0BaJAAKPAAQCAAMOAA8DESJRsDawBhCSAB3QBgAf4FIAH8AkwDSwJA8UsA4UDsAD
+ABDQAgBvDgTQDvBOTQAfQAUWBbChADgFFgXxAC-wTZUFUA88FLkv8PAyAP--qgCIBXJAR0AWIGcw
+BABABx8VFxke9wcHHhceIDUQZzAUEC8QBicGDSAkTSYdjSSFDG0MHxRQHD2NJA9dEyQv8PAyAP--
+-----------------------------75QPTEyfX0=
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAxNzozOToxNCIscmV2aXNpb249MjJdXWx6NAAXAQAAzDEAAPARe1swXT17Ym1wPXB4dQBD
@@ -1662,16 +1684,16 @@ EyATEBMwA0ATAANAM1ADAAMgI1ATYCMwEwADEDMgHgAv8whbABxfEh8VEh4CAAA-PhIeAgACTx8O
 FR0CAAE-NR0VAgABPz0VHS4Aoh8dRwFLPzIeEi4AdD8S8LCNAh4v-zIzAP--------------sl8Q
 EATw8DEA------------------------------------------------vFBtPTh9fQ==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxODowNzozMyIscmV2aXNpb249MjRdXWx6NADcAAAA5AIAAP8Ge3tibXA9cHh1AEyADwoA
-AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEW
-AwUCLGhpZGRlbj1mYWxzZSxuYW1lPSJmbG9vciIscGFuX3g9MAgAtXk9MTYsdGlsZV9oCgAQdwoA
-jHpvb209MX0scAFPAwABAwYAbCYAAAwADwYACi8BALEAEh8CUQAQ8QERAAAABAMMAAAAAwMABAMG
-CQARAgYAEQEGAD8OAABzAQFfd2FsbHNzARdQbT0xfX0=
+MS0yMiAxOToxODo0NCIscmV2aXNpb249MjZdXWx6NADgAAAAqgQAAP8Ge3tibXA9cHh1AEyADw8A
+AAEDAAIDBgD-Th8AaAEVOAEAAA8ADwYABR8CUQAQ8QERAAAABAMMAAAAAwMABAMGCQARAgYAEQEG
+APEWDgAALGhpZGRlbj1mYWxzZSxuYW1lPSJ3YWxscyIscGFuX3g9MAgAtXk9MTYsdGlsZV9oCgAQ
+dwoArHpvb209MC41fSxWAk8CAAICBgD-ThcGDAAPBgAKKQEGDwAPBgAFHwJRABBQDAYCAQR7ACEL
+AwkAQAMCCwUJABEMBgA-AwUCUwIBX2Zsb29yUwIZUDAuNX19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1679,9 +1701,11 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-22 18:09:51",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-22 18:09:51",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
+:: src/systems/.info.pod
+--[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-22 18:09:51",modified="2025-11-22 18:09:54"]]
+--[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
 :: [eoc]
