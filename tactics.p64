@@ -517,14 +517,14 @@ local COLOR_MENU_TEXT = 7
 local COLOR_MENU_HIGHLIGHT = 6
 local COLOR_MENU_HIGHLIGHT_TEXT = 32
 
-local MAP_OFFSET_X = 104
-local MAP_OFFSET_Y = 12
-local MAP_WIDTH = 15
-local MAP_HEIGHT = 15
-local TILE_WIDTH = 24
+local MAP_OFFSET_X = 154
+local MAP_OFFSET_Y = 9
+local MAP_WIDTH = 16
+local MAP_HEIGHT = 16
+local TILE_WIDTH = 20
 local TILE_HEIGHT = 16
 local WALL_HEIGHT = 24
-local UNIT_OFFSET_X = 4
+local UNIT_OFFSET_X = 1
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
 
@@ -1053,8 +1053,8 @@ function Battle:draw()
         --map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
     -- TODO: preload layers
     local layers = fetch("map/0.map")
-    local layer_ground = layers[1].bmp
-    local layer_wall = layers[2].bmp
+    local layer_ground = layers[2].bmp
+    local layer_wall = layers[1].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
     for y = 0, MAP_HEIGHT-1 do
         map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)
@@ -1601,15 +1601,16 @@ function IdCounter.new()
     return counter
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44",runtime=24,workspaces={{location="gfx/0.gfx",workspace_index=1},{location="gfx/1_units.gfx",workspace_index=1},{location="gfx/2_tiles.gfx",workspace_index=1},{location="gfx/3_walls.gfx",workspace_index=1},{location="map/0.map",workspace_index=2},{location="sfx/0.sfx",workspace_index=3}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:42:07",runtime=24,workspaces={{location="gfx/0.gfx",workspace_index=1},{location="gfx/1_units.gfx",workspace_index=1},{location="gfx/2_tiles.gfx",workspace_index=1},{location="gfx/3_walls.gfx",workspace_index=1},{location="map/0.map",workspace_index=2},{location="sfx/0.sfx",workspace_index=3}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:42:07"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxNDowNDoxOCIscmV2aXNpb249OV1dbHo0ALgAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
-EBAE8FYHEAfAF9AXwAcQB-BWLGZsYWdzPTAscGFuX3gIAMt5PTAsem9vbT04fSw_AB-wMQD-QPAQ
-GBgEABHwAhEAARcB8AABFxEHAfACAQcBAAHwBAHwsgYAIgABFAASESIAEQEwAC-wsZcAHg8xAP--
-------------------------------------------------------------TlBtPTh9fQ==
+MS0yMiAxOTozODo1OSIscmV2aXNpb249MTFdXWx6NADjAAAAsjEAAPMhe1swXT17Ym1wPXB4dQBD
+IBAQBPBWBxAHwBfQF8AHEAfwVixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sPgDzA-8WAUUO
+dR4FLxUFDgVTBR4FLQgAPw0HDRIADg8sABhfRQ51-hGcABwv8PAxAP8P8BAYGAQAEfACEQABFwHw
+AAEXEQcB8AIBBwEAAfAEAfCyBgAiAAEUABIRIgARATAAL-CxlwAeDzEA--------------------
+------------------------------------------9OUG09OH19
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAxOToxNToyOSIscmV2aXNpb249MTAxXV1sejQA_gsAAKxGAADzIXtbMF09e2JtcD1weHUA
@@ -1669,31 +1670,34 @@ BABABx8VFxke9wcHHhceIDUQZzAUEC8QBicGDSAkTSYdjSSFDG0MHxRQHD2NJA9dEyQv8PAyAP--
 -----------------------------75QPTEyfX0=
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxNzozOToxNCIscmV2aXNpb249MjJdXWx6NAAXAQAAzDEAAPARe1swXT17Ym1wPXB4dQBD
-IBgQBPCKBxAH8AUX8AYX8AULAPMAiixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sQQA-8-9x
-MgAcL-8bMwAe8wb8J18QPC58Llw_-I5OPD58Lkw_-FhEAB8xRQAVgjT-FAB0DvQHAwAf-gwADx8D
-pgAccPEnXDEscSyrAPQFcS5RPvF2TDE8cSxOPD5xLkE_8UCwAB8yTwAU8wz-D1VKbiouWk5qLir_
-UTouWj4qfipeOi46-lBLAB80SgAUHvBxAQ8yAP--------------BF8QEATw8DEA------------
-------------------------------------vFBtPTh9fQ==
+MS0yMiAxOTozMzoxNCIscmV2aXNpb249MjRdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
+IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sQQA-8-8x
+MgAcL-8bMwAe8wb8HV8QPC48Llw_-HJOPD48Lkw_-EZEAB8xRQAVghT-FAA0DvQDAwAf-gwADx8B
+pgAccPEdXDEsMSyrAPQFMS5RPvFeTDE8MSxOPD4xLkE_8TKwAB8yTwAU8Aj-D0NKbioeKk5qLhr_
+QBouWj4qPipeOg0AA0sAHzRKABSx_AUfFTgeGB44HigGAFEYHkg_WAIAE0gQABEoBgBfOB74Gh4p
+ABQUBc8AD4QAFB7w9QEPMgD-------------0V8QEATw8DEA----------------------------
+--------------------vFBtPTh9fQ==
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxNzo0MDoxMyIscmV2aXNpb249Nl1dbHo0ACcBAAC2MwAA8BF7WzBdPXtibXA9cHh1AEMg
-GBgE8OoHEAfwBRfwBhfwBQsA8wDqLGZsYWdzPTAscGFuX3gIAMt5PTAsem9vbT04fSxBAP8j-6Uf
-GxAO8AIeIB4QHjAOQB4ADkA_UA4ADiAuUB5gLjAeAA4QPiAeIB4gTgBeAD4APgBiAB-wFBMQA-AC
-EyATEBMwA0ATAANAM1ADAAMgI1ATYCMwEwADEDMgHgAv8whbABxfEh8VEh4CAAA-PhIeAgACTx8O
-FR0CAAE-NR0VAgABPz0VHS4Aoh8dRwFLPzIeEi4AdD8S8LCNAh4v-zIzAP--------------sl8Q
-EATw8DEA------------------------------------------------vFBtPTh9fQ==
+MS0yMiAxOTo0MjowNSIscmV2aXNpb249OV1dbHo0AA0BAAAWMwAA8BF7WzBdPXtibXA9cHh1AEMg
+FBgE8MAHEAfwARfwAhfwAQsA8wDALGZsYWdzPTAscGFuX3gIAMt5PTAsem9vbT04fSxBAP8Z-1sf
+GxAO0B4gHhAeMA4wDkA_UA4ALlAeYE4ADhA_IB4gXgBeAD4ALlgAH-8RExAD0BMgExATMAMwA0Az
+UAMAI1ATYEMAAxAzIBMg8wZSABwtFR4CADw_FR4CAD81HhUmAFxcFR8VEh0CADwyHRICAD89Eh0m
+ABAfHRYBtS-wkDICHh-RMgD--------------3hfEBAE8PAxAP--------------------------
+---------------------7xQbT04fX0=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:42:07"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxOToxODo0NCIscmV2aXNpb249MjZdXWx6NADgAAAAqgQAAP8Ge3tibXA9cHh1AEyADw8A
-AAEDAAIDBgD-Th8AaAEVOAEAAA8ADwYABR8CUQAQ8QERAAAABAMMAAAAAwMABAMGCQARAgYAEQEG
-APEWDgAALGhpZGRlbj1mYWxzZSxuYW1lPSJ3YWxscyIscGFuX3g9MAgAtXk9MTYsdGlsZV9oCgAQ
-dwoArHpvb209MC41fSxWAk8CAAICBgD-ThcGDAAPBgAKKQEGDwAPBgAFHwJRABBQDAYCAQR7ACEL
-AwkAQAMCCwUJABEMBgA-AwUCUwIBX2Zsb29yUwIZUDAuNX19
+MS0yMiAxOTozNTo1NSIscmV2aXNpb249MjldXWx6NAA1AQAA_AQAAP8Ge3tibXA9cHh1AEyAEBAA
+AAEDAAIDBgAVGgQPAA8GAA4aBA8AD2AAzhoDDwAISAALEgBfAQMBAABFAAYKEgA4AgAADwAPBgAF
+HgNRAA0GAJASAAAABAMNAABmADEEAwcJABECBgARAQYA8RYgAAAsaGlkZGVuPWZhbHNlLG5hbWU9
+IndhbGxzIixwYW5feD0wCADSeT0wLHRpbGVfaD0xNgoAEHcKAIx6b29tPTF9LGgCTwIAAgIGABUa
+Bw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUAChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIA
+BgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAVADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8C
+FlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 19:42:07"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1701,11 +1705,11 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-22 19:42:05",modified="2025-11-22 19:42:07"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-22 19:42:05",modified="2025-11-22 19:42:07"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-22 19:42:05",modified="2025-11-22 19:42:07"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-22 19:18:24",modified="2025-11-22 19:18:44"]]
+--[[pod,created="2025-11-22 19:42:05",modified="2025-11-22 19:42:07"]]
 :: [eoc]

@@ -10,14 +10,14 @@ local COLOR_MENU_TEXT = 7
 local COLOR_MENU_HIGHLIGHT = 6
 local COLOR_MENU_HIGHLIGHT_TEXT = 32
 
-local MAP_OFFSET_X = 104
-local MAP_OFFSET_Y = 12
-local MAP_WIDTH = 15
-local MAP_HEIGHT = 15
-local TILE_WIDTH = 24
+local MAP_OFFSET_X = 154
+local MAP_OFFSET_Y = 9
+local MAP_WIDTH = 16
+local MAP_HEIGHT = 16
+local TILE_WIDTH = 20
 local TILE_HEIGHT = 16
 local WALL_HEIGHT = 24
-local UNIT_OFFSET_X = 4
+local UNIT_OFFSET_X = 1
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
 
