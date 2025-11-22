@@ -20,7 +20,21 @@ end)
 BUS.on("TACTICS_END_ENEMY_TURN", function()
     printh("End enemy turn!")
 
-    BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
+    battle_result = Battle:check_for_end()
+
+    if not battle_result.finished then
+        BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
+    else
+        BUS.emit(battle_result.command)
+    end
+end)
+
+BUS.on("BATTLE_END_VICTORY", function()
+    printh("You win!")
+end)
+
+BUS.on("BATTLE_END_FAILURE", function()
+    printh("You lose!")
 end)
 
 return TurnManager

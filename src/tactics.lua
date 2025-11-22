@@ -112,14 +112,22 @@ function Battle:is_blocked()
     return battle_is_blocked
 end
 
+function Battle:check_for_end()
+    if self:is_blocked() then
+        return { finished = false }
+    end
 
--- map_info
--- width
--- height
+    local players = self:get_units(unit_is_player)
+    local enemies = self:get_units(unit_is_enemy)
 
-local CURSOR_GRID = 0
-local CURSOR_VERTICAL_LIST = 1
-local CURSOR_HORIZONTAL_LIST = 2
+    if (#players == 0) then
+        return { finished = true, command = "BATTLE_END_VICTORY" }
+    elseif (#enemies == 0) then
+        return { finished = true, command = "BATTLE_END_FAILURE" }
+    else
+        return { finished = false }
+    end
+end
 
 -- step data helpers
 
@@ -293,16 +301,12 @@ function Battle:handle_move_and_attack(ctx)
         end
         unit:end_animation()
 
-        printh("here1")
         self:move_unit(unit, x, y)
         do_combat(unit, target)
         unit.has_acted = true
-        printh("here2")
 
         set_menu("MENU_PLAYER_TURN")
-        printh("here3")
         battle_is_blocked = false
-        printh("here4")
     end)
 end
 
@@ -326,20 +330,20 @@ local MENU_DATA = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "acting_unit",
                 validator = grid_selection_is_available_player,
                 next_state = "SELECT_DESTINATION"
             },
             ["SELECT_DESTINATION"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "destination",
                 validator = grid_selection_is_empty_or_acting_unit,
                 next_state = "SELECT_ACTION",
                 get_legal_tiles = tiles_in_movement_range
             },
             ["SELECT_ACTION"] = {
-                kind = CURSOR_VERTICAL_LIST,
+                kind = "CURSOR_VERTICAL_LIST",
                 options_generator = function(ctx)
                     local options = {}
                     -- if target in range
@@ -359,7 +363,7 @@ local MENU_DATA = {
                 end
             },
             ["SELECT_TARGET"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "target",
                 validator = validate_tile_is_in_unit_attack_range,
                 finish_command = { kind = "MOVE_AND_ATTACK" },
@@ -392,7 +396,7 @@ function handle_menu_select()
         selection = menu_selection
     })
 
-    if step_data.kind == CURSOR_GRID then
+    if step_data.kind == "CURSOR_GRID" then
         printh("unit getting")
         local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
         if selected_unit ~= nil then
@@ -450,14 +454,14 @@ function handle_menu_back()
 end
 
 local update_cursor = {
-    [CURSOR_GRID] = function (joy)
+    ["CURSOR_GRID"] = function (joy)
         menu_selection.x = mid(0, menu_selection.x + joy.dxp, menu_state.x_max - 1)
         menu_selection.y = mid(0, menu_selection.y + joy.dyp, menu_state.y_max - 1)
     end,
-    [CURSOR_VERTICAL_LIST] = function (joy)
+    ["CURSOR_VERTICAL_LIST"] = function (joy)
         menu_selection.i = mid(1, menu_selection.i + joy.dyp, #menu_state.options)
     end,
-    [CURSOR_HORIZONTAL_LIST] = function (joy)
+    ["CURSOR_HORIZONTAL_LIST"] = function (joy)
         menu_selection.i = mid(1, menu_selection.i + joy.dxp, #menu_state.options)
     end,
 }
@@ -466,7 +470,7 @@ local update_cursor = {
 function set_menu(menu_id)
     -- TODO: make functional?
     menu_state = {
-        kind = CURSOR_GRID,
+        kind = "CURSOR_GRID",
         handle_back = nil,
         x_max = 20, -- TODO
         y_max = 15, -- TODO
@@ -508,7 +512,11 @@ function Battle:update(joy)
 
     if blocking_animation then return end
     if all_players_acted then
-        BUS.emit("TACTICS_END_PLAYER_TURN")
+        local status = Battle:check_for_end()
+
+        if not status.finished then
+            BUS.emit("TACTICS_END_PLAYER_TURN")
+        end
     end
 
     if joy.lp then
@@ -630,7 +638,7 @@ function Battle:draw()
         local y = menu_selection.y * TILE_HEIGHT
         spr(CURSOR_SPRITE, x, y)
 
-        if menu_state.kind == CURSOR_VERTICAL_LIST then
+        if menu_state.kind == "CURSOR_VERTICAL_LIST" then
             local selected_i = menu_selection.i
             local options = menu_state.options
             local PADDING = 2
