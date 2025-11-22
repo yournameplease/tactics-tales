@@ -10,10 +10,6 @@
 -- 6 deep water
 -- 7
 
--- not class-specific.  may revisit later
-local terrain_costs = {
-}
-
 local TERRAIN_DATA = {
     [0] = {
         movement_cost = 1,

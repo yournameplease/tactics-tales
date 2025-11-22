@@ -139,10 +139,6 @@ end
 
 -- grid filters
 
-function tile_is_in_unit_movement_range(x, y, unit)
-
-end
-
 function tile_has_distance_from_unit(x1, y1, x2, y2, min_distance, max_distance)
     max_distance = max_distance or min_distance
     local distance = abs(x1-x2)+abs(y1-y2)
@@ -312,7 +308,7 @@ end
 
 BUS.on("MOVE_AND_ATTACK", function(ctx) Battle:handle_move_and_attack(ctx) end)
 
-function grid_selection_is_available_player(grid_selection, ctx)
+function grid_selection_is_available_player(grid_selection)
     local unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
 
     if unit == nil then return false end
@@ -561,6 +557,7 @@ function draw_menu_overlay()
         },
     }
 
+    cls(COLOR_SCREEN_DECORATION_PRIMARY)
     for box in all(menu_boxes) do
         rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
         rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
@@ -664,13 +661,10 @@ function draw_unit(unit)
     local side = unit.side
     local x = unit.x
     local y = unit.y
-    local s = unit.s
-    local s = unit.side
     local has_acted = unit.has_acted
 
     local tile_x = x * TILE_WIDTH
     local tile_y = y * TILE_HEIGHT
-    local flip_x = side ~= 0
 
     local shadow_color
     if has_acted then
@@ -679,7 +673,7 @@ function draw_unit(unit)
         shadow_color = 7
     end
     draw_shadow(shadow_color,
-            function(x,y) unit:draw(x, y, side, false) end,
+            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
             tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
     unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)

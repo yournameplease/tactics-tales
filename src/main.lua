@@ -38,7 +38,6 @@ function _init()
 end
 
 function _draw()
-    cls(22)
     Battle:draw()
 end
 
@@ -52,7 +51,7 @@ function get_joypad()
         ap = btnp(4),
         b = btn(5),
         bp = btnp(5),
-        lp = btnp(14)
+        lp = btnp(14) -- debug button.  Set to next turn
     }
 
     return joy
