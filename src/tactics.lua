@@ -552,41 +552,39 @@ function Battle:draw()
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
     for y = 0, MAP_HEIGHT-1 do
         map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+
+
+        -- highlight legal tiles
+        if menu_state.legal_tiles ~= nil then
+            fillp(
+                    0x66,
+                    0xCC,
+                    0x99,
+                    0x33,
+                    0x66,
+                    0xCC,
+                    0x99,
+                    0x33
+            )
+            poke(0x550b,0x3f)
+            palt()
+            color(28)
+            for x = 0, MAP_WIDTH-1 do
+                if menu_state.legal_tiles[x] ~= nil and menu_state.legal_tiles[x][y] then
+                    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+                end
+            end
+            poke(0x550b,0x00)
+            fillp()
+            color()
+        end
+
         for x = 0, MAP_WIDTH-1 do
             if self.tile_contents[x][y] ~= nil then
                 draw_unit(self:get_unit_at_coordinates(x, y))
             end
         end
         map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, MAP_WIDTH, 1, nil, TILE_WIDTH, WALL_HEIGHT)
-    end
-
-
-
-    -- highlight legal tiles
-    if menu_state.legal_tiles ~= nil then
-        fillp(
-            0x66,
-            0xCC,
-            0x99,
-            0x33,
-            0x66,
-            0xCC,
-            0x99,
-            0x33
-        )
-        poke(0x550b,0x3f)
-        palt()
-        color(28)
-    for x,v in pairs(menu_state.legal_tiles) do
-    for y,is_legal in pairs(v) do
-    if is_legal then
-    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
-    end
-    end
-    end
-    poke(0x550b,0x00)
-        fillp()
-        color()
     end
 
     if menu_selection.x ~= nil and menu_selection.y ~= nil then
