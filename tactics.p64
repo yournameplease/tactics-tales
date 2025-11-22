@@ -5,6 +5,7 @@ version 2
 :: map/
 :: sfx/
 :: systems/
+:: tactics/
 :: animation.lua
 --[[pod_format="raw",created="2025-11-19 14:13:42",modified="2025-11-20 01:41:01",revision=25]]
 
@@ -71,7 +72,7 @@ function get_x_y_from_animation(animation_data)
 	return offset * cos(direction), offset * sin(direction)
 end
 :: battle_unit.lua
---[[pod_format="raw",created="2025-11-22 01:19:25",modified="2025-11-22 01:40:25",revision=9,xstickers={}]]
+--[[pod_format="raw",created="2025-11-22 01:19:25",modified="2025-11-22 01:50:37",revision=10,xstickers={}]]
 
 local BattleUnit = {}
 
@@ -108,9 +109,18 @@ function BattleUnit:is_alive()
     return self.hp_current > 0
 end
 
+function BattleUnit:take_damage(amount)
+	local new_hp = mid(0, self.hp_current - amount, self.hp_max)
+	self.hp_current = new_hp
+end
+
+function BattleUnit:die()
+
+end
+
 return BattleUnit
 :: character.lua
---[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-22 01:45:48",revision=87,xstickers={}]]
+--[[pod_format="raw",created="2025-11-18 04:01:30",modified="2025-11-22 02:22:08",revision=90,xstickers={}]]
 include "util.lua"
 include "animation.lua"
 
@@ -146,15 +156,6 @@ local BASE_BODY_SPRITE = 256 + 96
 local BASE_WEAPON_SPRITE = 256 + 104
 
 Character = {}
-
-function Character:take_damage(amount)
-	local new_hp = mid(0, self.hp_current - amount, self.hp_max)
-	self.hp_current = new_hp
-end
-
-function Character:die()
-
-end
 
 function Character:start_animation(animation_id, direction)
 	self.animation_data = create_animation(animation_id, direction)
@@ -240,8 +241,9 @@ function CharacterManager.generate_character()
 		stats = {
 			hp_max = 10,
 			damage = 5,
-			min_range = 1,
-			max_range = 1
+			min_range = 2,
+			max_range = 3,
+			movement = 6
 		}
 	}
 	
@@ -411,7 +413,7 @@ end
 --[[pod_format="raw",created="2025-11-21 02:41:45",modified="2025-11-21 02:42:24",revision=1]]
 
 :: tactics.lua
---[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-22 01:38:28",revision=460,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:57:30",modified="2025-11-22 02:21:53",revision=467,xstickers={}]]
 include "util.lua"
 include "tiles.lua"
 include "combat.lua"
@@ -557,14 +559,10 @@ function validate_tile_is_in_unit_attack_range(selection, ctx)
 	local unit_y = destination.y
 	local target_x = selection.x
 	local target_y = selection.y
-
-	printh("unit: ("..unit_x..","..unit_y..")")
-	printh("target: ("..target_x..","..target_y..")")
 			
 	local target_unit = Battle:get_unit_at_coordinates(target_x, target_y)
-	printh(target_unit.side)
-	printh(unit.side)
 	if target_unit == nil then return false end
+	
 	if target_unit.side == unit.side then return false end
 	
 	return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
@@ -593,40 +591,45 @@ function tiles_with_distance_from_unit_attacks(ctx)
 
 end
 
-function tiles_with_distance_from_unit(min_distance, max_distance)
+function tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
 	max_distance = max_distance or min_distance
-	return function(ctx)
-		local destination = ctx["destination"]
-		local dest_x = destination.x
-		local dest_y = destination.y
-		
-		local reachable = {}
-		for x=-max_distance,max_distance do
-			local map_x = x + dest_x
-			if map_x >= 0 and map_x < MAP_WIDTH then
-				local abs_x = abs(x)
-				local min_y_abs = max(0, min_distance-abs_x)
-				local max_y_abs = max_distance-abs_x
-				
-				if max_y_abs >= min_y_abs then
-					reachable[map_x] = {}
-					for y=-max_y_abs,-min_y_abs do
-						local map_y = y + dest_y
-						if map_y >= 0 and map_y < MAP_HEIGHT then
-							reachable[map_x][map_y] = true
-						end
+	
+	local reachable = {}
+	for x=-max_distance,max_distance do
+		local map_x = x + tile_x
+		if map_x >= 0 and map_x < MAP_WIDTH then
+			local abs_x = abs(x)
+			local min_y_abs = max(0, min_distance-abs_x)
+			local max_y_abs = max_distance-abs_x
+			
+			if max_y_abs >= min_y_abs then
+				reachable[map_x] = {}
+				for y=-max_y_abs,-min_y_abs do
+					local map_y = y + tile_y
+					if map_y >= 0 and map_y < MAP_HEIGHT then
+						reachable[map_x][map_y] = true
 					end
-					for y=min_y_abs,max_y_abs do
-						local map_y = y + dest_y
-						if map_y >= 0 and map_y < MAP_HEIGHT then
-							reachable[map_x][map_y] = true
-						end
+				end
+				for y=min_y_abs,max_y_abs do
+					local map_y = y + tile_y
+					if map_y >= 0 and map_y < MAP_HEIGHT then
+						reachable[map_x][map_y] = true
 					end
 				end
 			end
 		end
+	end
 	
-		return reachable
+	return reachable
+	
+end
+
+function tiles_with_distance_from_unit(min_distance, max_distance)
+	return function(ctx)
+		local destination = ctx["destination"]
+		local dest_x = destination.x
+		local dest_y = destination.y
+		return tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
 	end
 end
 
@@ -1022,6 +1025,31 @@ function Battle:draw_tactics_debug()
 end
 
 return Battle
+:: tactics/enemy_ai.lua
+--[[pod_format="raw",created="2025-11-22 01:56:14",modified="2025-11-22 02:17:55",revision=8,xstickers={}]]
+
+--[[
+AI Mk 1:
+- perform full dijkstra on tiles, with ancestor references
+- if enemy in range, look at all tiles within attack range
+- - pick one at random
+- else
+- - pick nearest  enemy, move as close as possible
+]]
+
+function compute_enemy_ai(unit)
+	local all_tile_costs = calculate_all_tile_costs(unit.x, unit.y, unit.side)
+
+	local enemies = Battle:get_units(unit_is_player)
+	
+	local potential_attacks = {}
+	for e in all(enemies) do
+		local tiles_in_range = 
+	end	
+
+end
+
+
 :: tasks.lua
 --[[pod_format="raw",created="2025-11-20 00:37:21",modified="2025-11-22 01:41:32",revision=5,xstickers={}]]
 local tasks = {}
@@ -1042,7 +1070,7 @@ function update_tasks()
     end
 end
 :: tiles.lua
---[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-22 01:38:43",revision=36,xstickers={}]]
+--[[pod_format="raw",created="2025-11-17 01:52:30",modified="2025-11-22 02:12:29",revision=39,xstickers={}]]
 -- tile flags:
 -- 0: empty/solid
 -- 1-3: terrain type
@@ -1085,66 +1113,49 @@ function movement_cost(x, y, side)
 	return terrain_costs[terrain]
 end
 
--- gemini, show me this man's dijkstra implementation
---- Finds all tiles reachable from a starting point within a given total cost.
---
--- @param start_x The x-coordinate of the starting tile.
--- @param start_y The y-coordinate of the starting tile.
--- @param total_cost The maximum cumulative cost allowed.
--- @return A table 'reachable' where reachable[x][y] = true for all reachable
---         tiles. Unreachable tiles will be nil.
-function find_reachable_tiles(start_x, start_y, side, total_cost)
-    -- min_cost[x][y] = cost: Stores the minimum cost found *so far* to reach (x, y).
-    local min_cost = {}
 
-    -- reachable[x][y] = true: Our output table.
-    local reachable = {}
+-- Shared neighbor offsets (up, down, left, right)
+local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
-    -- A simple list acting as a priority queue.
-    -- We will manually find the node with the minimum cost.
-    -- Stores nodes as {x = x, y = y, cost = c}
+-- --------------------------------------------------------------------------
+-- Core Logic: Shared Dijkstra Engine
+-- --------------------------------------------------------------------------
+-- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
+local function _dijkstra_traversal(start_x, start_y, side, max_cost)
+    -- The output map containing cost and parent info for every visited node
+    local visited_info = {}
+
+    -- Helper to safely set data
+    local function set_info(x, y, data)
+        if not visited_info[x] then visited_info[x] = {} end
+        visited_info[x][y] = data
+    end
+
+    -- Helper to safely get data
+    local function get_info(x, y)
+        if not visited_info[x] then return nil end
+        return visited_info[x][y]
+    end
+
+    -- Initialize
     local priority_queue = {}
+    
+    -- Start node setup
+    local start_cost = 0 -- Cost to be at the start is 0
+    
+    -- Sanity check: If the start tile itself is blocked or expensive
+    -- (depending on your game logic, moving *off* start might cost 0 or terrain cost)
+    if start_cost > max_cost then return {} end
 
-    -- Neighbor offsets (up, down, left, right)
-    local neighbors = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
+    set_info(start_x, start_y, { cost = start_cost, prev = nil })
+    add(priority_queue, {x = start_x, y = start_y, cost = start_cost})
 
-    -- --- Helper function to safely get values from our 2D min_cost table ---
-    local function get_min_cost(x, y)
-        if not min_cost[x] then
-            return math.huge
-        end
-        return min_cost[x][y] or math.huge
-    end
-
-    -- --- Helper function to safely set values in our 2D min_cost table ---
-    local function set_min_cost(x, y, cost)
-        if not min_cost[x] then
-            min_cost[x] = {}
-        end
-        min_cost[x][y] = cost
-    end
-
-    -- --- Initialization ---
-    -- Get the cost of the starting tile itself.
-    local start_tile_cost = 0
-
-    -- If the start tile is impassable or costs more than our total, we can't go anywhere.
-    if start_tile_cost > total_cost then
-        return reachable -- Return the empty table
-    end
-
-    -- The cost to reach the start tile is its own movement cost.
-    set_min_cost(start_x, start_y, start_tile_cost)
-
-    -- Add the starting node to the priority queue.
-    add(priority_queue, {x = start_x, y = start_y, cost = start_tile_cost})
-
-    -- --- Main Algorithm Loop (Dijkstra's) ---
+    -- Main Loop
     while #priority_queue > 0 do
-        -- 1. Find and remove the node with the minimum cost from the priority queue.
-        -- (This is the inefficient part for a large map, but simple to implement)
-        local min_node_cost = 999
+        -- 1. Pop the node with the lowest cost
+        local min_node_cost = math.huge
         local min_index = -1
+        
         for i, node in ipairs(priority_queue) do
             if node.cost < min_node_cost then
                 min_node_cost = node.cost
@@ -1152,47 +1163,73 @@ function find_reachable_tiles(start_x, start_y, side, total_cost)
             end
         end
 
-        -- Remove the node from the queue and get its data.
-        local node = deli(priority_queue, min_index)
-        local ux, uy, ucost = node.x, node.y, node.cost
+        local u = deli(priority_queue, min_index)
+        local ux, uy, ucost = u.x, u.y, u.cost
 
-        -- 2. Check for staleness. If we've already found a *better* path
-        --    to this node, its cost will be higher than the one in min_cost.
-        --    If so, we skip it.
-        if ucost <= get_min_cost(ux, uy) then
-            -- This is the cheapest path we've found to (ux, uy) so far.
-            -- Mark it as reachable.
-            if not reachable[ux] then
-                reachable[ux] = {}
-            end
-            reachable[ux][uy] = true
-
-            -- 3. Explore neighbors.
-            for _, offset in ipairs(neighbors) do
+        -- 2. Check if we found a better path to this node already
+        -- (Standard Dijkstra laziness check)
+        local current_info = get_info(ux, uy)
+        if current_info and ucost <= current_info.cost then
+            
+            -- 3. Explore neighbors
+            for _, offset in ipairs(NEIGHBORS) do
                 local vx, vy = ux + offset.x, uy + offset.y
 
-                -- Calculate the cost to enter the neighbor tile...
-                local cost_to_enter_v = movement_cost(vx, vy, side)
-                -- ...and the new total cost to reach it from our current path.
-                local new_cost_for_v = ucost + cost_to_enter_v
+                -- Calculate cost to move FROM u INTO v
+                local move_cost = movement_cost(vx, vy, side)
+                
+                -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
+                if move_cost < 999 then 
+                    local new_total = ucost + move_cost
 
-                -- 4. Check if this new path is valid (within budget).
-                if new_cost_for_v <= total_cost then
-                    -- 5. Check if this new path is *better* than any previous path
-                    --    we found to this neighbor.
-                    if new_cost_for_v < get_min_cost(vx, vy) then
-                        -- It's a better path!
-                        -- Record the new, lower cost.
-                        set_min_cost(vx, vy, new_cost_for_v)
-                        -- Add the neighbor to the queue to be explored.
-                        add(priority_queue, {x = vx, y = vy, cost = new_cost_for_v})
+                    -- 4. Check limits
+                    if new_total <= max_cost then
+                        local neighbor_info = get_info(vx, vy)
+                        
+                        -- 5. Relaxation: Is this new path better than the old one?
+                        if not neighbor_info or new_total < neighbor_info.cost then
+                            -- Record the new cost and the tile we came from (ux, uy)
+                            set_info(vx, vy, { cost = new_total, prev = {x=ux, y=uy} })
+                            add(priority_queue, {x = vx, y = vy, cost = new_total})
+                        end
                     end
                 end
             end
         end
     end
 
-    -- 6. Return the completed table of reachable tiles.
+    return visited_info
+end
+
+-- --------------------------------------------------------------------------
+-- Public API
+-- --------------------------------------------------------------------------
+
+--- Calculates the cost and shortest path to ALL reachable tiles.
+-- @return A table where map[x][y] = { cost = number, prev = {x, y} }
+function calculate_all_tile_costs(start_x, start_y, side, max_limit)
+    local limit = max_limit or 99999 
+    return _dijkstra_traversal(start_x, start_y, side, limit)
+end
+
+--- Finds all tiles reachable from a starting point within a given total cost.
+-- @return A table where reachable[x][y] = true (Compatible with original signature)
+function find_reachable_tiles(start_x, start_y, side, total_cost)
+    -- 1. Get the detailed map from the core engine
+    local full_map = _dijkstra_traversal(start_x, start_y, side, total_cost)
+    
+    -- 2. Transform it into the simple boolean map expected by existing code
+    local reachable = {}
+    
+    for x, col in pairs(full_map) do
+        reachable[x] = {}
+        for y, info in pairs(col) do
+            -- We don't need to check cost <= total_cost here because 
+            -- the core engine already filtered by total_cost.
+            reachable[x][y] = true
+        end
+    end
+
     return reachable
 end
 :: turn_manager.lua
@@ -1276,9 +1313,9 @@ function IdCounter.new()
 	return counter
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33",runtime=24,workspaces={{location="main.lua#59",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4},{location="main.lua#59",workspace_index=7},{location="character.lua#38,55",workspace_index=7},{location="battle_unit.lua#34,27",workspace_index=7},{location="tactics.lua#222,50",workspace_index=7},{location="tiles.lua#34,2",workspace_index=7},{location="tasks.lua#11,49",workspace_index=7},{location="combat.lua#30,45",workspace_index=7},{location="event_bus.lua#14,15",workspace_index=7}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 02:29:46",runtime=24,workspaces={{location="main.lua#59",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4},{location="main.lua#59",workspace_index=7},{location="character.lua#122,17",workspace_index=7},{location="tactics/enemy_ai.lua#18,26",workspace_index=7},{location="tiles.lua#138,38",workspace_index=7},{location="tactics.lua#198,30",workspace_index=7}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 02:29:46"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0xOCAxNDowODowNyIscmV2aXNpb249OF1dbHo0ALcAAABHMQAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -1346,14 +1383,14 @@ PvGgsQAfMk8AFPMZ-w9tSm4qLlpOai4q-lE6Llo_Kn4qXjouOv6AOi5KPjp_Kk46Pjr_OFgAHzRX
 ABRO8P--MtkADzMA--------------86XxAQBPDwMQD---------------------------------
 --------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 02:29:46"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAwMTo1MDo0NCIscmV2aXNpb249MTZdXWx6NAB-AAAAZAEAAP8Ge3tibXA9cHh1AEyADwoA
 AAICAAECBgBsFwYMAA8GAAopAQYPAA8GAAUfAlEAEFAMBgIBBHsAIQsDCQBAAwILBQkAEQwGAPEJ
 AwUCLGhpZGRlbj1mYWxzZSxwYW5feD0wCAC1eT0xNix0aWxlX2gKABB3CgCAem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 01:49:33"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 02:29:46"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1361,5 +1398,7 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: systems/.info.pod
---[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 01:49:33"]]
+--[[pod,created="2025-11-21 03:57:56",modified="2025-11-22 02:29:46"]]
+:: tactics/.info.pod
+--[[pod,created="2025-11-22 01:55:57",modified="2025-11-22 02:29:46"]]
 :: [eoc]
