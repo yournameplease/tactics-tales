@@ -1,0 +1,74 @@
+include "tiles.lua"
+
+--[[
+AI Mk 1:
+- perform full dijkstra on tiles, with ancestor references
+- if enemy in range, look at all tiles within attack range
+- - pick one at random
+- else
+- - pick nearest  enemy, move as close as possible
+]]
+
+function compute_enemy_ai(unit)
+    local all_tile_costs = calculate_all_tile_costs(unit.x, unit.y, unit.side)
+
+    local enemies = Battle:get_units(unit_is_player)
+
+    local potential_attacks = {}
+    local deep_moves = {}
+
+    for e in all(enemies) do
+        local tiles_in_range =
+        tiles_with_distance_from_tile(e.x, e.y, unit.stats.min_range, unit.stats.max_range)
+        for x,row in pairs(tiles_in_range) do
+            for y, reachable in pairs(row) do
+                --printh(x..","..y..":"..(reachable and "t" or "f"))--.." cost: "..all_tile_costs[x][y].cost)
+                if reachable then
+                    if all_tile_costs[x] ~= nil and all_tile_costs[x][y] ~= nil then
+                        --printh(x..","..y..":"..(reachable and "t" or "f").." cost: "..all_tile_costs[x][y].cost)
+                        if all_tile_costs[x][y].cost <= unit.stats.movement then
+                            if Battle:tile_is_legal_destination(unit, x, y) then
+                                add(potential_attacks, {x = x, y = y, target = e})
+                            end
+                        else
+                            add(deep_moves, {x = x, y = y})
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if #potential_attacks > 0 then
+        local choice = potential_attacks[1]
+        local action_ctx = {
+            acting_unit = { unit_id = unit.id },
+            destination = { x = choice.x, y = choice.y},
+            target = { unit_id = choice.target.id }
+        }
+        printh(unit.id .. " will attack "..choice.target.id)
+        BUS.emit("MOVE_AND_ATTACK", action_ctx)
+    elseif #deep_moves > 0 then
+        -- todo, find closest and follow back until in range
+    else
+        printh("WARN: No valid moves for "..unit.id.. "!")
+    end
+end
+
+function handle_enemy_turn()
+    start_routine(function()
+        local enemies = Battle:get_units(unit_is_enemy)
+
+        for enemy in all(enemies) do
+            printh("doing ai for " .. enemy.id)
+            compute_enemy_ai(enemy)
+            while (Battle:is_blocked()) do
+                yield()
+            end
+        end
+
+        BUS.emit("TACTICS_END_ENEMY_TURN")
+    end)
+end
+
+BUS.on("TACTICS_BEGIN_ENEMY_TURN", handle_enemy_turn)
