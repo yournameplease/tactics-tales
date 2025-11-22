@@ -21,15 +21,15 @@
 -- class progression
 -- inheritence?
 
-include "tasks.lua"
+include "src/tasks.lua"
 
-BUS = include "event_bus.lua"
-TACTICS = include "tactics.lua"
-TURN_MANAGER = include "turn_manager.lua"
-TILE_MANAGER = include "tiles.lua"
-CHARACTER_MANAGER = include "character.lua"
-COMBAT_CALCULATOR = include "combat/combat_calculator.lua"
-include "tactics/enemy_ai.lua"
+BUS = include "src/event_bus.lua"
+TACTICS = include "src/tactics.lua"
+TURN_MANAGER = include "src/turn_manager.lua"
+TILE_MANAGER = include "src/tiles.lua"
+CHARACTER_MANAGER = include "src/character.lua"
+COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
+include "src/tactics/enemy_ai.lua"
 
 function _init()
     Battle:create({

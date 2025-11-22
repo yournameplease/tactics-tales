@@ -1,8 +1,8 @@
-include "util.lua"
-include "tiles.lua"
-include "combat.lua"
-include "draw.lua"
-local BattleUnit = include "battle_unit.lua"
+include "src/util.lua"
+include "src/tiles.lua"
+include "src/combat.lua"
+include "src/draw.lua"
+local BattleUnit = include "src/battle_unit.lua"
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7
@@ -16,6 +16,7 @@ local MAP_WIDTH = 15
 local MAP_HEIGHT = 10
 local TILE_WIDTH = 24
 local TILE_HEIGHT = 16
+local WALL_HEIGHT = 24
 local UNIT_OFFSET_X = 4
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
@@ -541,7 +542,24 @@ end
 function Battle:draw()
     camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
 
-    map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
+    -- draw row-by row, top to bottom aka back to front
+
+        --map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
+    -- TODO: preload layers
+    local layers = fetch("map/0.map")
+    local layer_ground = layers[1].bmp
+    local layer_wall = layers[2].bmp
+    local wall_offset = WALL_HEIGHT - TILE_HEIGHT
+    for y = 0, MAP_HEIGHT-1 do
+        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+        for x = 0, MAP_WIDTH-1 do
+            if self.tile_contents[x][y] ~= nil then
+                draw_unit(self:get_unit_at_coordinates(x, y))
+            end
+        end
+        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, MAP_WIDTH, 1, nil, TILE_WIDTH, WALL_HEIGHT)
+    end
+
 
 
     -- highlight legal tiles
@@ -569,10 +587,6 @@ function Battle:draw()
     poke(0x550b,0x00)
         fillp()
         color()
-    end
-
-    for unit in all(self.units) do
-        draw_unit(unit)
     end
 
     if menu_selection.x ~= nil and menu_selection.y ~= nil then

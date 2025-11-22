@@ -1,5 +1,5 @@
-include "util.lua"
-include "animation.lua"
+include "src/util.lua"
+include "src/animation.lua"
 
 local id_counter = IdCounter.new()
 local characters = {}
