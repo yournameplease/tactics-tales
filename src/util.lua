@@ -33,6 +33,14 @@ function fn_true()
     return true
 end
 
+function tmap(table, fn)
+    local out = {}
+    for k,v in pairs(table) do
+        out[k] = fn(v)
+    end
+    return out
+end
+
 
 IdCounter = {}
 

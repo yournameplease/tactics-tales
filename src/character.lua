@@ -1,5 +1,4 @@
 include "src/util.lua"
-include "src/animation.lua"
 
 local id_counter = IdCounter.new()
 local characters = {}
@@ -35,32 +34,37 @@ local BASE_WEAPON_SPRITE = 256 + 104
 Character = {}
 
 function Character:start_animation(animation_id, direction)
-    self.animation_data = create_animation(animation_id, direction)
-    self.animation_playing = true
+    self.animation_data = ANIMATION_MANAGER.create_animation(animation_id, direction)
+    self.animation_blocking = true
 end
 
 function Character:start_walk_animation(target_x, target_y)
-    self.animation_data = create_walk_animation(target_x, target_y)
-    self.animation_playing = true
+    self.animation_data = ANIMATION_MANAGER.create_walk_animation(target_x, target_y)
+    self.animation_blocking = true
 end
 
 function Character:end_animation()
-    self.animation_data = nil
-    self.animation_playing = false
+    self.animation_data = ANIMATION_MANAGER.create_animation("IDLE", 0)
+    self.animation_blocking = false
 end
 
 function Character:update_animation()
     if self.animation_data == nil then return end
-    update_animation(self.animation_data)
-    self.animation_playing = self.animation_data.playing
+    self.animation_data:update()
+    self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
 end
 
 function Character:draw(x, y, side, set_pal)
+    if self.animation_data == nil then
+        -- this could go somewhere else...
+        self.animation_data = ANIMATION_MANAGER.create_animation("IDLE", 0)
+    end
+
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
     local sex = self.appearance.sex
 
-    local o_x, o_y = get_x_y_from_animation(self.animation_data)
+    local o_x, o_y = self.animation_data:get_x_y()
     x = x + o_x
     y = y + o_y
 

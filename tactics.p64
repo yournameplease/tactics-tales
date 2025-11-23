@@ -5,9 +5,11 @@ version 2
 :: map/
 :: sfx/
 :: src/
+:: src/character/
 :: src/combat/
 :: src/systems/
 :: src/tactics/
+:: src/util/
 :: main.lua
 --[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-22 17:27:48",revision=55,xstickers={}]]
 -- tactics game
@@ -270,6 +272,114 @@ end
 
 
 return CharacterManager
+:: src/character/weapons.lua
+include "src/util/data_utils.lua"
+
+-- potential additions
+-- shields
+-- dual wielding (use front hand sprite)
+
+local WEAPON_TYPES = enum {
+    "MELEE",
+    "RANGED"
+}
+
+-- picks the relevant body sprite
+local WEAPON_BODY_TYPES = enum {
+    "BACK_HAND", -- standard 1h weapons
+    "FRONT_HAND", -- bows, rapiers,
+    "HORIZONTAL" -- heavy weapons
+}
+
+local default_weapon = {
+    name = "weapon",
+    sprite = 104,
+    hand_offset = {x = 1, y = 8}, -- the top left position of the handle
+    damage = 1,
+    accuracy = 90,
+    type = WEAPON_TYPES.MELEE,
+    body_type = WEAPON_BODY_TYPES.BACK_HAND,
+    range = 1,
+    properties = {}
+}
+
+local function create_weapon(data)
+    setmetatable(data, { __index = default_weapon })
+    return data
+end
+
+local WEAPONS = {
+    dagger = create_weapon({
+        name = "dagger",
+        sprite = 104,
+        damage = 1,
+        accuracy = 90
+    }),
+    sword = create_weapon({
+        name = "sword",
+        sprite = 105,
+        damage = 2,
+        accuracy = 80
+    }),
+    axe = create_weapon({
+        name = "axe",
+        sprite = 106,
+        damage = 2,
+        accuracy = 70,
+        properties = {
+            shieldsplitter = true
+        }
+    }),
+    spear = create_weapon({
+        name = "spear",
+        sprite = 107,
+        damage = 1,
+        accuracy = 90,
+        properties = {
+            long = true
+        }
+    }),
+    poleaxe = create_weapon({
+        name = "poleaxe",
+        sprite = 108,
+        damage = 2,
+        accuracy = 60,
+        properties = {
+            long = true,
+            shieldsplitter = true
+        }
+    }),
+    club = create_weapon({
+        name = "club",
+        sprite = 109,
+        damage = 1,
+        accuracy = 80,
+        properties = {
+            armorkiller = true
+        }
+    }),
+    mace = create_weapon({
+        name = "mace",
+        sprite = 110,
+        damage = 2,
+        accuracy = 70,
+        properties = {
+            armorkiller = true
+        }
+    }),
+    greatsword = create_weapon({
+        name = "greatsword",
+        sprite = 111,
+        damage = 3,
+        accuracy = 70,
+    }),
+    bow = create_weapon({
+        name = "bow",
+        sprite = 112,
+        damage = 2,
+        accuracy = 90,
+    }),
+}
 :: src/combat.lua
 function is_in_combat_range(attacker, defender)
     local a_x = attacker.x
@@ -436,7 +546,6 @@ function _init()
 end
 
 function _draw()
-    cls(22)
     Battle:draw()
 end
 
@@ -450,7 +559,7 @@ function get_joypad()
         ap = btnp(4),
         b = btn(5),
         bp = btnp(5),
-        lp = btnp(14)
+        lp = btnp(14) -- debug button.  Set to next turn
     }
 
     return joy
@@ -527,7 +636,7 @@ local SCREEN_HEIGHT = 270
 local SCREEN_DECORATION_PADDING = 3
 
 local MAP_OFFSET_X = 154
-local MAP_OFFSET_Y = 10
+local MAP_OFFSET_Y = 11
 local MAP_WIDTH = 16
 local MAP_HEIGHT = 16
 local TILE_WIDTH = 20
@@ -619,14 +728,22 @@ function Battle:is_blocked()
     return battle_is_blocked
 end
 
+function Battle:check_for_end()
+    if self:is_blocked() then
+        return { finished = false }
+    end
 
--- map_info
--- width
--- height
+    local players = self:get_units(unit_is_player)
+    local enemies = self:get_units(unit_is_enemy)
 
-local CURSOR_GRID = 0
-local CURSOR_VERTICAL_LIST = 1
-local CURSOR_HORIZONTAL_LIST = 2
+    if (#players == 0) then
+        return { finished = true, command = "BATTLE_END_VICTORY" }
+    elseif (#enemies == 0) then
+        return { finished = true, command = "BATTLE_END_FAILURE" }
+    else
+        return { finished = false }
+    end
+end
 
 -- step data helpers
 
@@ -645,10 +762,6 @@ function unit_is_enemy(unit)
 end
 
 -- grid filters
-
-function tile_is_in_unit_movement_range(x, y, unit)
-
-end
 
 function tile_has_distance_from_unit(x1, y1, x2, y2, min_distance, max_distance)
     max_distance = max_distance or min_distance
@@ -804,22 +917,18 @@ function Battle:handle_move_and_attack(ctx)
         end
         unit:end_animation()
 
-        printh("here1")
         self:move_unit(unit, x, y)
         do_combat(unit, target)
         unit.has_acted = true
-        printh("here2")
 
         set_menu("MENU_PLAYER_TURN")
-        printh("here3")
         battle_is_blocked = false
-        printh("here4")
     end)
 end
 
 BUS.on("MOVE_AND_ATTACK", function(ctx) Battle:handle_move_and_attack(ctx) end)
 
-function grid_selection_is_available_player(grid_selection, ctx)
+function grid_selection_is_available_player(grid_selection)
     local unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
 
     if unit == nil then return false end
@@ -837,20 +946,20 @@ local MENU_DATA = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "acting_unit",
                 validator = grid_selection_is_available_player,
                 next_state = "SELECT_DESTINATION"
             },
             ["SELECT_DESTINATION"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "destination",
                 validator = grid_selection_is_empty_or_acting_unit,
                 next_state = "SELECT_ACTION",
                 get_legal_tiles = tiles_in_movement_range
             },
             ["SELECT_ACTION"] = {
-                kind = CURSOR_VERTICAL_LIST,
+                kind = "CURSOR_VERTICAL_LIST",
                 options_generator = function(ctx)
                     local options = {}
                     -- if target in range
@@ -870,7 +979,7 @@ local MENU_DATA = {
                 end
             },
             ["SELECT_TARGET"] = {
-                kind = CURSOR_GRID,
+                kind = "CURSOR_GRID",
                 store_key = "target",
                 validator = validate_tile_is_in_unit_attack_range,
                 finish_command = { kind = "MOVE_AND_ATTACK" },
@@ -903,7 +1012,7 @@ function handle_menu_select()
         selection = menu_selection
     })
 
-    if step_data.kind == CURSOR_GRID then
+    if step_data.kind == "CURSOR_GRID" then
         printh("unit getting")
         local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
         if selected_unit ~= nil then
@@ -961,14 +1070,14 @@ function handle_menu_back()
 end
 
 local update_cursor = {
-    [CURSOR_GRID] = function (joy)
+    ["CURSOR_GRID"] = function (joy)
         menu_selection.x = mid(0, menu_selection.x + joy.dxp, menu_state.x_max - 1)
         menu_selection.y = mid(0, menu_selection.y + joy.dyp, menu_state.y_max - 1)
     end,
-    [CURSOR_VERTICAL_LIST] = function (joy)
+    ["CURSOR_VERTICAL_LIST"] = function (joy)
         menu_selection.i = mid(1, menu_selection.i + joy.dyp, #menu_state.options)
     end,
-    [CURSOR_HORIZONTAL_LIST] = function (joy)
+    ["CURSOR_HORIZONTAL_LIST"] = function (joy)
         menu_selection.i = mid(1, menu_selection.i + joy.dxp, #menu_state.options)
     end,
 }
@@ -977,7 +1086,7 @@ local update_cursor = {
 function set_menu(menu_id)
     -- TODO: make functional?
     menu_state = {
-        kind = CURSOR_GRID,
+        kind = "CURSOR_GRID",
         handle_back = nil,
         x_max = 20, -- TODO
         y_max = 15, -- TODO
@@ -1019,7 +1128,11 @@ function Battle:update(joy)
 
     if blocking_animation then return end
     if all_players_acted then
-        BUS.emit("TACTICS_END_PLAYER_TURN")
+        local status = Battle:check_for_end()
+
+        if not status.finished then
+            BUS.emit("TACTICS_END_PLAYER_TURN")
+        end
     end
 
     if joy.lp then
@@ -1068,10 +1181,11 @@ function draw_menu_overlay()
         },
     }
 
+    cls(COLOR_SCREEN_DECORATION_PRIMARY)
     for box in all(menu_boxes) do
-        rrectfill(box.x-1, box.y, box.w+1, box.h+1, 1, COLOR_SCREEN_DECORATION_HIGHLIGHT)
-        rrectfill(box.x, box.y-1, box.w+1, box.h+1, 1, COLOR_SCREEN_DECORATION_SHADOW)
-        rrectfill(box.x, box.y, box.w, box.h, 0, COLOR_SCREEN_DECORATION_INTERIOR)
+        rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
+        rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
+        rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
     end
 end
 
@@ -1140,7 +1254,7 @@ function Battle:draw()
         local y = menu_selection.y * TILE_HEIGHT
         spr(CURSOR_SPRITE, x, y)
 
-        if menu_state.kind == CURSOR_VERTICAL_LIST then
+        if menu_state.kind == "CURSOR_VERTICAL_LIST" then
             local selected_i = menu_selection.i
             local options = menu_state.options
             local PADDING = 2
@@ -1171,13 +1285,10 @@ function draw_unit(unit)
     local side = unit.side
     local x = unit.x
     local y = unit.y
-    local s = unit.s
-    local s = unit.side
     local has_acted = unit.has_acted
 
     local tile_x = x * TILE_WIDTH
     local tile_y = y * TILE_HEIGHT
-    local flip_x = side ~= 0
 
     local shadow_color
     if has_acted then
@@ -1186,7 +1297,7 @@ function draw_unit(unit)
         shadow_color = 7
     end
     draw_shadow(shadow_color,
-            function(x,y) unit:draw(x, y, side, false) end,
+            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
             tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
     unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
@@ -1204,21 +1315,23 @@ function draw_health_bar(hp_current, hp_max, x, y, width, height)
 end
 
 function Battle:draw_tactics_debug()
-    print(menu_state.menu_id, 3 + 3, 3-1 + 3, 7)
-    print(menu_state.menu_id, 3 + 3+1, 3 + 3, 5)
+    --print(menu_state.menu_id, 3 + 3, 3-1 + 3, 7)
+    --print(menu_state.menu_id, 3 + 3+1, 3 + 3, 5)
     print(menu_state.menu_id, 3 + 3, 3 + 3, 6)
-    print(menu_state.menu_step, 3 + 3, 11-1 + 3, 7)
-    print(menu_state.menu_step, 3 + 3+1, 11 + 3, 5)
+    --print(menu_state.menu_step, 3 + 3, 11-1 + 3, 7)
+    --print(menu_state.menu_step, 3 + 3+1, 11 + 3, 5)
     print(menu_state.menu_step, 3 + 3, 11 + 3, 6)
-    print("x: "..(menu_selection.x or "nil"), 3 + 3, 19-1 + 3, 7)
-    print("x: "..(menu_selection.x or "nil"), 3 + 3+1, 19 + 3, 5)
+    --print("x: "..(menu_selection.x or "nil"), 3 + 3, 19-1 + 3, 7)
+    --print("x: "..(menu_selection.x or "nil"), 3 + 3+1, 19 + 3, 5)
     print("x: "..(menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
-    print("y: "..(menu_selection.y or "nil"), 3 + 3, 27-1 + 3, 7)
-    print("y: "..(menu_selection.y or "nil"), 3 + 3+1, 27 + 3, 5)
+    --print("y: "..(menu_selection.y or "nil"), 3 + 3, 27-1 + 3, 7)
+    --print("y: "..(menu_selection.y or "nil"), 3 + 3+1, 27 + 3, 5)
     print("y: "..(menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
-    print("i: "..(menu_selection.i or "nil"), 3 + 3, 35-1 + 3, 7)
-    print("i: "..(menu_selection.i or "nil"), 3 + 3+1, 35 + 3, 5)
+    --print("i: "..(menu_selection.i or "nil"), 3 + 3, 35-1 + 3, 7)
+    --print("i: "..(menu_selection.i or "nil"), 3 + 3+1, 35 + 3, 5)
     print("i: "..(menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
+
+    print("ABCDEFGHIJKLMNOPQRSTUVWXYZABC", 4, 50, 6)
 end
 
 return Battle
@@ -1377,10 +1490,6 @@ BUS.on("TACTICS_BEGIN_ENEMY_TURN", handle_enemy_turn)
 -- 5 shallow water
 -- 6 deep water
 -- 7
-
--- not class-specific.  may revisit later
-local terrain_costs = {
-}
 
 local TERRAIN_DATA = {
     [0] = {
@@ -1588,7 +1697,21 @@ end)
 BUS.on("TACTICS_END_ENEMY_TURN", function()
     printh("End enemy turn!")
 
-    BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
+    battle_result = Battle:check_for_end()
+
+    if not battle_result.finished then
+        BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
+    else
+        BUS.emit(battle_result.command)
+    end
+end)
+
+BUS.on("BATTLE_END_VICTORY", function()
+    printh("You win!")
+end)
+
+BUS.on("BATTLE_END_FAILURE", function()
+    printh("You lose!")
 end)
 
 return TurnManager
@@ -1642,21 +1765,45 @@ function IdCounter.new()
     setmetatable(counter, { __index = IdCounter })
     return counter
 end
+:: src/util/data_utils.lua
+-- Helper function to lock a table's keys
+local function protect(tbl)
+    return setmetatable(tbl, {
+        -- Error if accessing a key that doesn't exist
+        __index = function(t, k)
+            error("CRITICAL: Attempted to access missing data key: '" .. tostring(k) .. "'", 2)
+        end,
+
+        -- Error if trying to write new data
+        __newindex = function(t, k, v)
+            error("CRITICAL: Attempted to modify static data key: '" .. tostring(k) .. "'", 2)
+        end
+    })
+end
+
+local function enum(list)
+    local e = {}
+    for _, v in ipairs(list) do
+        e[v] = v
+    end
+    return protect(e) -- Use the protect function from above!
+end
+
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 20:44:40",runtime=24,workspaces={{location="gfx/0.gfx",workspace_index=1},{location="gfx/1_units.gfx",workspace_index=1},{location="gfx/2_tiles.gfx",workspace_index=1},{location="gfx/3_walls.gfx",workspace_index=1},{location="map/0.map",workspace_index=2},{location="sfx/0.sfx",workspace_index=3}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17",runtime=24,workspaces={{location="src/tactics.lua#115",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAyMDozNjo0NCIscmV2aXNpb249MTJdXWx6NADlAAAAtDEAAPMhe1swXT17Ym1wPXB4dQBD
-IBAQBPBWBxAHwBfQF8AHEAfwVixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sPgDzA-8WAUUO
-dR4GLxUFDgZTBR4GLQgAPw0HDRIADg8sABh-NgUOZgX_EZ4AHC-w8DEA-w-wEBgYBAAR8AIRAAEX
-AfAAARcRBwHwAgEHAQAB8AQB8LIGACIAARQAEhEiABEBMAAv8LGXAB4PMQD-----------------
----------------------------------------------05QbT04fX0=
+MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
+IBAQBPBWBxAHwBfQF8AHEAfwVixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sPgDwAv8WArYF
+LgavFQUuBg0HDQcdBACQBS4GrQUuxf4DGwAfowQAAz-F-gFrABwv8PAxAP8P8A0UEAQAEdARAAEX
+AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
+----------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxOToxNToyOSIscmV2aXNpb249MTAxXV1sejQA_gsAAKxGAADzIXtbMF09e2JtcD1weHUA
-QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEyfSw-AB-wMgD-
+MS0yMyAwMjo1MzoxNyIscmV2aXNpb249MTE2XV1sejQAcxAAACpQAADzIXtbMF09e2JtcD1weHUA
+QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEzfSw-AB-wMgD-
 SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
 HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
 DWAWIDRgFhBfEEAmAHxABRAEADwABDAEBRQQPBAEMAUwBgDvgDEABIAREAGQESABgBGAACDyCEAP
@@ -1669,50 +1816,70 @@ ZAwPE0ALHEQcC0AEC2wLDkAUGzwLHkAUcVAUMRAhMCcFUNABBkBPFEAGMG4wFhCO2QI4BD4E2wIl
 DiBOAqAOEDUADmQOIBQgVQJVJE8QFCwxAXUbTBseUAtMMQF-ACFwLSAtEI8AKj8_FB73AwkgAA5_
 BB8eiwBOAA4GQD4UPhCLACYeEIwAPwAOEI4AFCBgC0oCj2BRAA5gIRARGQEuICBO2AJPED4kHqgB
 Dg_PAEgP9QMPYGQwFDBEQIAAEC2AAPEHHxQPE40cQBxNHB8UUAxNDAAbUGEAC6ABTy4gLhAFBSs-
-ThQuBwUJAZ4BTyAOREAOAUMfDTsIGvMIFSBkMCQvEEQcIAUeHxNsG2ALTAseYGGBAC8hIGgEIB-w
-KgRSD44HHv8bDg8eDxAPHhAkLxBOLx4QBR4PE18QTx4wvCDMILwgPCEsARwgPAEQLAEcHQgf8QFZ
-BjAGkFYADxZQHgYHDxUGkQNBXgYHDQoA8gcAbmYAjlYgfgVQLhUQHgVQHgAFIB4VBwAvBSBtAD5f
-VhCONkBtAAMPzQGCGpCYBgLGARNwxAEigGSeBvEGLEQsMEwFbCAOJBWWAB4UBXZAEQUxpgJfIWAt
-MC2eBh4foHUAC-IJYB8QZFA8RBwwzCAMBBwFXB4gDhQVlhAOeQB-ICFQLTAtQOgCUvAAMG8QMAYw
-Dl8TMBYgDV4wWAQA_QUhDxS0ADIMBzAMADIMFAzRAyAUEG8F9AUkLkQeDRAFGw2OHUANbg0bUB0_
-DeQED9QIJwGMACAgjt0E9gBfEw4gFgAeDVQNIBYADQ6NAB8NjAAFLx8UjQA4DyANBjAcFBwIAJAP
-FRwdHA0QNRDgCAEBBHFkCyAkK0QbbwXECosaQAprCh5QGjsKmgcPiQAk8ASQLxAwBkBeMAYwLh8T
-HjAWIB49CgdBHg00DQYHEg0ZARINDAAAGgFADRA1AB8A3zAUEC00HSAkLh0UHQ4gAT0PIQUWH2Q9
-DknxDcAPFBAkgB4QNBB_ECQOAH4gDhQOAB5fDzAUDgAaAVEdDAcwFBkBAQoA0CBtMB0QDxBtCyAt
-K02rAVIOHx8PE60BIR8frgFfGVBhAAmRACr2BwUWBXAeEDYQfhA2AH4gBRYFAB5UMBUeARQVHgEB
-HAcPHgFIDw8EIBQWaAgfIIEOH9AsCwwLLBtACywLLAseBwA0HAsACAAQDggAfzxQCywLXBCVACAU
-EJUAIl8T9QJiDxUHHAcM9QIQDAsAUSA1AB1c6wEgTg0SBBNNEgTQLg0ODS4dQA0uDS4NGwcANB4N
-AAgAEAsIAG8_UA0uDV6VAB5QEAbgFtChEHBQFgB_QBUAmgA2MBUAmgAUFZoAPzAVEJoACDIAFRCc
-AAIJAACeACMVIJ8AAhMATj4gFQCjAA9SEEcAMgr3AU4rEAUOK3QbQA5kLlAeNA6JAj8kMBSJAh_x
-EwYQXxlAJgB_MCafAzYFAAagAyQFIKADIAUwoAP3B40gzQ8fEAUrjRsABSALbSsABTAbPQuwBE8t
-MB0gBAhG38wgDiSFJgAeFGUmMGEACCgFcQC0ABRAHl8PAAYABDDzAEQABhAE9QBgAAYQDjBtBgAQ
-IJkE8AwGEA4QK00bBh0PHwCrBh0OAAotawYQBBAaHUtDAFBAYQAUUJMATywwLDAQBE_BQE8QsE6g
-XkB6A0AwBhAtjgcPGwgFMAsUG0cCQA4rFBvoAhJLIAgPgQNFDZsAJ18VDwQYMBkEIA4NgAOAHg08
-DQ4gbj2XACQtTpQAEy2LAC8fFJQAMC-w8KQDVP8FRAxODB4QBS4EbC5ADmwuUB8TPAukAy2AAAbg
-NhBfFDC1BiAGELUGNFAFAIwAAgsAAIwAM0AFIIwA8xQELhQeBCBUTiUQBS5UBQ8TDxAPEwUABSAO
-RAUvEAUABTAeJBYAURVAUQUPEwB-MRARBRAFIKEAITzADx6SCSBfDyQBBEgEIxYQUwM8IDUQ6Acf
-BegHPg6NAB8fjQAWExQgChEUigBfFFBhAASKADkPjAkXAKYQAnAIIR8UcQhfGlBhAAoWATofFBYB
-FhMcFgERHBYBXxxQYQAMigAm8hTPGg8ZLxoGnh8ZLgY_fS4WHn0_Fh4dXw8_Fh4NDAcPFRwLBwsA
-8QgLHAsHLjUebD4cHg8QbAouLCpMGg8THjAC-wyKGU4JagkfH14ZOgkOGF5hDgheMR4RbiE_ES6Q
-ADQfH5AAFiIUCY4AERSNAF8UXmEOBI0APBBUgQAD2QUCCwAAZw1wLjUeZD4UHt8MEi7fDBEeNgIw
-ixpOTAO-FF4aOwoOGV5hDgkcAT0fFBwBFhMbHAERGxwBXxteYQ4LjQAm8AXwF08dkG6AboAOBw8V
-Hg0HgA4HDQcAf26AbpBO8FQSBh8PMgCCD_UABW_QTsAe8FWzAIIf8I0EHxQX8glv0A7gDvCKeAwg
-LxeAPgAov28XcD4QLmAeUA5gQgAiEFB-AI5gnlCeUC7AHoMADxkCQ5EPFwAOAA6QDgACAC-ws3QA
-UA8yAB-nB08XkG5wjmAeAD4ADmACAG9wDkAO8GNQACQyPhAe7QFP4A7gHkgAJu9_YD4QPlAeUB5Q
-DnAOUEwAK75ugE4ADnA_IB5gDuQAD2YBTpIFfxdgnlBOEC6AAn-gDvAADvBpeQAfDzIAgp9mDxYQ
-HqAuEB7WBSKfaR8WsB4QHvBjeAAhP0AOgMMBI09mDxbgsgAoj8AOEA6wPvBULAEjTgAOgC7yAA_c
-AUL3GGcPEC8dDxBAHx0QLxAvHS8QIC8dnxAPEyAdDo8QHkAObA4dUB48DkMfXy8VMBsgaAAw-wZP
-HX8QDSAtDx1vEC1ADW4tUB8TPgxoAC_xTx1AHhCOIM4NIC2CFREtgRUGVwBfHg0wDg3AACoAZg0C
-DgAACAAQIM0AAAkAEQ8RABIfPAHgLxAODA4sHkAOLA4sDh0HADQcDgAIABANCABfPFAOLA6hEyBD
-cR8dMIwACaoBdR5MHh1QDkyqAX8AIXAvFSArYQA7IGAOCwJBYFEADVIcD2EALgoEArsPE08QDxMt
-UA5PEMcAHyzHACoPogFcMSEG4LEUr8A1wBXQFdAV8E2qECIAQwAf0EcAK9cTBsAmwCbABQAGwAXg
-AgAv8C6DFSMg0BaJAAKPAAQCAAMOAA8DESJRsDawBhCSAB3QBgAf4FIAH8AkwDSwJA8UsA4UDsAD
-ABDQAgBvDgTQDvBOTQAfQAUWBbChADgFFgXxAC-wTZUFUA88FLkv8PAyAP--qgCIBXJAR0AWIGcw
-BABABx8VFxke9wcHHhceIDUQZzAUEC8QBicGDSAkTSYdjSSFDG0MHxRQHD2NJA9dEyQv8PAyAP--
------------------------------75QPTEyfX0=
+ThQuBwUJAZ4BTyAOREAOAUMfDTsIGvMIFSBkMCQvEEQcIAUeHxNsG2ALTAseYGGBAC8hIIQFLaBv
+EDAWIA4HDxUeewBhIA8THhwehAX1FRwbHDAUEA4bDBQMCw4gJC4LDBsMHgwQBRsMjhxADG4MG1Ac
+PpcBDvMED4MERw-nBx7-Gw4PHg8QDx4QJC8QTi8eEAUeDxNfEE8eMLwgzCC8IDwhLAEcIDwBECwB
+HHYIH-EBWQYwBpBWAA8WUB4GBw8VBuoDQV4GBw0KAPIHAG5mAI5WIH4FUC4VEB4FUB4ABSAeFQcA
+LwUgbQA_X1YQjjZAbQADD5sBUQ8yAB4akPEGAsYBE3DEASKAZPcG8QYsRCwwTAVsIA4kFZYAHhQF
+dkARBTH-Al8hYC0wLfcGHh_gdQAL8glgHxBkUDxEHDDMIAwEHAVcHiAOFBWWEA55AH8gIVAtMC1A
+6AJS8AAwbxAwBjAOXxMwFiANXjCxBABSBiEPFLQAMgwHMAwAMgwUDCoEIBQQyAX-BSQuRB4NEAUb
+DY4dQA1uDRtQHT4NpgMtA4wAICCONgX2AF8TDiAWAB4NVA0gFgANDo0AHw2MAAUvHxSNADgPeQ0G
+MBwUHAgAkA8VHB0cDRA1EDkJAQEEcWQLICQrRBvIBcQKixpACmsKHlAaOwrzBw_JACTwBJAvEDAG
+QF4wBjAuHxMeMBYgHj1jB0EeDTQNXwcSDRkBEg0MAAAaAUANEDUAHwDfMBQQLTQdICQuHRQdDiAB
+PQ8hBRYfZJYOSfENwA8UECSAHhA0EH4QJA4AfiAOFA4AHl8PMBQOABoBUR0MBzAUGQEBCgDQIG0w
+HRAPEG0LIC0rTasBUg4fHw8TrQEhHx_uAV8ZUGEACZEAKvYHBRYFcB4QNhB_EDYAfiAFFgUAHlQw
+FR4BFBUeAQF1Bw8eAUgPDwQgFBbBCB8g2g4f0CwLDAssG0ALLAssCx4HADQcCwAIABAOCAB-PFAL
+LAtcEJUAIBQQlQAiXxP1AmIPFQccBwz1AhAMCwBRIDUAHVzrASBODRIEE00SBNAuDQ4NLh1ADS4N
+Lg0bBwA0Hg0ACAAQCwgAbz5QDS4NXpUAHlAQBuAW0PoQcFAWAH5AFQCaADYwFQCaABQVmgA-MBUQ
+mgAIMgAVEJwAAgkAAJ4AIxUgnwACEwBOPiAVAKMAD6sQRwCLCvcBTisQBQ4rdBtADmQuUB40DokC
+PyQwFIkCH7ETBhBfGUAmAH4wJp8DNgUABqADJAUgoAMgBTCgA-cHjSDNDx8QBSuNGwAFIAttKwAF
+MBs9C7AETy0wHSAECEbfzCAOJIUmAB4UZSYwYQAIKAVxALQAFEAeXw8ABgAEMPMARAAGEAT1AGAA
+BhAOMG0GABAgmQTwDAYQDhArTRsGHQ8fAKsGHQ4ACi1rBhAEEBodS0MAUEBhABRQkwBPLDAsMBAE
+T4FATxCwTqBeQHoDQDAGEC2OBw8bCAUwCxQbRwJADisUG_gCEksgCA_BA0UNmwAnXxUPBBgwGQQg
+Dg2AA4AeDTwNDiBuPZcAJC1OlAATLYsALx8UlAAwL-DwpANU-wVEDE4MHhAFLgRsLkAObC5QHxM8
+C6QDLYAABuA2EF8UMLUGIAYQtQY0UAUAjAACCwAAjAAzQAUgjADzFAQuFB4EIFROJRAFLlQFDxMP
+EA8TBQAFIA5EBS8QBQAFMB4kFgBRFUBRBQ8TAH8xEBEFEAUgoQAhPMAPHpIJIF8PJAEESAQjFhBT
+AzwgNRDoBx8F6Ac_Do0AHx_NABYTFCAKERSKAF8UUGEABIoAOQ_MCRcA-xACcAghHxRxCF8aUGEA
+ChYBOh8UFgEWExwWAREcFgFfHFBhAAyKACbyFM8aDxkvGgaeHxkuBj59LhYefT4WHh1fDz4WHg0M
+Bw8VHAsHCwDxCAscCwcuNR5sPhweDxBsCi4sKkwaDxMeMAL-DIoZTglqCR8fXhk6CQ4YXmEOCF4x
+HhFuIT4RLpAANB8fkAAWIhQJjgARFI0AXxReYQ4EjQA8EFSBAAPZBQILAABnDXAuNR5kPhQe3wwS
+Lt8MER42AjCLGk5MA78UXho7Cg4ZXmEOCRwBPR8UHAEWExscAREbHAFfG15hDguNACaT8BdPHZBu
+gG6ArBJAgA4HDQcAf26AbpBO8FQSBh8PMgCCD_UABW_QTsAe8FWzAIIf8I0EHxQX8glv0A7gDvCK
+eAwgLxeAPgAov28XcD4QLmAeUA5gQgAiEFB-AI5gnlCeUC7AHoMADxkCQ5EPFwAOAA6QDgACAC-w
+s3QAUA8yAB-nB08XkG5wjmAeAD4ADmACAG9wDkAO8GNQACQyPhAe7QFP4A7gHkgAJu9_YD4QPlAe
+UB5QDnAOUEwAK75ugE4ADnA_IB5gDuQAD2YBTpIFfxdgnlBOEC6AAn-gDvAADvBpeQAfDzIAgp9m
+DxYQHqAuEB7WBSKfaR8WsB4QHvBjeAAhP0AOgMMBI09mDxbgsgAoj8AOEA6wPvBULAEjTgAOgC7y
+AA_cAUL3GGcPEC8dDxBAHx0QLxAvHS8QIC8dnxAPEyAdDo8QHkAObA4dUB48DpwfXy8VMBsgaAAw
+-wZPHX8QDSAtDx1vEC1ADW4tUB8TPgxoAC_xTx1AHhCOIM4NIC2CFREtgRUGVwBfHg0wDg3AACoA
+Zg0CDgAACAAQIM0AAAkAEQ8RABIfPAHgLxAODA4sHkAOLA4sDh0HADQcDgAIABANCABfPFAOLA6h
+EyBDcR8dMIwACaoBdR5MHh1QDkyqAX8AIXAvFSArYQA7IGAOCwJBYFEADascD2EALgoEArsPE08Q
+DxMtUA5PEMcAHyzHACoPogFcMSEG4LEUr8A1wBXQFdAV8E2qECIAQwAf0EcAK9cTBsAmwCbABQAG
+wAXgAgAf8KsLHhQgkQABQAAOBgAf4AMRIl2wNrAGEEwAD1IAJsAkwDSwJA8UsA4UDsADABDQAgBv
+DgTQDvBOTQAfQAUWBbChADIFFgWAAR-QhgElz6QFsDWWEDV2YAXwCz0AHvMEKxTQBgAEwAYQBLAG
+EA8UsAYQDgQAEw0IACAEsCEAPxTwE3EUuC-w8CQYIyDQFqQBCLABBQ4AD4MAHw8yAP--RgDcBXJA
+R0AWIGcwBABABx8VF20eMAceF6cj9wBnMBQQLxAGJwYNICRNJh06JY8MbQwfFFAcPaMjLrQBBkAf
+EB8TDxBABuoeIC4dBgAQbZggBP8D8QggDh0UHSA1AA0eDRQNDg0gFAANDg0ODeEeQV4dFA3dFzAu
+PR4ABIUdHi1QbQAfFJgATywwHCBKKqsPiAAMD90mSw_jAYgPmAAZIQ8UmQBhCyAUAAsEmQD_CwQL
+EFQdFA0UCxAFKyQ9FBtACyQbFCtQawAbmAAPiANLEgfIABCQxgD0AlAUAC4dHkAEAAYAbTAEEAYA
+ygBQDxQQBgDNAE8wCxAGZgEIEQtmAUEABBAGaQEREEoAXwAbIBQA1gApP8APFHAYJw-eIAAP0h0m
+MAAGsAoBcqAeEBYwfhAUMFQeVCAWIIsAJRA1iwCQFDBkICQvEGQglSfxAi8QRAwPE1ALfBtQC1wL
+HlABbSl_QHEADlAhIIwAD3MFSQ-QAw9lEB8XRB0gIioPsRkIPy4wHrgAUw8FBINcLhTQBuACAD8U
+8BCEAyq2gC4dHiAEQG0wBDB_AxIwfAMfIHsDEBEg3gA_BEBtSwQPTShAYQwPEzCsG1AoL0wLUSgC
+DzYhQDAPE1A3LHIPEzBMBUwbPykuDiQ-KQ96AD8AsCGJHDQATAVMJBB3AB_AtClEAXUA8AM0ECxE
+HCQQTAU8DxNADiQVhhB3AG8wIQUhcCFmAUcgYCzeAf8QJhCcCyYQDiRlJgUQDiRVJgUwYQAmQCEQ
+ISYwLTAdQP4DHw8yAIEPOSM3MFsPEzsjTwotOwk8Iy4DGwIxFEB_kQABmQACjAAEmQAfDpkABTId
+Dx_aADEOAJuSAHAADx8tSw8TSQCxIA8fLSsPExAUQGE-Aj8sMCw-AiEBBwdABkB_EJYHEAaeACUg
+BjUBJCAWmgBhIBYwbSAWlgBwADUAK00bLS0BIi0FLAFBAAUABS0BXyAFQGGAKQEoD44AAC8WII4A
+AyEQJY4AEi0jAUItBQCbiAADIwEjIAUhAR_AHwEqBF4DChcBLwYwFwEJMTsFWxkB-wEFNgsPE1AK
+LRYbCYABBUGAQQIsHmCgAQ8SAQz0BEsFOw8TQA8fLRU2YAotBRYPE4BtBA4PAQ-DA3MAmhbgJA5A
+FBAuJC4gJJ4PEyC4CAJ9LCEfFP0WBt8hD1QXIzBhFEBkAGEwJE4kHjBeAIANUA1_HVANXmIAIAEN
+YwBBQHEADNMJD2MAIx-wMgD-GRBljQH-GXA_JB5Qng8TMK4dIA4Efg0fFCAMFF4NABwwDBRRAAxQ
+ETAhUC8VMCu0Ah8QZF8ARIAuJC5fAJQPFCReDRwwDCRLAgFpCABdAB8wIAEfDzIA-xngZA8QLw8P
+EIAuLw8uUJ4oBfMBri0QDC1eDxNQDC0_C4BhgIgBLyowRAIhBVwAAP8EQp4tEJ76BIVODxNgDx8t
+LggGLy8V_gQiDzIA--------------------I1A9MTN9fQ==
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxOTozMzoxNCIscmV2aXNpb249MjRdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
+MS0yMiAyMTo0ODoyMSIscmV2aXNpb249MjVdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
 IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sQQA-8-8x
 MgAcL-8bMwAe8wb8HV8QPC48Llw_-HJOPD48Lkw_-EZEAB8xRQAVghT-FAA0DvQDAwAf-gwADx8B
 pgAccPEdXDEsMSyrAPQFMS5RPvFeTDE8MSxOPD4xLkE_8TKwAB8yTwAU8Aj-D0NKbioeKk5qLhr_
@@ -1721,25 +1888,26 @@ ABQUBc8AD4QAFB7w9QEPMgD-------------0V8QEATw8DEA----------------------------
 --------------------vFBtPTh9fQ==
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxOTo0MjowNSIscmV2aXNpb249OV1dbHo0AA0BAAAWMwAA8BF7WzBdPXtibXA9cHh1AEMg
-FBgE8MAHEAfwARfwAhfwAQsA8wDALGZsYWdzPTAscGFuX3gIAMt5PTAsem9vbT04fSxBAP8Z-1sf
-GxAO0B4gHhAeMA4wDkA_UA4ALlAeYE4ADhA_IB4gXgBeAD4ALlgAH-8RExAD0BMgExATMAMwA0Az
-UAMAI1ATYEMAAxAzIBMg8wZSABwtFR4CADw_FR4CAD81HhUmAFxcFR8VEh0CADwyHRICAD89Eh0m
-ABAfHRYBtS-wkDICHh-RMgD--------------3hfEBAE8PAxAP--------------------------
----------------------7xQbT04fX0=
+MS0yMiAyMTo1Mjo1MSIscmV2aXNpb249MTFdXWx6NABDAQAANzMAAPARe1swXT17Ym1wPXB4dQBD
+IBQYBPDABxAH8AEX8AIX8AELAPMAwCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sQQD-Gf9b
+HxsQDtAeIB4QHjAOMA5APlAOAC5QHmBOAA4QPiAeIF4AXgA_AC5YAB--ERMQA9ATIBMQEzADMANA
+M1ADACNQE2BDAAMQMyATIPMGUgAcLRUeAgA8PhUeAgA-NR4VJgBcXBUfFRIdAgA8Mh0SAgA-PRId
+JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
+MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
+------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAxOTozNTo1NSIscmV2aXNpb249MjldXWx6NAA1AQAA_AQAAP8Ge3tibXA9cHh1AEyAEBAA
-AAEDAAIDBgAVGgQPAA8GAA4aBA8AD2AAzhoDDwAISAALEgBfAQMBAABFAAYKEgA4AgAADwAPBgAF
-HgNRAA0GAJASAAAABAMNAABmADEEAwcJABECBgARAQYA8RYgAAAsaGlkZGVuPWZhbHNlLG5hbWU9
-IndhbGxzIixwYW5feD0wCADSeT0wLHRpbGVfaD0xNgoAEHcKAIx6b29tPTF9LGgCTwIAAgIGABUa
-Bw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUAChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIA
-BgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAVADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8C
-FlBtPTF9fQ==
+MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
+AAEDAAIDBgAqAgMSABoEDwAPBgAOGgQPAA8GAAAPYAC7Cy8BCEgACxIAXwEDAQAARQAGChIAOAIA
+AA8ADwYABR4DUQAPJAACcQUDCwAAAQWWAEEGAwgFigAQBQwAAHsAMgQDBwkAEQYYADEDAwEPABEJ
+DwARDQYA8RYEBgMsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0wCADSeT0wLHRpbGVf
+aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
+ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
+ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1747,11 +1915,15 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-22 20:44:39",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+:: src/character/.info.pod
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-22 20:44:39",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-22 20:44:39",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-22 20:44:39",modified="2025-11-22 20:44:40"]]
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+:: src/util/.info.pod
+--[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
 :: [eoc]

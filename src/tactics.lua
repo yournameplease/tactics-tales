@@ -272,7 +272,7 @@ function Battle:handle_move_unit(ctx)
     battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
-        while unit.animation_playing do
+        while unit.animation_blocking do
             yield()
         end
         unit:end_animation()
@@ -296,7 +296,7 @@ function Battle:handle_move_and_attack(ctx)
     battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
-        while unit.animation_playing do
+        while unit.animation_blocking do
             yield()
         end
         unit:end_animation()
@@ -502,7 +502,7 @@ function Battle:update(joy)
 
     for unit in all(self.units) do
         unit:update_animation()
-        if unit.animation_playing then
+        if unit.animation_blocking then
             blocking_animation = true
         end
         if unit.side == SIDE_PLAYER and not unit.has_acted then

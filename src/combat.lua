@@ -29,7 +29,7 @@ function apply_combat_step(step)
     if not step.is_hit then
         defender:start_animation("DODGE", direction)
     end
-    while attacker.animation_playing or defender.animation_playing do
+    while attacker.animation_blocking or defender.animation_blocking do
         yield()
     end
 
@@ -38,7 +38,7 @@ function apply_combat_step(step)
         defender:start_animation("HURT", direction + 0.5)
     end
 
-    while defender.animation_playing do
+    while defender.animation_blocking do
         yield()
     end
 

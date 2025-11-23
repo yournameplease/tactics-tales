@@ -19,7 +19,7 @@
 -- LONG TERM TODO
 -- character relationships
 -- class progression
--- inheritence?
+-- inheritence? (the human kind)
 
 include "src/systems/tasks.lua"
 
@@ -29,6 +29,7 @@ TURN_MANAGER = include "src/turn_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
+ANIMATION_MANAGER = include "src/animation.lua"
 include "src/tactics/enemy_ai.lua"
 
 function _init()
