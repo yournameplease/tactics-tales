@@ -9,6 +9,8 @@ version 2
 :: src/combat/
 :: src/systems/
 :: src/tactics/
+:: src/ui/
+:: src/ui/panels/
 :: src/util/
 :: main.lua
 --[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-23 05:01:45",revision=56,xstickers={}]]
@@ -741,7 +743,26 @@ end
 -- tactics game
 -- ynp
 
--- TODO LIST
+--[[
+-- TODO: LIST
+-- Next Goals
+- red highlight for attack ranges
+- lhs UI
+-- unit details
+-- combat preview ***
+-- combat log
+-- turn number
+-- goal
+- enemy/player spawn point map tiles
+- multi map support
+- r button to cycle units
+
+-- mid term goals
+- learn sfx/music
+- more tiles
+- make ~5 maps
+- title screen
+- investigate mounted units possibility
 
 
 -- PROTOTYPE GOALS
@@ -754,6 +775,7 @@ end
 -- character relationships
 -- class progression
 -- inheritence? (the human kind)
+]]
 
 include "src/systems/tasks.lua"
 
@@ -764,16 +786,14 @@ TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
+UI_MANAGER = include "src/ui/ui_manager.lua"
 include "src/tactics/enemy_ai.lua"
 
 function _init()
     Battle:create({
         width=15, height=10
     })
-end
-
-function _draw()
-    Battle:draw()
+    UI_MANAGER:init()
 end
 
 function get_joypad()
@@ -796,6 +816,11 @@ function _update()
     local joy = get_joypad()
     Battle:update(joy)
     update_tasks()
+end
+
+function _draw()
+    Battle:draw()
+    UI_MANAGER:draw()
 end
 :: src/systems/event_bus.lua
 
@@ -1942,6 +1967,179 @@ BUS.on("BATTLE_END_FAILURE", function()
 end)
 
 return TurnManager
+:: src/ui/box.lua
+local Box = {}
+Box.__index = Box -- TODO: ?
+
+function Box.new(props)
+    local self = setmetatable({}, Box)
+    self.x = props.x or 0
+    self.y = props.y or 0
+    self.w = props.w or 0
+    self.h = props.h or 0
+
+    -- Layout properties
+    self.dir = props.dir or "col" -- "row" or "col"
+    self.gap = props.gap or 3
+    self.padding = props.padding or 2
+    self.decoration_padding = props.decoration_padding or (props.padding and props.padding-1) or 1
+    self.decoration = props.decoration -- "embossed" or "recessed"
+
+    self.children = {}
+    return self
+end
+
+function Box:add(child)
+    add(self.children, child)
+    return child -- Return child for chaining
+end
+
+-- The "Flexbox" magic: Recalculate children positions based on parent
+function Box:layout()
+    local cx, cy = self.x + self.padding, self.y + self.padding
+
+    for _, child in ipairs(self.children) do
+        child.x = cx
+        child.y = cy
+
+        -- Let the child calculate its own internal layout
+        if child.layout then child:layout() end
+
+        -- Advance cursor for next sibling
+        if self.dir == "row" then
+            cx = cx + child.w + self.gap
+        else
+            cy = cy + child.h + self.gap
+        end
+    end
+end
+
+function Box:draw(state)
+    if self.decoration == 'embossed' then
+        self:draw_embossed()
+    elseif self.decoration == 'recessed' then
+        self:draw_recessed()
+    end
+
+    -- 2. Draw Children
+    --for _, child in ipairs(self.children) do
+    --    child:draw(state)
+    --end
+end
+
+function Box:draw_embossed()
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
+end
+
+function Box:draw_recessed()
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+end
+
+function Box:draw_shaded(color_ne, color_sw, color_interior)
+    -- TODO: 45 degree slant (draw lines in loop)
+    -- TODO: child separators
+    if self.decoration_padding ~= 0 then
+        rectfill(
+                self.x,
+                self.y+self.decoration_padding-1,
+                self.x+self.decoration_padding-1,
+                self.y+self.h-1,
+                color_sw
+        )
+        rectfill(
+                self.x,
+                self.y+self.h,
+                self.x+self.w-1,
+                self.y+self.h-1,
+                color_sw
+        )
+        rectfill(
+                self.x,
+                self.y,
+                self.x+self.w-1,
+                self.y+self.decoration_padding-1,
+                color_ne
+        )
+        rectfill(
+                self.x+self.w-self.decoration_padding,
+                self.y,
+                self.x+self.w,
+                self.y+self.h-1-self.decoration_padding,
+                color_ne
+        )
+    end
+    rectfill(
+            self.x+self.decoration_padding,
+            self.y+self.decoration_padding,
+            self.x+self.w-1-self.decoration_padding,
+            self.y+self.h-1-self.decoration_padding,
+            color_interior
+    )
+end
+
+return Box
+:: src/ui/panels/unit_info.lua
+Box = include "src/ui/box.lua"
+
+local UnitInfo = {}
+
+function UnitInfo:draw(state)
+    Box.draw(self, state)
+
+    local unit = state.selected_unit
+    if unit then
+        print("HP: "..unit.hp, self.x + 5, self.y + 5, 7)
+    else
+        print("No Unit Selected", self.x + 5, self.y + 5, 6)
+    end
+end
+
+setmetatable(UnitInfo, { __index = Box})
+
+return UnitInfo
+:: src/ui/ui_manager.lua
+local Box = include "src/ui/box.lua"
+local UnitInfo = include "src/ui/panels/unit_info.lua"
+
+local UIManager = {}
+
+UIManager.THEME = {
+    COLOR_DECORATION_PRIMARY = 22,
+    COLOR_DECORATION_HIGHLIGHT = 6,
+    COLOR_DECORATION_SHADOW = 5,
+    COLOR_INTERIOR = 21
+}
+
+-- Define Layouts
+function UIManager:init()
+    -- 1. Create the BATTLE layout tree
+    self.layouts = {}
+
+    local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
+
+    -- Left Sidebar (Info + Log)
+    local right_col = battle_root:add(Box.new({w=120, h=270, dir="col", gap=5}))
+    right_col:add(UnitInfo.new({w=120, h=100, bg_color=5})) -- Top right
+    right_col:add(Box.new({w=120, h=165, bg_color=2}))      -- Bottom right (Log)
+
+    -- Center Area (The Map Viewport - usually transparent so we see the game)
+    battle_root:add(Box.new({w=300, h=270}))
+
+    self.layouts.BATTLE = battle_root
+
+    -- Set initial
+    self.current_layout = self.layouts.BATTLE
+end
+
+function UIManager:draw(global_state)
+    -- Recalculate positions (in case of dynamic resizing or initial setup)
+    self.current_layout:layout()
+
+    -- Render
+    self.current_layout:draw(global_state)
+end
+
+return UIManager
 :: src/util.lua
 
 -- http://lua-users.org/wiki/CopyTable
@@ -2038,9 +2236,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 06:10:44",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2145,7 +2343,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2156,7 +2354,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2164,15 +2362,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+:: src/ui/.info.pod
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+:: src/ui/panels/.info.pod
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 06:03:15",modified="2025-11-23 06:10:44"]]
+--[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
 :: [eoc]

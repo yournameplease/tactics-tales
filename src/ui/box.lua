@@ -10,11 +10,14 @@ function Box.new(props)
 
     -- Layout properties
     self.dir = props.dir or "col" -- "row" or "col"
-    self.gap = props.gap or 0
-    self.padding = props.padding or 0
-    self.bg_color = props.bg_color
+    self.gap = props.gap or 3
+    self.padding = props.padding or 2
+    self.decoration_padding = props.decoration_padding or self.padding - 1
+    self.decoration = props.decoration -- "embossed" or "recessed"
 
     self.children = {}
+
+    assert(self.decoration_padding < self.padding)
     return self
 end
 
@@ -44,15 +47,66 @@ function Box:layout()
 end
 
 function Box:draw(state)
-    -- 1. Draw Background (if any)
-    if self.bg_color then
-        rectfill(self.x, self.y, self.x+self.w, self.y+self.h, self.bg_color)
+    if self.decoration == 'embossed' then
+        self:draw_embossed()
+    elseif self.decoration == 'recessed' then
+        self:draw_recessed()
     end
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
         child:draw(state)
     end
+end
+
+function Box:draw_embossed()
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
+end
+
+function Box:draw_recessed()
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+end
+
+function Box:draw_shaded(color_ne, color_sw, color_interior)
+    -- TODO: 45 degree slant (draw lines in loop)
+    -- TODO: child separators
+    if self.decoration_padding ~= 0 then
+        rectfill(
+                self.x,
+                self.y+self.decoration_padding-1,
+                self.x+self.decoration_padding-1,
+                self.y+self.h-1,
+                color_sw
+        )
+        rectfill(
+                self.x,
+                self.y+self.h,
+                self.x+self.w-1,
+                self.y+self.h-1,
+                color_sw
+        )
+        rectfill(
+                self.x,
+                self.y,
+                self.x+self.w-1,
+                self.y+self.decoration_padding-1,
+                color_ne
+        )
+        rectfill(
+                self.x+self.w-self.decoration_padding,
+                self.y,
+                self.x+self.w,
+                self.y+self.h-1-self.decoration_padding,
+                color_ne
+        )
+    end
+    rectfill(
+            self.x+self.decoration_padding,
+            self.y+self.decoration_padding,
+            self.x+self.w-1-self.decoration_padding,
+            self.y+self.h-1-self.decoration_padding,
+            color_interior
+    )
 end
 
 return Box
