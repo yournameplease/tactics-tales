@@ -10,6 +10,9 @@ UIManager.THEME = {
     COLOR_INTERIOR = 21
 }
 
+local BATTLE_WIDTH = CONFIG.MAP_WIDTH * CONFIG.TILE_WIDTH + 2
+local BATTLE_HEIGHT = CONFIG.MAP_HEIGHT * CONFIG.TILE_HEIGHT + 2
+
 -- Define Layouts
 function UIManager:init()
     -- 1. Create the BATTLE layout tree
@@ -18,11 +21,11 @@ function UIManager:init()
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
     -- Left Sidebar
-    local left = battle_root:add(Box.new({ w=120, h=270, dir="col", gap=5, decoration = "recessed" }))
-    left:add(UnitInfo.new({ w=120, h=100, bg_color=5})) -- Top right
-    left:add(Box.new({ w=120, h=165, bg_color=2}))      -- Bottom right (Log)
+    local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+    left:add(UnitInfo.new({ h=100, padding = 0 }))
+    left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
-    battle_root:add(Box.new({w=300, h=270, decoration = "recessed"}))
+    battle_root:add(Box.new({w=BATTLE_WIDTH, h=BATTLE_HEIGHT, decoration = "recessed"}))
 
     self.layouts.BATTLE = battle_root
 

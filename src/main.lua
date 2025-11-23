@@ -37,6 +37,7 @@
 
 include "src/systems/tasks.lua"
 
+CONFIG = include "src/config.lua"
 BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"

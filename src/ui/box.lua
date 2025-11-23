@@ -8,6 +8,11 @@ function Box.new(props)
     self.w = props.w or 0
     self.h = props.h or 0
 
+    -- proportional flex amount
+    self.flex_grow = props.flex_grow or 0
+    -- If true, children expand to fill the cross-axis (e.g. width in a column)
+    self.cross_stretch = props.cross_stretch ~= false
+
     -- Layout properties
     self.dir = props.dir or "col" -- "row" or "col"
     self.gap = props.gap or 3
@@ -17,7 +22,8 @@ function Box.new(props)
 
     self.children = {}
 
-    assert(self.decoration_padding < self.padding)
+    if self.decoration_padding < 0 then self.decoration_padding = 0 end
+    assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
 
@@ -26,19 +32,75 @@ function Box:add(child)
     return child -- Return child for chaining
 end
 
--- The "Flexbox" magic: Recalculate children positions based on parent
-function Box:layout()
+function Box:layout()local is_row = (self.dir == "row")
+
+    -- ---------------------------------------------------------
+    -- PASS 1: Measurement & Flex Calculation
+    -- ---------------------------------------------------------
+    local total_flex = 0
+    local used_space = (self.padding * 2)
+    local num_children = #self.children
+
+    -- Add gap space
+    if num_children > 1 then
+        used_space = used_space + (self.gap * (num_children - 1))
+    end
+
+    for _, child in ipairs(self.children) do
+        if child.flex_grow > 0 then
+            total_flex = total_flex + child.flex_grow
+        else
+            -- For fixed items, we just add their current requested size
+            local size = is_row and child.w or child.h
+            used_space = used_space + size
+        end
+    end
+
+    -- Calculate the size of 1 "flex unit"
+    local total_size = is_row and self.w or self.h
+    local remaining_space = math.max(0, total_size - used_space)
+    local px_per_flex = 0
+
+    if total_flex > 0 then
+        assert(remaining_space % total_flex == 0, "Flex remainder not implemented!")
+        px_per_flex = remaining_space / total_flex -- TODO: remainder!
+    end
+
+    -- ---------------------------------------------------------
+    -- PASS 2: Positioning & Sizing
+    -- ---------------------------------------------------------
     local cx, cy = self.x + self.padding, self.y + self.padding
 
     for _, child in ipairs(self.children) do
+        -- A. Apply Flex Sizing (Main Axis)
+        if child.flex_grow > 0 then
+            local new_size = math.floor(child.flex_grow * px_per_flex)
+            if is_row then
+                child.w = new_size
+            else
+                child.h = new_size
+            end
+        end
+
+        -- B. Apply Cross-Axis Stretch
+        if self.cross_stretch then
+            if is_row then
+                child.h = self.h - (self.padding * 2)
+            else
+                child.w = self.w - (self.padding * 2)
+            end
+        end
+
+        -- C. Set Position
         child.x = cx
         child.y = cy
 
-        -- Let the child calculate its own internal layout
-        if child.layout then child:layout() end
+        -- D. Recursively Layout Child
+        -- (Child needs valid x,y,w,h before it can layout its own children)
+        if child.layout then child:layout() end -- todo : ???
 
-        -- Advance cursor for next sibling
-        if self.dir == "row" then
+        -- E. Advance Cursor
+        if is_row then
             cx = cx + child.w + self.gap
         else
             cy = cy + child.h + self.gap
@@ -52,6 +114,8 @@ function Box:draw(state)
     elseif self.decoration == 'recessed' then
         self:draw_recessed()
     end
+
+    rrect(self.x+self.padding, self.y+self.padding, self.w - 2*self.padding, self.h - 2*self.padding, 0, 14)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
