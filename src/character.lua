@@ -39,8 +39,8 @@ function Character:start_animation(animation_id, direction)
     self.animation_blocking = true
 end
 
-function Character:start_walk_animation(target_x, target_y)
-    self.animation_data = ANIMATION_MANAGER.create_walk_animation(target_x, target_y)
+function Character:start_walk_animation(path)
+    self.animation_data = ANIMATION_MANAGER.create_walk_animation(to_tile_path(path))
     self.animation_blocking = true
 end
 

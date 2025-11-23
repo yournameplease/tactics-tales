@@ -1,3 +1,5 @@
+include "src/util.lua"
+
 -- tile flags:
 -- 0: empty/solid
 -- 1-3: terrain type
@@ -169,6 +171,19 @@ end
 function calculate_all_tile_costs(start_x, start_y, side, max_limit)
     local limit = max_limit or 99999
     return _dijkstra_traversal(start_x, start_y, side, limit)
+end
+
+-- @return list of { { x, y } } tile coordinates from start position
+function get_path_to_tile(all_tile_costs, x, y)
+    assert(all_tile_costs[x][y] ~= nil)
+    local path = { { x = x, y = y} }
+    while all_tile_costs[x][y].prev ~= nil do
+        next_x = all_tile_costs[x][y].prev.x
+        next_y = all_tile_costs[x][y].prev.y
+        x, y = next_x, next_y
+        add(path, { x = x, y = y })
+    end
+    return reverse_list(path)
 end
 
 --- Finds all tiles reachable from a starting point within a given total cost.

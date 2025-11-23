@@ -7,14 +7,40 @@ local function no_offset_calculator(_)
     return 0, 0
 end
 
+local function lerp_x_y(x0, y0, x1, y1, t, d)
+    printh(x0.. ",".. y0.. ",".. x1.. ",".. y1.. ",".. t.. ",".. d)
+    return x0 + t * (x1 - x0) / d, y0 + t * (y1 - y0) / d
+end
+
 local function lerp_animation_offset_calculator(animation_data)
     local d = animation_data.duration
     local t = animation_data.frame
     local x = animation_data.target_x
     local y = animation_data.target_y
 
+    return lerp_x_y(0, 0, x, y, t, d)
+end
 
-    return t * (x) / d, t * (y) / d
+local function path_animation_offset_calculator(animation_data)
+    printh(animation_data.frame)
+    local point_index = 1
+    local duration_counter = animation_data.frame
+    while (duration_counter > 0) do
+        local prev_point = animation_data.path_points[point_index]
+        local next_point = animation_data.path_points[point_index+1]
+        if duration_counter - prev_point.duration <= 0 then
+            local t = duration_counter
+            local d = prev_point.duration
+            local x0 = prev_point.x
+            local y0 = prev_point.y
+            local x1 = next_point.x
+            local y1 = next_point.y
+            return lerp_x_y(x0, y0, x1, y1, t, d)
+        end
+        duration_counter = duration_counter - prev_point.duration
+        point_index = point_index + 1
+    end
+    error("failed path animation")
 end
 
 local function directional_offsets_offset_calculator(animation_data)
@@ -52,7 +78,7 @@ local ANIMATIONS = {
                 duration = 10
             }
         },
-        offset_calculator = lerp_animation_offset_calculator
+        offset_calculator = path_animation_offset_calculator
     },
     ["BUMP"] = {
         duration = 10,
@@ -133,7 +159,6 @@ end
 
 function AnimationManager.create_animation(animation_id, direction)
     local animation_data = {
-        rnd = rnd(1),
         id = animation_id,
         frame = 1,
         sprite_frame = 1,
@@ -147,19 +172,38 @@ function AnimationManager.create_animation(animation_id, direction)
     return animation_data
 end
 
-function AnimationManager.create_walk_animation(target_x, target_y)
-    -- TODO: make this grid aligned animation
+function AnimationManager.create_walk_animation(path)
+    -- TODO: future
+    -- - different terrain/unit speeds
+    -- - faux elevation
+    local DURATION_PER_TILE = 8
+
+    local path_points = tmap(path, function(p)
+        return {
+            x = p.x, y = p.y,
+            duration = DURATION_PER_TILE
+        }
+    end)
+    path_points[#path].duration = nil
+
+    foreach(path_points, function
+    (p)
+        printh("Point: ".. p.x..",".. p.y)
+    end)
+
     local animation_data = {
-        rnd = rnd(1),
         id = "WALK",
         frame = 1,
         sprite_frame = 1,
         sprite = 1,
         target_x = target_x,
         target_y = target_y,
-        duration = 25,
+        duration = DURATION_PER_TILE * (#path - 1),
+        path_points = path_points,
         playing = true
     }
+
+    printh("hi anim")
 
     setmetatable(animation_data, animation_metatable("WALK"))
 

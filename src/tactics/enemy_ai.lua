@@ -41,9 +41,14 @@ function compute_enemy_ai(unit)
 
     if #potential_attacks > 0 then
         local choice = potential_attacks[1]
+
+        local x = choice.x
+        local y = choice.y
+        local path = get_path_to_tile(all_tile_costs, x, y)
+
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
-            destination = { x = choice.x, y = choice.y},
+            destination = { x = choice.x, y = choice.y, path = path},
             target = { unit_id = choice.target.id }
         }
         printh(unit.id .. " will attack "..choice.target.id)
@@ -65,9 +70,11 @@ function compute_enemy_ai(unit)
             y = all_tile_costs[x][y].prev.y
         end
 
+        local path = get_path_to_tile(all_tile_costs, x, y)
+
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
-            destination = { x = x, y = y }
+            destination = { x = x, y = y, path = path }
         }
         printh(unit.id .. " will move to "..x..","..y)
         BUS.emit("MOVE_AND_WAIT", action_ctx)

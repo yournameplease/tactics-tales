@@ -48,6 +48,7 @@ COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
 CONTEXT_MANAGER = include "src/game_context.lua"
+DEBUG = include "src/debug.lua"
 include "src/tactics/enemy_ai.lua"
 
 local context = {}

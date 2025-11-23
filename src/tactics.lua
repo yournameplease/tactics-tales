@@ -259,10 +259,11 @@ function Battle:handle_move_unit(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
+    local path = ctx["destination"].path
 
     battle_is_blocked = true
     start_routine(function()
-        unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+        unit:start_walk_animation(path)
         while unit.animation_blocking do
             yield()
         end
@@ -282,11 +283,12 @@ function Battle:handle_move_and_attack(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
+    local path = ctx["destination"].path
     local target = get_unit_from_step(ctx, "target")
 
     battle_is_blocked = true
     start_routine(function()
-        unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+        unit:start_walk_animation(path)
         while unit.animation_blocking do
             yield()
         end

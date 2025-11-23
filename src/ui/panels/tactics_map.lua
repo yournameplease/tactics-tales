@@ -39,7 +39,6 @@ function TacticsMap:draw(state)
     Box.draw(self, state)
 
     local tactics = state.tactics
-    printh(tactics)
     local menu = state.menu_manager
 
     local camera_x = self.x + self.padding
