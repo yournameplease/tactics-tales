@@ -41,6 +41,7 @@ CONFIG = include "src/config.lua"
 BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
+MENU_MANAGER = include "src/menu_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
@@ -73,6 +74,7 @@ end
 
 function _update()
     local joy = get_joypad()
+    MENU_MANAGER.update(joy)
     Battle:update(joy)
     update_tasks()
 end

@@ -10,15 +10,6 @@ local COLOR_MENU_TEXT = 7
 local COLOR_MENU_HIGHLIGHT = 6
 local COLOR_MENU_HIGHLIGHT_TEXT = 32
 
-local COLOR_SCREEN_DECORATION_PRIMARY = 22
-local COLOR_SCREEN_DECORATION_HIGHLIGHT = 6
-local COLOR_SCREEN_DECORATION_SHADOW = 5
-local COLOR_SCREEN_DECORATION_INTERIOR = 21
-
-local SCREEN_WIDTH = CONFIG.SCREEN_WIDTH
-local SCREEN_HEIGHT = CONFIG.SCREEN_HEIGHT
-local SCREEN_DECORATION_PADDING = 3
-
 local MAP_OFFSET_X = 154
 local MAP_OFFSET_Y = 11
 local MAP_WIDTH = CONFIG.MAP_WIDTH
@@ -49,7 +40,7 @@ function Battle:create(map_info)
         self.tile_contents[i] = {}
     end
 
-    set_menu("MENU_PLAYER_TURN")
+    MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
 
     for i = 0,3 do
         self:spawn_unit(CHARACTER_MANAGER.generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
@@ -280,7 +271,7 @@ function Battle:handle_move_unit(ctx)
         self:move_unit(unit, x, y)
         unit.has_acted = true
 
-        set_menu("MENU_PLAYER_TURN")
+        MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
     end)
 end
@@ -305,7 +296,7 @@ function Battle:handle_move_and_attack(ctx)
         do_combat(unit, target)
         unit.has_acted = true
 
-        set_menu("MENU_PLAYER_TURN")
+        MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
     end)
 end
@@ -322,168 +313,6 @@ function grid_selection_is_available_player(grid_selection)
     return true
 end
 
--- kind
--- selected_data_mapper -- returns (success bool, data) to store
--- select_transition
-local MENU_DATA = {
-    ["MENU_PLAYER_TURN"] = {
-        initial_step = "SELECT_UNIT",
-        steps = {
-            ["SELECT_UNIT"] = {
-                kind = "CURSOR_GRID",
-                store_key = "acting_unit",
-                validator = grid_selection_is_available_player,
-                next_state = "SELECT_DESTINATION"
-            },
-            ["SELECT_DESTINATION"] = {
-                kind = "CURSOR_GRID",
-                store_key = "destination",
-                validator = grid_selection_is_empty_or_acting_unit,
-                next_state = "SELECT_ACTION",
-                get_legal_tiles = tiles_in_movement_range
-            },
-            ["SELECT_ACTION"] = {
-                kind = "CURSOR_VERTICAL_LIST",
-                options_generator = function(ctx)
-                    local options = {}
-                    -- if target in range
-                    if any_target_in_range(ctx) then
-                        add(options, {
-                            text = "Attack",
-                            next_state = "SELECT_TARGET"
-                        })
-                    end
-
-                    add(options, {
-                        text = "Wait",
-                        finish_command = { kind = "MOVE_AND_WAIT" }
-                    })
-
-                    return options
-                end
-            },
-            ["SELECT_TARGET"] = {
-                kind = "CURSOR_GRID",
-                store_key = "target",
-                validator = validate_tile_is_in_unit_attack_range,
-                finish_command = { kind = "MOVE_AND_ATTACK" },
-                get_legal_tiles = tiles_with_distance_from_unit_attacks
-            },
-        }
-    }
-}
-
-local menu_state = {}
-local menu_ctx = {}
-local menu_selection = {}
-local selection_history = {}
-
-function handle_menu_select()
-    local menu_data = MENU_DATA[menu_state.menu_id]
-    local step_data = menu_data.steps[menu_state.menu_step]
-
-    if step_data.validator ~= nil then
-        local validation = step_data.validator(menu_selection, menu_ctx)
-        if not validation then return end
-    end
-
-    if menu_state.options ~= nil then
-        step_data = menu_state.options[menu_selection.i]
-    end
-
-    add(selection_history, {
-        step = menu_state.menu_step,
-        selection = menu_selection
-    })
-
-    if step_data.kind == "CURSOR_GRID" then
-        printh("unit getting")
-        local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
-        if selected_unit ~= nil then
-            menu_selection.unit_id = selected_unit.id
-        end
-    end
-
-    if step_data.store_key ~= nil then
-        printh("writing to "..step_data.store_key.."...")
-        printh("x="..(menu_selection.x or "nil"))
-        printh("y="..(menu_selection.y or "nil"))
-        printh("i="..(menu_selection.i or "nil"))
-        printh("unit_id="..(menu_selection.unit_id or "nil"))
-        menu_ctx[step_data.store_key] = deepcopy(menu_selection)
-    end
-
-    if step_data.next_state ~= nil then
-        populate_menu_state(step_data.next_state, menu_ctx)
-    end
-
-    if step_data.finish_command ~= nil then
-        printh("emitting "..step_data.finish_command.kind)
-        BUS.emit(step_data.finish_command.kind, menu_ctx)
-    end
-end
-
-function populate_menu_state(new_step, ctx)
-    menu_state.menu_step = new_step
-
-    local menu_data = MENU_DATA[menu_state.menu_id]
-    local new_step_data = menu_data.steps[menu_state.menu_step]
-    menu_state.kind = new_step_data.kind
-    if new_step_data.options_generator ~= nil then
-        menu_state.options = new_step_data.options_generator(ctx)
-        printh ("generated "..#menu_state.options.." options")
-    else
-        menu_state.options = nil
-    end
-    if new_step_data.get_legal_tiles ~= nil then
-        menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
-    else
-        menu_state.legal_tiles = nil
-    end
-end
-
-function handle_menu_back()
-    if #selection_history == 0 then return end
-
-    local previous_step = selection_history[#selection_history]
-    -- TODO: use this to get last cursor position
-    -- or, just push the entire active cursor onto a list
-    selection_history[#selection_history] = nil
-    populate_menu_state(previous_step.step, menu_ctx)
-    selection = previous_step.selection
-end
-
-local update_cursor = {
-    ["CURSOR_GRID"] = function (joy)
-        menu_selection.x = mid(0, menu_selection.x + joy.dxp, menu_state.x_max - 1)
-        menu_selection.y = mid(0, menu_selection.y + joy.dyp, menu_state.y_max - 1)
-    end,
-    ["CURSOR_VERTICAL_LIST"] = function (joy)
-        menu_selection.i = mid(1, menu_selection.i + joy.dyp, #menu_state.options)
-    end,
-    ["CURSOR_HORIZONTAL_LIST"] = function (joy)
-        menu_selection.i = mid(1, menu_selection.i + joy.dxp, #menu_state.options)
-    end,
-}
-
-
-function set_menu(menu_id)
-    -- TODO: make functional?
-    menu_state = {
-        kind = "CURSOR_GRID",
-        handle_back = nil,
-        x_max = 20, -- TODO
-        y_max = 15, -- TODO
-        menu_id = menu_id,
-        menu_step = MENU_DATA[menu_id].initial_step
-    }
-    menu_selection = {
-        x = 0,
-        y = 0,
-        i = 0
-    }
-end
-
 function Battle:spawn_unit(unit, x, y, side)
     if self.tile_contents[x][y] ~= nil then
         error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
@@ -496,7 +325,7 @@ function Battle:spawn_unit(unit, x, y, side)
     self.tile_contents[x][y] = id
 end
 
-function Battle:update(joy)
+function Battle:update()
     local blocking_animation = false
     local all_players_acted = true
 
@@ -517,16 +346,6 @@ function Battle:update(joy)
         if not status.finished then
             BUS.emit("TACTICS_END_PLAYER_TURN")
         end
-    end
-
-    if joy.lp then
-        BUS.emit("TACTICS_END_PLAYER_TURN")
-    elseif joy.bp then
-        handle_menu_back()
-    elseif joy.ap then
-        handle_menu_select()
-    else
-        update_cursor[menu_state.kind](joy)
     end
 end
 
@@ -551,30 +370,7 @@ function Battle:kill_unit(unit)
     unit:die()
 end
 
-function draw_menu_overlay()
-    --local menu_boxes = {
-    --    {
-    --        x = SCREEN_DECORATION_PADDING, y = SCREEN_DECORATION_PADDING,
-    --        w = SCREEN_WIDTH - MAP_WIDTH * TILE_WIDTH - 4 * SCREEN_DECORATION_PADDING,
-    --        h = SCREEN_HEIGHT - 2 * SCREEN_DECORATION_PADDING
-    --    },
-    --    {
-    --        x = MAP_OFFSET_X, y = MAP_OFFSET_Y,
-    --        w = MAP_WIDTH * TILE_WIDTH,
-    --        h = MAP_HEIGHT * TILE_HEIGHT
-    --    },
-    --}
-    --
-    --cls(COLOR_SCREEN_DECORATION_PRIMARY)
-    --for box in all(menu_boxes) do
-    --    rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
-    --    rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
-    --    rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
-    --end
-end
-
 function Battle:draw()
-    draw_menu_overlay()
 
     camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
 
@@ -591,7 +387,7 @@ function Battle:draw()
 
 
         -- highlight legal tiles
-        if menu_state.legal_tiles ~= nil then
+        if MENU_MANAGER.menu_state.legal_tiles ~= nil then
             fillp(
             -- 1:2 diagonal slashes
             --0b00111111,
@@ -616,7 +412,7 @@ function Battle:draw()
             palt()
             color(28)
             for x = 0, MAP_WIDTH-1 do
-                if menu_state.legal_tiles[x] ~= nil and menu_state.legal_tiles[x][y] then
+                if MENU_MANAGER.menu_state.legal_tiles[x] ~= nil and MENU_MANAGER.menu_state.legal_tiles[x][y] then
                     rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
                 end
             end
@@ -633,14 +429,14 @@ function Battle:draw()
         map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, MAP_WIDTH, 1, nil, TILE_WIDTH, WALL_HEIGHT)
     end
 
-    if menu_selection.x ~= nil and menu_selection.y ~= nil then
-        local x = menu_selection.x * TILE_WIDTH
-        local y = menu_selection.y * TILE_HEIGHT
+    if MENU_MANAGER.menu_selection.x ~= nil and MENU_MANAGER.menu_selection.y ~= nil then
+        local x = MENU_MANAGER.menu_selection.x * TILE_WIDTH
+        local y = MENU_MANAGER.menu_selection.y * TILE_HEIGHT
         spr(CURSOR_SPRITE, x, y)
 
-        if menu_state.kind == "CURSOR_VERTICAL_LIST" then
-            local selected_i = menu_selection.i
-            local options = menu_state.options
+        if MENU_MANAGER.menu_state.kind == "CURSOR_VERTICAL_LIST" then
+            local selected_i = MENU_MANAGER.menu_selection.i
+            local options = MENU_MANAGER.menu_state.options
             local PADDING = 2
 
             local menu_x = x + TILE_WIDTH
@@ -699,21 +495,11 @@ function draw_health_bar(hp_current, hp_max, x, y, width, height)
 end
 
 function Battle:draw_tactics_debug()
-    --print(menu_state.menu_id, 3 + 3, 3-1 + 3, 7)
-    --print(menu_state.menu_id, 3 + 3+1, 3 + 3, 5)
-    print(menu_state.menu_id, 3 + 3, 3 + 3, 6)
-    --print(menu_state.menu_step, 3 + 3, 11-1 + 3, 7)
-    --print(menu_state.menu_step, 3 + 3+1, 11 + 3, 5)
-    print(menu_state.menu_step, 3 + 3, 11 + 3, 6)
-    --print("x: "..(menu_selection.x or "nil"), 3 + 3, 19-1 + 3, 7)
-    --print("x: "..(menu_selection.x or "nil"), 3 + 3+1, 19 + 3, 5)
-    print("x: "..(menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
-    --print("y: "..(menu_selection.y or "nil"), 3 + 3, 27-1 + 3, 7)
-    --print("y: "..(menu_selection.y or "nil"), 3 + 3+1, 27 + 3, 5)
-    print("y: "..(menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
-    --print("i: "..(menu_selection.i or "nil"), 3 + 3, 35-1 + 3, 7)
-    --print("i: "..(menu_selection.i or "nil"), 3 + 3+1, 35 + 3, 5)
-    print("i: "..(menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
+    print(MENU_MANAGER.menu_state.menu_id, 3 + 3, 3 + 3, 6)
+    print(MENU_MANAGER.menu_state.menu_step, 3 + 3, 11 + 3, 6)
+    print("x: "..(MENU_MANAGER.menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
+    print("y: "..(MENU_MANAGER.menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
+    print("i: "..(MENU_MANAGER.menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
 
     print("ABCDEFGHIJKLMNOPQRSTUVWXYZABC", 4, 50, 6)
 end
