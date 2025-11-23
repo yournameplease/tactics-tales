@@ -175,6 +175,7 @@ end
 
 -- @return list of { { x, y } } tile coordinates from start position
 function get_path_to_tile(all_tile_costs, x, y)
+    printh(x.." "..y)
     assert(all_tile_costs[x][y] ~= nil)
     local path = { { x = x, y = y} }
     while all_tile_costs[x][y].prev ~= nil do

@@ -1,3 +1,6 @@
+-- TODO: only needed for lazy dijkstra animation.
+include "src/tiles.lua"
+
 local MenuManager = {
     menu_state = {},
     menu_ctx = {},
@@ -72,6 +75,7 @@ local update_cursor = {
 }
 
 function handle_menu_select()
+    printh("Select "..MenuManager.menu_state.menu_id .. ":" .. MenuManager.menu_state.menu_step)
     local menu_data = MENU_DATA[MenuManager.menu_state.menu_id]
     local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
 
@@ -90,6 +94,18 @@ function handle_menu_select()
     })
 
     if step_data.kind == "CURSOR_GRID" then
+        -- TODO: lazy impl.  keep track of cursor for the real path!
+        if MenuManager.menu_state.menu_step == "SELECT_DESTINATION" then
+            if MenuManager.menu_ctx.acting_unit ~= nil then
+                local acting_unit = Battle:get_unit_by_id(MenuManager.menu_ctx.acting_unit.unit_id)
+                printh(acting_unit.x.." "..acting_unit.y)
+                local costs = calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999)
+                local path = get_path_to_tile(costs, MenuManager.menu_selection.x, MenuManager.menu_selection.y)
+                printh("path length "..#path)
+                MenuManager.menu_selection.path = path
+            end
+        end
+
         printh("unit getting")
         local selected_unit = Battle:get_unit_at_coordinates(MenuManager.menu_selection.x, MenuManager.menu_selection.y)
         if selected_unit ~= nil then

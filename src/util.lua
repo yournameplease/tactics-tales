@@ -66,7 +66,8 @@ end
 -- normalize to offsets from first tile
 -- multiply by tile scale
 function to_tile_path(path)
-    if #path == 0 then return path end
+    assert(#path > 0)
+    --if #path == 0 then return path end
 
     local base_x = path[1].x
     local base_y = path[1].y

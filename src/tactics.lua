@@ -233,7 +233,7 @@ end
 function tiles_in_movement_range(ctx)
     local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
 
-    return find_reachable_tiles(unit.x, unit.y, unit.side, 6)
+    return find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
 end
 
 function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)

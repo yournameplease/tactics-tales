@@ -8,7 +8,6 @@ local function no_offset_calculator(_)
 end
 
 local function lerp_x_y(x0, y0, x1, y1, t, d)
-    printh(x0.. ",".. y0.. ",".. x1.. ",".. y1.. ",".. t.. ",".. d)
     return x0 + t * (x1 - x0) / d, y0 + t * (y1 - y0) / d
 end
 
@@ -22,7 +21,6 @@ local function lerp_animation_offset_calculator(animation_data)
 end
 
 local function path_animation_offset_calculator(animation_data)
-    printh(animation_data.frame)
     local point_index = 1
     local duration_counter = animation_data.frame
     while (duration_counter > 0) do
@@ -185,11 +183,6 @@ function AnimationManager.create_walk_animation(path)
         }
     end)
     path_points[#path].duration = nil
-
-    foreach(path_points, function
-    (p)
-        printh("Point: ".. p.x..",".. p.y)
-    end)
 
     local animation_data = {
         id = "WALK",
