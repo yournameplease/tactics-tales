@@ -1,7 +1,26 @@
 -- tactics game
 -- ynp
 
--- TODO LIST
+--[[
+-- TODO: LIST
+-- Next Goals
+- red highlight for attack ranges
+- lhs UI
+-- unit details
+-- combat preview ***
+-- combat log
+-- turn number
+-- goal
+- enemy/player spawn point map tiles
+- multi map support
+- r button to cycle units
+
+-- mid term goals
+- learn sfx/music
+- more tiles
+- make ~5 maps
+- title screen
+- investigate mounted units possibility
 
 
 -- PROTOTYPE GOALS
@@ -14,6 +33,7 @@
 -- character relationships
 -- class progression
 -- inheritence? (the human kind)
+]]
 
 include "src/systems/tasks.lua"
 
