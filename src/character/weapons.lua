@@ -25,10 +25,16 @@ local default_weapon = {
     type = WEAPON_TYPES.MELEE,
     body_type = WEAPON_BODY_TYPES.BACK_HAND,
     range = 1,
+    min_range = 1,
+    max_range = 1,
     properties = {}
 }
 
 local function create_weapon(data)
+    if data.range ~= nil then
+        data.min_range = data.range
+        data.max_range = data.range
+    end
     setmetatable(data, { __index = default_weapon })
     return data
 end
@@ -106,6 +112,7 @@ WEAPON_DATA = {
         hand_anchor = { x = 13, y = 9},
         damage = 2,
         accuracy = 90,
+        range = 2,
         type = WEAPON_TYPES.RANGED,
         body_type = WEAPON_BODY_TYPES.FRONT_HAND,
     }),

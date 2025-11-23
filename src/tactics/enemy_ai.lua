@@ -19,7 +19,7 @@ function compute_enemy_ai(unit)
 
     for e in all(enemies) do
         local tiles_in_range =
-        tiles_with_distance_from_tile(e.x, e.y, unit.stats.min_range, unit.stats.max_range)
+        tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
         for x,row in pairs(tiles_in_range) do
             for y, reachable in pairs(row) do
                 --printh(x..","..y..":"..(reachable and "t" or "f"))--.." cost: "..all_tile_costs[x][y].cost)

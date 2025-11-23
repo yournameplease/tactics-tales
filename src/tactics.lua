@@ -72,8 +72,8 @@ end
 function Battle:get_targets_in_range(unit_id, x, y)
     local targets = {}
     local attacker = self.units[unit_id]
-    local min_range = attacker.stats.min_range
-    local max_range = attacker.stats.max_range
+    local min_range = attacker.weapon.min_range
+    local max_range = attacker.weapon.max_range
     for target in all(self.units) do
         if target.id ~= attacker.id then
             if target.side ~= attacker.side
@@ -158,8 +158,8 @@ end
 
 function validate_tile_is_in_unit_attack_range(selection, ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
-    local min_distance = unit.stats.min_range
-    local max_distance = unit.stats.max_range
+    local min_distance = unit.weapon.min_range
+    local max_distance = unit.weapon.max_range
     local destination = ctx["destination"]
     local unit_x = destination.x
     local unit_y = destination.y
@@ -188,8 +188,8 @@ end
 
 function tiles_with_distance_from_unit_attacks(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
-    local min_distance = unit.stats.min_range
-    local max_distance = unit.stats.max_range
+    local min_distance = unit.weapon.min_range
+    local max_distance = unit.weapon.max_range
 
     return tiles_with_distance_from_unit
     (min_distance, max_distance)

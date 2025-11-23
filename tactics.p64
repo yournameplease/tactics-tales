@@ -609,8 +609,8 @@ function is_in_combat_range(attacker, defender)
     local a_y = attacker.y
     local d_x = defender.x
     local d_y = defender.y
-    local min_range = attacker.stats.min_range
-    local max_range = attacker.stats.max_range
+    local min_range = attacker.weapon.min_range
+    local max_range = attacker.weapon.max_range
     local dist = abs(a_x-d_x)+abs(a_y-d_y)
 
     return dist >= min_range and dist <= max_range
@@ -906,8 +906,8 @@ end
 function Battle:get_targets_in_range(unit_id, x, y)
     local targets = {}
     local attacker = self.units[unit_id]
-    local min_range = attacker.stats.min_range
-    local max_range = attacker.stats.max_range
+    local min_range = attacker.weapon.min_range
+    local max_range = attacker.weapon.max_range
     for target in all(self.units) do
         if target.id ~= attacker.id then
             if target.side ~= attacker.side
@@ -992,8 +992,8 @@ end
 
 function validate_tile_is_in_unit_attack_range(selection, ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
-    local min_distance = unit.stats.min_range
-    local max_distance = unit.stats.max_range
+    local min_distance = unit.weapon.min_range
+    local max_distance = unit.weapon.max_range
     local destination = ctx["destination"]
     local unit_x = destination.x
     local unit_y = destination.y
@@ -1022,8 +1022,8 @@ end
 
 function tiles_with_distance_from_unit_attacks(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
-    local min_distance = unit.stats.min_range
-    local max_distance = unit.stats.max_range
+    local min_distance = unit.weapon.min_range
+    local max_distance = unit.weapon.max_range
 
     return tiles_with_distance_from_unit
     (min_distance, max_distance)
@@ -1622,7 +1622,7 @@ function compute_enemy_ai(unit)
 
     for e in all(enemies) do
         local tiles_in_range =
-        tiles_with_distance_from_tile(e.x, e.y, unit.stats.min_range, unit.stats.max_range)
+        tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
         for x,row in pairs(tiles_in_range) do
             for y, reachable in pairs(row) do
                 --printh(x..","..y..":"..(reachable and "t" or "f"))--.." cost: "..all_tile_costs[x][y].cost)
