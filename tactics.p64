@@ -222,6 +222,7 @@ return AnimationManager
 :: src/character.lua
 include "src/util.lua"
 include "src/character/animation_data.lua"
+include "src/character/weapons.lua"
 
 local id_counter = IdCounter.new()
 local characters = {}
@@ -247,12 +248,11 @@ local SKIN_COLORS = {
     {20, 21}
 }
 
+local BASE_UNIT_SPRITE = 256
 local BASE_HEAD_SPRITE = 256 + 64
 local BASE_M_HAIR_SPRITE = 256 + 72
 local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
-local BASE_BODY_SPRITE = 256
-local BASE_WEAPON_SPRITE = 256 + 104
 
 Character = {}
 
@@ -286,6 +286,12 @@ function get_anchor_offsets(base_x, base_y, anchor_x, anchor_y, limb_x, limb_y, 
     return base_x + diff_x, base_y + diff_y
 end
 
+function Character:get_body_type()
+    local base_body_type = self.weapon.body_type
+
+    return "STANDARD_"..base_body_type
+end
+
 function Character:draw(x, y, side, set_pal)
     if self.animation_data == nil then
         -- this could go somewhere else...
@@ -300,7 +306,8 @@ function Character:draw(x, y, side, set_pal)
     local base_x = x + frame_data.x
     local base_y = y + frame_data.y
     --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
-    local body_sprite_data = ANIMATION_DATA["STANDARD_FRONT_HAND"][frame_data.sprite_id]
+    printh(self.weapon.body_type)
+    local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 
     local body_main_hand_x = body_sprite_data.anchors.main_hand.x
     local body_main_hand_y = body_sprite_data.anchors.main_hand.y
@@ -311,9 +318,6 @@ function Character:draw(x, y, side, set_pal)
     local body_neck_y = body_sprite_data.anchors.neck.y
     local HEAD_NECK_X = 9
     local HEAD_NECK_Y = 7
-
-    local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
-    spr(BASE_WEAPON_SPRITE, weapon_x, weapon_y, flip_h)
 
     if set_pal then
         if side == 1 then
@@ -327,7 +331,7 @@ function Character:draw(x, y, side, set_pal)
         pal(COLOR_BEARD, self.appearance.beard_color)
     end
 
-    spr(BASE_BODY_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
+    spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
 
     local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
     spr(BASE_HEAD_SPRITE + 4 * sex, head_x, head_y, flip_h)
@@ -339,6 +343,10 @@ function Character:draw(x, y, side, set_pal)
     if self.appearance.beard ~= nil then
         spr(BASE_BEARD_SPRITE + self.appearance.beard, head_x, head_y, flip_h)
     end
+
+    local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
+    spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_x, weapon_y, flip_h)
+
     if set_pal then
         pal()
     end
@@ -378,17 +386,14 @@ function CharacterManager.generate_character()
         appearance = generate_appearance(),
         s = 264,
         stats = {
-            hp_max = 10,
+            hp_max = 5,
             damage = 5,
             min_range = 2,
             max_range = 3,
             movement = 6,
             def = 1
         },
-        weapon = {
-            damage = 5,
-            accuracy = 70
-        }
+        weapon = choose_random_from_table(WEAPON_DATA)
     }
 
     setmetatable(character, { __index = Character })
@@ -521,7 +526,7 @@ local function create_weapon(data)
     return data
 end
 
-local WEAPONS = {
+WEAPON_DATA = {
     dagger = create_weapon({
         name = "dagger",
         sprite = 104,
@@ -583,14 +588,19 @@ local WEAPONS = {
     greatsword = create_weapon({
         name = "greatsword",
         sprite = 111,
+        hand_anchor = { x = 3, y = 12},
         damage = 3,
         accuracy = 70,
+        body_type = WEAPON_BODY_TYPES.HORIZONTAL,
     }),
     bow = create_weapon({
         name = "bow",
         sprite = 112,
+        hand_anchor = { x = 13, y = 9},
         damage = 2,
         accuracy = 90,
+        type = WEAPON_TYPES.RANGED,
+        body_type = WEAPON_BODY_TYPES.FRONT_HAND,
     }),
 }
 :: src/combat.lua
@@ -1955,6 +1965,19 @@ function choose_random_from_list(list)
     return list[i]
 end
 
+function choose_random_from_table(table)
+    local size = 0
+    for k, v in pairs(table) do
+        size = size + 1
+    end
+    local i = rndi(size)
+    for k, v in pairs(table) do
+        if i == 0 then return v end
+        i = i - 1
+    end
+    error("Table was empty! (Or I made a bug here...)")
+end
+
 function fn_true()
     return true
 end
@@ -1983,7 +2006,7 @@ function IdCounter.new()
 end
 :: src/util/data_utils.lua
 -- Helper function to lock a table's keys
-local function protect(tbl)
+function protect(tbl)
     return setmetatable(tbl, {
         -- Error if accessing a key that doesn't exist
         __index = function(t, k)
@@ -1997,7 +2020,7 @@ local function protect(tbl)
     })
 end
 
-local function enum(list)
+function enum(list)
     local e = {}
     for _, v in ipairs(list) do
         e[v] = v
@@ -2006,9 +2029,9 @@ local function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:46:35",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:46:35"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2018,7 +2041,7 @@ AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
 ----------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMyAwNToyMjowOCIscmV2aXNpb249MTE3XV1sejQAYBAAAENQAADzIXtbMF09e2JtcD1weHUA
+MS0yMyAwNTo0NjozNSIscmV2aXNpb249MTE5XV1sejQAlBAAAFNQAADzIXtbMF09e2JtcD1weHUA
 QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEzfSw-AB-wMgD-
 SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
 HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
@@ -2069,30 +2092,31 @@ AA_cAUL3GGcPEC8dDxBAHx0QLxAvHS8QIC8dnxAPEyAdDo8QHkAObA4dUB48DpwfXy8VMBsgaAAw
 -wZPHX8QDSAtDx1vEC1ADW4tUB8TPgxoAC_xTx1AHhCOIM4NIC2CFREtgRUGVwBfHg0wDg3AACoA
 Zg0CDgAACAAQIM0AAAkAEQ8RABIfPAHgLxAODA4sHkAOLA4sDh0HADQcDgAIABANCABfPFAOLA6h
 EyBDcR8dMIwACaoBdR5MHh1QDkyqAX8AIXAvFSArYQA7IGAOCwJBYFEADascD2EALgoEArsPE08Q
-DxMtUA5PEMcAHyzHACoPogFcMSEG4LEUr8A1wBXQFdAV8E2qECIAQwAf0EcAK9cTBsAmwCbABQAG
-wAXgAgAf8KsLHhQgkQABQAAOBgAf4AMRIl2wNrAGEEwAD1IAJsAkwDSwJA8UsA4UDsADABDQAgBv
-DgTQDvBOTQAfQAUWBbChADIFFgWAAR-QhgElz6QFsDWWEDV2YAXwCz0AHvMEKxTQBgAEwAYQBLAG
-EA8UsAYQDgQAEw0IACAEsCEAPxTwE3EUuC-w8CQYIyDQFqQBCLABBQ4AD4MAHw8yAP--RgDcBXJA
-R0AWIGcwBABABx8VF20eMAceF6cj9wBnMBQQLxAGJwYNICRNJh06JY8MbQwfFFAcPaMjLrQBBkAf
-EB8TDxBABuoeIC4dBgAQbZggBP8D8QggDh0UHSA1AA0eDRQNDg0gFAANDg0ODeEeQV4dFA3dFzAu
-PR4ABIUdHi1QbQAfFJgATywwHCBKKqsPiAAMD90mSw_jAYgPmAAZIQ8UmQBhCyAUAAsEmQD_CwQL
-EFQdFA0UCxAFKyQ9FBtACyQbFCtQawAbmAAPiANLEgfIABCQxgD0AlAUAC4dHkAEAAYAbTAEEAYA
-ygBQDxQQBgDNAE8wCxAGZgEIEQtmAUEABBAGaQEREEoAXwAbIBQA1gApP8APFHAYJw-eIAAP0h0m
-MAAGsAoBcqAeEBYwfhAUMFQeVCAWIIsAJRA1iwCQFDBkICQvEGQglSfxAi8QRAwPE1ALfBtQC1wL
-HlABbSl_QHEADlAhIIwAD3MFSQ-QAw9lEB8XRB0gIioPsRkIPy4wHrgAUw8FBINcLhTQBuACAD8U
-8BCEAyq2gC4dHiAEQG0wBDB_AxIwfAMfIHsDEBEg3gA_BEBtSwQPTShAYQwPEzCsG1AoL0wLUSgC
-DzYhQDAPE1A3LHIPEzBMBUwbPykuDiQ-KQ96AD8AsCGJHDQATAVMJBB3AB_AtClEAXUA8AM0ECxE
-HCQQTAU8DxNADiQVhhB3AG8wIQUhcCFmAUcgYCzeAf8QJhCcCyYQDiRlJgUQDiRVJgUwYQAmQCEQ
-ISYwLTAdQP4DHw8yAIEPOSM3MFsPEzsjTwotOwk8Iy4DGwIxFEB_kQABmQACjAAEmQAfDpkABTId
-Dx_aADEOAJuSAHAADx8tSw8TSQCxIA8fLSsPExAUQGE-Aj8sMCw-AiEBBwdABkB_EJYHEAaeACUg
-BjUBJCAWmgBhIBYwbSAWlgBwADUAK00bLS0BIi0FLAFBAAUABS0BXyAFQGGAKQEoD44AAC8WII4A
-AyEQJY4AEi0jAUItBQCbiAADIwEjIAUhAR_AHwEqBF4DChcBLwYwFwEJMTsFWxkB-wEFNgsPE1AK
-LRYbCYABBUGAQQIsHmCgAQ8SAQz0BEsFOw8TQA8fLRU2YAotBRYPE4BtBA4PAQ-DA3MPwhdWQmEf
-HUBrAPEOMC8dTxAvHR8QMB0PE48QDxNQDn8QHlAOXA4dUAEiFkFAcQAN4QkPawAjH-AyAP8ZEmWU
-Af8ccD4vHR5Qng8TMK4dIA4PHX4NHw0gDB8dXg0AHDAMG1EADFARMCFQLxUwKscCHxJkZABUgC4v
-HS5kALAPDS8dXg0fDTAML2EZAUMkAYIIXy8VMCswKwEfDzIA-xkKjwHzBS0PDQCuLRAMLV4PE1AM
-LT4LgGGAiAEvKjBPAiUBXACALQ8NEJ4tEJ4TBaUNLU4PE2APDS0uIQYvLxUTBSIPMgD---------
-----------8jUD0xM319
+DxMtUA5PEMcAHyzHACoPogFcMSEG4LEUv8A1wA8dBdAOBfBdqxAiAEQAH9BIACzwBRMGwCbAJsAF
+AAbABeAF4A8d4A7gCQAvBfCuCx4UIJMAAUAAMNAF0JUAFB4OAAAGAB-gnwAesAMGsDawNrAFEAaw
+lAASAKIAAAgAAw8ATwXgBbBWAB7QACTANLAkDxSwDhQOwAMA39AU0A8dBNANBNAO8E5PAB8yBRYF
+pwBQFgXAFdACAA_QASb-AaQFsB8dFZYQDR4FdmAF8AtBAB7zBCsU0AYABMAGEASwBhAPFLAGEA4E
+ABMNCAAgBLAhAD8U8BOBFLgv8PA0GCMg0BavAQO1AQMCAAMOAA_DAB8PMgD--0YA6wVyQEdAFiBn
+MAQAQAcfFRd9HjAHHhe3I-cAZzAUEC8QBicGDSAkTSYdSiWPDG0MHxRQHD2zIy60AQZAHxAfEw8Q
+QAb6HiAuHQYAEG2oIAT-A-EIIA4dFB0gNQANHg0UDQ4NIBQADQ4NDg3xHkFeHRQN7RcwLj0eAASF
+HR4tUG0AHxSYAE8sMBwgWiqrD4gADA-tJksPowGID5gAGSEPFJkAYQsgFAALBJkA-gsECxBUHRQN
+FAsQBSskPRQbQAskGxQrUGsAG5gAD4gDSxIHyAAQkMYA9AJQFAAuHR5ABAAGAG0wBBAGAMoAUA8U
+EAYAzQBPMAsQBmYBCBELZgFBAAQQBmkBERBKAF8AGyAUANYAKT-ADxSAGCcP7iAAD_IdJjAABrAK
+AXKgHhAWMH4QJDBUHlQgFiCLACUQNYsAkBQwZCAkLxBkIKUn8QIvEEQMDxNQC3wbUAtcCx5QAX0p
+fkBxAA5QISCMAA9zBUkP0AMPZRAfF0QdIDIqD8EZCD8uMB64AFMPBQSDXC4U0AbgAgA-FPAQhAMq
+toAuHR4gBEBtMAQwfgMSMHwDHyB7AxARIN4APgRAbUsED10oQGEMDxMwrBtgKC9MC2EoAg9GIUAw
+DxNQRyxyDxMwTAVMG08pLg4kTykPegA-AMAhiRw0AEwFTCQQdwAfgMQpRAF1APADNBAsRBwkEEwF
+PA8TQA4kFYYQdwBvMCEFIXAhZgFHIGAs3gH-ECYQnAsmEA4kZSYFEA4kVSYFMGEAJkAhECEmMC0w
+HUD_Ax8PMgCBD0kjNzBbDxNLI08KLTsJTCMuAxsCMRRAfpEAAZkAAowABJkAHw6ZAAUyHQ8fmgAx
+DgCbkgBwAA8fLUsPE0kAsSAPHy0rDxMQFEBhPwI-LDAsPwIhAQcHQAZAfhCWBxAGngAlIAY1ASQg
+FpoAYSAWMG0gFpYAcAA1ACtNGy0tASItBSwBQQAFAAUtAV8gBUBhgCkBKA_OAAAvFiCOAAMhECWO
+ABItIwFCLQUAm4gAAyMBIyAFIQEfgB8BKgReAwoXAS8GMBcBCTE7BVsZAf8BBTYLDxNQCi0WGwmA
+AQVBgEECLB5goAEPEgEM9ARLBTsPE0APHy0VNmAKLQUWDxOAbQQODwEPwwNzD9IXVkJhHx1AawDx
+DjAvHU8QLx0fEDAdDxOPEA8TUA5-EB5QDlwOHVABMhZBQHEADeEJD2sAIx-wMgD-GRJllAH-HHA_
+Lx0eUJ4PEzCuHSAODx1_DR8NIAwfHV4NABwwDBtRAAxQETAhUC8VMCrHAh8SZGQAVIAuLx0uZACw
+Dw0vHV4NHw0wDC9xGQFTJAGCCF8vFTArMCsBHw8yAP8ZCo8B8wUtDw0Ari0QDC1eDxNQDC0_C4Bh
+gIgBLyowTwIlAVwAgC0PDRCeLRCeEwWlDS1ODxNgDw0tLiEGLy8VEwUiDzIA----------------
+----I1A9MTN9fQ==
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo0ODoyMSIscmV2aXNpb249MjVdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
@@ -2112,7 +2136,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:46:35"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2123,7 +2147,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:46:35"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2131,15 +2155,15 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
+--[[pod,created="2025-11-23 05:46:27",modified="2025-11-23 05:46:35"]]
 :: [eoc]

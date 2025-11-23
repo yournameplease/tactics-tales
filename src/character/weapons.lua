@@ -33,7 +33,7 @@ local function create_weapon(data)
     return data
 end
 
-local WEAPONS = {
+WEAPON_DATA = {
     dagger = create_weapon({
         name = "dagger",
         sprite = 104,
@@ -95,13 +95,18 @@ local WEAPONS = {
     greatsword = create_weapon({
         name = "greatsword",
         sprite = 111,
+        hand_anchor = { x = 3, y = 12},
         damage = 3,
         accuracy = 70,
+        body_type = WEAPON_BODY_TYPES.HORIZONTAL,
     }),
     bow = create_weapon({
         name = "bow",
         sprite = 112,
+        hand_anchor = { x = 13, y = 9},
         damage = 2,
         accuracy = 90,
+        type = WEAPON_TYPES.RANGED,
+        body_type = WEAPON_BODY_TYPES.FRONT_HAND,
     }),
 }

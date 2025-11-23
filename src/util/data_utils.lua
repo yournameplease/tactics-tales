@@ -1,5 +1,5 @@
 -- Helper function to lock a table's keys
-local function protect(tbl)
+function protect(tbl)
     return setmetatable(tbl, {
         -- Error if accessing a key that doesn't exist
         __index = function(t, k)
@@ -13,7 +13,7 @@ local function protect(tbl)
     })
 end
 
-local function enum(list)
+function enum(list)
     local e = {}
     for _, v in ipairs(list) do
         e[v] = v

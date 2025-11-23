@@ -29,6 +29,19 @@ function choose_random_from_list(list)
     return list[i]
 end
 
+function choose_random_from_table(table)
+    local size = 0
+    for k, v in pairs(table) do
+        size = size + 1
+    end
+    local i = rndi(size)
+    for k, v in pairs(table) do
+        if i == 0 then return v end
+        i = i - 1
+    end
+    error("Table was empty! (Or I made a bug here...)")
+end
+
 function fn_true()
     return true
 end
