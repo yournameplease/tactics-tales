@@ -115,6 +115,7 @@ function Box:draw(state)
         self:draw_recessed()
     end
 
+    -- Debug rectangle
     rrect(self.x+self.padding, self.y+self.padding, self.w - 2*self.padding, self.h - 2*self.padding, 0, 14)
 
     -- 2. Draw Children

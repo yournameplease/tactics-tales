@@ -552,25 +552,25 @@ function Battle:kill_unit(unit)
 end
 
 function draw_menu_overlay()
-    local menu_boxes = {
-        {
-            x = SCREEN_DECORATION_PADDING, y = SCREEN_DECORATION_PADDING,
-            w = SCREEN_WIDTH - MAP_WIDTH * TILE_WIDTH - 4 * SCREEN_DECORATION_PADDING,
-            h = SCREEN_HEIGHT - 2 * SCREEN_DECORATION_PADDING
-        },
-        {
-            x = MAP_OFFSET_X, y = MAP_OFFSET_Y,
-            w = MAP_WIDTH * TILE_WIDTH,
-            h = MAP_HEIGHT * TILE_HEIGHT
-        },
-    }
-
-    cls(COLOR_SCREEN_DECORATION_PRIMARY)
-    for box in all(menu_boxes) do
-        rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
-        rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
-        rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
-    end
+    --local menu_boxes = {
+    --    {
+    --        x = SCREEN_DECORATION_PADDING, y = SCREEN_DECORATION_PADDING,
+    --        w = SCREEN_WIDTH - MAP_WIDTH * TILE_WIDTH - 4 * SCREEN_DECORATION_PADDING,
+    --        h = SCREEN_HEIGHT - 2 * SCREEN_DECORATION_PADDING
+    --    },
+    --    {
+    --        x = MAP_OFFSET_X, y = MAP_OFFSET_Y,
+    --        w = MAP_WIDTH * TILE_WIDTH,
+    --        h = MAP_HEIGHT * TILE_HEIGHT
+    --    },
+    --}
+    --
+    --cls(COLOR_SCREEN_DECORATION_PRIMARY)
+    --for box in all(menu_boxes) do
+    --    rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
+    --    rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
+    --    rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
+    --end
 end
 
 function Battle:draw()
