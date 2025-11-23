@@ -7,6 +7,8 @@ function Box.new(props)
     self.y = props.y or 0
     self.w = props.w or 0
     self.h = props.h or 0
+    self.offset_x = props.offset_x or 0
+    self.offset_y = props.offset_y or 0
 
     -- proportional flex amount
     self.flex_grow = props.flex_grow or 0
@@ -116,7 +118,7 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    rrect(self.x+self.padding, self.y+self.padding, self.w - 2*self.padding, self.h - 2*self.padding, 0, 14)
+    --rrect(self.x+self.padding+self.offset_x, self.y+self.padding+self.offset_y, self.w - 2*self.padding - self.offset_x, self.h - 2*self.padding - self.offset_y, 0, 14)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
@@ -135,41 +137,46 @@ end
 function Box:draw_shaded(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
     -- TODO: child separators
-    if self.decoration_padding ~= 0 then
+    local x = self.x + self.offset_x
+    local y = self.y + self.offset_y
+    local w = self.w - self.offset_x
+    local h = self.h - self.offset_y
+    local pad = self.decoration_padding
+    if pad ~= 0 then
         rectfill(
-                self.x,
-                self.y+self.decoration_padding-1,
-                self.x+self.decoration_padding-1,
-                self.y+self.h-1,
+                x,
+                y+pad-1,
+                x+pad-1,
+                y+h-1,
                 color_sw
         )
         rectfill(
-                self.x,
-                self.y+self.h-1,
-                self.x+self.w-1,
-                self.y+self.h-1,
+                x,
+                y+h-1,
+                x+w-1,
+                y+h-1,
                 color_sw
         )
         rectfill(
-                self.x,
-                self.y,
-                self.x+self.w-1,
-                self.y+self.decoration_padding-1,
+                x,
+                y,
+                x+w-1,
+                y+pad-1,
                 color_ne
         )
         rectfill(
-                self.x+self.w-self.decoration_padding,
-                self.y,
-                self.x+self.w-1,
-                self.y+self.h-1-self.decoration_padding,
+                x+w-pad,
+                y,
+                x+w-1,
+                y+h-1-pad,
                 color_ne
         )
     end
     rectfill(
-            self.x+self.decoration_padding,
-            self.y+self.decoration_padding,
-            self.x+self.w-1-self.decoration_padding,
-            self.y+self.h-1-self.decoration_padding,
+            x+pad,
+            y+pad,
+            x+w-1-pad,
+            y+h-1-pad,
             color_interior
     )
 end
