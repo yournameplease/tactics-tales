@@ -440,7 +440,7 @@ local BASE_FRAMES = {
             anchors = {
                 neck = { x = 7, y = 7 },
                 main_hand = { x = 3, y = 12 },
-                off_hand = { x = 11, y = 12 },
+                off_hand = { x = 12, y = 12 },
                 feet_center = { x = 7, y = 15 }
             }
         },
@@ -2004,7 +2004,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
         )
         rectfill(
                 self.x,
-                self.y+self.h,
+                self.y+self.h-1,
                 self.x+self.w-1,
                 self.y+self.h-1,
                 color_sw
@@ -2019,7 +2019,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
         rectfill(
                 self.x+self.w-self.decoration_padding,
                 self.y,
-                self.x+self.w,
+                self.x+self.w-1,
                 self.y+self.h-1-self.decoration_padding,
                 color_ne
         )
@@ -2058,19 +2058,18 @@ local CURSOR_SPRITE = 8
 local TEXT_HEIGHT = 7
 
 function TacticsMap.new(map_width, map_height, props)
-    map_width = map_width or MAP_WIDTH
-    map_height = map_height or MAP_HEIGHT
-
-    props.x = 0
-    props.y = WALL_HEIGHT - TILE_HEIGHT
-    props.w = map_width * TILE_WIDTH
-    props.h = map_height * TILE_HEIGHT
-
     local box = Box.new(props)
     setmetatable(box, { __index = TacticsMap})
 
     box.map_width = map_width or MAP_WIDTH
     box.map_height = map_height or MAP_HEIGHT
+
+    box.padding = box.decoration_padding
+    box.x = 0
+    box.y = WALL_HEIGHT - TILE_HEIGHT
+    box.w = box.map_width * TILE_WIDTH + 2 * box.padding
+    box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
+
     return box
 end
 
@@ -2206,6 +2205,30 @@ end
 setmetatable(TacticsMap, Box)
 
 return TacticsMap
+:: src/ui/panels/text_display.lua
+Box = include "src/ui/box.lua"
+
+local TextDisplay = {}
+
+function TextDisplay.new(props)
+    local box = Box.new(props)
+    setmetatable(box, { __index = TextDisplay })
+end
+
+function TextDisplay:draw(state)
+    Box.draw(self, state)
+
+    local unit = state.selected_unit
+    if unit then
+        print("HP: "..unit.hp, self.x + 5, self.y + 5, 7)
+    else
+        print("No Unit Selected", self.x + 5, self.y + 5, 6)
+    end
+end
+
+setmetatable(TextDisplay, { __index = Box})
+
+return TextDisplay
 :: src/ui/panels/unit_info.lua
 Box = include "src/ui/box.lua"
 
@@ -2364,9 +2387,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2376,7 +2399,7 @@ AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
 ----------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMyAwNTo0NjozNSIscmV2aXNpb249MTE5XV1sejQAlBAAAFNQAADzIXtbMF09e2JtcD1weHUA
+MS0yMyAxOToxOToxMSIscmV2aXNpb249MTIxXV1sejQAhxAAAE5QAADzIXtbMF09e2JtcD1weHUA
 QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEzfSw-AB-wMgD-
 SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
 HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
@@ -2447,11 +2470,10 @@ DgCbkgBwAA8fLUsPE0kAsSAPHy0rDxMQFEBhPwI-LDAsPwIhAQcHQAZAfhCWBxAGngAlIAY1ASQg
 FpoAYSAWMG0gFpYAcAA1ACtNGy0tASItBSwBQQAFAAUtAV8gBUBhgCkBKA_OAAAvFiCOAAMhECWO
 ABItIwFCLQUAm4gAAyMBIyAFIQEfgB8BKgReAwoXAS8GMBcBCTE7BVsZAf8BBTYLDxNQCi0WGwmA
 AQVBgEECLB5goAEPEgEM9ARLBTsPE0APHy0VNmAKLQUWDxOAbQQODwEPwwNzD9IXVkJhHx1AawDx
-DjAvHU8QLx0fEDAdDxOPEA8TUA5-EB5QDlwOHVABMhZBQHEADeEJD2sAIx-wMgD-GRJllAH-HHA_
-Lx0eUJ4PEzCuHSAODx1_DR8NIAwfHV4NABwwDBtRAAxQETAhUC8VMCrHAh8SZGQAVIAuLx0uZACw
-Dw0vHV4NHw0wDC9xGQFTJAGCCF8vFTArMCsBHw8yAP8ZCo8B8wUtDw0Ari0QDC1eDxNQDC0_C4Bh
-gIgBLyowTwIlAVwAgC0PDRCeLRCeEwWlDS1ODxNgDw0tLiEGLy8VEwUiDzIA----------------
-----I1A9MTN9fQ==
+DjAvHU8QLx0fEDAdDxOPEA8TUA5-EB5QDlwOHVABMhZBQHEADeEJD2sAIx-wMgD-GRJllAH-HIAu
+Lx0uUJ4PEzCuHSAODx1_DR8NIAwfHV4NABwwDBtRAAxQETAhUC8VMCpPAx4r8GRkAPIDQJ4dMA8N
+Lx1ODR8NQAwvHS4NUyQBgghfLxUwKzArAR8PMgD-GQqPAfIDLQ8NAK4tEAwtXg8TUAwtPguAUQYO
+6wEPTwIdlC0PDRCeLRCuQFwAIS4bHAYfEVwAJB-wMgD-------------------8jUD0xM319
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo0ODoyMSIscmV2aXNpb249MjVdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
@@ -2471,7 +2493,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2482,7 +2504,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2490,19 +2512,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
+--[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
 :: [eoc]

@@ -29,7 +29,7 @@ local BASE_FRAMES = {
             anchors = {
                 neck = { x = 7, y = 7 },
                 main_hand = { x = 3, y = 12 },
-                off_hand = { x = 11, y = 12 },
+                off_hand = { x = 12, y = 12 },
                 feet_center = { x = 7, y = 15 }
             }
         },
