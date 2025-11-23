@@ -11,7 +11,7 @@ version 2
 :: src/tactics/
 :: src/util/
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-22 17:27:48",revision=55,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-11-23 05:01:45",revision=56,xstickers={}]]
 -- tactics game
 -- ynp
 
@@ -19,9 +19,16 @@ cp("/desktop/projects/tactics/src", "./src")
 
 include("src/main.lua")
 :: src/animation.lua
+
+local AnimationManager = {}
+local Animation = {}
 local ANIMATIONS = {}
 
-local function lerp_animation_handler(animation_data)
+local function no_offset_calculator(_)
+    return 0, 0
+end
+
+local function lerp_animation_offset_calculator(animation_data)
     local d = animation_data.duration
     local t = animation_data.frame
     local x = animation_data.target_x
@@ -31,8 +38,8 @@ local function lerp_animation_handler(animation_data)
     return t * (x) / d, t * (y) / d
 end
 
-local function directional_offsets_animation_handler(animation_data)
-    local track = ANIMATIONS[animation_data.id].track
+local function directional_offsets_offset_calculator(animation_data)
+    local track = animation_data.track
     assert(animation_data.frame <= #track)
 
     local direction = animation_data.direction
@@ -40,37 +47,94 @@ local function directional_offsets_animation_handler(animation_data)
     return offset * cos(direction), offset * sin(direction)
 end
 
-ANIMATIONS = {
+local ANIMATIONS = {
+    ["IDLE"] = {
+        repeating = true,
+        duration = 100000,
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 60
+            },
+            {
+                sprite = "idle_2",
+                duration = 60
+            }
+        },
+        offset_calculator = no_offset_calculator,
+    },
     ["WALK"] = {
-        handler = lerp_animation_handler
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 10
+            },
+            {
+                sprite = "idle_2",
+                duration = 10
+            }
+        },
+        offset_calculator = lerp_animation_offset_calculator
     },
     ["BUMP"] = {
         duration = 10,
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 3
+            },
+            {
+                sprite = "idle_2",
+                duration = 5
+            },
+            {
+                sprite = "idle_2",
+                duration = 3
+            }
+        },
         track = { -- list of offsets
             0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
         },
-        handler = directional_offsets_animation_handler
+        offset_calculator = directional_offsets_offset_calculator
     },
     ["DODGE"] = {
         duration = 10,
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 60
+            }
+        },
         track = { -- list of offsets
             0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
         },
-        handler = directional_offsets_animation_handler
+        offset_calculator = directional_offsets_offset_calculator
     },
     ["HURT"] = {
         duration = 10,
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 60
+            }
+        },
         track = { -- list of offsets
             0, 0, 0, 0, 4, 6, 6, 6, 4, 2, 0
         },
-        handler = directional_offsets_animation_handler
+        offset_calculator = directional_offsets_offset_calculator
     },
     ["DEATH"] = {
         duration = 10,
+        sprites = {
+            {
+                sprite = "idle_1",
+                duration = 60
+            }
+        },
         track = { -- list of offsets
             0, 1, 4,12, 12, 12, 12, 12, 12, 12, 12
         },
-        handler = directional_offsets_animation_handler
+        offset_calculator = directional_offsets_offset_calculator
     }
 }
 
@@ -79,51 +143,85 @@ ANIMATIONS = {
 -- animation_id
 -- direction
 
-function create_animation(animation_id, direction)
+function animation_metatable(animation_id)
+    return {
+        __index = function(t, k)
+            if Animation[k] then return Animation[k] end
+
+            return ANIMATIONS[animation_id][k]
+        end
+    }
+end
+
+function AnimationManager.create_animation(animation_id, direction)
     local animation_data = {
+        rnd = rnd(1),
         id = animation_id,
         frame = 1,
+        sprite_frame = 1,
+        sprite = 1,
         direction = direction,
         playing = true
     }
 
-    setmetatable(animation_data, { __index = ANIMATIONS[animation_id] } )
+    setmetatable(animation_data, animation_metatable(animation_id) )
 
     return animation_data
 end
 
-function create_walk_animation(target_x, target_y)
+function AnimationManager.create_walk_animation(target_x, target_y)
     -- TODO: make this grid aligned animation
     local animation_data = {
+        rnd = rnd(1),
         id = "WALK",
         frame = 1,
+        sprite_frame = 1,
+        sprite = 1,
         target_x = target_x,
         target_y = target_y,
         duration = 25,
         playing = true
     }
 
-    setmetatable(animation_data, { __index = ANIMATIONS["WALK"] } )
+    setmetatable(animation_data, animation_metatable("WALK"))
 
     return animation_data
 end
 
-function update_animation(animation_data)
-    if animation_data.frame >= animation_data.duration then
-        animation_data.playing = false
+function Animation:update()
+    if self.frame >= self.duration then
+        self.playing = false
     else
-        animation_data.frame = animation_data.frame + 1
+        self.frame = self.frame + 1
+        self.sprite_frame = self.sprite_frame + 1
+        if (self.sprite_frame >
+                self.sprites[1].duration) then
+            self.sprite = (self.sprite % #self.sprites) + 1
+            self.sprite_frame = 1
+        end
     end
 end
 
-function get_x_y_from_animation(animation_data)
-    if animation_data == nil then return 0, 0 end
-
-    return animation_data.handler(animation_data)
+function Animation:get_x_y()
+    return self.offset_calculator(self)
 end
+
+function Animation:get_anchors()
+    return self.offset_calculator(self)
+end
+
+function Animation:get_frame_data()
+    local x, y = self:get_x_y()
+    return {
+        sprite_id = self.sprites[self.sprite].sprite,
+        x = x, y = y
+    }
+end
+
+return AnimationManager
 :: src/character.lua
 include "src/util.lua"
-include "src/animation.lua"
+include "src/character/animation_data.lua"
 
 local id_counter = IdCounter.new()
 local characters = {}
@@ -153,42 +251,69 @@ local BASE_HEAD_SPRITE = 256 + 64
 local BASE_M_HAIR_SPRITE = 256 + 72
 local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
-local BASE_BODY_SPRITE = 256 + 96
+local BASE_BODY_SPRITE = 256
 local BASE_WEAPON_SPRITE = 256 + 104
 
 Character = {}
 
 function Character:start_animation(animation_id, direction)
-    self.animation_data = create_animation(animation_id, direction)
-    self.animation_playing = true
+    self.animation_data = ANIMATION_MANAGER.create_animation(animation_id, direction)
+    self.animation_blocking = true
 end
 
 function Character:start_walk_animation(target_x, target_y)
-    self.animation_data = create_walk_animation(target_x, target_y)
-    self.animation_playing = true
+    self.animation_data = ANIMATION_MANAGER.create_walk_animation(target_x, target_y)
+    self.animation_blocking = true
 end
 
 function Character:end_animation()
-    self.animation_data = nil
-    self.animation_playing = false
+    self.animation_data = ANIMATION_MANAGER.create_animation("IDLE", 0)
+    self.animation_blocking = false
 end
 
 function Character:update_animation()
     if self.animation_data == nil then return end
-    update_animation(self.animation_data)
-    self.animation_playing = self.animation_data.playing
+    self.animation_data:update()
+    self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
+end
+
+function get_anchor_offsets(base_x, base_y, anchor_x, anchor_y, limb_x, limb_y, flip_h, flip_v)
+    local diff_x = anchor_x - limb_x
+    local diff_y = anchor_y - limb_y
+    if flip_h then diff_x = -diff_x end
+    if flip_v then diff_y = -diff_y end
+
+    return base_x + diff_x, base_y + diff_y
 end
 
 function Character:draw(x, y, side, set_pal)
+    if self.animation_data == nil then
+        -- this could go somewhere else...
+        self.animation_data = ANIMATION_MANAGER.create_animation("IDLE", 0)
+    end
+
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
     local sex = self.appearance.sex
 
-    local o_x, o_y = get_x_y_from_animation(self.animation_data)
-    x = x + o_x
-    y = y + o_y
+    local frame_data = self.animation_data:get_frame_data()
+    local base_x = x + frame_data.x
+    local base_y = y + frame_data.y
+    --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
+    local body_sprite_data = ANIMATION_DATA["STANDARD_FRONT_HAND"][frame_data.sprite_id]
 
-    spr(BASE_WEAPON_SPRITE, x, y, flip_h)
+    local body_main_hand_x = body_sprite_data.anchors.main_hand.x
+    local body_main_hand_y = body_sprite_data.anchors.main_hand.y
+    local weapon_main_hand_x = 1
+    local weapon_main_hand_y = 8
+
+    local body_neck_x = body_sprite_data.anchors.neck.x
+    local body_neck_y = body_sprite_data.anchors.neck.y
+    local HEAD_NECK_X = 9
+    local HEAD_NECK_Y = 7
+
+    local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
+    spr(BASE_WEAPON_SPRITE, weapon_x, weapon_y, flip_h)
 
     if set_pal then
         if side == 1 then
@@ -201,15 +326,18 @@ function Character:draw(x, y, side, set_pal)
         pal(COLOR_HAIR, self.appearance.hair_color)
         pal(COLOR_BEARD, self.appearance.beard_color)
     end
-    spr(BASE_BODY_SPRITE + 4 * sex + self.appearance.body, x, y, flip_h)
-    spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
+
+    spr(BASE_BODY_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
+
+    local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
+    spr(BASE_HEAD_SPRITE + 4 * sex, head_x, head_y, flip_h)
     if sex == 0 then
-        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
     else
-        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
     end
     if self.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + self.appearance.beard, x, y, flip_h)
+        spr(BASE_BEARD_SPRITE + self.appearance.beard, head_x, head_y, flip_h)
     end
     if set_pal then
         pal()
@@ -272,6 +400,91 @@ end
 
 
 return CharacterManager
+:: src/character/animation_data.lua
+include "src/util.lua"
+-- possible future work
+-- z-ordering for hair, beards, shield, weapon, etc
+
+local BASE_FRAMES = {
+    BACK_HAND = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = { x = 9, y = 7 },
+                main_hand = { x = 1, y = 8 },
+                off_hand = { x = 14, y = 12 },
+                feet_center = { x = 7, y = 15 }
+            }
+        },
+        idle_2 = {
+            sprite_offset = 1,
+            anchors = {
+                neck = { x = 10, y = 7 },
+                main_hand = { x = 1, y = 7 },
+                off_hand = { x = 14, y = 12 },
+                feet_center = { x = 7, y = 15 }
+            }
+        }
+    },
+    HORIZONTAL = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = { x = 7, y = 7 },
+                main_hand = { x = 3, y = 12 },
+                off_hand = { x = 11, y = 12 },
+                feet_center = { x = 7, y = 15 }
+            }
+        },
+        idle_2 = {
+           sprite_offset = 1,
+           anchors = {
+               neck = { x = 6, y = 7 },
+               main_hand = { x = 4, y = 11 },
+               off_hand = { x = 11, y = 12 },
+               feet_center = { x = 7, y = 15 }
+           }
+        },
+    },
+    FRONT_HAND = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = { x = 6, y = 7 },
+                main_hand = { x = 13, y = 9 },
+                off_hand = { x = 3, y = 11 },
+                feet_center = { x = 7, y = 15 }
+            }
+        },
+        idle_2 = {
+           sprite_offset = 1,
+           anchors = {
+               neck = { x = 7, y = 7 },
+               main_hand = { x = 14, y = 8 },
+               off_hand = { x = 4, y = 11 },
+               feet_center = { x = 7, y = 15 }
+           }
+        }
+    }
+}
+
+local function frame_from_base_frame(s, base_frame)
+    local frame = {
+        sprite = s + base_frame.sprite_offset
+    }
+    setmetatable(frame, { __index = base_frame })
+    return frame
+end
+
+local function frames_from_base_frame(s, base_frame)
+    return tmap(BASE_FRAMES[base_frame], function (f) return frame_from_base_frame(s, f) end)
+end
+
+ANIMATION_DATA = {
+    STANDARD_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
+    STANDARD_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
+    STANDARD_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
+}
 :: src/character/weapons.lua
 include "src/util/data_utils.lua"
 
@@ -294,7 +507,7 @@ local WEAPON_BODY_TYPES = enum {
 local default_weapon = {
     name = "weapon",
     sprite = 104,
-    hand_offset = {x = 1, y = 8}, -- the top left position of the handle
+    hand_anchor = { x = 1, y = 8}, -- the top left position of the handle
     damage = 1,
     accuracy = 90,
     type = WEAPON_TYPES.MELEE,
@@ -412,7 +625,7 @@ function apply_combat_step(step)
     if not step.is_hit then
         defender:start_animation("DODGE", direction)
     end
-    while attacker.animation_playing or defender.animation_playing do
+    while attacker.animation_blocking or defender.animation_blocking do
         yield()
     end
 
@@ -421,7 +634,7 @@ function apply_combat_step(step)
         defender:start_animation("HURT", direction + 0.5)
     end
 
-    while defender.animation_playing do
+    while defender.animation_blocking do
         yield()
     end
 
@@ -509,13 +722,7 @@ end
 -- tactics game
 -- ynp
 
--- MAJOR NEXT:  Finish menuing.  Send event messages on wait/attack
-
 -- TODO LIST
--- start using an external editor (file updates)
--- unit stuff
---   enemy ai for not direct attacks
--- handle deaths
 
 
 -- PROTOTYPE GOALS
@@ -527,7 +734,7 @@ end
 -- LONG TERM TODO
 -- character relationships
 -- class progression
--- inheritence?
+-- inheritence? (the human kind)
 
 include "src/systems/tasks.lua"
 
@@ -537,6 +744,7 @@ TURN_MANAGER = include "src/turn_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
+ANIMATION_MANAGER = include "src/animation.lua"
 include "src/tactics/enemy_ai.lua"
 
 function _init()
@@ -888,7 +1096,7 @@ function Battle:handle_move_unit(ctx)
     battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
-        while unit.animation_playing do
+        while unit.animation_blocking do
             yield()
         end
         unit:end_animation()
@@ -912,7 +1120,7 @@ function Battle:handle_move_and_attack(ctx)
     battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
-        while unit.animation_playing do
+        while unit.animation_blocking do
             yield()
         end
         unit:end_animation()
@@ -1118,7 +1326,7 @@ function Battle:update(joy)
 
     for unit in all(self.units) do
         unit:update_animation()
-        if unit.animation_playing then
+        if unit.animation_blocking then
             blocking_animation = true
         end
         if unit.side == SIDE_PLAYER and not unit.has_acted then
@@ -1751,6 +1959,14 @@ function fn_true()
     return true
 end
 
+function tmap(table, fn)
+    local out = {}
+    for k,v in pairs(table) do
+        out[k] = fn(v)
+    end
+    return out
+end
+
 
 IdCounter = {}
 
@@ -1790,9 +2006,9 @@ local function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17",runtime=24,workspaces={{location="src/tactics.lua#115",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -1802,7 +2018,7 @@ AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
 ----------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMyAwMjo1MzoxNyIscmV2aXNpb249MTE2XV1sejQAcxAAACpQAADzIXtbMF09e2JtcD1weHUA
+MS0yMyAwNToyMjowOCIscmV2aXNpb249MTE3XV1sejQAYBAAAENQAADzIXtbMF09e2JtcD1weHUA
 QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTEzfSw-AB-wMgD-
 SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
 HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
@@ -1871,12 +2087,12 @@ ISYwLTAdQP4DHw8yAIEPOSM3MFsPEzsjTwotOwk8Iy4DGwIxFEB_kQABmQACjAAEmQAfDpkABTId
 Dx_aADEOAJuSAHAADx8tSw8TSQCxIA8fLSsPExAUQGE-Aj8sMCw-AiEBBwdABkB_EJYHEAaeACUg
 BjUBJCAWmgBhIBYwbSAWlgBwADUAK00bLS0BIi0FLAFBAAUABS0BXyAFQGGAKQEoD44AAC8WII4A
 AyEQJY4AEi0jAUItBQCbiAADIwEjIAUhAR_AHwEqBF4DChcBLwYwFwEJMTsFWxkB-wEFNgsPE1AK
-LRYbCYABBUGAQQIsHmCgAQ8SAQz0BEsFOw8TQA8fLRU2YAotBRYPE4BtBA4PAQ-DA3MAmhbgJA5A
-FBAuJC4gJJ4PEyC4CAJ9LCEfFP0WBt8hD1QXIzBhFEBkAGEwJE4kHjBeAIANUA1_HVANXmIAIAEN
-YwBBQHEADNMJD2MAIx-wMgD-GRBljQH-GXA_JB5Qng8TMK4dIA4Efg0fFCAMFF4NABwwDBRRAAxQ
-ETAhUC8VMCu0Ah8QZF8ARIAuJC5fAJQPFCReDRwwDCRLAgFpCABdAB8wIAEfDzIA-xngZA8QLw8P
-EIAuLw8uUJ4oBfMBri0QDC1eDxNQDC0_C4BhgIgBLyowRAIhBVwAAP8EQp4tEJ76BIVODxNgDx8t
-LggGLy8V_gQiDzIA--------------------I1A9MTN9fQ==
+LRYbCYABBUGAQQIsHmCgAQ8SAQz0BEsFOw8TQA8fLRU2YAotBRYPE4BtBA4PAQ-DA3MPwhdWQmEf
+HUBrAPEOMC8dTxAvHR8QMB0PE48QDxNQDn8QHlAOXA4dUAEiFkFAcQAN4QkPawAjH-AyAP8ZEmWU
+Af8ccD4vHR5Qng8TMK4dIA4PHX4NHw0gDB8dXg0AHDAMG1EADFARMCFQLxUwKscCHxJkZABUgC4v
+HS5kALAPDS8dXg0fDTAML2EZAUMkAYIIXy8VMCswKwEfDzIA-xkKjwHzBS0PDQCuLRAMLV4PE1AM
+LT4LgGGAiAEvKjBPAiUBXACALQ8NEJ4tEJ4TBaUNLU4PE2APDS0uIQYvLxUTBSIPMgD---------
+----------8jUD0xM319
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo0ODoyMSIscmV2aXNpb249MjVdXWx6NABEAQAAHjIAAPARe1swXT17Ym1wPXB4dQBD
@@ -1896,7 +2112,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -1907,7 +2123,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 05:22:08"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -1915,15 +2131,15 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 01:21:15",modified="2025-11-23 02:53:17"]]
+--[[pod,created="2025-11-23 05:21:35",modified="2025-11-23 05:22:08"]]
 :: [eoc]

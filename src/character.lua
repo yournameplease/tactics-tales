@@ -1,4 +1,5 @@
 include "src/util.lua"
+include "src/character/animation_data.lua"
 
 local id_counter = IdCounter.new()
 local characters = {}
@@ -28,7 +29,7 @@ local BASE_HEAD_SPRITE = 256 + 64
 local BASE_M_HAIR_SPRITE = 256 + 72
 local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
-local BASE_BODY_SPRITE = 256 + 96
+local BASE_BODY_SPRITE = 256
 local BASE_WEAPON_SPRITE = 256 + 104
 
 Character = {}
@@ -54,6 +55,15 @@ function Character:update_animation()
     self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
 end
 
+function get_anchor_offsets(base_x, base_y, anchor_x, anchor_y, limb_x, limb_y, flip_h, flip_v)
+    local diff_x = anchor_x - limb_x
+    local diff_y = anchor_y - limb_y
+    if flip_h then diff_x = -diff_x end
+    if flip_v then diff_y = -diff_y end
+
+    return base_x + diff_x, base_y + diff_y
+end
+
 function Character:draw(x, y, side, set_pal)
     if self.animation_data == nil then
         -- this could go somewhere else...
@@ -64,11 +74,21 @@ function Character:draw(x, y, side, set_pal)
     local flip_h = side ~= 0
     local sex = self.appearance.sex
 
-    local o_x, o_y = self.animation_data:get_x_y()
-    x = x + o_x
-    y = y + o_y
+    local frame_data = self.animation_data:get_frame_data()
+    local base_x = x + frame_data.x
+    local base_y = y + frame_data.y
+    --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
+    local body_sprite_data = ANIMATION_DATA["STANDARD_HORIZONTAL"][frame_data.sprite_id]
 
-    spr(BASE_WEAPON_SPRITE, x, y, flip_h)
+    local body_main_hand_x = body_sprite_data.anchors.main_hand.x
+    local body_main_hand_y = body_sprite_data.anchors.main_hand.y
+    local weapon_main_hand_x = 1
+    local weapon_main_hand_y = 8
+
+    local body_neck_x = body_sprite_data.anchors.neck.x
+    local body_neck_y = body_sprite_data.anchors.neck.y
+    local HEAD_NECK_X = 9
+    local HEAD_NECK_Y = 7
 
     if set_pal then
         if side == 1 then
@@ -81,16 +101,23 @@ function Character:draw(x, y, side, set_pal)
         pal(COLOR_HAIR, self.appearance.hair_color)
         pal(COLOR_BEARD, self.appearance.beard_color)
     end
-    spr(BASE_BODY_SPRITE + 4 * sex + self.appearance.body, x, y, flip_h)
-    spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
+
+    spr(BASE_BODY_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
+
+    local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
+    spr(BASE_HEAD_SPRITE + 4 * sex, head_x, head_y, flip_h)
     if sex == 0 then
-        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
     else
-        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
     end
     if self.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + self.appearance.beard, x, y, flip_h)
+        spr(BASE_BEARD_SPRITE + self.appearance.beard, head_x, head_y, flip_h)
     end
+
+    local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
+    spr(BASE_WEAPON_SPRITE, weapon_x, weapon_y, flip_h)
+
     if set_pal then
         pal()
     end

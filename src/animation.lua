@@ -182,13 +182,19 @@ function Animation:update()
 end
 
 function Animation:get_x_y()
-    printh(
-            --self.id " " ..
-            self.rnd .. " " .. ":" ..
-            self.frame .. ","..
-            self.sprite_frame)
-
     return self.offset_calculator(self)
+end
+
+function Animation:get_anchors()
+    return self.offset_calculator(self)
+end
+
+function Animation:get_frame_data()
+    local x, y = self:get_x_y()
+    return {
+        sprite_id = self.sprites[self.sprite].sprite,
+        x = x, y = y
+    }
 end
 
 return AnimationManager

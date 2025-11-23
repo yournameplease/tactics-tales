@@ -1,13 +1,7 @@
 -- tactics game
 -- ynp
 
--- MAJOR NEXT:  Finish menuing.  Send event messages on wait/attack
-
 -- TODO LIST
--- start using an external editor (file updates)
--- unit stuff
---   enemy ai for not direct attacks
--- handle deaths
 
 
 -- PROTOTYPE GOALS

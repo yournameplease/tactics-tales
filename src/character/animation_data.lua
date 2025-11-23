@@ -47,9 +47,9 @@ local BASE_FRAMES = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = { x = 9, y = 7 },
-                main_hand = { x = 1, y = 8 },
-                off_hand = { x = 14, y = 12 },
+                neck = { x = 6, y = 7 },
+                main_hand = { x = 13, y = 9 },
+                off_hand = { x = 3, y = 11 },
                 feet_center = { x = 7, y = 15 }
             }
         },
@@ -77,8 +77,8 @@ local function frames_from_base_frame(s, base_frame)
     return tmap(BASE_FRAMES[base_frame], function (f) return frame_from_base_frame(s, f) end)
 end
 
-local ANIMATION_DATA = {
+ANIMATION_DATA = {
     STANDARD_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
-    STANDARD_FRONT_HAND = frames_from_base_frame(168, "FRONT_HAND"),
-    STANDARD_HORIZONTAL = frames_from_base_frame(176, "HORIZONTAL"),
+    STANDARD_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
+    STANDARD_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
 }
