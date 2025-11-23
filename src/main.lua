@@ -44,16 +44,14 @@ TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
+UI_MANAGER = include "src/ui/ui_manager.lua"
 include "src/tactics/enemy_ai.lua"
 
 function _init()
     Battle:create({
         width=15, height=10
     })
-end
-
-function _draw()
-    Battle:draw()
+    UI_MANAGER:init()
 end
 
 function get_joypad()
@@ -76,4 +74,9 @@ function _update()
     local joy = get_joypad()
     Battle:update(joy)
     update_tasks()
+end
+
+function _draw()
+    Battle:draw()
+    UI_MANAGER:draw()
 end
