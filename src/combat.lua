@@ -10,12 +10,6 @@ function is_in_combat_range(attacker, defender)
     return dist >= min_range and dist <= max_range
 end
 
-function can_counterattack(defender, attacker)
-    return is_in_combat_range(defender, attacker)
-            and defender:is_alive()
-            and attacker:is_alive()
-end
-
 function apply_combat_step(step)
     local attacker = step.attacker
     local defender = step.defender

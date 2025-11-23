@@ -15,6 +15,12 @@ function Calculator.get_damage(attacker, defender)
     return mid(0, atk - def, 999)
 end
 
+local function can_attack(attacker, defender)
+    return is_in_combat_range(attacker, defender)
+            and attacker:is_alive()
+            and defender:is_alive()
+end
+
 function Calculator.compute_combat(attacker, defender)
     local result = { steps = {} }
 
@@ -35,7 +41,7 @@ function Calculator.compute_combat(attacker, defender)
     printh("virtual hp for " .. defender.id .. ": " .. virtual_hp)
 
     -- defender counterattack
-    if virtual_hp > 0 then
+    if can_attack(defender, attacker) then
         local step2 = {
             attacker = defender,
             defender = attacker,

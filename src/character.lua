@@ -171,7 +171,7 @@ function CharacterManager.generate_character()
             min_range = 2,
             max_range = 3,
             movement = 6,
-            def = 1
+            def = 0
         },
         weapon = choose_random_from_table(WEAPON_DATA)
     }

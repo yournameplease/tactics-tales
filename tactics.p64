@@ -394,7 +394,7 @@ function CharacterManager.generate_character()
             min_range = 2,
             max_range = 3,
             movement = 6,
-            def = 1
+            def = 0
         },
         weapon = choose_random_from_table(WEAPON_DATA)
     }
@@ -626,12 +626,6 @@ function is_in_combat_range(attacker, defender)
     return dist >= min_range and dist <= max_range
 end
 
-function can_counterattack(defender, attacker)
-    return is_in_combat_range(defender, attacker)
-            and defender:is_alive()
-            and attacker:is_alive()
-end
-
 function apply_combat_step(step)
     local attacker = step.attacker
     local defender = step.defender
@@ -689,6 +683,12 @@ function Calculator.get_damage(attacker, defender)
     return mid(0, atk - def, 999)
 end
 
+local function can_attack(attacker, defender)
+    return is_in_combat_range(attacker, defender)
+            and attacker:is_alive()
+            and defender:is_alive()
+end
+
 function Calculator.compute_combat(attacker, defender)
     local result = { steps = {} }
 
@@ -709,7 +709,7 @@ function Calculator.compute_combat(attacker, defender)
     printh("virtual hp for " .. defender.id .. ": " .. virtual_hp)
 
     -- defender counterattack
-    if virtual_hp > 0 then
+    if can_attack(defender, attacker) then
         local step2 = {
             attacker = defender,
             defender = attacker,
@@ -737,6 +737,12 @@ Config.MAP_HEIGHT = 16
 Config.TILE_WIDTH = 20
 Config.TILE_HEIGHT = 16
 Config.WALL_HEIGHT = 24
+
+Config.COLOR_MENU_PRIMARY = 32
+Config.COLOR_MENU_SECONDARY = 7
+Config.COLOR_MENU_TEXT = 7
+Config.COLOR_MENU_HIGHLIGHT = 6
+Config.COLOR_MENU_HIGHLIGHT_TEXT = 32
 
 return Config
 :: src/draw.lua
@@ -1866,6 +1872,8 @@ function Box.new(props)
     self.y = props.y or 0
     self.w = props.w or 0
     self.h = props.h or 0
+    self.offset_x = props.offset_x or 0
+    self.offset_y = props.offset_y or 0
 
     -- proportional flex amount
     self.flex_grow = props.flex_grow or 0
@@ -1975,7 +1983,7 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    rrect(self.x+self.padding, self.y+self.padding, self.w - 2*self.padding, self.h - 2*self.padding, 0, 14)
+    --rrect(self.x+self.padding+self.offset_x, self.y+self.padding+self.offset_y, self.w - 2*self.padding - self.offset_x, self.h - 2*self.padding - self.offset_y, 0, 14)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
@@ -1994,41 +2002,46 @@ end
 function Box:draw_shaded(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
     -- TODO: child separators
-    if self.decoration_padding ~= 0 then
+    local x = self.x + self.offset_x
+    local y = self.y + self.offset_y
+    local w = self.w - self.offset_x
+    local h = self.h - self.offset_y
+    local pad = self.decoration_padding
+    if pad ~= 0 then
         rectfill(
-                self.x,
-                self.y+self.decoration_padding-1,
-                self.x+self.decoration_padding-1,
-                self.y+self.h-1,
+                x,
+                y+pad-1,
+                x+pad-1,
+                y+h-1,
                 color_sw
         )
         rectfill(
-                self.x,
-                self.y+self.h-1,
-                self.x+self.w-1,
-                self.y+self.h-1,
+                x,
+                y+h-1,
+                x+w-1,
+                y+h-1,
                 color_sw
         )
         rectfill(
-                self.x,
-                self.y,
-                self.x+self.w-1,
-                self.y+self.decoration_padding-1,
+                x,
+                y,
+                x+w-1,
+                y+pad-1,
                 color_ne
         )
         rectfill(
-                self.x+self.w-self.decoration_padding,
-                self.y,
-                self.x+self.w-1,
-                self.y+self.h-1-self.decoration_padding,
+                x+w-pad,
+                y,
+                x+w-1,
+                y+h-1-pad,
                 color_ne
         )
     end
     rectfill(
-            self.x+self.decoration_padding,
-            self.y+self.decoration_padding,
-            self.x+self.w-1-self.decoration_padding,
-            self.y+self.h-1-self.decoration_padding,
+            x+pad,
+            y+pad,
+            x+w-1-pad,
+            y+h-1-pad,
             color_interior
     )
 end
@@ -2039,11 +2052,11 @@ Box = include "src/ui/box.lua"
 
 local TacticsMap = {}
 
-local COLOR_MENU_PRIMARY = 32
-local COLOR_MENU_SECONDARY = 7
-local COLOR_MENU_TEXT = 7
-local COLOR_MENU_HIGHLIGHT = 6
-local COLOR_MENU_HIGHLIGHT_TEXT = 32
+local COLOR_MENU_PRIMARY = CONFIG.COLOR_MENU_PRIMARY
+local COLOR_MENU_SECONDARY = CONFIG.COLOR_MENU_SECONDARY
+local COLOR_MENU_TEXT = CONFIG.COLOR_MENU_TEXT
+local COLOR_MENU_HIGHLIGHT = CONFIG.COLOR_MENU_HIGHLIGHT
+local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
@@ -2065,8 +2078,7 @@ function TacticsMap.new(map_width, map_height, props)
     box.map_height = map_height or MAP_HEIGHT
 
     box.padding = box.decoration_padding
-    box.x = 0
-    box.y = WALL_HEIGHT - TILE_HEIGHT
+    box.offset_y = WALL_HEIGHT - TILE_HEIGHT
     box.w = box.map_width * TILE_WIDTH + 2 * box.padding
     box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
 
@@ -2205,30 +2217,50 @@ end
 setmetatable(TacticsMap, Box)
 
 return TacticsMap
-:: src/ui/panels/text_display.lua
+:: src/ui/panels/text_node.lua
 Box = include "src/ui/box.lua"
 
-local TextDisplay = {}
+local TextNode = {}
 
-function TextDisplay.new(props)
+local TEXT_HEIGHT = 8
+
+function TextNode.new(text_getter, rows, props)
     local box = Box.new(props)
-    setmetatable(box, { __index = TextDisplay })
+    setmetatable(box, { __index = TextNode })
+
+    box.padding = props.padding or 0
+    box.decoration_padding = 0
+    box.text_getter = text_getter
+    box.h = rows * (TEXT_HEIGHT + 2)
+    box.justify = props.justify or "left"  -- "left", "right", "center"
+
+    return box
 end
 
-function TextDisplay:draw(state)
+function TextNode:draw(state)
     Box.draw(self, state)
 
-    local unit = state.selected_unit
-    if unit then
-        print("HP: "..unit.hp, self.x + 5, self.y + 5, 7)
+    local text = self.text_getter(state)
+
+    local text_width = print(text, 0, -1000)
+
+    local t_x
+    if self.justify == "left" then
+        t_x = self.x + self.padding + 1
+    elseif self.justify == "center" then
+        t_x = self.x + (self.w - 2 * (self.padding + 1) - text_width) / 2
+    elseif self.justify == "right" then
+        t_x = self.x + self.w - self.padding - 1 - text_width - 1
     else
-        print("No Unit Selected", self.x + 5, self.y + 5, 6)
+        error("Unexpected value!")
     end
-end
 
-setmetatable(TextDisplay, { __index = Box})
+        print(text, t_x, self.y + self.padding + 1, UI_MANAGER.THEME.COLOR_INTERIOR_TEXT)
+    end
 
-return TextDisplay
+setmetatable(TextNode, { __index = Box})
+
+return TextNode
 :: src/ui/panels/unit_info.lua
 Box = include "src/ui/box.lua"
 
@@ -2252,6 +2284,7 @@ return UnitInfo
 local Box = include "src/ui/box.lua"
 local UnitInfo = include "src/ui/panels/unit_info.lua"
 local TacticsMap = include "src/ui/panels/tactics_map.lua"
+local TextNode = include "src/ui/panels/text_node.lua"
 
 local UIManager = {}
 
@@ -2259,7 +2292,8 @@ UIManager.THEME = {
     COLOR_DECORATION_PRIMARY = 22,
     COLOR_DECORATION_HIGHLIGHT = 6,
     COLOR_DECORATION_SHADOW = 5,
-    COLOR_INTERIOR = 21
+    COLOR_INTERIOR = 21,
+    COLOR_INTERIOR_TEXT = 7,
 }
 
 -- Define Layouts
@@ -2269,10 +2303,17 @@ function UIManager:init()
 
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
+    local battle_summary = Box.new({ x = 0, y = 0, flex_grow = 1, dir = "col", gap = 0 })
+    battle_summary:add(TextNode.new(function() return "BATTLE"  end, 1, { justify = "center" }))
+    battle_summary:add(TextNode.new(function() return "Turn N"  end, 1, { justify = "center" }))
+    battle_summary:add(TextNode.new(function() return "Defeat all"  end, 1, { justify = "center" }))
+    --battle_summary:add(TextNode.new(function() return "hello3"  end, {flex_grow = 1}))
+
     -- Left Sidebar
     local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+    left:add(battle_summary)
     left:add(UnitInfo.new({ h=100, padding = 0 }))
-    left:add(Box.new({ flex_grow = 1, padding = 0 }))
+    --left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
     battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
@@ -2387,9 +2428,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:31:06",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#173",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="src/ui/panels/text_node.lua#29",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:31:06"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2493,7 +2534,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:31:06"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2504,7 +2545,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:31:06"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2512,19 +2553,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 19:19:11",modified="2025-11-23 19:19:54"]]
+--[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:31:06"]]
 :: [eoc]
