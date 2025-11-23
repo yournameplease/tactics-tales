@@ -58,7 +58,14 @@ end
 
 -- cost to move onto x,y from any neighbor
 function movement_cost(x, y, side)
-    local tile = mget(x,y)
+    -- TODO: preload layers
+
+    local ground = fetch("map/0.map")[2].bmp
+    if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
+        return 999
+    end
+
+    local tile = ground:get(x,y)
     if tile == nil then return 999 end
 
     local unit = Battle:get_unit_at_coordinates(x, y)

@@ -30,14 +30,38 @@ local function no_offset_calculator(_)
     return 0, 0
 end
 
+local function lerp_x_y(x0, y0, x1, y1, t, d)
+    return x0 + t * (x1 - x0) / d, y0 + t * (y1 - y0) / d
+end
+
 local function lerp_animation_offset_calculator(animation_data)
     local d = animation_data.duration
     local t = animation_data.frame
     local x = animation_data.target_x
     local y = animation_data.target_y
 
+    return lerp_x_y(0, 0, x, y, t, d)
+end
 
-    return t * (x) / d, t * (y) / d
+local function path_animation_offset_calculator(animation_data)
+    local point_index = 1
+    local duration_counter = animation_data.frame
+    while (duration_counter > 0) do
+        local prev_point = animation_data.path_points[point_index]
+        local next_point = animation_data.path_points[point_index+1]
+        if duration_counter - prev_point.duration <= 0 then
+            local t = duration_counter
+            local d = prev_point.duration
+            local x0 = prev_point.x
+            local y0 = prev_point.y
+            local x1 = next_point.x
+            local y1 = next_point.y
+            return lerp_x_y(x0, y0, x1, y1, t, d)
+        end
+        duration_counter = duration_counter - prev_point.duration
+        point_index = point_index + 1
+    end
+    error("failed path animation")
 end
 
 local function directional_offsets_offset_calculator(animation_data)
@@ -75,7 +99,7 @@ local ANIMATIONS = {
                 duration = 10
             }
         },
-        offset_calculator = lerp_animation_offset_calculator
+        offset_calculator = path_animation_offset_calculator
     },
     ["BUMP"] = {
         duration = 10,
@@ -156,7 +180,6 @@ end
 
 function AnimationManager.create_animation(animation_id, direction)
     local animation_data = {
-        rnd = rnd(1),
         id = animation_id,
         frame = 1,
         sprite_frame = 1,
@@ -170,19 +193,33 @@ function AnimationManager.create_animation(animation_id, direction)
     return animation_data
 end
 
-function AnimationManager.create_walk_animation(target_x, target_y)
-    -- TODO: make this grid aligned animation
+function AnimationManager.create_walk_animation(path)
+    -- TODO: future
+    -- - different terrain/unit speeds
+    -- - faux elevation
+    local DURATION_PER_TILE = 8
+
+    local path_points = tmap(path, function(p)
+        return {
+            x = p.x, y = p.y,
+            duration = DURATION_PER_TILE
+        }
+    end)
+    path_points[#path].duration = nil
+
     local animation_data = {
-        rnd = rnd(1),
         id = "WALK",
         frame = 1,
         sprite_frame = 1,
         sprite = 1,
         target_x = target_x,
         target_y = target_y,
-        duration = 25,
+        duration = DURATION_PER_TILE * (#path - 1),
+        path_points = path_points,
         playing = true
     }
+
+    printh("hi anim")
 
     setmetatable(animation_data, animation_metatable("WALK"))
 
@@ -262,8 +299,8 @@ function Character:start_animation(animation_id, direction)
     self.animation_blocking = true
 end
 
-function Character:start_walk_animation(target_x, target_y)
-    self.animation_data = ANIMATION_MANAGER.create_walk_animation(target_x, target_y)
+function Character:start_walk_animation(path)
+    self.animation_data = ANIMATION_MANAGER.create_walk_animation(to_tile_path(path))
     self.animation_blocking = true
 end
 
@@ -393,7 +430,7 @@ function CharacterManager.generate_character()
             damage = 5,
             min_range = 2,
             max_range = 3,
-            movement = 6,
+            movement = 5,
             def = 0
         },
         weapon = choose_random_from_table(WEAPON_DATA)
@@ -745,6 +782,21 @@ Config.COLOR_MENU_HIGHLIGHT = 6
 Config.COLOR_MENU_HIGHLIGHT_TEXT = 32
 
 return Config
+:: src/debug.lua
+
+Debug = {}
+
+-- why no work?
+function Debug.log(...)
+    local str = ""
+    for i=1,arg.n-1 do
+        str = str .. arg[i] .. " , "
+    end
+    str = str .. arg[arg.n]
+    printh("LOG: " .. str)
+end
+
+return Debug
 :: src/draw.lua
 
 
@@ -829,6 +881,7 @@ COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
 CONTEXT_MANAGER = include "src/game_context.lua"
+DEBUG = include "src/debug.lua"
 include "src/tactics/enemy_ai.lua"
 
 local context = {}
@@ -874,6 +927,9 @@ function _draw()
     UI_MANAGER:draw(context)
 end
 :: src/menu_manager.lua
+-- TODO: only needed for lazy dijkstra animation.
+include "src/tiles.lua"
+
 local MenuManager = {
     menu_state = {},
     menu_ctx = {},
@@ -948,6 +1004,7 @@ local update_cursor = {
 }
 
 function handle_menu_select()
+    printh("Select "..MenuManager.menu_state.menu_id .. ":" .. MenuManager.menu_state.menu_step)
     local menu_data = MENU_DATA[MenuManager.menu_state.menu_id]
     local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
 
@@ -966,6 +1023,18 @@ function handle_menu_select()
     })
 
     if step_data.kind == "CURSOR_GRID" then
+        -- TODO: lazy impl.  keep track of cursor for the real path!
+        if MenuManager.menu_state.menu_step == "SELECT_DESTINATION" then
+            if MenuManager.menu_ctx.acting_unit ~= nil then
+                local acting_unit = Battle:get_unit_by_id(MenuManager.menu_ctx.acting_unit.unit_id)
+                printh(acting_unit.x.." "..acting_unit.y)
+                local costs = calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999)
+                local path = get_path_to_tile(costs, MenuManager.menu_selection.x, MenuManager.menu_selection.y)
+                printh("path length "..#path)
+                MenuManager.menu_selection.path = path
+            end
+        end
+
         printh("unit getting")
         local selected_unit = Battle:get_unit_at_coordinates(MenuManager.menu_selection.x, MenuManager.menu_selection.y)
         if selected_unit ~= nil then
@@ -1333,7 +1402,7 @@ end
 function tiles_in_movement_range(ctx)
     local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
 
-    return find_reachable_tiles(unit.x, unit.y, unit.side, 6)
+    return find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
 end
 
 function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
@@ -1359,10 +1428,11 @@ function Battle:handle_move_unit(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
+    local path = ctx["destination"].path
 
     battle_is_blocked = true
     start_routine(function()
-        unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+        unit:start_walk_animation(path)
         while unit.animation_blocking do
             yield()
         end
@@ -1382,11 +1452,12 @@ function Battle:handle_move_and_attack(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
+    local path = ctx["destination"].path
     local target = get_unit_from_step(ctx, "target")
 
     battle_is_blocked = true
     start_routine(function()
-        unit:start_walk_animation((x-unit.x) * TILE_WIDTH, (y-unit.y) * TILE_HEIGHT)
+        unit:start_walk_animation(path)
         while unit.animation_blocking do
             yield()
         end
@@ -1573,9 +1644,14 @@ function compute_enemy_ai(unit)
 
     if #potential_attacks > 0 then
         local choice = potential_attacks[1]
+
+        local x = choice.x
+        local y = choice.y
+        local path = get_path_to_tile(all_tile_costs, x, y)
+
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
-            destination = { x = choice.x, y = choice.y},
+            destination = { x = choice.x, y = choice.y, path = path},
             target = { unit_id = choice.target.id }
         }
         printh(unit.id .. " will attack "..choice.target.id)
@@ -1597,9 +1673,11 @@ function compute_enemy_ai(unit)
             y = all_tile_costs[x][y].prev.y
         end
 
+        local path = get_path_to_tile(all_tile_costs, x, y)
+
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
-            destination = { x = x, y = y }
+            destination = { x = x, y = y, path = path }
         }
         printh(unit.id .. " will move to "..x..","..y)
         BUS.emit("MOVE_AND_WAIT", action_ctx)
@@ -1626,6 +1704,8 @@ end
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", handle_enemy_turn)
 :: src/tiles.lua
+include "src/util.lua"
+
 -- tile flags:
 -- 0: empty/solid
 -- 1-3: terrain type
@@ -1797,6 +1877,20 @@ end
 function calculate_all_tile_costs(start_x, start_y, side, max_limit)
     local limit = max_limit or 99999
     return _dijkstra_traversal(start_x, start_y, side, limit)
+end
+
+-- @return list of { { x, y } } tile coordinates from start position
+function get_path_to_tile(all_tile_costs, x, y)
+    printh(x.." "..y)
+    assert(all_tile_costs[x][y] ~= nil)
+    local path = { { x = x, y = y} }
+    while all_tile_costs[x][y].prev ~= nil do
+        next_x = all_tile_costs[x][y].prev.x
+        next_y = all_tile_costs[x][y].prev.y
+        x, y = next_x, next_y
+        add(path, { x = x, y = y })
+    end
+    return reverse_list(path)
 end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
@@ -2089,7 +2183,6 @@ function TacticsMap:draw(state)
     Box.draw(self, state)
 
     local tactics = state.tactics
-    printh(tactics)
     local menu = state.menu_manager
 
     local camera_x = self.x + self.padding
@@ -2377,11 +2470,20 @@ function choose_random_from_table(table)
     error("Table was empty! (Or I made a bug here...)")
 end
 
+function reverse_list(list)
+    local out = {}
+    for i = 1,#list do
+        out[#list-i+1] = list[i]
+    end
+    return out
+end
+
 function fn_true()
     return true
 end
 
 function tmap(table, fn)
+    printh("Mapping..." .. #table)
     local out = {}
     for k,v in pairs(table) do
         out[k] = fn(v)
@@ -2389,6 +2491,21 @@ function tmap(table, fn)
     return out
 end
 
+-- normalize to offsets from first tile
+-- multiply by tile scale
+function to_tile_path(path)
+    assert(#path > 0)
+    --if #path == 0 then return path end
+
+    local base_x = path[1].x
+    local base_y = path[1].y
+    return tmap(path, function(p)
+        return {
+            x = (p.x - base_x) * CONFIG.TILE_WIDTH,
+            y = (p.y - base_y) * CONFIG.TILE_HEIGHT
+        }
+    end)
+end
 
 IdCounter = {}
 
@@ -2428,9 +2545,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:38:19",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#173",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="src/ui/panels/text_node.lua#29",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 22:19:51",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#173",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="src/ui/panels/text_node.lua#29",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#178",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 22:19:51"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2534,18 +2651,18 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 22:19:51"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
-AAEDAAIDBgAqAgMSABoEDwAPBgAOGgQPAA8GAAAPYAC7Cy8BCEgACxIAXwEDAQAARQAGChIAOAIA
-AA8ADwYABR4DUQAPJAACcQUDCwAAAQWWAEEGAwgFigAQBQwAAHsAMgQDBwkAEQYYADEDAwEPABEJ
-DwARDQYA8RYEBgMsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0wCADSeT0wLHRpbGVf
-aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
-ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
-ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
+MS0yMyAyMjoxOTozMiIscmV2aXNpb249MzNdXWx6NABYAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
+AAEDAAIDBgAqAgMSABoEDwAPBgAOGgQPAA8GAAAPYAC7Cy8BAkIABQwACgYAPwEAAD8AAAsSAAEG
+ADgCAAAPAA8GAAUeA1EADyQAAnEFAwsAAAEFnABBBgMIBYoAEAUMAACBADIEAwcJABEGGAAxAwMB
+DwARCQ8AEQ0GAPEWBAYDLGhpZGRlbj1mYWxzZSxuYW1lPSJ3YWxscyIscGFuX3g9MAgA0nk9MCx0
+aWxlX2g9MTYKABB3CgCMem9vbT0xfSyGAk8CAAICBgAVGgcPAA8GAA4aBw8AD2AA4A9yAAcvAQY-
+AAELEgABBgApAgYPAA8GAAUeA1EADyQAAtEDAggGAgEEAgAGAgEDdQBBBQIIAxIAEAMMAFMBBwIH
+BRgAABUAMQcCAQ8AEQkPABENBgA-BAUCjwIBX2Zsb29yjwIWUG09MX19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 22:19:51"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2553,19 +2670,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 20:30:55",modified="2025-11-23 20:38:19"]]
+--[[pod,created="2025-11-23 22:19:33",modified="2025-11-23 22:19:51"]]
 :: [eoc]
