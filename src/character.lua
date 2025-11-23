@@ -52,6 +52,9 @@ end
 function Character:update_animation()
     if self.animation_data == nil then return end
     self.animation_data:update()
+    if not self.animation_data.playing then
+        self:end_animation()
+    end
     self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
 end
 

@@ -29,7 +29,6 @@ end
 local ANIMATIONS = {
     ["IDLE"] = {
         repeating = true,
-        duration = 100000,
         sprites = {
             {
                 sprite = "idle_1",
@@ -168,7 +167,7 @@ function AnimationManager.create_walk_animation(target_x, target_y)
 end
 
 function Animation:update()
-    if self.frame >= self.duration then
+    if self.duration ~= nil and self.frame >= self.duration then
         self.playing = false
     else
         self.frame = self.frame + 1
