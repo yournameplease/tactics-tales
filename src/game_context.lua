@@ -4,13 +4,15 @@ function GameContext.new(
     tactics,
     turn_manager,
     tile_manager,
-    character_manager
+    character_manager,
+    menu_manager
 )
     return {
         tactics = tactics,
         turn_manager = turn_manager,
         tile_manager = tile_manager,
         character_manager = character_manager,
+        menu_manager = menu_manager
     }
 end
 

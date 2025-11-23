@@ -47,13 +47,23 @@ CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
+CONTEXT_MANAGER = include "src/game_context.lua"
 include "src/tactics/enemy_ai.lua"
+
+local context = {}
 
 function _init()
     Battle:create({
         width=15, height=10
     })
     UI_MANAGER:init()
+    context = CONTEXT_MANAGER.new(
+            TACTICS,
+            TURN_MANAGER,
+            TILE_MANAGER,
+            CHARACTER_MANAGER,
+            MENU_MANAGER
+    )
 end
 
 function get_joypad()
@@ -80,6 +90,5 @@ function _update()
 end
 
 function _draw()
-    Battle:draw()
-    UI_MANAGER:draw()
+    UI_MANAGER:draw(context)
 end

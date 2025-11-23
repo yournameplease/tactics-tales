@@ -310,7 +310,6 @@ function Character:draw(x, y, side, set_pal)
     local base_x = x + frame_data.x
     local base_y = y + frame_data.y
     --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
-    printh(self.weapon.body_type)
     local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 
     local body_main_hand_x = body_sprite_data.anchors.main_hand.x
@@ -726,6 +725,20 @@ function Calculator.compute_combat(attacker, defender)
 end
 
 return Calculator
+:: src/config.lua
+-- constant configs.  eventually, may move back into relevant files.
+
+local Config = {}
+
+Config.SCREEN_WIDTH = 480
+Config.SCREEN_HEIGHT = 270
+Config.MAP_WIDTH = 16
+Config.MAP_HEIGHT = 16
+Config.TILE_WIDTH = 20
+Config.TILE_HEIGHT = 16
+Config.WALL_HEIGHT = 24
+
+return Config
 :: src/draw.lua
 
 
@@ -739,6 +752,26 @@ function draw_shadow(c, draw, x, y)
     draw(x, y+1)
     pal()
 end
+:: src/game_context.lua
+local GameContext = {}
+
+function GameContext.new(
+    tactics,
+    turn_manager,
+    tile_manager,
+    character_manager,
+    menu_manager
+)
+    return {
+        tactics = tactics,
+        turn_manager = turn_manager,
+        tile_manager = tile_manager,
+        character_manager = character_manager,
+        menu_manager = menu_manager
+    }
+end
+
+return GameContext
 :: src/main.lua
 -- tactics game
 -- ynp
@@ -779,21 +812,33 @@ end
 
 include "src/systems/tasks.lua"
 
+CONFIG = include "src/config.lua"
 BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
+MENU_MANAGER = include "src/menu_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
 CHARACTER_MANAGER = include "src/character.lua"
 COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
+CONTEXT_MANAGER = include "src/game_context.lua"
 include "src/tactics/enemy_ai.lua"
+
+local context = {}
 
 function _init()
     Battle:create({
         width=15, height=10
     })
     UI_MANAGER:init()
+    context = CONTEXT_MANAGER.new(
+            TACTICS,
+            TURN_MANAGER,
+            TILE_MANAGER,
+            CHARACTER_MANAGER,
+            MENU_MANAGER
+    )
 end
 
 function get_joypad()
@@ -814,14 +859,195 @@ end
 
 function _update()
     local joy = get_joypad()
+    MENU_MANAGER.update(joy)
     Battle:update(joy)
     update_tasks()
 end
 
 function _draw()
-    Battle:draw()
-    UI_MANAGER:draw()
+    UI_MANAGER:draw(context)
 end
+:: src/menu_manager.lua
+local MenuManager = {
+    menu_state = {},
+    menu_ctx = {},
+    menu_selection = {},
+    selection_history = {}
+}
+
+
+-- kind
+-- selected_data_mapper -- returns (success bool, data) to store
+-- select_transition
+local MENU_DATA = {
+    ["MENU_PLAYER_TURN"] = {
+        initial_step = "SELECT_UNIT",
+        steps = {
+            ["SELECT_UNIT"] = {
+                kind = "CURSOR_GRID",
+                store_key = "acting_unit",
+                validator = grid_selection_is_available_player,
+                next_state = "SELECT_DESTINATION"
+            },
+            ["SELECT_DESTINATION"] = {
+                kind = "CURSOR_GRID",
+                store_key = "destination",
+                validator = grid_selection_is_empty_or_acting_unit,
+                next_state = "SELECT_ACTION",
+                get_legal_tiles = tiles_in_movement_range
+            },
+            ["SELECT_ACTION"] = {
+                kind = "CURSOR_VERTICAL_LIST",
+                options_generator = function(ctx)
+                    local options = {}
+                    -- if target in range
+                    if any_target_in_range(ctx) then
+                        add(options, {
+                            text = "Attack",
+                            next_state = "SELECT_TARGET"
+                        })
+                    end
+
+                    add(options, {
+                        text = "Wait",
+                        finish_command = { kind = "MOVE_AND_WAIT" }
+                    })
+
+                    return options
+                end
+            },
+            ["SELECT_TARGET"] = {
+                kind = "CURSOR_GRID",
+                store_key = "target",
+                validator = validate_tile_is_in_unit_attack_range,
+                finish_command = { kind = "MOVE_AND_ATTACK" },
+                get_legal_tiles = tiles_with_distance_from_unit_attacks
+            },
+        }
+    }
+}
+
+
+local update_cursor = {
+    ["CURSOR_GRID"] = function (joy)
+        MenuManager.menu_selection.x = mid(0, MenuManager.menu_selection.x + joy.dxp, MenuManager.menu_state.x_max - 1)
+        MenuManager.menu_selection.y = mid(0, MenuManager.menu_selection.y + joy.dyp, MenuManager.menu_state.y_max - 1)
+    end,
+    ["CURSOR_VERTICAL_LIST"] = function (joy)
+        MenuManager.menu_selection.i = mid(1, MenuManager.menu_selection.i + joy.dyp, #MenuManager.menu_state.options)
+    end,
+    ["CURSOR_HORIZONTAL_LIST"] = function (joy)
+        MenuManager.menu_selection.i = mid(1, MenuManager.menu_selection.i + joy.dxp, #MenuManager.menu_state.options)
+    end,
+}
+
+function handle_menu_select()
+    local menu_data = MENU_DATA[MenuManager.menu_state.menu_id]
+    local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
+
+    if step_data.validator ~= nil then
+        local validation = step_data.validator(MenuManager.menu_selection, MenuManager.menu_ctx)
+        if not validation then return end
+    end
+
+    if MenuManager.menu_state.options ~= nil then
+        step_data = MenuManager.menu_state.options[MenuManager.menu_selection.i]
+    end
+
+    add(MenuManager.selection_history, {
+        step = MenuManager.menu_state.menu_step,
+        selection = MenuManager.menu_selection
+    })
+
+    if step_data.kind == "CURSOR_GRID" then
+        printh("unit getting")
+        local selected_unit = Battle:get_unit_at_coordinates(MenuManager.menu_selection.x, MenuManager.menu_selection.y)
+        if selected_unit ~= nil then
+            MenuManager.menu_selection.unit_id = selected_unit.id
+        end
+    end
+
+    if step_data.store_key ~= nil then
+        printh("writing to "..step_data.store_key.."...")
+        printh("x="..(MenuManager.menu_selection.x or "nil"))
+        printh("y="..(MenuManager.menu_selection.y or "nil"))
+        printh("i="..(MenuManager.menu_selection.i or "nil"))
+        printh("unit_id="..(MenuManager.menu_selection.unit_id or "nil"))
+        MenuManager.menu_ctx[step_data.store_key] = deepcopy(MenuManager.menu_selection)
+    end
+
+    if step_data.next_state ~= nil then
+        populate_menu_state(step_data.next_state, MenuManager.menu_ctx)
+    end
+
+    if step_data.finish_command ~= nil then
+        printh("emitting "..step_data.finish_command.kind)
+        BUS.emit(step_data.finish_command.kind, MenuManager.menu_ctx)
+    end
+end
+
+function populate_menu_state(new_step, ctx)
+    MenuManager.menu_state.menu_step = new_step
+
+    local menu_data = MENU_DATA[MenuManager.menu_state.menu_id]
+    local new_step_data = menu_data.steps[MenuManager.menu_state.menu_step]
+    MenuManager.menu_state.kind = new_step_data.kind
+    if new_step_data.options_generator ~= nil then
+        MenuManager.menu_state.options = new_step_data.options_generator(ctx)
+        printh ("generated "..#MenuManager.menu_state.options.." options")
+    else
+        MenuManager.menu_state.options = nil
+    end
+    if new_step_data.get_legal_tiles ~= nil then
+        MenuManager.menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
+    else
+        MenuManager.menu_state.legal_tiles = nil
+    end
+end
+
+local function handle_menu_back()
+    if #MenuManager.selection_history == 0 then return end
+
+    local previous_step = MenuManager.selection_history[#MenuManager.selection_history]
+    -- TODO: use this to get last cursor position
+    -- or, just push the entire active cursor onto a list
+    MenuManager.selection_history[#MenuManager.selection_history] = nil
+    populate_menu_state(previous_step.step, MenuManager.menu_ctx)
+    selection = previous_step.selection
+end
+
+
+function MenuManager.set_menu(menu_id)
+    -- TODO: make functional?
+    MenuManager.menu_state = {
+        kind = "CURSOR_GRID",
+        handle_back = nil,
+        x_max = 20, -- TODO
+        y_max = 15, -- TODO
+        menu_id = menu_id,
+        menu_step = MENU_DATA[menu_id].initial_step
+    }
+    MenuManager.menu_selection = {
+        x = 0,
+        y = 0,
+        i = 0
+    }
+end
+
+
+function MenuManager.update(joy)
+    if joy.lp then
+        BUS.emit("TACTICS_END_PLAYER_TURN")
+    elseif joy.bp then
+        handle_menu_back()
+    elseif joy.ap then
+        handle_menu_select()
+    else
+        update_cursor[MenuManager.menu_state.kind](joy)
+    end
+end
+
+return MenuManager
 :: src/systems/event_bus.lua
 
 local listeners = {}
@@ -878,22 +1104,13 @@ local COLOR_MENU_TEXT = 7
 local COLOR_MENU_HIGHLIGHT = 6
 local COLOR_MENU_HIGHLIGHT_TEXT = 32
 
-local COLOR_SCREEN_DECORATION_PRIMARY = 22
-local COLOR_SCREEN_DECORATION_HIGHLIGHT = 6
-local COLOR_SCREEN_DECORATION_SHADOW = 5
-local COLOR_SCREEN_DECORATION_INTERIOR = 21
-
-local SCREEN_WIDTH = 480
-local SCREEN_HEIGHT = 270
-local SCREEN_DECORATION_PADDING = 3
-
 local MAP_OFFSET_X = 154
 local MAP_OFFSET_Y = 11
-local MAP_WIDTH = 16
-local MAP_HEIGHT = 16
-local TILE_WIDTH = 20
-local TILE_HEIGHT = 16
-local WALL_HEIGHT = 24
+local MAP_WIDTH = CONFIG.MAP_WIDTH
+local MAP_HEIGHT = CONFIG.MAP_HEIGHT
+local TILE_WIDTH = CONFIG.TILE_WIDTH
+local TILE_HEIGHT = CONFIG.TILE_HEIGHT
+local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 local UNIT_OFFSET_X = 1
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
@@ -917,7 +1134,7 @@ function Battle:create(map_info)
         self.tile_contents[i] = {}
     end
 
-    set_menu("MENU_PLAYER_TURN")
+    MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
 
     for i = 0,3 do
         self:spawn_unit(CHARACTER_MANAGER.generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
@@ -1148,7 +1365,7 @@ function Battle:handle_move_unit(ctx)
         self:move_unit(unit, x, y)
         unit.has_acted = true
 
-        set_menu("MENU_PLAYER_TURN")
+        MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
     end)
 end
@@ -1173,7 +1390,7 @@ function Battle:handle_move_and_attack(ctx)
         do_combat(unit, target)
         unit.has_acted = true
 
-        set_menu("MENU_PLAYER_TURN")
+        MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
     end)
 end
@@ -1190,168 +1407,6 @@ function grid_selection_is_available_player(grid_selection)
     return true
 end
 
--- kind
--- selected_data_mapper -- returns (success bool, data) to store
--- select_transition
-local MENU_DATA = {
-    ["MENU_PLAYER_TURN"] = {
-        initial_step = "SELECT_UNIT",
-        steps = {
-            ["SELECT_UNIT"] = {
-                kind = "CURSOR_GRID",
-                store_key = "acting_unit",
-                validator = grid_selection_is_available_player,
-                next_state = "SELECT_DESTINATION"
-            },
-            ["SELECT_DESTINATION"] = {
-                kind = "CURSOR_GRID",
-                store_key = "destination",
-                validator = grid_selection_is_empty_or_acting_unit,
-                next_state = "SELECT_ACTION",
-                get_legal_tiles = tiles_in_movement_range
-            },
-            ["SELECT_ACTION"] = {
-                kind = "CURSOR_VERTICAL_LIST",
-                options_generator = function(ctx)
-                    local options = {}
-                    -- if target in range
-                    if any_target_in_range(ctx) then
-                        add(options, {
-                            text = "Attack",
-                            next_state = "SELECT_TARGET"
-                        })
-                    end
-
-                    add(options, {
-                        text = "Wait",
-                        finish_command = { kind = "MOVE_AND_WAIT" }
-                    })
-
-                    return options
-                end
-            },
-            ["SELECT_TARGET"] = {
-                kind = "CURSOR_GRID",
-                store_key = "target",
-                validator = validate_tile_is_in_unit_attack_range,
-                finish_command = { kind = "MOVE_AND_ATTACK" },
-                get_legal_tiles = tiles_with_distance_from_unit_attacks
-            },
-        }
-    }
-}
-
-local menu_state = {}
-local menu_ctx = {}
-local menu_selection = {}
-local selection_history = {}
-
-function handle_menu_select()
-    local menu_data = MENU_DATA[menu_state.menu_id]
-    local step_data = menu_data.steps[menu_state.menu_step]
-
-    if step_data.validator ~= nil then
-        local validation = step_data.validator(menu_selection, menu_ctx)
-        if not validation then return end
-    end
-
-    if menu_state.options ~= nil then
-        step_data = menu_state.options[menu_selection.i]
-    end
-
-    add(selection_history, {
-        step = menu_state.menu_step,
-        selection = menu_selection
-    })
-
-    if step_data.kind == "CURSOR_GRID" then
-        printh("unit getting")
-        local selected_unit = Battle:get_unit_at_coordinates(menu_selection.x, menu_selection.y)
-        if selected_unit ~= nil then
-            menu_selection.unit_id = selected_unit.id
-        end
-    end
-
-    if step_data.store_key ~= nil then
-        printh("writing to "..step_data.store_key.."...")
-        printh("x="..(menu_selection.x or "nil"))
-        printh("y="..(menu_selection.y or "nil"))
-        printh("i="..(menu_selection.i or "nil"))
-        printh("unit_id="..(menu_selection.unit_id or "nil"))
-        menu_ctx[step_data.store_key] = deepcopy(menu_selection)
-    end
-
-    if step_data.next_state ~= nil then
-        populate_menu_state(step_data.next_state, menu_ctx)
-    end
-
-    if step_data.finish_command ~= nil then
-        printh("emitting "..step_data.finish_command.kind)
-        BUS.emit(step_data.finish_command.kind, menu_ctx)
-    end
-end
-
-function populate_menu_state(new_step, ctx)
-    menu_state.menu_step = new_step
-
-    local menu_data = MENU_DATA[menu_state.menu_id]
-    local new_step_data = menu_data.steps[menu_state.menu_step]
-    menu_state.kind = new_step_data.kind
-    if new_step_data.options_generator ~= nil then
-        menu_state.options = new_step_data.options_generator(ctx)
-        printh ("generated "..#menu_state.options.." options")
-    else
-        menu_state.options = nil
-    end
-    if new_step_data.get_legal_tiles ~= nil then
-        menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
-    else
-        menu_state.legal_tiles = nil
-    end
-end
-
-function handle_menu_back()
-    if #selection_history == 0 then return end
-
-    local previous_step = selection_history[#selection_history]
-    -- TODO: use this to get last cursor position
-    -- or, just push the entire active cursor onto a list
-    selection_history[#selection_history] = nil
-    populate_menu_state(previous_step.step, menu_ctx)
-    selection = previous_step.selection
-end
-
-local update_cursor = {
-    ["CURSOR_GRID"] = function (joy)
-        menu_selection.x = mid(0, menu_selection.x + joy.dxp, menu_state.x_max - 1)
-        menu_selection.y = mid(0, menu_selection.y + joy.dyp, menu_state.y_max - 1)
-    end,
-    ["CURSOR_VERTICAL_LIST"] = function (joy)
-        menu_selection.i = mid(1, menu_selection.i + joy.dyp, #menu_state.options)
-    end,
-    ["CURSOR_HORIZONTAL_LIST"] = function (joy)
-        menu_selection.i = mid(1, menu_selection.i + joy.dxp, #menu_state.options)
-    end,
-}
-
-
-function set_menu(menu_id)
-    -- TODO: make functional?
-    menu_state = {
-        kind = "CURSOR_GRID",
-        handle_back = nil,
-        x_max = 20, -- TODO
-        y_max = 15, -- TODO
-        menu_id = menu_id,
-        menu_step = MENU_DATA[menu_id].initial_step
-    }
-    menu_selection = {
-        x = 0,
-        y = 0,
-        i = 0
-    }
-end
-
 function Battle:spawn_unit(unit, x, y, side)
     if self.tile_contents[x][y] ~= nil then
         error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
@@ -1364,7 +1419,7 @@ function Battle:spawn_unit(unit, x, y, side)
     self.tile_contents[x][y] = id
 end
 
-function Battle:update(joy)
+function Battle:update()
     local blocking_animation = false
     local all_players_acted = true
 
@@ -1385,16 +1440,6 @@ function Battle:update(joy)
         if not status.finished then
             BUS.emit("TACTICS_END_PLAYER_TURN")
         end
-    end
-
-    if joy.lp then
-        BUS.emit("TACTICS_END_PLAYER_TURN")
-    elseif joy.bp then
-        handle_menu_back()
-    elseif joy.ap then
-        handle_menu_select()
-    else
-        update_cursor[menu_state.kind](joy)
     end
 end
 
@@ -1419,169 +1464,13 @@ function Battle:kill_unit(unit)
     unit:die()
 end
 
-function draw_menu_overlay()
-    local menu_boxes = {
-        {
-            x = SCREEN_DECORATION_PADDING, y = SCREEN_DECORATION_PADDING,
-            w = SCREEN_WIDTH - MAP_WIDTH * TILE_WIDTH - 4 * SCREEN_DECORATION_PADDING,
-            h = SCREEN_HEIGHT - 2 * SCREEN_DECORATION_PADDING
-        },
-        {
-            x = MAP_OFFSET_X, y = MAP_OFFSET_Y,
-            w = MAP_WIDTH * TILE_WIDTH,
-            h = MAP_HEIGHT * TILE_HEIGHT
-        },
-    }
-
-    cls(COLOR_SCREEN_DECORATION_PRIMARY)
-    for box in all(menu_boxes) do
-        rectfill(box.x-1, box.y, box.x+box.w-1, box.y+box.h, COLOR_SCREEN_DECORATION_HIGHLIGHT)
-        rectfill(box.x, box.y-1, box.x+box.w, box.y+box.h-1, COLOR_SCREEN_DECORATION_SHADOW)
-        rectfill(box.x, box.y, box.x+box.w-1, box.y+box.h-1, COLOR_SCREEN_DECORATION_INTERIOR)
-    end
-end
-
-function Battle:draw()
-    draw_menu_overlay()
-
-    camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
-
-    -- draw row-by row, top to bottom aka back to front
-
-        --map(0, 0, 0, 0, MAP_WIDTH, MAP_HEIGHT, nil, TILE_WIDTH, TILE_HEIGHT)
-    -- TODO: preload layers
-    local layers = fetch("map/0.map")
-    local layer_ground = layers[2].bmp
-    local layer_wall = layers[1].bmp
-    local wall_offset = WALL_HEIGHT - TILE_HEIGHT
-    for y = 0, MAP_HEIGHT-1 do
-        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)
-
-
-        -- highlight legal tiles
-        if menu_state.legal_tiles ~= nil then
-            fillp(
-            -- 1:2 diagonal slashes
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111,
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111
-            -- 1:2 checkerboard
-                0x33,
-                0xCC,
-                0x33,
-                0xCC,
-                0x33,
-                0xCC,
-                0x33,
-                0xCC
-            )
-            poke(0x550b,0x3f)
-            palt()
-            color(28)
-            for x = 0, MAP_WIDTH-1 do
-                if menu_state.legal_tiles[x] ~= nil and menu_state.legal_tiles[x][y] then
-                    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
-                end
-            end
-            poke(0x550b,0x00)
-            fillp()
-            color()
-        end
-
-        for x = 0, MAP_WIDTH-1 do
-            if self.tile_contents[x][y] ~= nil then
-                draw_unit(self:get_unit_at_coordinates(x, y))
-            end
-        end
-        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, MAP_WIDTH, 1, nil, TILE_WIDTH, WALL_HEIGHT)
-    end
-
-    if menu_selection.x ~= nil and menu_selection.y ~= nil then
-        local x = menu_selection.x * TILE_WIDTH
-        local y = menu_selection.y * TILE_HEIGHT
-        spr(CURSOR_SPRITE, x, y)
-
-        if menu_state.kind == "CURSOR_VERTICAL_LIST" then
-            local selected_i = menu_selection.i
-            local options = menu_state.options
-            local PADDING = 2
-
-            local menu_x = x + TILE_WIDTH
-            local menu_y = y + TILE_HEIGHT
-            local menu_w = 2*PADDING + 30
-            local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
-            rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
-            for i,opt in ipairs(options) do
-                if i == selected_i then
-                    rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
-                else
-                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
-                end
-            end
-            rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
-        end
-    end
-
-    camera()
-
-    self:draw_tactics_debug()
-end
-
-function draw_unit(unit)
-    local side = unit.side
-    local x = unit.x
-    local y = unit.y
-    local has_acted = unit.has_acted
-
-    local tile_x = x * TILE_WIDTH
-    local tile_y = y * TILE_HEIGHT
-
-    local shadow_color
-    if has_acted then
-        shadow_color = 0
-    else
-        shadow_color = 7
-    end
-    draw_shadow(shadow_color,
-            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
-            tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
-
-    unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
-
-    local hp_current = unit.hp_current
-    local hp_max = unit.stats.hp_max
-    draw_health_bar(hp_current, hp_max, tile_x+1, tile_y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
-end
-
-function draw_health_bar(hp_current, hp_max, x, y, width, height)
-    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
-    local bar_width = flr(hp_current*(width-2) / hp_max)
-    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
-    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
-end
 
 function Battle:draw_tactics_debug()
-    --print(menu_state.menu_id, 3 + 3, 3-1 + 3, 7)
-    --print(menu_state.menu_id, 3 + 3+1, 3 + 3, 5)
-    print(menu_state.menu_id, 3 + 3, 3 + 3, 6)
-    --print(menu_state.menu_step, 3 + 3, 11-1 + 3, 7)
-    --print(menu_state.menu_step, 3 + 3+1, 11 + 3, 5)
-    print(menu_state.menu_step, 3 + 3, 11 + 3, 6)
-    --print("x: "..(menu_selection.x or "nil"), 3 + 3, 19-1 + 3, 7)
-    --print("x: "..(menu_selection.x or "nil"), 3 + 3+1, 19 + 3, 5)
-    print("x: "..(menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
-    --print("y: "..(menu_selection.y or "nil"), 3 + 3, 27-1 + 3, 7)
-    --print("y: "..(menu_selection.y or "nil"), 3 + 3+1, 27 + 3, 5)
-    print("y: "..(menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
-    --print("i: "..(menu_selection.i or "nil"), 3 + 3, 35-1 + 3, 7)
-    --print("i: "..(menu_selection.i or "nil"), 3 + 3+1, 35 + 3, 5)
-    print("i: "..(menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
+    print(MENU_MANAGER.menu_state.menu_id, 3 + 3, 3 + 3, 6)
+    print(MENU_MANAGER.menu_state.menu_step, 3 + 3, 11 + 3, 6)
+    print("x: "..(MENU_MANAGER.menu_selection.x or "nil"), 3 + 3, 19 + 3, 6)
+    print("y: "..(MENU_MANAGER.menu_selection.y or "nil"), 3 + 3, 27 + 3, 6)
+    print("i: "..(MENU_MANAGER.menu_selection.i or "nil"), 3 + 3, 35 + 3, 6)
 
     print("ABCDEFGHIJKLMNOPQRSTUVWXYZABC", 4, 50, 6)
 end
@@ -1978,14 +1867,22 @@ function Box.new(props)
     self.w = props.w or 0
     self.h = props.h or 0
 
+    -- proportional flex amount
+    self.flex_grow = props.flex_grow or 0
+    -- If true, children expand to fill the cross-axis (e.g. width in a column)
+    self.cross_stretch = props.cross_stretch ~= false
+
     -- Layout properties
     self.dir = props.dir or "col" -- "row" or "col"
     self.gap = props.gap or 3
     self.padding = props.padding or 2
-    self.decoration_padding = props.decoration_padding or (props.padding and props.padding-1) or 1
+    self.decoration_padding = props.decoration_padding or self.padding - 1
     self.decoration = props.decoration -- "embossed" or "recessed"
 
     self.children = {}
+
+    if self.decoration_padding < 0 then self.decoration_padding = 0 end
+    assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
 
@@ -1994,19 +1891,75 @@ function Box:add(child)
     return child -- Return child for chaining
 end
 
--- The "Flexbox" magic: Recalculate children positions based on parent
-function Box:layout()
+function Box:layout()local is_row = (self.dir == "row")
+
+    -- ---------------------------------------------------------
+    -- PASS 1: Measurement & Flex Calculation
+    -- ---------------------------------------------------------
+    local total_flex = 0
+    local used_space = (self.padding * 2)
+    local num_children = #self.children
+
+    -- Add gap space
+    if num_children > 1 then
+        used_space = used_space + (self.gap * (num_children - 1))
+    end
+
+    for _, child in ipairs(self.children) do
+        if child.flex_grow > 0 then
+            total_flex = total_flex + child.flex_grow
+        else
+            -- For fixed items, we just add their current requested size
+            local size = is_row and child.w or child.h
+            used_space = used_space + size
+        end
+    end
+
+    -- Calculate the size of 1 "flex unit"
+    local total_size = is_row and self.w or self.h
+    local remaining_space = math.max(0, total_size - used_space)
+    local px_per_flex = 0
+
+    if total_flex > 0 then
+        assert(remaining_space % total_flex == 0, "Flex remainder not implemented!")
+        px_per_flex = remaining_space / total_flex -- TODO: remainder!
+    end
+
+    -- ---------------------------------------------------------
+    -- PASS 2: Positioning & Sizing
+    -- ---------------------------------------------------------
     local cx, cy = self.x + self.padding, self.y + self.padding
 
     for _, child in ipairs(self.children) do
+        -- A. Apply Flex Sizing (Main Axis)
+        if child.flex_grow > 0 then
+            local new_size = math.floor(child.flex_grow * px_per_flex)
+            if is_row then
+                child.w = new_size
+            else
+                child.h = new_size
+            end
+        end
+
+        -- B. Apply Cross-Axis Stretch
+        if self.cross_stretch then
+            if is_row then
+                child.h = self.h - (self.padding * 2)
+            else
+                child.w = self.w - (self.padding * 2)
+            end
+        end
+
+        -- C. Set Position
         child.x = cx
         child.y = cy
 
-        -- Let the child calculate its own internal layout
-        if child.layout then child:layout() end
+        -- D. Recursively Layout Child
+        -- (Child needs valid x,y,w,h before it can layout its own children)
+        if child.layout then child:layout() end -- todo : ???
 
-        -- Advance cursor for next sibling
-        if self.dir == "row" then
+        -- E. Advance Cursor
+        if is_row then
             cx = cx + child.w + self.gap
         else
             cy = cy + child.h + self.gap
@@ -2021,10 +1974,13 @@ function Box:draw(state)
         self:draw_recessed()
     end
 
+    -- Debug rectangle
+    rrect(self.x+self.padding, self.y+self.padding, self.w - 2*self.padding, self.h - 2*self.padding, 0, 14)
+
     -- 2. Draw Children
-    --for _, child in ipairs(self.children) do
-    --    child:draw(state)
-    --end
+    for _, child in ipairs(self.children) do
+        child:draw(state)
+    end
 end
 
 function Box:draw_embossed()
@@ -2078,6 +2034,178 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
 end
 
 return Box
+:: src/ui/panels/tactics_map.lua
+Box = include "src/ui/box.lua"
+
+local TacticsMap = {}
+
+local COLOR_MENU_PRIMARY = 32
+local COLOR_MENU_SECONDARY = 7
+local COLOR_MENU_TEXT = 7
+local COLOR_MENU_HIGHLIGHT = 6
+local COLOR_MENU_HIGHLIGHT_TEXT = 32
+
+local MAP_WIDTH = CONFIG.MAP_WIDTH
+local MAP_HEIGHT = CONFIG.MAP_HEIGHT
+local TILE_WIDTH = CONFIG.TILE_WIDTH
+local TILE_HEIGHT = CONFIG.TILE_HEIGHT
+local WALL_HEIGHT = CONFIG.WALL_HEIGHT
+
+local UNIT_OFFSET_X = 1
+local UNIT_OFFSET_Y = -3
+local CURSOR_SPRITE = 8
+
+local TEXT_HEIGHT = 7
+
+function TacticsMap.new(map_width, map_height, props)
+    map_width = map_width or MAP_WIDTH
+    map_height = map_height or MAP_HEIGHT
+
+    props.x = 0
+    props.y = WALL_HEIGHT - TILE_HEIGHT
+    props.w = map_width * TILE_WIDTH
+    props.h = map_height * TILE_HEIGHT
+
+    local box = Box.new(props)
+    setmetatable(box, { __index = TacticsMap})
+
+    box.map_width = map_width or MAP_WIDTH
+    box.map_height = map_height or MAP_HEIGHT
+    return box
+end
+
+function TacticsMap:draw(state)
+    Box.draw(self, state)
+
+    local tactics = state.tactics
+    printh(tactics)
+    local menu = state.menu_manager
+
+    local camera_x = self.x + self.padding
+    local camera_y = self.y + self.padding + WALL_HEIGHT - TILE_HEIGHT
+    camera(-camera_x, -camera_y)
+
+    -- draw row-by row, top to bottom aka back to front
+
+    -- TODO: preload layers
+    local layers = fetch("map/0.map")
+    local layer_ground = layers[2].bmp
+    local layer_wall = layers[1].bmp
+    local wall_offset = WALL_HEIGHT - TILE_HEIGHT
+    for y = 0, self.map_height-1 do
+        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+
+
+        -- highlight legal tiles
+        if menu.menu_state.legal_tiles ~= nil then
+            fillp(
+            -- 1:2 diagonal slashes
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111,
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111
+            -- 1:2 checkerboard
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC
+            )
+            poke(0x550b,0x3f)
+            palt()
+            color(28)
+            for x = 0, self.map_width-1 do
+                if menu.menu_state.legal_tiles[x] ~= nil and menu.menu_state.legal_tiles[x][y] then
+                    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+                end
+            end
+            poke(0x550b,0x00)
+            fillp()
+            color()
+        end
+
+        for x = 0, self.map_width-1 do
+            local unit = tactics:get_unit_at_coordinates(x, y)
+            if unit ~= nil then
+                draw_unit(unit)
+            end
+        end
+        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
+    end
+
+    if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
+        local x = menu.menu_selection.x * TILE_WIDTH
+        local y = menu.menu_selection.y * TILE_HEIGHT
+        spr(CURSOR_SPRITE, x, y)
+
+        if menu.menu_state.kind == "CURSOR_VERTICAL_LIST" then
+            local selected_i = menu.menu_selection.i
+            local options = menu.menu_state.options
+            local PADDING = 2
+
+            local menu_x = x + TILE_WIDTH
+            local menu_y = y + TILE_HEIGHT
+            local menu_w = 2*PADDING + 30
+            local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
+            rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+            for i,opt in ipairs(options) do
+                if i == selected_i then
+                    rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
+                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+                else
+                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
+                end
+            end
+            rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+        end
+    end
+
+    camera()
+end
+
+function draw_unit(unit)
+    local side = unit.side
+    local x = unit.x
+    local y = unit.y
+    local has_acted = unit.has_acted
+
+    local tile_x = x * TILE_WIDTH
+    local tile_y = y * TILE_HEIGHT
+
+    local shadow_color
+    if has_acted then
+        shadow_color = 0
+    else
+        shadow_color = 7
+    end
+    draw_shadow(shadow_color,
+            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
+            tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
+
+    unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
+
+    local hp_current = unit.hp_current
+    local hp_max = unit.stats.hp_max
+    draw_health_bar(hp_current, hp_max, tile_x+1, tile_y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
+end
+
+function draw_health_bar(hp_current, hp_max, x, y, width, height)
+    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
+    local bar_width = flr(hp_current*(width-2) / hp_max)
+    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
+    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
+end
+
+setmetatable(TacticsMap, Box)
+
+return TacticsMap
 :: src/ui/panels/unit_info.lua
 Box = include "src/ui/box.lua"
 
@@ -2100,6 +2228,7 @@ return UnitInfo
 :: src/ui/ui_manager.lua
 local Box = include "src/ui/box.lua"
 local UnitInfo = include "src/ui/panels/unit_info.lua"
+local TacticsMap = include "src/ui/panels/tactics_map.lua"
 
 local UIManager = {}
 
@@ -2117,13 +2246,12 @@ function UIManager:init()
 
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
-    -- Left Sidebar (Info + Log)
-    local right_col = battle_root:add(Box.new({w=120, h=270, dir="col", gap=5}))
-    right_col:add(UnitInfo.new({w=120, h=100, bg_color=5})) -- Top right
-    right_col:add(Box.new({w=120, h=165, bg_color=2}))      -- Bottom right (Log)
+    -- Left Sidebar
+    local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+    left:add(UnitInfo.new({ h=100, padding = 0 }))
+    left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
-    -- Center Area (The Map Viewport - usually transparent so we see the game)
-    battle_root:add(Box.new({w=300, h=270}))
+    battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
     self.layouts.BATTLE = battle_root
 
@@ -2236,9 +2364,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55",runtime=24,workspaces={{location="src/animation.lua#11",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#83",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#21",workspace_index=1},{location="src/ui/box.lua#47",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#110",workspace_index=1},{location="src/ui/panels/tactics_map.lua#58",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2343,7 +2471,7 @@ JgAQHx0WAbUv8JAyAh7zAVkfECBOMD4QHC5MPjwe-EBBAB8xQgAX9AJeTDA8EBEsTxA8PjEuQT7x
 MkMAHzJDABYe0bcADzIA--------------8CXxAQBPDwMQD-----------------------------
 ------------------_8UG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTo1NDozNCIscmV2aXNpb249MzJdXWx6NABTAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2354,7 +2482,7 @@ aD0xNgoAEHcKAIx6b29tPTF9LIYCTwIAAgIGABUaBw8ADwYADhoHDwAPYADmDxgAASYBBgwADEUA
 ChIAKQIGDwAPBgAFHgNRAA8kAALRAwIIBgIBBAIABgIBA28AQQUCCAMSABADDABTAQcCBwUYAAAV
 ADEHAgEPABEJDwARDQYAPwQFAo8CAV9mbG9vco8CFlBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-23 18:17:55"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2362,19 +2490,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-23 16:03:15",modified="2025-11-23 16:03:16"]]
+--[[pod,created="2025-11-23 18:17:49",modified="2025-11-23 18:17:55"]]
 :: [eoc]

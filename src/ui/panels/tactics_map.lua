@@ -2,16 +2,49 @@ Box = include "src/ui/box.lua"
 
 local TacticsMap = {}
 
+local COLOR_MENU_PRIMARY = 32
+local COLOR_MENU_SECONDARY = 7
+local COLOR_MENU_TEXT = 7
+local COLOR_MENU_HIGHLIGHT = 6
+local COLOR_MENU_HIGHLIGHT_TEXT = 32
+
 local MAP_WIDTH = CONFIG.MAP_WIDTH
-local MAP_HEIGHT = CONFIG.MAP_WIDTH
+local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_WIDTH = CONFIG.TILE_WIDTH
 local TILE_HEIGHT = CONFIG.TILE_HEIGHT
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
+local UNIT_OFFSET_X = 1
+local UNIT_OFFSET_Y = -3
+local CURSOR_SPRITE = 8
+
+local TEXT_HEIGHT = 7
+
+function TacticsMap.new(map_width, map_height, props)
+    local box = Box.new(props)
+    setmetatable(box, { __index = TacticsMap})
+
+    box.map_width = map_width or MAP_WIDTH
+    box.map_height = map_height or MAP_HEIGHT
+
+    box.x = 0
+    box.y = WALL_HEIGHT - TILE_HEIGHT
+    box.w = box.map_width * TILE_WIDTH + 2 * box.padding
+    box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
+
+    return box
+end
+
 function TacticsMap:draw(state)
     Box.draw(self, state)
 
-    camera(-MAP_OFFSET_X, -MAP_OFFSET_Y)
+    local tactics = state.tactics
+    printh(tactics)
+    local menu = state.menu_manager
+
+    local camera_x = self.x + self.padding
+    local camera_y = self.y + self.padding + WALL_HEIGHT - TILE_HEIGHT
+    camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
 
@@ -20,83 +53,117 @@ function TacticsMap:draw(state)
     local layer_ground = layers[2].bmp
     local layer_wall = layers[1].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
-    for y = 0, MAP_HEIGHT-1 do
-        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, MAP_WIDTH, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+    for y = 0, self.map_height-1 do
+        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
 
 
         -- highlight legal tiles
-        --if menu_state.legal_tiles ~= nil then
-        --    fillp(
-        --    -- 1:2 diagonal slashes
-        --    --0b00111111,
-        --    --0b11111100,
-        --    --0b11110011,
-        --    --0b11001111,
-        --    --0b00111111,
-        --    --0b11111100,
-        --    --0b11110011,
-        --    --0b11001111
-        --    -- 1:2 checkerboard
-        --            0x33,
-        --            0xCC,
-        --            0x33,
-        --            0xCC,
-        --            0x33,
-        --            0xCC,
-        --            0x33,
-        --            0xCC
-        --    )
-        --    poke(0x550b,0x3f)
-        --    palt()
-        --    color(28)
-        --    for x = 0, MAP_WIDTH-1 do
-        --        if menu_state.legal_tiles[x] ~= nil and menu_state.legal_tiles[x][y] then
-        --            rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
-        --        end
-        --    end
-        --    poke(0x550b,0x00)
-        --    fillp()
-        --    color()
-        --end
+        if menu.menu_state.legal_tiles ~= nil then
+            fillp(
+            -- 1:2 diagonal slashes
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111,
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111
+            -- 1:2 checkerboard
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC
+            )
+            poke(0x550b,0x3f)
+            palt()
+            color(28)
+            for x = 0, self.map_width-1 do
+                if menu.menu_state.legal_tiles[x] ~= nil and menu.menu_state.legal_tiles[x][y] then
+                    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+                end
+            end
+            poke(0x550b,0x00)
+            fillp()
+            color()
+        end
 
-        for x = 0, MAP_WIDTH-1 do
-            if self.tile_contents[x][y] ~= nil then
-                draw_unit(self:get_unit_at_coordinates(x, y))
+        for x = 0, self.map_width-1 do
+            local unit = tactics:get_unit_at_coordinates(x, y)
+            if unit ~= nil then
+                draw_unit(unit)
             end
         end
-        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, MAP_WIDTH, 1, nil, TILE_WIDTH, WALL_HEIGHT)
+        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
     end
 
-    --if menu_selection.x ~= nil and menu_selection.y ~= nil then
-    --    local x = menu_selection.x * TILE_WIDTH
-    --    local y = menu_selection.y * TILE_HEIGHT
-    --    spr(CURSOR_SPRITE, x, y)
-    --
-    --    if menu_state.kind == "CURSOR_VERTICAL_LIST" then
-    --        local selected_i = menu_selection.i
-    --        local options = menu_state.options
-    --        local PADDING = 2
-    --
-    --        local menu_x = x + TILE_WIDTH
-    --        local menu_y = y + TILE_HEIGHT
-    --        local menu_w = 2*PADDING + 30
-    --        local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
-    --        rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
-    --        for i,opt in ipairs(options) do
-    --            if i == selected_i then
-    --                rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-    --                print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
-    --            else
-    --                print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
-    --            end
-    --        end
-    --        rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
-    --    end
-    --end
+    if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
+        local x = menu.menu_selection.x * TILE_WIDTH
+        local y = menu.menu_selection.y * TILE_HEIGHT
+        spr(CURSOR_SPRITE, x, y)
+
+        if menu.menu_state.kind == "CURSOR_VERTICAL_LIST" then
+            local selected_i = menu.menu_selection.i
+            local options = menu.menu_state.options
+            local PADDING = 2
+
+            local menu_x = x + TILE_WIDTH
+            local menu_y = y + TILE_HEIGHT
+            local menu_w = 2*PADDING + 30
+            local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
+            rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+            for i,opt in ipairs(options) do
+                if i == selected_i then
+                    rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
+                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+                else
+                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
+                end
+            end
+            rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+        end
+    end
 
     camera()
 end
 
-setmetatable(TacticsMap, { __index = Box})
+function draw_unit(unit)
+    local side = unit.side
+    local x = unit.x
+    local y = unit.y
+    local has_acted = unit.has_acted
+
+    local tile_x = x * TILE_WIDTH
+    local tile_y = y * TILE_HEIGHT
+
+    local shadow_color
+    if has_acted then
+        shadow_color = 0
+    else
+        shadow_color = 7
+    end
+    draw_shadow(shadow_color,
+            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
+            tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
+
+    unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
+
+    local hp_current = unit.hp_current
+    local hp_max = unit.stats.hp_max
+    draw_health_bar(hp_current, hp_max, tile_x+1, tile_y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
+end
+
+function draw_health_bar(hp_current, hp_max, x, y, width, height)
+    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
+    local bar_width = flr(hp_current*(width-2) / hp_max)
+    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
+    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
+end
+
+setmetatable(TacticsMap, Box)
 
 return TacticsMap

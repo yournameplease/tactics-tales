@@ -87,7 +87,6 @@ function Character:draw(x, y, side, set_pal)
     local base_x = x + frame_data.x
     local base_y = y + frame_data.y
     --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
-    printh(self.weapon.body_type)
     local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 
     local body_main_hand_x = body_sprite_data.anchors.main_hand.x
