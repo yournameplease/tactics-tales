@@ -145,7 +145,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
         )
         rectfill(
                 self.x,
-                self.y+self.h,
+                self.y+self.h-1,
                 self.x+self.w-1,
                 self.y+self.h-1,
                 color_sw
@@ -160,7 +160,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
         rectfill(
                 self.x+self.w-self.decoration_padding,
                 self.y,
-                self.x+self.w,
+                self.x+self.w-1,
                 self.y+self.h-1-self.decoration_padding,
                 color_ne
         )
