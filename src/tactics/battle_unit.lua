@@ -40,7 +40,7 @@ function BattleUnit:take_damage(amount)
 end
 
 function BattleUnit:die()
-    printh("unit "..self.id.." is now dead")
+    LOG.info("Unit "..self.id.." is now dead")
 end
 
 return BattleUnit

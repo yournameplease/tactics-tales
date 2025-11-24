@@ -22,10 +22,8 @@ function compute_enemy_ai(unit)
             find_tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
         for x,row in pairs(tiles_in_range) do
             for y, reachable in pairs(row) do
-                --printh(x..","..y..":"..(reachable and "t" or "f"))--.." cost: "..all_tile_costs[x][y].cost)
                 if reachable then
                     if all_tile_costs[x] ~= nil and all_tile_costs[x][y] ~= nil then
-                        --printh(x..","..y..":"..(reachable and "t" or "f").." cost: "..all_tile_costs[x][y].cost)
                         if all_tile_costs[x][y].cost <= unit.stats.movement then
                             if Battle:tile_is_legal_destination(unit, x, y) then
                                 add(potential_attacks, {x = x, y = y, target = e})
@@ -51,7 +49,7 @@ function compute_enemy_ai(unit)
             destination = { x = choice.x, y = choice.y, path = path},
             target = { unit_id = choice.target.id }
         }
-        printh(unit.id .. " will attack "..choice.target.id)
+        LOG.info(unit.id .. " will attack "..choice.target.id)
         BUS.emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
         local min_cost_deep_move = deep_moves[1]
@@ -76,10 +74,10 @@ function compute_enemy_ai(unit)
             acting_unit = { unit_id = unit.id },
             destination = { x = x, y = y, path = path }
         }
-        printh(unit.id .. " will move to "..x..","..y)
+        LOG.info(unit.id .. " will move to "..x..","..y)
         BUS.emit("MOVE_AND_WAIT", action_ctx)
     else
-        printh("WARN: No valid moves for "..unit.id.. "!")
+        LOG.warn("WARN: No valid moves for "..unit.id.. "!")
     end
 end
 
@@ -88,7 +86,6 @@ function handle_enemy_turn()
         local enemies = Battle:get_units(unit_is_enemy)
 
         for enemy in all(enemies) do
-            printh("doing ai for " .. enemy.id)
             compute_enemy_ai(enemy)
             while (Battle:is_blocked()) do
                 yield()

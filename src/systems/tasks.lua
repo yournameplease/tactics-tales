@@ -10,7 +10,7 @@ function update_tasks()
         if costatus(co) == "suspended" then
             local ok, err = coresume(co)
             if not ok then
-                printh("Task Error: "..err)
+                LOG.error("Task Error: "..err)
                 assert(ok)
             end
         elseif costatus(co) == "dead" then

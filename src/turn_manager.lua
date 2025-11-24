@@ -8,23 +8,23 @@ function TurnManager.get_turn()
 end
 
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
-    printh("Begin player turn!")
+    LOG.info("Begin player turn!")
     TACTICS:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()
-    printh("End player turn!")
+    LOG.info("End player turn!")
 
     BUS.emit("TACTICS_BEGIN_ENEMY_TURN")
 end)
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
-    printh("Begin enemy turn!")
+    LOG.info("Begin enemy turn!")
 
 end)
 
 BUS.on("TACTICS_END_ENEMY_TURN", function()
-    printh("End enemy turn!")
+    LOG.info("End enemy turn!")
 
     turn = turn + 1
 
@@ -38,11 +38,11 @@ BUS.on("TACTICS_END_ENEMY_TURN", function()
 end)
 
 BUS.on("BATTLE_END_VICTORY", function()
-    printh("You win!")
+    LOG.info("You win!")
 end)
 
 BUS.on("BATTLE_END_FAILURE", function()
-    printh("You lose!")
+    LOG.info("You lose!")
 end)
 
 return TurnManager

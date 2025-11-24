@@ -133,7 +133,7 @@ function TacticsMap:draw(state)
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = tactics:get_unit_by_id(unit_id)
-            --printh("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
+            LOG.trace("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1
         end

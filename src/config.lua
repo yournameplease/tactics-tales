@@ -2,6 +2,8 @@
 
 local Config = {}
 
+Config.LOG_LEVEL = "INFO"
+
 Config.SCREEN_WIDTH = 480
 Config.SCREEN_HEIGHT = 270
 Config.MAP_WIDTH = 16

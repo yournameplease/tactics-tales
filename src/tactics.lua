@@ -141,7 +141,6 @@ end
 function tile_has_distance_from_unit(x1, y1, x2, y2, min_distance, max_distance)
     max_distance = max_distance or min_distance
     local distance = abs(x1-x2)+abs(y1-y2)
-    printh("distance: "..distance)
     return distance >= min_distance and distance <= max_distance
 end
 

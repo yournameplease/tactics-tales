@@ -38,7 +38,6 @@ function Calculator.compute_combat(attacker, defender)
 
     local virtual_hp = defender.hp_current
     if step1.is_hit then virtual_hp = virtual_hp - step1.dmg end
-    printh("virtual hp for " .. defender.id .. ": " .. virtual_hp)
 
     -- defender counterattack
     if can_attack(defender, attacker) then

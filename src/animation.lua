@@ -218,8 +218,6 @@ function AnimationManager.create_walk_animation(path)
         playing = true
     }
 
-    printh("hi anim")
-
     setmetatable(animation_data, animation_metatable("WALK"))
 
     return animation_data

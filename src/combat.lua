@@ -45,7 +45,7 @@ function do_combat(attacker, defender)
     local combat_result = COMBAT_CALCULATOR.compute_combat(attacker, defender)
 
     for i,combat_step in ipairs(combat_result.steps) do
-        printh("step: "..i)
+        LOG.trace("Combat step: ",i)
         apply_combat_step(combat_step)
     end
 end
