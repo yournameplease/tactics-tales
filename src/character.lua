@@ -73,6 +73,21 @@ function Character:get_body_type()
     return "STANDARD_"..base_body_type
 end
 
+-- @return the position of the "feet_center" anchor
+function Character:get_animation_offset()
+    if self.animation_data == nil then
+        -- this could go somewhere else...
+        self.animation_data = ANIMATION_MANAGER.create_animation("IDLE", 0)
+    end
+
+    local frame_data = self.animation_data:get_frame_data()
+
+    local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
+
+    return frame_data.x + body_sprite_data.anchors.feet_center.x,
+            frame_data.y + body_sprite_data.anchors.feet_center.y
+end
+
 function Character:draw(x, y, side, set_pal)
     if self.animation_data == nil then
         -- this could go somewhere else...

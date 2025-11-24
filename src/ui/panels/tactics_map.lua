@@ -20,6 +20,21 @@ local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7
 
+
+local function compute_animated_unit_positions(tactics)
+    return tmap(
+            tactics:get_units(),
+            function(unit)
+                local ox, oy = unit:get_animation_offset()
+                return {
+                    id = unit.id,
+                    x = unit.x * TILE_WIDTH + ox,
+                    y = unit.y * TILE_HEIGHT + oy
+                }
+            end
+    )
+end
+
 function TacticsMap.new(map_width, map_height, props)
     local box = Box.new(props)
     setmetatable(box, { __index = TacticsMap})
@@ -47,6 +62,17 @@ function TacticsMap:draw(state)
 
     -- draw row-by row, top to bottom aka back to front
 
+    -- pre-compute actor animations for z-ordering
+    local unit_positions = compute_animated_unit_positions(state.tactics)
+
+    sorted_units = userdata("i16", 2, #unit_positions)
+    for i,u in ipairs(unit_positions) do
+        sorted_units:set(0,i-1, u.y)
+        sorted_units:set(1,i-1, u.id)
+    end
+    sorted_units:sort()
+
+    local drawn_unit_count = 0
     -- TODO: preload layers
     local layers = fetch("map/0.map")
     local layer_ground = layers[2].bmp
@@ -91,12 +117,14 @@ function TacticsMap:draw(state)
             color()
         end
 
-        for x = 0, self.map_width-1 do
-            local unit = tactics:get_unit_at_coordinates(x, y)
-            if unit ~= nil then
-                draw_unit(unit)
-            end
+        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) < (y) * TILE_HEIGHT do
+            local unit_id = sorted_units:get(1, drawn_unit_count)
+            local unit = tactics:get_unit_by_id(unit_id)
+            --printh("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
+            draw_unit(unit)
+            drawn_unit_count = drawn_unit_count + 1
         end
+
         map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
     end
 

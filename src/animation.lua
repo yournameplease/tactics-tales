@@ -21,9 +21,13 @@ local function lerp_animation_offset_calculator(animation_data)
 end
 
 local function path_animation_offset_calculator(animation_data)
+    if #animation_data.path_points == 1 then
+        return animation_data.path_points[1].x, animation_data.path_points[1].y
+    end
+
     local point_index = 1
-    local duration_counter = animation_data.frame
-    while (duration_counter > 0) do
+    local duration_counter = animation_data.frame-1
+    while (duration_counter >= 0) do
         local prev_point = animation_data.path_points[point_index]
         local next_point = animation_data.path_points[point_index+1]
         if duration_counter - prev_point.duration <= 0 then
@@ -189,8 +193,6 @@ function AnimationManager.create_walk_animation(path)
         frame = 1,
         sprite_frame = 1,
         sprite = 1,
-        target_x = target_x,
-        target_y = target_y,
         duration = DURATION_PER_TILE * (#path - 1),
         path_points = path_points,
         playing = true

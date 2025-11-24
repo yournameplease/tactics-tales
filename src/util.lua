@@ -55,7 +55,6 @@ function fn_true()
 end
 
 function tmap(table, fn)
-    printh("Mapping..." .. #table)
     local out = {}
     for k,v in pairs(table) do
         out[k] = fn(v)
