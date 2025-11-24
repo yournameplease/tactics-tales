@@ -78,6 +78,12 @@ function TacticsMap:draw(state)
     local layer_ground = layers[2].bmp
     local layer_wall = layers[1].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
+
+    local cursor_x, cursor_y = nil, nil
+    if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
+        cursor_x, cursor_y = menu.menu_selection.x, menu.menu_selection.y
+    end
+
     for y = 0, self.map_height-1 do
         map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
 
@@ -125,13 +131,20 @@ function TacticsMap:draw(state)
             drawn_unit_count = drawn_unit_count + 1
         end
 
+        -- TODO: this is better with transparency
+        if cursor_y == y then
+            local c_x = cursor_x * TILE_WIDTH
+            local c_y = cursor_y * TILE_HEIGHT
+            spr(CURSOR_SPRITE, c_x, c_y)
+        end
+
         map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
     end
 
     if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
         local x = menu.menu_selection.x * TILE_WIDTH
         local y = menu.menu_selection.y * TILE_HEIGHT
-        spr(CURSOR_SPRITE, x, y)
+        spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         if menu.menu_state.kind == "CURSOR_VERTICAL_LIST" then
             local selected_i = menu.menu_selection.i
