@@ -1,7 +1,9 @@
 
 local AnimationManager = {}
 local Animation = {}
-local ANIMATIONS = {}
+
+local active_animations = {}
+local global_frame = 0
 
 local function no_offset_calculator(_)
     return 0, 0
@@ -57,6 +59,7 @@ end
 local ANIMATIONS = {
     ["IDLE"] = {
         repeating = true,
+        duration = 120,
         sprites = {
             {
                 sprite = "idle_1",
@@ -159,6 +162,23 @@ function animation_metatable(animation_id)
     }
 end
 
+function AnimationManager.tick()
+    global_frame = global_frame + 1
+end
+
+-- animations such as "IDLE" which use shared frame counters
+function AnimationManager.create_global_animation(animation_id)
+    local animation_data = {
+        id = animation_id,
+        global_frame = true,
+        playing = true
+    }
+
+    setmetatable(animation_data, animation_metatable(animation_id) )
+
+    return animation_data
+end
+
 function AnimationManager.create_animation(animation_id, direction)
     local animation_data = {
         id = animation_id,
@@ -206,15 +226,17 @@ function AnimationManager.create_walk_animation(path)
 end
 
 function Animation:update()
-    if self.duration ~= nil and self.frame >= self.duration then
+    if self.duration ~= nil and not self.global_frame and self.frame >= self.duration then
         self.playing = false
     else
-        self.frame = self.frame + 1
-        self.sprite_frame = self.sprite_frame + 1
-        if (self.sprite_frame >
-                self.sprites[1].duration) then
-            self.sprite = (self.sprite % #self.sprites) + 1
-            self.sprite_frame = 1
+        if not self.global_frame then
+            self.frame = self.frame + 1
+            self.sprite_frame = self.sprite_frame + 1
+            if (self.sprite_frame >
+                    self.sprites[1].duration) then
+                self.sprite = (self.sprite % #self.sprites) + 1
+                self.sprite_frame = 1
+            end
         end
     end
 end
@@ -229,8 +251,22 @@ end
 
 function Animation:get_frame_data()
     local x, y = self:get_x_y()
+
+    local sprite_id
+    if self.global_frame then
+        local frame_remainder = global_frame % self.duration
+        local sprite_counter = 0
+        while frame_remainder >= 0 and sprite_counter < #self.sprites do
+            sprite_counter = sprite_counter + 1
+            frame_remainder = frame_remainder - self.sprites[sprite_counter].duration
+        end
+        sprite_id = self.sprites[sprite_counter].sprite
+    else
+        sprite_id = self.sprites[self.sprite].sprite
+    end
+
     return {
-        sprite_id = self.sprites[self.sprite].sprite,
+        sprite_id = sprite_id,
         x = x, y = y
     }
 end

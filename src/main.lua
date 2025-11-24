@@ -87,6 +87,7 @@ function _update()
     local joy = get_joypad()
     MENU_MANAGER.update(joy)
     Battle:update(joy)
+    ANIMATION_MANAGER.tick()
     update_tasks()
 end
 
