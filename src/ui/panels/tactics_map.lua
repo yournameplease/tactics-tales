@@ -112,9 +112,16 @@ function TacticsMap:draw(state)
             )
             poke(0x550b,0x3f)
             palt()
-            color(28)
             for x = 0, self.map_width-1 do
-                if menu.menu_state.legal_tiles[x] ~= nil and menu.menu_state.legal_tiles[x][y] then
+                local highlighted_tile = menu.menu_state.legal_tiles:get(x, y)
+                if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
+                    if (highlighted_tile.reachable) then
+                        color(28)
+                    elseif highlighted_tile.can_attack then
+                        color(8)
+                    else
+                        error("invalid state")
+                    end
                     rrectfill(x*TILE_WIDTH+1, y*TILE_HEIGHT+1, TILE_WIDTH-2, TILE_HEIGHT-2)
                 end
             end

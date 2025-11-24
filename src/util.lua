@@ -91,3 +91,28 @@ function IdCounter.new()
     setmetatable(counter, { __index = IdCounter })
     return counter
 end
+
+-- 0-indexed
+Array2D = {}
+
+function Array2D.new(w, h)
+    local out = {
+        w = w,
+        h = h
+    }
+    for i=0, w-1 do
+        out[i] = {}
+    end
+    setmetatable(out, { __index = Array2D })
+    return out
+end
+
+function Array2D:get(x, y)
+    assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
+    return self[x][y]
+end
+
+function Array2D:set(x, y, v)
+    assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
+    self[x][y] = v
+end

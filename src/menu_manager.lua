@@ -27,7 +27,7 @@ local MENU_DATA = {
                 store_key = "destination",
                 validator = grid_selection_is_empty_or_acting_unit,
                 next_state = "SELECT_ACTION",
-                get_legal_tiles = tiles_in_movement_range
+                get_legal_tiles = tiles_in_movement_and_attack_range
             },
             ["SELECT_ACTION"] = {
                 kind = "CURSOR_VERTICAL_LIST",

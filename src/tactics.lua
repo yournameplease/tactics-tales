@@ -177,18 +177,36 @@ end
 
 -- legal tile getters
 
+-- @return  { [x][y] = { valid_selection, reachable, can_attack } }
 function tiles_with_distance_from_unit_attacks(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
 
-    return tiles_with_distance_from_unit
-    (min_distance, max_distance)
-    (ctx)
+    local destination = ctx["destination"]
+    local dest_x = destination.x
+    local dest_y = destination.y
+    local tiles_in_distance =  find_tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
 
+    local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
+
+    for x, r in pairs(tiles_in_distance) do
+        for y, in_range in pairs(r) do
+            if in_range then
+                local tile = tiles:get(x,y)
+                if tile == nil then tile = {} end
+                tile.can_attack = true
+                tile.valid_selection = true
+                tiles:set(x, y, tile)
+            end
+        end
+    end
+
+    return tiles
 end
 
-function tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
+-- @return  { [x][y] = bool }
+function find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance
 
     local reachable = {}
@@ -221,19 +239,42 @@ function tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distanc
 
 end
 
-function tiles_with_distance_from_unit(min_distance, max_distance)
-    return function(ctx)
-        local destination = ctx["destination"]
-        local dest_x = destination.x
-        local dest_y = destination.y
-        return tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
-    end
-end
-
-function tiles_in_movement_range(ctx)
+-- @return  { [x][y] = { valid_selection, reachable, can_attack } }
+function tiles_in_movement_and_attack_range(ctx)
     local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
+    local min_range = unit.min_range
+    local max_range = unit.max_range
 
-    return find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
+    local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
+
+    local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
+
+
+    for x, r in pairs(reachable_tiles) do
+        for y, reachable  in pairs(r) do
+            if reachable then
+                local tile = tiles:get(x,y)
+                if tile == nil then tile = {} end
+                tile.reachable = true
+                tile.valid_selection = true
+                tiles:set(x, y, tile)
+                local tiles_in_attack_range = find_tiles_with_distance_from_tile(x, y, min_range, max_range)
+
+                for ax, ar in pairs(tiles_in_attack_range) do
+                    for ay, can_attack  in pairs(ar) do
+                        if can_attack then
+                            local a_tile = tiles:get(ax,ay)
+                            if a_tile == nil then a_tile = {} end
+                            a_tile.can_attack = true
+                            tiles:set(ax, ay, a_tile)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return tiles
 end
 
 function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
