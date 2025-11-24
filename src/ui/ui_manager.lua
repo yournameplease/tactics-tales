@@ -22,7 +22,10 @@ function UIManager:init()
 
     local battle_summary = Box.new({ x = 0, y = 0, flex_grow = 1, dir = "col", gap = 0 })
     battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function() return { "Turn N" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(state)
+        local turn = state.turn_manager.get_turn()
+        return { "Turn " .. turn }
+    end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function() return { "Defeat all" }  end, justify = "center" }))
     --battle_summary:add(TextNode.new(function() return "hello3"  end, {flex_grow = 1}))
 

@@ -1,6 +1,12 @@
 
 local TurnManager = {}
 
+local turn = 1
+
+function TurnManager.get_turn()
+    return turn
+end
+
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     printh("Begin player turn!")
     TACTICS:refresh_units()
@@ -19,6 +25,8 @@ end)
 
 BUS.on("TACTICS_END_ENEMY_TURN", function()
     printh("End enemy turn!")
+
+    turn = turn + 1
 
     battle_result = Battle:check_for_end()
 
