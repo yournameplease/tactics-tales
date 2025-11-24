@@ -884,10 +884,11 @@ local function debug_print(level, ...)
     if should_print(level) then
         local arg = {...}
         local str = ""
-        for i=1,#arg do
+        for i=1,#arg-1 do
             str = str .. arg[i] .. " , "
         end
         str = str .. arg[#arg]
+
         printh(level .. ": " .. str)
     end
 end
@@ -1275,7 +1276,6 @@ end
 
 return event_bus
 :: src/systems/tasks.lua
---[[pod_format="raw",created="2025-11-24 14:29:59",modified="2025-11-24 14:29:59",revision=0]]
 local tasks = {}
 
 function start_routine(func)
@@ -1288,7 +1288,7 @@ function update_tasks()
         if costatus(co) == "suspended" then
             local ok, err = coresume(co)
             if not ok then
-                printh("Task Error: "..err)
+                LOG.error("Task Error: "..err)
                 assert(ok)
             end
         elseif costatus(co) == "dead" then
@@ -2267,14 +2267,14 @@ function Box:draw(state)
 end
 
 function Box:draw_embossed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
 end
 
 function Box:draw_recessed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
 end
 
-function Box:draw_shaded(color_ne, color_sw, color_interior)
+function Box:draw_shaded(color_exterior, color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
     -- TODO: child separators
     local x = self.x + self.offset_x
@@ -2319,6 +2319,38 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
             y+h-1-pad,
             color_interior
     )
+
+    if #self.children > 1 and self.gap > 2 * self.decoration_padding then
+        for i = 2, #self.children do
+            if self.dir == "col" then
+                local child = self.children[i]
+                local c_y = child.y + child.offset_y
+                local gap_h = self.gap
+                rectfill(
+                        x,
+                        c_y - gap_h + pad,
+                        x + w -1,
+                        c_y - pad,
+                        color_exterior
+                )
+                rectfill(
+                    x,
+                    c_y - pad + 1,
+                    x + w -1,
+                    c_y,
+                    color_ne
+                )
+                rectfill(
+                    x,
+                    c_y - gap_h,
+                    x + w -1,
+                    c_y - gap_h + pad - 1,
+                    color_sw
+                )
+
+                end
+            end
+    end
 end
 
 return Box
@@ -2881,9 +2913,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 14:29:59",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#125",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#183",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2893,7 +2925,7 @@ AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
 ----------------------------------------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yNCAwNTowMDo0NCIscmV2aXNpb249MTI4XV1sejQAgREAAFtRAADzIXtbMF09e2JtcD1weHUA
+MS0yNCAxOTowNzo0NSIscmV2aXNpb249MTMxXV1sejQAgREAAFtRAADzIXtbMF09e2JtcD1weHUA
 QyAQEATwVgcQB8AX0BfABxAH8FYsZmxhZ3M9MCxwYW5feAgA23k9MCx6b29tPTExfSw-AB-wMgD-
 SvIQwA8UIAaQHiAGMH4gFhB_MBYQHlQwFhAOBAcPFRQNBwsA-yUNFA0HIDUQZDAUEA8QZAwgJCxE
 HA8TEAUeC4wbQAtsCx5QGzwLAB5QYQAOUDEQEWAhMBEguwAe0AwPFGAGIE5gBhAeJGB3APUVDxUE
@@ -2953,8 +2985,8 @@ BbAfHRWWEA0eBXZgBfALQQAe8wQrFNAGAATABhAEsAYQDxSwBhAOBAATDQgAIASwIQA-FPAT3BS4
 L-DwjxgjINAWrwEDtQEDAgADDgAPgwAfDzIA--9GAOsFckBHQBYgZzAEAEAHHxUX2B4wBx4XEiT3
 AGcwFBAvEAYnBg0gJE0mHaUljwxtDB8UUBw9DiQutAEGQB8QHxMPEEAGVR8gLh0GAFRtMBYgDf8D
 8QggDh0UHSA1AA0eDRQNDg0gFAANDg0ODUwfQV4dFA1IGDAuPR4ABIUdHi1QbQAfFJgATywwHCC1
-KqsPiAAMD0gnSw_jAYgPmAAZIQ8UmQBhCyAUAAsEmQD_CwQLEFQdFA0UCxAFKyQ9FBtACyQbFCtQ
-awAbmAAPiANLEgfIABCQxgD0AlAUAC4dHkAEAAYAbTAEEAYAygBQDxQQBgDNAE8wCxAGZgEIEQtm
+KqsPiAAMD0gnSw_jAYgPmAAZIQ8UmQBhCyAUAAsEmQD_CwQLEFQdFA0UCxAFK4QbQAskGxQrUCsU
+GwAbmAAPiANLEgfIABCQxgD0AlAUAC4dHkAEAAYAbTAEEAYAygBQDxQQBgDNAE8wCxAGZgEIEQtm
 AUEABBAGaQEREEoAXwAbIBQA1gApP8APFIAYJw9JIQAPPR4mMAAGsAoBcqAeEBYwfhB-MFQeVCAW
 IIsAJRA1iwCQFDBkICQvEGQgACjxAi8QRAwPE1ALfBtQC1wLHlAB2Cl_QHEADlAhIIwAD3MFSQ-Q
 Aw9lEB8XRB0gjSoPwRkIPy4wHrgAUw8FBINcLhTQBuACAD8U8BCEAyq2gC4dHiAEQG0wBDB_AxIw
@@ -2986,7 +3018,7 @@ AP------------99XxAQBPDwMQD-----------------------------------------------_8
 UG09OH19
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
-MS0yNCAxMzowMzozNCIscmV2aXNpb249MTldXWx6NADZAgAA0jcAAPARe1swXT17Ym1wPXB4dQBD
+MS0yNCAxNzoyNzowMiIscmV2aXNpb249MjFdXWx6NADZAgAA0jcAAPARe1swXT17Ym1wPXB4dQBD
 IBQYBPDABxAH8AEX8AIX8AELAPMAwCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OX0sQQD-Gf9b
 HxsQDtAeIB4QHjAOMA5APlAOAC5QHmBOAA4QPiAeIF4AXgA_AC5YAB--ERMQA9ATIBMQEzADMANA
 M1ADACNQE2BDAAMQMyATIPMGUgAcLRUeAgA8PhUeAgA-NR4VJgA2XBUfFRIdAgA8Mh0SAgA-PRId
@@ -3001,7 +3033,7 @@ H18mABIPUAAXHk_JBg-TABtADxQkDggAgw4kDg0lBA4tBgCTTU5Nng00Tg00GAAKHgBwDSUETk1O
 XSAAFk4eAA9CAB8fTUYHIB-RMgD----------_tfEBAE8PAxAAsfODEA--------------------
 ----------------------------nVBtPTh9fQ==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMyAyMjoxOTozMiIscmV2aXNpb249MzNdXWx6NABYAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3018,7 +3050,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209Mn0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3026,19 +3058,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-24 14:29:51",modified="2025-11-24 14:29:59"]]
+--[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
 :: [eoc]

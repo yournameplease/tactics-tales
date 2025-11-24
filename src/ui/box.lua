@@ -132,11 +132,11 @@ end
 
 function Box:draw_recessed()
     self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+    self:draw_shaded_dividers(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
 end
 
 function Box:draw_shaded(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
-    -- TODO: child separators
     local x = self.x + self.offset_x
     local y = self.y + self.offset_y
     local w = self.w - self.offset_x
@@ -179,6 +179,103 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
             y+h-1-pad,
             color_interior
     )
+end
+
+function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
+    -- TODO: 45 degree slant (draw lines in loop)
+    local x = self.x + self.offset_x
+    local y = self.y + self.offset_y
+    local w = self.w - self.offset_x
+    local h = self.h - self.offset_y
+    local pad = self.decoration_padding
+
+    if #self.children > 1 and self.gap > 2 * self.decoration_padding then
+        for i = 2, #self.children do
+            if self.dir == "col" then
+                local child = self.children[i]
+                local c_y = child.y + child.offset_y
+                local gap_h = self.gap
+                rectfill(
+                        x,
+                        c_y - gap_h + pad,
+                        x + w -1,
+                        c_y - pad,
+                        color_interior
+                )
+                rectfill(
+                    x,
+                    c_y - pad + 1,
+                    x + w -1,
+                    c_y,
+                    color_ne
+                )
+                rectfill(
+                    x,
+                    c_y - gap_h,
+                    x + w -1,
+                    c_y - gap_h + pad - 1,
+                    color_sw
+                )
+
+                end
+            if self.dir == "col" then
+                local child = self.children[i]
+                local c_y = child.y + child.offset_y
+                local gap_h = self.gap
+                rectfill(
+                        x,
+                        c_y - gap_h + pad,
+                        x + w -1,
+                        c_y - pad,
+                        color_interior
+                )
+                rectfill(
+                    x,
+                    c_y - gap_h,
+                    x + w -1,
+                    c_y - gap_h + pad - 1,
+                    color_sw
+                )
+                rectfill(
+                    x,
+                    c_y - pad + 1,
+                    x + w -1,
+                    c_y,
+                    color_ne
+                )
+            elseif self.dir == "row" then
+                local prev_child = self.children[i]
+                local next_child = self.children[i]
+                local c_x = next_child.x + next_child.offset_x
+                local gap_w = self.gap
+                local y_prev = prev_child.y + prev_child.offset_y
+                local h_prev = prev_child.h
+                local y_next = next_child.y + next_child.offset_y
+                local h_next = next_child.h
+                rectfill(
+                        c_x - gap_w + pad,
+                        y,
+                        c_x - pad,
+                        y + h -1,
+                        color_interior
+                )
+                rectfill(
+                    c_x - gap_w,
+                    y_prev,
+                    c_x - gap_w + pad - 1,
+                    h_prev + h_prev -1,
+                    color_sw
+                )
+                rectfill(
+                    c_x - pad + 1,
+                    y_next,
+                    c_x,
+                    y_next + h_next -1,
+                    color_ne
+                )
+            end
+        end
+    end
 end
 
 return Box
