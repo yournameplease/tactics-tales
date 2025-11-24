@@ -120,7 +120,10 @@ function Character:draw_head(x, y, side, set_pal)
 
 end
 
-function Character:draw(x, y, side, set_pal)
+function Character:draw(x, y, side, set_pal, apply_animation)
+    set_pal = set_pal ~= false
+    apply_animation = apply_animation ~= false
+
     if self.animation_data == nil then
         -- this could go somewhere else...
         self.animation_data = ANIMATION_MANAGER.create_global_animation("IDLE")
@@ -131,8 +134,13 @@ function Character:draw(x, y, side, set_pal)
     local sex = self.appearance.sex
 
     local frame_data = self.animation_data:get_frame_data()
-    local base_x = x + frame_data.x
-    local base_y = y + frame_data.y
+    local offset_x, offset_y = frame_data.x, frame_data.y
+    if not apply_animation then
+        offset_x, offset_y = 0, 0
+    end
+
+    local base_x = x + offset_x
+    local base_y = y + offset_y
     --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
     local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 

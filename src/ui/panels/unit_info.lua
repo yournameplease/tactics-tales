@@ -34,7 +34,7 @@ function UnitInfo.new(props)
             local spr_y = self.y + (self.h / 2) - 8
 
             -- Use the renderer we defined previously
-            unit:draw(spr_x, spr_y, unit.side, true)
+            unit:draw(spr_x, spr_y, unit.side, true, false)
         end
     end
 
