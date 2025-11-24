@@ -242,8 +242,8 @@ end
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
 function tiles_in_movement_and_attack_range(ctx)
     local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
-    local min_range = unit.min_range
-    local max_range = unit.max_range
+    local min_range = unit.weapon.min_range
+    local max_range = unit.weapon.max_range
 
     local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
 
