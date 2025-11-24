@@ -88,7 +88,7 @@ function Character:get_animation_offset()
             frame_data.y + body_sprite_data.anchors.feet_center.y
 end
 
-function Character:set_pal()
+function Character:set_pal(side)
     if side == 1 then
         pal(16, 8)
         pal(19, 24)
@@ -105,7 +105,7 @@ function Character:draw_head(x, y, side, set_pal)
     local sex = self.appearance.sex
 
     if set_pal then
-        self:set_pal()
+        self:set_pal(side)
     end
 
     spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
@@ -155,7 +155,7 @@ function Character:draw(x, y, side, set_pal, apply_animation)
     local HEAD_NECK_Y = 7
 
     if set_pal then
-        self:set_pal()
+        self:set_pal(side)
     end
 
     spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)

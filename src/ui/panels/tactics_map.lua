@@ -173,9 +173,9 @@ function draw_unit(unit)
     else
         shadow_color = 7
     end
-    draw_shadow(shadow_color,
-            function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
-            tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
+    --draw_shadow(shadow_color,
+    --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
+    --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
     unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
 
