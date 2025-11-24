@@ -109,7 +109,7 @@ function TacticsMap:draw(state)
             color(28)
             for x = 0, self.map_width-1 do
                 if menu.menu_state.legal_tiles[x] ~= nil and menu.menu_state.legal_tiles[x][y] then
-                    rrectfill(x*TILE_WIDTH, y*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+                    rrectfill(x*TILE_WIDTH+1, y*TILE_HEIGHT+1, TILE_WIDTH-2, TILE_HEIGHT-2)
                 end
             end
             poke(0x550b,0x00)
