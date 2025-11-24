@@ -22,10 +22,11 @@ local function debug_print(level, ...)
     if should_print(level) then
         local arg = {...}
         local str = ""
-        for i=1,#arg do
+        for i=1,#arg-1 do
             str = str .. arg[i] .. " , "
         end
         str = str .. arg[#arg]
+
         printh(level .. ": " .. str)
     end
 end
