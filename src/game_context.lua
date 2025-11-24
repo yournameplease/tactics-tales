@@ -24,4 +24,16 @@ function GameContext:get_selected_unit()
     return self.tactics:get_unit_by_id(self.selected_unit_id)
 end
 
+function GameContext:enrich()
+
+    if self.menu_manager.menu_state.kind == "CURSOR_GRID" then
+        local x, y = self.menu_manager.menu_selection.x, self.menu_manager.menu_selection.y
+        local unit = self.tactics:get_unit_at_coordinates(x, y)
+        if unit then
+            self.selected_unit_id = unit.id
+        end
+    end
+
+end
+
 return GameContext

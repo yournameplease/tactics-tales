@@ -90,6 +90,7 @@ function _update()
     MENU_MANAGER.update(joy)
     Battle:update(joy)
     ANIMATION_MANAGER.tick()
+    context:enrich()
     update_tasks()
 end
 
