@@ -15,13 +15,13 @@ function apply_combat_step(step)
     local defender = step.defender
 
     local direction = atan2(
-            attacker.x - defender.x,
-            attacker.y - defender.y
+            defender.x - attacker.x,
+            defender.y - attacker.y
     )
 
     attacker:start_animation("BUMP", direction)
     if not step.is_hit then
-        defender:start_animation("DODGE", direction)
+        defender:start_animation("DODGE", direction + 0.25)
     end
     while attacker.animation_blocking or defender.animation_blocking do
         yield()

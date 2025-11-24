@@ -83,7 +83,7 @@ local ANIMATIONS = {
         offset_calculator = path_animation_offset_calculator
     },
     ["BUMP"] = {
-        duration = 10,
+        duration = 13,
         sprites = {
             {
                 sprite = "idle_1",
@@ -99,12 +99,12 @@ local ANIMATIONS = {
             }
         },
         track = { -- list of offsets
-            0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
+            0, 1, 1,3, 6, 7, 7, 7, 7, 6, 4, 2, 0
         },
         offset_calculator = directional_offsets_offset_calculator
     },
     ["DODGE"] = {
-        duration = 10,
+        duration = 9,
         sprites = {
             {
                 sprite = "idle_1",
@@ -112,7 +112,7 @@ local ANIMATIONS = {
             }
         },
         track = { -- list of offsets
-            0, 1, 4,12, 15, 16, 15, 12, 4, 1, 0
+            0, 2,4,6, 8, 8, 4, 2, 0
         },
         offset_calculator = directional_offsets_offset_calculator
     },
@@ -125,7 +125,7 @@ local ANIMATIONS = {
             }
         },
         track = { -- list of offsets
-            0, 0, 0, 0, 4, 6, 6, 6, 4, 2, 0
+            0, 0, 0, 0, 6, 8, 8, 8, 6, 3, 0
         },
         offset_calculator = directional_offsets_offset_calculator
     },
