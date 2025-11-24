@@ -7,8 +7,8 @@ function Box.new(props)
     self.y = props.y or 0
     self.w = props.w or 0
     self.h = props.h or 0
-    self.offset_x = props.offset_x or 0
-    self.offset_y = props.offset_y or 0
+    self.margin_x = props.margin_x or 0
+    self.margin_y = props.margin_y or 0
 
     -- proportional flex amount
     self.flex_grow = props.flex_grow or 0
@@ -118,7 +118,7 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    --rrect(self.x+self.padding+self.offset_x, self.y+self.padding+self.offset_y, self.w - 2*self.padding - self.offset_x, self.h - 2*self.padding - self.offset_y, 0, 14)
+    --rrect(self.x+self.padding+self.margin_x, self.y+self.padding+self.margin_y, self.w - 2*self.padding - self.margin_x, self.h - 2*self.padding - self.margin_y, 0, 14)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
@@ -137,10 +137,10 @@ end
 
 function Box:draw_shaded(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
-    local x = self.x + self.offset_x
-    local y = self.y + self.offset_y
-    local w = self.w - self.offset_x
-    local h = self.h - self.offset_y
+    local x = self.x + self.margin_x
+    local y = self.y + self.margin_y
+    local w = self.w - self.margin_x
+    local h = self.h - self.margin_y
     local pad = self.decoration_padding
     if pad ~= 0 then
         rectfill(
@@ -183,17 +183,17 @@ end
 
 function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
-    local x = self.x + self.offset_x
-    local y = self.y + self.offset_y
-    local w = self.w - self.offset_x
-    local h = self.h - self.offset_y
+    local x = self.x + self.margin_x
+    local y = self.y + self.margin_y
+    local w = self.w - self.margin_x
+    local h = self.h - self.margin_y
     local pad = self.decoration_padding
 
     if #self.children > 1 and self.gap > 2 * self.decoration_padding then
         for i = 2, #self.children do
             if self.dir == "col" then
                 local child = self.children[i]
-                local c_y = child.y + child.offset_y
+                local c_y = child.y + child.margin_y
                 local gap_h = self.gap
                 rectfill(
                         x,
@@ -220,7 +220,7 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
                 end
             if self.dir == "col" then
                 local child = self.children[i]
-                local c_y = child.y + child.offset_y
+                local c_y = child.y + child.margin_y
                 local gap_h = self.gap
                 rectfill(
                         x,
@@ -246,11 +246,11 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
             elseif self.dir == "row" then
                 local prev_child = self.children[i]
                 local next_child = self.children[i]
-                local c_x = next_child.x + next_child.offset_x
+                local c_x = next_child.x + next_child.margin_x
                 local gap_w = self.gap
-                local y_prev = prev_child.y + prev_child.offset_y
+                local y_prev = prev_child.y + prev_child.margin_y
                 local h_prev = prev_child.h
-                local y_next = next_child.y + next_child.offset_y
+                local y_next = next_child.y + next_child.margin_y
                 local h_next = next_child.h
                 rectfill(
                         c_x - gap_w + pad,
