@@ -88,6 +88,38 @@ function Character:get_animation_offset()
             frame_data.y + body_sprite_data.anchors.feet_center.y
 end
 
+function Character:set_pal()
+    if side == 1 then
+        pal(16, 8)
+        pal(19, 24)
+    end
+    local skin = self.appearance.skin
+    pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+    pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+    pal(COLOR_HAIR, self.appearance.hair_color)
+    pal(COLOR_BEARD, self.appearance.beard_color)
+end
+
+function Character:draw_head(x, y, side, set_pal)
+    local flip_h = side ~= 0
+    local sex = self.appearance.sex
+
+    if set_pal then
+        self:set_pal()
+    end
+
+    spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
+    if sex == 0 then
+        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+    else
+        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+    end
+    if self.appearance.beard ~= nil then
+        spr(BASE_BEARD_SPRITE + self.appearance.beard, x, y, flip_h)
+    end
+
+end
+
 function Character:draw(x, y, side, set_pal)
     if self.animation_data == nil then
         -- this could go somewhere else...
@@ -115,29 +147,13 @@ function Character:draw(x, y, side, set_pal)
     local HEAD_NECK_Y = 7
 
     if set_pal then
-        if side == 1 then
-            pal(16, 8)
-            pal(19, 24)
-        end
-        local skin = self.appearance.skin
-        pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-        pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-        pal(COLOR_HAIR, self.appearance.hair_color)
-        pal(COLOR_BEARD, self.appearance.beard_color)
+        self:set_pal()
     end
 
     spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
 
     local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
-    spr(BASE_HEAD_SPRITE + 4 * sex, head_x, head_y, flip_h)
-    if sex == 0 then
-        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
-    else
-        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
-    end
-    if self.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + self.appearance.beard, head_x, head_y, flip_h)
-    end
+    self:draw_head(head_x, head_y, side, set_pal)
 
     local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
     spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_x, weapon_y, flip_h)
@@ -178,6 +194,7 @@ end
 function CharacterManager.generate_character()
     local character = {
         id = id_counter:get_id(),
+        name = "Bob",
         appearance = generate_appearance(),
         s = 264,
         stats = {

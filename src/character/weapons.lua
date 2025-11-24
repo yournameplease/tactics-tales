@@ -17,7 +17,7 @@ local WEAPON_BODY_TYPES = enum {
 }
 
 local default_weapon = {
-    name = "weapon",
+    name = "Default Weapon",
     sprite = 104,
     hand_anchor = { x = 1, y = 8}, -- the top left position of the handle
     damage = 1,
@@ -41,19 +41,19 @@ end
 
 WEAPON_DATA = {
     dagger = create_weapon({
-        name = "dagger",
+        name = "Dagger",
         sprite = 104,
         damage = 1,
         accuracy = 90
     }),
     sword = create_weapon({
-        name = "sword",
+        name = "Sword",
         sprite = 105,
         damage = 2,
         accuracy = 80
     }),
     axe = create_weapon({
-        name = "axe",
+        name = "Axe",
         sprite = 106,
         damage = 2,
         accuracy = 70,
@@ -62,7 +62,7 @@ WEAPON_DATA = {
         }
     }),
     spear = create_weapon({
-        name = "spear",
+        name = "Spear",
         sprite = 107,
         damage = 1,
         accuracy = 90,
@@ -71,7 +71,7 @@ WEAPON_DATA = {
         }
     }),
     poleaxe = create_weapon({
-        name = "poleaxe",
+        name = "Poleaxe",
         sprite = 108,
         damage = 2,
         accuracy = 60,
@@ -81,7 +81,7 @@ WEAPON_DATA = {
         }
     }),
     club = create_weapon({
-        name = "club",
+        name = "Club",
         sprite = 109,
         damage = 1,
         accuracy = 80,
@@ -90,7 +90,7 @@ WEAPON_DATA = {
         }
     }),
     mace = create_weapon({
-        name = "mace",
+        name = "Mace",
         sprite = 110,
         damage = 2,
         accuracy = 70,
@@ -99,7 +99,7 @@ WEAPON_DATA = {
         }
     }),
     greatsword = create_weapon({
-        name = "greatsword",
+        name = "Greatsword",
         sprite = 111,
         hand_anchor = { x = 3, y = 12},
         damage = 3,
@@ -107,7 +107,7 @@ WEAPON_DATA = {
         body_type = WEAPON_BODY_TYPES.HORIZONTAL,
     }),
     bow = create_weapon({
-        name = "bow",
+        name = "Bow",
         sprite = 112,
         hand_anchor = { x = 13, y = 9},
         damage = 2,

@@ -14,8 +14,10 @@
 - enemy/player spawn point map tiles
 - multi map support
 - r button to cycle units
+- transparency effect
 
 -- mid term goals
+- mouse control
 - learn sfx/music
 - more tiles
 - make ~5 maps

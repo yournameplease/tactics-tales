@@ -21,9 +21,9 @@ function UIManager:init()
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
     local battle_summary = Box.new({ x = 0, y = 0, flex_grow = 1, dir = "col", gap = 0 })
-    battle_summary:add(TextNode.new(function() return "BATTLE"  end, 1, { justify = "center" }))
-    battle_summary:add(TextNode.new(function() return "Turn N"  end, 1, { justify = "center" }))
-    battle_summary:add(TextNode.new(function() return "Defeat all"  end, 1, { justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "Turn N" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "Defeat all" }  end, justify = "center" }))
     --battle_summary:add(TextNode.new(function() return "hello3"  end, {flex_grow = 1}))
 
     -- Left Sidebar

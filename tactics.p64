@@ -386,6 +386,38 @@ function Character:get_animation_offset()
             frame_data.y + body_sprite_data.anchors.feet_center.y
 end
 
+function Character:set_pal()
+    if side == 1 then
+        pal(16, 8)
+        pal(19, 24)
+    end
+    local skin = self.appearance.skin
+    pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+    pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+    pal(COLOR_HAIR, self.appearance.hair_color)
+    pal(COLOR_BEARD, self.appearance.beard_color)
+end
+
+function Character:draw_head(x, y, side, set_pal)
+    local flip_h = side ~= 0
+    local sex = self.appearance.sex
+
+    if set_pal then
+        self:set_pal()
+    end
+
+    spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
+    if sex == 0 then
+        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+    else
+        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+    end
+    if self.appearance.beard ~= nil then
+        spr(BASE_BEARD_SPRITE + self.appearance.beard, x, y, flip_h)
+    end
+
+end
+
 function Character:draw(x, y, side, set_pal)
     if self.animation_data == nil then
         -- this could go somewhere else...
@@ -413,29 +445,13 @@ function Character:draw(x, y, side, set_pal)
     local HEAD_NECK_Y = 7
 
     if set_pal then
-        if side == 1 then
-            pal(16, 8)
-            pal(19, 24)
-        end
-        local skin = self.appearance.skin
-        pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-        pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-        pal(COLOR_HAIR, self.appearance.hair_color)
-        pal(COLOR_BEARD, self.appearance.beard_color)
+        self:set_pal()
     end
 
     spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
 
     local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
-    spr(BASE_HEAD_SPRITE + 4 * sex, head_x, head_y, flip_h)
-    if sex == 0 then
-        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
-    else
-        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, head_x, head_y, flip_h)
-    end
-    if self.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + self.appearance.beard, head_x, head_y, flip_h)
-    end
+    self:draw_head(head_x, head_y, side, set_pal)
 
     local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
     spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_x, weapon_y, flip_h)
@@ -476,6 +492,7 @@ end
 function CharacterManager.generate_character()
     local character = {
         id = id_counter:get_id(),
+        name = "Bob",
         appearance = generate_appearance(),
         s = 264,
         stats = {
@@ -603,7 +620,7 @@ local WEAPON_BODY_TYPES = enum {
 }
 
 local default_weapon = {
-    name = "weapon",
+    name = "Default Weapon",
     sprite = 104,
     hand_anchor = { x = 1, y = 8}, -- the top left position of the handle
     damage = 1,
@@ -627,19 +644,19 @@ end
 
 WEAPON_DATA = {
     dagger = create_weapon({
-        name = "dagger",
+        name = "Dagger",
         sprite = 104,
         damage = 1,
         accuracy = 90
     }),
     sword = create_weapon({
-        name = "sword",
+        name = "Sword",
         sprite = 105,
         damage = 2,
         accuracy = 80
     }),
     axe = create_weapon({
-        name = "axe",
+        name = "Axe",
         sprite = 106,
         damage = 2,
         accuracy = 70,
@@ -648,7 +665,7 @@ WEAPON_DATA = {
         }
     }),
     spear = create_weapon({
-        name = "spear",
+        name = "Spear",
         sprite = 107,
         damage = 1,
         accuracy = 90,
@@ -657,7 +674,7 @@ WEAPON_DATA = {
         }
     }),
     poleaxe = create_weapon({
-        name = "poleaxe",
+        name = "Poleaxe",
         sprite = 108,
         damage = 2,
         accuracy = 60,
@@ -667,7 +684,7 @@ WEAPON_DATA = {
         }
     }),
     club = create_weapon({
-        name = "club",
+        name = "Club",
         sprite = 109,
         damage = 1,
         accuracy = 80,
@@ -676,7 +693,7 @@ WEAPON_DATA = {
         }
     }),
     mace = create_weapon({
-        name = "mace",
+        name = "Mace",
         sprite = 110,
         damage = 2,
         accuracy = 70,
@@ -685,7 +702,7 @@ WEAPON_DATA = {
         }
     }),
     greatsword = create_weapon({
-        name = "greatsword",
+        name = "Greatsword",
         sprite = 111,
         hand_anchor = { x = 3, y = 12},
         damage = 3,
@@ -693,7 +710,7 @@ WEAPON_DATA = {
         body_type = WEAPON_BODY_TYPES.HORIZONTAL,
     }),
     bow = create_weapon({
-        name = "bow",
+        name = "Bow",
         sprite = 112,
         hand_anchor = { x = 13, y = 9},
         damage = 2,
@@ -873,13 +890,21 @@ function GameContext.new(
     character_manager,
     menu_manager
 )
-    return {
+    local context = {
         tactics = tactics,
         turn_manager = turn_manager,
         tile_manager = tile_manager,
         character_manager = character_manager,
-        menu_manager = menu_manager
+        menu_manager = menu_manager,
+
+        selected_unit_id = 1
     }
+    setmetatable(context, { __index = GameContext })
+    return context
+end
+
+function GameContext:get_selected_unit()
+    return self.tactics:get_unit_by_id(self.selected_unit_id)
 end
 
 return GameContext
@@ -900,8 +925,10 @@ return GameContext
 - enemy/player spawn point map tiles
 - multi map support
 - r button to cycle units
+- transparency effect
 
 -- mid term goals
+- mouse control
 - learn sfx/music
 - more tiles
 - make ~5 maps
@@ -2322,7 +2349,7 @@ function TacticsMap:draw(state)
             color()
         end
 
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) < (y) * TILE_HEIGHT do
+        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = tactics:get_unit_by_id(unit_id)
             --printh("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
@@ -2406,24 +2433,25 @@ local TextNode = {}
 
 local TEXT_HEIGHT = 8
 
-function TextNode.new(text_getter, rows, props)
+-- extra props
+-- func = text callback
+-- rows = defaults to 1
+-- justify
+function TextNode.new(props)
     local box = Box.new(props)
     setmetatable(box, { __index = TextNode })
 
     box.padding = props.padding or 0
     box.decoration_padding = 0
-    box.text_getter = text_getter
-    box.h = rows * (TEXT_HEIGHT + 2)
+    box.func = props.func or error("Need text getter `func`")
+    box.rows = props.rows or 1
+    box.h = (box.rows) * (TEXT_HEIGHT + 2)
     box.justify = props.justify or "left"  -- "left", "right", "center"
 
     return box
 end
 
-function TextNode:draw(state)
-    Box.draw(self, state)
-
-    local text = self.text_getter(state)
-
+local function draw_text_row(self, i, text)
     local text_width = print(text, 0, -1000)
 
     local t_x
@@ -2437,29 +2465,113 @@ function TextNode:draw(state)
         error("Unexpected value!")
     end
 
-        print(text, t_x, self.y + self.padding + 1, UI_MANAGER.THEME.COLOR_INTERIOR_TEXT)
+    print(text, t_x, self.y + self.padding + 1 + ((i-1) * TEXT_HEIGHT + 2), UI_MANAGER.THEME.COLOR_INTERIOR_TEXT)
+end
+
+function TextNode:draw(state)
+    Box.draw(self, state)
+
+    local text = self.func(state)
+
+    assert(
+            #text ==
+            self.rows, "`func` should return expected number of rows"
+    )
+    for i, text_row in ipairs(text) do
+        draw_text_row(self, i, text_row)
     end
+
+end
 
 setmetatable(TextNode, { __index = Box})
 
 return TextNode
 :: src/ui/panels/unit_info.lua
-Box = include "src/ui/box.lua"
+local Box = include "src/ui/box.lua"
+local TextNode = include "src/ui/panels/text_node.lua"
 
 local UnitInfo = {}
+-- Inherit from Box so it behaves like a normal container
+setmetatable(UnitInfo, { __index = Box })
 
-function UnitInfo:draw(state)
-    Box.draw(self, state)
+function UnitInfo.new(props)
+    -- 1. Create the Root Container
+    -- We force direction to 'row' because we want [Sprite] | [Stats]
+    props.dir = "row"
+    props.gap = props.gap or 4
+    props.padding = props.padding or 4
 
-    local unit = state.selected_unit
-    if unit then
-        print("HP: "..unit.hp, self.x + 5, self.y + 5, 7)
-    else
-        print("No Unit Selected", self.x + 5, self.y + 5, 6)
+    local self = Box.new(props)
+    setmetatable(self, { __index = UnitInfo })
+
+    -- ---------------------------------------------------------
+    -- LEFT COLUMN: Unit Sprite
+    -- ---------------------------------------------------------
+    -- We create a fixed-size box for the portrait (e.g., 20x20)
+    local portrait_box = Box.new({ w=24, h=24 })
+
+    -- Override the draw method ONLY for this specific box instance
+    -- This allows us to inject the CharacterRenderer logic
+    function portrait_box:draw(state)
+        -- Draw background/debug rect if needed
+        Box.draw(self, state)
+
+        local unit = state:get_selected_unit()
+        if unit then
+            -- Center sprite in the box (assuming 16x16 sprites)
+            local spr_x = self.x + (self.w / 2) - 8
+            local spr_y = self.y + (self.h / 2) - 8
+
+            -- Use the renderer we defined previously
+            unit:draw(spr_x, spr_y, unit.side, true)
+        end
     end
-end
 
-setmetatable(UnitInfo, { __index = Box})
+    self:add(portrait_box)
+
+    -- ---------------------------------------------------------
+    -- RIGHT COLUMN: Stats Text
+    -- ---------------------------------------------------------
+    -- Fills remaining width (flex_grow=1), stacks vertically (dir="col")
+    local info_col = self:add(Box.new({
+        flex_grow = 1,
+        dir = "col",
+        gap = 2
+    }))
+
+    -- ROW 1: Name and Level
+    info_col:add(TextNode.new({
+        func = function(state)
+            local u = state:get_selected_unit()
+            if not u then return { "No Unit Selected" } end
+            return { u.name .. " Lv." .. 1 }
+        end
+    }))
+
+    -- ROW 2-4: HP, Weapon
+    info_col:add(TextNode.new({
+        rows = 3,
+        func = function(state)
+            local u = state:get_selected_unit()
+            if not u then return { "", "", "" } end
+
+            local w = u.weapon
+            if w then
+                return
+            else
+                return "Unarmed"
+            end
+
+            return {
+                "HP: " .. u.hp_current .. "/" .. u.hp_max,
+                w and (w.name .. " (" .. w.damage .. " dmg)") or "Unarmed",
+                w and ("(" .. w.accuracy .. "% for " .. w.damage .. " dmg)") or "",
+            }
+        end
+    }))
+
+    return self
+end
 
 return UnitInfo
 :: src/ui/ui_manager.lua
@@ -2486,9 +2598,9 @@ function UIManager:init()
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
     local battle_summary = Box.new({ x = 0, y = 0, flex_grow = 1, dir = "col", gap = 0 })
-    battle_summary:add(TextNode.new(function() return "BATTLE"  end, 1, { justify = "center" }))
-    battle_summary:add(TextNode.new(function() return "Turn N"  end, 1, { justify = "center" }))
-    battle_summary:add(TextNode.new(function() return "Defeat all"  end, 1, { justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "Turn N" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function() return { "Defeat all" }  end, justify = "center" }))
     --battle_summary:add(TextNode.new(function() return "hello3"  end, {flex_grow = 1}))
 
     -- Left Sidebar
@@ -2633,9 +2745,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 01:59:31",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#173",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#29",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 03:16:11",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#42",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#14",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#125",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 03:16:11"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -2739,7 +2851,7 @@ JgA2Hx0WAY4PJgATPxXwkDICHvMBWR8QIE4wPhAcLkw_PB78QEEAHzFCABf0Al5MMDwQESxPEDw_
 MS5BPvEyQwAfMkMAFh7RtwAPMgD--------------wJfEBAE8PAxAP----------------------
 -------------------------7xQbT04fX0=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 03:16:11"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMyAyMjoxOTozMiIscmV2aXNpb249MzNdXWx6NABYAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -2750,7 +2862,7 @@ aWxlX2g9MTYKABB3CgCMem9vbT0xfSyGAk8CAAICBgAVGgcPAA8GAA4aBw8AD2AA4A9yAAcvAQY-
 AAELEgABBgApAgYPAA8GAAUeA1EADyQAAtEDAggGAgEEAgAGAgEDdQBBBQIIAxIAEAMMAFMBBwIH
 BRgAABUAMQcCAQ8AEQkPABENBgA-BAUCjwIBX2Zsb29yjwIWUG09MX19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 03:16:11"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -2758,19 +2870,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-24 01:59:06",modified="2025-11-24 01:59:31"]]
+--[[pod,created="2025-11-24 03:16:10",modified="2025-11-24 03:16:11"]]
 :: [eoc]
