@@ -2,6 +2,9 @@ local Box = include "src/ui/box.lua"
 local UnitInfo = include "src/ui/panels/unit_info.lua"
 local TacticsMap = include "src/ui/panels/tactics_map.lua"
 local TextNode = include "src/ui/panels/text_node.lua"
+local EventMessageLog = include "src/ui/panels/event_message_log.lua"
+
+local MenuValidator = include "src/ui/validator.lua"
 
 local UIManager = {}
 
@@ -32,12 +35,19 @@ function UIManager:init()
     -- Left Sidebar
     local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
     left:add(battle_summary)
-    left:add(UnitInfo.new({ h=100, padding = 0 }))
+    left:add(UnitInfo.new({ padding = 0 }))
+    left:add(EventMessageLog.new({ flex_grow = 1}))
     --left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
     battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
     self.layouts.BATTLE = battle_root
+
+
+    -- Validate all layouts
+    for i, v in pairs(self.layouts) do
+        MenuValidator.validate(v)
+    end
 
     -- Set initial
     self.current_layout = self.layouts.BATTLE

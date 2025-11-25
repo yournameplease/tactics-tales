@@ -5,7 +5,8 @@ function GameContext.new(
     turn_manager,
     tile_manager,
     character_manager,
-    menu_manager
+    menu_manager,
+    event_bus
 )
     local context = {
         tactics = tactics,
@@ -13,6 +14,7 @@ function GameContext.new(
         tile_manager = tile_manager,
         character_manager = character_manager,
         menu_manager = menu_manager,
+        event_bus = event_bus,
 
         selected_unit_id = 1
     }

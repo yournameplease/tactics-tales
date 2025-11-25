@@ -98,7 +98,6 @@ function Box:measure()
     -- C. Set our calculated size (Content + Padding)
     self._calculated_w = self.auto_width and (content_w + self.padding*2) or self.w
     self._calculated_h = self.auto_height and (content_h + self.padding*2) or self.h
-LOG.info("AUTO SIZE", self._calculated_w, self._calculated_h)
 end
 
 -- =========================================================
@@ -197,20 +196,20 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
-    LOG.info(self.x, self.y, self.w, self.h)
-    rrect(
-            self.x+self.padding+self.internal_margin.l,
-            self.y+self.padding+self.internal_margin.t,
-            self.w - 2*self.padding,
-            self.h - 2*self.padding,
-            0, 14)
-    rrect(
-            self.x+self.padding+self.internal_margin.l,
-            self.y+self.padding+self.internal_margin.t,
-            self._calculated_w - 2*self.padding,
-            self._calculated_h - 2*self.padding,
-            0, 28)
+    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
+    --LOG.info(self.x, self.y, self.w, self.h)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self.w - 2*self.padding,
+    --        self.h - 2*self.padding,
+    --        0, 14)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self._calculated_w - 2*self.padding,
+    --        self._calculated_h - 2*self.padding,
+    --        0, 28)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do

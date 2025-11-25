@@ -63,7 +63,8 @@ function _init()
             TURN_MANAGER,
             TILE_MANAGER,
             CHARACTER_MANAGER,
-            MENU_MANAGER
+            MENU_MANAGER,
+            BUS
     )
 end
 
