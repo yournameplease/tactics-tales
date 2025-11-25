@@ -774,7 +774,7 @@ function do_combat(attacker, defender)
     local combat_result = COMBAT_CALCULATOR.compute_combat(attacker, defender)
 
     for i,combat_step in ipairs(combat_result.steps) do
-        LOG.trace("Combat step: ",i)
+        LOG.debug("Combat step: ",i)
         apply_combat_step(combat_step)
     end
 end
@@ -821,7 +821,7 @@ function Calculator.compute_combat(attacker, defender)
     if step1.is_hit then virtual_hp = virtual_hp - step1.dmg end
 
     -- defender counterattack
-    if can_attack(defender, attacker) then
+    if can_attack(defender, attacker) and virtual_hp > 0 then -- Is there a good way to extract this?
         local step2 = {
             attacker = defender,
             defender = attacker,
@@ -842,7 +842,7 @@ return Calculator
 
 local Config = {}
 
-Config.LOG_LEVEL = "INFO"
+Config.LOG_LEVEL = "DEBUG"
 
 Config.SCREEN_WIDTH = 480
 Config.SCREEN_HEIGHT = 270
@@ -935,7 +935,8 @@ function GameContext.new(
     turn_manager,
     tile_manager,
     character_manager,
-    menu_manager
+    menu_manager,
+    event_bus
 )
     local context = {
         tactics = tactics,
@@ -943,6 +944,7 @@ function GameContext.new(
         tile_manager = tile_manager,
         character_manager = character_manager,
         menu_manager = menu_manager,
+        event_bus = event_bus,
 
         selected_unit_id = 1
     }
@@ -1033,7 +1035,8 @@ function _init()
             TURN_MANAGER,
             TILE_MANAGER,
             CHARACTER_MANAGER,
-            MENU_MANAGER
+            MENU_MANAGER,
+            BUS
     )
 end
 
@@ -1258,6 +1261,9 @@ return MenuManager
 local listeners = {}
 local event_bus = {}
 
+local MAX_EVENT_HISTORY = 99
+local event_history = {}
+
 function event_bus.on(event_name, callback)
     if not listeners[event_name] then
         listeners[event_name] = {}
@@ -1266,12 +1272,21 @@ function event_bus.on(event_name, callback)
 end
 
 function event_bus.emit(event_name, args)
+    if #event_history > MAX_EVENT_HISTORY then
+        deli(event_history, 1)
+    end
+    add(event_history, event_name)
+
     local slots = listeners[event_name]
     if slots then
         for callback in all(slots) do
             callback(args)
         end
     end
+end
+
+function event_bus.get_event_history()
+    return event_history
 end
 
 return event_bus
@@ -1639,6 +1654,7 @@ function Battle:handle_move_and_attack(ctx)
 
         MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
+        LOG.debug("unblockiung battle")
     end)
 end
 
@@ -2089,10 +2105,14 @@ end
 
 return Tiles
 :: src/turn_manager.lua
+include "src/util/data_utils.lua"
 
 local TurnManager = {}
 
+local PHASE = enum({"PLAYER", "ENEMY"})
+
 local turn = 1
+local phase = PHASE.PLAYER
 
 function TurnManager.get_turn()
     return turn
@@ -2100,21 +2120,32 @@ end
 
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     LOG.info("Begin player turn!")
+    phase = PHASE.PLAYER
     TACTICS:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()
+    if phase ~= PHASE.PLAYER then
+        LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..phase..".  Ignoring message.")
+        return
+    end
+
     LOG.info("End player turn!")
 
     BUS.emit("TACTICS_BEGIN_ENEMY_TURN")
 end)
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
+    phase = PHASE.ENEMY
     LOG.info("Begin enemy turn!")
 
 end)
 
 BUS.on("TACTICS_END_ENEMY_TURN", function()
+    if phase ~= PHASE.ENEMY then
+        LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..phase..".  Ignoring message.")
+        return
+    end
     LOG.info("End enemy turn!")
 
     turn = turn + 1
@@ -2147,9 +2178,23 @@ function Box.new(props)
     self.y = props.y or 0
     self.w = props.w or 0
     self.h = props.h or 0
-    self.offset_x = props.offset_x or 0
-    self.offset_y = props.offset_y or 0
 
+    -- margin inside the view window, mainly used for drawing the shaded box at an offset
+    if type(props.internal_margin) == "table" then
+        self.internal_margin = {
+            t = props.internal_margin.t or 0,
+            b = props.internal_margin.b or 0,
+            l = props.internal_margin.l or 0,
+            r = props.internal_margin.r or 0
+        }
+    else
+        local m = props.internal_margin or 0
+        self.internal_margin = {t=m, b=m, l=m, r=m}
+    end
+
+    -- calculate width/height based on children
+    self.auto_width = props.auto_width or false
+    self.auto_height = props.auto_height or false
     -- proportional flex amount
     self.flex_grow = props.flex_grow or 0
     -- If true, children expand to fill the cross-axis (e.g. width in a column)
@@ -2165,6 +2210,8 @@ function Box.new(props)
     self.children = {}
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
+
+    assert(not (flex_grow and (auto_width or auto_height)), "Cannot flex grow with auto_width or auto_height")
     assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
@@ -2174,78 +2221,140 @@ function Box:add(child)
     return child -- Return child for chaining
 end
 
-function Box:layout()local is_row = (self.dir == "row")
-
-    -- ---------------------------------------------------------
-    -- PASS 1: Measurement & Flex Calculation
-    -- ---------------------------------------------------------
-    local total_flex = 0
-    local used_space = (self.padding * 2)
-    local num_children = #self.children
-
-    -- Add gap space
-    if num_children > 1 then
-        used_space = used_space + (self.gap * (num_children - 1))
+-- =========================================================
+-- PASS 1: MEASURE (Bottom-Up)
+-- Calculate intrinsic size of children, then self
+-- =========================================================
+function Box:measure()
+    -- A. If we are fixed size, we don't care about children (optimization)
+    -- EXCEPT if we contain content that might overflow (not handled here yet)
+    if not self.auto_width and not self.auto_height then
+        self._calculated_w = self.w + self.internal_margin.l + self.internal_margin.r
+        self._calculated_h = self.h + self.internal_margin.t + self.internal_margin.b
+        --LOG.info("Measured", self._calculated_w, self._calculated_h)
+        -- We still measure children so they know their own size
+        for _, child in ipairs(self.children) do
+            if child.measure then child:measure() end
+        end
+        return
     end
 
-    for _, child in ipairs(self.children) do
-        if child.flex_grow > 0 then
-            total_flex = total_flex + child.flex_grow
+    -- B. Measure Children to determine our own size
+    local content_w, content_h = 0, 0
+    local is_row = (self.dir == "row")
+
+    for i, child in ipairs(self.children) do
+        -- Recursively measure child
+        -- Note: We pass 0 or math.huge because we are in 'auto' mode,
+        -- so we don't enforce a strict limit yet.
+        if child.measure then
+            child:measure()
+        end
+
+        -- Get child's total footprint (Size + Margins)
+        local child_outer_w = (child._calculated_w or child.w) + (child.internal_margin and (child.internal_margin.l + child.internal_margin.r) or 0)
+        local child_outer_h = (child._calculated_h or child.h) + (child.internal_margin and (child.internal_margin.t + child.internal_margin.b) or 0)
+
+        if is_row then
+            content_w = content_w + child_outer_w
+            content_h = max(content_h, child_outer_h)
+            if i > 1 then content_w = content_w + self.gap end
         else
-            -- For fixed items, we just add their current requested size
-            local size = is_row and child.w or child.h
-            used_space = used_space + size
+            content_w = max(content_w, child_outer_w)
+            content_h = content_h + child_outer_h
+            if i > 1 then content_h = content_h + self.gap end
         end
     end
 
-    -- Calculate the size of 1 "flex unit"
-    local total_size = is_row and self.w or self.h
-    local remaining_space = math.max(0, total_size - used_space)
-    local px_per_flex = 0
+    -- C. Set our calculated size (Content + Padding)
+    self._calculated_w = self.auto_width and (content_w + self.padding*2) or self.w
+    self._calculated_h = self.auto_height and (content_h + self.padding*2) or self.h
+end
 
-    if total_flex > 0 then
-        assert(remaining_space % total_flex == 0, "Flex remainder not implemented!")
-        px_per_flex = remaining_space / total_flex -- TODO: remainder!
-    end
+-- =========================================================
+-- PASS 2: ARRANGE (Top-Down)
+-- Distribute space and set final X/Y
+-- =========================================================
+function Box:layout(parent_x, parent_y)
+    -- Use calculated sizes if available, otherwise fixed
+    local my_w = self._calculated_w or self.w
+    local my_h = self._calculated_h or self.h
 
-    -- ---------------------------------------------------------
-    -- PASS 2: Positioning & Sizing
-    -- ---------------------------------------------------------
-    local cx, cy = self.x + self.padding, self.y + self.padding
+    -- Apply our own position (usually passed from parent)
+    -- If no parent (root), use self.x/y
+    self.x = parent_x or self.x
+    self.y = parent_y or self.y
 
-    for _, child in ipairs(self.children) do
-        -- A. Apply Flex Sizing (Main Axis)
-        if child.flex_grow > 0 then
-            local new_size = math.floor(child.flex_grow * px_per_flex)
+    local is_row = (self.dir == "row")
+
+    -- 1. Calculate Free Space for Flex
+    local used_space = self.padding * 2
+    local total_flex = 0
+
+    -- We assume margins were accounted for in the Measure pass size
+
+    for i, child in ipairs(self.children) do
+        -- Add Gap
+        if i > 1 then used_space = used_space + self.gap end
+
+        -- Add Child Fixed Size (Size + Margin)
+        -- Important: If child is flex_grow > 0 but we are auto_size,
+        -- flex is effectively disabled for that axis.
+        if child.flex_grow > 0 and not (is_row and self.auto_width) and not (not is_row and self.auto_height) then
+            total_flex = total_flex + child.flex_grow
+            -- Don't add to used_space yet, flex takes remainder
+        else
+            local child_w = child._calculated_w or child.w
+            local child_h = child._calculated_h or child.h
+            local cm = child.internal_margin or {t=0,b=0,l=0,r=0}
+
             if is_row then
-                child.w = new_size
+                used_space = used_space + child_w + cm.l + cm.r
             else
-                child.h = new_size
+                used_space = used_space + child_h + cm.t + cm.b
             end
         end
+    end
 
-        -- B. Apply Cross-Axis Stretch
+    -- 2. Distribute Children
+    local cx = self.x + self.padding + self.internal_margin.l
+    local cy = self.y + self.padding + self.internal_margin.t
+    local total_size = is_row and my_w or my_h
+    local remaining = max(0, total_size - used_space)
+    local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
+
+    for _, child in ipairs(self.children) do
+        -- Calculate Final Child Size
+        local child_w = child._calculated_w or child.w
+        local child_h = child._calculated_h or child.h
+
+        -- Handle Flex
+        if child.flex_grow > 0 and total_flex > 0 then
+            local added = flr(child.flex_grow * px_per_flex)
+            if is_row then child_w = added
+            else child_h = added end
+        end
+
         if self.cross_stretch then
             if is_row then
-                child.h = self.h - (self.padding * 2)
+                child_h = self.h - (self.padding * 2)
             else
-                child.w = self.w - (self.padding * 2)
+                child_w = self.w - (self.padding * 2)
             end
         end
+        -- Recurse Layout
+        if child.layout then
+            child.w, child.h = child_w, child_h
+            child:layout(cx, cy)
+        end
 
-        -- C. Set Position
-        child.x = cx
-        child.y = cy
-
-        -- D. Recursively Layout Child
-        -- (Child needs valid x,y,w,h before it can layout its own children)
-        if child.layout then child:layout() end -- todo : ???
-
-        -- E. Advance Cursor
+        -- Advance Cursor
         if is_row then
-            cx = cx + child.w + self.gap
+            cx = cx + child_w + self.gap
+            cy = cy
         else
-            cy = cy + child.h + self.gap
+            cy = cy + child_h + self.gap
+            cx = cx
         end
     end
 end
@@ -2258,7 +2367,20 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    --rrect(self.x+self.padding+self.offset_x, self.y+self.padding+self.offset_y, self.w - 2*self.padding - self.offset_x, self.h - 2*self.padding - self.offset_y, 0, 14)
+    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
+    --LOG.info(self.x, self.y, self.w, self.h)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self.w - 2*self.padding,
+    --        self.h - 2*self.padding,
+    --        0, 14)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self._calculated_w - 2*self.padding,
+    --        self._calculated_h - 2*self.padding,
+    --        0, 28)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
@@ -2267,20 +2389,20 @@ function Box:draw(state)
 end
 
 function Box:draw_embossed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
 end
 
 function Box:draw_recessed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
+    self:draw_shaded_dividers(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
 end
 
-function Box:draw_shaded(color_exterior, color_ne, color_sw, color_interior)
+function Box:draw_shaded(color_ne, color_sw, color_interior)
     -- TODO: 45 degree slant (draw lines in loop)
-    -- TODO: child separators
-    local x = self.x + self.offset_x
-    local y = self.y + self.offset_y
-    local w = self.w - self.offset_x
-    local h = self.h - self.offset_y
+    local x = self.x + self.internal_margin.l
+    local y = self.y + self.internal_margin.t
+    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
     local pad = self.decoration_padding
     if pad ~= 0 then
         rectfill(
@@ -2319,26 +2441,55 @@ function Box:draw_shaded(color_exterior, color_ne, color_sw, color_interior)
             y+h-1-pad,
             color_interior
     )
+end
+
+function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
+    -- TODO: 45 degree slant (draw lines in loop)
+    local x = self.x + self.internal_margin.l
+    local y = self.y + self.internal_margin.t
+    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+    local pad = self.decoration_padding
 
     if #self.children > 1 and self.gap > 2 * self.decoration_padding then
         for i = 2, #self.children do
+            --if self.dir == "col" then
+            --    local child = self.children[i]
+            --    local c_y = child.y + child.internal_margin.t
+            --    local gap_h = self.gap
+            --    rectfill(
+            --            x,
+            --            c_y - gap_h + pad,
+            --            x + w -1,
+            --            c_y - pad,
+            --            color_interior
+            --    )
+            --    rectfill(
+            --        x,
+            --        c_y - pad + 1,
+            --        x + w -1,
+            --        c_y,
+            --        color_ne
+            --    )
+            --    rectfill(
+            --        x,
+            --        c_y - gap_h,
+            --        x + w -1,
+            --        c_y - gap_h + pad - 1,
+            --        color_sw
+            --    )
+            --
+            --    end
             if self.dir == "col" then
                 local child = self.children[i]
-                local c_y = child.y + child.offset_y
+                local c_y = child.y + child.internal_margin.t
                 local gap_h = self.gap
                 rectfill(
                         x,
                         c_y - gap_h + pad,
                         x + w -1,
                         c_y - pad,
-                        color_exterior
-                )
-                rectfill(
-                    x,
-                    c_y - pad + 1,
-                    x + w -1,
-                    c_y,
-                    color_ne
+                        color_interior
                 )
                 rectfill(
                     x,
@@ -2347,13 +2498,133 @@ function Box:draw_shaded(color_exterior, color_ne, color_sw, color_interior)
                     c_y - gap_h + pad - 1,
                     color_sw
                 )
-
-                end
+                rectfill(
+                    x,
+                    c_y - pad + 1,
+                    x + w -1,
+                    c_y,
+                    color_ne
+                )
+            elseif self.dir == "row" then
+                local prev_child = self.children[i]
+                local next_child = self.children[i]
+                local c_x = next_child.x + next_child.internal_margin_x
+                local gap_w = self.gap
+                local y_prev = prev_child.y + prev_child.internal_margin_y
+                local h_prev = prev_child.h
+                local y_next = next_child.y + next_child.internal_margin_y
+                local h_next = next_child.h
+                rectfill(
+                        c_x - gap_w + pad,
+                        y,
+                        c_x - pad,
+                        y + h -1,
+                        color_interior
+                )
+                rectfill(
+                    c_x - gap_w,
+                    y_prev,
+                    c_x - gap_w + pad - 1,
+                    h_prev + h_prev -1,
+                    color_sw
+                )
+                rectfill(
+                    c_x - pad + 1,
+                    y_next,
+                    c_x,
+                    y_next + h_next -1,
+                    color_ne
+                )
             end
+        end
     end
 end
 
 return Box
+:: src/ui/panels/event_message_log.lua
+Box = include "src/ui/box.lua"
+MessageLog = include "src/ui/panels/message_log.lua"
+
+local EventMessageLog = {}
+
+function EventMessageLog.new(props)
+    props.func = function(state, row_limit)
+        return tmap(state.event_bus.get_event_history(), function(e) return "> "..e  end)
+    end
+
+    return MessageLog.new(props)
+end
+
+return EventMessageLog
+:: src/ui/panels/message_log.lua
+Box = include "src/ui/box.lua"
+
+local MessageLog = {}
+
+local TEXT_HEIGHT = 8
+local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
+
+-- extra props
+-- func(state, (opt)row_limit) = text callback
+-- rows = defaults to 1
+-- justify
+function MessageLog.new(props)
+    local box = Box.new(props)
+    setmetatable(box, { __index = MessageLog })
+
+    box.padding = props.padding or 1
+    box.decoration_padding = 0
+    box.func = props.func or error("Need text getter `func`")
+    if not box.auto_height then
+        if props.rows then
+            box.rows = props.rows or 1
+            box.h = (box.rows) * (TEXT_HEIGHT + 2)
+        elseif box.h then
+        --    ok
+        else
+            error("Need height for MessageLog")
+        end
+    end
+    box.justify = props.justify or "left"  -- "left", "right", "center"
+
+    return box
+end
+
+local function draw_text_row(self, i, text)
+    local text_width = print(text, 0, -1000)
+
+    local t_x
+    if self.justify == "left" then
+        t_x = self.x + self.padding + 1
+    elseif self.justify == "center" then
+        t_x = self.x + (self.w - 2 * (self.padding + 1) - text_width) / 2
+    elseif self.justify == "right" then
+        t_x = self.x + self.w - self.padding - 1 - text_width - 1
+    else
+        error("Unexpected value!")
+    end
+
+    print(text, t_x, self.y + self.padding + 1 + ((i-1) * TEXT_ROW_HEIGHT), UI_MANAGER.THEME.COLOR_INTERIOR_TEXT)
+end
+
+function MessageLog:draw(state)
+    Box.draw(self, state)
+
+    local row_count = self.rows or flr(self.h / TEXT_ROW_HEIGHT)
+
+    local text = self.func(state, row_count)
+
+    -- TODO: text wrapping?  and cutoff text if not wrap
+    local rows_to_render = min(row_count, #text)
+    for i=1,rows_to_render do
+        draw_text_row(self, i, text[#text-i+1])
+    end
+
+end
+
+setmetatable(MessageLog, { __index = Box})
+
+return MessageLog
 :: src/ui/panels/tactics_map.lua
 Box = include "src/ui/box.lua"
 
@@ -2400,7 +2671,7 @@ function TacticsMap.new(map_width, map_height, props)
     box.map_height = map_height or MAP_HEIGHT
 
     box.padding = box.decoration_padding
-    box.offset_y = WALL_HEIGHT - TILE_HEIGHT
+    box.internal_margin = { t = WALL_HEIGHT - TILE_HEIGHT, b = 0, l = 0, r = 0 }
     box.w = box.map_width * TILE_WIDTH + 2 * box.padding
     box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
 
@@ -2645,6 +2916,7 @@ function UnitInfo.new(props)
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
+    props.auto_height = props.auto_height or true
 
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
@@ -2679,7 +2951,7 @@ function UnitInfo.new(props)
     -- ---------------------------------------------------------
     -- Fills remaining width (flex_grow=1), stacks vertically (dir="col")
     local info_col = self:add(Box.new({
-        flex_grow = 1,
+        auto_height = 1,
         dir = "col",
         gap = 2
     }))
@@ -2719,6 +2991,9 @@ local Box = include "src/ui/box.lua"
 local UnitInfo = include "src/ui/panels/unit_info.lua"
 local TacticsMap = include "src/ui/panels/tactics_map.lua"
 local TextNode = include "src/ui/panels/text_node.lua"
+local EventMessageLog = include "src/ui/panels/event_message_log.lua"
+
+local MenuValidator = include "src/ui/validator.lua"
 
 local UIManager = {}
 
@@ -2737,7 +3012,7 @@ function UIManager:init()
 
     local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
-    local battle_summary = Box.new({ x = 0, y = 0, flex_grow = 1, dir = "col", gap = 0 })
+    local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
     battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(state)
         local turn = state.turn_manager.get_turn()
@@ -2749,19 +3024,27 @@ function UIManager:init()
     -- Left Sidebar
     local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
     left:add(battle_summary)
-    left:add(UnitInfo.new({ h=100, padding = 0 }))
+    left:add(UnitInfo.new({ padding = 0 }))
+    left:add(EventMessageLog.new({ flex_grow = 1}))
     --left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
     battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
     self.layouts.BATTLE = battle_root
 
+
+    -- Validate all layouts
+    for i, v in pairs(self.layouts) do
+        MenuValidator.validate(v)
+    end
+
     -- Set initial
     self.current_layout = self.layouts.BATTLE
 end
 
 function UIManager:draw(global_state)
-    -- Recalculate positions (in case of dynamic resizing or initial setup)
+    -- Recalculate size and positions
+    self.current_layout:measure()
     self.current_layout:layout()
 
     -- Render
@@ -2769,6 +3052,77 @@ function UIManager:draw(global_state)
 end
 
 return UIManager
+:: src/ui/validator.lua
+local MenuValidator = {}
+
+local function get_node_name(node, index)
+    return node.name or node.id or ("child[" .. index .. "]")
+end
+
+--- Recursively validates a UI tree.
+function MenuValidator.validate(node, path)
+    path = path or "Root"
+
+    if not node then return end
+
+    local is_col = (node.dir == "col")
+    local is_row = (node.dir == "row")
+
+    -- Safety defaults in case nil
+    local children = node.children or {}
+
+    if node.auto_height then
+        if is_col then
+            assert(#children > 0, "LAYOUT ERROR: "..path.."\nMust have children to use auto_height.")
+            for i, child in ipairs(children) do
+                if (child.flex_grow or 0) > 0 then
+                    error(
+                            "LAYOUT ERROR: Circular Dependency.\nPath: "
+                                    ..path.." > "..get_node_name(child, i)..
+                                    "Parent is 'auto_height' (col), but child has to 'flex_grow'."
+                    )
+                end
+            end
+        end
+
+        if is_row then
+            for i, child in ipairs(children) do
+                if child.cross_stretch and not child.h and not child.auto_height then
+                    error( "Warning: "..path.."\nThis child effectively vanishes or relies on a sibling.")
+                end
+            end
+        end
+    end
+
+    if node.auto_width then
+        if is_row then
+            assert(#children > 0, "LAYOUT ERROR: "..path.."\nMust have children to use auto_width.")
+            for i, child in ipairs(children) do
+                if (child.flex_grow or 0) > 0 then
+                    error(string.format(
+                            "LAYOUT ERROR: Circular Dependency.\nPath: %s > %s\nReason: Parent is 'auto_width' (row), but child tries to 'flex_grow'.",
+                            path, get_node_name(child, i)
+                    ))
+                end
+            end
+        end
+
+        if is_row then
+            for i, child in ipairs(children) do
+                if child.cross_stretch and not child.w and not child.auto_width then
+                    error( "Warning: "..path.."\nThis child effectively vanishes or relies on a sibling.")
+                end
+            end
+        end
+    end
+
+    for i, child in ipairs(children) do
+        local child_path = path .. " > " .. get_node_name(child, i)
+        MenuValidator.validate(child, child_path)
+    end
+end
+
+return MenuValidator
 :: src/util.lua
 
 -- http://lua-users.org/wiki/CopyTable
@@ -2913,9 +3267,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#183",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#219",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="src/turn_manager.lua#4",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -3033,7 +3387,7 @@ H18mABIPUAAXHk_JBg-TABtADxQkDggAgw4kDg0lBA4tBgCTTU5Nng00Tg00GAAKHgBwDSUETk1O
 XSAAFk4eAA9CAB8fTUYHIB-RMgD----------_tfEBAE8PAxAAsfODEA--------------------
 ----------------------------nVBtPTh9fQ==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMyAyMjoxOTozMiIscmV2aXNpb249MzNdXWx6NABYAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3050,7 +3404,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209Mn0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3058,19 +3412,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-24 18:14:06",modified="2025-11-24 19:07:45"]]
+--[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
 :: [eoc]

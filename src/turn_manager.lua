@@ -1,7 +1,11 @@
+include "src/util/data_utils.lua"
 
 local TurnManager = {}
 
+local PHASE = enum({"PLAYER", "ENEMY"})
+
 local turn = 1
+local phase = PHASE.PLAYER
 
 function TurnManager.get_turn()
     return turn
@@ -9,21 +13,32 @@ end
 
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     LOG.info("Begin player turn!")
+    phase = PHASE.PLAYER
     TACTICS:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()
+    if phase ~= PHASE.PLAYER then
+        LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..phase..".  Ignoring message.")
+        return
+    end
+
     LOG.info("End player turn!")
 
     BUS.emit("TACTICS_BEGIN_ENEMY_TURN")
 end)
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
+    phase = PHASE.ENEMY
     LOG.info("Begin enemy turn!")
 
 end)
 
 BUS.on("TACTICS_END_ENEMY_TURN", function()
+    if phase ~= PHASE.ENEMY then
+        LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..phase..".  Ignoring message.")
+        return
+    end
     LOG.info("End enemy turn!")
 
     turn = turn + 1
