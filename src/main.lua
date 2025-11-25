@@ -4,15 +4,10 @@
 --[[
 -- TODO: LIST
 -- Next Goals
-- lhs UI
--- unit details
--- combat preview ***
--- combat log
--- goal
+-- get helix on laptop to work on vacation
+-- battle goal
 - enemy/player spawn point map tiles
 - multi map support
-- r button to cycle units
-- transparency effect
 
 -- mid term goals
 - mouse control
@@ -21,6 +16,11 @@
 - make ~5 maps
 - title screen
 - investigate mounted units possibility
+
+--- Small but not time-critical
+-- combat log
+- transparency effect
+- r button to cycle units
 
 
 -- PROTOTYPE GOALS
