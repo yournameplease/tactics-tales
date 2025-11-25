@@ -43,7 +43,7 @@ function TacticsMap.new(map_width, map_height, props)
     box.map_height = map_height or MAP_HEIGHT
 
     box.padding = box.decoration_padding
-    box.margin_y = WALL_HEIGHT - TILE_HEIGHT
+    box.internal_margin = { t = WALL_HEIGHT - TILE_HEIGHT, b = 0, l = 0, r = 0 }
     box.w = box.map_width * TILE_WIDTH + 2 * box.padding
     box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
 

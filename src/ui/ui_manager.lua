@@ -44,7 +44,9 @@ function UIManager:init()
 end
 
 function UIManager:draw(global_state)
-    -- Recalculate positions (in case of dynamic resizing or initial setup)
+    LOG.info("DRAWING")
+    -- Recalculate size and positions
+    self.current_layout:measure()
     self.current_layout:layout()
 
     -- Render
