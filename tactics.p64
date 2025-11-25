@@ -2625,6 +2625,35 @@ end
 setmetatable(MessageLog, { __index = Box})
 
 return MessageLog
+:: src/ui/panels/portrait_box.lua
+local Box = include "src/ui/box.lua"
+
+local PortraitBox = {}
+setmetatable(PortraitBox, { __index = Box })
+
+local BACKGROUND_SPRITE = 7 + 3 * 256
+
+function PortraitBox.new()
+    local box = Box.new({ w=20, h=24 })
+    setmetatable(box, {__index = PortraitBox})
+    return box
+end
+
+function PortraitBox:draw(state)
+    -- Draw background/debug rect if needed
+    Box.draw(self, state)
+
+    local unit = state:get_selected_unit()
+    if unit then
+        -- Center sprite in the box (assuming 16x16 sprites)
+
+        spr(BACKGROUND_SPRITE, self.x, self.y+8)
+        -- Use the renderer we defined previously
+        unit:draw(self.x, self.y+12, unit.side, true, false)
+    end
+end
+
+return PortraitBox
 :: src/ui/panels/tactics_map.lua
 Box = include "src/ui/box.lua"
 
@@ -2905,6 +2934,7 @@ return TextNode
 :: src/ui/panels/unit_info.lua
 local Box = include "src/ui/box.lua"
 local TextNode = include "src/ui/panels/text_node.lua"
+local PortraitBox = include "src/ui/panels/portrait_box.lua"
 
 local UnitInfo = {}
 -- Inherit from Box so it behaves like a normal container
@@ -2921,35 +2951,8 @@ function UnitInfo.new(props)
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
 
-    -- ---------------------------------------------------------
-    -- LEFT COLUMN: Unit Sprite
-    -- ---------------------------------------------------------
-    -- We create a fixed-size box for the portrait (e.g., 20x20)
-    local portrait_box = Box.new({ w=24, h=24 })
+    self:add(PortraitBox.new())
 
-    -- Override the draw method ONLY for this specific box instance
-    -- This allows us to inject the CharacterRenderer logic
-    function portrait_box:draw(state)
-        -- Draw background/debug rect if needed
-        Box.draw(self, state)
-
-        local unit = state:get_selected_unit()
-        if unit then
-            -- Center sprite in the box (assuming 16x16 sprites)
-            local spr_x = self.x + (self.w / 2) - 8
-            local spr_y = self.y + (self.h / 2) - 8
-
-            -- Use the renderer we defined previously
-            unit:draw(spr_x, spr_y, unit.side, true, false)
-        end
-    end
-
-    self:add(portrait_box)
-
-    -- ---------------------------------------------------------
-    -- RIGHT COLUMN: Stats Text
-    -- ---------------------------------------------------------
-    -- Fills remaining width (flex_grow=1), stacks vertically (dir="col")
     local info_col = self:add(Box.new({
         auto_height = 1,
         dir = "col",
@@ -3267,9 +3270,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#219",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="src/turn_manager.lua#4",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:38:55",runtime=24,workspaces={{location="src/animation.lua#24",workspace_index=1},{location="src/util.lua#110",workspace_index=1},{location="src/character/weapons.lua#7",workspace_index=1},{location="src/character.lua#87",workspace_index=1},{location="src/systems/tasks.lua#13",workspace_index=1},{location="src/ui/ui_manager.lua#24",workspace_index=1},{location="src/ui/box.lua#219",workspace_index=1},{location="src/tactics.lua#58",workspace_index=1},{location="src/menu_manager.lua#99",workspace_index=1},{location="src/ui/panels/tactics_map.lua#75",workspace_index=1},{location="src/ui/panels/text_node.lua#48",workspace_index=1},{location="src/debug.lua#6",workspace_index=1},{location="src/tiles.lua#71",workspace_index=1},{location="src/ui/panels/unit_info.lua#37",workspace_index=1},{location="src/turn_manager.lua#4",workspace_index=1},{location="src/ui/panels/portrait_box.lua#12",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:38:55"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -3372,22 +3375,23 @@ AP------------99XxAQBPDwMQD-----------------------------------------------_8
 UG09OH19
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
-MS0yNCAxNzoyNzowMiIscmV2aXNpb249MjFdXWx6NADZAgAA0jcAAPARe1swXT17Ym1wPXB4dQBD
+MS0yNSAwMzozODo1NSIscmV2aXNpb249MjVdXWx6NAAXAwAAPDgAAPARe1swXT17Ym1wPXB4dQBD
 IBQYBPDABxAH8AEX8AIX8AELAPMAwCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OX0sQQD-Gf9b
 HxsQDtAeIB4QHjAOMA5APlAOAC5QHmBOAA4QPiAeIF4AXgA_AC5YAB--ERMQA9ATIBMQEzADMANA
 M1ADACNQE2BDAAMQMyATIPMGUgAcLRUeAgA8PhUeAgA-NR4VJgA2XBUfFRIdAgA8Mh0SAgA-PRId
 JgA2Hx0WAY4PJgATPxXwkDICHvMBWR8QIE4wPhAcLkw_PB78QEEAHzFCABf0Al5MMDwQESxPEDw_
-MS5BPvEyQwAfMkMAFh-RtwAcUw8VPxRFBQDzAyQPFAUuBQ8VJA4FLgUNJA4FLQYAk01FTZUNPkUN
-PhgACh4AcA0kDkVNRV0gABZFHgAKJADxGU8WRUyVTEWcRUxFnUWtLG0sXQwlDE0MJVwNLA0cDRwN
-LB0lbSV9BY0CAIN9DAUMbQwFDCQAbgxNRU1FTdgADwoBPPkI8GkPGQAOwA4ADgAJDgnACQ4JAA4J
-DgACABEJHAANBAABKAAJBAA8HgkOAgA8GQ4JAgAPJgAUIikOAgA-OQ4JAgCKD3EBHB8AcAH-Li-w
-aOMCHf89l08S8ABO4F7AHlKgIl8fAqAdHxUdHLAdHB0cwG2wDm0OYCQuTR4CHxRAGwIuAg4CLgIL
-gAIuAi4CsBIOAh4C4DLwAAsEC-ABCwQLYJEDHw8yAIBTDxU0TxQFAC8lBAYAASBPFQQAL58UKgAT
-H18mABIPUAAXHk_JBg-TABtADxQkDggAgw4kDg0lBA4tBgCTTU5Nng00Tg00GAAKHgBwDSUETk1O
-XSAAFk4eAA9CAB8fTUYHIB-RMgD----------_tfEBAE8PAxAAsfODEA--------------------
-----------------------------nVBtPTh9fQ==
+MS5BPvEyQwAfMkMAFPcK8QUPHQEuAVABLgEOIQ4hcCEOIQ4B0AEOEQYAfyHwACHwAhEDAAcAIQAO
+NgAETgADXgAv8QUgAQssMTCcAFMPFT8URQUA8wMkDxQFLgUPFSQOBS4FDSQOBS0GAJNNRU2VDT5F
+DT4YAAoeAHANJA5FTUVdIAAWRR4ACiQA8RlPFkVMlUxFnEVMRZ1FrSxtLF0MJQxNDCVcDSwNHA0c
+DSwdJW0lfQWNAgCDfQwFDG0MBQwkAG4MTUVNRU3ZAA_3AQwf0TIAHfkHaQ8ZAA7ADgAOAAkOCcAJ
+DgkADgkOAAIAEQkcAA0EAAEoAAkEADweCQ4CADwZDgkCAA8mABQiKQ4CAD85DgkCAIoPcQEcHwBw
+Af8uL-Bo4wId-z2XTxLwAE7gXsAeUqAiXx8CoB0fFR0csB0cHRzAbbAObQ5gJC5NHgIfFEAbAi4C
+DgIuAguAAi4CLgKwEg4CHgLgMvAACwQL8AELBAtgkQMfDzIAgFMPFTRPFAUALyUEBgABIE8VBAAv
+nxQqABMfXyYAEg9QABceT-MGD9MAG0APFCQOCACDDiQODSUEDi0GAJNNTk2eDTRODTQYAAoeAHAN
+JQROTU5dIAAWTh4AD0IAHx9NsAcgH9EyAP----------618QEATw8DEACx84MQD-------------
+----------------------------------_dUG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:38:55"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMyAyMjoxOTozMiIscmV2aXNpb249MzNdXWx6NABYAQAAFgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3404,7 +3408,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209Mn0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-25 03:38:55"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3412,19 +3416,19 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-25 03:23:44",modified="2025-11-25 03:25:12"]]
+--[[pod,created="2025-11-25 03:38:41",modified="2025-11-25 03:38:55"]]
 :: [eoc]

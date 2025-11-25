@@ -1,13 +1,11 @@
 local Box = include "src/ui/box.lua"
 local TextNode = include "src/ui/panels/text_node.lua"
+local PortraitBox = include "src/ui/panels/portrait_box.lua"
 
 local UnitInfo = {}
--- Inherit from Box so it behaves like a normal container
 setmetatable(UnitInfo, { __index = Box })
 
 function UnitInfo.new(props)
-    -- 1. Create the Root Container
-    -- We force direction to 'row' because we want [Sprite] | [Stats]
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
@@ -16,35 +14,8 @@ function UnitInfo.new(props)
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
 
-    -- ---------------------------------------------------------
-    -- LEFT COLUMN: Unit Sprite
-    -- ---------------------------------------------------------
-    -- We create a fixed-size box for the portrait (e.g., 20x20)
-    local portrait_box = Box.new({ w=24, h=24 })
+    self:add(PortraitBox.new())
 
-    -- Override the draw method ONLY for this specific box instance
-    -- This allows us to inject the CharacterRenderer logic
-    function portrait_box:draw(state)
-        -- Draw background/debug rect if needed
-        Box.draw(self, state)
-
-        local unit = state:get_selected_unit()
-        if unit then
-            -- Center sprite in the box (assuming 16x16 sprites)
-            local spr_x = self.x + (self.w / 2) - 8
-            local spr_y = self.y + (self.h / 2) - 8
-
-            -- Use the renderer we defined previously
-            unit:draw(spr_x, spr_y, unit.side, true, false)
-        end
-    end
-
-    self:add(portrait_box)
-
-    -- ---------------------------------------------------------
-    -- RIGHT COLUMN: Stats Text
-    -- ---------------------------------------------------------
-    -- Fills remaining width (flex_grow=1), stacks vertically (dir="col")
     local info_col = self:add(Box.new({
         auto_height = 1,
         dir = "col",
