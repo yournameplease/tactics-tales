@@ -23,9 +23,17 @@ local function debug_print(level, ...)
         local arg = {...}
         local str = ""
         for i=1,#arg-1 do
-            str = str .. arg[i] .. " , "
+            local v = arg[i]
+            if type(v) == "boolean" then
+                v = v and "TRUE" or "FALSE"
+            end
+            str = str .. v .. " , "
         end
-        str = str .. arg[#arg]
+        local v = arg[#arg]
+        if type(v) == "boolean" then
+            v = v and "TRUE" or "FALSE"
+        end
+        str = str .. v
 
         printh(level .. ": " .. str)
     end

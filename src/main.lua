@@ -64,7 +64,8 @@ function _init()
             TILE_MANAGER,
             CHARACTER_MANAGER,
             MENU_MANAGER,
-            BUS
+            BUS,
+            COMBAT_CALCULATOR
     )
 end
 

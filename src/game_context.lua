@@ -6,7 +6,8 @@ function GameContext.new(
     tile_manager,
     character_manager,
     menu_manager,
-    event_bus
+    event_bus,
+    combat_calculator
 )
     local context = {
         tactics = tactics,
@@ -15,6 +16,7 @@ function GameContext.new(
         character_manager = character_manager,
         menu_manager = menu_manager,
         event_bus = event_bus,
+        combat_calculator = combat_calculator,
 
         layout = "TACTICS",
 
