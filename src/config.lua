@@ -2,7 +2,7 @@
 
 local Config = {}
 
-Config.LOG_LEVEL = "INFO"
+Config.LOG_LEVEL = "DEBUG"
 
 Config.SCREEN_WIDTH = 480
 Config.SCREEN_HEIGHT = 270

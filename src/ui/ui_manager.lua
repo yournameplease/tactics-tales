@@ -54,7 +54,6 @@ function UIManager:init()
 end
 
 function UIManager:draw(global_state)
-    LOG.info("DRAWING")
     -- Recalculate size and positions
     self.current_layout:measure()
     self.current_layout:layout()

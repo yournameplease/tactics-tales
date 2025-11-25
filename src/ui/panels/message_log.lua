@@ -55,9 +55,10 @@ function MessageLog:draw(state)
 
     local text = self.func(state, row_count)
 
-    for i=1,min(row_count, #text) do
-        LOG.info(text[i])
-        draw_text_row(self, i, text[i])
+    -- TODO: text wrapping?  and cutoff text if not wrap
+    local rows_to_render = min(row_count, #text)
+    for i=1,rows_to_render do
+        draw_text_row(self, i, text[#text-i+1])
     end
 
 end

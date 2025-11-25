@@ -340,6 +340,7 @@ function Battle:handle_move_and_attack(ctx)
 
         MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
         battle_is_blocked = false
+        LOG.debug("unblockiung battle")
     end)
 end
 

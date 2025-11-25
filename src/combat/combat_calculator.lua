@@ -40,7 +40,7 @@ function Calculator.compute_combat(attacker, defender)
     if step1.is_hit then virtual_hp = virtual_hp - step1.dmg end
 
     -- defender counterattack
-    if can_attack(defender, attacker) then
+    if can_attack(defender, attacker) and virtual_hp > 0 then -- Is there a good way to extract this?
         local step2 = {
             attacker = defender,
             defender = attacker,
