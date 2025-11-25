@@ -39,6 +39,8 @@ function Box.new(props)
     self.children = {}
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
+
+    assert(not (flex_grow and (auto_width or auto_height)), "Cannot flex grow with auto_width or auto_height")
     assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
@@ -96,6 +98,7 @@ function Box:measure()
     -- C. Set our calculated size (Content + Padding)
     self._calculated_w = self.auto_width and (content_w + self.padding*2) or self.w
     self._calculated_h = self.auto_height and (content_h + self.padding*2) or self.h
+LOG.info("AUTO SIZE", self._calculated_w, self._calculated_h)
 end
 
 -- =========================================================
@@ -171,15 +174,8 @@ function Box:layout(parent_x, parent_y)
         end
         -- Recurse Layout
         if child.layout then
-            -- Temporarily override width/height with calculated layout size
-            -- so the child knows its constraints
-            local old_w, old_h = child.w, child.h
             child.w, child.h = child_w, child_h
-
             child:layout(cx, cy)
-
-            -- Restore props (optional, depends if you want persistent state)
-            --child.w, child.h = old_w, old_h
         end
 
         -- Advance Cursor
@@ -201,14 +197,20 @@ function Box:draw(state)
     end
 
     -- Debug rectangle
-    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h, self.padding, self.internal_margin.l, self.internal_margin.t)
-    LOG.info(self.x, self.y, self.w, self.h, self.padding, self.internal_margin.l, self.internal_margin.t)
+    LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
+    LOG.info(self.x, self.y, self.w, self.h)
     rrect(
             self.x+self.padding+self.internal_margin.l,
             self.y+self.padding+self.internal_margin.t,
             self.w - 2*self.padding,
             self.h - 2*self.padding,
             0, 14)
+    rrect(
+            self.x+self.padding+self.internal_margin.l,
+            self.y+self.padding+self.internal_margin.t,
+            self._calculated_w - 2*self.padding,
+            self._calculated_h - 2*self.padding,
+            0, 28)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
