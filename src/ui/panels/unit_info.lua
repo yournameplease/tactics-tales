@@ -11,6 +11,7 @@ function UnitInfo.new(props)
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
+    props.auto_height = props.auto_height or true
 
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
@@ -45,7 +46,7 @@ function UnitInfo.new(props)
     -- ---------------------------------------------------------
     -- Fills remaining width (flex_grow=1), stacks vertically (dir="col")
     local info_col = self:add(Box.new({
-        flex_grow = 1,
+        auto_height = 1,
         dir = "col",
         gap = 2
     }))
