@@ -11,12 +11,12 @@ local function get_preview_text(state)
     local preview = state.combat_calculator.preview_combat(attacker, defender).steps
 
     local out = {
-        attacker.name .."->".. defender.name,
+        attacker.name .." -> ".. defender.name,
         "Hit: "..preview[1].hit.."%",
         "Dmg: "..preview[1].dmg,
     }
     if preview[2] ~= nil then
-        add(out, attacker.name .."<-".. defender.name)
+        add(out, attacker.name .." <- ".. defender.name)
         add(out, "Hit: "..preview[2].hit.."%")
         add(out, "Dmg: "..preview[2].dmg)
     else

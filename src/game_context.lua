@@ -46,8 +46,8 @@ function GameContext:enrich()
         end
     end
 
-    if self.menu_manager.acting_unit ~= nil then
-        self.acting_unit_id = self.menu_manager.acting_unit.unit_id
+    if self.menu_manager.menu_ctx.acting_unit ~= nil then
+        self.acting_unit_id = self.menu_manager.menu_ctx.acting_unit.unit_id
     end
 
     if self.menu_manager.menu_state.menu_step == "SELECT_TARGET" then

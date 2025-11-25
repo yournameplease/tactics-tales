@@ -202,7 +202,6 @@ end
 function CharacterManager.generate_character()
     local character = {
         id = id_counter:get_id(),
-        name = "Bob",
         appearance = generate_appearance(),
         s = 264,
         stats = {
@@ -215,6 +214,7 @@ function CharacterManager.generate_character()
         },
         weapon = choose_random_from_table(WEAPON_DATA)
     }
+    character.name = character.appearance.sex == 0 and "Bob" or "Alice",
 
     setmetatable(character, { __index = Character })
 

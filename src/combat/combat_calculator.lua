@@ -73,7 +73,7 @@ function Calculator.preview_combat(attacker, defender)
 
     -- TODO: Lazy impl.  This won't work if ranges are more than fixed range
     -- may want some kind of "virtual unit" class
-    if not (attacker.min_range > defender.max_range and attacker.max_range < defender.min_range) then
+    if not (attacker.weapon.min_range > defender.weapon.max_range or attacker.weapon.max_range < defender.weapon.min_range) then
     --if can_attack(defender, attacker) then
         local step2 = {
             attacker = defender,
