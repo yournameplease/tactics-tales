@@ -14,7 +14,7 @@ function UnitInfo.new(props)
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
 
-    self:add(PortraitBox.new())
+    self:add(PortraitBox.new(function(state) return state:get_selected_unit()  end))
 
     local info_col = self:add(Box.new({
         auto_height = 1,

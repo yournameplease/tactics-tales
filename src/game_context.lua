@@ -19,7 +19,7 @@ function GameContext.new(
         layout = "TACTICS",
 
         selected_unit_id = 1,
-        acting_unit_id = nil,
+        acting_unit_id = 1,
     }
     setmetatable(context, { __index = GameContext })
     return context
@@ -27,6 +27,10 @@ end
 
 function GameContext:get_selected_unit()
     return self.tactics:get_unit_by_id(self.selected_unit_id)
+end
+
+function GameContext:get_acting_unit()
+    return self.tactics:get_unit_by_id(self.acting_unit_id)
 end
 
 function GameContext:enrich()

@@ -1,5 +1,6 @@
 local Box = include "src/ui/box.lua"
 local UnitInfo = include "src/ui/panels/unit_info.lua"
+local CombatPreview = include "src/ui/panels/combat_preview.lua"
 local TacticsMap = include "src/ui/panels/tactics_map.lua"
 local TextNode = include "src/ui/panels/text_node.lua"
 local EventMessageLog = include "src/ui/panels/event_message_log.lua"
@@ -21,8 +22,6 @@ function UIManager:init()
     -- 1. Create the BATTLE layout tree
     self.layouts = {}
 
-    local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
-
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
     battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(state)
@@ -30,19 +29,33 @@ function UIManager:init()
         return { "Turn " .. turn }
     end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function() return { "Defeat all" }  end, justify = "center" }))
-    --battle_summary:add(TextNode.new(function() return "hello3"  end, {flex_grow = 1}))
+    do
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
-    -- Left Sidebar
-    local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
-    left:add(battle_summary)
-    left:add(UnitInfo.new({ padding = 0 }))
-    left:add(EventMessageLog.new({ flex_grow = 1}))
-    --left:add(Box.new({ flex_grow = 1, padding = 0 }))
+        -- Left Sidebar
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+        left:add(battle_summary)
+        left:add(UnitInfo.new({ padding = 0 }))
+        left:add(EventMessageLog.new({ flex_grow = 1}))
 
-    battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
-    self.layouts.BATTLE = battle_root
+        self.layouts.TACTICS = battle_root
+    end
+    do
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
+        -- Left Sidebar
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+        left:add(battle_summary)
+        left:add(CombatPreview.new({ padding = 0 }))
+        left:add(EventMessageLog.new({ flex_grow = 1}))
+        --left:add(Box.new({ flex_grow = 1, padding = 0 }))
+
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
+
+        self.layouts.COMBAT_PREVIEW = battle_root
+    end
 
     -- Validate all layouts
     for i, v in pairs(self.layouts) do
@@ -50,10 +63,12 @@ function UIManager:init()
     end
 
     -- Set initial
-    self.current_layout = self.layouts.BATTLE
+    self.current_layout = self.layouts.TACTICS
 end
 
 function UIManager:draw(global_state)
+    self.current_layout = self.layouts[global_state.layout]
+
     -- Recalculate size and positions
     self.current_layout:measure()
     self.current_layout:layout()

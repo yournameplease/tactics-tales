@@ -14,10 +14,11 @@ function UnitInfo.new(props)
     local self = Box.new(props)
     setmetatable(self, { __index = UnitInfo })
 
-    local attacker_portrait = PortraitBox.new(function(state) return state.menu_state.get_acting_unit  end)
-    local defender_portrait = PortraitBox.new(function(state) return state.menu_state.get_selected_unit  end)
+    local attacker_portrait = PortraitBox.new(function(state) return state:get_acting_unit()  end)
+    local defender_portrait = PortraitBox.new(function(state) return state:get_selected_unit()  end)
 
     local preview_text = TextNode.new({
+        flex_grow = 1,
         rows = 6,
         func = function(state)
             local u = state:get_selected_unit()
