@@ -20,7 +20,7 @@ LOG.debug(#all_tile_costs)
 
     for e in all(enemies) do
         local tiles_in_range =
-            find_tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
+            battle_manager.tactics_engine:find_tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
         for x,row in pairs(tiles_in_range) do
             for y, reachable in pairs(row) do
                 if reachable then
@@ -43,7 +43,7 @@ LOG.debug(#all_tile_costs)
 
         local x = choice.x
         local y = choice.y
-        local path = get_path_to_tile(all_tile_costs, x, y)
+        local path = tile_manager:get_path_to_tile(all_tile_costs, x, y)
 
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
@@ -69,7 +69,7 @@ LOG.debug(#all_tile_costs)
             y = all_tile_costs[x][y].prev.y
         end
 
-        local path = get_path_to_tile(all_tile_costs, x, y)
+        local path = tile_manager:get_path_to_tile(all_tile_costs, x, y)
 
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
@@ -88,7 +88,7 @@ function handle_enemy_turn(tactics_engine)
 
         for enemy in all(enemies) do
             compute_enemy_ai(enemy, tactics_engine)
-            while (Battle:is_blocked()) do
+            while tactics_engine:is_blocked() do
                 yield()
             end
         end
