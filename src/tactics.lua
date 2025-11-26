@@ -29,16 +29,18 @@ local SIDE_ENEMY = 1
 Battle = {}
 Battle.__index = Battle
 
-function Battle.new(battle_state)
+function Battle.new(battle_state, tile_manager)
     local self = setmetatable({}, Battle)
     self.battle_is_blocked = false
     self.battle_state = battle_state
+    self.tile_manager = tile_manager
     BUS.on("MOVE_AND_WAIT", function(ctx)
         self:handle_move_unit(ctx)
     end)
     BUS.on("MOVE_AND_ATTACK", function(ctx)
         self:handle_move_and_attack(ctx)
     end)
+    LOG.debug("battle new", #self.battle_state.units_by_id)
     return self
 end
 
@@ -113,7 +115,7 @@ end
 -- legal tile getters
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
-function tiles_with_distance_from_unit_attacks(ctx)
+function Battle:tiles_with_distance_from_unit_attacks(ctx)
     local unit = self:get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
@@ -121,7 +123,7 @@ function tiles_with_distance_from_unit_attacks(ctx)
     local destination = ctx["destination"]
     local dest_x = destination.x
     local dest_y = destination.y
-    local tiles_in_distance =  find_tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
+    local tiles_in_distance =  self:find_tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
 
     local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -141,7 +143,7 @@ function tiles_with_distance_from_unit_attacks(ctx)
 end
 
 -- @return  { [x][y] = bool }
-function find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
+function Battle:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance
 
     local reachable = {}
@@ -180,7 +182,7 @@ function Battle:tiles_in_movement_and_attack_range(ctx)
     local min_range = unit.weapon.min_range
     local max_range = unit.weapon.max_range
 
-    local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement, self.battle_state)
+    local reachable_tiles = self.tile_manager:find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
 
     local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -193,7 +195,7 @@ function Battle:tiles_in_movement_and_attack_range(ctx)
                 tile.reachable = true
                 tile.valid_selection = true
                 tiles:set(x, y, tile)
-                local tiles_in_attack_range = find_tiles_with_distance_from_tile(x, y, min_range, max_range)
+                local tiles_in_attack_range = self:find_tiles_with_distance_from_tile(x, y, min_range, max_range)
 
                 for ax, ar in pairs(tiles_in_attack_range) do
                     for ay, can_attack  in pairs(ar) do

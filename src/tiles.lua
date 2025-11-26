@@ -38,7 +38,7 @@ local TERRAIN_DATA = {
         dodge = 0
     },
     [6] = {
-        movement_cost = 6,
+        movement_cost = 5,
         dodge = 0
     },
     [7] = {
@@ -47,20 +47,28 @@ local TERRAIN_DATA = {
     }
 }
 
-local Tiles = {}
+local TileManager = {}
+TileManager.__index = TileManager
 
-function Tiles.get_terrain()
-    local tile = mget(x,y)
+function TileManager.new(map_data, battle_state)
+    self = setmetatable({}, TileManager)
+
+    self.map_data = map_data
+    self.battle_state = battle_state
+
+    return self
+end
+
+function TileManager:get_terrain(x, y)
+    local tile = mget(self.map_data.map_userdata[3], x,y)
     local flags = fget(tile)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
 end
 
 -- cost to move onto x,y from any neighbor
-function movement_cost(x, y, side, battle_state)
-    -- TODO: preload layers
-
-    local ground = fetch("map/0.map")[2].bmp
+function TileManager:movement_cost(x, y, side)
+    local ground = self.map_data.map_userdata[3].bmp
     if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
         return 999
     end
@@ -68,7 +76,7 @@ function movement_cost(x, y, side, battle_state)
     local tile = ground:get(x,y)
     if tile == nil then return 999 end
 
-    local unit = battle_state:get_unit_at_coordinates(x, y)
+    local unit = self.battle_state:get_unit_at_coordinates(x, y)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -89,7 +97,7 @@ local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-local function _dijkstra_traversal(start_x, start_y, side, max_cost, battle_state)
+function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
     -- The output map containing cost and parent info for every visited node
     local visited_info = {}
 
@@ -144,7 +152,7 @@ local function _dijkstra_traversal(start_x, start_y, side, max_cost, battle_stat
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = movement_cost(vx, vy, side, battle_state)
+                local move_cost = self:movement_cost(vx, vy, side)
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
                 if move_cost < 999 then
@@ -175,13 +183,13 @@ end
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function calculate_all_tile_costs(start_x, start_y, side, max_limit, battle_state)
+function TileManager:calculate_all_tile_costs(start_x, start_y, side, max_limit)
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, side, limit, battle_state)
+    return self:_dijkstra_traversal(start_x, start_y, side, limit)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
-function get_path_to_tile(all_tile_costs, x, y)
+function TileManager:get_path_to_tile(all_tile_costs, x, y) -- could be static with current signature
     assert(all_tile_costs[x][y] ~= nil)
     local path = { { x = x, y = y} }
     while all_tile_costs[x][y].prev ~= nil do
@@ -195,9 +203,9 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function find_reachable_tiles(start_x, start_y, side, total_cost, battle_state)
+function TileManager:find_reachable_tiles(start_x, start_y, side, total_cost)
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(start_x, start_y, side, total_cost, battle_state)
+    local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable = {}
@@ -214,4 +222,4 @@ function find_reachable_tiles(start_x, start_y, side, total_cost, battle_state)
     return reachable
 end
 
-return Tiles
+return TileManager

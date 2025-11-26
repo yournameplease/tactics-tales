@@ -42,7 +42,7 @@ function MapManager:_load_static(definition)
         enemy_spawners = {},
     }
 
-    for x = 1, metatiles_layer:height()-1 do
+    for x = 0, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local tile = metatiles_layer:get(x, y)
             if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then

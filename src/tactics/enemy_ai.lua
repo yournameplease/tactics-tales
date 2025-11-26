@@ -10,7 +10,8 @@ AI Mk 1:
 ]]
 
 function compute_enemy_ai(unit, tactics_engine)
-    local all_tile_costs = calculate_all_tile_costs(unit.x, unit.y, unit.side, 999, tactics_engine.battle_state)
+    local tile_manager = battle_manager.tile_manager -- TODO: global state
+    local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.x, unit.y, unit.side, 999, tactics_engine.battle_state)
 LOG.debug(#all_tile_costs)
     local enemies = tactics_engine.battle_state:get_units(unit_is_player)
 

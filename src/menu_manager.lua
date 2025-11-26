@@ -19,15 +19,18 @@ local MENU_DATA = {
             ["SELECT_UNIT"] = {
                 kind = "CURSOR_GRID",
                 store_key = "acting_unit",
-                validator = grid_selection_is_available_player,
+                validator = function (s, t, ctx)
+                    LOG.debug("in validator", #t.battle_state.units_by_id)
+
+                    return t:grid_selection_is_available_player(s, ctx) end,
                 next_state = "SELECT_DESTINATION"
             },
             ["SELECT_DESTINATION"] = {
                 kind = "CURSOR_GRID",
                 store_key = "destination",
-                validator = grid_selection_is_empty_or_acting_unit,
+                validator = function (s, t, ctx) return t:grid_selection_is_empty_or_acting_unit(s, ctx) end,
                 next_state = "SELECT_ACTION",
-                get_legal_tiles = tiles_in_movement_and_attack_range
+                get_legal_tiles = function (t, ctx) return t:tiles_in_movement_and_attack_range(ctx) end
             },
             ["SELECT_ACTION"] = {
                 kind = "CURSOR_VERTICAL_LIST",
@@ -52,9 +55,9 @@ local MENU_DATA = {
             ["SELECT_TARGET"] = {
                 kind = "CURSOR_GRID",
                 store_key = "target",
-                validator = validate_tile_is_in_unit_attack_range,
+                validator = function (s, t, ctx) return t:validate_tile_is_in_unit_attack_range(s, ctx) end,
                 finish_command = { kind = "MOVE_AND_ATTACK" },
-                get_legal_tiles = tiles_with_distance_from_unit_attacks
+                get_legal_tiles = function (t, ctx) return t:tiles_with_distance_from_unit_attacks(ctx) end
             },
         }
     }
@@ -80,7 +83,10 @@ function handle_menu_select(battle_state)
     local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
 
     if step_data.validator ~= nil then
-        local validation = step_data.validator(MenuManager.menu_selection, MenuManager.menu_ctx)
+    LOG.debug("validating..",#self.battle_state.units_by_id)
+    LOG.debug(#battle_manager.battle_state.units_by_id)
+    LOG.debug(#battle_manager.tactics_engine.battle_state.units_by_id)
+        local validation = step_data.validator(MenuManager.menu_selection, battle_manager.tactics_engine, MenuManager.menu_ctx)
         if not validation then return end
     end
 
@@ -98,8 +104,8 @@ function handle_menu_select(battle_state)
         if MenuManager.menu_state.menu_step == "SELECT_DESTINATION" then
             if MenuManager.menu_ctx.acting_unit ~= nil then
                 local acting_unit = battle_state:get_unit_by_id(MenuManager.menu_ctx.acting_unit.unit_id)
-                local costs = calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999, battle_state)
-                local path = get_path_to_tile(costs, MenuManager.menu_selection.x, MenuManager.menu_selection.y)
+                local costs = battle_manager.tile_manager:calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999) -- TODO: global battle_manager
+                local path = battle_manager.tile_manager:get_path_to_tile(costs, MenuManager.menu_selection.x, MenuManager.menu_selection.y)
                 MenuManager.menu_selection.path = path
             end
         end
@@ -136,7 +142,7 @@ function populate_menu_state(new_step, ctx)
         MenuManager.menu_state.options = nil
     end
     if new_step_data.get_legal_tiles ~= nil then
-        MenuManager.menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
+        MenuManager.menu_state.legal_tiles = new_step_data.get_legal_tiles(battle_manager.tactics_engine, ctx)
     else
         MenuManager.menu_state.legal_tiles = nil
     end

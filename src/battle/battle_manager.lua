@@ -2,6 +2,7 @@ include "src/battle/battle_data.lua"
 
 local BattleState = include "src/battle/battle_state.lua"
 local BattleUnit = include "src/tactics/battle_unit.lua"
+local TileManager = include "src/tiles.lua"
 local Tactics = include "src/tactics.lua"
 
 local SIDE_PLAYER = 0
@@ -23,16 +24,17 @@ function BattleManager.new(battle_id)
     
     self.battle_state = BattleState.new(self.map_data.width, self.map_data.height)
 
+    self.tile_manager = TileManager.new(self.map_data, self.battle_state)
+
     MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
 
     self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
     self:_spawn_players(self.map_data.metadata.player_spawners)
     -- 5. return Tactics.new(map_data, placed_party, enemy_units, battle_def.victory)
 
-    self.tactics_engine = Tactics.new(self.battle_state)
+    self.tactics_engine = Tactics.new(self.battle_state, self.tile_manager)
 
     LOG.debug(#self.battle_state.units_by_id)
-    
     return self
 end
 
@@ -54,7 +56,7 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
 end
 
 function BattleManager:_spawn_players(player_spawners)
-    for spawn_point in all(player_spawners) do
+    for id, spawn_point in pairs(player_spawners) do
         -- TODO: use existing players
         local character = CHARACTER_MANAGER.generate_character()
         self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_PLAYER)

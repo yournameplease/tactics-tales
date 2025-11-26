@@ -3,7 +3,7 @@ local Calculator = {}
 function Calculator.get_hit_chance(attacker, defender)
     local accuracy = attacker.weapon.accuracy
 
-    local terrain = TILE_MANAGER.get_terrain(defender.x, defender.y)
+    local terrain = battle_manager.tile_manager:get_terrain(defender.x, defender.y)
     local avoid = (terrain.dodge or 0)
 
     return mid(0, accuracy - avoid, 100)
