@@ -14,7 +14,7 @@ end
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     LOG.info("Begin player turn!")
     phase = PHASE.PLAYER
-    TACTICS:refresh_units()
+    battle_manager.tactics_engine:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()

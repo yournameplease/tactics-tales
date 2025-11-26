@@ -46,6 +46,6 @@ function do_combat(attacker, defender, battle_state)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)
-        apply_combat_step(combat_step)
+        apply_combat_step(combat_step, battle_state)
     end
 end

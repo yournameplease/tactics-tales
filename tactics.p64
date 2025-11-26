@@ -359,7 +359,6 @@ function BattleManager.new(battle_id)
     self.tactics_engine = Tactics.new(self.battle_state, self.tile_manager)
 
     LOG.debug(#self.battle_state.units_by_id)
-    
     return self
 end
 
@@ -381,7 +380,7 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
 end
 
 function BattleManager:_spawn_players(player_spawners)
-    for spawn_point in all(player_spawners) do
+    for id, spawn_point in pairs(player_spawners) do
         -- TODO: use existing players
         local character = CHARACTER_MANAGER.generate_character()
         self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_PLAYER)
@@ -1027,7 +1026,7 @@ function do_combat(attacker, defender, battle_state)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)
-        apply_combat_step(combat_step)
+        apply_combat_step(combat_step, battle_state)
     end
 end
 
@@ -1037,7 +1036,7 @@ local Calculator = {}
 function Calculator.get_hit_chance(attacker, defender)
     local accuracy = attacker.weapon.accuracy
 
-    local terrain = TILE_MANAGER.get_terrain(defender.x, defender.y)
+    local terrain = battle_manager.tile_manager:get_terrain(defender.x, defender.y)
     local avoid = (terrain.dodge or 0)
 
     return mid(0, accuracy - avoid, 100)
@@ -1122,6 +1121,7 @@ function Calculator.preview_combat(attacker, defender)
 end
 
 return Calculator
+
 :: src/config.lua
 -- constant configs.  eventually, may move back into relevant files.
 
@@ -1447,7 +1447,7 @@ function MapManager:_load_static(definition)
         enemy_spawners = {},
     }
 
-    for x = 1, metatiles_layer:height()-1 do
+    for x = 0, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local tile = metatiles_layer:get(x, y)
             if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
@@ -1492,15 +1492,18 @@ local MENU_DATA = {
             ["SELECT_UNIT"] = {
                 kind = "CURSOR_GRID",
                 store_key = "acting_unit",
-                validator = grid_selection_is_available_player,
+                validator = function (s, t, ctx)
+                    LOG.debug("in validator", #t.battle_state.units_by_id)
+
+                    return t:grid_selection_is_available_player(s, ctx) end,
                 next_state = "SELECT_DESTINATION"
             },
             ["SELECT_DESTINATION"] = {
                 kind = "CURSOR_GRID",
                 store_key = "destination",
-                validator = grid_selection_is_empty_or_acting_unit,
+                validator = function (s, t, ctx) return t:grid_selection_is_empty_or_acting_unit(s, ctx) end,
                 next_state = "SELECT_ACTION",
-                get_legal_tiles = tiles_in_movement_and_attack_range
+                get_legal_tiles = function (t, ctx) return t:tiles_in_movement_and_attack_range(ctx) end
             },
             ["SELECT_ACTION"] = {
                 kind = "CURSOR_VERTICAL_LIST",
@@ -1525,9 +1528,9 @@ local MENU_DATA = {
             ["SELECT_TARGET"] = {
                 kind = "CURSOR_GRID",
                 store_key = "target",
-                validator = validate_tile_is_in_unit_attack_range,
+                validator = function (s, t, ctx) return t:validate_tile_is_in_unit_attack_range(s, ctx) end,
                 finish_command = { kind = "MOVE_AND_ATTACK" },
-                get_legal_tiles = tiles_with_distance_from_unit_attacks
+                get_legal_tiles = function (t, ctx) return t:tiles_with_distance_from_unit_attacks(ctx) end
             },
         }
     }
@@ -1553,7 +1556,10 @@ function handle_menu_select(battle_state)
     local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
 
     if step_data.validator ~= nil then
-        local validation = step_data.validator(MenuManager.menu_selection, MenuManager.menu_ctx)
+    LOG.debug("validating..",#self.battle_state.units_by_id)
+    LOG.debug(#battle_manager.battle_state.units_by_id)
+    LOG.debug(#battle_manager.tactics_engine.battle_state.units_by_id)
+        local validation = step_data.validator(MenuManager.menu_selection, battle_manager.tactics_engine, MenuManager.menu_ctx)
         if not validation then return end
     end
 
@@ -1609,7 +1615,7 @@ function populate_menu_state(new_step, ctx)
         MenuManager.menu_state.options = nil
     end
     if new_step_data.get_legal_tiles ~= nil then
-        MenuManager.menu_state.legal_tiles = new_step_data.get_legal_tiles(ctx)
+        MenuManager.menu_state.legal_tiles = new_step_data.get_legal_tiles(battle_manager.tactics_engine, ctx)
     else
         MenuManager.menu_state.legal_tiles = nil
     end
@@ -1746,16 +1752,18 @@ local SIDE_ENEMY = 1
 Battle = {}
 Battle.__index = Battle
 
-function Battle.new(battle_state)
+function Battle.new(battle_state, tile_manager)
     local self = setmetatable({}, Battle)
     self.battle_is_blocked = false
     self.battle_state = battle_state
+    self.tile_manager = tile_manager
     BUS.on("MOVE_AND_WAIT", function(ctx)
         self:handle_move_unit(ctx)
     end)
     BUS.on("MOVE_AND_ATTACK", function(ctx)
         self:handle_move_and_attack(ctx)
     end)
+    LOG.debug("battle new", #self.battle_state.units_by_id)
     return self
 end
 
@@ -1830,7 +1838,7 @@ end
 -- legal tile getters
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
-function tiles_with_distance_from_unit_attacks(ctx)
+function Battle:tiles_with_distance_from_unit_attacks(ctx)
     local unit = self:get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
@@ -1838,7 +1846,7 @@ function tiles_with_distance_from_unit_attacks(ctx)
     local destination = ctx["destination"]
     local dest_x = destination.x
     local dest_y = destination.y
-    local tiles_in_distance =  find_tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
+    local tiles_in_distance =  self:find_tiles_with_distance_from_tile(dest_x, dest_y, min_distance, max_distance)
 
     local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -1858,7 +1866,7 @@ function tiles_with_distance_from_unit_attacks(ctx)
 end
 
 -- @return  { [x][y] = bool }
-function find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
+function Battle:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance
 
     local reachable = {}
@@ -1897,7 +1905,7 @@ function Battle:tiles_in_movement_and_attack_range(ctx)
     local min_range = unit.weapon.min_range
     local max_range = unit.weapon.max_range
 
-    local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement, self.battle_state)
+    local reachable_tiles = self.tile_manager:find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
 
     local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -1910,7 +1918,7 @@ function Battle:tiles_in_movement_and_attack_range(ctx)
                 tile.reachable = true
                 tile.valid_selection = true
                 tiles:set(x, y, tile)
-                local tiles_in_attack_range = find_tiles_with_distance_from_tile(x, y, min_range, max_range)
+                local tiles_in_attack_range = self:find_tiles_with_distance_from_tile(x, y, min_range, max_range)
 
                 for ax, ar in pairs(tiles_in_attack_range) do
                     for ay, can_attack  in pairs(ar) do
@@ -2112,7 +2120,7 @@ LOG.debug(#all_tile_costs)
 
     for e in all(enemies) do
         local tiles_in_range =
-            find_tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
+            battle_manager.tactics_engine:find_tiles_with_distance_from_tile(e.x, e.y, unit.weapon.min_range, unit.weapon.max_range)
         for x,row in pairs(tiles_in_range) do
             for y, reachable in pairs(row) do
                 if reachable then
@@ -2135,7 +2143,7 @@ LOG.debug(#all_tile_costs)
 
         local x = choice.x
         local y = choice.y
-        local path = get_path_to_tile(all_tile_costs, x, y)
+        local path = tile_manager:get_path_to_tile(all_tile_costs, x, y)
 
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
@@ -2161,7 +2169,7 @@ LOG.debug(#all_tile_costs)
             y = all_tile_costs[x][y].prev.y
         end
 
-        local path = get_path_to_tile(all_tile_costs, x, y)
+        local path = tile_manager:get_path_to_tile(all_tile_costs, x, y)
 
         local action_ctx = {
             acting_unit = { unit_id = unit.id },
@@ -2180,7 +2188,7 @@ function handle_enemy_turn(tactics_engine)
 
         for enemy in all(enemies) do
             compute_enemy_ai(enemy, tactics_engine)
-            while (Battle:is_blocked()) do
+            while tactics_engine:is_blocked() do
                 yield()
             end
         end
@@ -2254,7 +2262,7 @@ function TileManager.new(map_data, battle_state)
 end
 
 function TileManager:get_terrain(x, y)
-    local tile = mget(self.map_data[3], x,y)
+    local tile = mget(self.map_data.map_userdata[3], x,y)
     local flags = fget(tile)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
@@ -2262,7 +2270,7 @@ end
 
 -- cost to move onto x,y from any neighbor
 function TileManager:movement_cost(x, y, side)
-    local ground = self.map_data[3].bmp
+    local ground = self.map_data.map_userdata[3].bmp
     if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
         return 999
     end
@@ -2270,7 +2278,7 @@ function TileManager:movement_cost(x, y, side)
     local tile = ground:get(x,y)
     if tile == nil then return 999 end
 
-    local unit = battle_state:get_unit_at_coordinates(x, y)
+    local unit = self.battle_state:get_unit_at_coordinates(x, y)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -2346,7 +2354,7 @@ function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = movement_cost(vx, vy, side, battle_state)
+                local move_cost = self:movement_cost(vx, vy, side)
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
                 if move_cost < 999 then
@@ -2379,7 +2387,7 @@ end
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
 function TileManager:calculate_all_tile_costs(start_x, start_y, side, max_limit)
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, side, limit)
+    return self:_dijkstra_traversal(start_x, start_y, side, limit)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
@@ -2435,7 +2443,7 @@ end
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     LOG.info("Begin player turn!")
     phase = PHASE.PLAYER
-    TACTICS:refresh_units()
+    battle_manager.tactics_engine:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()
@@ -3654,9 +3662,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 19:35:15",runtime=24,workspaces={{location="gfx/0.gfx",workspace_index=1},{location="gfx/1_units.gfx",workspace_index=1},{location="gfx/2_tiles.gfx",workspace_index=1},{location="gfx/3_walls.gfx",workspace_index=1},{location="gfx/4_map_util.gfx",workspace_index=1},{location="gfx/portrait.gfx",workspace_index=1},{location="map/0.map",workspace_index=2},{location="map/castle.map",workspace_index=2},{location="map/bandit_village.map",workspace_index=2},{location="sfx/0.sfx",workspace_index=3},{location="src/tiles.lua#71,4",workspace_index=6},{location="src/menu_manager.lua#37,2",workspace_index=6}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:49:33",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:49:33"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -3810,7 +3818,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:49:33"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3836,7 +3844,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:49:33"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3844,23 +3852,23 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/battle/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/map/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-26 19:35:11",modified="2025-11-26 19:35:15"]]
+--[[pod,created="2025-11-26 22:49:00",modified="2025-11-26 22:49:33"]]
 :: [eoc]
