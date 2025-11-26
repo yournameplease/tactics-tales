@@ -3662,9 +3662,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:57:23",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 23:27:58",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 23:27:58"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -3758,18 +3758,18 @@ K00PDAEQPw8VBwwBaQgiAk8fHx0biQABExuJABEbiQAVG3IRDx4CRx8cEgEfDzQDqi-w8DIA----
 ----------8FUD0xMX19
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
-MS0yNiAwNToyNjo0OCIscmV2aXNpb249MjhdXWx6NABZAgAAqjQAAPARe1swXT17Ym1wPXB4dQBD
+MS0yNiAyMzoyNDowNiIscmV2aXNpb249MjldXWx6NABfAgAAqjQAAPARe1swXT17Ym1wPXB4dQBD
 IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sQQA-8-8x
 MgAcL-8bMwAe8wb8HV8QPC48Llw_-HJOPD48Lkw_-EZEAB8xRQAVghT-FAA0DvQDAwAf-gwADx8B
 pgAccPEdXDEsMSyrAPQFMS5RPvFeTDE8MSxOPD4xLkE_8TKwAB8yTwAU8Aj-D0NKbioeKk5qLhr_
 QBouWj4qPipeOg0AA0sAHzRKABSx_AUfFTgeGB44HigGAFEYHkg_WAIAE0gQABEoBgBfOB74Gh4p
 ABQUBc8AD4QAFFMPFTRPFAUALyUEBgABIE8VBAAvnxQqABMfXyYAEg9QABcuTxXuAQ-RABhADxQk
 DggAgw4kDg0lBA4tBgCTTU5Nng00Tg00GAAKHgBwDSUETk1OXSAAFk4eAA9CAB8fTbsAHD-w-zEy
-AE8zGQcgAgA-ECcAAgAKFQYCAB8AAgAJD0YAKQ_9AB3-EnofEfAAHh8T0B49sB5dkB59cB6dUB69
-MB7dEB79AB79AlEAHX9U-xEE-xO4NwAdcGgfEfACHxOOAP8aPxMfEdBfEx8RsH8THxGQnxMfEXC-
-Ex8RUN8THxEw-xMAHxEQ-xMCHxENAh8PMgDkPwf2AwMAFy-3BF4AHCD3BVQHDwMAFR8HXgAcBJcA
-D7sAEh8FfQEfDzIA---------75fEBAE8PAxAP--------------------------------------
----------7xQbT04fX0=
+AE8zGQcgAgA-ECcAAgAKFQYCAB8AAgAJD0YAKQ_tAhz-E-B6HxHwAB4fE9AePbAeXZAefXAenVAe
+vTAe3RAe-QAe-QJRAB1-VP8RBP8TuDcAHXBoHxHwAh8TjgD_Gj8THxHQXxMfEbB-Ex8RkJ8THxFw
+vxMfEVDfEx8RMP8TAB8REP8TAh8RZAAPDQIVDzIA3D8H9gMDABcv9wRYARwg9wVUBw8DABUfB7wA
+HASXAA_7ABIOrAUPfQEWDzIA---------7ZfEBAE8PAxAP------------------------------
+-----------------7xQbT04fX0=
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNSAwNDo1ODo0NyIscmV2aXNpb249MjZdXWx6NAARAwAAPDgAAPARe1swXT17Ym1wPXB4dQBD
@@ -3818,7 +3818,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 23:27:58"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3830,13 +3830,14 @@ Bj8AAQsSAAEGACkCBg8ADwYABR4DUQAPJAAC0QMCCAYCAQQCAAYCAQN1AEEFAggDEgAQAwwAUwEH
 AgcFGAAAFQAxBwIBDwARCQ8AEQ0GAD8EBQKRAgFfZmxvb3KRAhhQMC41fX0=
 :: map/bandit_village.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI2IDA1OjE2OjMxIixtb2RpZmllZD0iMjAyNS0x
-MS0yNiAxOTozNToxNSIscmV2aXNpb249MTBdXWx6NAA7AQAA8AMAAPERe3tibXA9cHh1AEyAEBAA
+MS0yNiAyMzoyNjo1MCIscmV2aXNpb249MTJdXWx6NACfAQAAXwYAAPERe3tibXA9cHh1AEyAEBAA
 EAAAAAwEAgAAABEEDAAAABAGABMNEgBxMAAAAREEFwwA8QdNAAAACQQAAAAACAQTAAAACgQACwQE
 GwDxGhAAACxoaWRkZW49ZmFsc2UsbmFtZT0ibWV0YXRpbGVzIixwYW5feD0wCABAeT0wLBcAUl9o
-PTE2CgAQdwoAinpvb209MX0soQAv-wBdAANPd2FsbFkAKmsAAQIAAgIGAC8BBBUAAQ0SACEAAioA
-DhUADRIACVQAfw0CAA4CAA9UABB-FQIAFgIAF1QAEA6oAAdmAAlUAAstABYMZgAvAQxRAAoKBgAP
-UQACD6UAHg9UABcFzwALVAAH5wADVAAFNQELVAAH5wADEgAKBgAvAQSoADEPVAA6PwABAvUCAV9m
-bG9vcvUCFlBtPTF9fQ==
+PTE2CgAQdwoAinpvb209MX0soQBrAAEDAAIDBgA-AQAAFQAADRIAIQACKgAOFQANEgAIVAAA_wAP
+TgANACQAD0gADQ6cAAJaAAhIAA6WAAJaAA9IAAsIEgAPTgALCBIAD1QANQ6iAAgyAQ7kAAIwAA_Q
+AEcfAFQAOj8AAQPMAgFPd2FsbMgCLEsCAAICBgAvAQQVAAENEgAhAAIqAA4VAA0SAAlUAH8NAgAO
+AgAPVAAQfxUCABYCABdUABAOqAAHZgAJVAALLQAWDGYALwEMUQAKCgYAD1EAAg_lAB4PVAAXBc8A
+C1QAB_cAA1QABTUBC1QAB_cAAxIACgYALwEEqAAxD1QAOj8AAQL1AgFfZmxvb3L1AhZQbT0xfX0=
 :: map/castle.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI0IDA1OjA5OjU2Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjoxNCIscmV2aXNpb249Nl1dbHo0AJEAAACLAwAA8Sx7e2JtcD1weHUATIAQEADC
@@ -3844,7 +3845,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-11-26 23:27:58"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3852,23 +3853,23 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/battle/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/map/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-26 22:57:14",modified="2025-11-26 22:57:23"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-11-26 23:27:58"]]
 :: [eoc]
