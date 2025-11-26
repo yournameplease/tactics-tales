@@ -37,7 +37,9 @@
 
 include "src/systems/tasks.lua"
 
+LOG = include "src/debug.lua"
 CONFIG = include "src/config.lua"
+
 BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
@@ -48,7 +50,8 @@ COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
 CONTEXT_MANAGER = include "src/game_context.lua"
-LOG = include "src/debug.lua"
+
+MAP_MANAGER = include "src/map/map_manager.lua"
 include "src/tactics/enemy_ai.lua"
 
 local context = {}

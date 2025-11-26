@@ -203,12 +203,9 @@ function CharacterManager.generate_character()
     local character = {
         id = id_counter:get_id(),
         appearance = generate_appearance(),
-        s = 264,
         stats = {
             hp_max = 5,
             damage = 5,
-            min_range = 2,
-            max_range = 3,
             movement = 5,
             def = 0
         },
