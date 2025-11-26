@@ -59,7 +59,7 @@ end
 -- step data helpers
 
 function Battle:get_unit_from_step(ctx, step)
-    return self:get_unit_by_id(ctx[step].unit_id)
+    return self.battle_state:get_unit_by_id(ctx[step].unit_id)
 end
 
 -- unit filters
@@ -83,7 +83,7 @@ end
 -- validators
 
 function Battle:validate_tile_is_in_unit_attack_range(selection, ctx)
-    local unit = get_unit_from_step(ctx, "acting_unit")
+    local unit = self:get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
     local destination = ctx["destination"]
@@ -101,7 +101,7 @@ function Battle:validate_tile_is_in_unit_attack_range(selection, ctx)
 end
 
 function Battle:any_target_in_range(ctx)
-    local unit = get_unit_from_step(ctx, "acting_unit")
+    local unit = self:get_unit_from_step(ctx, "acting_unit")
     local destination = ctx["destination"]
     local unit_x = destination.x
     local unit_y = destination.y
@@ -114,7 +114,7 @@ end
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
 function tiles_with_distance_from_unit_attacks(ctx)
-    local unit = get_unit_from_step(ctx, "acting_unit")
+    local unit = self:get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
 
@@ -232,7 +232,7 @@ end
 -- handlers
 
 function Battle:handle_move_unit(ctx)
-    local unit = get_unit_from_step(ctx, "acting_unit")
+    local unit = self:get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
     local path = ctx["destination"].path
@@ -254,11 +254,11 @@ function Battle:handle_move_unit(ctx)
 end
 
 function Battle:handle_move_and_attack(ctx)
-    local unit = get_unit_from_step(ctx, "acting_unit")
+    local unit = self:get_unit_from_step(ctx, "acting_unit")
     local x = ctx["destination"].x
     local y = ctx["destination"].y
     local path = ctx["destination"].path
-    local target = get_unit_from_step(ctx, "target")
+    local target = self:get_unit_from_step(ctx, "target")
 
     self.battle_is_blocked = true
     start_routine(function()
@@ -293,7 +293,7 @@ function Battle:update()
     local blocking_animation = false
     local all_players_acted = true
 
-    for unit in all(self.units) do
+    for unit in all(self.battle_state:get_units()) do
         unit:update_animation()
         if unit.animation_blocking then
             blocking_animation = true

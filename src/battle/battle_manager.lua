@@ -4,6 +4,9 @@ local BattleState = include "src/battle/battle_state.lua"
 local BattleUnit = include "src/tactics/battle_unit.lua"
 local Tactics = include "src/tactics.lua"
 
+local SIDE_PLAYER = 0
+local SIDE_ENEMY = 1
+
 BattleManager = {}
 BattleManager.__index = BattleManager
 
@@ -51,7 +54,7 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
 end
 
 function BattleManager:_spawn_players(player_spawners)
-    for spawn_point in all(player_spawners[i]) do
+    for spawn_point in all(player_spawners) do
         -- TODO: use existing players
         local character = CHARACTER_MANAGER.generate_character()
         self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_PLAYER)
