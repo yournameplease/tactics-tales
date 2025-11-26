@@ -75,9 +75,9 @@ function TacticsMap:draw(state)
 
     local drawn_unit_count = 0
     -- TODO: preload layers
-    local layers = fetch("map/0.map")
-    local layer_ground = layers[2].bmp
-    local layer_wall = layers[1].bmp
+    local layers = state.battle_manager.map_data.map_userdata
+    local layer_ground = layers[3].bmp
+    local layer_wall = layers[2].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
 
     local cursor_x, cursor_y = nil, nil
