@@ -34,7 +34,7 @@ local MENU_DATA = {
                 options_generator = function(ctx)
                     local options = {}
                     -- if target in range
-                    if any_target_in_range(ctx) then
+                    if battle_manager.tactics_engine:any_target_in_range(ctx) then -- TODO: global state
                         add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"
@@ -74,7 +74,7 @@ local update_cursor = {
     end,
 }
 
-function handle_menu_select()
+function handle_menu_select(battle_state)
     LOG.debug("Selecting "..MenuManager.menu_state.menu_id .. ":" .. MenuManager.menu_state.menu_step)
     local menu_data = MENU_DATA[MenuManager.menu_state.menu_id]
     local step_data = menu_data.steps[MenuManager.menu_state.menu_step]
@@ -97,14 +97,14 @@ function handle_menu_select()
         -- TODO: lazy impl.  keep track of cursor for the real path!
         if MenuManager.menu_state.menu_step == "SELECT_DESTINATION" then
             if MenuManager.menu_ctx.acting_unit ~= nil then
-                local acting_unit = Battle:get_unit_by_id(MenuManager.menu_ctx.acting_unit.unit_id)
-                local costs = calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999)
+                local acting_unit = battle_state:get_unit_by_id(MenuManager.menu_ctx.acting_unit.unit_id)
+                local costs = calculate_all_tile_costs(acting_unit.x, acting_unit.y, 0, 999, battle_state)
                 local path = get_path_to_tile(costs, MenuManager.menu_selection.x, MenuManager.menu_selection.y)
                 MenuManager.menu_selection.path = path
             end
         end
 
-        local selected_unit = Battle:get_unit_at_coordinates(MenuManager.menu_selection.x, MenuManager.menu_selection.y)
+        local selected_unit = battle_state:get_unit_at_coordinates(MenuManager.menu_selection.x, MenuManager.menu_selection.y)
         if selected_unit ~= nil then
             MenuManager.menu_selection.unit_id = selected_unit.id
         end
@@ -178,7 +178,7 @@ function MenuManager.update(joy)
     elseif joy.bp then
         handle_menu_back()
     elseif joy.ap then
-        handle_menu_select()
+        handle_menu_select(battle_manager.battle_state) -- TODO: global state
     else
         update_cursor[MenuManager.menu_state.kind](joy)
     end

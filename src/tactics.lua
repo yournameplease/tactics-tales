@@ -245,7 +245,7 @@ function Battle:handle_move_unit(ctx)
         end
         unit:end_animation()
 
-        self:move_unit(unit, x, y)
+        self.battle_state:move_unit(unit, x, y)
         unit.has_acted = true
 
         MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
@@ -268,7 +268,7 @@ function Battle:handle_move_and_attack(ctx)
         end
         unit:end_animation()
 
-        self:move_unit(unit, x, y)
+        self.battle_state:move_unit(unit, x, y)
         do_combat(unit, target, self.battle_state)
         unit.has_acted = true
 
