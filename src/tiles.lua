@@ -57,7 +57,7 @@ function Tiles.get_terrain()
 end
 
 -- cost to move onto x,y from any neighbor
-function movement_cost(x, y, side)
+function movement_cost(x, y, side, battle_state)
     -- TODO: preload layers
 
     local ground = fetch("map/0.map")[2].bmp
@@ -68,7 +68,7 @@ function movement_cost(x, y, side)
     local tile = ground:get(x,y)
     if tile == nil then return 999 end
 
-    local unit = Battle:get_unit_at_coordinates(x, y)
+    local unit = battle_state:get_unit_at_coordinates(x, y)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -89,7 +89,7 @@ local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-local function _dijkstra_traversal(start_x, start_y, side, max_cost)
+local function _dijkstra_traversal(start_x, start_y, side, max_cost, battle_state)
     -- The output map containing cost and parent info for every visited node
     local visited_info = {}
 
@@ -144,7 +144,7 @@ local function _dijkstra_traversal(start_x, start_y, side, max_cost)
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = movement_cost(vx, vy, side)
+                local move_cost = movement_cost(vx, vy, side, battle_state)
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
                 if move_cost < 999 then
@@ -175,9 +175,9 @@ end
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function calculate_all_tile_costs(start_x, start_y, side, max_limit)
+function calculate_all_tile_costs(start_x, start_y, side, max_limit, battle_state)
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, side, limit)
+    return _dijkstra_traversal(start_x, start_y, side, limit, battle_state)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
@@ -195,9 +195,9 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function find_reachable_tiles(start_x, start_y, side, total_cost)
+function find_reachable_tiles(start_x, start_y, side, total_cost, battle_state)
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(start_x, start_y, side, total_cost)
+    local full_map = _dijkstra_traversal(start_x, start_y, side, total_cost, battle_state)
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable = {}

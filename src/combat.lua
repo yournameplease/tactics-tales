@@ -1,4 +1,4 @@
-function is_in_combat_range(attacker, defender)
+function is_in_combat_range(attacker, defender, battle_state)
     local a_x = attacker.x
     local a_y = attacker.y
     local d_x = defender.x
@@ -10,7 +10,7 @@ function is_in_combat_range(attacker, defender)
     return dist >= min_range and dist <= max_range
 end
 
-function apply_combat_step(step)
+function apply_combat_step(step, battle_state)
     local attacker = step.attacker
     local defender = step.defender
 
@@ -37,12 +37,12 @@ function apply_combat_step(step)
     end
 
     if not defender:is_alive() then
-        Battle:kill_unit(defender)
+        battle_state:kill_unit(defender)
     end
 end
 
-function do_combat(attacker, defender)
-    local combat_result = COMBAT_CALCULATOR.compute_combat(attacker, defender)
+function do_combat(attacker, defender, battle_state)
+    local combat_result = COMBAT_CALCULATOR.compute_combat(attacker, defender, battle_state)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)

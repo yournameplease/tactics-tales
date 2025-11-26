@@ -9,10 +9,10 @@ AI Mk 1:
 - - pick nearest  enemy, move as close as possible
 ]]
 
-function compute_enemy_ai(unit)
-    local all_tile_costs = calculate_all_tile_costs(unit.x, unit.y, unit.side)
+function compute_enemy_ai(unit, tactics_engine)
+    local all_tile_costs = calculate_all_tile_costs(unit.x, unit.y, unit.side, 999, tactics_engine.battle_state)
 
-    local enemies = Battle:get_units(unit_is_player)
+    local enemies = tactics_engine.battle_state:get_units(unit_is_player)
 
     local potential_attacks = {}
     local deep_moves = {}
@@ -25,7 +25,7 @@ function compute_enemy_ai(unit)
                 if reachable then
                     if all_tile_costs[x] ~= nil and all_tile_costs[x][y] ~= nil then
                         if all_tile_costs[x][y].cost <= unit.stats.movement then
-                            if Battle:tile_is_legal_destination(unit, x, y) then
+                            if tactics_engine.battle_state:tile_is_legal_destination(unit, x, y) then
                                 add(potential_attacks, {x = x, y = y, target = e})
                             end
                         else
@@ -81,12 +81,12 @@ function compute_enemy_ai(unit)
     end
 end
 
-function handle_enemy_turn()
+function handle_enemy_turn(tactics_engine)
     start_routine(function()
-        local enemies = Battle:get_units(unit_is_enemy)
+        local enemies = tactics_engine.battle_state:get_units(unit_is_enemy)
 
         for enemy in all(enemies) do
-            compute_enemy_ai(enemy)
+            compute_enemy_ai(enemy, tactics_engine)
             while (Battle:is_blocked()) do
                 yield()
             end

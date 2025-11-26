@@ -7,8 +7,8 @@ include "src/battle/victory_conditions.lua"
   - specify input for utility map tiles
 ]]
 
-local BATTLE_DATA = {
-    ["BANDIT_VILLAGE"] = {
+BATTLE_DATA = {
+    ["bandit_village"] = {
         map_id = "bandit_village",
         victory_conditions = { {
             type = VICTORY_CONDITIONS.ROUT

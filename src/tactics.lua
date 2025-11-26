@@ -2,7 +2,7 @@ include "src/util.lua"
 include "src/tiles.lua"
 include "src/combat.lua"
 include "src/draw.lua"
-local BattleUnit = include "src/tactics//battle_unit.lua"
+local BattleUnit = include "src/tactics/battle_unit.lua"
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7
@@ -26,73 +26,24 @@ local TEXT_HEIGHT = 7
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
--- set to true during actions
-local battle_is_blocked = false
-
 Battle = {}
+Battle.__index = Battle
 
-function Battle:create(map_info)
-    self.units = {}
-    self.index_counter = 1
-    -- map of [x][y] for each entity in the map
-    self.tile_contents = {}
-    for i=0,map_info.width do
-        self.tile_contents[i] = {}
-    end
-
-    MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
-
-    for i = 0,3 do
-        self:spawn_unit(CHARACTER_MANAGER.generate_character(), 2 + i%2, 2+i*2, SIDE_PLAYER)
-    end
-    for i = 0,3 do
-        self:spawn_unit(CHARACTER_MANAGER.generate_character(), 7 + i%2, 3+i*2, SIDE_ENEMY)
-    end
-end
-
-function Battle:get_unit_by_id(id)
-    return self.units[id]
-end
-
-function Battle:get_unit_at_coordinates(x, y)
-    local unit_id = self.tile_contents[x][y]
-    if unit_id == nil then return nil end
-    return self:get_unit_by_id(unit_id)
-end
-
-function Battle:get_targets_in_range(unit_id, x, y)
-    local targets = {}
-    local attacker = self.units[unit_id]
-    local min_range = attacker.weapon.min_range
-    local max_range = attacker.weapon.max_range
-    for target in all(self.units) do
-        if target.id ~= attacker.id then
-            if target.side ~= attacker.side
-                    and tile_has_distance_from_unit(
-                    x, y,
-                    target.x, target.y,
-                    min_range, max_range
-            ) then
-                add(targets, target)
-            end
-        end
-    end
-    return targets
-end
-
-function Battle:get_units(filter)
-    filter = filter or fn_true
-    local units = {}
-    for unit in all(self.units) do
-        if filter(unit) then
-            add(units, unit)
-        end
-    end
-    return units
+function Battle.new(battle_state)
+    local self = setmetatable({}, Battle)
+    self.battle_is_blocked = false
+    self.battle_state = battle_state
+    BUS.on("MOVE_AND_WAIT", function(ctx)
+        self:handle_move_unit(ctx)
+    end)
+    BUS.on("MOVE_AND_ATTACK", function(ctx)
+        self:handle_move_and_attack(ctx)
+    end)
+    return self
 end
 
 function Battle:refresh_units(filter)
-    local units_to_refresh = self:get_units(filter)
+    local units_to_refresh = self.battle_state:get_units(filter)
 
     for unit in all(units_to_refresh) do
         unit.has_acted = false
@@ -100,30 +51,15 @@ function Battle:refresh_units(filter)
 end
 
 function Battle:is_blocked()
-    return battle_is_blocked
+    return self.battle_is_blocked
 end
 
-function Battle:check_for_end()
-    if self:is_blocked() then
-        return { finished = false }
-    end
 
-    local players = self:get_units(unit_is_player)
-    local enemies = self:get_units(unit_is_enemy)
-
-    if (#players == 0) then
-        return { finished = true, command = "BATTLE_END_VICTORY" }
-    elseif (#enemies == 0) then
-        return { finished = true, command = "BATTLE_END_FAILURE" }
-    else
-        return { finished = false }
-    end
-end
 
 -- step data helpers
 
-function get_unit_from_step(ctx, step)
-    return Battle:get_unit_by_id(ctx[step].unit_id)
+function Battle:get_unit_from_step(ctx, step)
+    return self:get_unit_by_id(ctx[step].unit_id)
 end
 
 -- unit filters
@@ -146,7 +82,7 @@ end
 
 -- validators
 
-function validate_tile_is_in_unit_attack_range(selection, ctx)
+function Battle:validate_tile_is_in_unit_attack_range(selection, ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local min_distance = unit.weapon.min_range
     local max_distance = unit.weapon.max_range
@@ -156,7 +92,7 @@ function validate_tile_is_in_unit_attack_range(selection, ctx)
     local target_x = selection.x
     local target_y = selection.y
 
-    local target_unit = Battle:get_unit_at_coordinates(target_x, target_y)
+    local target_unit = self.battle_state:get_unit_at_coordinates(target_x, target_y)
     if target_unit == nil then return false end
 
     if target_unit.side == unit.side then return false end
@@ -164,13 +100,13 @@ function validate_tile_is_in_unit_attack_range(selection, ctx)
     return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
 end
 
-function any_target_in_range(ctx)
+function Battle:any_target_in_range(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
     local destination = ctx["destination"]
     local unit_x = destination.x
     local unit_y = destination.y
 
-    local units_in_range = Battle:get_targets_in_range(unit.id, unit_x, unit_y)
+    local units_in_range = self.battle_state:get_targets_in_range(unit.id, unit_x, unit_y)
     return #units_in_range > 0
 end
 
@@ -239,12 +175,12 @@ function find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_di
 end
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
-function tiles_in_movement_and_attack_range(ctx)
-    local unit = Battle:get_unit_by_id(ctx["acting_unit"].unit_id)
+function Battle:tiles_in_movement_and_attack_range(ctx)
+    local unit = self.battle_state:get_unit_by_id(ctx["acting_unit"].unit_id)
     local min_range = unit.weapon.min_range
     local max_range = unit.weapon.max_range
 
-    local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement)
+    local reachable_tiles = find_reachable_tiles(unit.x, unit.y, unit.side, unit.movement, self.battle_state)
 
     local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -276,8 +212,8 @@ function tiles_in_movement_and_attack_range(ctx)
     return tiles
 end
 
-function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
-    local destination_unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
+function Battle:grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
+    local destination_unit = self.battle_state:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
     if destination_unit == nil then
         return true
     end
@@ -285,8 +221,8 @@ function grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
     return destination_unit.id == acting_unit.id
 end
 
-function selected_empty_tile_mapper (active_cursor)
-    local selected_unit = Battle:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
+function Battle:selected_empty_tile_mapper (active_cursor)
+    local selected_unit = self.battle_state:get_unit_at_coordinates(active_cursor.x, active_cursor.y)
     if selected_unit == nil then
         return true, {x = active_cursor.x, y = active_cursor.y}
     end
@@ -301,7 +237,7 @@ function Battle:handle_move_unit(ctx)
     local y = ctx["destination"].y
     local path = ctx["destination"].path
 
-    battle_is_blocked = true
+    self.battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation(path)
         while unit.animation_blocking do
@@ -313,11 +249,9 @@ function Battle:handle_move_unit(ctx)
         unit.has_acted = true
 
         MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
-        battle_is_blocked = false
+        self.battle_is_blocked = false
     end)
 end
-
-BUS.on("MOVE_AND_WAIT", function(ctx) Battle:handle_move_unit(ctx) end)
 
 function Battle:handle_move_and_attack(ctx)
     local unit = get_unit_from_step(ctx, "acting_unit")
@@ -326,7 +260,7 @@ function Battle:handle_move_and_attack(ctx)
     local path = ctx["destination"].path
     local target = get_unit_from_step(ctx, "target")
 
-    battle_is_blocked = true
+    self.battle_is_blocked = true
     start_routine(function()
         unit:start_walk_animation(path)
         while unit.animation_blocking do
@@ -335,19 +269,17 @@ function Battle:handle_move_and_attack(ctx)
         unit:end_animation()
 
         self:move_unit(unit, x, y)
-        do_combat(unit, target)
+        do_combat(unit, target, self.battle_state)
         unit.has_acted = true
 
         MENU_MANAGER.set_menu("MENU_PLAYER_TURN")
-        battle_is_blocked = false
+        self.battle_is_blocked = false
         LOG.debug("unblockiung battle")
     end)
 end
 
-BUS.on("MOVE_AND_ATTACK", function(ctx) Battle:handle_move_and_attack(ctx) end)
-
-function grid_selection_is_available_player(grid_selection)
-    local unit = Battle:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
+function Battle:grid_selection_is_available_player(grid_selection)
+    local unit = self.battle_state:get_unit_at_coordinates(grid_selection.x, grid_selection.y)
 
     if unit == nil then return false end
     if unit.side ~= SIDE_PLAYER then return false end
@@ -356,17 +288,6 @@ function grid_selection_is_available_player(grid_selection)
     return true
 end
 
-function Battle:spawn_unit(unit, x, y, side)
-    if self.tile_contents[x][y] ~= nil then
-        error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
-    end
-
-    local battle_unit = BattleUnit.spawn(unit, x, y, side)
-
-    local id = battle_unit.id
-    self.units[id] = battle_unit
-    self.tile_contents[x][y] = id
-end
 
 function Battle:update()
     local blocking_animation = false
@@ -384,34 +305,11 @@ function Battle:update()
 
     if blocking_animation then return end
     if all_players_acted then
-        local status = Battle:check_for_end()
-
-        if not status.finished then
-            BUS.emit("TACTICS_END_PLAYER_TURN")
-        end
+        BUS.emit("TACTICS_END_PLAYER_TURN")
     end
 end
 
-function Battle:tile_is_legal_destination(unit, x, y)
-    local unit_id_at_destination = self.tile_contents[x][y]
-    return (unit_id_at_destination == nil
-            or unit_id_at_destination == unit.id)
-end
 
-function Battle:move_unit(unit, x, y)
-    assert(self:tile_is_legal_destination(unit, x, y))
-
-    self.tile_contents[unit.x][unit.y] = nil
-    self.tile_contents[x][y] = unit.id
-    unit.x = x
-    unit.y = y
-end
-
-function Battle:kill_unit(unit)
-    self.tile_contents[unit.x][unit.y] = nil
-    self.units[unit.id] = nil
-    unit:die()
-end
 
 
 function Battle:draw_tactics_debug()

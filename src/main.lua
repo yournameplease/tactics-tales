@@ -35,10 +35,10 @@
 -- inheritence? (the human kind)
 ]]
 
+CONFIG = include "src/config.lua"
 include "src/systems/tasks.lua"
 
 LOG = include "src/debug.lua"
-CONFIG = include "src/config.lua"
 
 BUS = include "src/systems/event_bus.lua"
 TACTICS = include "src/tactics.lua"
@@ -50,19 +50,20 @@ COMBAT_CALCULATOR = include "src/combat/combat_calculator.lua"
 ANIMATION_MANAGER = include "src/animation.lua"
 UI_MANAGER = include "src/ui/ui_manager.lua"
 CONTEXT_MANAGER = include "src/game_context.lua"
+BATTLE_MANAGER = include "src/battle/battle_manager.lua"
 
 MAP_MANAGER = include "src/map/map_manager.lua"
 include "src/tactics/enemy_ai.lua"
 
+-- TODO: local battle_manager
+
 local context = {}
 
 function _init()
-    Battle:create({
-        width=15, height=10
-    })
+    battle_manager = BATTLE_MANAGER.new("bandit_village")
     UI_MANAGER:init()
     context = CONTEXT_MANAGER.new(
-            TACTICS,
+            battle_manager,
             TURN_MANAGER,
             TILE_MANAGER,
             CHARACTER_MANAGER,
@@ -91,7 +92,7 @@ end
 function _update()
     local joy = get_joypad()
     MENU_MANAGER.update(joy)
-    Battle:update(joy)
+    battle_manager:update()
     ANIMATION_MANAGER.tick()
     context:enrich()
     update_tasks()

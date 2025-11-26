@@ -25,7 +25,7 @@ BUS.on("TACTICS_END_PLAYER_TURN", function()
 
     LOG.info("End player turn!")
 
-    BUS.emit("TACTICS_BEGIN_ENEMY_TURN")
+    BUS.emit("TACTICS_BEGIN_ENEMY_TURN", battle_manager.tactics_engine) -- TODO: global
 end)
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
@@ -43,7 +43,7 @@ BUS.on("TACTICS_END_ENEMY_TURN", function()
 
     turn = turn + 1
 
-    battle_result = Battle:check_for_end()
+    battle_result = battle_manager:check_for_end()
 
     if not battle_result.finished then
         BUS.emit("TACTICS_BEGIN_PLAYER_TURN")

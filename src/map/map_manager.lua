@@ -6,6 +6,8 @@ local BASE_PLAYER_SPAWNER_SPRITE = 0x408
 local BASE_ENEMY_SPAWNER_SPRITE = 0x410
 local BASE_REINFORCEMENT_SPAWNER_SPRITE = 0x418
 
+local METATILES_LAYER = 1
+local GROUND_LAYER = 3
 -- map_data
 --
 
@@ -28,27 +30,30 @@ function MapManager:load_map(map_id)
 end
 
 function MapManager:_load_static(definition)
-    local map_data = fetch(definition.file)
+    local map_data = {}
 
+    map_data.map_userdata = fetch(definition.file)
 
-    local metadata = {
+    local metatiles_layer = map_data.map_userdata[METATILES_LAYER].bmp
+    map_data.width = metatiles_layer:width()
+    map_data.height = metatiles_layer:height()
+    map_data.metadata = {
         player_spawners = {},
         enemy_spawners = {},
     }
 
-    local metatiles_layer = map_data["METATILES"] -- TODO: does this work?  may need numeric indices
     for x = 1, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local tile = metatiles_layer:get(x, y)
             if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
                 local player_spawner_id = tile - BASE_PLAYER_SPAWNER_SPRITE + 1
-                metadata.player_spawners[player_spawner_id] = {x = x, y = y}
+                map_data.metadata.player_spawners[player_spawner_id] = {x = x, y = y}
             elseif tile >= BASE_ENEMY_SPAWNER_SPRITE and tile < BASE_REINFORCEMENT_SPAWNER_SPRITE then
                 local enemy_spawner_id = tile - BASE_ENEMY_SPAWNER_SPRITE + 1
-                if metadata.enemy_spawners[enemy_spawner_id] == nil then
-                    metadata.enemy_spawners[enemy_spawner_id] = {}
+                if map_data.metadata.enemy_spawners[enemy_spawner_id] == nil then
+                    map_data.metadata.enemy_spawners[enemy_spawner_id] = {}
                 end
-                add(metadata.enemy_spawners[enemy_spawner_id], {x = x, y = y})
+                add(map_data.metadata.enemy_spawners[enemy_spawner_id], {x = x, y = y})
             end
         end
     end

@@ -21,9 +21,9 @@ local CURSOR_SPRITE = 8
 local TEXT_HEIGHT = 7
 
 
-local function compute_animated_unit_positions(tactics)
+local function compute_animated_unit_positions(battle_state)
     return tmap(
-            tactics:get_units(),
+            battle_state:get_units(),
             function(unit)
                 local ox, oy = unit:get_animation_offset()
                 return {
@@ -54,6 +54,7 @@ function TacticsMap:draw(state)
     Box.draw(self, state)
 
     local tactics = state.tactics
+    local battle_state = state.battle_state
     local menu = state.menu_manager
 
     local camera_x = self.x + self.padding
@@ -63,9 +64,9 @@ function TacticsMap:draw(state)
     -- draw row-by row, top to bottom aka back to front
 
     -- pre-compute actor animations for z-ordering
-    local unit_positions = compute_animated_unit_positions(state.tactics)
+    local unit_positions = compute_animated_unit_positions(state.battle_state)
 
-    sorted_units = userdata("i16", 2, #unit_positions)
+    local sorted_units = userdata("i16", 2, #unit_positions)
     for i,u in ipairs(unit_positions) do
         sorted_units:set(0,i-1, u.y)
         sorted_units:set(1,i-1, u.id)
@@ -132,7 +133,7 @@ function TacticsMap:draw(state)
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = tactics:get_unit_by_id(unit_id)
+            local unit = battle_state:get_unit_by_id(unit_id)
             LOG.trace("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1

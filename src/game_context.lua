@@ -1,7 +1,7 @@
 local GameContext = {}
 
 function GameContext.new(
-    tactics,
+    battle_manager,
     turn_manager,
     tile_manager,
     character_manager,
@@ -10,7 +10,9 @@ function GameContext.new(
     combat_calculator
 )
     local context = {
-        tactics = tactics,
+        battle_manager = battle_manager,
+        tactics = battle_manager.tactics_engine,
+        battle_state = battle_manager.battle_state,
         turn_manager = turn_manager,
         tile_manager = tile_manager,
         character_manager = character_manager,
@@ -28,11 +30,11 @@ function GameContext.new(
 end
 
 function GameContext:get_selected_unit()
-    return self.tactics:get_unit_by_id(self.selected_unit_id)
+    return self.battle_state:get_unit_by_id(self.selected_unit_id)
 end
 
 function GameContext:get_acting_unit()
-    return self.tactics:get_unit_by_id(self.acting_unit_id)
+    return self.battle_state:get_unit_by_id(self.acting_unit_id)
 end
 
 function GameContext:enrich()
@@ -40,7 +42,7 @@ function GameContext:enrich()
 
     if self.menu_manager.menu_state.menu_step == "SELECT_UNIT" then
         local x, y = self.menu_manager.menu_selection.x, self.menu_manager.menu_selection.y
-        local unit = self.tactics:get_unit_at_coordinates(x, y)
+        local unit = self.battle_state:get_unit_at_coordinates(x, y)
         if unit then
             self.selected_unit_id = unit.id
         end
@@ -52,7 +54,7 @@ function GameContext:enrich()
 
     if self.menu_manager.menu_state.menu_step == "SELECT_TARGET" then
         local x, y = self.menu_manager.menu_selection.x, self.menu_manager.menu_selection.y
-        local unit = self.tactics:get_unit_at_coordinates(x, y)
+        local unit = self.battle_state:get_unit_at_coordinates(x, y)
         if unit then
             self.layout = "COMBAT_PREVIEW"
             self.selected_unit_id = unit.id
