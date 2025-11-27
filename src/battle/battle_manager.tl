@@ -1,9 +1,9 @@
-require("src/battle/battle_data.lua")
+require("src/battle/battle_data")
 
-local BattleState = require("src/battle/battle_state.lua")
-local BattleUnit = require("src/tactics/battle_unit.lua")
-local TileManager = require("src/tiles.lua")
-local Tactics = require("src/tactics.lua")
+local BattleState = require("src/battle/battle_state")
+local BattleUnit = require("src/tactics/battle_unit")
+local TileManager = require("src/tiles")
+local Tactics = require("src/tactics")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
