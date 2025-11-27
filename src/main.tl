@@ -35,24 +35,23 @@
 -- inheritence? (the human kind)
 ]]
 
-CONFIG = require("src/config.lua")
+global CONFIG = require("src/config.lua")
 require("src/systems/tasks.lua")
 
-LOG = require("src/debug.lua")
+global LOG = require("src/debug.lua")
 
-BUS = require("src/systems/event_bus.lua")
-TACTICS = require("src/tactics.lua")
-TURN_MANAGER = require("src/turn_manager.lua")
-MENU_MANAGER = require("src/menu_manager.lua")
-TILE_MANAGER = require("src/tiles.lua")
-CHARACTER_MANAGER = require("src/character.lua")
-COMBAT_CALCULATOR = require("src/combat/combat_calculator.lua")
-ANIMATION_MANAGER = require("src/animation.lua")
-UI_MANAGER = require("src/ui/ui_manager.lua")
-CONTEXT_MANAGER = require("src/game_context.lua")
-BATTLE_MANAGER = require("src/battle/battle_manager.lua")
+global BUS = require("src/systems/event_bus.lua")
 
-MAP_MANAGER = require("src/map/map_manager.lua")
+global TURN_MANAGER = require("src/turn_manager.lua")
+global MENU_MANAGER = require("src/menu_manager.lua")
+global CHARACTER_MANAGER = require("src/character.lua")
+global COMBAT_CALCULATOR = require("src/combat/combat_calculator.lua")
+global ANIMATION_MANAGER = require("src/animation.lua")
+global UI_MANAGER = require("src/ui/ui_manager.lua")
+global CONTEXT_MANAGER = require("src/game_context.lua")
+gloabl BATTLE_MANAGER = require("src/battle/battle_manager.lua")
+
+global MAP_MANAGER = require("src/map/map_manager.lua")
 require("src/tactics/enemy_ai.lua")
 
 -- TODO: local battle_manager
@@ -60,7 +59,7 @@ require("src/tactics/enemy_ai.lua")
 local context = {}
 
 function _init()
-    battle_manager = BATTLE_MANAGER.new("bandit_village")
+    global battle_manager = BATTLE_MANAGER.new("bandit_village")
     UI_MANAGER:init()
     context = CONTEXT_MANAGER.new(
             battle_manager,
