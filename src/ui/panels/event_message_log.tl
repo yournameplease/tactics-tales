@@ -1,5 +1,5 @@
-Box = require("src/ui/box.lua")
-MessageLog = require("src/ui/panels/message_log.lua")
+Box = require("src/ui/box")
+MessageLog = require("src/ui/panels/message_log")
 
 local EventMessageLog = {}
 

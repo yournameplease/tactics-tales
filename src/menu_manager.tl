@@ -1,5 +1,5 @@
 -- TODO: only needed for lazy dijkstra animation.
-require("src/tiles.lua")
+require("src/tiles")
 
 local MenuManager = {
     menu_state = {},

@@ -1,4 +1,4 @@
-require("src/map/map_data.lua")
+require("src/map/map_data")
 
 MapManager = {}
 

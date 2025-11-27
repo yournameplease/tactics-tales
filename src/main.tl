@@ -35,24 +35,24 @@
 -- inheritence? (the human kind)
 ]]
 
-global CONFIG = require("src/config.lua")
-require("src/systems/tasks.lua")
+global CONFIG = require("src/config")
+require("src/systems/tasks")
 
-global LOG = require("src/debug.lua")
+global LOG = require("src/debug")
 
-global BUS = require("src/systems/event_bus.lua")
+global BUS = require("src/systems/event_bus")
 
-global TURN_MANAGER = require("src/turn_manager.lua")
-global MENU_MANAGER = require("src/menu_manager.lua")
-global CHARACTER_MANAGER = require("src/character.lua")
-global COMBAT_CALCULATOR = require("src/combat/combat_calculator.lua")
-global ANIMATION_MANAGER = require("src/animation.lua")
-global UI_MANAGER = require("src/ui/ui_manager.lua")
-global CONTEXT_MANAGER = require("src/game_context.lua")
-gloabl BATTLE_MANAGER = require("src/battle/battle_manager.lua")
+global TURN_MANAGER = require("src/turn_manager")
+global MENU_MANAGER = require("src/menu_manager")
+global CHARACTER_MANAGER = require("src/character")
+global COMBAT_CALCULATOR = require("src/combat/combat_calculator")
+global ANIMATION_MANAGER = require("src/animation")
+global UI_MANAGER = require("src/ui/ui_manager")
+global CONTEXT_MANAGER = require("src/game_context")
+gloabl BATTLE_MANAGER = require("src/battle/battle_manager")
 
-global MAP_MANAGER = require("src/map/map_manager.lua")
-require("src/tactics/enemy_ai.lua")
+global MAP_MANAGER = require("src/map/map_manager")
+require("src/tactics/enemy_ai")
 
 -- TODO: local battle_manager
 

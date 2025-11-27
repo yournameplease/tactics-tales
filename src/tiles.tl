@@ -1,4 +1,4 @@
-require("src/util.lua")
+require("src/util")
 
 -- tile flags:
 -- 0: empty/solid

@@ -1,6 +1,6 @@
-local Box = require("src/ui/box.lua")
-local TextNode = require("src/ui/panels/text_node.lua")
-local PortraitBox = require("src/ui/panels/portrait_box.lua")
+local Box = require("src/ui/box")
+local TextNode = require("src/ui/panels/text_node")
+local PortraitBox = require("src/ui/panels/portrait_box")
 
 local UnitInfo = {}
 setmetatable(UnitInfo, { __index = Box })

@@ -1,4 +1,4 @@
-require("src/battle/victory_conditions.lua")
+require("src/battle/victory_conditions")
 
 --[[ Data contains:
 - map_file or generator

@@ -1,4 +1,4 @@
-require("src/util/data_utils.lua")
+require("src/util/data_utils")
 
 VICTORY_CONDITIONS = enum{
         "ROUT",

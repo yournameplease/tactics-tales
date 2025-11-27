@@ -1,8 +1,8 @@
-require("src/util.lua")
-require("src/tiles.lua")
-require("src/combat.lua")
-require("src/draw.lua")
-local BattleUnit = require("src/tactics/battle_unit.lua")
+require("src/util")
+require("src/tiles")
+require("src/combat")
+require("src/draw")
+local BattleUnit = require("src/tactics/battle_unit")
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7

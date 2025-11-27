@@ -1,4 +1,4 @@
-Box = require("src/ui/box.lua")
+Box = require("src/ui/box")
 
 local MessageLog = {}
 
