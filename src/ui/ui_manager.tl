@@ -1,11 +1,11 @@
-local Box = include "src/ui/box.lua"
-local UnitInfo = include "src/ui/panels/unit_info.lua"
-local CombatPreview = include "src/ui/panels/combat_preview.lua"
-local TacticsMap = include "src/ui/panels/tactics_map.lua"
-local TextNode = include "src/ui/panels/text_node.lua"
-local EventMessageLog = include "src/ui/panels/event_message_log.lua"
+local Box = require("src/ui/box.lua")
+local UnitInfo = require("src/ui/panels/unit_info.lua")
+local CombatPreview = require("src/ui/panels/combat_preview.lua")
+local TacticsMap = require("src/ui/panels/tactics_map.lua")
+local TextNode = require("src/ui/panels/text_node.lua")
+local EventMessageLog = require("src/ui/panels/event_message_log.lua")
 
-local MenuValidator = include "src/ui/validator.lua"
+local MenuValidator = require("src/ui/validator.lua")
 
 local UIManager = {}
 

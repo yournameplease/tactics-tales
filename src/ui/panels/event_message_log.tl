@@ -1,5 +1,5 @@
-Box = include "src/ui/box.lua"
-MessageLog = include "src/ui/panels/message_log.lua"
+Box = require("src/ui/box.lua")
+MessageLog = require("src/ui/panels/message_log.lua")
 
 local EventMessageLog = {}
 

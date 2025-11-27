@@ -1,6 +1,6 @@
-include "src/util.lua"
-include "src/character/animation_data.lua"
-include "src/character/weapons.lua"
+require("src/util.lua")
+require("src/character/animation_data.lua")
+require("src/character/weapons.lua")
 
 local id_counter = IdCounter.new()
 local characters = {}

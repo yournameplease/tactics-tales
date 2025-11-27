@@ -1,4 +1,4 @@
-include "src/util/data_utils.lua"
+require("src/util/data_utils.lua")
 
 -- potential additions
 -- shields

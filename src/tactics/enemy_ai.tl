@@ -1,4 +1,4 @@
-include "src/tiles.lua"
+require("src/tiles.lua")
 
 --[[
 AI Mk 1:

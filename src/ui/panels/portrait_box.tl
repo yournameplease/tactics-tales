@@ -1,4 +1,4 @@
-local Box = include "src/ui/box.lua"
+local Box = require("src/ui/box.lua")
 
 local PortraitBox = {}
 setmetatable(PortraitBox, { __index = Box })

@@ -1,4 +1,4 @@
-include "src/util.lua"
+require("src/util.lua")
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc
 

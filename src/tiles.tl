@@ -1,4 +1,4 @@
-include "src/util.lua"
+require("src/util.lua")
 
 -- tile flags:
 -- 0: empty/solid
