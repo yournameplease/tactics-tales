@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cat ./lib/* > src/picotron.d.tl
+cat ./lib/* > ./picotron.d.tl
