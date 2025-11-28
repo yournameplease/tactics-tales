@@ -68,7 +68,8 @@ global pget: function(x: integer, y: integer) : integer
 --- @param n integer
 --- @param f integer
 --- @return boolean
-global fget: function(n: integer, f: integer) : boolean
+-- global fget: function(n: integer, f: integer) : boolean
+global fget: function(n: integer) : integer
 
 --- Set the value of a sprite n's flag f (0-7)
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fset)

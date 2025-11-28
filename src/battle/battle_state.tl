@@ -1,7 +1,7 @@
 require("src/util")
 require("src/tactics/battle_unit")
 
-local record BattleState
+global record BattleState
     units_by_id: { integer: BattleUnit }
     units_by_x_y: Array2D<BattleUnit>
 end

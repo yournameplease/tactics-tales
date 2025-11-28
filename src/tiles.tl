@@ -1,4 +1,6 @@
 require("src/util")
+require("src/battle/battle_state")
+require("src/map/map_manager")
 
 -- tile flags:
 -- 0: empty/solid
@@ -47,11 +49,13 @@ local TERRAIN_DATA = {
     }
 }
 
-local TileManager = {}
-TileManager.__index = TileManager
+global record TileManager
+    map_data: MapData
+    battle_state: BattleState
+end
 
-function TileManager.new(map_data, battle_state)
-    self = setmetatable({}, TileManager)
+function TileManager.new(map_data: MapData, battle_state: BattleState): TileManager
+    local self: TileManager = setmetatable({}, { __index = TileManager })
 
     self.map_data = map_data
     self.battle_state = battle_state
@@ -59,15 +63,15 @@ function TileManager.new(map_data, battle_state)
     return self
 end
 
-function TileManager:get_terrain(x, y)
-    local tile = mget(self.map_data.userdata[3], x,y)
+function TileManager:get_terrain(x: integer, y: integer): TerrainData
+    local tile = self.map_data.userdata[3].bmp:get(x,y)
     local flags = fget(tile)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
 end
 
 -- cost to move onto x,y from any neighbor
-function TileManager:movement_cost(x, y, side)
+function TileManager:movement_cost(x: integer, y: integer, side: integer): integer
     local ground = self.map_data.userdata[3].bmp
     if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
         return 999
