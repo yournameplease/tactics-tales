@@ -1,9 +1,18 @@
 
+local enum LogLevel
+    "ERROR"
+    "WARN"
+    "INFO"
+    "DEBUG"
+    "TRACE"
+end
+
+
 Log = {}
 
 local log_level = CONFIG.LOG_LEVEL
 
-function should_print (level)
+function should_print (level: LogLevel): boolean
     if log_level == "ERROR" then
         return level == "ERROR"
     elseif log_level == "WARN" then
@@ -18,7 +27,7 @@ function should_print (level)
 end
 
 
-local function debug_print(level, ...)
+local function debug_print(level: LogLevel, ...: any)
     if should_print(level) then
         local arg = {...}
         local str = ""
@@ -39,23 +48,23 @@ local function debug_print(level, ...)
     end
 end
 
-function Log.error(...)
+function Log.error(...: any)
     debug_print("ERROR", ...)
 end
 
-function Log.warn(...)
+function Log.warn(...: any)
     debug_print("WARN", ...)
 end
 
-function Log.info(...)
+function Log.info(...: any)
     debug_print("INFO", ...)
 end
 
-function Log.debug(...)
+function Log.debug(...: any)
     debug_print("DEBUG", ...)
 end
 
-function Log.trace(...)
+function Log.trace(...: any)
     debug_print("TRACE", ...)
 end
 

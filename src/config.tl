@@ -1,3 +1,5 @@
+require("src/debug")
+
 -- constant configs.  eventually, may move back into relevant files.
 
 local record Config
