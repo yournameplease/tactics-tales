@@ -1,3 +1,5 @@
+require("src/types")
+
 require("src/util")
 require("src/battle/battle_state")
 require("src/map/map_manager")
@@ -14,7 +16,12 @@ require("src/map/map_manager")
 -- 6 deep water
 -- 7
 
-local TERRAIN_DATA = {
+local record TerrainData
+    movement_cost: integer
+    dodge: integer
+end
+
+local TERRAIN_DATA: { integer: TerrainData } = {
     [0] = {
         movement_cost = 1,
         dodge = 0
@@ -71,7 +78,7 @@ function TileManager:get_terrain(x: integer, y: integer): TerrainData
 end
 
 -- cost to move onto x,y from any neighbor
-function TileManager:movement_cost(x: integer, y: integer, side: integer): integer
+function TileManager:movement_cost(x: integer, y: integer, side: Side): integer
     local ground = self.map_data.userdata[3].bmp
     if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
         return 999
@@ -97,28 +104,30 @@ end
 -- Shared neighbor offsets (up, down, left, right)
 local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
+local record ShortestPathEntry
+    cost: number
+    prev: TilePoint
+end
+
+local type ShortestPathResult = Array2D<ShortestPathEntry>
+
 -- --------------------------------------------------------------------------
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
+function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): ShortestPathResult
     -- The output map containing cost and parent info for every visited node
-    local visited_info = {}
+    local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.map_data.width, self.map_data.height)
 
-    -- Helper to safely set data
-    local function set_info(x, y, data)
-        if not visited_info[x] then visited_info[x] = {} end
-        visited_info[x][y] = data
-    end
 
-    -- Helper to safely get data
-    local function get_info(x, y)
-        if not visited_info[x] then return nil end
-        return visited_info[x][y]
+    local record ShortestPathQueueEntry
+        cost: number
+        x: integer
+        y: integer
     end
 
     -- Initialize
-    local priority_queue = {}
+    local priority_queue: { ShortestPathQueueEntry } = {}
 
     -- Start node setup
     local start_cost = 0 -- Cost to be at the start is 0
@@ -127,7 +136,7 @@ function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
     -- (depending on your game logic, moving *off* start might cost 0 or terrain cost)
     if start_cost > max_cost then return {} end
 
-    set_info(start_x, start_y, { cost = start_cost, prev = nil })
+    visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
     add(priority_queue, {x = start_x, y = start_y, cost = start_cost})
 
     -- Main Loop
@@ -144,11 +153,12 @@ function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
         end
 
         local u = deli(priority_queue, min_index)
+        assert(u is ShortestPathQueueEntry)
         local ux, uy, ucost = u.x, u.y, u.cost
 
         -- 2. Check if we found a better path to this node already
         -- (Standard Dijkstra laziness check)
-        local current_info = get_info(ux, uy)
+        local current_info = visited_info:get(ux, uy)
         if current_info and ucost <= current_info.cost then
 
             -- 3. Explore neighbors
@@ -164,12 +174,12 @@ function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
 
                     -- 4. Check limits
                     if new_total <= max_cost then
-                        local neighbor_info = get_info(vx, vy)
+                        local neighbor_info = visited_info:get(vx, vy)
 
                         -- 5. Relaxation: Is this new path better than the old one?
                         if not neighbor_info or new_total < neighbor_info.cost then
                             -- Record the new cost and the tile we came from (ux, uy)
-                            set_info(vx, vy, { cost = new_total, prev = {x=ux, y=uy} })
+                            visited_info:set(vx, vy, { cost = new_total, prev = {x=ux, y=uy} })
                             add(priority_queue, {x = vx, y = vy, cost = new_total})
                         end
                     end
@@ -178,7 +188,7 @@ function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
         end
     end
 
-    return visited_info
+    return visited_info as ShortestPathResult -- TODO: weird cast
 end
 
 -- --------------------------------------------------------------------------
@@ -187,18 +197,18 @@ end
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:calculate_all_tile_costs(start_x, start_y, side, max_limit)
+function TileManager:calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): ShortestPathResult
     local limit = max_limit or 99999
     return self:_dijkstra_traversal(start_x, start_y, side, limit)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
-function TileManager:get_path_to_tile(all_tile_costs, x, y) -- could be static with current signature
-    assert(all_tile_costs[x][y] ~= nil)
+function TileManager:get_path_to_tile(all_tile_costs: ShortestPathResult, x: integer, y: integer): { TilePoint } -- could be static with current signature
+    assert(all_tile_costs:get(x, y) ~= nil)
     local path = { { x = x, y = y} }
-    while all_tile_costs[x][y].prev ~= nil do
-        next_x = all_tile_costs[x][y].prev.x
-        next_y = all_tile_costs[x][y].prev.y
+    while all_tile_costs:get(x, y).prev ~= nil do
+        local next_x = all_tile_costs:get(x, y).prev.x
+        local next_y = all_tile_costs:get(x, y).prev.y
         x, y = next_x, next_y
         add(path, { x = x, y = y })
     end
@@ -207,21 +217,23 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function TileManager:find_reachable_tiles(start_x, start_y, side, total_cost)
+function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, side: Side, total_cost: integer): Array2D<boolean>
     -- 1. Get the detailed map from the core engine
     local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
 
     -- 2. Transform it into the simple boolean map expected by existing code
-    local reachable = {}
+    local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h)
 
-    for x, col in pairs(full_map) do
-        reachable[x] = {}
-        for y, info in pairs(col) do
+    full_map:foreach(
+        function (x: integer, y: integer, value: ShortestPathEntry)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
-            reachable[x][y] = true
+            -- TODO: not positive after refactor to Array2D.  investigate.
+            if (value.cost <= total_cost) then
+                reachable:set(x, y, true)
+            end
         end
-    end
+    )
 
     return reachable
 end

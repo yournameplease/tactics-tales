@@ -1,3 +1,4 @@
+require("src/types")
 
 -- TODO: some of this moves to character/weapon files
 
@@ -10,7 +11,7 @@ global record BattleUnit
     id: integer
     x: integer
     y: integer
-    side: integer
+    side: Side
     weapon: WeaponInstance
 end
 

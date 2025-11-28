@@ -21,7 +21,7 @@ global del: function(table: any, value: any) : any | nil
 --- @param table table
 --- @param index? integer
 --- @return any | nil
-global deli: function(table: any, index?: any) : any | nil
+global deli: function<V>(table: { V }, index?: integer) : V | nil
 
 --- Get the length of a table
 --- When value is specified, get the number of times value is in the table

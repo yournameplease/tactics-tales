@@ -1,3 +1,5 @@
+require("src/types")
+
 local BATTLE_DATA = require("src/battle/battle_data")
 
 local BattleState = require("src/battle/battle_state")
@@ -66,7 +68,7 @@ function BattleManager:_spawn_players(player_spawners: { SpawnPoint })
     end
 end
 
-function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: SpawnPoint, side: integer)
+function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: SpawnPoint, side: Side)
     local battle_unit = BattleUnit.spawn(unit, spawn_point.x, spawn_point.y, side)
     self.battle_state:spawn_unit(battle_unit, spawn_point.x, spawn_point.y)
 end

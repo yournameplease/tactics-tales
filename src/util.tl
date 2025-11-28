@@ -122,3 +122,11 @@ function Array2D:set<V>(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x][y] = v
 end
+
+function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
+    for x, col in ipairs(self.data) do
+        for y, v in ipairs(col) do
+            fn(x, y, v)
+        end
+    end
+end
