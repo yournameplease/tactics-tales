@@ -18,14 +18,14 @@ local function lerp_x_y(x0: number, y0: number, x1: number, y1: number, t: numbe
     return {x = x0 + t * (x1 - x0) / d, y = y0 + t * (y1 - y0) / d }
 end
 
-local function lerp_animation_offset_calculator(animation_data): AnimationOffset
-    local d = animation_data.duration
-    local t = animation_data.frame
-    local x = animation_data.target_x
-    local y = animation_data.target_y
+-- local function lerp_animation_offset_calculator(animation_data): AnimationOffset
+--     local d = animation_data.duration
+--     local t = animation_data.frame
+--     local x = animation_data.target_x
+--     local y = animation_data.target_y
 
-    return lerp_x_y(0, 0, x, y, t, d)
-end
+--     return lerp_x_y(0, 0, x, y, t, d)
+-- end
 
 local function path_animation_offset_calculator(animation_data): AnimationOffset
     if #animation_data.path_points == 1 then
