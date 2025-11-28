@@ -1,3 +1,5 @@
+require("src/types")
+
 local CONFIG = require("src/config")
 -- http://lua-users.org/wiki/CopyTable
 -- global function deepcopy(orig)
@@ -29,17 +31,12 @@ global function choose_random_from_list<A>(list: {A}): A
     return list[i]
 end
 
-global function choose_random_from_table<A>(table: {string: A}): A
-    local size = 0
-    for k, v in pairs(table) do
-        size = size + 1
+global function choose_random_from_table<A>(tab: {string: A}): A
+    local list: {A} = {}
+    for _, v in pairs(tab) do
+        add(list, v)
     end
-    local i = rndi(size)
-    for k, v in pairs(table) do
-        if i == 0 then return v end
-        i = i - 1
-    end
-    error("Table was empty! (Or I made a bug here...)")
+    return choose_random_from_list(list)
 end
 
 global function reverse_list<A>(list: {A}): {A} 
@@ -54,9 +51,9 @@ global function fn_true(): boolean
     return true
 end
 
-global function tmap<K, A, B>(table: {K: A}, fn: function(A): B): { K: B }
+global function tmap<K, A, B>(tab: {K: A}, fn: function(A): B): { K: B }
     local out = {}
-    for k,v in pairs(table) do
+    for k,v in pairs(tab) do
         out[k] = fn(v)
     end
     return out
@@ -70,7 +67,7 @@ global function to_tile_path(path: { TilePoint }): { AnimationPoint }
 
     local base_x = path[1].x
     local base_y = path[1].y
-    return tmap(path, function(p)
+    return tmap(path, function(p: TilePoint): AnimationPoint
         return {
             x = (p.x - base_x) * CONFIG.TILE_WIDTH,
             y = (p.y - base_y) * CONFIG.TILE_HEIGHT
@@ -104,10 +101,11 @@ end
 function Array2D.new<V>(w: integer, h: integer): Array2D<V>
     local out = {
         w = w,
-        h = h
+        h = h,
+        data = {}
     }
     for i=0, w-1 do
-        out[i] = {}
+        out.data[i] = {}
     end
     setmetatable(out, { __index = Array2D })
     return out
