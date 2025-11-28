@@ -8,8 +8,7 @@ require("src/character/weapons")
 
 global record BattleUnit
     id: integer
-    x: integer
-    y: integer
+    tile: TilePoint
     hp_current: integer
     side: Side
     weapon: Weapon

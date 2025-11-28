@@ -1,9 +1,10 @@
 local CONFIG = require("src/config")
+local LOG = require("src/debug")
 
 require("src/util")
 require("src/tiles")
-require("src/combat")
 require("src/draw")
+require("src/combat/combat_calculator")
 local BattleUnit = require("src/tactics/battle_unit")
 
 local COLOR_MENU_PRIMARY = 32
@@ -31,14 +32,17 @@ local SIDE_ENEMY = 1
 global record TacticsEngine
     tile_manager: TileManager
     battle_state: BattleState
+    combat_calculator: CombatCalculator
+    battle_is_blocked: boolean
 end
 
 
 function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager): TacticsEngine
-    local self = setmetatable({}, { __index = TacticsEngine })
+    local self: TacticsEngine = setmetatable({}, { __index = TacticsEngine })
     self.battle_is_blocked = false
     self.battle_state = battle_state
     self.tile_manager = tile_manager
+    self.combat_calculator = CombatCalculator.new(tile_manager)
     BUS.on("MOVE_AND_WAIT", function(ctx)
         self:handle_move_unit(ctx)
     end)
@@ -48,6 +52,50 @@ function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager)
     LOG.debug("battle new", #self.battle_state.units_by_id)
     return self
 end
+
+-- Combat
+
+function TacticsEngine:apply_combat_step(step: CombatStep)
+    local attacker = step.attacker
+    local defender = step.defender
+
+    local direction = atan2(
+            defender.x - attacker.x,
+            defender.y - attacker.y
+    )
+
+    attacker:start_animation("BUMP", direction)
+    if not step.is_hit then
+        defender:start_animation("DODGE", direction + 0.25)
+    end
+    while attacker.animation_blocking or defender.animation_blocking do
+        yield()
+    end
+
+    if step.is_hit then
+        defender:take_damage(step.dmg)
+        defender:start_animation("HURT", direction + 0.5)
+    end
+
+    while defender.animation_blocking do
+        yield()
+    end
+
+    if not defender:is_alive() then
+        self.battle_state:kill_unit(defender)
+    end
+end
+
+function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
+    local combat_result = combat_calculator.compute_combat(attacker, defender)
+
+    for i,combat_step in ipairs(combat_result.steps) do
+        LOG.debug("Combat step: ",i)
+        self:apply_combat_step(combat_step)
+    end
+end
+
+-- Turn flow
 
 function Battle:refresh_units(filter)
     local units_to_refresh = self.battle_state:get_units(filter)
@@ -71,20 +119,12 @@ end
 
 -- unit filters
 
-function unit_is_player(unit)
+global function unit_is_player(unit: BattleUnit): boolean
     return unit.side == SIDE_PLAYER
 end
 
-function unit_is_enemy(unit)
+global function unit_is_enemy(unit: BattleUnit): boolean
     return unit.side == SIDE_ENEMY
-end
-
--- grid filters
-
-function tile_has_distance_from_unit(x1, y1, x2, y2, min_distance, max_distance)
-    max_distance = max_distance or min_distance
-    local distance = abs(x1-x2)+abs(y1-y2)
-    return distance >= min_distance and distance <= max_distance
 end
 
 -- validators
@@ -104,7 +144,7 @@ function Battle:validate_tile_is_in_unit_attack_range(selection, ctx)
 
     if target_unit.side == unit.side then return false end
 
-    return tile_has_distance_from_unit(target_x, target_y, unit_x, unit_y, min_distance, max_distance)
+    return self.battle_state:tile_has_distance_from_tile(target.tile, unit_x, unit_y, min_distance, max_distance)
 end
 
 function Battle:any_target_in_range(ctx)

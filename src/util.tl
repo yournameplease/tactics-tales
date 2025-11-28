@@ -116,9 +116,19 @@ function Array2D:get<V>(x: integer, y: integer): V
     return self.data[x][y]
 end
 
+function Array2D:get_point<V>(p: Point<integer>): V
+    assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
+    return self.data[p.x][p.y]
+end
+
 function Array2D:set<V>(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x][y] = v
+end
+
+function Array2D:set_point<V>(p: Point<integer>, v: V)
+    assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
+    self.data[p.x][p.y] = v
 end
 
 function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))

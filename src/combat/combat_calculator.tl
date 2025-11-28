@@ -6,6 +6,13 @@ global record CombatCalculator
     tile_manager: TileManager
 end
 
+function CombatCalculator.new(tile_manager: TileManager): CombatCalculator
+    local self = setmetatable({
+        tile_manager = tile_manager
+    }, { __index = CombatCalculator })
+    return self
+end
+
 function CombatCalculator:get_hit_chance(attacker: BattleUnit, defender: BattleUnit): integer
     local accuracy = attacker.weapon.accuracy
 
@@ -17,7 +24,7 @@ end
 
 function CombatCalculator:get_damage(attacker: BattleUnit, defender: BattleUnit): integer
     local atk = attacker.weapon.damage
-    local def = defender.stats.def
+    local def = defender.character.stats.def
     return mid(0, atk - def, 999)
 end
 

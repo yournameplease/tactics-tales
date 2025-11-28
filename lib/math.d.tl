@@ -67,13 +67,14 @@ global tonum: function(val: any, format_flags: integer) : number
 --- [View Online](https://pico-8.fandom.com/wiki/Abs)
 --- @param n number
 --- @return number
-global abs: function(n: number) : number
+-- global abs: function(n: number) : number
+global abs: function(n: integer) : integer
 
 --- Returns the sign of a number. 1 for positive, -1 for negative
 --- [View Online](https://pico-8.fandom.com/wiki/Sgn)
 --- @param n number
 --- @return -1 | 1
-global sgn: function(n: number) : number
+global sgn: function(n: number) : integer
 
 --- Calculates the arctangent of dx/dy formed by the vector on the unit circle.
 --- The result is adjusted to represent the full circle.

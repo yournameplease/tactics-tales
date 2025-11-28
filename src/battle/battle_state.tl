@@ -1,3 +1,4 @@
+require("src/types")
 require("src/util")
 require("src/tactics/battle_unit")
 
@@ -14,29 +15,39 @@ function BattleState.new(width: integer, height: integer): BattleState
     return self
 end
 
-function BattleState:spawn_unit(unit: BattleUnit, x: integer, y: integer)
-    if self.units_by_x_y:get(x, y) ~= nil then
-        error("Tried to spawn unit in an occupied tile! (".. x .. "," .. y .. ")")
+
+-- data access
+
+function BattleState:get_unit_by_id(id: integer): BattleUnit
+    return self.units_by_id[id]
+end
+
+function BattleState:get_at_tile(tile: TilePoint): BattleUnit
+    return self.units_by_x_y:get_point(tile)
+end
+
+function BattleState:spawn_unit(unit: BattleUnit, tile: TilePoint)
+    if self:get_at_tile(tile) ~= nil then
+        error("Tried to spawn unit in an occupied tile! (".. tile.x .. "," .. tile.y .. ")")
     end
 
     local id = unit.id
     self.units_by_id[id] = unit
-    self.units_by_x_y:set(x, y, unit)
+    self.units_by_x_y:set_point(tile, unit)
 end
 
-function BattleState:tile_is_legal_destination(unit: BattleUnit, x: integer, y: integer): boolean
-    local unit_id_at_destination = self.units_by_x_y:get(x, y)
+function BattleState:tile_is_legal_destination(unit: BattleUnit, tile: TilePoint): boolean
+    local unit_id_at_destination = self.units_by_x_y:get_point(tile)
     return (unit_id_at_destination == nil
             or unit_id_at_destination.id == unit.id)
 end
 
-function BattleState:move_unit(unit: BattleUnit, x: integer, y: integer)
-    assert(self:tile_is_legal_destination(unit, x, y))
+function BattleState:move_unit(unit: BattleUnit, tile: TilePoint)
+    assert(self:tile_is_legal_destination(unit, tile))
 
-    self.units_by_x_y:set(unit.x, unit.y, nil)
-    self.units_by_x_y:set(x, y, unit)
-    unit.x = x
-    unit.y = y
+    self.units_by_x_y:set_point(unit.tile, nil)
+    self.units_by_x_y:set_point(tile, unit)
+    unit.tile = tile
 end
 
 function BattleState:kill_unit(unit: BattleUnit)
@@ -45,19 +56,17 @@ function BattleState:kill_unit(unit: BattleUnit)
     unit:die()
 end
 
--- data access
-
-function BattleState:get_unit_by_id(id: integer): BattleUnit
-    return self.units_by_id[id]
-end
-
-function BattleState:get_unit_at_coordinates(x: integer, y: integer): BattleUnit
-    return self.units_by_x_y:get(x, y)
-end
 
 -- queries
 
-function BattleState:get_targets_in_range(unit_id: integer, x: integer, y: integer): { BattleUnit }
+
+function BattleState:tile_has_distance_from_tile(t1: TilePoint, t2: TilePoint, min_distance: integer, max_distance: integer): boolean
+    max_distance = max_distance or min_distance
+    local distance = taxicab_distance(t1, t2)
+    return distance >= min_distance and distance <= max_distance
+end
+
+function BattleState:get_targets_in_range(unit_id: integer, tile: TilePoint): { BattleUnit }
     local targets: { BattleUnit } = {}
     local attacker = self.units_by_id[unit_id]
     local min_range = attacker.weapon.min_range
@@ -65,9 +74,9 @@ function BattleState:get_targets_in_range(unit_id: integer, x: integer, y: integ
     for _,target in pairs(self.units_by_id) do
         if target.id ~= attacker.id then
             if target.side ~= attacker.side
-                    and tile_has_distance_from_unit(
-                    x, y,
-                    target.x, target.y,
+                    and self:tile_has_distance_from_tile(
+                    tile,
+                    target.tile,
                     min_range, max_range
             ) then
                 add(targets, target)
