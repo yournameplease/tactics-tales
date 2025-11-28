@@ -30,30 +30,13 @@ local BASE_ENEMY_SPAWNER_SPRITE = 0x410
 local BASE_REINFORCEMENT_SPAWNER_SPRITE = 0x418
 
 local METATILES_LAYER = 1
-local GROUND_LAYER = 3
+-- local GROUND_LAYER = 3
 -- map_data
 --
 
---- Returns a grid table and metadata table
--- @param map_def: The entry from MAP_DEFINITIONS
--- @return map: The Picotron map data
--- @return meta: table containing { events={} }
-function MapManager:load_map(map_id: string): MapData
-    local definition = MAP_DEFINITIONS[map_id]
-    assert(definition ~= nil)
-
-    local map_data: MapData
-    if definition.type == "static" then
-        map_data = self:_load_static(definition)
-    elseif definition.type == "procedural" then
-
-    end
-
-    return map_data
-end
 
 function MapManager:_load_static(definition: StaticMapDefinition): MapData
-    local map_data = {}
+    local map_data: MapData = {}
 
     map_data.userdata = fetch(definition.file) as { __MapFetchResultEntry }
 
@@ -84,6 +67,24 @@ function MapManager:_load_static(definition: StaticMapDefinition): MapData
     return map_data
 end
 
-function MapManager:_generate_procedural(definition) end
+-- function MapManager:_generate_procedural(definition) end
+
+--- Returns a grid table and metadata table
+-- @param map_def: The entry from MAP_DEFINITIONS
+-- @return map: The Picotron map data
+-- @return meta: table containing { events={} }
+function MapManager:load_map(map_id: string): MapData
+    local definition = MAP_DEFINITIONS[map_id]
+    assert(definition ~= nil)
+
+    local map_data: MapData
+    if definition is StaticMapDefinition then
+        map_data = self:_load_static(definition)
+    -- elseif definition is ProceduralMapDefinition then
+
+    end
+
+    return map_data
+end
 
 return MapManager

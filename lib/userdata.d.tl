@@ -12,6 +12,9 @@ global record Userdata
 	x: number
 	y: number
 	z: number
+	width: function(self): integer | nil
+	height: function(self): integer | nil
+	get: function(self, integer, integer): integer
 end
 
 
