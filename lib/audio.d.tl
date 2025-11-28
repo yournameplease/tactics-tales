@@ -8,7 +8,7 @@
 --- @param length? integer The length of the sound effect to play in notes (0-63).
 --- @param pan? integer The panning of the sound effect (-128 to 127).
 --- @param mix_volume? integer The volume of the sound effect (0-255). Takes priority over the value at `0x553a`.
-global sfx: function (n: integer, channel: integer, offset: integer, length: integer, pan: integer, mix_volume: integer) 
+global sfx: function (n: integer, channel?: integer, offset?: integer, length?: integer, pan?: integer, mix_volume?: integer) 
 
 --- Plays music starting from pattern n.
 --- If n is -1, stop music
@@ -17,7 +17,7 @@ global sfx: function (n: integer, channel: integer, offset: integer, length: int
 --- @param n integer
 --- @param fade_len? integer
 --- @param channel_mask? integer
-global music: function(n: integer, fade_len: integer, channel_mask: integer) 
+global music: function(n: integer, fade_len?: integer, channel_mask?: integer) 
 
 --- This provides low level control over a channel. It is useful in more niche situations, like audio authoring tools and size-coding.
 --- Internally this is what is used to play each row of a sfx when one is active. Use 0xff to indicate an attribute should not be altered.

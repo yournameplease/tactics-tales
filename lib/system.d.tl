@@ -35,7 +35,7 @@ global env: function() : __Environment
 
 --- Exits the program
 --- @param exit_code? integer
-global exit: function(exit_code: integer) 
+global exit: function(exit_code?: integer) 
 
 --- Prints text to the host system's console
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#printh)
@@ -44,12 +44,12 @@ global printh: function(value: any)
 
 --- @param filename string
 --- @param env? __Environment
-global create_process: function(filename: string, env: __Environment) 
+global create_process: function(filename: string, env?: __Environment) 
 
 --- Stop the cart and optionally print a message
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#stop)
 --- @param message? string
-global stop: function(message: string) 
+global stop: function(message?: string) 
 
 --- If condition is false, stop the cart and print a message
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#assert)
@@ -73,7 +73,7 @@ global t : function() : number
 --- @param t? integer | string
 --- @param delta? number
 --- @return string
-global date: function(format: string, t: integer | string, delta: number): string 
+global date: function(format?: string, t?: integer | string, delta?: number): string 
 
 --- Set the system clipboard
 --- @param text string
@@ -109,7 +109,7 @@ global notify: function(message: string)
 --- @param id integer
 --- @param addr? integer
 --- @return any
-global stat: function(id: integer, addr: integer) 
+global stat: function(id?: integer, addr?: integer) 
 
 --- Get a property from the current theme (/ram/shared/theme.pod)
 --- @param which string

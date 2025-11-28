@@ -20,7 +20,7 @@ end
 --- If m is nil, reset the menu
 --- View implementation in /system/lib/app_menu.lua
 --- @param m? __MenuItem
-global menuitem: function(m: __MenuItem) 
+-- global menuitem: function(m?: __MenuItem) 
 
 --- Adds a menu item
 --- id is the numerical id
@@ -30,4 +30,4 @@ global menuitem: function(m: __MenuItem)
 --- @param id integer
 --- @param label string | function
 --- @param action function
--- global menuitem: function(id: integer, label: any, action: any) 
+global menuitem: function(id?: integer | __MenuItem, label?: any, action?: any) 

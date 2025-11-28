@@ -52,7 +52,7 @@ global get_display: function() : Userdata
 --- If ud is not provided, set the draw target to the current display
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_draw_target)
 --- @param ud? userdata
-global set_draw_target: function(ud: Userdata) 
+global set_draw_target: function(ud?: Userdata) 
 
 --- Gets the current draw target as a u8, 2d userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_draw_target)
@@ -64,7 +64,7 @@ global get_draw_target: function(): Userdata
 --- @param width integer
 --- @param height integer
 --- @param attribs? __WindowAttribs
-global window: function(width: integer, height: integer, attribs: __WindowAttribs) 
+global window: function(width: integer | __WindowAttrribs, height: integer, attribs?: __WindowAttribs) 
 
 --- Create a window or set its attributes
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#window)

@@ -23,7 +23,7 @@
 --- @param p8layers? any
 --- @param tile_w? any
 --- @param tile_h? any
-global map: function(src: any, tile_x: any, tile_y: any, sx: any, sy: any, tiles_x: any, tiles_y: any, p8layers: any, tile_w: any, tile_h: any) 
+global map: function(src: any, tile_x: any, tile_y: any, sx?: any, sy?: any, tiles_x?: any, tiles_y?: any, p8layers?: any, tile_w?: any, tile_h?: any) 
 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mget)
 --- @param x any

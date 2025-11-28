@@ -11,7 +11,7 @@
 --- @param flags? integer
 --- @param metadata? table
 --- @return string | nil
-global pod: function(val: any | string | Userdata | boolean | number, flags: integer, metadata: any): string | nil 
+global pod: function(val: any | string | Userdata | boolean | number, flags?: integer, metadata?: any): string | nil 
 
 --- Gets the decoded value and metadata from a POD string
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#unpod)

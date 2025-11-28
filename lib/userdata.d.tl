@@ -32,7 +32,7 @@ end
 --- @return userdata
 --- @overload fun(data_type: userdata_type, width: integer, data: string?): userdata
 --- @overload fun(data: string): userdata
-global userdata: function(data_type: userdata_type, width: integer, height: integer, data: string): Userdata 
+global userdata: function(data_type: userdata_type, width: integer, height: integer, data?: string): Userdata 
 
 --- Creates a vector (f64, 1d userdata)
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#vec)
@@ -44,7 +44,7 @@ global vec: function(...: number) : Userdata
 --- @return number
 --- Get the magnitude of the vector
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
--- global userdata: function:magnitude: any() 
+-- global Userdata:magnitude = function(self): number 
 
 --- @class userdata
 --- @param v userdata

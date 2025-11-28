@@ -6,7 +6,7 @@
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-global peek: function(addr: integer, n: integer): integer
+global peek: function(addr: integer, n?: integer): integer
 
 --- Read an i16 from an address in memory
 --- If n is provided, return that number of results
@@ -14,7 +14,7 @@ global peek: function(addr: integer, n: integer): integer
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-global peek2: function(addr: integer, n: integer): integer
+global peek2: function(addr: integer, n?: integer): integer
 
 --- Read an i32 from an address in memory
 --- If n is provided, return that number of results
@@ -22,7 +22,7 @@ global peek2: function(addr: integer, n: integer): integer
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-global peek4: function(addr: integer, n: integer): integer
+global peek4: function(addr: integer, n?: integer): integer
 
 --- Read an i64 from an address in memory
 --- If n is provided, return that number of results
@@ -30,7 +30,7 @@ global peek4: function(addr: integer, n: integer): integer
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-global peek8: function(addr: integer, n: integer): integer
+global peek8: function(addr: integer, n?: integer): integer
 
 --- Write a byte to an address in memory
 --- If multiple values are given, they will be written sequentially

@@ -6,7 +6,7 @@
 --- @param table table
 --- @param value any
 --- @param index? number
-global add: function(table: any, value: any, index: number) 
+global add: function(table: any, value: any, index?: number) 
 
 --- Delete the first instance of value in table
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#del)
@@ -21,14 +21,14 @@ global del: function(table: any, value: any) : any | nil
 --- @param table table
 --- @param index? integer
 --- @return any | nil
-global deli: function(table: any, index: any) : any | nil
+global deli: function(table: any, index?: any) : any | nil
 
 --- Get the length of a table
 --- When value is specified, get the number of times value is in the table
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#count)
 --- @param table table
 --- @param value? any
-global count: function(table: any, value: any) 
+global count: function(table: any, value?: any) 
 
 --- Returns an iterator for array like tables
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#all)

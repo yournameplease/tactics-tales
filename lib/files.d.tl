@@ -23,7 +23,7 @@ global cd: function(path: any)
 --- @return string | nil type
 --- @return number | nil size
 --- @return string | nil origin
-global fstat: function(path: any): string, number, string 
+global fstat: function(path: any): string | nil, number | nil, string | nil 
 
 --- Converts a relative path to an absolute path
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fullpath)
@@ -35,7 +35,7 @@ global fullpath: function(filename: any) : string
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ls)
 --- @param path? string
 --- @return string[]
-global ls: function(path: any) : {string}
+global ls: function(path?: any) : {string}
 
 --- Copy a file from src to dest. Folders are copied recursively and the dest is overwritten.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cp)
@@ -77,7 +77,7 @@ global store: function(filename: string, object: any, metadata: __FileMetadata)
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fetch_metadata)
 --- @param filename string
 --- @return __FileMetadata | nil
-global fetch_metadata: function(filename: string): __FileMetadata 
+global fetch_metadata: function(filename: string): __FileMetadata | nil
 
 --- Store just the metadata of a path
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#store_metadata)

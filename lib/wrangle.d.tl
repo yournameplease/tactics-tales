@@ -12,7 +12,7 @@
 --- @param untitled_filename? string
 --- @param get_hlocation? function
 --- @param set_hlocation? function
-global wrangle_working_file: function(save_state: any, load_state: any, untitled_filename: string, get_hlocation: any, set_hlocation: any) 
+global wrangle_working_file: function(save_state?: any, load_state?: any, untitled_filename?: string, get_hlocation?: any, set_hlocation?: any) 
 
 --- Gets the present working file. Used with wrangle_working_file
 --- View implementation in /system/lib/wrangle.lua

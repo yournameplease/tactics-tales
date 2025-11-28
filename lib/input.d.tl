@@ -12,7 +12,7 @@
 --- @param button integer
 --- @param player? integer
 --- @return number | false
-global btn: function(button: integer, player: integer) : number -- | false
+global btn: function(button: integer, player?: integer) : number | boolean
 
 --- Get the state of a button held down.
 --- By default, a button press repeats after 30 frames, and once again every 8 frames
@@ -27,7 +27,7 @@ global btn: function(button: integer, player: integer) : number -- | false
 --- @param button integer
 --- @param player? integer
 --- @return number | false
-global btnp: function(button: integer, player: integer): number -- | false 
+global btnp: function(button: integer, player?: integer): number | boolean 
 
 --- Get the state of a key
 --- If raw is set, ignore the keyboard layout
@@ -35,7 +35,7 @@ global btnp: function(button: integer, player: integer): number -- | false
 --- @param k string
 --- @param raw? boolean
 --- @return boolean
-global key: function(k: string, raw: boolean) : boolean
+global key: function(k: string, raw?: boolean) : boolean
 
 --- Get the state of a key held down
 --- If raw is set, ignore the keyboard layout
@@ -43,7 +43,7 @@ global key: function(k: string, raw: boolean) : boolean
 --- @param k string
 --- @param raw? boolean
 --- @return boolean
-global keyp: function(k: string, raw: boolean): boolean 
+global keyp: function(k: string, raw?: boolean): boolean 
 
 --- Reset the state of a key until the end of frame
 --- View implementation in /system/lib/events.lua
@@ -59,7 +59,7 @@ global peektext: function(): boolean
 --- If clear is set, discard remaining text
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#readtext)
 --- @param clear? boolean
-global readtext: function(clear: boolean) 
+global readtext: function(clear?: boolean) 
 
 --- Gets the current location and state of the mouse
 --- If new_mx and new_my are set, move the mouse to that position
