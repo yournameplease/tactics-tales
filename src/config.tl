@@ -1,6 +1,12 @@
-require("src/debug")
-
 -- constant configs.  eventually, may move back into relevant files.
+
+global enum LogLevel
+    "ERROR"
+    "WARN"
+    "INFO"
+    "DEBUG"
+    "TRACE"
+end
 
 local record Config
 	LOG_LEVEL: LogLevel
@@ -38,4 +44,4 @@ local CONFIG: Config = {
 
 }
 
-return Config
+return CONFIG

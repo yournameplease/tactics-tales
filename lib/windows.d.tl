@@ -64,7 +64,7 @@ global get_draw_target: function(): Userdata
 --- @param width integer
 --- @param height integer
 --- @param attribs? __WindowAttribs
-global window: function(width: integer | __WindowAttrribs, height: integer, attribs?: __WindowAttribs) 
+global window: function(width: integer, height: integer, attribs?: __WindowAttribs) 
 
 --- Create a window or set its attributes
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#window)

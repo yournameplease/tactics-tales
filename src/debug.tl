@@ -1,18 +1,10 @@
+local CONFIG = require("src/config")
 
-local enum LogLevel
-    "ERROR"
-    "WARN"
-    "INFO"
-    "DEBUG"
-    "TRACE"
-end
-
-
-Log = {}
+local Log = {}
 
 local log_level = CONFIG.LOG_LEVEL
 
-function should_print (level: LogLevel): boolean
+local function should_print (level: LogLevel): boolean
     if log_level == "ERROR" then
         return level == "ERROR"
     elseif log_level == "WARN" then
@@ -29,20 +21,29 @@ end
 
 local function debug_print(level: LogLevel, ...: any)
     if should_print(level) then
-        local arg = {...}
+        local array = {...}
         local str = ""
-        for i=1,#arg-1 do
-            local v = arg[i]
+        for i=1,#array-1 do
+            local v = array[i]
             if type(v) == "boolean" then
                 v = v and "TRUE" or "FALSE"
             end
-            str = str .. v .. " , "
+            if v is string then
+                str = str .. v .. " , "
+            else
+                error("Logging undefined type!")
+            end
         end
-        local v = arg[#arg]
+        local v = array[#arg]
         if type(v) == "boolean" then
             v = v and "TRUE" or "FALSE"
         end
-        str = str .. v
+
+        if v is string then
+            str = str .. v
+        else
+            error("Logging undefined type!")
+        end
 
         printh(level .. ": " .. str)
     end
