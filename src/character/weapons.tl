@@ -4,17 +4,17 @@ require("src/util/data_utils")
 -- shields
 -- dual wielding (use front hand sprite)
 
-local WEAPON_TYPES = enum {
+local enum WeaponType
     "MELEE",
     "RANGED"
-}
+end
 
 -- picks the relevant body sprite
-local WEAPON_BODY_TYPES = enum {
+local enum WeaponBodyType
     "BACK_HAND", -- standard 1h weapons
     "FRONT_HAND", -- bows, rapiers,
     "HORIZONTAL" -- heavy weapons
-}
+end
 
 local default_weapon = {
     name = "Default Weapon",

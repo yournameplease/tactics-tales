@@ -1,35 +1,35 @@
 
 -- http://lua-users.org/wiki/CopyTable
-function deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
-        end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
-end
+-- global function deepcopy(orig)
+--     local orig_type = type(orig)
+--     local copy
+--     if orig_type == 'table' then
+--         copy = {}
+--         for orig_key, orig_value in next, orig, nil do
+--             copy[deepcopy(orig_key)] = deepcopy(orig_value)
+--         end
+--         setmetatable(copy, deepcopy(getmetatable(orig)))
+--     else -- number, string, boolean, etc
+--         copy = orig
+--     end
+--     return copy
+-- end
 
-function rndi(i)
+global function rndi(i: number): integer
     return flr(rnd(i)//1)
 end
 
-function choose_random(...)
-    local i = rndi(args.n)+1
-    return args[i]
-end
+-- global function choose_random(...)
+--     local i = rndi(args.n)+1
+--     return args[i]
+-- end
 
-function choose_random_from_list(list)
+global function choose_random_from_list<A>(list: {A}): A
     local i = rndi(#list)+1
     return list[i]
 end
 
-function choose_random_from_table(table)
+global function choose_random_from_table<A>(table: {string: A}): A
     local size = 0
     for k, v in pairs(table) do
         size = size + 1
@@ -42,7 +42,7 @@ function choose_random_from_table(table)
     error("Table was empty! (Or I made a bug here...)")
 end
 
-function reverse_list(list)
+global function reverse_list<A>(list: {A}): {A} 
     local out = {}
     for i = 1,#list do
         out[#list-i+1] = list[i]
@@ -50,11 +50,11 @@ function reverse_list(list)
     return out
 end
 
-function fn_true()
+global function fn_true(): boolean
     return true
 end
 
-function tmap(table, fn)
+global function tmap<K, A, B>(table: {K: A}, fn: function(A): B): { K: B }
     local out = {}
     for k,v in pairs(table) do
         out[k] = fn(v)
@@ -64,7 +64,7 @@ end
 
 -- normalize to offsets from first tile
 -- multiply by tile scale
-function to_tile_path(path)
+global function to_tile_path(path: { TilePoint }): { AnimationPoint }
     assert(#path > 0)
     --if #path == 0 then return path end
 
@@ -80,20 +80,20 @@ end
 
 IdCounter = {}
 
-function IdCounter:get_id()
+function IdCounter:get_id(): integer
     local id = self.id_count
     self.id_count = self.id_count + 1
     return id
 end
 
-function IdCounter.new()
+function IdCounter.new(): IdCounter
     local counter = { id_count = 1 }
     setmetatable(counter, { __index = IdCounter })
     return counter
 end
 
 -- 0-indexed
-Array2D = {}
+global Array2D = {}
 
 function Array2D.new(w, h)
     local out = {
@@ -107,12 +107,12 @@ function Array2D.new(w, h)
     return out
 end
 
-function Array2D:get(x, y)
+function Array2D:get(x: integer, y: integer): V
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     return self[x][y]
 end
 
-function Array2D:set(x, y, v)
+function Array2D:set(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self[x][y] = v
 end

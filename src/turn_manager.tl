@@ -2,10 +2,13 @@ require("src/util/data_utils")
 
 local TurnManager = {}
 
-local PHASE = enum({"PLAYER", "ENEMY"})
+local enum Phase
+    "PLAYER"
+    "ENEMY"
+end
 
 local turn = 1
-local phase = PHASE.PLAYER
+local phase: Phase = "PLAYER"
 
 function TurnManager.get_turn()
     return turn
@@ -13,12 +16,12 @@ end
 
 BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
     LOG.info("Begin player turn!")
-    phase = PHASE.PLAYER
+    phase = "PLAYER"
     battle_manager.tactics_engine:refresh_units()
 end)
 
 BUS.on("TACTICS_END_PLAYER_TURN", function()
-    if phase ~= PHASE.PLAYER then
+    if phase ~= "PLAYER" then
         LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..phase..".  Ignoring message.")
         return
     end
@@ -29,13 +32,13 @@ BUS.on("TACTICS_END_PLAYER_TURN", function()
 end)
 
 BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
-    phase = PHASE.ENEMY
+    phase = "ENEMY"
     LOG.info("Begin enemy turn!")
 
 end)
 
 BUS.on("TACTICS_END_ENEMY_TURN", function()
-    if phase ~= PHASE.ENEMY then
+    if phase ~= "ENEMY" then
         LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..phase..".  Ignoring message.")
         return
     end

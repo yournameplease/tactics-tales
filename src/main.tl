@@ -49,7 +49,7 @@ global COMBAT_CALCULATOR = require("src/combat/combat_calculator")
 global ANIMATION_MANAGER = require("src/animation")
 global UI_MANAGER = require("src/ui/ui_manager")
 global CONTEXT_MANAGER = require("src/game_context")
-gloabl BATTLE_MANAGER = require("src/battle/battle_manager")
+global BATTLE_MANAGER = require("src/battle/battle_manager")
 
 global MAP_MANAGER = require("src/map/map_manager")
 require("src/tactics/enemy_ai")

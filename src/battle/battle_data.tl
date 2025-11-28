@@ -7,14 +7,14 @@ require("src/battle/victory_conditions")
   - specify input for utility map tiles
 ]]
 
-BATTLE_DATA = {
+local BATTLE_DATA = {
     ["bandit_village"] = {
         map_id = "bandit_village",
         victory_conditions = { {
-            type = VICTORY_CONDITIONS.ROUT
+            type = "ROUT"
         } },
         failure_conditions = { {
-            type = FAILURE_CONDITIONS.TURN_LIMIT
+            type = "TURN_LIMIT"
         } },
         enemies = {
             { template = "bandit_goon" },
@@ -22,3 +22,5 @@ BATTLE_DATA = {
         }
     }
 }
+
+return BATTLE_DATA

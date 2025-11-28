@@ -1,13 +1,13 @@
 require("src/util/data_utils")
 
-VICTORY_CONDITIONS = enum{
-        "ROUT",
-        "DEFEAT_BOSS",
-        "SURVIVE",
+local enum VictoryCondition
+        "ROUT"
+        "DEFEAT_BOSS"
+        "SURVIVE"
         "ESCAPE"
-}
+end
 
-FAILURE_CONDITIONS = enum{
-    "LEADER_DIES",
+local enum FailureCondition
+    "LEADER_DIES"
     "TURN_LIMIT"
-}
+end
