@@ -1,5 +1,18 @@
 
-local BattleUnit = {}
+-- TODO: some of this moves to character/weapon files
+
+global record WeaponInstance
+    min_range: integer
+    max_range: integer
+end
+
+global record BattleUnit
+    id: integer
+    x: integer
+    y: integer
+    side: integer
+    weapon: WeaponInstance
+end
 
 local function access_fallback(table, key)
     if table.source.stats[key] then

@@ -1,3 +1,5 @@
+local CONFIG = require("src/config")
+
 require("src/util")
 require("src/tiles")
 require("src/combat")
@@ -26,11 +28,14 @@ local TEXT_HEIGHT = 7
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
-Battle = {}
-Battle.__index = Battle
+global record TacticsEngine
+    tile_manager: TileManager
+    battle_state: BattleState
+end
 
-function Battle.new(battle_state, tile_manager)
-    local self = setmetatable({}, Battle)
+
+function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager): TacticsEngine
+    local self = setmetatable({}, { __index = TacticsEngine })
     self.battle_is_blocked = false
     self.battle_state = battle_state
     self.tile_manager = tile_manager
@@ -295,7 +300,7 @@ function Battle:update()
     local blocking_animation = false
     local all_players_acted = true
 
-    for unit in all(self.battle_state:get_units()) do
+    for unit in all(self.battle_state:get_all_units()) do
         unit:update_animation()
         if unit.animation_blocking then
             blocking_animation = true

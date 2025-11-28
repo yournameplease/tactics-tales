@@ -1,4 +1,4 @@
-
+local CONFIG = require("src/config")
 -- http://lua-users.org/wiki/CopyTable
 -- global function deepcopy(orig)
 --     local orig_type = type(orig)
@@ -78,7 +78,9 @@ global function to_tile_path(path: { TilePoint }): { AnimationPoint }
     end)
 end
 
-IdCounter = {}
+global record IdCounter
+    id_count: integer
+end
 
 function IdCounter:get_id(): integer
     local id = self.id_count
@@ -93,9 +95,13 @@ function IdCounter.new(): IdCounter
 end
 
 -- 0-indexed
-global Array2D = {}
+global record Array2D<V>
+    w: integer
+    h: integer
+    data: {{ V }}
+end
 
-function Array2D.new(w, h)
+function Array2D.new<V>(w: integer, h: integer): Array2D<V>
     local out = {
         w = w,
         h = h
@@ -107,12 +113,12 @@ function Array2D.new(w, h)
     return out
 end
 
-function Array2D:get(x: integer, y: integer): V
+function Array2D:get<V>(x: integer, y: integer): V
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
-    return self[x][y]
+    return self.data[x][y]
 end
 
-function Array2D:set(x: integer, y: integer, v: V)
+function Array2D:set<V>(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
-    self[x][y] = v
+    self.data[x][y] = v
 end

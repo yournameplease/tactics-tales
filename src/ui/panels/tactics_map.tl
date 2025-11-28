@@ -23,7 +23,7 @@ local TEXT_HEIGHT = 7
 
 local function compute_animated_unit_positions(battle_state)
     return tmap(
-            battle_state:get_units(),
+            battle_state:get_all_units(),
             function(unit)
                 local ox, oy = unit:get_animation_offset()
                 return {
