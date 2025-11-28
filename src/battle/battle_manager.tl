@@ -1,24 +1,27 @@
-require("src/battle/battle_data")
+local BATTLE_DATA = require("src/battle/battle_data")
 
 local BattleState = require("src/battle/battle_state")
 local BattleUnit = require("src/tactics/battle_unit")
 local TileManager = require("src/tiles")
 local Tactics = require("src/tactics")
+local MapManager = require("src/map/map_manager")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
-BattleManager = {}
-BattleManager.__index = BattleManager
+local record BattleManager
+    battle_state: BattleState
+    tile_manager: TileManager
+end
 
 --- Main entry point.
 -- @param battle_id: Key from BATTLES
 -- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id)
+function BattleManager.new(battle_id: string): BattleManager
     local battle_definition = BATTLE_DATA[battle_id]
     assert(battle_definition ~= nil)
 
-    local self = setmetatable({}, BattleManager)
+    local self = setmetatable({}, { __index = BattleManager })
 
     self.map_data = MapManager:load_map(battle_definition.map_id)
     
@@ -55,7 +58,7 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
     end
 end
 
-function BattleManager:_spawn_players(player_spawners)
+function BattleManager:_spawn_players(player_spawners: { SpawnPoint })
     for id, spawn_point in pairs(player_spawners) do
         -- TODO: use existing players
         local character = CHARACTER_MANAGER.generate_character()
@@ -63,20 +66,20 @@ function BattleManager:_spawn_players(player_spawners)
     end
 end
 
-function BattleManager:_spawn_unit(unit, x, y, side)
-    local battle_unit = BattleUnit.spawn(unit, x, y, side)
-    self.battle_state:spawn_unit(battle_unit, x, y)
+function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: SpawnPoint, side: integer)
+    local battle_unit = BattleUnit.spawn(unit, spawn_point.x, spawn_point.y, side)
+    self.battle_state:spawn_unit(battle_unit, spawn_point.x, spawn_point.y)
 end
 
 --- Checks if current state satisfies Victory/Failure conditions
 -- Called by TurnManager at end of actions
-function BattleManager:check_objectives(battle_state)
+function BattleManager:check_objectives(): BattleFinishState
     -- returns "WIN", "LOSS", or nil (continue)
-    self:check_for_end()
+    return self:check_for_end()
 end
 
--- legacy function
-function BattleManager:check_for_end()
+-- legacy function, doesn't support different end conditions
+function BattleManager:check_for_end(): BattleFinishState
     if self.tactics_engine:is_blocked() then
         return { finished = false }
     end

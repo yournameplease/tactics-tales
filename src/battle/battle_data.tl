@@ -7,7 +7,39 @@ require("src/battle/victory_conditions")
   - specify input for utility map tiles
 ]]
 
-local BATTLE_DATA = {
+local enum VictoryConditionType
+        "ROUT"
+        "DEFEAT_BOSS"
+        "SURVIVE"
+        "ESCAPE"
+end
+
+local interface VictoryCondition
+    type: VictoryConditionType
+end
+
+
+local enum FailureConditionType
+    "LEADER_DIES"
+    "TURN_LIMIT"
+end
+
+local interface FailureCondition
+    type: FailureConditionType
+end
+
+local record EnemySpawnData
+    template: string
+end
+
+global record BattleDefinition
+    map_id: string
+    victory_conditions: { VictoryCondition }
+    failure_conditions: { FailureCondition }
+    enemies: { integer: EnemySpawnData }
+end
+
+local BATTLE_DATA: { string: BattleDefinition } = {
     ["bandit_village"] = {
         map_id = "bandit_village",
         victory_conditions = { {
