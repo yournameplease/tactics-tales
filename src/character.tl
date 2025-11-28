@@ -1,13 +1,40 @@
 require("src/util")
-require("src/character/animation_data")
-require("src/character/weapons")
+local ANIMATION_DATA = require("src/character/animation_data")
+local WEAPON_DATA = require("src/character/weapons")
 
 local id_counter = IdCounter.new()
 local characters = {}
 
 local CharacterManager = {}
 
+global enum Sex
+    "male"
+    "female"
+end 
 
+global record CharacterAppearance
+    sex: Sex
+    hair: integer
+    skin: integer
+    hair_color: Color
+    body: integer
+    beard: integer
+    beard_color: Color
+end
+
+global record CharacterStats
+    hp_max: integer
+    movement: integer
+    def: integer
+end
+
+global record Character
+    id: integer
+    name: string
+    appearance: CharacterAppearance
+    stats: CharacterStats
+    weapon: Weapon
+end
 
 local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
@@ -16,10 +43,10 @@ local COLOR_BEARD = 22
 local COLOR_EYE = 21
 local COLOR_EYE_WHITE = 7
 
-local HAIR_COLORS = {
+local HAIR_COLORS: { Color } = {
     4, 5, 6, 9, 10, 20, 21, 22, 24, 25, 31
 }
-local SKIN_COLORS = {
+local SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
     {31, 4},
     {4, 20},
@@ -32,9 +59,8 @@ local BASE_M_HAIR_SPRITE = 256 + 72
 local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
 
-Character = {}
 
-function Character:start_animation(animation_id, direction)
+function Character:start_animation(animation_id: integer, direction: Angle)
     self.animation_data = ANIMATION_MANAGER.create_animation(animation_id, direction)
     self.animation_blocking = true
 end
@@ -58,13 +84,13 @@ function Character:update_animation()
     self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
 end
 
-function get_anchor_offsets(base_x, base_y, anchor_x, anchor_y, limb_x, limb_y, flip_h, flip_v)
-    local diff_x = anchor_x - limb_x
-    local diff_y = anchor_y - limb_y
+local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint, child: AnimationAnchorPoint, flip_h: boolean, flip_v: boolean): AnimationOffset
+    local diff_x = anchor.x - child.x
+    local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
     if flip_v then diff_y = -diff_y end
 
-    return base_x + diff_x, base_y + diff_y
+    return { x = base.x + diff_x, y = base.y + diff_y }
 end
 
 function Character:get_body_type()
@@ -74,7 +100,7 @@ function Character:get_body_type()
 end
 
 -- @return the position of the "feet_center" anchor
-function Character:get_animation_offset()
+function Character:get_animation_offset(): AnimationOffset
     if self.animation_data == nil then
         -- this could go somewhere else...
         self.animation_data = ANIMATION_MANAGER.create_global_animation("IDLE")
@@ -88,7 +114,7 @@ function Character:get_animation_offset()
             frame_data.y + body_sprite_data.anchors.feet_center.y
 end
 
-function Character:set_pal(side)
+function Character:set_pal(side: Side)
     if side == 1 then
         pal(16, 8)
         pal(19, 24)
@@ -100,7 +126,7 @@ function Character:set_pal(side)
     pal(COLOR_BEARD, self.appearance.beard_color)
 end
 
-function Character:draw_head(x, y, side, set_pal)
+function Character:draw_head(point: DrawPoint, side: Side, set_pal: boolean)
     local flip_h = side ~= 0
     local sex = self.appearance.sex
 
@@ -120,7 +146,7 @@ function Character:draw_head(x, y, side, set_pal)
 
 end
 
-function Character:draw(x, y, side, set_pal, apply_animation)
+function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_animation: boolean)
     set_pal = set_pal ~= false
     apply_animation = apply_animation ~= false
 
@@ -160,11 +186,11 @@ function Character:draw(x, y, side, set_pal, apply_animation)
 
     spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
 
-    local head_x, head_y = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h)
-    self:draw_head(head_x, head_y, side, set_pal)
+    local head_anchor = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h, false)
+    self:draw_head(head_anchor, side, set_pal)
 
-    local weapon_x, weapon_y = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h)
-    spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_x, weapon_y, flip_h)
+    local weapon_anchor = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h, false)
+    spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_anchor, flip_h)
 
     if set_pal then
         pal()
@@ -172,10 +198,10 @@ function Character:draw(x, y, side, set_pal, apply_animation)
 
 end
 
-function generate_appearance()
-    local appearance = {}
+local function generate_appearance(): CharacterAppearance
+    local appearance: CharacterAppearance = {}
 
-    appearance.sex = rndi(2)
+    appearance.sex = choose_random_from_list({"male", "female"})
     appearance.hair = rndi(6)
     appearance.skin = rndi(#SKIN_COLORS)+1
     while appearance.hair_color == nil
@@ -184,7 +210,7 @@ function generate_appearance()
         appearance.hair_color = choose_random_from_list(HAIR_COLORS)
     end
 
-    if appearance.sex == 0 then -- male
+    if appearance.sex == "male" then 
         appearance.body = rndi(4)
         appearance.beard = rndi(7)
         if rnd(6) <= 1 then
@@ -199,19 +225,18 @@ function generate_appearance()
     return appearance
 end
 
-function CharacterManager.generate_character()
-    local character = {
+function CharacterManager.generate_character(): Character
+    local character: Character = {
         id = id_counter:get_id(),
         appearance = generate_appearance(),
         stats = {
             hp_max = 5,
-            damage = 5,
             movement = 5,
             def = 0
         },
         weapon = choose_random_from_table(WEAPON_DATA)
     }
-    character.name = character.appearance.sex == 0 and "Bob" or "Alice",
+    character.name = character.appearance.sex == "male" and "Bob" or "Alice",
 
     setmetatable(character, { __index = Character })
 

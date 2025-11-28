@@ -2,7 +2,39 @@ require("src/util")
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc
 
-local BASE_FRAMES = {
+local enum BaseAnimationName
+    "BACK_HAND"
+    "FRONT_HAND"
+    "HORIZONTAL"
+end
+
+local enum AnimationName
+    "STANDARD_BACK_HAND"
+    "STANDARD_FRONT_HAND"
+    "STANDARD_HORIZONTAL"
+end
+
+local enum AnimationFrameName
+    "idle_1"
+    "idle_2"
+end
+
+local enum AnchorPointName
+    "neck"
+    "main_hand"
+    "off_hand"
+    "feet_center"
+end
+
+global record AnimationFrame
+    sprite_offset: integer
+    anchors: { AnchorPointName: AnimationAnchorPoint }
+end
+
+global type Animation = { AnimationFrameName: AnimationFrame }
+
+
+local BASE_FRAMES: { BaseAnimationName: Animation } = {
     BACK_HAND = {
         idle_1 = {
             sprite_offset = 0,
@@ -65,7 +97,7 @@ local BASE_FRAMES = {
     }
 }
 
-local function frame_from_base_frame(s, base_frame)
+local function frame_from_base_frame(s: integer, base_frame: AnimationFrame ): AnimationFrame
     local frame = {
         sprite = s + base_frame.sprite_offset
     }
@@ -73,12 +105,14 @@ local function frame_from_base_frame(s, base_frame)
     return frame
 end
 
-local function frames_from_base_frame(s, base_frame)
-    return tmap(BASE_FRAMES[base_frame], function (f) return frame_from_base_frame(s, f) end)
+local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
+    return tmap(BASE_FRAMES[base_frame], function (f: AnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
 end
 
-ANIMATION_DATA = {
+local ANIMATION_DATA: { AnimationName: Animation } = {
     STANDARD_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
     STANDARD_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
     STANDARD_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
 }
+
+return ANIMATION_DATA

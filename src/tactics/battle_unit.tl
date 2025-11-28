@@ -15,12 +15,12 @@ global record BattleUnit
     weapon: WeaponInstance
 end
 
-local function access_fallback(table, key)
-    if table.source.stats[key] then
-        return table.source.stats[key]
+local function access_fallback(tab, k)
+    if tab.source.stats[k] then
+        return tab.source.stats[k]
     end
 
-    return table.source[key]
+    return tab.source[k]
 end
 
 function BattleUnit.spawn(permanent_unit, x, y, side)

@@ -1,3 +1,4 @@
+require("src/types")
 require("src/util/data_utils")
 
 -- potential additions
@@ -5,41 +6,61 @@ require("src/util/data_utils")
 -- dual wielding (use front hand sprite)
 
 local enum WeaponType
-    "MELEE",
+    "MELEE"
     "RANGED"
 end
 
 -- picks the relevant body sprite
 local enum WeaponBodyType
-    "BACK_HAND", -- standard 1h weapons
-    "FRONT_HAND", -- bows, rapiers,
+    "BACK_HAND" -- standard 1h weapons
+    "FRONT_HAND" -- bows, rapiers,
     "HORIZONTAL" -- heavy weapons
 end
 
-local default_weapon = {
+local enum WeaponProperty
+    "armorkiller"
+    "shieldsplitter"
+    "long"
+end
+
+global record Weapon
+    name: string
+    sprite: integer
+    hand_anchor: AnimationAnchorPoint
+    damage: integer
+    accuracy: integer
+    type: WeaponType
+    body_type: WeaponBodyType
+    _range: integer
+    min_range: integer
+    max_range: integer
+    properties: { WeaponProperty: boolean } -- TODO: config table per property
+end
+
+local default_weapon: Weapon = {
     name = "Default Weapon",
     sprite = 104,
     hand_anchor = { x = 1, y = 8}, -- the top left position of the handle
     damage = 1,
     accuracy = 90,
-    type = WEAPON_TYPES.MELEE,
-    body_type = WEAPON_BODY_TYPES.BACK_HAND,
-    range = 1,
+    type = "MELEE",
+    body_type = "BACK_HAND",
+    _range = 1,
     min_range = 1,
     max_range = 1,
     properties = {}
 }
 
-local function create_weapon(data)
-    if data.range ~= nil then
-        data.min_range = data.range
-        data.max_range = data.range
+local function create_weapon(data: Weapon) : Weapon
+    if data._range ~= nil then
+        data.min_range = data._range
+        data.max_range = data._range
     end
     setmetatable(data, { __index = default_weapon })
     return data
 end
 
-WEAPON_DATA = {
+local WEAPON_DATA: {string: Weapon} = {
     dagger = create_weapon({
         name = "Dagger",
         sprite = 104,
@@ -104,7 +125,7 @@ WEAPON_DATA = {
         hand_anchor = { x = 3, y = 12},
         damage = 3,
         accuracy = 70,
-        body_type = WEAPON_BODY_TYPES.HORIZONTAL,
+        body_type = "HORIZONTAL",
     }),
     bow = create_weapon({
         name = "Bow",
@@ -112,8 +133,11 @@ WEAPON_DATA = {
         hand_anchor = { x = 13, y = 9},
         damage = 2,
         accuracy = 90,
-        range = 2,
-        type = WEAPON_TYPES.RANGED,
-        body_type = WEAPON_BODY_TYPES.FRONT_HAND,
+        _range = 2,
+        type = "RANGED",
+        body_type = "FRONT_HAND",
     }),
 }
+
+
+return WEAPON_DATA

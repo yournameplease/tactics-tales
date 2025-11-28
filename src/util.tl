@@ -61,13 +61,13 @@ end
 
 -- normalize to offsets from first tile
 -- multiply by tile scale
-global function to_tile_path(path: { TilePoint }): { AnimationPoint }
+global function to_tile_path(path: { TilePoint }): { AnimationOffset }
     assert(#path > 0)
     --if #path == 0 then return path end
 
     local base_x = path[1].x
     local base_y = path[1].y
-    return tmap(path, function(p: TilePoint): AnimationPoint
+    return tmap(path, function(p: TilePoint): AnimationOffset
         return {
             x = (p.x - base_x) * CONFIG.TILE_WIDTH,
             y = (p.y - base_y) * CONFIG.TILE_HEIGHT
