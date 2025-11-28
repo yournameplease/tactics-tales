@@ -5,14 +5,16 @@
 --- @param x number
 --- @param y number
 --- @return number
-global min: function(x: number, y: number) : number
+-- global min: function(x: number, y: number) : number
+global min: function(x: integer, y: integer) : integer
 
 --- Returns the maximum of two numbers
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#MAX)
 --- @param x number
 --- @param y number
 --- @return number
-global max: function(x: number, y: number) : number
+-- global max: function(x: number, y: number) : number
+global max: function(x: integer, y: integer) : integer
 
 --- Returns the middle value of two numbers
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#MID)
@@ -20,7 +22,8 @@ global max: function(x: number, y: number) : number
 --- @param y number
 --- @param z number
 --- @return number
-global mid: function(x: number, y: number, z: number) : number
+-- global mid: function(x: number, y: number, z: number) : number
+global mid: function(x: integer, y: integer, z: integer) : integer
 
 --- Returns the nearest integer at or below a number
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#FLR)

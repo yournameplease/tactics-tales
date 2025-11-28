@@ -5,6 +5,8 @@ local WEAPON_DATA = require("src/character/weapons")
 local id_counter = IdCounter.new()
 local characters = {}
 
+-- TODO: break "drawing" functionality into a CharacterRenderer
+
 local CharacterManager = {}
 
 global enum Sex
@@ -128,20 +130,20 @@ end
 
 function Character:draw_head(point: DrawPoint, side: Side, set_pal: boolean)
     local flip_h = side ~= 0
-    local sex = self.appearance.sex
+    local sex_offset = self.appearance.sex == "male" and 0 or 1
 
     if set_pal then
         self:set_pal(side)
     end
 
-    spr(BASE_HEAD_SPRITE + 4 * sex, x, y, flip_h)
-    if sex == 0 then
-        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+    spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
+    if self.appearance.sex == "male" then
+        spr(BASE_M_HAIR_SPRITE + self.appearance.hair, point.x, point.y, flip_h)
     else
-        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, x, y, flip_h)
+        spr(BASE_F_HAIR_SPRITE + self.appearance.hair, point.x, point.y, flip_h)
     end
     if self.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + self.appearance.beard, x, y, flip_h)
+        spr(BASE_BEARD_SPRITE + self.appearance.beard, point.x, point.y, flip_h)
     end
 
 end

@@ -216,7 +216,7 @@ global palt: function(c: integer, is_transparent?: boolean)
 --- @param y? integer
 --- @param flip_x? boolean
 --- @param flip_y? boolean
-global spr: function(s: integer, x?: integer, y?: integer, flip_x?: boolean, flip_y?: boolean) 
+global spr: function(s: integer, x?: number, y?: number, flip_x?: boolean, flip_y?: boolean) 
 
 --- Crops a sprite to a source rectangle and draws it stretched to fit a destination rectangle on the current draw target.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sspr)

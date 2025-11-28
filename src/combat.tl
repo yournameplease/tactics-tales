@@ -1,14 +1,4 @@
-function is_in_combat_range(attacker, defender, battle_state)
-    local a_x = attacker.x
-    local a_y = attacker.y
-    local d_x = defender.x
-    local d_y = defender.y
-    local min_range = attacker.weapon.min_range
-    local max_range = attacker.weapon.max_range
-    local dist = abs(a_x-d_x)+abs(a_y-d_y)
-
-    return dist >= min_range and dist <= max_range
-end
+require("src/combat/combat_calculator")
 
 function apply_combat_step(step, battle_state)
     local attacker = step.attacker
