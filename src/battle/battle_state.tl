@@ -51,7 +51,7 @@ function BattleState:move_unit(unit: BattleUnit, tile: TilePoint)
 end
 
 function BattleState:kill_unit(unit: BattleUnit)
-    self.units_by_x_y:set(unit.x, unit.y, nil)
+    self.units_by_x_y:set_point(unit.tile, nil)
     self.units_by_id[unit.id] = nil
     unit:die()
 end

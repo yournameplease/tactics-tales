@@ -1,5 +1,3 @@
-require("src/battle/victory_conditions")
-
 --[[ Data contains:
 - map_file or generator
 - victory condition

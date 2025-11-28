@@ -53,6 +53,7 @@ global BATTLE_MANAGER = require("src/battle/battle_manager")
 
 global MAP_MANAGER = require("src/map/map_manager")
 require("src/tactics/enemy_ai")
+require("src/joypad")
 
 -- TODO: local battle_manager
 
@@ -70,22 +71,6 @@ function _init()
             BUS,
             COMBAT_CALCULATOR
     )
-end
-
-function get_joypad()
-    local joy = {
-        dx = (btn(1) or 0) - (btn(0) or 0),
-        dxp = (btnp(1) and 1 or 0) - (btnp(0) and 1 or 0),
-        dy = (btn(3) or 0) - (btn(2) or 0),
-        dyp = (btnp(3) and 1 or 0) - (btnp(2) and 1 or 0),
-        a = btn(4),
-        ap = btnp(4),
-        b = btn(5),
-        bp = btnp(5),
-        lp = btnp(14) -- debug button.  Set to next turn
-    }
-
-    return joy
 end
 
 function _update()

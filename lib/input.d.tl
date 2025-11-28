@@ -12,7 +12,8 @@
 --- @param button integer
 --- @param player? integer
 --- @return number | false
-global btn: function(button: integer, player?: integer) : number | boolean
+-- global btn: function(button: integer, player?: integer) : number | boolean
+global btn: function(button: integer, player?: integer) : boolean
 
 --- Get the state of a button held down.
 --- By default, a button press repeats after 30 frames, and once again every 8 frames
@@ -27,7 +28,8 @@ global btn: function(button: integer, player?: integer) : number | boolean
 --- @param button integer
 --- @param player? integer
 --- @return number | false
-global btnp: function(button: integer, player?: integer): number | boolean 
+-- global btnp: function(button: integer, player?: integer): number | boolean 
+global btnp: function(button: integer, player?: integer): boolean 
 
 --- Get the state of a key
 --- If raw is set, ignore the keyboard layout

@@ -87,7 +87,7 @@ function TileManager:movement_cost(x: integer, y: integer, side: Side): integer
     local tile = ground:get(x,y)
     if tile == nil then return 999 end
 
-    local unit = self.battle_state:get_unit_at_coordinates(x, y)
+    local unit = self.battle_state:get_at_tile({x = x, y = y})
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
