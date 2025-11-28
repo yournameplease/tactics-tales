@@ -1,6 +1,29 @@
-require("src/map/map_data")
+local MAP_DEFINITIONS = require("src/map/map_data")
 
-MapManager = {}
+global record MapManager
+
+end
+
+local record __MapFetchResultEntry
+    bmp: Userdata
+end
+
+global record SpawnPoint
+    x: integer
+    y: integer
+end
+
+global record MapMetadata
+    player_spawners: { integer: SpawnPoint }
+    enemy_spawners: { integer: { SpawnPoint } }
+end
+
+global record MapData
+    width: integer
+    height: integer
+    userdata: { __MapFetchResultEntry }
+    metadata: MapMetadata
+end
 
 local BASE_PLAYER_SPAWNER_SPRITE = 0x408
 local BASE_ENEMY_SPAWNER_SPRITE = 0x410
@@ -15,11 +38,11 @@ local GROUND_LAYER = 3
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function MapManager:load_map(map_id)
+function MapManager:load_map(map_id: string): MapData
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
-    local map_data
+    local map_data: MapData
     if definition.type == "static" then
         map_data = self:_load_static(definition)
     elseif definition.type == "procedural" then
@@ -29,12 +52,12 @@ function MapManager:load_map(map_id)
     return map_data
 end
 
-function MapManager:_load_static(definition)
+function MapManager:_load_static(definition: StaticMapDefinition): MapData
     local map_data = {}
 
-    map_data.map_userdata = fetch(definition.file)
+    map_data.userdata = fetch(definition.file) as { __MapFetchResultEntry }
 
-    local metatiles_layer = map_data.map_userdata[METATILES_LAYER].bmp
+    local metatiles_layer = map_data.userdata[METATILES_LAYER].bmp
     map_data.width = metatiles_layer:width()
     map_data.height = metatiles_layer:height()
     map_data.metadata = {

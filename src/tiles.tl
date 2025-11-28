@@ -60,7 +60,7 @@ function TileManager.new(map_data, battle_state)
 end
 
 function TileManager:get_terrain(x, y)
-    local tile = mget(self.map_data.map_userdata[3], x,y)
+    local tile = mget(self.map_data.userdata[3], x,y)
     local flags = fget(tile)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
@@ -68,7 +68,7 @@ end
 
 -- cost to move onto x,y from any neighbor
 function TileManager:movement_cost(x, y, side)
-    local ground = self.map_data.map_userdata[3].bmp
+    local ground = self.map_data.userdata[3].bmp
     if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
         return 999
     end
