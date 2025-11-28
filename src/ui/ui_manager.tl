@@ -1,3 +1,5 @@
+local CONFIG = require("src/config")
+
 local Box = require("src/ui/box")
 local UnitInfo = require("src/ui/panels/unit_info")
 local CombatPreview = require("src/ui/panels/combat_preview")

@@ -1,3 +1,5 @@
+local CONFIG = require("src/config")
+
 Box = require("src/ui/box")
 
 local TacticsMap = {}
