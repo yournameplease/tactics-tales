@@ -8,18 +8,18 @@ local enum BaseAnimationName
     "HORIZONTAL"
 end
 
-local enum AnimationName
+global enum AnimationName
     "STANDARD_BACK_HAND"
     "STANDARD_FRONT_HAND"
     "STANDARD_HORIZONTAL"
 end
 
-local enum AnimationFrameName
+global enum AnimationFrameName
     "idle_1"
     "idle_2"
 end
 
-local enum AnchorPointName
+global enum AnchorPointName
     "neck"
     "main_hand"
     "off_hand"

@@ -71,7 +71,7 @@ function Character:start_walk_animation(path)
 end
 
 function Character:end_animation()
-    self.animation_data = ANIMATION_MANAGER.create_global_animation("IDLE")
+    self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
     self.animation_blocking = false
 end
 
@@ -103,7 +103,7 @@ end
 function Character:get_animation_offset(): AnimationOffset
     if self.animation_data == nil then
         -- this could go somewhere else...
-        self.animation_data = ANIMATION_MANAGER.create_global_animation("IDLE")
+        self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
     end
 
     local frame_data = self.animation_data:get_frame_data()
@@ -152,7 +152,7 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
 
     if self.animation_data == nil then
         -- this could go somewhere else...
-        self.animation_data = ANIMATION_MANAGER.create_global_animation("IDLE")
+        self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
     end
 
     -- TODO: consider pre-rendering some of this
