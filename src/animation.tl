@@ -5,15 +5,20 @@ local Animation = {}
 local active_animations = {}
 local global_frame = 0
 
-local function no_offset_calculator(_)
-    return 0, 0
+local record AnimationOffset
+    x: number
+    y: number
 end
 
-local function lerp_x_y(x0, y0, x1, y1, t, d)
-    return x0 + t * (x1 - x0) / d, y0 + t * (y1 - y0) / d
+local function no_offset_calculator(_): AnimationOffset
+    return { x = 0, y = 0}
 end
 
-local function lerp_animation_offset_calculator(animation_data)
+local function lerp_x_y(x0: number, y0: number, x1: number, y1: number, t: number, d: number): AnimationOffset
+    return {x = x0 + t * (x1 - x0) / d, y = y0 + t * (y1 - y0) / d }
+end
+
+local function lerp_animation_offset_calculator(animation_data): AnimationOffset
     local d = animation_data.duration
     local t = animation_data.frame
     local x = animation_data.target_x
@@ -22,7 +27,7 @@ local function lerp_animation_offset_calculator(animation_data)
     return lerp_x_y(0, 0, x, y, t, d)
 end
 
-local function path_animation_offset_calculator(animation_data)
+local function path_animation_offset_calculator(animation_data): AnimationOffset
     if #animation_data.path_points == 1 then
         return animation_data.path_points[1].x, animation_data.path_points[1].y
     end
@@ -47,13 +52,13 @@ local function path_animation_offset_calculator(animation_data)
     error("failed path animation")
 end
 
-local function directional_offsets_offset_calculator(animation_data)
+local function directional_offsets_offset_calculator(animation_data): AnimationOffset
     local track = animation_data.track
     assert(animation_data.frame <= #track)
 
     local direction = animation_data.direction
     local offset = track[animation_data.frame]
-    return offset * cos(direction), offset * sin(direction)
+    return { x = offset * cos(direction), y = offset * sin(direction)}
 end
 
 local ANIMATIONS = {
