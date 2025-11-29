@@ -143,3 +143,11 @@ function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
         end
     end
 end
+
+function Array2D:foreachpoint<V>(fn: function(point: Point<integer>, v: V))
+    for x, col in ipairs(self.data) do
+        for y, v in ipairs(col) do
+            fn({x = x, y = y}, v)
+        end
+    end
+end

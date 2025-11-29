@@ -71,8 +71,8 @@ function TileManager.new(map_data: MapData, battle_state: BattleState): TileMana
 end
 
 function TileManager:get_terrain(tile: TilePoint): TerrainData
-    local tile = self.map_data.userdata[3].bmp:get(x,y)
-    local flags = fget(tile)
+    local tile_sprite = self.map_data.userdata[3].bmp:get(tile.x,tile.y)
+    local flags = fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
 end
@@ -105,7 +105,7 @@ end
 local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
 local record ShortestPathEntry
-    cost: number
+    cost: integer
     prev: TilePoint
 end
 
@@ -204,13 +204,11 @@ end
 
 -- @return list of { { x, y } } tile coordinates from start position
 function TileManager:get_path_to_tile(all_tile_costs: ShortestPathResult, tile: TilePoint): { TilePoint } -- could be static with current signature
-    assert(all_tile_costs:get(x, y) ~= nil)
-    local path = { { x = x, y = y} }
-    while all_tile_costs:get(x, y).prev ~= nil do
-        local next_x = all_tile_costs:get(x, y).prev.x
-        local next_y = all_tile_costs:get(x, y).prev.y
-        x, y = next_x, next_y
-        add(path, { x = x, y = y })
+    assert(all_tile_costs:get_point(tile) ~= nil)
+    local path = { tile }
+    while all_tile_costs:get_point(tile).prev ~= nil do
+        local next = all_tile_costs:get_point(tile).prev
+        add(path, next)
     end
     return reverse_list(path)
 end
@@ -224,7 +222,7 @@ function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, si
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h)
 
-    full_map:foreach(
+    full_map:foreachtile(
         function (tile: TilePoint, value: ShortestPathEntry)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
