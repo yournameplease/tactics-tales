@@ -2,11 +2,11 @@ require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
 
-global record UnitInfo
+global record CombatPreview
     is UIElement
 
 end
-setmetatable(UnitInfo, { __index = Box })
+setmetatable(CombatPreview, { __index = Box })
 
 local function get_preview_text(state: GameContext): {string}
     local attacker = state.acting_unit
@@ -30,14 +30,14 @@ local function get_preview_text(state: GameContext): {string}
     return out
 end
 
-function UnitInfo.new(props: UIElement): UnitInfo
+function CombatPreview.new(props: UIElement): CombatPreview
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
 
-    local self = Box.new(props) as UnitInfo
-    setmetatable(self, { __index = UnitInfo })
+    local self = Box.new(props) as CombatPreview
+    setmetatable(self, { __index = CombatPreview })
 
     local attacker_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.acting_unit end)
     local defender_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.hovered_unit end)
@@ -55,4 +55,4 @@ function UnitInfo.new(props: UIElement): UnitInfo
     return self
 end
 
-return UnitInfo
+return CombatPreview
