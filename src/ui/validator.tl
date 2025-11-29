@@ -1,13 +1,13 @@
-local MenuValidator = {}
+global record MenuValidator
 
-local function get_node_name(node, index)
-    return node.name or node.id or ("child[" .. index .. "]")
+end 
+
+local function get_node_name(node: UIElement, index: integer): string
+    return ("child[" .. index .. "]")
 end
 
 --- Recursively validates a UI tree.
-function MenuValidator.validate(node, path)
-    path = path or "Root"
-
+function MenuValidator.validate(node: UIElement, path: string)
     if not node then return end
 
     local is_col = (node.dir == "col")

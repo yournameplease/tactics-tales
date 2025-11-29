@@ -172,7 +172,7 @@ end
 -- PASS 2: ARRANGE (Top-Down)
 -- Distribute space and set final X/Y
 -- =========================================================
-function Box:layout(parent_x: integer, parent_y: integer)
+function Box:layout(parent_x?: integer, parent_y?: integer)
     -- Use calculated sizes if available, otherwise fixed
     local my_w = self._calculated_w or self.w
     local my_h = self._calculated_h or self.h

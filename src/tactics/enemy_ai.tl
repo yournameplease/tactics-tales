@@ -27,27 +27,6 @@ global record EnemyAIEngine
     tile_manager: TileManager
 end
 
-function EnemyAIEngine.new(
-    battle_manager: BattleManager,
-    battle_state: BattleState,
-    tactics_engine: TacticsEngine,
-    event_bus: EventBus,
-    task_manager: TaskManager,
-    tile_manager: TileManager
-): EnemyAIEngine
-    local self: EnemyAIEngine = setmetatable({}, { __index = EnemyAIEngine })
-
-    self.battle_manager = battle_manager
-    self.battle_state = battle_state
-    self.tactics_engine = tactics_engine
-    self.event_bus = event_bus
-    self.task_manager = task_manager
-    self.tile_manager = tile_manager
-
-    self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
-    return self
-end
-
 local record AttackOption
     destination: TilePoint
     target: BattleUnit
@@ -91,7 +70,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         local action_ctx: MenuContext = {
             acting_unit = { unit = unit},
             destination = { point = destination, path = path},
-            target = { unit = choice.target }
+            target_unit = { unit = choice.target }
         }
         LOG.info(unit.id .. " will attack "..choice.target.id)
         self.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
@@ -138,3 +117,25 @@ function EnemyAIEngine:handle_enemy_turn()
     end)
 end
 
+function EnemyAIEngine.new(
+    battle_manager: BattleManager,
+    battle_state: BattleState,
+    tactics_engine: TacticsEngine,
+    event_bus: EventBus,
+    task_manager: TaskManager,
+    tile_manager: TileManager
+): EnemyAIEngine
+    local self: EnemyAIEngine = setmetatable({}, { __index = EnemyAIEngine })
+
+    self.battle_manager = battle_manager
+    self.battle_state = battle_state
+    self.tactics_engine = tactics_engine
+    self.event_bus = event_bus
+    self.task_manager = task_manager
+    self.tile_manager = tile_manager
+
+    self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
+    return self
+end
+
+return EnemyAIEngine

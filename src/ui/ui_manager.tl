@@ -3,14 +3,14 @@ require("src/types")
 require("src/game_context")
 local CONFIG = require("src/config")
 
-local TacticsMap = require("src/ui/panels/tactics_map")
+require("src/ui/panels/tactics_map")
 require("src/ui/box")
 require("src/ui/panels/unit_info")
 require("src/ui/panels/combat_preview")
 require("src/ui/panels/text_node")
 require("src/ui/panels/event_message_log")
 
-local MenuValidator = require("src/ui/validator")
+require("src/ui/validator")
 
 global enum UILayoutId
     "TACTICS"
@@ -23,7 +23,7 @@ end
 
 global record UIManager
     layouts: { UILayoutId: UILayout }
-    current_layout: UIElement
+    current_layout: UILayout
     theme: UITheme
 end
 
@@ -37,7 +37,7 @@ function UIManager.new(): UIManager
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
     battle_summary:add(TextNode.new({ func = function(state: GameContext): { string } return { "BATTLE" }  end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(state: GameContext): { string }
-        local turn = state.turn_manager.get_turn()
+        local turn = state.turn_manager.turn
         return { "Turn " .. turn }
     end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
@@ -52,7 +52,7 @@ function UIManager.new(): UIManager
 
         battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
-        self.layouts.TACTICS = battle_root
+        self.layouts.TACTICS = { root = battle_root }
     end
     do
         local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
@@ -66,12 +66,12 @@ function UIManager.new(): UIManager
 
         battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
-        self.layouts.COMBAT_PREVIEW = battle_root
+        self.layouts.COMBAT_PREVIEW = { root = battle_root }
     end
 
     -- Validate all layouts
-    for i, v in pairs(self.layouts) do
-        MenuValidator.validate(v)
+    for id, v in pairs(self.layouts) do
+        MenuValidator.validate(v.root, id)
     end
 
     -- Set initial
@@ -89,12 +89,13 @@ end
 function UIManager:draw(game_context: GameContext)
     self.current_layout = self.layouts[game_context.layout]
 
+    local root = self.current_layout.root
     -- Recalculate size and positions
-    self.current_layout:measure()
-    self.current_layout:layout()
+    root:measure()
+    root:layout(root.x, root.y)
 
     -- Render
-    self.current_layout:draw(game_context, self.theme)
+    root:draw(game_context, self.theme)
 end
 
 return UIManager
