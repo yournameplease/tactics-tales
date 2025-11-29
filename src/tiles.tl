@@ -16,7 +16,7 @@ require("src/map/map_manager")
 -- 6 deep water
 -- 7
 
-local record TerrainData
+global record TerrainData
     movement_cost: integer
     dodge: integer
 end
@@ -84,7 +84,7 @@ function TileManager:movement_cost(tile: TilePoint, side: Side): integer
         return 999
     end
 
-    local tile = ground:get(tile.x,tile.y)
+    local tile_sprite = ground:get(tile.x,tile.y)
     if tile == nil then return 999 end
 
     local unit = self.battle_state:get_at_tile(tile)
@@ -92,7 +92,7 @@ function TileManager:movement_cost(tile: TilePoint, side: Side): integer
         if unit.side ~= side then return 999 end
     end
 
-    local flags = fget(tile)
+    local flags = fget(tile_sprite)
     local solid = (flags & 0x1) == 0x1
     local terrain = (flags & 0xD) >> 1
 
@@ -104,24 +104,22 @@ end
 -- Shared neighbor offsets (up, down, left, right)
 local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
-local record ShortestPathEntry
+global record ShortestPathEntry
     cost: integer
     prev: TilePoint
 end
-
-local type ShortestPathResult = Array2D<ShortestPathEntry>
 
 -- --------------------------------------------------------------------------
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): ShortestPathResult
+function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
     local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.map_data.width, self.map_data.height)
 
 
     local record ShortestPathQueueEntry
-        cost: number
+        cost: integer
         x: integer
         y: integer
     end
@@ -166,7 +164,7 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = self:movement_cost(vx, vy, side)
+                local move_cost = self:movement_cost({ x=vx, y=vy }, side)
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
                 if move_cost < 999 then
@@ -188,7 +186,7 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
         end
     end
 
-    return visited_info as ShortestPathResult -- TODO: weird cast
+    return visited_info
 end
 
 -- --------------------------------------------------------------------------
@@ -197,13 +195,13 @@ end
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): ShortestPathResult
+function TileManager:calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
     return self:_dijkstra_traversal(start_x, start_y, side, limit)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
-function TileManager:get_path_to_tile(all_tile_costs: ShortestPathResult, tile: TilePoint): { TilePoint } -- could be static with current signature
+function TileManager:get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path = { tile }
     while all_tile_costs:get_point(tile).prev ~= nil do
@@ -222,7 +220,7 @@ function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, si
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h)
 
-    full_map:foreachtile(
+    full_map:foreachpoint(
         function (tile: TilePoint, value: ShortestPathEntry)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
