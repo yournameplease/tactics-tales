@@ -98,14 +98,19 @@ global record Array2D<V>
     data: {{ V }}
 end
 
-function Array2D.new<V>(w: integer, h: integer): Array2D<V>
+function Array2D.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
     local out = {
         w = w,
         h = h,
         data = {}
     }
-    for i=0, w-1 do
-        out.data[i] = {}
+    for x=0, w-1 do
+        out.data[x] = {}
+        if initial ~= nil then
+            for y=0,h-1 do
+                out.data[x][y] = initial
+            end 
+        end
     end
     setmetatable(out, { __index = Array2D })
     return out

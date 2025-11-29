@@ -12,6 +12,7 @@ global record BattleUnit
     hp_current: integer
     side: Side
     weapon: Weapon
+    has_acted: boolean
 
     character: Character
 end
@@ -25,12 +26,12 @@ end
 -- end
 
 function BattleUnit.spawn(permanent_unit: Character, tile: TilePoint, side: Side): BattleUnit
-    local instance = {
+    local instance: BattleUnit = {
         tile = tile,
         side = side,
         hp_current = permanent_unit.stats.hp_max,
         has_acted = false,
-        source = permanent_unit
+        character = permanent_unit
     }
 
     -- setmetatable(instance, {

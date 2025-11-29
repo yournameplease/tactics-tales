@@ -82,7 +82,7 @@ function Character:start_walk_animation(path: { TilePoint })
     -- self.animation_blocking = true
 end
 
-function Character:end_animation(animation_manager: AnimationManager)
+function Character:end_animation()
     -- self.animation_data = animation_manager:create_idle_animation("IDLE")
     -- self.animation_blocking = false
 end

@@ -5,6 +5,12 @@ require("src/tactics")
 require("src/joypad")
 require("src/tiles")
 
+global record MenuTileHighlight
+    reachable: boolean
+    valid_selection: boolean
+    can_attack: boolean
+end
+
 global enum MenuType
     "CURSOR_GRID"
     "CURSOR_VERTICAL_LIST"
@@ -66,8 +72,20 @@ global record MenuState
 
 end
 
-global record MenuContext
+global record TileSelection
+    point: TilePoint
+    path: { TilePoint }
+end
 
+global record UnitSelection
+    point: TilePoint
+    unit: BattleUnit
+end
+
+global record MenuContext
+    acting_unit: UnitSelection
+    destination: TileSelection
+    target_unit: UnitSelection
 end
 
 global record MenuManager

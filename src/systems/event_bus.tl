@@ -4,6 +4,7 @@ global enum GameEvent
     "TACTICS_END_PLAYER_TURN"
     "TACTICS_BEGIN_ENEMY_TURN"
     "TACTICS_END_ENEMY_TURN"
+    "TACTICS_UNIT_END_ACTION"
     "MOVE_AND_ATTACK"
     "MOVE_AND_WAIT"
 end
@@ -29,7 +30,7 @@ function EventBus:on(event_name: GameEvent, callback: function(args: any))
     add(self.listeners[event_name], callback)
 end
 
-function EventBus:emit(event_name: GameEvent, args: any)
+function EventBus:emit(event_name: GameEvent, args?: any)
     if #self.event_history > MAX_EVENT_HISTORY then
         deli(self.event_history, 1)
     end
