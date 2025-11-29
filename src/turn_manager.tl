@@ -35,7 +35,7 @@ function TurnManager.new(
     self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
-        self.tactics_engine:refresh_units()
+        self.tactics_engine:refresh_all_units()
     end)
 
     self.event_bus:on("TACTICS_END_PLAYER_TURN", function()
@@ -77,7 +77,7 @@ function TurnManager.new(
         LOG.info("You win!")
     end)
 
-    self.event_bus:on("BATTLE_END_FAILURE", function()
+    self.event_bus:on("BATTLE_END_DEFEAT", function()
         LOG.info("You lose!")
     end)
 

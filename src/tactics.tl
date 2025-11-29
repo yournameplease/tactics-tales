@@ -90,6 +90,10 @@ end
 
 -- Turn flow
 
+function TacticsEngine:refresh_all_units()
+    self:refresh_units(fn_true)
+end
+
 function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)
     local units_to_refresh = self.battle_state:get_units(filter)
 

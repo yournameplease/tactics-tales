@@ -7,6 +7,8 @@ global enum GameEvent
     "TACTICS_UNIT_END_ACTION"
     "MOVE_AND_ATTACK"
     "MOVE_AND_WAIT"
+    "BATTLE_END_VICTORY"
+    "BATTLE_END_DEFEAT"
 end
 
 global type EventListener = function(args: any)

@@ -6,6 +6,7 @@ require("src/menu_manager")
 require("src/character")
 require("src/systems/event_bus")
 require("src/combat/combat_calculator")
+require("src/ui/ui_manager")
 
 global record GameContext
     battle_manager: BattleManager
@@ -18,7 +19,7 @@ global record GameContext
     event_bus: EventBus
     combat_calculator: CombatCalculator
 
-    layout: UILayout
+    layout: UILayoutId
 
     hovered_unit: BattleUnit
     acting_unit: BattleUnit
