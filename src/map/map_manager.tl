@@ -34,7 +34,7 @@ local METATILES_LAYER = 1
 function MapManager:_load_static(definition: StaticMapDefinition): MapData
     local map_data: MapData = {}
 
-    map_data.userdata = fetch(definition.file) as { __MapFetchResultEntry }
+    map_data.userdata = fetch(DATP..definition.file) as { __MapFetchResultEntry }
 
     local metatiles_layer = map_data.userdata[METATILES_LAYER].bmp
     map_data.width = metatiles_layer:width()
