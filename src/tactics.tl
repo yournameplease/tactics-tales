@@ -7,9 +7,11 @@ require("src/draw")
 require("src/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
-require("src/menu_manager")
 
 require("src/tactics/battle_unit")
+
+global type MenuContext
+global type MenuSelection
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT

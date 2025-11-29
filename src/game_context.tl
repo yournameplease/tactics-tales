@@ -6,7 +6,8 @@ require("src/menu_manager")
 require("src/character")
 require("src/systems/event_bus")
 require("src/combat/combat_calculator")
-require("src/ui/ui_manager")
+
+global type UILayoutId
 
 global record GameContext
     battle_manager: BattleManager
