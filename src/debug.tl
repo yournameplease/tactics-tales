@@ -31,10 +31,11 @@ local function debug_print(level: LogLevel, ...: any)
             if v is string then
                 str = str .. v .. " , "
             else
-                error("Logging undefined type!")
+                str = str .. v as string
+                -- error("Logging undefined type!")
             end
         end
-        local v = array[#arg]
+        local v = array[#array]
         if type(v) == "boolean" then
             v = v and "TRUE" or "FALSE"
         end
@@ -42,7 +43,8 @@ local function debug_print(level: LogLevel, ...: any)
         if v is string then
             str = str .. v
         else
-            error("Logging undefined type!")
+            str = str .. v as string
+            -- printh("Warning: Logging undefined type "..type(v))
         end
 
         printh(level .. ": " .. str)

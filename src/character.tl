@@ -1,6 +1,6 @@
 require("src/util")
-local ANIMATION_DATA = require("src/character/animation_data")
-local WEAPON_DATA = require("src/character/weapons")
+require("src/character/animation_data")
+require("src/character/weapons")
 require("src/animation")
 
 -- TODO: break "drawing" functionality into a CharacterRenderer
@@ -11,7 +11,7 @@ global record CharacterManager
 end
 
 function CharacterManager.new(): CharacterManager
-    local self: CharacterManager = {}
+    local self: CharacterManager = setmetatable({}, { __index = CharacterManager})
     self.id_counter = IdCounter.new()
     self.characters = {}
     return self

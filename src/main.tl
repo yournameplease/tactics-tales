@@ -37,7 +37,7 @@
 
 require("src/systems/tasks")
 
-global LOG = require("src/debug")
+require("src/debug")
 
 require("src/systems/event_bus")
 
@@ -74,6 +74,7 @@ function _init()
     local event_bus = EventBus.new()
 
     local character_manager = CharacterManager.new()
+    LOG.debug(character_manager.id_counter:get_id())
 
     battle_manager = BattleManager.new("bandit_village", event_bus, character_manager)
     local tactics_engine = battle_manager.tactics_engine

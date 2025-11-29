@@ -60,7 +60,7 @@ local function create_weapon(data: Weapon) : Weapon
     return data
 end
 
-local WEAPON_DATA: {string: Weapon} = {
+global WEAPON_DATA: {string: Weapon} = {
     dagger = create_weapon({
         name = "Dagger",
         sprite = 104,
