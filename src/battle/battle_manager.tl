@@ -1,4 +1,4 @@
-local log = require("src/debug")
+local LOG = require("src/debug")
 
 require("src/types")
 require("src/systems/event_bus")
@@ -24,17 +24,17 @@ global record BattleManager
 end
 
 
-function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: SpawnPoint, side: Side)
+function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: TilePoint, side: Side)
     local battle_unit = BattleUnit.spawn(unit, spawn_point.x, spawn_point.y, side)
     self.battle_state:spawn_unit(battle_unit, spawn_point.x, spawn_point.y)
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
-function BattleManager:_spawn_enemies(enemies, enemy_spawners)
+function BattleManager:_spawn_enemies(enemies: {EnemyTemplate}, enemy_spawners: {integer: {TilePoint}})
     for i, enemy in ipairs(enemies) do
         local spawners = enemy_spawners[i]
         assert(spawners)
-        for spawn_point in all(enemy_spawners[i]) do
+        for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
             local character = self.character_manager:generate_character()
             self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_ENEMY)
@@ -42,8 +42,8 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
     end
 end
 
-function BattleManager:_spawn_players(player_spawners: { SpawnPoint })
-    for id, spawn_point in pairs(player_spawners) do
+function BattleManager:_spawn_players(player_spawners: { TilePoint })
+    for id, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
         local character = self.character_manager:generate_character()
         self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_PLAYER)

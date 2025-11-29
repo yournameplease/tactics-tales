@@ -15,6 +15,8 @@ global record Userdata
 	width: function(self): integer | nil
 	height: function(self): integer | nil
 	get: function(self, integer, integer): integer
+	set: function(self, integer, ...: integer)
+	sort: function(self)
 end
 
 

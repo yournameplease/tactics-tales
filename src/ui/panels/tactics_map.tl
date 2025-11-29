@@ -1,8 +1,13 @@
 local CONFIG = require("src/config")
 
-Box = require("src/ui/box")
+require("src/ui/box")
+require("src/battle/battle_state")
 
-local TacticsMap = {}
+global record TacticsMap
+    is UIElement
+    map_width: integer
+    map_height: integer
+end
 
 local COLOR_MENU_PRIMARY = CONFIG.COLOR_MENU_PRIMARY
 local COLOR_MENU_SECONDARY = CONFIG.COLOR_MENU_SECONDARY
@@ -23,22 +28,28 @@ local CURSOR_SPRITE = 8
 local TEXT_HEIGHT = 7
 
 
-local function compute_animated_unit_positions(battle_state)
+local record AnimatedUnitPosition
+    id: integer
+    x: integer
+    y: integer
+end
+
+local function compute_animated_unit_positions(battle_state: BattleState): { AnimatedUnitPosition }
     return tmap(
             battle_state:get_all_units(),
-            function(unit)
-                local ox, oy = unit:get_animation_offset()
+            function(unit: BattleUnit): AnimatedUnitPosition
+                local animation_offset = unit.character:get_animation_offset()
                 return {
                     id = unit.id,
-                    x = unit.x * TILE_WIDTH + ox,
-                    y = unit.y * TILE_HEIGHT + oy
+                    x = flr(unit.tile.x * TILE_WIDTH + animation_offset.x),
+                    y = flr(unit.tile.y * TILE_HEIGHT + animation_offset.y)
                 }
             end
     )
 end
 
-function TacticsMap.new(map_width, map_height, props)
-    local box = Box.new(props)
+function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
+    local box = Box.new(props) as TacticsMap
     setmetatable(box, { __index = TacticsMap})
 
     box.map_width = map_width or MAP_WIDTH
@@ -52,8 +63,8 @@ function TacticsMap.new(map_width, map_height, props)
     return box
 end
 
-function TacticsMap:draw(state)
-    Box.draw(self, state)
+function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
+    self:draw(state, ui_theme)
 
     local tactics = state.tactics
     local battle_state = state.battle_state
