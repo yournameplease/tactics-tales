@@ -26,7 +26,7 @@ local interface FailureCondition
     type: FailureConditionType
 end
 
-local record EnemySpawnData
+global record EnemySpawnData
     template: string
 end
 

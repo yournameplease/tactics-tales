@@ -21,23 +21,27 @@ global record BattleManager
     tile_manager: TileManager
     menu_manager: MenuManager
     character_manager: CharacterManager
+    tactics_engine: TacticsEngine
+    event_bus: EventBus
+
+    map_data: MapData
 end
 
 
-function BattleManager:_spawn_unit(unit: UnitInstance, spawn_point: TilePoint, side: Side)
-    local battle_unit = BattleUnit.spawn(unit, spawn_point.x, spawn_point.y, side)
-    self.battle_state:spawn_unit(battle_unit, spawn_point.x, spawn_point.y)
+function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side: Side)
+    local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
+    self.battle_state:spawn_unit(battle_unit, spawn_point)
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
-function BattleManager:_spawn_enemies(enemies: {EnemyTemplate}, enemy_spawners: {integer: {TilePoint}})
+function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners: {integer: {TilePoint}})
     for i, enemy in ipairs(enemies) do
         local spawners = enemy_spawners[i]
         assert(spawners)
         for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
             local character = self.character_manager:generate_character()
-            self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_ENEMY)
+            self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
         end
     end
 end
@@ -46,18 +50,20 @@ function BattleManager:_spawn_players(player_spawners: { TilePoint })
     for id, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
         local character = self.character_manager:generate_character()
-        self:_spawn_unit(character, spawn_point.x, spawn_point.y, SIDE_PLAYER)
+        self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
     end
 end
 
 --- Main entry point.
 -- @param battle_id: Key from BATTLES
 -- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id: string): BattleManager
+function BattleManager.new(battle_id: string, event_bus: EventBus): BattleManager
     local battle_definition = BATTLE_DATA[battle_id]
     assert(battle_definition ~= nil)
 
-    local self = setmetatable({}, { __index = BattleManager })
+    local self: BattleManager = setmetatable({}, { __index = BattleManager })
+
+    self.event_bus = event_bus
 
     self.map_data = MapManager:load_map(battle_definition.map_id)
     
@@ -72,7 +78,7 @@ function BattleManager.new(battle_id: string): BattleManager
     self:_spawn_players(self.map_data.metadata.player_spawners)
     -- 5. return Tactics.new(map_data, placed_party, enemy_units, battle_def.victory)
 
-    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager)
+    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus)
 
     LOG.debug(#self.battle_state.units_by_id)
     return self
@@ -87,13 +93,6 @@ global record BattleFinishState
     command: GameEvent
 end
 
---- Checks if current state satisfies Victory/Failure conditions
--- Called by TurnManager at end of actions
-function BattleManager:check_objectives(): BattleFinishState
-    -- returns "WIN", "LOSS", or nil (continue)
-    return self:check_for_end()
-end
-
 -- legacy function, doesn't support different end conditions
 function BattleManager:check_for_end(): BattleFinishState
     if self.tactics_engine:is_blocked() then
@@ -106,10 +105,17 @@ function BattleManager:check_for_end(): BattleFinishState
     if (#players == 0) then
         return { finished = true, command = "BATTLE_END_VICTORY" }
     elseif (#enemies == 0) then
-        return { finished = true, command = "BATTLE_END_FAILURE" }
+        return { finished = true, command = "BATTLE_END_DEFEAT" }
     else
         return { finished = false }
     end
+end
+
+--- Checks if current state satisfies Victory/Failure conditions
+-- Called by TurnManager at end of actions
+function BattleManager:check_objectives(): BattleFinishState
+    -- returns "WIN", "LOSS", or nil (continue)
+    return self:check_for_end()
 end
 
 return BattleManager
