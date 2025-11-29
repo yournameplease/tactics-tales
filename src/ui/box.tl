@@ -1,15 +1,58 @@
-local Box = {}
-Box.__index = Box -- TODO: ?
+require("src/types")
 
-function Box.new(props)
-    local self = setmetatable({}, Box)
+global record Margin
+    t: integer
+    b: integer
+    l: integer
+    r: integer
+end
+
+global enum BoxDirection
+    "col"
+    "row"
+end
+
+global enum DecorationStyle
+    "embossed"
+    "recessed"
+end
+
+
+-- TODO: better name
+global interface BoxInterface
+
+end
+
+global record Box
+    is BoxInterface
+    x: integer
+    y: integer
+    w: integer
+    _calculated_w: integer
+    h: integer
+    _calculated_h: integer
+    internal_margin: Margin
+    auto_width: boolean
+    auto_height: boolean
+    flex_grow: integer
+    cross_stretch: boolean
+    dir: BoxDirection
+    gap: integer
+    padding: integer
+    decoration_padding: integer
+    decoration: DecorationStyle
+    children: { Box }
+end
+
+function Box.new(props: Box): Box
+    local self: Box = setmetatable({}, { __index = Box})
     self.x = props.x or 0
     self.y = props.y or 0
     self.w = props.w or 0
     self.h = props.h or 0
 
     -- margin inside the view window, mainly used for drawing the shaded box at an offset
-    if type(props.internal_margin) == "table" then
+    if type(props.internal_margin) ~= nil then
         self.internal_margin = {
             t = props.internal_margin.t or 0,
             b = props.internal_margin.b or 0,
@@ -17,8 +60,12 @@ function Box.new(props)
             r = props.internal_margin.r or 0
         }
     else
-        local m = props.internal_margin or 0
-        self.internal_margin = {t=m, b=m, l=m, r=m}
+        self.internal_margin = {
+            t = 0,
+            b = 0,
+            l = 0,
+            r = 0
+        }
     end
 
     -- calculate width/height based on children
@@ -40,12 +87,12 @@ function Box.new(props)
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
-    assert(not (flex_grow and (auto_width or auto_height)), "Cannot flex grow with auto_width or auto_height")
+    assert(not (self.flex_grow and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
     assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
 
-function Box:add(child)
+function Box:add(child: Box): Box
     add(self.children, child)
     return child -- Return child for chaining
 end
@@ -104,7 +151,7 @@ end
 -- PASS 2: ARRANGE (Top-Down)
 -- Distribute space and set final X/Y
 -- =========================================================
-function Box:layout(parent_x, parent_y)
+function Box:layout(parent_x: integer, parent_y: integer)
     -- Use calculated sizes if available, otherwise fixed
     local my_w = self._calculated_w or self.w
     local my_h = self._calculated_h or self.h
@@ -188,7 +235,7 @@ function Box:layout(parent_x, parent_y)
     end
 end
 
-function Box:draw(state)
+function Box:draw(state: GameContext)
     if self.decoration == 'embossed' then
         self:draw_embossed()
     elseif self.decoration == 'recessed' then
@@ -226,7 +273,7 @@ function Box:draw_recessed()
     self:draw_shaded_dividers(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
 end
 
-function Box:draw_shaded(color_ne, color_sw, color_interior)
+function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color)
     -- TODO: 45 degree slant (draw lines in loop)
     local x = self.x + self.internal_margin.l
     local y = self.y + self.internal_margin.t
@@ -272,7 +319,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
     )
 end
 
-function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
+function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interior: Color)
     -- TODO: 45 degree slant (draw lines in loop)
     local x = self.x + self.internal_margin.l
     local y = self.y + self.internal_margin.t
@@ -337,11 +384,11 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
             elseif self.dir == "row" then
                 local prev_child = self.children[i]
                 local next_child = self.children[i]
-                local c_x = next_child.x + next_child.internal_margin_x
+                local c_x = next_child.x + next_child.internal_margin.l
                 local gap_w = self.gap
-                local y_prev = prev_child.y + prev_child.internal_margin_y
+                local y_prev = prev_child.y + prev_child.internal_margin.t
                 local h_prev = prev_child.h
-                local y_next = next_child.y + next_child.internal_margin_y
+                local y_next = next_child.y + next_child.internal_margin.t
                 local h_next = next_child.h
                 rectfill(
                         c_x - gap_w + pad,

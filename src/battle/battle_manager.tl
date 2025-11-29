@@ -11,7 +11,7 @@ local MapManager = require("src/map/map_manager")
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
-local record BattleManager
+global record BattleManager
     battle_state: BattleState
     tile_manager: TileManager
 end

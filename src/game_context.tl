@@ -1,15 +1,44 @@
-local GameContext = {}
+require("src/tactics")
+require("src/battle/battle_manager")
+require("src/turn_manager")
+require("src/tiles")
+require("src/menu_manager")
+require("src/character")
+require("src/systems/event_bus")
+require("src/combat/combat_calculator")
+
+global enum UILayout
+    "TACTICS"
+    "COMBAT_PREVIEW"
+end
+
+global record GameContext
+    battle_manager: BattleManager
+    tactics: TacticsEngine
+    battle_state: BattleState
+    turn_manager: TurnManager
+    tile_manager: TileManager
+    character_manager: CharacterManager
+    menu_manager: MenuManager
+    event_bus: EventBus
+    combat_calculator: CombatCalculator
+
+    layout: UILayout
+
+    hovered_unit: BattleUnit
+    acting_unit: BattleUnit
+end
 
 function GameContext.new(
-    battle_manager,
-    turn_manager,
-    tile_manager,
-    character_manager,
-    menu_manager,
-    event_bus,
-    combat_calculator
-)
-    local context = {
+    battle_manager: BattleManager,
+    turn_manager: TurnManager,
+    tile_manager: TileManager,
+    character_manager: CharacterManager,
+    menu_manager: MenuManager,
+    event_bus: EventBus,
+    combat_calculator: CombatCalculator
+): GameContext
+    local context: GameContext = {
         battle_manager = battle_manager,
         tactics = battle_manager.tactics_engine,
         battle_state = battle_manager.battle_state,
@@ -22,43 +51,40 @@ function GameContext.new(
 
         layout = "TACTICS",
 
-        selected_unit_id = 1,
-        acting_unit_id = 1,
+        hovered_unit = nil,
+        acting_unit = nil,
     }
     setmetatable(context, { __index = GameContext })
     return context
 end
 
-function GameContext:get_selected_unit()
-    return self.battle_state:get_unit_by_id(self.selected_unit_id)
-end
-
-function GameContext:get_acting_unit()
-    return self.battle_state:get_unit_by_id(self.acting_unit_id)
-end
-
 function GameContext:enrich()
     self.layout = "TACTICS"
 
-    if self.menu_manager.menu_state.menu_step == "SELECT_UNIT" then
-        local x, y = self.menu_manager.menu_selection.x, self.menu_manager.menu_selection.y
-        local unit = self.battle_state:get_unit_at_coordinates(x, y)
-        if unit then
-            self.selected_unit_id = unit.id
+
+    local selection = self.menu_manager.menu_selection
+
+    if selection is GridMenuSelection then
+        if self.menu_manager.menu_state.menu_step == "SELECT_UNIT" then
+            local point = selection.point
+            local unit = self.battle_state:get_at_tile(point)
+            if unit then
+                self.hovered_unit = unit.id
+            end
+        end
+
+        if self.menu_manager.menu_state.menu_step == "SELECT_TARGET" then
+            local point = selection.point
+            local unit = self.battle_state:get_at_tile(point)
+            if unit then
+                self.layout = "COMBAT_PREVIEW"
+                self.hovered_unit = unit
+            end
         end
     end
 
     if self.menu_manager.menu_ctx.acting_unit ~= nil then
-        self.acting_unit_id = self.menu_manager.menu_ctx.acting_unit.unit_id
-    end
-
-    if self.menu_manager.menu_state.menu_step == "SELECT_TARGET" then
-        local x, y = self.menu_manager.menu_selection.x, self.menu_manager.menu_selection.y
-        local unit = self.battle_state:get_unit_at_coordinates(x, y)
-        if unit then
-            self.layout = "COMBAT_PREVIEW"
-            self.selected_unit_id = unit.id
-        end
+        self.acting_unit = self.menu_manager.menu_ctx.acting_unit.unit_id
     end
 
 end

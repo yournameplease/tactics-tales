@@ -1,33 +1,50 @@
 
-local listeners = {}
-local event_bus = {}
-
-local MAX_EVENT_HISTORY = 99
-local event_history = {}
-
-function event_bus.on(event_name, callback)
-    if not listeners[event_name] then
-        listeners[event_name] = {}
-    end
-    add(listeners[event_name], callback)
+global enum GameEvent
+    "TACTICS_BEGIN_PLAYER_TURN"
+    "TACTICS_END_PLAYER_TURN"
+    "TACTICS_BEGIN_ENEMY_TURN"
+    "TACTICS_END_ENEMY_TURN"
+    "MOVE_AND_ATTACK"
+    "MOVE_AND_WAIT"
 end
 
-function event_bus.emit(event_name, args)
-    if #event_history > MAX_EVENT_HISTORY then
-        deli(event_history, 1)
-    end
-    add(event_history, event_name)
+global type EventListener = function(args: any)
 
-    local slots = listeners[event_name]
+global record EventBus
+    event_history: { GameEvent }
+    listeners: { GameEvent: {EventListener}}
+end
+
+local MAX_EVENT_HISTORY = 99
+
+function EventBus.new(): EventBus
+    local self = setmetatable({}, { __index = EventBus })
+    return self
+end
+
+function EventBus:on(event_name: GameEvent, callback: function(args: any))
+    if not self.listeners[event_name] then
+        self.listeners[event_name] = {}
+    end
+    add(self.listeners[event_name], callback)
+end
+
+function EventBus:emit(event_name: GameEvent, args: any)
+    if #self.event_history > MAX_EVENT_HISTORY then
+        deli(self.event_history, 1)
+    end
+    add(self.event_history, event_name)
+
+    local slots = self.listeners[event_name]
     if slots then
-        for callback in all(slots) do
+        for _,callback in ipairs(slots) do
             callback(args)
         end
     end
 end
 
-function event_bus.get_event_history()
-    return event_history
+function EventBus:get_event_history(): { GameEvent }
+    return self.event_history
 end
 
-return event_bus
+return EventBus
