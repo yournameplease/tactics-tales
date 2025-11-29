@@ -14,7 +14,7 @@ global record StaticMapDefinition
     file: string
 end
 
-local MAP_DEFINITIONS: {string: MapDefinition} = {
+global MAP_DEFINITIONS: {string: MapDefinition} = {
     bandit_village = {
         type = "static",
         file = "map/bandit_village.map"

@@ -109,7 +109,7 @@ local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName)
     return tmap(BASE_FRAMES[base_frame], function (f: AnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
 end
 
-local ANIMATION_DATA: { AnimationName: Animation } = {
+global ANIMATION_DATA: { AnimationName: Animation } = {
     STANDARD_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
     STANDARD_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
     STANDARD_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),

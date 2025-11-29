@@ -3,7 +3,7 @@ require("src/debug")
 require("src/types")
 require("src/systems/event_bus")
 
-local BATTLE_DATA = require("src/battle/battle_data")
+require("src/battle/battle_data")
 
 require("src/battle/battle_state")
 require("src/tactics/battle_unit")

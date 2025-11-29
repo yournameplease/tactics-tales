@@ -37,7 +37,7 @@ global record BattleDefinition
     enemies: { integer: EnemySpawnData }
 end
 
-local BATTLE_DATA: { string: BattleDefinition } = {
+global BATTLE_DATA: { string: BattleDefinition } = {
     ["bandit_village"] = {
         map_id = "bandit_village",
         victory_conditions = { {

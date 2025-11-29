@@ -1,5 +1,5 @@
 require("src/types")
-local MAP_DEFINITIONS = require("src/map/map_data")
+require("src/map/map_data")
 
 global record MapManager
 
