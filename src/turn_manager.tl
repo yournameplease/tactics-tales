@@ -1,5 +1,6 @@
 require("src/debug")
 
+require("src/menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/tactics")
@@ -17,12 +18,14 @@ global record TurnManager
     event_bus: EventBus
     tactics_engine: TacticsEngine
     battle_manager: BattleManager
+    menu_manager: MenuManager
 end
 
 function TurnManager.new(
     event_bus: EventBus,
     tactics_engine: TacticsEngine,
-    battle_manager: BattleManager
+    battle_manager: BattleManager,
+    menu_manager: MenuManager
 ): TurnManager
     local self: TurnManager = setmetatable({}, { __index = TurnManager })
 
@@ -32,6 +35,17 @@ function TurnManager.new(
     self.event_bus = event_bus
     self.tactics_engine = tactics_engine
     self.battle_manager = battle_manager
+    self.menu_manager = menu_manager
+
+    self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
+        self.menu_manager:set_menu("MENU_PLAYER_TURN")
+    end)
+
+    self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
+        if self.phase == "PLAYER" then
+            self.menu_manager:set_menu("MENU_PLAYER_TURN")
+        end        
+    end)
 
     self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
         LOG.info("Begin player turn!")

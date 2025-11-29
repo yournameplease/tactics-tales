@@ -81,8 +81,8 @@ function _init()
     local tile_manager = battle_manager.tile_manager
     local battle_state = battle_manager.battle_state
 
-    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager)
     menu_manager =  MenuManager.new(tactics_engine, battle_state, tile_manager, event_bus)
+    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager, menu_manager)
 
     context = GameContext.new(
         battle_manager,
@@ -91,6 +91,8 @@ function _init()
         menu_manager,
         event_bus
     )
+
+    event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
 function _update()

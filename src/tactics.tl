@@ -31,7 +31,9 @@ global record TacticsEngine
     task_manager: TaskManager
 
     battle_is_blocked: boolean
-        
+
+    -- sometimes the lsp complains if i don't do this
+    -- doesn't seem consistent tho?        
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     apply_combat_step: function(self, CombatStep)

@@ -35,6 +35,11 @@ function MenuManager.new(
 ): MenuManager
     local self: MenuManager = setmetatable({}, { __index = MenuManager })
 
+    self.menu_state = {}
+    self.menu_ctx = {}
+    self.menu_selection = {}
+    self.selection_history = {}
+
     self.tactics_engine = tactics_engine
     self.battle_state = battle_state
     self.tile_manager = tile_manager
@@ -224,6 +229,7 @@ end
 
 
 function MenuManager:set_menu(menu_id: MenuId)
+    self.menu_state.menu_id = menu_id
     local step = MENU_DATA[menu_id].initial_step
     self:populate_menu_state(step)
 end
@@ -237,7 +243,9 @@ function MenuManager:update(joy: Joypad)
     elseif joy.ap then
         self:handle_menu_select()
     else
-        self.menu_selection:update(joy)
+        if self.menu_selection.update ~= nil then
+            self.menu_selection:update(joy)
+        end
     end
 end
 

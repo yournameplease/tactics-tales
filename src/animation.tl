@@ -1,6 +1,6 @@
 require("src/types")
 require("src/util")
-local ANIMATION_DATA = require("src/character/animation_data")
+require("src/character/animation_data")
 
 
 local enum AnimationType
