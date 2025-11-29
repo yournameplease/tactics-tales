@@ -9,7 +9,7 @@ local enum AnimationType
     "global"
 end
 
-local interface AnimationInstance
+global interface AnimationInstance
     type: AnimationType
     playing: boolean
     animation_name: AnimationName
@@ -123,7 +123,7 @@ function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: 
     return { x = offset * cos(direction), y = offset * sin(direction)}
 end
 
-local record GlobalAnimationInstance
+global record GlobalAnimationInstance
     is AnimationInstance
     where self.type == "global"
     sprites: SpriteFrameData

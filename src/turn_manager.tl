@@ -1,66 +1,87 @@
-require("src/util/data_utils")
+local LOG = require("src/debug")
 
-local TurnManager = {}
+require("src/util/data_utils")
+require("src/systems/event_bus")
+require("src/tactics")
+require("src/battle/battle_manager")
 
 local enum Phase
     "PLAYER"
     "ENEMY"
 end
 
-local turn = 1
-local phase: Phase = "PLAYER"
+global record TurnManager 
+    turn: integer
+    phase: Phase
 
-function TurnManager.get_turn()
-    return turn
+    event_bus: EventBus
+    tactics_engine: TacticsEngine
+    battle_manager: BattleManager
 end
 
-BUS.on("TACTICS_BEGIN_PLAYER_TURN", function()
-    LOG.info("Begin player turn!")
-    phase = "PLAYER"
-    battle_manager.tactics_engine:refresh_units()
-end)
+function TurnManager.new(
+    event_bus: EventBus,
+    tactics_engine: TacticsEngine,
+    battle_manager: BattleManager
+): TurnManager
+    local self: TurnManager = setmetatable({}, { __index = TurnManager })
 
-BUS.on("TACTICS_END_PLAYER_TURN", function()
-    if phase ~= "PLAYER" then
-        LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..phase..".  Ignoring message.")
-        return
-    end
+    self.turn = 1
+    self.phase = "PLAYER"
 
-    LOG.info("End player turn!")
+    self.event_bus = self.event_bus
+    self.tactics_engine = tactics_engine
 
-    BUS.emit("TACTICS_BEGIN_ENEMY_TURN", battle_manager.tactics_engine) -- TODO: global
-end)
+    self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+        LOG.info("Begin player turn!")
+        self.phase = "PLAYER"
+        self.tactics_engine:refresh_units()
+    end)
 
-BUS.on("TACTICS_BEGIN_ENEMY_TURN", function()
-    phase = "ENEMY"
-    LOG.info("Begin enemy turn!")
+    self.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+        if self.phase ~= "PLAYER" then
+            LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
+            return
+        end
 
-end)
+        LOG.info("End player turn!")
 
-BUS.on("TACTICS_END_ENEMY_TURN", function()
-    if phase ~= "ENEMY" then
-        LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..phase..".  Ignoring message.")
-        return
-    end
-    LOG.info("End enemy turn!")
+        self.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.tactics_engine)
+    end)
 
-    turn = turn + 1
+    self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+        self.phase = "ENEMY"
+        LOG.info("Begin enemy turn!")
 
-    battle_result = battle_manager:check_for_end()
+    end)
 
-    if not battle_result.finished then
-        BUS.emit("TACTICS_BEGIN_PLAYER_TURN")
-    else
-        BUS.emit(battle_result.command)
-    end
-end)
+    self.event_bus:on("TACTICS_END_ENEMY_TURN", function()
+        if self.phase ~= "ENEMY" then
+            LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
+            return
+        end
+        LOG.info("End enemy turn!")
 
-BUS.on("BATTLE_END_VICTORY", function()
-    LOG.info("You win!")
-end)
+        self.turn = self.turn + 1
 
-BUS.on("BATTLE_END_FAILURE", function()
-    LOG.info("You lose!")
-end)
+        local battle_result = self.battle_manager:check_for_end()
+
+        if not battle_result.finished then
+            self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
+        else
+            self.event_bus:emit(battle_result.command)
+        end
+    end)
+
+    self.event_bus:on("BATTLE_END_VICTORY", function()
+        LOG.info("You win!")
+    end)
+
+    self.event_bus:on("BATTLE_END_FAILURE", function()
+        LOG.info("You lose!")
+    end)
+
+    return self
+end
 
 return TurnManager

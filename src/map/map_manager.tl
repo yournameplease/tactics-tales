@@ -8,14 +8,9 @@ local record __MapFetchResultEntry
     bmp: Userdata
 end
 
-global record SpawnPoint
-    x: integer
-    y: integer
-end
-
 global record MapMetadata
-    player_spawners: { integer: SpawnPoint }
-    enemy_spawners: { integer: { SpawnPoint } }
+    player_spawners: { integer: TilePoint }
+    enemy_spawners: { integer: { TilePoint } }
 end
 
 global record MapData

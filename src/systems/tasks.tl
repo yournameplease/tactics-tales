@@ -1,12 +1,16 @@
-local tasks = {}
+local LOG = require("src/debug")
 
-function start_routine(func)
-    local co = cocreate(func)
-    add(tasks, co)
+global record TaskManager
+    tasks: { any }
+end 
+
+function TaskManager:start_routine(func: function)
+    local co = cocreate(func) as any
+    add(self.tasks, co)
 end
 
-function update_tasks()
-    for co in all(tasks) do
+function TaskManager:update_tasks()
+    for _,co in ipairs(self.tasks) do
         if costatus(co) == "suspended" then
             local ok, err = coresume(co)
             if not ok then
@@ -14,7 +18,7 @@ function update_tasks()
                 assert(ok)
             end
         elseif costatus(co) == "dead" then
-            del(tasks, co)
+            del(self.tasks, co)
         end
     end
 end

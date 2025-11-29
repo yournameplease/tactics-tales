@@ -4,7 +4,7 @@
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COCREATE)
 --- @param func function
 --- @return thread
-global cocreate: function(func: any) 
+global cocreate: function(func: any): any
 
 --- Run or continue the coroutine c. Parameters are passed to the function
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#CORESUME)
@@ -12,13 +12,13 @@ global cocreate: function(func: any)
 --- @param ... any
 --- @return boolean error
 --- @return ... any
-global coresume: function(c: any, ...: any) 
+global coresume: function(c: any, ...: any): boolean, string
 
 --- Checks the status of a coroutine
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COSTATUS)
 --- @param c thread
 --- @return string
-global costatus: function(c: any) 
+global costatus: function(c: any) : string
 
 --- Yield the coroutine back to the caller
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#YIELD)

@@ -1,13 +1,21 @@
 require("src/util")
 local ANIMATION_DATA = require("src/character/animation_data")
 local WEAPON_DATA = require("src/character/weapons")
-
-local id_counter = IdCounter.new()
-local characters = {}
+require("src/animation")
 
 -- TODO: break "drawing" functionality into a CharacterRenderer
 
-local CharacterManager = {}
+global record CharacterManager
+    id_counter: IdCounter
+    characters: { Character }
+end
+
+function CharacterManager.new(): CharacterManager
+    local self: CharacterManager = {}
+    self.id_counter = IdCounter.new()
+    self.characters = {}
+    return self
+end
 
 global enum Sex
     "male"
@@ -36,6 +44,8 @@ global record Character
     appearance: CharacterAppearance
     stats: CharacterStats
     weapon: Weapon
+    animation_data: AnimationInstance
+    animation_blocking: boolean
 end
 
 local COLOR_SKIN = 29
@@ -62,18 +72,18 @@ local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
 
 
-function Character:start_animation(animation_id: integer, direction: Angle)
-    self.animation_data = ANIMATION_MANAGER.create_animation(animation_id, direction)
+function Character:start_animation(animation_manager: AnimationManager, animation_id: integer, direction: Angle)
+    self.animation_data = animation_manager:create_animation(animation_id, direction)
     self.animation_blocking = true
 end
 
-function Character:start_walk_animation(path)
-    self.animation_data = ANIMATION_MANAGER.create_walk_animation(to_tile_path(path))
+function Character:start_walk_animation(animation_manager: AnimationManager, path: { TilePoint })
+    self.animation_data = animation_manager:create_walk_animation(to_tile_path(path))
     self.animation_blocking = true
 end
 
-function Character:end_animation()
-    self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
+function Character:end_animation(animation_manager: AnimationManager)
+    self.animation_data = animation_manager:create_idle_animation("IDLE")
     self.animation_blocking = false
 end
 
@@ -83,7 +93,8 @@ function Character:update_animation()
     if not self.animation_data.playing then
         self:end_animation()
     end
-    self.animation_blocking = self.animation_data.id ~= "IDLE" and self.animation_data.playing
+    -- todo: this isn't ideal
+    self.animation_blocking = not (self.animation_data is GlobalAnimationInstance)
 end
 
 local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint, child: AnimationAnchorPoint, flip_h: boolean, flip_v: boolean): AnimationOffset
@@ -103,11 +114,6 @@ end
 
 -- @return the position of the "feet_center" anchor
 function Character:get_animation_offset(): AnimationOffset
-    if self.animation_data == nil then
-        -- this could go somewhere else...
-        self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
-    end
-
     local frame_data = self.animation_data:get_frame_data()
 
     local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
@@ -154,7 +160,7 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
 
     if self.animation_data == nil then
         -- this could go somewhere else...
-        self.animation_data = ANIMATION_MANAGER.create_idle_animation("IDLE")
+        self.animation_data = animation_manager:create_idle_animation("IDLE")
     end
 
     -- TODO: consider pre-rendering some of this
@@ -167,8 +173,7 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
         offset_x, offset_y = 0, 0
     end
 
-    local base_x = x + offset_x
-    local base_y = y + offset_y
+    local base_point = { x = point.x + offset_x, y = point.y + offset_y }
     --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
     local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 
@@ -227,9 +232,9 @@ local function generate_appearance(): CharacterAppearance
     return appearance
 end
 
-function CharacterManager.generate_character(): Character
+function CharacterManager:generate_character(): Character
     local character: Character = {
-        id = id_counter:get_id(),
+        id = self.id_counter:get_id(),
         appearance = generate_appearance(),
         stats = {
             hp_max = 5,
@@ -242,7 +247,7 @@ function CharacterManager.generate_character(): Character
 
     setmetatable(character, { __index = Character })
 
-    characters[character.id] = character
+    self.characters[character.id] = character
 
     return character
 end

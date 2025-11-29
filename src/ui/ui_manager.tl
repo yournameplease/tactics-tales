@@ -3,12 +3,12 @@ require("src/types")
 require("src/game_context")
 local CONFIG = require("src/config")
 
-local Box = require("src/ui/box")
-local UnitInfo = require("src/ui/panels/unit_info")
-local CombatPreview = require("src/ui/panels/combat_preview")
 local TacticsMap = require("src/ui/panels/tactics_map")
-local TextNode = require("src/ui/panels/text_node")
-local EventMessageLog = require("src/ui/panels/event_message_log")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/text_node")
+require("src/ui/panels/event_message_log")
 
 local MenuValidator = require("src/ui/validator")
 
@@ -35,12 +35,12 @@ function UIManager.new(): UIManager
     self.layouts = {}
 
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
-    battle_summary:add(TextNode.new({ func = function() return { "BATTLE" }  end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function(state)
+    battle_summary:add(TextNode.new({ func = function(state: GameContext): { string } return { "BATTLE" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(state: GameContext): { string }
         local turn = state.turn_manager.get_turn()
         return { "Turn " .. turn }
     end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function() return { "Defeat all" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
     do
         local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 
