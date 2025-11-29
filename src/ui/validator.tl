@@ -1,3 +1,5 @@
+require("src/ui/box")
+
 global record MenuValidator
 
 end 

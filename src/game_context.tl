@@ -62,7 +62,7 @@ function GameContext:enrich()
     local selection = self.menu_manager.menu_selection
 
     if selection is GridMenuSelection then
-        if self.menu_manager.menu_state.menu_step == "SELECT_UNIT" then
+        if self.menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
             local unit = self.battle_state:get_at_tile(point)
             if unit then
@@ -70,7 +70,7 @@ function GameContext:enrich()
             end
         end
 
-        if self.menu_manager.menu_state.menu_step == "SELECT_TARGET" then
+        if self.menu_manager.menu_state.step == "SELECT_TARGET" then
             local point = selection.point
             local unit = self.battle_state:get_at_tile(point)
             if unit then
