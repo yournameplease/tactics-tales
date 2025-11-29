@@ -1,6 +1,6 @@
 require("src/tactics/battle_unit")
 require("src/tiles")
-local LOG = require("src/debug")
+require("src/debug")
 
 global record CombatCalculator
     tile_manager: TileManager

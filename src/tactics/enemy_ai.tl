@@ -1,4 +1,4 @@
-local LOG = require("src/debug")
+require("src/debug")
 
 require("src/menu_manager")
 require("src/tactics/battle_unit")

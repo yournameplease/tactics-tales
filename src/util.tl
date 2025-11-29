@@ -1,6 +1,6 @@
 require("src/types")
 
-local CONFIG = require("src/config")
+require("src/config")
 -- http://lua-users.org/wiki/CopyTable
 -- global function deepcopy(orig)
 --     local orig_type = type(orig)

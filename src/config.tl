@@ -8,7 +8,7 @@ global enum LogLevel
     "TRACE"
 end
 
-local record Config
+global record Config
 	LOG_LEVEL: LogLevel
 	SCREEN_WIDTH: integer 
 	SCREEN_HEIGHT: integer 
@@ -24,7 +24,7 @@ local record Config
 	COLOR_MENU_HIGHLIGHT_TEXT: integer 
 end
 
-local CONFIG: Config = {
+global CONFIG: Config = {
 
 	LOG_LEVEL = "DEBUG",
 

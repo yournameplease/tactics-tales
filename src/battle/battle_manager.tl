@@ -1,4 +1,4 @@
-local LOG = require("src/debug")
+require("src/debug")
 
 require("src/types")
 require("src/systems/event_bus")

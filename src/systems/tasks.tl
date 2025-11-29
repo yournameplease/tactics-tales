@@ -1,4 +1,4 @@
-local LOG = require("src/debug")
+require("src/debug")
 
 global record TaskManager
     tasks: { any }

@@ -240,7 +240,7 @@ global sspr: function(s: integer, sx?: integer, sy?: integer, sw?: integer, sh?:
 --- @param p integer
 --- @param ... integer
 -- global fillp: function(p?: integer, ...: integer) 
-global fillp: function(p?: integer) 
+global fillp: function(...: any) 
 
 --- Get the sprite for a given index
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_spr)

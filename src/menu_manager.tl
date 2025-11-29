@@ -1,5 +1,5 @@
 -- TODO: only needed for lazy dijkstra animation.
-local LOG = require("src/debug")
+require("src/debug")
 require ("src/types")
 require("src/tactics")
 require("src/joypad")
@@ -230,6 +230,28 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
 }
 
 
+function MenuManager:populate_menu_state(new_step: MenuStep)
+    self.menu_state.step = new_step
+
+    local menu_data = MENU_DATA[self.menu_state.menu_id]
+    local new_step_data = menu_data.steps[self.menu_state.step]
+    if new_step_data is GridMenuDefinition then
+        local new_selection: GridMenuSelection = { point = self.menu_state.point }
+        if new_step_data.get_legal_tiles ~= nil then
+            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.tactics_engine, self.menu_ctx)
+        else
+            new_selection.legal_tiles = nil
+        end
+        self.menu_selection = new_selection
+    elseif new_step_data is ListMenuDefinition then
+        local new_selection: VerticalListMenuSelection = {
+            i = 0,
+            options = new_step_data.get_options(self.tactics_engine, self.menu_ctx)
+        }
+        self.menu_selection = new_selection
+    end
+end
+
 function MenuManager:handle_menu_select()
     LOG.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
     local menu_data = MENU_DATA[self.menu_state.menu_id]
@@ -273,28 +295,6 @@ function MenuManager:handle_menu_select()
     if finish_command ~= nil then
         LOG.info("Emitting menu command ", finish_command)
         self.event_bus:emit(finish_command, self.menu_ctx)
-    end
-end
-
-function MenuManager:populate_menu_state(new_step: MenuStep)
-    self.menu_state.step = new_step
-
-    local menu_data = MENU_DATA[self.menu_state.menu_id]
-    local new_step_data = menu_data.steps[self.menu_state.step]
-    if new_step_data is GridMenuDefinition then
-        local new_selection: GridMenuSelection = { point = self.menu_state.point }
-        if new_step_data.get_legal_tiles ~= nil then
-            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.tactics_engine, self.menu_ctx)
-        else
-            new_selection.legal_tiles = nil
-        end
-        self.menu_selection = new_selection
-    elseif new_step_data is ListMenuDefinition then
-        local new_selection: VerticalListMenuSelection = {
-            i = 0,
-            options = new_step_data.get_options(self.tactics_engine, self.menu_ctx)
-        }
-        self.menu_selection = new_selection
     end
 end
 

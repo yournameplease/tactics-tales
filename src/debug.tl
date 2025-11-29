@@ -1,6 +1,6 @@
-local CONFIG = require("src/config")
+require("src/config")
 
-local Log = {}
+global LOG = {}
 
 local log_level = CONFIG.LOG_LEVEL
 
@@ -49,24 +49,24 @@ local function debug_print(level: LogLevel, ...: any)
     end
 end
 
-function Log.error(...: any)
+function LOG.error(...: any)
     debug_print("ERROR", ...)
 end
 
-function Log.warn(...: any)
+function LOG.warn(...: any)
     debug_print("WARN", ...)
 end
 
-function Log.info(...: any)
+function LOG.info(...: any)
     debug_print("INFO", ...)
 end
 
-function Log.debug(...: any)
+function LOG.debug(...: any)
     debug_print("DEBUG", ...)
 end
 
-function Log.trace(...: any)
+function LOG.trace(...: any)
     debug_print("TRACE", ...)
 end
 
-return Log
+return LOG

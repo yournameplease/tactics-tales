@@ -1,5 +1,5 @@
-local LOG = require("src/debug")
-local CONFIG = require("src/config")
+require("src/debug")
+require("src/config")
 
 require("src/ui/box")
 require("src/menu_manager")

@@ -35,7 +35,6 @@
 -- inheritence? (the human kind)
 ]]
 
-global CONFIG = require("src/config")
 require("src/systems/tasks")
 
 global LOG = require("src/debug")
