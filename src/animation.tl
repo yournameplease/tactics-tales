@@ -152,6 +152,13 @@ global record AnimationManager
     global_frame: integer
 end
 
+function AnimationManager.new(): AnimationManager
+    return setmetatable({
+        active_animations = {},
+        global_frame = 0
+    }, { __index = AnimationManager })
+end
+
 global enum OffsetAnimationId
     "BUMP"
     "DODGE"

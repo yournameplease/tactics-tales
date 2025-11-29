@@ -40,48 +40,68 @@ require("src/systems/tasks")
 
 global LOG = require("src/debug")
 
-global BUS = require("src/systems/event_bus")
+require("src/systems/event_bus")
 
-global TURN_MANAGER = require("src/turn_manager")
-global MENU_MANAGER = require("src/menu_manager")
-global CHARACTER_MANAGER = require("src/character")
-global COMBAT_CALCULATOR = require("src/combat/combat_calculator")
-global ANIMATION_MANAGER = require("src/animation")
-global UI_MANAGER = require("src/ui/ui_manager")
-global CONTEXT_MANAGER = require("src/game_context")
-global BATTLE_MANAGER = require("src/battle/battle_manager")
+require("src/game_context")
+require("src/turn_manager")
+require("src/menu_manager")
+require("src/character")
+require("src/combat/combat_calculator")
+require("src/animation")
+require("src/ui/ui_manager")
+require("src/game_context")
+require("src/battle/battle_manager")
 
-global MAP_MANAGER = require("src/map/map_manager")
+require("src/map/map_manager")
+
 require("src/tactics/enemy_ai")
 require("src/joypad")
 
 -- TODO: local battle_manager
 
-local context = {}
+local context: GameContext = {}
+local animation_manager: AnimationManager
+local ui_manager: UIManager
+local task_manager: TaskManager
+
+local battle_manager: BattleManager
+local menu_manager: MenuManager
 
 function _init()
-    global battle_manager = BATTLE_MANAGER.new("bandit_village")
-    UI_MANAGER:init()
-    context = CONTEXT_MANAGER.new(
-            battle_manager,
-            TURN_MANAGER,
-            TILE_MANAGER,
-            CHARACTER_MANAGER,
-            MENU_MANAGER,
-            BUS,
-            COMBAT_CALCULATOR
+    task_manager = TaskManager.new()
+    ui_manager =  UIManager.new()
+    animation_manager =  AnimationManager.new()
+
+    local event_bus = EventBus.new()
+
+    local character_manager = CharacterManager.new()
+
+    battle_manager = BattleManager.new("bandit_village", event_bus, character_manager)
+    local tactics_engine = battle_manager.tactics_engine
+    local tile_manager = battle_manager.tile_manager
+    local battle_state = battle_manager.battle_state
+
+    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager)
+    menu_manager =  MenuManager.new(tactics_engine, battle_state, tile_manager, event_bus)
+
+    context = GameContext.new(
+        battle_manager,
+        turn_manager,
+        character_manager,
+        menu_manager,
+        event_bus
     )
 end
 
 function _update()
     local joy = get_joypad()
-    MENU_MANAGER.update(joy)
+    menu_manager:update(joy)
     battle_manager:update()
-    ANIMATION_MANAGER.tick()
+    animation_manager:tick()
     context:enrich()
-    update_tasks()
+    task_manager:update_tasks()
 end
 
 function _draw()
-    UI_MANAGER:draw(context)
+    ui_manager:draw(context)
 end

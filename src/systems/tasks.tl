@@ -2,7 +2,11 @@ local LOG = require("src/debug")
 
 global record TaskManager
     tasks: { any }
-end 
+end
+
+function TaskManager.new(): TaskManager
+    return setmetatable({tasks = {}}, { __index = TaskManager })
+end
 
 function TaskManager:start_routine(func: function)
     local co = cocreate(func) as any

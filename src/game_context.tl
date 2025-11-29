@@ -29,22 +29,20 @@ end
 function GameContext.new(
     battle_manager: BattleManager,
     turn_manager: TurnManager,
-    tile_manager: TileManager,
     character_manager: CharacterManager,
     menu_manager: MenuManager,
-    event_bus: EventBus,
-    combat_calculator: CombatCalculator
+    event_bus: EventBus
 ): GameContext
     local context: GameContext = {
         battle_manager = battle_manager,
         tactics = battle_manager.tactics_engine,
         battle_state = battle_manager.battle_state,
         turn_manager = turn_manager,
-        tile_manager = tile_manager,
+        tile_manager = battle_manager.tactics_engine.tile_manager,
         character_manager = character_manager,
         menu_manager = menu_manager,
         event_bus = event_bus,
-        combat_calculator = combat_calculator,
+        combat_calculator = battle_manager.tactics_engine.combat_calculator,
 
         layout = "TACTICS",
 

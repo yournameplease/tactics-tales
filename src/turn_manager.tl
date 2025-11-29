@@ -29,8 +29,9 @@ function TurnManager.new(
     self.turn = 1
     self.phase = "PLAYER"
 
-    self.event_bus = self.event_bus
+    self.event_bus = event_bus
     self.tactics_engine = tactics_engine
+    self.battle_manager = battle_manager
 
     self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
         LOG.info("Begin player turn!")

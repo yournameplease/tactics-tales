@@ -19,7 +19,6 @@ local SIDE_ENEMY = 1
 global record BattleManager
     battle_state: BattleState
     tile_manager: TileManager
-    menu_manager: MenuManager
     character_manager: CharacterManager
     tactics_engine: TacticsEngine
     event_bus: EventBus
@@ -57,7 +56,7 @@ end
 --- Main entry point.
 -- @param battle_id: Key from BATTLES
 -- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id: string, event_bus: EventBus): BattleManager
+function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager): BattleManager
     local battle_definition = BATTLE_DATA[battle_id]
     assert(battle_definition ~= nil)
 
@@ -65,14 +64,13 @@ function BattleManager.new(battle_id: string, event_bus: EventBus): BattleManage
 
     self.event_bus = event_bus
 
+    self.character_manager = character_manager
+
     self.map_data = MapManager:load_map(battle_definition.map_id)
     
     self.battle_state = BattleState.new(self.map_data.width, self.map_data.height)
 
     self.tile_manager = TileManager.new(self.map_data, self.battle_state)
-
-    -- TODO: move the menu setting outside this method
-    self.menu_manager:set_menu("MENU_PLAYER_TURN")
 
     self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
     self:_spawn_players(self.map_data.metadata.player_spawners)
