@@ -37,7 +37,7 @@ global peek8: function(addr: integer, n?: integer): integer
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke)
 --- @param addr integer
 --- @param ... integer
-global poke: function(addr: integer, ...: {integer})
+global poke: function(addr: integer, ...: integer)
 
 --- Write an i16 to an address in memory
 --- If multiple values are given, they will be written sequentially

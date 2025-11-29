@@ -1,6 +1,8 @@
+local LOG = require("src/debug")
 local CONFIG = require("src/config")
 
 require("src/ui/box")
+require("src/menu_manager")
 require("src/battle/battle_state")
 
 global record TacticsMap
@@ -8,6 +10,9 @@ global record TacticsMap
     map_width: integer
     map_height: integer
 end
+
+setmetatable(TacticsMap, { __index = Box})
+
 
 local COLOR_MENU_PRIMARY = CONFIG.COLOR_MENU_PRIMARY
 local COLOR_MENU_SECONDARY = CONFIG.COLOR_MENU_SECONDARY
@@ -21,12 +26,27 @@ local TILE_WIDTH = CONFIG.TILE_WIDTH
 local TILE_HEIGHT = CONFIG.TILE_HEIGHT
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
+-- UNIT offset should instead be the feet position, and draw using skeleton position
 local UNIT_OFFSET_X = 1
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7
 
+function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
+    local box = Box.new(props) as TacticsMap
+    setmetatable(box, { __index = TacticsMap})
+
+    box.map_width = map_width or MAP_WIDTH
+    box.map_height = map_height or MAP_HEIGHT
+
+    box.padding = box.decoration_padding
+    box.internal_margin = { t = WALL_HEIGHT - TILE_HEIGHT, b = 0, l = 0, r = 0 }
+    box.w = box.map_width * TILE_WIDTH + 2 * box.padding
+    box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
+
+    return box
+end
 
 local record AnimatedUnitPosition
     id: integer
@@ -48,19 +68,39 @@ local function compute_animated_unit_positions(battle_state: BattleState): { Ani
     )
 end
 
-function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
-    local box = Box.new(props) as TacticsMap
-    setmetatable(box, { __index = TacticsMap})
+local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer, y: integer, width: integer, height: integer)
+    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
+    local bar_width = flr(hp_current*(width-2) / hp_max)
+    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
+    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
+end
 
-    box.map_width = map_width or MAP_WIDTH
-    box.map_height = map_height or MAP_HEIGHT
+local function draw_unit(unit: BattleUnit)
+    local side = unit.side
+    local unit_tile = unit.tile
+    -- local has_acted = unit.has_acted
 
-    box.padding = box.decoration_padding
-    box.internal_margin = { t = WALL_HEIGHT - TILE_HEIGHT, b = 0, l = 0, r = 0 }
-    box.w = box.map_width * TILE_WIDTH + 2 * box.padding
-    box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
+    local world_point = {
+        x = unit_tile.x * TILE_WIDTH,
+        y = unit_tile.y * TILE_HEIGHT
+    }
 
-    return box
+    -- local shadow_color
+    -- if has_acted then
+    --     shadow_color = 0
+    -- else
+    --     shadow_color = 7
+    -- end
+    --draw_shadow(shadow_color,
+    --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
+    --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
+
+    unit.character:draw(world_point, side, true, false)
+
+    local hp_current = unit.hp_current
+    local hp_max = unit.character.stats.hp_max
+    -- TODO: make this a skeleton point
+    draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
 end
 
 function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
@@ -93,9 +133,9 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local layer_wall = layers[2].bmp
     local wall_offset = WALL_HEIGHT - TILE_HEIGHT
 
-    local cursor_x, cursor_y = nil, nil
-    if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
-        cursor_x, cursor_y = menu.menu_selection.x, menu.menu_selection.y
+    local cursor_tile: TilePoint = nil
+    if menu.menu_state.point ~= nil then
+        cursor_tile = menu.menu_state.point
     end
 
     for y = 0, self.map_height-1 do
@@ -103,73 +143,77 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
 
         -- highlight legal tiles
-        if menu.menu_state.legal_tiles ~= nil then
-            fillp(
-            -- 1:2 diagonal slashes
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111,
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111
-            -- 1:2 checkerboard
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC
-            )
-            poke(0x550b,0x3f)
-            palt()
-            for x = 0, self.map_width-1 do
-                local highlighted_tile = menu.menu_state.legal_tiles:get(x, y)
-                if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
-                    if (highlighted_tile.reachable) then
-                        color(28)
-                    elseif highlighted_tile.can_attack then
-                        color(8)
-                    else
-                        error("invalid state")
+        local menu_selection = menu.menu_selection
+        if menu_selection is GridMenuSelection then
+            if menu_selection.legal_tiles ~= nil then
+                fillp(
+                -- 1:2 diagonal slashes
+                --0b00111111,
+                --0b11111100,
+                --0b11110011,
+                --0b11001111,
+                --0b00111111,
+                --0b11111100,
+                --0b11110011,
+                --0b11001111
+                -- 1:2 checkerboard
+                        0x33,
+                        0xCC,
+                        0x33,
+                        0xCC,
+                        0x33,
+                        0xCC,
+                        0x33,
+                        0xCC
+                )
+                poke(0x550b,0x3f)
+                palt()
+                for x = 0, self.map_width-1 do
+                    local highlighted_tile = menu_selection.legal_tiles:get(x, y)
+                    if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
+                        if (highlighted_tile.reachable) then
+                            color(28)
+                        elseif highlighted_tile.can_attack then
+                            color(8)
+                        else
+                            error("invalid state")
+                        end
+                        rrectfill(x*TILE_WIDTH+1, y*TILE_HEIGHT+1, TILE_WIDTH-2, TILE_HEIGHT-2)
                     end
-                    rrectfill(x*TILE_WIDTH+1, y*TILE_HEIGHT+1, TILE_WIDTH-2, TILE_HEIGHT-2)
                 end
+                poke(0x550b,0x00)
+                fillp()
+                color()
             end
-            poke(0x550b,0x00)
-            fillp()
-            color()
         end
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_state:get_unit_by_id(unit_id)
-            LOG.trace("drawing unit ".. unit_id .." with y="..unit.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
+            LOG.trace("drawing unit ".. unit_id .." with y="..unit.tile.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1
         end
 
         -- TODO: this is better with transparency
-        if cursor_y == y then
-            local c_x = cursor_x * TILE_WIDTH
-            local c_y = cursor_y * TILE_HEIGHT
+        if cursor_tile ~= nil then
+            local c_x = cursor_tile.x * TILE_WIDTH
+            local c_y = cursor_tile.y * TILE_HEIGHT
             spr(CURSOR_SPRITE, c_x, c_y)
         end
 
         map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
     end
 
-    if menu.menu_selection.x ~= nil and menu.menu_selection.y ~= nil then
-        local x = menu.menu_selection.x * TILE_WIDTH
-        local y = menu.menu_selection.y * TILE_HEIGHT
+    if cursor_tile ~= nil then
+        local x = cursor_tile.x * TILE_WIDTH
+        local y = cursor_tile.y * TILE_HEIGHT
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if menu.menu_state.kind == "CURSOR_VERTICAL_LIST" then
-            local selected_i = menu.menu_selection.i
-            local options = menu.menu_state.options
+        local menu_selection = menu.menu_selection
+        if menu_selection is VerticalListMenuSelection then
+            local selected_i = menu_selection.i
+            local options = menu_selection.options
             local PADDING = 2
 
             local menu_x = x + TILE_WIDTH
@@ -191,40 +235,5 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     camera()
 end
-
-function draw_unit(unit)
-    local side = unit.side
-    local x = unit.x
-    local y = unit.y
-    local has_acted = unit.has_acted
-
-    local tile_x = x * TILE_WIDTH
-    local tile_y = y * TILE_HEIGHT
-
-    local shadow_color
-    if has_acted then
-        shadow_color = 0
-    else
-        shadow_color = 7
-    end
-    --draw_shadow(shadow_color,
-    --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
-    --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
-
-    unit:draw(tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y, side, true)
-
-    local hp_current = unit.hp_current
-    local hp_max = unit.stats.hp_max
-    draw_health_bar(hp_current, hp_max, tile_x+1, tile_y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
-end
-
-function draw_health_bar(hp_current, hp_max, x, y, width, height)
-    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
-    local bar_width = flr(hp_current*(width-2) / hp_max)
-    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
-    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
-end
-
-setmetatable(TacticsMap, Box)
 
 return TacticsMap

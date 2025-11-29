@@ -90,7 +90,7 @@ global cursor: function(x: integer, y: integer, col?: integer)
 --- If color is not specified, set the current color to 6
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#color)
 --- @param col integer
-global color: function(col: integer) 
+global color: function(col?: integer) 
 
 --- Set a screen offset of -x, -y for all drawing operations
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#camera)
@@ -162,6 +162,7 @@ global line: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: 
 --- @param y1 integer
 --- @param col? integer
 global rect: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+global rrect: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
 
 --- Draw a filled rectangle within the given points
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#rectfill)
@@ -171,6 +172,7 @@ global rect: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: 
 --- @param y1 integer
 --- @param col? integer
 global rectfill: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+global rrectfill: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
 
 --- Remaps one color index to produce another.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pal)
@@ -201,7 +203,7 @@ global pal: function(c0?: integer, c1?: integer, p?: integer)
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
 --- @param c integer
 --- @param is_transparent boolean
-global palt: function(c: integer, is_transparent?: boolean) 
+global palt: function(c?: integer, is_transparent?: boolean) 
 
 --- Set the transparency of all colors
 --- c is a bitfield representing the transparency of all 64 colors
@@ -237,7 +239,7 @@ global sspr: function(s: integer, sx?: integer, sy?: integer, sw?: integer, sh?:
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fillp)
 --- @param p integer
 --- @param ... integer
-global fillp: function(p: integer, ...: {integer}) 
+global fillp: function(p?: integer, ...: integer) 
 
 --- Get the sprite for a given index
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_spr)
