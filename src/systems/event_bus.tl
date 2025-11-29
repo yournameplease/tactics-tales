@@ -22,6 +22,8 @@ local MAX_EVENT_HISTORY = 99
 
 function EventBus.new(): EventBus
     local self = setmetatable({}, { __index = EventBus })
+    self.event_history = {}
+    self.listeners = {}
     return self
 end
 

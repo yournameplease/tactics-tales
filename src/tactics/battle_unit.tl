@@ -27,6 +27,7 @@ end
 
 function BattleUnit.spawn(permanent_unit: Character, tile: TilePoint, side: Side): BattleUnit
     local instance: BattleUnit = {
+        id = permanent_unit.id,
         tile = tile,
         side = side,
         hp_current = permanent_unit.stats.hp_max,
