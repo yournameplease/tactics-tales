@@ -2,6 +2,7 @@ require("src/config")
 require("src/debug")
 
 require ("src/menu/types")
+require ("src/menu/menu_selection")
 
 require("src/util")
 require("src/tiles")

@@ -1,79 +1,13 @@
 require("src/debug")
 require ("src/types")
 require ("src/menu/types")
+require ("src/menu/menu_selection")
 -- TODO: tactics is only needed for lazy dijkstra animation.
 require("src/tactics")
 require("src/joypad")
 require("src/tiles")
 
-global record MenuTileHighlight
-    reachable: boolean
-    valid_selection: boolean
-    can_attack: boolean
-end
 
-global enum MenuType
-    "CURSOR_GRID"
-    "CURSOR_VERTICAL_LIST"
-    "CURSOR_HORIZONTAL_LIST"
-end
-
-global interface MenuSelection
-    type: MenuType
-    update: function(self, Joypad) 
-end
-
-global record GridMenuSelection
-    is MenuSelection
-    where self.type == "CURSOR_GRID"
-    point: TilePoint
-    x_max: integer
-    y_max: integer
-    path: { TilePoint }
-    legal_tiles: Array2D<MenuTileHighlight>
-end
-
-function GridMenuSelection:update(joy: Joypad)
-        self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
-        self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
-end
-
-global type MenuId = string
-global type MenuStep = string
-
-global record MenuOption
-    text: string
-    next_state: MenuStep
-    finish_command: GameEvent
-end
-
-global record VerticalListMenuSelection
-    is MenuSelection
-    where self.type == "CURSOR_VERTICAL_LIST"
-    i: integer
-    options: { MenuOption }
-end
-
-function VerticalListMenuSelection:update(joy: Joypad)
-    self.i = mid(1, self.i + joy.dyp, #self.options)
-end
-
-global record HorizontalListMenuSelection
-    is MenuSelection
-    where self.type == "CURSOR_HORIZONTAL_LIST"
-    i: integer
-    options: { MenuOption }
-end
-
-function HorizontalListMenuSelection:update(joy: Joypad)
-    self.i = mid(1, self.i + joy.dxp, #self.options)
-end
-
-global record MenuState
-    step: MenuStep
-    menu_id: MenuId
-    point: TilePoint
-end
 
 
 global record SelectionHistory
