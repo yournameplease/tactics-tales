@@ -1,3 +1,4 @@
+require("src/ui/types")
 require("src/tactics")
 require("src/battle/battle_manager")
 require("src/turn_manager")
