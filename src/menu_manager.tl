@@ -1,6 +1,7 @@
--- TODO: only needed for lazy dijkstra animation.
 require("src/debug")
 require ("src/types")
+require ("src/menu/types")
+-- TODO: tactics is only needed for lazy dijkstra animation.
 require("src/tactics")
 require("src/joypad")
 require("src/tiles")
@@ -74,28 +75,6 @@ global record MenuState
     point: TilePoint
 end
 
-global record TileSelection
-    point: TilePoint
-    path: { TilePoint }
-end
-
-global record UnitSelection
-    point: TilePoint
-    unit: BattleUnit
-end
-
-global enum MenuContextId
-    "acting_unit"
-    "destination"
-    "target_unit"
-end
-
--- todo: can I use the ContextId without losing type information?
-global record MenuContext
-    acting_unit: UnitSelection
-    destination: TileSelection
-    target_unit: UnitSelection
-end
 
 global record SelectionHistory
     step: MenuStep

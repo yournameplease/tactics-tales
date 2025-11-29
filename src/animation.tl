@@ -31,7 +31,7 @@ end
 
 function SpriteFrameData.new(sprite_frames: { SpriteFrame }): SpriteFrameData
     local duration = 0
-    for k, v in ipairs(sprite_frames) do
+    for _, v in ipairs(sprite_frames) do
         duration = duration + v.duration
     end
     
@@ -53,8 +53,8 @@ local function no_offset_calculator(_): AnimationOffset
     return { x = 0, y = 0}
 end
 
-local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, t: number, d: number): AnimationOffset
-    return {x = o0.x + t * (o1.x - o0.x) / d, y = o0.y + t * (o1.y - o0.y) / d }
+local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, frame: number, duration: number): AnimationOffset
+    return {x = o0.x + frame * (o1.x - o0.x) / duration, y = o0.y + frame * (o1.y - o0.y) / duration }
 end
 
 local record PathAnimationPoint
@@ -147,18 +147,6 @@ global record AnimationFrameData
     offset: AnimationOffset
 end
 
-global record AnimationManager
-    active_animations: { AnimationInstance }
-    global_frame: integer
-end
-
-function AnimationManager.new(): AnimationManager
-    return setmetatable({
-        active_animations = {},
-        global_frame = 0
-    }, { __index = AnimationManager })
-end
-
 global enum OffsetAnimationId
     "BUMP"
     "DODGE"
@@ -226,36 +214,49 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
     }
 }
 
+
+global record AnimationManager
+    active_animations: { AnimationInstance }
+    global_frame: integer
+end
+
+function AnimationManager.new(): AnimationManager
+    return setmetatable({
+        active_animations = {},
+        global_frame = 0
+    }, { __index = AnimationManager })
+end
+
 function AnimationManager:tick()
     self.global_frame = self.global_frame + 1
 
-    for k, animation in ipairs(self.active_animations) do
+    for _, animation in ipairs(self.active_animations) do
         animation:tick()
     end
 end
 
 -- animations such as "IDLE" which use shared frame counters
-function AnimationManager.create_idle_animation(): GlobalAnimationInstance
-    local instance: GlobalAnimationInstance = {
-        duration = 120,
-        sprites = SpriteFrameData.new({
-            {
-                sprite_name = "idle_1",
-                duration = 60
-            },
-            {
-                sprite_name = "idle_2",
-                duration = 60
-            }
-        })
-    }
+-- function AnimationManager:create_idle_animation(): GlobalAnimationInstance
+--     local instance: GlobalAnimationInstance = {
+--         duration = 120,
+--         sprites = SpriteFrameData.new({
+--             {
+--                 sprite_name = "idle_1",
+--                 duration = 60
+--             },
+--             {
+--                 sprite_name = "idle_2",
+--                 duration = 60
+--             }
+--         })
+--     }
 
-    setmetatable(instance, { __index = GlobalAnimationInstance } )
+--     setmetatable(instance, { __index = GlobalAnimationInstance } )
 
-    return instance
-end
+--     return instance
+-- end
 
-function AnimationManager.create_animation(animation_id: OffsetAnimationId, direction: Angle): DirectionalOffsetAnimationInstance
+function AnimationManager:create_animation(animation_id: OffsetAnimationId, direction: Angle): DirectionalOffsetAnimationInstance
     local config = OFFSET_ANIMATION_DATA[animation_id]
     
     local animation_data: DirectionalOffsetAnimationInstance = {
@@ -271,7 +272,7 @@ function AnimationManager.create_animation(animation_id: OffsetAnimationId, dire
     return animation_data
 end
 
-function AnimationManager.create_walk_animation(path: { AnimationOffset }): PathAnimationInstance
+function AnimationManager:create_walk_animation(path: { AnimationOffset }): PathAnimationInstance
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation

@@ -1,6 +1,8 @@
 require("src/config")
 require("src/debug")
 
+require ("src/menu/types")
+
 require("src/util")
 require("src/tiles")
 require("src/draw")
@@ -9,6 +11,7 @@ require("src/systems/event_bus")
 require("src/systems/tasks")
 
 require("src/tactics/battle_unit")
+require("src/menu/types")
 
 global type MenuContext
 global type MenuSelection
@@ -27,8 +30,23 @@ global record TacticsEngine
     task_manager: TaskManager
 
     battle_is_blocked: boolean
+        
+    handle_move_unit: function(self, MenuContext)
+    handle_move_and_attack: function(self, MenuContext)
+    apply_combat_step: function(self, CombatStep)
+    do_combat: function(self, BattleUnit, BattleUnit)
+    refresh_all_units: function(self)
+    refresh_units: function(self, function(BattleUnit): boolean)
+    is_blocked: function(self): boolean
+    validate_tile_is_in_unit_attack_range: function(self, MenuSelection, MenuContext): boolean
+    any_target_in_range: function(self, MenuContext): boolean
+    tiles_with_distance_from_unit_attacks: function(self, MenuContext): Array2D<MenuTileHighlight>
+    find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): Array2D<boolean>
+    tiles_in_movement_and_attack_range: function(self, MenuContext): Array2D<MenuTileHighlight>
+    grid_selection_is_empty_or_acting_unit: function(self, MenuSelection, MenuContext): boolean
+    grid_selection_is_available_player: function(self, MenuSelection): boolean
+    update: function(self)
 end
-
 
 function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager, event_bus: EventBus): TacticsEngine
     local self: TacticsEngine = setmetatable({}, { __index = TacticsEngine })
@@ -44,8 +62,55 @@ function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager,
     self.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self:handle_move_and_attack(ctx)
     end)
-    LOG.debug("battle new", #self.battle_state.units_by_id)
+    LOG.debug("New battle.")
     return self
+end
+
+-- handlers
+
+function TacticsEngine:handle_move_unit(ctx: MenuContext)
+    local unit = ctx.acting_unit.unit
+    local destination = ctx.destination.point
+    local path = ctx.destination.path
+
+    self.battle_is_blocked = true
+    self.task_manager:start_routine(function()
+        unit.character:start_walk_animation(path)
+        while unit.character.animation_blocking do
+            yield()
+        end
+        unit.character:end_animation()
+
+        self.battle_state:move_unit(unit, destination)
+        unit.has_acted = true
+
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        self.battle_is_blocked = false
+    end)
+end
+
+function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
+    local unit = ctx.acting_unit.unit
+    local destination = ctx.destination.point
+    local path = ctx.destination.path
+    local target = ctx.target_unit.unit
+
+    self.battle_is_blocked = true
+    self.task_manager:start_routine(function()
+        unit.character:start_walk_animation(path)
+        while unit.character.animation_blocking do
+            yield()
+        end
+        unit.character:end_animation()
+
+        self.battle_state:move_unit(unit, destination)
+        self:do_combat(unit, target)
+        unit.has_acted = true
+
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        self.battle_is_blocked = false
+        LOG.debug("unblockiung battle")
+    end)
 end
 
 -- Combat
@@ -243,53 +308,6 @@ function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: Me
     end
     local acting_unit = ctx.acting_unit.unit
     return destination_unit.id == acting_unit.id
-end
-
--- handlers
-
-function TacticsEngine:handle_move_unit(ctx: MenuContext)
-    local unit = ctx.acting_unit.unit
-    local destination = ctx.destination.point
-    local path = ctx.destination.path
-
-    self.battle_is_blocked = true
-    self.task_manager:start_routine(function()
-        unit.character:start_walk_animation(path)
-        while unit.character.animation_blocking do
-            yield()
-        end
-        unit.character:end_animation()
-
-        self.battle_state:move_unit(unit, destination)
-        unit.has_acted = true
-
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
-        self.battle_is_blocked = false
-    end)
-end
-
-function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
-    local unit = ctx.acting_unit.unit
-    local destination = ctx.destination.point
-    local path = ctx.destination.path
-    local target = ctx.target_unit.unit
-
-    self.battle_is_blocked = true
-    self.task_manager:start_routine(function()
-        unit.character:start_walk_animation(path)
-        while unit.character.animation_blocking do
-            yield()
-        end
-        unit.character:end_animation()
-
-        self.battle_state:move_unit(unit, destination)
-        self:do_combat(unit, target)
-        unit.has_acted = true
-
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
-        self.battle_is_blocked = false
-        LOG.debug("unblockiung battle")
-    end)
 end
 
 function TacticsEngine:grid_selection_is_available_player(grid_selection: MenuSelection): boolean
