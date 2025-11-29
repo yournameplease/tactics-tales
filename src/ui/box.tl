@@ -73,7 +73,7 @@ function Box.new(props: UIElement): Box
     self.h = props.h or 0
 
     -- margin inside the view window, mainly used for drawing the shaded box at an offset
-    if type(props.internal_margin) ~= nil then
+    if props.internal_margin ~= nil then
         self.internal_margin = {
             t = props.internal_margin.t or 0,
             b = props.internal_margin.b or 0,
@@ -108,7 +108,7 @@ function Box.new(props: UIElement): Box
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
-    assert(not (self.flex_grow and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
+    assert(not (self.flex_grow > 0  and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
     assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
     return self
 end
