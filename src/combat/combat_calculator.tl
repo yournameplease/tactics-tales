@@ -16,7 +16,7 @@ end
 function CombatCalculator:get_hit_chance(attacker: BattleUnit, defender: BattleUnit): integer
     local accuracy = attacker.weapon.accuracy
 
-    local terrain = self.tile_manager:get_terrain(defender.x, defender.y)
+    local terrain = self.tile_manager:get_terrain(defender.tile)
     local avoid = (terrain.dodge or 0)
 
     return mid(0, accuracy - avoid, 100)
@@ -29,13 +29,9 @@ function CombatCalculator:get_damage(attacker: BattleUnit, defender: BattleUnit)
 end
 
 function CombatCalculator:is_in_combat_range(attacker: BattleUnit, defender: BattleUnit): boolean
-    local a_x = attacker.x
-    local a_y = attacker.y
-    local d_x = defender.x
-    local d_y = defender.y
     local min_range = attacker.weapon.min_range
     local max_range = attacker.weapon.max_range
-    local dist = abs(a_x-d_x)+abs(a_y-d_y)
+    local dist = taxicab_distance(attacker.tile, defender.tile)
 
     return dist >= min_range and dist <= max_range
 end

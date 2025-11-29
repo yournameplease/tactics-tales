@@ -70,7 +70,7 @@ function TileManager.new(map_data: MapData, battle_state: BattleState): TileMana
     return self
 end
 
-function TileManager:get_terrain(x: integer, y: integer): TerrainData
+function TileManager:get_terrain(tile: TilePoint): TerrainData
     local tile = self.map_data.userdata[3].bmp:get(x,y)
     local flags = fget(tile)
     local terrain = (flags & 0xD) >> 1
@@ -78,16 +78,16 @@ function TileManager:get_terrain(x: integer, y: integer): TerrainData
 end
 
 -- cost to move onto x,y from any neighbor
-function TileManager:movement_cost(x: integer, y: integer, side: Side): integer
+function TileManager:movement_cost(tile: TilePoint, side: Side): integer
     local ground = self.map_data.userdata[3].bmp
-    if x < 0 or y < 0 or x >= ground:width() or y >= ground:height() then
+    if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
 
-    local tile = ground:get(x,y)
+    local tile = ground:get(tile.x,tile.y)
     if tile == nil then return 999 end
 
-    local unit = self.battle_state:get_at_tile({x = x, y = y})
+    local unit = self.battle_state:get_at_tile(tile)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -203,7 +203,7 @@ function TileManager:calculate_all_tile_costs(start_x: integer, start_y: integer
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
-function TileManager:get_path_to_tile(all_tile_costs: ShortestPathResult, x: integer, y: integer): { TilePoint } -- could be static with current signature
+function TileManager:get_path_to_tile(all_tile_costs: ShortestPathResult, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get(x, y) ~= nil)
     local path = { { x = x, y = y} }
     while all_tile_costs:get(x, y).prev ~= nil do
@@ -225,12 +225,12 @@ function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, si
     local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h)
 
     full_map:foreach(
-        function (x: integer, y: integer, value: ShortestPathEntry)
+        function (tile: TilePoint, value: ShortestPathEntry)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
             -- TODO: not positive after refactor to Array2D.  investigate.
             if (value.cost <= total_cost) then
-                reachable:set(x, y, true)
+                reachable:set_point(tile, true)
             end
         end
     )
