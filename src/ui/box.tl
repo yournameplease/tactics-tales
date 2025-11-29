@@ -20,19 +20,12 @@ global enum DecorationStyle
 end
 
 global interface UIElement
-    measure: function(self)
-    layout: function(self, integer, integer)
-    draw: function(self, GameContext, UITheme)
-end
-
-global record Box
-    is UIElement
     x: integer
     y: integer
     w: integer
-    _calculated_w: integer
+    -- _calculated_w: integer
     h: integer
-    _calculated_h: integer
+    -- _calculated_h: integer
     internal_margin: Margin
     auto_width: boolean
     auto_height: boolean
@@ -44,9 +37,35 @@ global record Box
     decoration_padding: integer
     decoration: DecorationStyle
     children: { Box }
+
+    add: function(self, UIElement): UIElement
+    measure: function(self)
+    layout: function(self, integer, integer)
+    draw: function(self, GameContext, UITheme)
 end
 
-function Box.new(props: Box): Box
+global record Box
+    is UIElement
+    -- x: integer
+    -- y: integer
+    -- w: integer
+    _calculated_w: integer
+    -- h: integer
+    _calculated_h: integer
+    -- internal_margin: Margin
+    -- auto_width: boolean
+    -- auto_height: boolean
+    -- flex_grow: integer
+    -- cross_stretch: boolean
+    -- dir: BoxDirection
+    -- gap: integer
+    -- padding: integer
+    -- decoration_padding: integer
+    -- decoration: DecorationStyle
+    -- children: { Box }
+end
+
+function Box.new(props: UIElement): Box
     local self: Box = setmetatable({}, { __index = Box})
     self.x = props.x or 0
     self.y = props.y or 0
@@ -94,7 +113,7 @@ function Box.new(props: Box): Box
     return self
 end
 
-function Box:add(child: Box): Box
+function Box:add(child: UIElement): UIElement
     add(self.children, child)
     return child -- Return child for chaining
 end
@@ -380,20 +399,20 @@ function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interi
     end
 end
 
-function Box:draw_embossed(theme: UITheme)
-    self:draw_shaded(theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_PRIMARY)
+function Box:draw_embossed(ui_theme: UITheme)
+    self:draw_shaded(ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
-function Box:draw_recessed(theme: UITheme)
-    self:draw_shaded(theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_INTERIOR)
-    self:draw_shaded_dividers(theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_DECORATION_PRIMARY)
+function Box:draw_recessed(ui_theme: UITheme)
+    self:draw_shaded(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_INTERIOR)
+    self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
-function Box:draw(state: GameContext, theme: UITheme)
+function Box:draw(state: GameContext, ui_theme: UITheme)
     if self.decoration == 'embossed' then
-        self:draw_embossed(theme)
+        self:draw_embossed(ui_theme)
     elseif self.decoration == 'recessed' then
-        self:draw_recessed(theme)
+        self:draw_recessed(ui_theme)
     end
 
     -- Debug rectangle
@@ -414,7 +433,7 @@ function Box:draw(state: GameContext, theme: UITheme)
 
     -- 2. Draw Children
     for _, child in ipairs(self.children) do
-        child:draw(state, theme)
+        child:draw(state, ui_theme)
     end
 end
 

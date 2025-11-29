@@ -27,8 +27,6 @@ global record UIManager
     theme: UITheme
 end
 
-UIManager.THEME = 
-
 -- Define Layouts
 function UIManager.new(): UIManager
 

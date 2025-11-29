@@ -1,22 +1,25 @@
-local Box = require("src/ui/box")
-local TextNode = require("src/ui/panels/text_node")
-local PortraitBox = require("src/ui/panels/portrait_box")
+require("src/ui/box")
+require("src/ui/panels/text_node")
+require("src/ui/panels/portrait_box")
 
-local UnitInfo = {}
+global record UnitInfo
+    is UIElement
+
+end
 setmetatable(UnitInfo, { __index = Box })
 
-local function get_preview_text(state)
-    local attacker = state:get_acting_unit()
-    local defender = state:get_selected_unit()
-    local preview = state.combat_calculator.preview_combat(attacker, defender).steps
+local function get_preview_text(state: GameContext): {string}
+    local attacker = state.acting_unit
+    local defender = state.hovered_unit
+    local preview = state.combat_calculator:preview_combat(attacker, defender).steps
 
     local out = {
-        attacker.name .." -> ".. defender.name,
+        attacker.character.name .." -> ".. defender.character.name,
         "Hit: "..preview[1].hit.."%",
         "Dmg: "..preview[1].dmg,
     }
     if preview[2] ~= nil then
-        add(out, attacker.name .." <- ".. defender.name)
+        add(out, attacker.character.name .." <- ".. defender.character.name)
         add(out, "Hit: "..preview[2].hit.."%")
         add(out, "Dmg: "..preview[2].dmg)
     else
@@ -27,17 +30,17 @@ local function get_preview_text(state)
     return out
 end
 
-function UnitInfo.new(props)
+function UnitInfo.new(props: UIElement): UnitInfo
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
 
-    local self = Box.new(props)
+    local self = Box.new(props) as UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
-    local attacker_portrait = PortraitBox.new(function(state) return state:get_acting_unit()  end)
-    local defender_portrait = PortraitBox.new(function(state) return state:get_selected_unit()  end)
+    local attacker_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.acting_unit end)
+    local defender_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.hovered_unit end)
 
     local preview_text = TextNode.new({
         flex_grow = 1,
