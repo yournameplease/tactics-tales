@@ -1,3 +1,6 @@
+require("src/types")
+
+require("src/game_context")
 local CONFIG = require("src/config")
 
 local Box = require("src/ui/box")
@@ -9,18 +12,27 @@ local EventMessageLog = require("src/ui/panels/event_message_log")
 
 local MenuValidator = require("src/ui/validator")
 
-local UIManager = {}
+global enum UILayoutId
+    "TACTICS"
+    "COMBAT_PREVIEW"
+end
 
-UIManager.THEME = {
-    COLOR_DECORATION_PRIMARY = 22,
-    COLOR_DECORATION_HIGHLIGHT = 6,
-    COLOR_DECORATION_SHADOW = 5,
-    COLOR_INTERIOR = 21,
-    COLOR_INTERIOR_TEXT = 7,
-}
+global record UILayout
+    root: UIElement
+end
+
+global record UIManager
+    layouts: { UILayoutId: UILayout }
+    current_layout: UIElement
+    theme: UITheme
+end
+
+UIManager.THEME = 
 
 -- Define Layouts
-function UIManager:init()
+function UIManager.new(): UIManager
+
+    local self: UIManager = setmetatable({}, { __index = UIManager }) 
     -- 1. Create the BATTLE layout tree
     self.layouts = {}
 
@@ -66,17 +78,25 @@ function UIManager:init()
 
     -- Set initial
     self.current_layout = self.layouts.TACTICS
+
+    self.theme = {
+        COLOR_DECORATION_PRIMARY = 22,
+        COLOR_DECORATION_HIGHLIGHT = 6,
+        COLOR_DECORATION_SHADOW = 5,
+        COLOR_INTERIOR = 21,
+        COLOR_INTERIOR_TEXT = 7,
+    }
 end
 
-function UIManager:draw(global_state)
-    self.current_layout = self.layouts[global_state.layout]
+function UIManager:draw(game_context: GameContext)
+    self.current_layout = self.layouts[game_context.layout]
 
     -- Recalculate size and positions
     self.current_layout:measure()
     self.current_layout:layout()
 
     -- Render
-    self.current_layout:draw(global_state)
+    self.current_layout:draw(game_context, self.theme)
 end
 
 return UIManager

@@ -7,11 +7,6 @@ require("src/character")
 require("src/systems/event_bus")
 require("src/combat/combat_calculator")
 
-global enum UILayout
-    "TACTICS"
-    "COMBAT_PREVIEW"
-end
-
 global record GameContext
     battle_manager: BattleManager
     tactics: TacticsEngine

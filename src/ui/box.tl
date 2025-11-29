@@ -1,4 +1,6 @@
 require("src/types")
+require("src/game_context")
+require("src/ui/theme")
 
 global record Margin
     t: integer
@@ -17,14 +19,14 @@ global enum DecorationStyle
     "recessed"
 end
 
-
--- TODO: better name
-global interface BoxInterface
-
+global interface UIElement
+    measure: function(self)
+    layout: function(self, integer, integer)
+    draw: function(self, GameContext, UITheme)
 end
 
 global record Box
-    is BoxInterface
+    is UIElement
     x: integer
     y: integer
     w: integer
@@ -235,44 +237,6 @@ function Box:layout(parent_x: integer, parent_y: integer)
     end
 end
 
-function Box:draw(state: GameContext)
-    if self.decoration == 'embossed' then
-        self:draw_embossed()
-    elseif self.decoration == 'recessed' then
-        self:draw_recessed()
-    end
-
-    -- Debug rectangle
-    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
-    --LOG.info(self.x, self.y, self.w, self.h)
-    --rrect(
-    --        self.x+self.padding+self.internal_margin.l,
-    --        self.y+self.padding+self.internal_margin.t,
-    --        self.w - 2*self.padding,
-    --        self.h - 2*self.padding,
-    --        0, 14)
-    --rrect(
-    --        self.x+self.padding+self.internal_margin.l,
-    --        self.y+self.padding+self.internal_margin.t,
-    --        self._calculated_w - 2*self.padding,
-    --        self._calculated_h - 2*self.padding,
-    --        0, 28)
-
-    -- 2. Draw Children
-    for _, child in ipairs(self.children) do
-        child:draw(state)
-    end
-end
-
-function Box:draw_embossed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
-end
-
-function Box:draw_recessed()
-    self:draw_shaded(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_INTERIOR)
-    self:draw_shaded_dividers(UI_MANAGER.THEME.COLOR_DECORATION_SHADOW, UI_MANAGER.THEME.COLOR_DECORATION_HIGHLIGHT, UI_MANAGER.THEME.COLOR_DECORATION_PRIMARY)
-end
-
 function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color)
     -- TODO: 45 degree slant (draw lines in loop)
     local x = self.x + self.internal_margin.l
@@ -413,6 +377,44 @@ function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interi
                 )
             end
         end
+    end
+end
+
+function Box:draw_embossed(theme: UITheme)
+    self:draw_shaded(theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_PRIMARY)
+end
+
+function Box:draw_recessed(theme: UITheme)
+    self:draw_shaded(theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_INTERIOR)
+    self:draw_shaded_dividers(theme.COLOR_DECORATION_SHADOW, theme.COLOR_DECORATION_HIGHLIGHT, theme.COLOR_DECORATION_PRIMARY)
+end
+
+function Box:draw(state: GameContext, theme: UITheme)
+    if self.decoration == 'embossed' then
+        self:draw_embossed(theme)
+    elseif self.decoration == 'recessed' then
+        self:draw_recessed(theme)
+    end
+
+    -- Debug rectangle
+    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
+    --LOG.info(self.x, self.y, self.w, self.h)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self.w - 2*self.padding,
+    --        self.h - 2*self.padding,
+    --        0, 14)
+    --rrect(
+    --        self.x+self.padding+self.internal_margin.l,
+    --        self.y+self.padding+self.internal_margin.t,
+    --        self._calculated_w - 2*self.padding,
+    --        self._calculated_h - 2*self.padding,
+    --        0, 28)
+
+    -- 2. Draw Children
+    for _, child in ipairs(self.children) do
+        child:draw(state, theme)
     end
 end
 
