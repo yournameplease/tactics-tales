@@ -66,7 +66,7 @@ function GameContext:enrich()
             local point = selection.point
             local unit = self.battle_state:get_at_tile(point)
             if unit then
-                self.hovered_unit = unit.id
+                self.hovered_unit = unit
             end
         end
 
@@ -81,7 +81,7 @@ function GameContext:enrich()
     end
 
     if self.menu_manager.menu_ctx.acting_unit ~= nil then
-        self.acting_unit = self.menu_manager.menu_ctx.acting_unit.unit_id
+        self.acting_unit = self.menu_manager.menu_ctx.acting_unit.unit
     end
 
 end
