@@ -72,32 +72,32 @@ local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
 
 
-function Character:start_animation(animation_manager: AnimationManager, animation_id: integer, direction: Angle)
-    self.animation_data = animation_manager:create_animation(animation_id, direction)
-    self.animation_blocking = true
+function Character:start_animation(animation_id: integer, direction: Angle)
+    -- self.animation_data = animation_manager:create_animation(animation_id, direction)
+    -- self.animation_blocking = true
 end
 
-function Character:start_walk_animation(animation_manager: AnimationManager, path: { TilePoint })
-    self.animation_data = animation_manager:create_walk_animation(to_tile_path(path))
-    self.animation_blocking = true
+function Character:start_walk_animation(path: { TilePoint })
+    -- self.animation_data = animation_manager:create_walk_animation(to_tile_path(path))
+    -- self.animation_blocking = true
 end
 
 function Character:end_animation(animation_manager: AnimationManager)
-    self.animation_data = animation_manager:create_idle_animation("IDLE")
-    self.animation_blocking = false
+    -- self.animation_data = animation_manager:create_idle_animation("IDLE")
+    -- self.animation_blocking = false
 end
 
 function Character:update_animation()
-    if self.animation_data == nil then return end
-    self.animation_data:update()
-    if not self.animation_data.playing then
-        self:end_animation()
-    end
-    -- todo: this isn't ideal
-    self.animation_blocking = not (self.animation_data is GlobalAnimationInstance)
+    -- if self.animation_data == nil then return end
+    -- self.animation_data:update()
+    -- if not self.animation_data.playing then
+    --     self:end_animation()
+    -- end
+    -- -- todo: this isn't ideal
+    -- self.animation_blocking = not (self.animation_data is GlobalAnimationInstance)
 end
 
-local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint, child: AnimationAnchorPoint, flip_h: boolean, flip_v: boolean): AnimationOffset
+local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint, child: AnimationAnchorPoint, flip_h: boolean, flip_v: boolean): DrawPoint
     local diff_x = anchor.x - child.x
     local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
@@ -107,19 +107,20 @@ local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint,
 end
 
 function Character:get_body_type()
-    local base_body_type = self.weapon.body_type
+    -- local base_body_type = self.weapon.body_type
 
-    return "STANDARD_"..base_body_type
+    -- return "STANDARD_"..base_body_type
 end
 
 -- @return the position of the "feet_center" anchor
 function Character:get_animation_offset(): AnimationOffset
-    local frame_data = self.animation_data:get_frame_data()
+    return { x = 0, y = 0}
+    -- local frame_data = self.animation_data:get_frame_data()
 
-    local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
+    -- local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
 
-    return frame_data.x + body_sprite_data.anchors.feet_center.x,
-            frame_data.y + body_sprite_data.anchors.feet_center.y
+    -- return frame_data.x + body_sprite_data.anchors.feet_center.x,
+    --         frame_data.y + body_sprite_data.anchors.feet_center.y
 end
 
 function Character:set_pal(side: Side)
@@ -158,32 +159,29 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
     set_pal = set_pal ~= false
     apply_animation = apply_animation ~= false
 
-    if self.animation_data == nil then
-        -- this could go somewhere else...
-        self.animation_data = animation_manager:create_idle_animation("IDLE")
-    end
-
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
     local sex = self.appearance.sex
 
-    local frame_data = self.animation_data:get_frame_data()
-    local offset_x, offset_y = frame_data.x, frame_data.y
+    local frame_data: AnimationFrameData = {
+        frame = {
+            sprite_offset = 0,
+            anchors = {
+                neck = { x = 9, y = 7 },
+                main_hand = { x = 1, y = 8 },
+                off_hand = { x = 14, y = 12 },
+                feet_center = { x = 7, y = 15 }
+            }
+        },
+        offset = {x = 0, y = 0}
+    } -- TODO: have this updated in the background by animation_manager
+    local offset_x, offset_y = frame_data.offset.x, frame_data.offset.y
     if not apply_animation then
         offset_x, offset_y = 0, 0
     end
 
     local base_point = { x = point.x + offset_x, y = point.y + offset_y }
-    --local body_sprite_data = ANIMATION_DATA["STANDARD_BACK_HAND"][frame_data.sprite_id]
-    local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
-
-    local body_main_hand_x = body_sprite_data.anchors.main_hand.x
-    local body_main_hand_y = body_sprite_data.anchors.main_hand.y
-    local weapon_main_hand_x = self.weapon.hand_anchor.x
-    local weapon_main_hand_y = self.weapon.hand_anchor.y
-
-    local body_neck_x = body_sprite_data.anchors.neck.x
-    local body_neck_y = body_sprite_data.anchors.neck.y
+    
     local HEAD_NECK_X = 9
     local HEAD_NECK_Y = 7
 
@@ -191,13 +189,13 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
         self:set_pal(side)
     end
 
-    spr(BASE_UNIT_SPRITE + body_sprite_data.sprite, base_x, base_y, flip_h)
+    spr(BASE_UNIT_SPRITE + frame_data.frame.sprite_offset, base_point.x, base_point.y, flip_h)
 
-    local head_anchor = get_anchor_offsets(base_x, base_y, body_neck_x, body_neck_y, HEAD_NECK_X, HEAD_NECK_Y, flip_h, false)
+    local head_anchor = get_anchor_offsets(base_point, frame_data.frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
     self:draw_head(head_anchor, side, set_pal)
 
-    local weapon_anchor = get_anchor_offsets(base_x, base_y, body_main_hand_x, body_main_hand_y, weapon_main_hand_x, weapon_main_hand_y, flip_h, false)
-    spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_anchor, flip_h)
+    local weapon_anchor = get_anchor_offsets(base_point, frame_data.frame.anchors.main_hand, self.weapon.hand_anchor, flip_h, false)
+    spr(BASE_UNIT_SPRITE + self.weapon.sprite, weapon_anchor.x, weapon_anchor.y, flip_h)
 
     if set_pal then
         pal()
