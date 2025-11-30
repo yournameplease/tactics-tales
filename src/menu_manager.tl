@@ -156,10 +156,11 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     local menu_data = MENU_DATA[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
     if new_step_data is GridMenuDefinition then
-        local new_selection: GridMenuSelection = {
-            type = "CURSOR_GRID",
-            point = self.menu_state.point
-        }
+        local new_selection = GridMenuSelection.new(
+            self.menu_state.point,
+            16,
+            16
+        )
         if new_step_data.get_legal_tiles ~= nil then
             new_selection.legal_tiles = new_step_data.get_legal_tiles(self.tactics_engine, self.menu_ctx)
         else
@@ -167,11 +168,10 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
         end
         self.menu_selection = new_selection
     elseif new_step_data is ListMenuDefinition then
-        local new_selection: VerticalListMenuSelection = {
-            i = 0,
-            type = "CURSOR_VERTICAL_LIST",
-            options = new_step_data.get_options(self.tactics_engine, self.menu_ctx)
-        }
+        local new_selection = VerticalListMenuSelection.new(
+            0,
+            new_step_data.get_options(self.tactics_engine, self.menu_ctx)
+        )
         self.menu_selection = new_selection
     end
 end
@@ -249,9 +249,7 @@ function MenuManager:update(joy: Joypad)
     elseif joy.ap then
         self:handle_menu_select()
     else
-        if self.menu_selection.update ~= nil then
-            self.menu_selection:update(joy)
-        end
+        self.menu_selection:update(joy)
     end
 end
 
