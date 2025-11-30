@@ -48,6 +48,7 @@ end
 
 function VerticalListMenuSelection.new(i: integer, options: {MenuOption}): VerticalListMenuSelection
     local self: VerticalListMenuSelection = {
+        type = "CURSOR_VERTICAL_LIST",
         i = i,
         options = options
     }
