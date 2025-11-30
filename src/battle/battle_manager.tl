@@ -22,6 +22,7 @@ global record BattleManager
     character_manager: CharacterManager
     tactics_engine: TacticsEngine
     event_bus: EventBus
+    animation_manager: AnimationManager
 
     map_data: MapData
 end
@@ -29,6 +30,8 @@ end
 
 function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side: Side)
     local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
+    local idle_animation = self.animation_manager:create_idle_animation()
+    battle_unit.character.animation_data = idle_animation
     self.battle_state:spawn_unit(battle_unit, spawn_point)
 end
 
@@ -63,6 +66,7 @@ function BattleManager.new(battle_id: string, event_bus: EventBus, character_man
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
 
     self.event_bus = event_bus
+    self.animation_manager = animation_manager
 
     self.character_manager = character_manager
 
