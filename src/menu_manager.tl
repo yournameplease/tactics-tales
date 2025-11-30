@@ -92,32 +92,32 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, b: BattleState, ctx: MenuContext)
-                    ctx.acting_unit = { unit = b:get_at_tile(s.point)}
+                set_selected_context = function(s: GridMenuSelection, bs: BattleState, ctx: MenuContext)
+                    ctx.acting_unit = { unit = bs:get_at_tile(s.point)}
                 end,
-                validator = function (s: MenuSelection, t: TacticsEngine, ctx: MenuContext): boolean
-                    return t:grid_selection_is_available_player(s) end,
+                validator = function (s: MenuSelection, te: TacticsEngine, _ctx: MenuContext): boolean
+                    return te:grid_selection_is_available_player(s) end,
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, b: BattleState, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, _bs: BattleState, ctx: MenuContext)
                     ctx.destination = { point = s.point, path = s.path }
                 end,
-                validator = function (s: MenuSelection, t: TacticsEngine, ctx: MenuContext): boolean
-                     return t:grid_selection_is_empty_or_acting_unit(s, ctx)
+                validator = function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
+                     return te:grid_selection_is_empty_or_acting_unit(s, ctx)
                 end,
                 next_state = "SELECT_ACTION",
-                get_legal_tiles = function (t: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
-                    return t:tiles_in_movement_and_attack_range(ctx)
+                get_legal_tiles = function (te: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
+                    return te:tiles_in_movement_and_attack_range(ctx)
                 end
             }),
             ["SELECT_ACTION"] = ListMenuDefinition.new({
                 type = "CURSOR_VERTICAL_LIST",
-                get_options = function(t: TacticsEngine, ctx: MenuContext): {MenuOption}
+                get_options = function(te: TacticsEngine, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
                     -- if target in range
-                    if t:any_target_in_range(ctx) then -- TODO: global state
+                    if te:any_target_in_range(ctx) then -- TODO: global state
                         add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"
@@ -134,15 +134,15 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, b: BattleState, ctx: MenuContext)
-                    ctx.target_unit = { unit = b:get_at_tile(s.point)}
+                set_selected_context = function(s: GridMenuSelection, bs: BattleState, ctx: MenuContext)
+                    ctx.target_unit = { unit = bs:get_at_tile(s.point)}
                 end,
-                validator =  function (s: MenuSelection, t: TacticsEngine, ctx: MenuContext): boolean
-                    return t:validate_tile_is_in_unit_attack_range(s, ctx) 
+                validator =  function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
+                    return te:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
                 finish_command = "MOVE_AND_ATTACK",
-                get_legal_tiles = function (t: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
-                    return t:tiles_with_distance_from_unit_attacks(ctx)
+                get_legal_tiles = function (te: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
+                    return te:tiles_with_distance_from_unit_attacks(ctx)
                 end
             }),
         }

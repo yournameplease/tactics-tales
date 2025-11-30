@@ -78,11 +78,9 @@ function BattleManager.new(battle_id: string, event_bus: EventBus, character_man
 
     self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
     self:_spawn_players(self.map_data.metadata.player_spawners)
-    -- 5. return Tactics.new(map_data, placed_party, enemy_units, battle_def.victory)
 
     self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, animation_manager)
 
-    LOG.debug(#self.battle_state.units_by_id)
     return self
 end
 

@@ -20,8 +20,8 @@ local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23
 local COLOR_BEARD = 22
-local COLOR_EYE = 21
-local COLOR_EYE_WHITE = 7
+local _COLOR_EYE = 21
+local _COLOR_EYE_WHITE = 7
 
 local record CharacterRenderer
 

@@ -4,7 +4,7 @@ global record MenuValidator
 
 end 
 
-local function get_node_name(node: UIElement, index: integer): string
+local function get_node_name(_node: UIElement, index: integer): string
     return ("child[" .. index .. "]")
 end
 
@@ -33,7 +33,7 @@ function MenuValidator.validate(node: UIElement, path: string)
         end
 
         if is_row then
-            for i, child in ipairs(children) do
+            for _, child in ipairs(children) do
                 if child.cross_stretch and not child.h and not child.auto_height then
                     error( "Warning: "..path.."\nThis child effectively vanishes or relies on a sibling.")
                 end
@@ -55,7 +55,7 @@ function MenuValidator.validate(node: UIElement, path: string)
         end
 
         if is_row then
-            for i, child in ipairs(children) do
+            for _, child in ipairs(children) do
                 if child.cross_stretch and not child.w and not child.auto_width then
                     error( "Warning: "..path.."\nThis child effectively vanishes or relies on a sibling.")
                 end

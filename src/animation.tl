@@ -54,10 +54,6 @@ function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
     return self.sprite_frames[frame_number].sprite_name
 end
 
-local function no_offset_calculator(_): AnimationOffset
-    return { x = 0, y = 0}
-end
-
 local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, frame: number, duration: number): AnimationOffset
     return {x = o0.x + frame * (o1.x - o0.x) / duration, y = o0.y + frame * (o1.y - o0.y) / duration }
 end

@@ -29,7 +29,6 @@ local TILE_HEIGHT = CONFIG.TILE_HEIGHT
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
-local UNIT_OFFSET_X = 1
 local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
 
@@ -108,7 +107,6 @@ end
 function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local tactics = state.tactics
     local battle_state = state.battle_state
     local menu = state.menu_manager
 

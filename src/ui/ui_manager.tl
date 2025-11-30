@@ -31,12 +31,12 @@ function UIManager.new(): UIManager
     self.layouts = {}
 
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
-    battle_summary:add(TextNode.new({ func = function(state: GameContext): { string } return { "BATTLE" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(_state: GameContext): { string } return { "BATTLE" }  end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(state: GameContext): { string }
         local turn = state.turn_manager.turn
         return { "Turn " .. turn }
     end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function(state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(_state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
     do
         local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
 

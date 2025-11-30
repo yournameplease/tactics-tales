@@ -8,7 +8,7 @@ global record EventMessageLog
 end
  
 function EventMessageLog.new(props: MessageLog): EventMessageLog
-    props.func = function(state: GameContext, row_limit: integer): { string }
+    props.func = function(state: GameContext, _row_limit: integer): { string }
         return tmap(state.event_bus:get_event_history(), function(e: GameEvent): string return "> "..e  end)
     end
 
