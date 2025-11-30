@@ -1,10 +1,10 @@
 require("src/debug")
 
-require("src/tactics/enemy_ai")
-require("src/menu_manager")
+require("src/battle/tactics/enemy_ai")
+require("src/menu/menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
-require("src/tactics")
+require("src/battle/tactics/tactics_engine")
 require("src/battle/battle_manager")
 
 local enum Phase

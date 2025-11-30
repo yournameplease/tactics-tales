@@ -5,14 +5,14 @@ require ("src/menu/types")
 require ("src/menu/menu_selection")
 
 require("src/util")
-require("src/tiles")
+require("src/battle/tile_manager")
 require("src/draw")
-require("src/combat/combat_calculator")
+require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
 
-require("src/tactics/battle_unit")
+require("src/battle/tactics/battle_unit")
 require("src/menu/types")
 
 global type MenuContext

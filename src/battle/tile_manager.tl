@@ -2,7 +2,7 @@ require("src/types")
 
 require("src/util")
 require("src/battle/battle_state")
-require("src/map/map_manager")
+require("src/battle/map/map_manager")
 
 -- tile flags:
 -- 0: empty/solid

@@ -10,7 +10,7 @@ version 2
 :: src/combat/
 :: src/map/
 :: src/systems/
-:: src/tactics/
+:: src/battle/tactics/
 :: src/ui/
 :: src/ui/panels/
 :: src/util/
@@ -343,9 +343,9 @@ BATTLE_DATA = {
 include "src/battle/battle_data.lua"
 
 local BattleState = include "src/battle/battle_state.lua"
-local BattleUnit = include "src/tactics/battle_unit.lua"
+local BattleUnit = include "src/battle/tactics/battle_unit.lua"
 local TileManager = include "src/tiles.lua"
-local Tactics = include "src/tactics.lua"
+local Tactics = include "src/battle/tactics.lua"
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -1350,7 +1350,7 @@ include "src/systems/tasks.lua"
 LOG = include "src/debug.lua"
 
 BUS = include "src/systems/event_bus.lua"
-TACTICS = include "src/tactics.lua"
+TACTICS = include "src/battle/tactics.lua"
 TURN_MANAGER = include "src/turn_manager.lua"
 MENU_MANAGER = include "src/menu_manager.lua"
 TILE_MANAGER = include "src/tiles.lua"
@@ -1362,7 +1362,7 @@ CONTEXT_MANAGER = include "src/game_context.lua"
 BATTLE_MANAGER = include "src/battle/battle_manager.lua"
 
 MAP_MANAGER = include "src/map/map_manager.lua"
-include "src/tactics/enemy_ai.lua"
+include "src/battle/tactics/enemy_ai.lua"
 
 -- TODO: local battle_manager
 
@@ -1738,12 +1738,12 @@ function update_tasks()
         end
     end
 end
-:: src/tactics.lua
+:: src/battle/tactics.lua
 include "src/util.lua"
 include "src/tiles.lua"
 include "src/combat.lua"
 include "src/draw.lua"
-local BattleUnit = include "src/tactics/battle_unit.lua"
+local BattleUnit = include "src/battle/tactics/battle_unit.lua"
 
 local COLOR_MENU_PRIMARY = 32
 local COLOR_MENU_SECONDARY = 7
@@ -2067,7 +2067,7 @@ end
 
 return Battle
 
-:: src/tactics/battle_unit.lua
+:: src/battle/tactics/battle_unit.lua
 
 local BattleUnit = {}
 
@@ -2115,7 +2115,7 @@ end
 
 return BattleUnit
 
-:: src/tactics/enemy_ai.lua
+:: src/battle/tactics/enemy_ai.lua
 include "src/tiles.lua"
 
 --[[
@@ -3884,7 +3884,7 @@ OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 --[[pod,created="2025-11-26 23:26:51",modified="2025-11-30 19:43:06"]]
 :: src/systems/.info.pod
 --[[pod,created="2025-11-26 23:26:51",modified="2025-11-30 19:43:06"]]
-:: src/tactics/.info.pod
+:: src/battle/tactics/.info.pod
 --[[pod,created="2025-11-26 23:26:51",modified="2025-11-30 19:43:06"]]
 :: src/ui/.info.pod
 --[[pod,created="2025-11-26 23:26:51",modified="2025-11-30 19:43:06"]]

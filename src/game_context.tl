@@ -1,12 +1,12 @@
 require("src/ui/types")
-require("src/tactics")
+require("src/battle/tactics/tactics_engine")
 require("src/battle/battle_manager")
 require("src/turn_manager")
-require("src/tiles")
-require("src/menu_manager")
-require("src/character")
+require("src/battle/tile_manager")
+require("src/menu/menu_manager")
+require("src/character/character_manager")
 require("src/systems/event_bus")
-require("src/combat/combat_calculator")
+require("src/battle/combat/combat_calculator")
 
 global type UILayoutId
 

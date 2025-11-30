@@ -1,5 +1,5 @@
 require("src/types")
-require("src/map/map_data")
+require("src/battle/map/map_data")
 
 global record MapManager
 

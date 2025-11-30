@@ -7,12 +7,12 @@ require("src/systems/tasks")
 require("src/battle/battle_data")
 
 require("src/battle/battle_state")
-require("src/tactics/battle_unit")
-require("src/tiles")
-require("src/tactics")
-require("src/map/map_manager")
-require("src/menu_manager")
-require("src/character")
+require("src/battle/tactics/battle_unit")
+require("src/battle/tile_manager")
+require("src/battle/tactics/tactics_engine")
+require("src/battle/map/map_manager")
+require("src/menu/menu_manager")
+require("src/character/character_manager")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1

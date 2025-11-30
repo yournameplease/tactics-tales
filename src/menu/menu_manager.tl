@@ -3,9 +3,9 @@ require ("src/types")
 require ("src/menu/types")
 require ("src/menu/menu_selection")
 -- TODO: tactics is only needed for lazy dijkstra animation.
-require("src/tactics")
+require("src/battle/tactics/tactics_engine")
 require("src/joypad")
-require("src/tiles")
+require("src/battle/tile_manager")
 
 
 

@@ -1,7 +1,7 @@
 require("src/types")
 require("src/menu/types")
 require("src/joypad")
-require("src/tactics/battle_unit")
+require("src/battle/tactics/battle_unit")
 
 global interface MenuSelection
     type: MenuType

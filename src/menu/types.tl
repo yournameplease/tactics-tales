@@ -1,7 +1,7 @@
 require("src/types")
 require("src/joypad")
 require("src/systems/event_bus")
-require("src/tactics/battle_unit")
+require("src/battle/tactics/battle_unit")
 
 -- Note: some of these extracted types could be kept in menu_manager if tactics_engine and menu_manager didn't require each other
 -- Probably, there would be a menu_action_listener or similar to delegate menu commands to the tactics_engine

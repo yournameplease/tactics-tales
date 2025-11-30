@@ -1,6 +1,6 @@
 require("src/types")
 require("src/util")
-require("src/tactics/battle_unit")
+require("src/battle/tactics/battle_unit")
 
 global record BattleState
     units_by_id: { integer: BattleUnit }

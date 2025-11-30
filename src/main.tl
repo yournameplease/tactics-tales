@@ -43,17 +43,17 @@ require("src/systems/event_bus")
 
 require("src/game_context")
 require("src/turn_manager")
-require("src/menu_manager")
-require("src/character")
-require("src/combat/combat_calculator")
+require("src/menu/menu_manager")
+require("src/character/character_manager")
+require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
 require("src/game_context")
 require("src/battle/battle_manager")
 
-require("src/map/map_manager")
+require("src/battle/map/map_manager")
 
-require("src/tactics/enemy_ai")
+require("src/battle/tactics/enemy_ai")
 require("src/joypad")
 
 -- TODO: local battle_manager

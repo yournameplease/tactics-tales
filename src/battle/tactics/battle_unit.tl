@@ -1,7 +1,7 @@
 require("src/debug")
 
 require("src/types")
-require("src/character")
+require("src/character/character_manager")
 require("src/character/weapons")
 
 -- TODO: some of this moves to character/weapon files

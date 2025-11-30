@@ -1,5 +1,5 @@
-require("src/tactics/battle_unit")
-require("src/tiles")
+require("src/battle/tactics/battle_unit")
+require("src/battle/tile_manager")
 require("src/debug")
 
 global record CombatCalculator

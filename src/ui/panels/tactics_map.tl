@@ -2,7 +2,7 @@ require("src/debug")
 require("src/config")
 
 require("src/ui/box")
-require("src/menu_manager")
+require("src/menu/menu_manager")
 require("src/battle/battle_state")
 
 local CharacterRenderer = require("src/character/character_renderer")
