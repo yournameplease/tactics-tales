@@ -94,7 +94,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         local path = tile_manager:get_path_to_tile(all_tile_costs, point)
 
         local action_ctx = {
-            acting_unit = { unit_id = unit.id },
+            acting_unit = { unit = unit },
             destination = { point = point, path = path }
         }
         LOG.info(unit.id .. " will move to "..point.x..","..point.y)

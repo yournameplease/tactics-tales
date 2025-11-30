@@ -13,7 +13,7 @@ global add: function<V>(table: {V}, value: V, index?: number)
 --- @param table table
 --- @param value any
 --- @return any | nil
-global del: function<V>(table: V, value: V) : V | nil
+global del: function<V>(table: {V}, value: V) : V | nil
 
 --- Delete the item in the table at the specified index
 --- If index is not specified, the last item will be removed and returned

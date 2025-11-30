@@ -105,7 +105,9 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
                 validator = function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
+                    assert(s is GridMenuSelection)
                      return te:grid_selection_is_empty_or_acting_unit(s, ctx)
+                        and s.legal_tiles:get_point(s.point).valid_selection
                 end,
                 next_state = "SELECT_ACTION",
                 get_legal_tiles = function (te: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
