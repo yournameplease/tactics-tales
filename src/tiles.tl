@@ -202,9 +202,9 @@ end
 function TileManager:get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path = { tile }
-    local next = tile
-    while all_tile_costs:get_point(next).prev ~= nil do
-        next = all_tile_costs:get_point(tile).prev
+    local next_tile = tile
+    while all_tile_costs:get_point(next_tile).prev ~= nil do
+        next_tile = all_tile_costs:get_point(next_tile).prev
         add(path, next)
     end
     return reverse_list(path)

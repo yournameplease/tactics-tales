@@ -173,6 +173,8 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
             new_step_data.get_options(self.tactics_engine, self.menu_ctx)
         )
         self.menu_selection = new_selection
+    else
+        error("not implemented")
     end
 end
 
