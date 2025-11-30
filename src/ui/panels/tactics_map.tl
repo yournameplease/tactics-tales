@@ -141,7 +141,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     end
 
     for y = 0, self.map_height-1 do
-        -- map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
 
 
         -- highlight legal tiles
