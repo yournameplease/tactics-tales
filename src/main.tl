@@ -76,7 +76,7 @@ function _init()
     local character_manager = CharacterManager.new()
     LOG.debug(character_manager.id_counter:get_id())
 
-    battle_manager = BattleManager.new("bandit_village", event_bus, character_manager, animation_manager)
+    battle_manager = BattleManager.new("bandit_village", event_bus, character_manager, animation_manager, task_manager)
     local tactics_engine = battle_manager.tactics_engine
     local tile_manager = battle_manager.tile_manager
     local battle_state = battle_manager.battle_state

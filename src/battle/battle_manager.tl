@@ -2,6 +2,7 @@ require("src/debug")
 
 require("src/types")
 require("src/systems/event_bus")
+require("src/systems/tasks")
 
 require("src/battle/battle_data")
 
@@ -23,6 +24,7 @@ global record BattleManager
     tactics_engine: TacticsEngine
     event_bus: EventBus
     animation_manager: AnimationManager
+    task_manager: TaskManager
 
     map_data: MapData
 end
@@ -59,7 +61,7 @@ end
 --- Main entry point.
 -- @param battle_id: Key from BATTLES
 -- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager, animation_manager: AnimationManager): BattleManager
+function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager, animation_manager: AnimationManager, task_manager: TaskManager): BattleManager
     local battle_definition = BATTLE_DATA[battle_id]
     assert(battle_definition ~= nil)
 
@@ -67,6 +69,7 @@ function BattleManager.new(battle_id: string, event_bus: EventBus, character_man
 
     self.event_bus = event_bus
     self.animation_manager = animation_manager
+    self.task_manager = task_manager
 
     self.character_manager = character_manager
 
@@ -79,7 +82,7 @@ function BattleManager.new(battle_id: string, event_bus: EventBus, character_man
     self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
     self:_spawn_players(self.map_data.metadata.player_spawners)
 
-    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, animation_manager)
+    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, self.animation_manager, self.task_manager)
 
     return self
 end

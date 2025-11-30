@@ -57,7 +57,8 @@ function TacticsEngine.new(
     battle_state: BattleState,
     tile_manager: TileManager,
     event_bus: EventBus,
-    animation_manager: AnimationManager
+    animation_manager: AnimationManager,
+    task_manager: TaskManager
 ): TacticsEngine
     local self: TacticsEngine = setmetatable({}, { __index = TacticsEngine })
     self.battle_is_blocked = false
@@ -66,6 +67,7 @@ function TacticsEngine.new(
     self.combat_calculator = CombatCalculator.new(tile_manager)
     self.event_bus = event_bus
     self.animation_manager = animation_manager
+    self.task_manager = task_manager
 
     self.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self:handle_move_unit(ctx)
