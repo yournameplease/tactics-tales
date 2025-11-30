@@ -25,7 +25,7 @@ function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
         -- TODO: magic numbers galore
         spr(BACKGROUND_SPRITE, self.x, self.y+8)
         -- Use the renderer we defined previously
-        CharacterRenderer.draw(unit.character, { x = self.x+2, y = self.y+12}, unit.side, true, false)
+        CharacterRenderer.draw(unit.character, { x = self.x+8, y = self.y+28}, unit.side, true, false)
     end
 end
 

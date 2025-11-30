@@ -6,14 +6,14 @@
 --- @param table table
 --- @param value any
 --- @param index? number
-global add: function(table: any, value: any, index?: number) 
+global add: function<V>(table: {V}, value: V, index?: number) 
 
 --- Delete the first instance of value in table
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#del)
 --- @param table table
 --- @param value any
 --- @return any | nil
-global del: function(table: any, value: any) : any | nil
+global del: function<V>(table: V, value: V) : V | nil
 
 --- Delete the item in the table at the specified index
 --- If index is not specified, the last item will be removed and returned

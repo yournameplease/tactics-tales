@@ -114,7 +114,7 @@ function Box.new(props: UIElement): Box
 end
 
 function Box:add(child: UIElement): UIElement
-    add(self.children, child)
+    add(self.children, child as Box) -- Note: casting
     return child -- Return child for chaining
 end
 

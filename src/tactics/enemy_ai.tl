@@ -47,15 +47,17 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
 
     for _,e in ipairs(enemies) do
         local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, unit.character.weapon.min_range, unit.character.weapon.max_range)
-        tiles_in_range:foreach(function(x: integer, y: integer, reachable: boolean)
-            if reachable then
-                local tile = all_tile_costs:get(x,y)
-                if tile.cost <= unit.character.stats.movement then
-                    if self.battle_state:tile_is_legal_destination(unit, { x = x, y = y } ) then
-                        add(potential_attacks, {x = x, y = y, target = e})
+        tiles_in_range:foreachpoint(function(tile: TilePoint, in_range: boolean)
+            if in_range then
+                local shortest_path_tile = all_tile_costs:get_point(tile) -- if could calculate
+                if shortest_path_tile ~= nil then
+                    if shortest_path_tile.cost <= unit.character.stats.movement then
+                        if self.battle_state:tile_is_legal_destination(unit, tile ) then
+                            add(potential_attacks, { destination = tile, target = e})
+                        end
+                    else
+                        add(deep_moves, { destination = tile })
                     end
-                else
-                    add(deep_moves, {x = x, y = y})
                 end
             end
         end)

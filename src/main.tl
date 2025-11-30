@@ -88,7 +88,11 @@ function _init()
     local battle_state = battle_manager.battle_state
 
     menu_manager =  MenuManager.new(tactics_engine, battle_state, tile_manager, event_bus)
-    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager, menu_manager)
+    local enemy_ai_engine = EnemyAIEngine.new(battle_manager,battle_state,tactics_engine,event_bus,task_manager,tile_manager)
+
+    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager, menu_manager, enemy_ai_engine)
+
+        
 
     context = GameContext.new(
         battle_manager,

@@ -1,5 +1,6 @@
 require("src/debug")
 
+require("src/tactics/enemy_ai")
 require("src/menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
@@ -19,13 +20,15 @@ global record TurnManager
     tactics_engine: TacticsEngine
     battle_manager: BattleManager
     menu_manager: MenuManager
+    enemy_ai_engine: EnemyAIEngine
 end
 
 function TurnManager.new(
     event_bus: EventBus,
     tactics_engine: TacticsEngine,
     battle_manager: BattleManager,
-    menu_manager: MenuManager
+    menu_manager: MenuManager,
+    enemy_ai_engine: EnemyAIEngine
 ): TurnManager
     local self: TurnManager = setmetatable({}, { __index = TurnManager })
 
@@ -36,6 +39,7 @@ function TurnManager.new(
     self.tactics_engine = tactics_engine
     self.battle_manager = battle_manager
     self.menu_manager = menu_manager
+    self.enemy_ai_engine = enemy_ai_engine
 
     self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
         self.menu_manager:set_menu("MENU_PLAYER_TURN")
@@ -69,6 +73,7 @@ function TurnManager.new(
         self.phase = "ENEMY"
         LOG.info("Begin enemy turn!")
 
+        enemy_ai_engine:handle_enemy_turn()
     end)
 
     self.event_bus:on("TACTICS_END_ENEMY_TURN", function()
