@@ -59,6 +59,14 @@ global function tmap<K, A, B>(tab: {K: A}, fn: function(A): B): { K: B }
     return out
 end
 
+global function reduce<A, V>(list: {A}, initial: V, fn: function(V, A): V): V
+    local val = initial
+    for _,e in ipairs(list) do
+        val = fn(val, e)
+    end
+    return val
+end
+
 -- normalize to offsets from first tile
 -- multiply by tile scale
 global function to_tile_path(path: { TilePoint }): { AnimationOffset }

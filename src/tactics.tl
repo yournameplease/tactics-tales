@@ -90,7 +90,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
     self.task_manager:start_routine(function()
         local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
         unit.character.animation_data = animation
-        
+        LOG.debug("Animating!", animation.playing)
         while animation.playing do
             yield()
         end

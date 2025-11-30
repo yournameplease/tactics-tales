@@ -1,3 +1,4 @@
+require("src/debug")
 require("src/types")
 require("src/util")
 require("src/character/animation_data")
@@ -49,9 +50,20 @@ function SpriteFrameData.new(sprite_frames: { SpriteFrame }): SpriteFrameData
 end
 
 function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
-    local frame_number = (frame % self.duration) // (self.duration // #self.sprite_frames)
-    -- TODO: variable durations 
-    return self.sprite_frames[frame_number].sprite_name
+    local total_frames = reduce(self.sprite_frames, 0, function(s:integer,f:SpriteFrame):integer
+        return s + f.duration
+    end)
+    local frame_number = frame % total_frames
+    local sprite_id = 1
+    while frame_number >= 0 do
+        if self.sprite_frames[sprite_id].duration < frame_number then
+            return self.sprite_frames[sprite_id].sprite_name
+        end
+        frame_number = frame_number - self.sprite_frames[sprite_id].duration
+        sprite_id = sprite_id + 1
+    end
+    -- TODO: double check this function
+    return self.sprite_frames[#self.sprite_frames].sprite_name
 end
 
 local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, frame: number, duration: number): AnimationOffset
@@ -75,8 +87,12 @@ end
 function PathAnimationInstance:tick()
     self.frame = self.frame + 1
     if self.frame > self.path_points[self.current_point].duration then
-        self.current_point = self.current_point + 1
-        self.frame = 0
+        if self.frame < #self.path_points - 1 then
+            self.current_point = self.current_point + 1
+            self.frame = 0
+        else
+            self.playing = false
+        end
     end
 end
 
@@ -231,8 +247,19 @@ end
 function AnimationManager:tick()
     self.global_frame = self.global_frame + 1
 
+    LOG.trace("Ticking "..#self.active_animations.." animations")
     for _, animation in ipairs(self.active_animations) do
         animation:tick()
+    end
+    local i = 1
+    while i <= #self.active_animations do
+        if not self.active_animations[i].playing then
+            LOG.debug("Ending animation")
+            self.active_animations[i].animated_object.playing = false
+            deli(self.active_animations, i)
+        else
+            i = i + 1
+        end
     end
 end
 
@@ -250,9 +277,11 @@ function AnimationManager:create_idle_animation(): AnimatedSpriteData
                 duration = 60
             }
         }),
-        animated_object = {}
+        animated_object = { playing = true },
+        playing = true
     }
-
+    
+    add(self.active_animations, instance)
     setmetatable(instance, { __index = GlobalAnimationInstance } )
 
     return instance.animated_object
@@ -267,9 +296,10 @@ function AnimationManager:create_animation(animation_id: OffsetAnimationId, dire
         playing = true,
         sprites = SpriteFrameData.new(config.sprites),
         track = config.track,
-        animated_object = {}
+        animated_object = { playing = true }
     }
 
+    add(self.active_animations, animation_data)
     setmetatable(animation_data, { __index = DirectionalOffsetAnimationInstance } )
 
     return animation_data.animated_object
@@ -303,9 +333,11 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
                 duration = 20
             }
         }),
-        animated_object = {}
+        animated_object = { playing = true },
+        playing = true
     }
 
+    add(self.active_animations, instance)
     setmetatable(instance, { __index = PathAnimationInstance })
 
     return instance.animated_object
@@ -322,6 +354,7 @@ function AnimationManager:get_frame_data(animation: AnimationInstance): Animatio
 end
 
 function AnimationManager:generate_frame_data()
+    LOG.trace("Rendering "..#self.active_animations.." animations")
     for _, animation in ipairs(self.active_animations) do
         local frame_data = self:get_frame_data(animation)
         animation.animated_object.current_frame = frame_data
