@@ -253,7 +253,6 @@ function Box:layout(parent_x: integer, parent_y: integer)
             cy = cy + child_h + self.gap
             cx = cx
         end
-        LOG.debug("final Box size", self.x, self.y, self.w, self.h)
     end
 end
 
@@ -434,7 +433,6 @@ function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
     --        0, 28)
 
     -- 2. Draw Children
-    LOG.debug("drawing Box", box.x, box.y, box.w, box.h)
     for _, child in ipairs(box.children) do
         child:draw(state, ui_theme)
     end

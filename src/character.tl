@@ -1,3 +1,4 @@
+require("src/debug")
 require("src/util")
 require("src/character/animation_data")
 require("src/character/weapons")
@@ -165,7 +166,7 @@ function Character:draw(point: DrawPoint, side: Side, set_pal: boolean, apply_an
 
     local frame_data: AnimationFrameData = {
         frame = {
-            sprite_offset = 0,
+            sprite_offset = 160,
             anchors = {
                 neck = { x = 9, y = 7 },
                 main_hand = { x = 1, y = 8 },
