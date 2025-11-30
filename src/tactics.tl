@@ -88,19 +88,21 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
 
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
-        local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-        unit.character.animation_data = animation
-        LOG.debug("Animating!", animation.playing)
-        while animation.playing do
-            yield()
+        if #path > 1 then
+            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+            unit.character.animation_data = animation
+            LOG.debug("Animating!", animation.playing)
+            while animation.playing do
+                yield()
+            end
         end
 
         self.battle_state:move_unit(unit, destination)
         unit.has_acted = true
 
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
         self.battle_is_blocked = false
         unit.character.animation_data = self.animation_manager:create_idle_animation()
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
 
@@ -112,22 +114,24 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
 
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
-        local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-        unit.character.animation_data = animation
+        if #path > 1 then
+            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+            unit.character.animation_data = animation
 
-        while animation.playing do
-            yield()
+            while animation.playing do
+                yield()
+            end
         end
 
         self.battle_state:move_unit(unit, destination)
         self:do_combat(unit, target)
         unit.has_acted = true
 
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
         self.battle_is_blocked = false
         LOG.debug("unblockiung battle")
         unit.character.animation_data = self.animation_manager:create_idle_animation()
         target.character.animation_data = self.animation_manager:create_idle_animation()
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
 

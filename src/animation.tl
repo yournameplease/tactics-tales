@@ -309,6 +309,7 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation
+    assert(#path > 0)
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
