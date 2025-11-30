@@ -17,7 +17,7 @@ function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): 
 end
 
 function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
-    self:draw(state, ui_theme)
+    Box._draw(self, state, ui_theme)
 
     local unit = self.get_selected_unit(state)
     if unit then

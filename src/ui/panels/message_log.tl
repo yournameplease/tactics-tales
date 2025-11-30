@@ -36,7 +36,7 @@ function MessageLog.new(props: MessageLog): MessageLog
 end
 
 function MessageLog:draw(state: GameContext, ui_theme: UITheme)
-    self:draw(state, ui_theme)
+    Box._draw(self, state, ui_theme)
 
     local row_count = self.rows or flr(self.h / TEXT_ROW_HEIGHT)
 

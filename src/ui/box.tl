@@ -253,6 +253,7 @@ function Box:layout(parent_x: integer, parent_y: integer)
             cy = cy + child_h + self.gap
             cx = cx
         end
+        LOG.debug("final Box size", self.x, self.y, self.w, self.h)
     end
 end
 
@@ -408,33 +409,39 @@ function Box:draw_recessed(ui_theme: UITheme)
     self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
-function Box:draw(state: GameContext, ui_theme: UITheme)
-    if self.decoration == 'embossed' then
-        self:draw_embossed(ui_theme)
-    elseif self.decoration == 'recessed' then
-        self:draw_recessed(ui_theme)
+function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
+    local box = self as Box -- Cast!  All classes subclass to box though
+    if box.decoration == 'embossed' then
+        box:draw_embossed(ui_theme)
+    elseif box.decoration == 'recessed' then
+        box:draw_recessed(ui_theme)
     end
 
     -- Debug rectangle
-    --LOG.info(self.x, self.y, self._calculated_w, self._calculated_h)
-    --LOG.info(self.x, self.y, self.w, self.h)
+    --LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
+    --LOG.info(box.x, box.y, box.w, box.h)
     --rrect(
-    --        self.x+self.padding+self.internal_margin.l,
-    --        self.y+self.padding+self.internal_margin.t,
-    --        self.w - 2*self.padding,
-    --        self.h - 2*self.padding,
+    --        box.x+box.padding+box.internal_margin.l,
+    --        box.y+box.padding+box.internal_margin.t,
+    --        box.w - 2*box.padding,
+    --        box.h - 2*box.padding,
     --        0, 14)
     --rrect(
-    --        self.x+self.padding+self.internal_margin.l,
-    --        self.y+self.padding+self.internal_margin.t,
-    --        self._calculated_w - 2*self.padding,
-    --        self._calculated_h - 2*self.padding,
+    --        box.x+box.padding+box.internal_margin.l,
+    --        box.y+box.padding+box.internal_margin.t,
+    --        box._calculated_w - 2*box.padding,
+    --        box._calculated_h - 2*box.padding,
     --        0, 28)
 
     -- 2. Draw Children
-    for _, child in ipairs(self.children) do
+    LOG.debug("drawing Box", box.x, box.y, box.w, box.h)
+    for _, child in ipairs(box.children) do
         child:draw(state, ui_theme)
     end
+end
+
+function Box:draw(state: GameContext, ui_theme: UITheme)
+    Box._draw(self, state, ui_theme)
 end
 
 return Box

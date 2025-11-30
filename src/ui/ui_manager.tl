@@ -58,7 +58,6 @@ function UIManager.new(): UIManager
         left:add(battle_summary)
         left:add(CombatPreview.new({ padding = 0 }))
         left:add(EventMessageLog.new({ flex_grow = 1}))
-        --left:add(Box.new({ flex_grow = 1, padding = 0 }))
 
         battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
 
@@ -80,6 +79,8 @@ function UIManager.new(): UIManager
         COLOR_INTERIOR = 21,
         COLOR_INTERIOR_TEXT = 7,
     }
+
+    return self
 end
 
 function UIManager:draw(game_context: GameContext)

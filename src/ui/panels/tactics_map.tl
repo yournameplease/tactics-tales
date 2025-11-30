@@ -104,7 +104,7 @@ local function draw_unit(unit: BattleUnit)
 end
 
 function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
-    self:draw(state, ui_theme)
+    Box._draw(self, state, ui_theme)
 
     local tactics = state.tactics
     local battle_state = state.battle_state

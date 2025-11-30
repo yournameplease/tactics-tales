@@ -17,6 +17,8 @@ global record TextNode
     func: function(GameContext): { string }
 end
 
+setmetatable(TextNode, { __index = Box })
+
 local TEXT_HEIGHT = 8
 
 -- extra props
@@ -55,7 +57,7 @@ global function draw_text_row(self: TextUIElement, i: integer, text: string, ui_
 end
 
 function TextNode:draw(state: GameContext, ui_theme: UITheme)
-    Box:draw(state, ui_theme)
+    Box._draw(self, state, ui_theme)
 
     local text = self.func(state)
 
@@ -68,7 +70,5 @@ function TextNode:draw(state: GameContext, ui_theme: UITheme)
     end
 
 end
-
-setmetatable(TextNode, { __index = Box})
 
 return TextNode

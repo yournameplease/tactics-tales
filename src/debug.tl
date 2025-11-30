@@ -31,7 +31,7 @@ local function debug_print(level: LogLevel, ...: any)
             if v is string then
                 str = str .. v .. " , "
             else
-                str = str .. v as string
+                str = str .. v as string .. " , "
                 -- error("Logging undefined type!")
             end
         end

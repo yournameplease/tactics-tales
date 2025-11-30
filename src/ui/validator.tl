@@ -15,8 +15,8 @@ function MenuValidator.validate(node: UIElement, path: string)
     local is_col = (node.dir == "col")
     local is_row = (node.dir == "row")
 
-    -- Safety defaults in case nil
-    local children = node.children or {}
+    local children = node.children
+    assert(children ~= nil)
 
     if node.auto_height then
         if is_col then
