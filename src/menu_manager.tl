@@ -204,6 +204,7 @@ function MenuManager:handle_menu_select()
             end
         end
 
+        self.menu_state.point = menu_selection.point:copy()
         step_data.set_selected_context(menu_selection, self.battle_state, self.menu_ctx)
         next_state = step_data.next_state
         finish_command = step_data.finish_command

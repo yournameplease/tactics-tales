@@ -128,7 +128,10 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
     local cursor_tile: TilePoint = nil
-    if menu.menu_state.point ~= nil then
+    local menu_selection = menu.menu_selection
+    if menu_selection is GridMenuSelection then
+        cursor_tile = menu_selection.point
+    elseif menu.menu_state.point ~= nil then
         cursor_tile = menu.menu_state.point
     end
 
@@ -137,7 +140,6 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
 
         -- highlight legal tiles
-        local menu_selection = menu.menu_selection
         if menu_selection is GridMenuSelection then
             if menu_selection.legal_tiles ~= nil then
                 fillp(
@@ -204,7 +206,6 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
         local y = cursor_tile.y * TILE_SIZE.y
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        local menu_selection = menu.menu_selection
         if menu_selection is VerticalListMenuSelection then
             local selected_i = menu_selection.i
             local options = menu_selection.options
