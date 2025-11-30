@@ -13,6 +13,9 @@ global interface Point<D>
     y: D
     of: function(D,D): Point<D>
     metamethod __add: function(Point<D>, Point<D>): Point<D>
+    metamethod __sub: function(Point<D>, Point<D>): Point<D>
+    metamethod __mul: function(Point<D>, Point<D>): Point<D>
+    metamethod __unm: function(Point<D>): Point<D>
     metamethod __tostring: function(Point<D>): string
 end
 
@@ -23,6 +26,15 @@ end
 local base_point_mt = {
     __add = function(a: Point<number>, b: Point<number>): Point<number>
         return BasePoint.of(a.x + b.x, a.y + b.y)
+    end,
+    __sub = function(a: Point<number>, b: Point<number>): Point<number>
+        return BasePoint.of(a.x - b.x, a.y - b.y)
+    end,
+    __mul = function(a: Point<number>, b: Point<number>): Point<number>
+        return BasePoint.of(a.x * b.x, a.y * b.y)
+    end,
+    __unm = function(p: Point<number>): Point<number>
+        return BasePoint.of(- p.x, - p.y)
     end,
     __tostring = function(p: Point<number>): string
         return "("..p.x..","..p.y..")"
