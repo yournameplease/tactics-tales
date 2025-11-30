@@ -35,7 +35,9 @@ function MenuManager.new(
 ): MenuManager
     local self: MenuManager = setmetatable({}, { __index = MenuManager })
 
-    self.menu_state = {}
+    self.menu_state = {
+        point = {x = 0, y = 0}
+    }
     self.menu_ctx = {}
     self.menu_selection = {}
     self.selection_history = {}
@@ -154,7 +156,10 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     local menu_data = MENU_DATA[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
     if new_step_data is GridMenuDefinition then
-        local new_selection: GridMenuSelection = { point = self.menu_state.point }
+        local new_selection: GridMenuSelection = {
+            type = "CURSOR_GRID",
+            point = self.menu_state.point
+        }
         if new_step_data.get_legal_tiles ~= nil then
             new_selection.legal_tiles = new_step_data.get_legal_tiles(self.tactics_engine, self.menu_ctx)
         else
@@ -164,6 +169,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     elseif new_step_data is ListMenuDefinition then
         local new_selection: VerticalListMenuSelection = {
             i = 0,
+            type = "CURSOR_VERTICAL_LIST",
             options = new_step_data.get_options(self.tactics_engine, self.menu_ctx)
         }
         self.menu_selection = new_selection
