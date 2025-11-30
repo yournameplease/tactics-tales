@@ -14,7 +14,7 @@ function CombatCalculator.new(tile_manager: TileManager): CombatCalculator
 end
 
 function CombatCalculator:get_hit_chance(attacker: BattleUnit, defender: BattleUnit): integer
-    local accuracy = attacker.weapon.accuracy
+    local accuracy = attacker.character.weapon.accuracy
 
     local terrain = self.tile_manager:get_terrain(defender.tile)
     local avoid = (terrain.dodge or 0)
@@ -23,14 +23,14 @@ function CombatCalculator:get_hit_chance(attacker: BattleUnit, defender: BattleU
 end
 
 function CombatCalculator:get_damage(attacker: BattleUnit, defender: BattleUnit): integer
-    local atk = attacker.weapon.damage
+    local atk = attacker.character.weapon.damage
     local def = defender.character.stats.def
     return mid(0, atk - def, 999)
 end
 
 function CombatCalculator:is_in_combat_range(attacker: BattleUnit, defender: BattleUnit): boolean
-    local min_range = attacker.weapon.min_range
-    local max_range = attacker.weapon.max_range
+    local min_range = attacker.character.weapon.min_range
+    local max_range = attacker.character.weapon.max_range
     local dist = taxicab_distance(attacker.tile, defender.tile)
 
     return dist >= min_range and dist <= max_range
@@ -117,7 +117,7 @@ function CombatCalculator:preview_combat(attacker: BattleUnit, defender: BattleU
 
     -- TODO: Lazy impl.  This won't work if ranges are more than fixed range
     -- may want some kind of "virtual unit" class
-    if not (attacker.weapon.min_range > defender.weapon.max_range or attacker.weapon.max_range < defender.weapon.min_range) then
+    if not (attacker.character.weapon.min_range > defender.character.weapon.max_range or attacker.character.weapon.max_range < defender.character.weapon.min_range) then
     --if can_attack(defender, attacker) then
         local step2 = {
             attacker = defender,

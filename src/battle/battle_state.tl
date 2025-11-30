@@ -69,8 +69,8 @@ end
 function BattleState:get_targets_in_range(unit_id: integer, tile: TilePoint): { BattleUnit }
     local targets: { BattleUnit } = {}
     local attacker = self.units_by_id[unit_id]
-    local min_range = attacker.weapon.min_range
-    local max_range = attacker.weapon.max_range
+    local min_range = attacker.character.weapon.min_range
+    local max_range = attacker.character.weapon.max_range
     for _,target in pairs(self.units_by_id) do
         if target.id ~= attacker.id then
             if target.side ~= attacker.side

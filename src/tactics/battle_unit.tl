@@ -11,7 +11,6 @@ global record BattleUnit
     tile: TilePoint
     hp_current: integer
     side: Side
-    weapon: Weapon
     has_acted: boolean
 
     character: Character

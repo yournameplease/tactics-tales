@@ -46,7 +46,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     local deep_moves: {MovementOption} = {}
 
     for _,e in ipairs(enemies) do
-        local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, unit.weapon.min_range, unit.weapon.max_range)
+        local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, unit.character.weapon.min_range, unit.character.weapon.max_range)
         tiles_in_range:foreach(function(x: integer, y: integer, reachable: boolean)
             if reachable then
                 local tile = all_tile_costs:get(x,y)
