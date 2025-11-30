@@ -198,6 +198,10 @@ function MenuManager:handle_menu_select()
             local costs = self.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, acting_unit.character.stats.movement) 
             local path = self.tile_manager:get_path_to_tile(costs, menu_selection.point)
             menu_selection.path = path
+            LOG.debug("Path length: ", #path)
+            for _, p in ipairs(path) do
+                LOG.debug("Path point", p.x, p.y)
+            end
         end
 
         step_data.set_selected_context(menu_selection, self.battle_state, self.menu_ctx)
