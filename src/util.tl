@@ -87,24 +87,25 @@ function IdCounter.new(): IdCounter
     return counter
 end
 
--- 0-indexed
+-- 0-indexed methods,
+-- but internal structure is 1-indexed
 global record Array2D<V>
     w: integer
     h: integer
-    data: {{ V }}
+    _data: {{ V }}
 end
 
 function Array2D.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
     local out = {
         w = w,
         h = h,
-        data = {}
+        _data = {}
     }
-    for x=0, w-1 do
-        out.data[x] = {}
+    for x=1, w do
+        out._data[x] = {}
         if initial ~= nil then
-            for y=0,h-1 do
-                out.data[x][y] = initial
+            for y=1,h do
+                out._data[x][y] = initial
             end 
         end
     end
@@ -114,36 +115,34 @@ end
 
 function Array2D:get<V>(x: integer, y: integer): V
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
-    return self.data[x][y]
+    return self._data[x+1][y+1]
 end
 
 function Array2D:get_point<V>(p: Point): V
-    assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
-    return self.data[p.x][p.y]
+    return self:get(p.x, p.y)
 end
 
 function Array2D:set<V>(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
-    self.data[x][y] = v
+    self._data[x+1][y+1] = v
 end
 
 function Array2D:set_point<V>(p: Point, v: V)
-    assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
-    self.data[p.x][p.y] = v
+    self:set(p.x, p.y, v)
 end
 
 function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
-    for x, col in ipairs(self.data) do
+    for x, col in ipairs(self._data) do
         for y, v in ipairs(col) do
-            fn(x, y, v)
+            fn(x-1, y-1, v)
         end
     end
 end
 
 function Array2D:foreachpoint<V>(fn: function(point: Point, v: V))
-    for x, col in ipairs(self.data) do
+    for x, col in ipairs(self._data) do
         for y, v in ipairs(col) do
-            fn(TilePoint.of(x, y), v)
+            fn(TilePoint.of(x-1, y-1), v)
         end
     end
 end
