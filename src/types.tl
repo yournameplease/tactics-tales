@@ -16,7 +16,7 @@ global interface Point
     copy: function(self): self
     metamethod __add: function(Point, Point): Point
     metamethod __sub: function(Point, Point): Point
-    metamethod __mul: function(Point|integer, Point|integer): Point
+    metamethod __mul: function(Point|number, Point|number): Point -- gets rounded!
     metamethod __unm: function(Point): Point
     metamethod __tostring: function(Point): string
 end
@@ -32,14 +32,14 @@ local base_point_mt = {
     __sub = function(a: Point, b: Point): Point
         return BasePoint.of(a.x - b.x, a.y - b.y)
     end,
-    __mul = function(a: Point|integer, b: Point|integer): Point
-        if a is integer then
+    __mul = function(a: Point|number, b: Point|number): Point
+        if a is number then
             assert(b is Point)
-            return BasePoint.of(a * b.x, a * b.y)
+            return BasePoint.of(flr(a * b.x), flr(a * b.y))
         end
-        if b is integer then
+        if b is number then
             assert(a is Point)
-            return BasePoint.of(a.x * b, a.y * b)
+            return BasePoint.of(flr(a.x * b), flr(a.y * b))
         end
         return BasePoint.of(a.x * b.x, a.y * b.y)
     end,

@@ -1,4 +1,5 @@
 require("src/debug")
+require("src/types")
 
 require("src/character")
 local ANIMATION_DATA = require("src/character/animation_data")
@@ -109,19 +110,24 @@ function CharacterRenderer.draw_head(character: Character, point: DrawPoint, sid
 end
 
 function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Side, set_pal: boolean, apply_animation: boolean)
-    set_pal = set_pal ~= false
-    apply_animation = apply_animation ~= false
-
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
 
 	local animation_frame = get_animation_frame(character)
-    local offset_x, offset_y = animation_frame.offset.x, animation_frame.offset.y
-    if not apply_animation then
-        offset_x, offset_y = 0, 0
-    end
 
-    local base_point = { x = point.x + offset_x, y = point.y + offset_y }
+	local offset = animation_frame.offset
+	if not apply_animation then
+		offset = AnimationOffset.of(0,0)
+	end
+	
+    local base_point = get_anchor_offsets(
+		point + offset,
+		AnimationAnchorPoint.of(0, 0),
+		animation_frame.anchors.feet_center,
+		-- flip_h,
+		false,
+		false
+	)
     
     local HEAD_NECK_X = 9
     local HEAD_NECK_Y = 7

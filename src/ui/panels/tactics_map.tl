@@ -33,6 +33,8 @@ local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7
 
+local FOOT_GROUND_ANCHOR = AnimationAnchorPoint.of(8,12)
+
 function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
     local box = Box.new(props) as TacticsMap
     setmetatable(box, { __index = TacticsMap})
@@ -90,7 +92,7 @@ local function draw_unit(unit: BattleUnit)
     --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
-    CharacterRenderer.draw(unit.character, world_point, side, true, false)
+    CharacterRenderer.draw(unit.character, world_point + FOOT_GROUND_ANCHOR, side, true, true)
 
     local hp_current = unit.hp_current
     local hp_max = unit.character.stats.hp_max

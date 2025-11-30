@@ -67,7 +67,7 @@ function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
 end
 
 local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, frame: number, duration: number): AnimationOffset
-    return o0 + flr(frame/duration) * (o1 - o0)
+    return o0 + (frame/duration) * (o1 - o0)
 end
 
 local record PathAnimationPoint
