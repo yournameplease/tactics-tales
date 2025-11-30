@@ -87,7 +87,8 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         end
         -- follow until first tile in range
         local point = min_cost_deep_move.destination
-        while all_tile_costs:get_point(point).cost > unit.character.stats.movement do
+        while all_tile_costs:get_point(point).cost > unit.character.stats.movement
+            or not self.battle_state:tile_is_legal_destination(unit, point) do
             point = all_tile_costs:get_point(point).prev
         end
 

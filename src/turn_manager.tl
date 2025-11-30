@@ -56,6 +56,7 @@ function TurnManager.new(
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
         self.tactics_engine:refresh_all_units()
+        self.menu_manager:set_menu("MENU_PLAYER_TURN")
     end)
 
     self.event_bus:on("TACTICS_END_PLAYER_TURN", function()
@@ -72,8 +73,6 @@ function TurnManager.new(
     self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
         self.phase = "ENEMY"
         LOG.info("Begin enemy turn!")
-
-        enemy_ai_engine:handle_enemy_turn()
     end)
 
     self.event_bus:on("TACTICS_END_ENEMY_TURN", function()
