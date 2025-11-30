@@ -43,6 +43,7 @@ function TurnManager.new(
 
     self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
         if self.phase == "PLAYER" then
+            LOG.debug("Setting to player turn menu")
             self.menu_manager:set_menu("MENU_PLAYER_TURN")
         end        
     end)

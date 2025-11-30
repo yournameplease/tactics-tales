@@ -1,3 +1,4 @@
+require("src/debug")
 
 global enum GameEvent
     "TACTICS_BEGIN_PLAYER_TURN"
@@ -36,6 +37,7 @@ function EventBus:on(event_name: GameEvent, callback: function(args: any))
 end
 
 function EventBus:emit(event_name: GameEvent, args?: any)
+    LOG.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
         deli(self.event_history, 1)
     end

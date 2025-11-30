@@ -30,8 +30,10 @@ local function debug_print(level: LogLevel, ...: any)
             end
             if v is string then
                 str = str .. v .. " , "
+            elseif v == nil then
+                str = str .. "<nil> , "
             else
-                str = str .. v as string .. " , "
+                str = str .. tostring(v) .. " , "
                 -- error("Logging undefined type!")
             end
         end
@@ -42,8 +44,10 @@ local function debug_print(level: LogLevel, ...: any)
 
         if v is string then
             str = str .. v
+        elseif v == nil then
+            str = str .. "<nil> , "
         else
-            str = str .. v as string
+            str = str .. tostring(v)
             -- printh("Warning: Logging undefined type "..type(v))
         end
 
