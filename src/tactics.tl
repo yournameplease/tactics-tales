@@ -98,6 +98,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
 
         self.event_bus:emit("TACTICS_UNIT_END_ACTION")
         self.battle_is_blocked = false
+        unit.character.animation_data = self.animation_manager:create_idle_animation()
     end)
 end
 
@@ -123,6 +124,8 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
         self.event_bus:emit("TACTICS_UNIT_END_ACTION")
         self.battle_is_blocked = false
         LOG.debug("unblockiung battle")
+        unit.character.animation_data = self.animation_manager:create_idle_animation()
+        target.character.animation_data = self.animation_manager:create_idle_animation()
     end)
 end
 
