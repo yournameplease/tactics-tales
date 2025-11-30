@@ -67,6 +67,10 @@ global function reduce<A, V>(list: {A}, initial: V, fn: function(V, A): V): V
     return val
 end
 
+global function sum<A>(list: {A}, fn: function(A): number): number
+    return reduce(list, 0, function(s: number, a: A): number return s + fn(a) end)
+end
+
 -- normalize to offsets from first tile
 -- multiply by tile scale
 global function to_tile_path(path: { TilePoint }): { AnimationOffset }

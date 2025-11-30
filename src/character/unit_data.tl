@@ -1,4 +1,9 @@
+require("src/util/random")
 
+
+global record CharacterTemplate
+	
+end
 
 -- UNIT_TEMPLATES = {
 --     human_base = {

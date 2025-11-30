@@ -4,8 +4,8 @@ require("src/character/animation_data")
 require("src/character/weapons")
 require("src/animation")
 
--- TODO: break "drawing" functionality into a CharacterRenderer
-
+-- Eventually, may want to differentiate between persistent
+-- and transient characters.  No real reason now though.
 global record CharacterManager
     id_counter: IdCounter
     characters: { Character }
