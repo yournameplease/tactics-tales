@@ -26,15 +26,22 @@ global enum AnchorPointName
     "feet_center"
 end
 
-global record AnimationFrame
+global record BaseAnimationFrame
     sprite_offset: integer
     anchors: { AnchorPointName: AnimationAnchorPoint }
 end
 
+global record AnimationFrame
+    sprite: integer
+    anchors: { AnchorPointName: AnimationAnchorPoint }
+end
+
+local type BaseAnimation = { AnimationFrameName: BaseAnimationFrame }
+
 global type Animation = { AnimationFrameName: AnimationFrame }
 
 
-local BASE_FRAMES: { BaseAnimationName: Animation } = {
+local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
     BACK_HAND = {
         idle_1 = {
             sprite_offset = 0,
@@ -97,16 +104,16 @@ local BASE_FRAMES: { BaseAnimationName: Animation } = {
     }
 }
 
-local function frame_from_base_frame(s: integer, base_frame: AnimationFrame ): AnimationFrame
+local function frame_from_base_frame(s: integer, base_frame: BaseAnimationFrame ): AnimationFrame
     local frame = {
-        sprite = s + base_frame.sprite_offset
+        sprite = s + base_frame.sprite_offset,
+        anchors = base_frame.anchors
     }
-    setmetatable(frame, { __index = base_frame })
     return frame
 end
 
 local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
-    return tmap(BASE_FRAMES[base_frame], function (f: AnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
+    return tmap(BASE_FRAMES[base_frame], function (f: BaseAnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
 end
 
 global ANIMATION_DATA: { AnimationName: Animation } = {

@@ -56,7 +56,7 @@ end
 --- Main entry point.
 -- @param battle_id: Key from BATTLES
 -- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager): BattleManager
+function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager, animation_manager: AnimationManager): BattleManager
     local battle_definition = BATTLE_DATA[battle_id]
     assert(battle_definition ~= nil)
 
@@ -76,7 +76,7 @@ function BattleManager.new(battle_id: string, event_bus: EventBus, character_man
     self:_spawn_players(self.map_data.metadata.player_spawners)
     -- 5. return Tactics.new(map_data, placed_party, enemy_units, battle_def.victory)
 
-    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus)
+    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, animation_manager)
 
     LOG.debug(#self.battle_state.units_by_id)
     return self

@@ -45,7 +45,7 @@ global record Character
     appearance: CharacterAppearance
     stats: CharacterStats
     weapon: Weapon
-    animation_data: AnimationInstance
+    animation_data: AnimatedSpriteData
     animation_blocking: boolean
 end
 
@@ -60,31 +60,6 @@ local SKIN_COLORS: { { Color, Color } } = {
     {20, 21}
 }
 
-
-function Character:start_animation(animation_id: integer, direction: Angle)
-    -- self.animation_data = animation_manager:create_animation(animation_id, direction)
-    -- self.animation_blocking = true
-end
-
-function Character:start_walk_animation(path: { TilePoint })
-    -- self.animation_data = animation_manager:create_walk_animation(to_tile_path(path))
-    -- self.animation_blocking = true
-end
-
-function Character:end_animation()
-    -- self.animation_data = animation_manager:create_idle_animation("IDLE")
-    -- self.animation_blocking = false
-end
-
-function Character:update_animation()
-    -- if self.animation_data == nil then return end
-    -- self.animation_data:update()
-    -- if not self.animation_data.playing then
-    --     self:end_animation()
-    -- end
-    -- -- todo: this isn't ideal
-    -- self.animation_blocking = not (self.animation_data is GlobalAnimationInstance)
-end
 
 local function generate_appearance(): CharacterAppearance
     local appearance: CharacterAppearance = {}

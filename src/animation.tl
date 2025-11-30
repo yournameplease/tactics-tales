@@ -2,6 +2,10 @@ require("src/types")
 require("src/util")
 require("src/character/animation_data")
 
+global record AnimatedSpriteData
+    current_frame: AnimationFrameData
+    playing: boolean
+end
 
 local enum AnimationType
     "path"
@@ -12,11 +16,12 @@ end
 global interface AnimationInstance
     type: AnimationType
     playing: boolean
-    animation_name: AnimationName
     tick: function(self)
     -- takes a the global frame as input
     get_sprite_frame_name: function(self, integer): AnimationFrameName
     get_animation_offset: function(self, integer): AnimationOffset
+
+    animated_object: AnimatedSpriteData
 end
 
 local record SpriteFrame
@@ -143,7 +148,7 @@ function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): A
 end
 
 global record AnimationFrameData
-    frame: AnimationFrame
+    frame: AnimationFrameName
     offset: AnimationOffset
 end
 
@@ -236,27 +241,28 @@ function AnimationManager:tick()
 end
 
 -- animations such as "IDLE" which use shared frame counters
--- function AnimationManager:create_idle_animation(): GlobalAnimationInstance
---     local instance: GlobalAnimationInstance = {
---         duration = 120,
---         sprites = SpriteFrameData.new({
---             {
---                 sprite_name = "idle_1",
---                 duration = 60
---             },
---             {
---                 sprite_name = "idle_2",
---                 duration = 60
---             }
---         })
---     }
+function AnimationManager:create_idle_animation(): AnimatedSpriteData
+    local instance: GlobalAnimationInstance = {
+        duration = 120,
+        sprites = SpriteFrameData.new({
+            {
+                sprite_name = "idle_1",
+                duration = 60
+            },
+            {
+                sprite_name = "idle_2",
+                duration = 60
+            }
+        }),
+        animated_object = {}
+    }
 
---     setmetatable(instance, { __index = GlobalAnimationInstance } )
+    setmetatable(instance, { __index = GlobalAnimationInstance } )
 
---     return instance
--- end
+    return instance.animated_object
+end
 
-function AnimationManager:create_animation(animation_id: OffsetAnimationId, direction: Angle): DirectionalOffsetAnimationInstance
+function AnimationManager:create_animation(animation_id: OffsetAnimationId, direction: Angle): AnimatedSpriteData
     local config = OFFSET_ANIMATION_DATA[animation_id]
     
     local animation_data: DirectionalOffsetAnimationInstance = {
@@ -264,15 +270,16 @@ function AnimationManager:create_animation(animation_id: OffsetAnimationId, dire
         direction = direction,
         playing = true,
         sprites = SpriteFrameData.new(config.sprites),
-        track = config.track
+        track = config.track,
+        animated_object = {}
     }
 
     setmetatable(animation_data, { __index = DirectionalOffsetAnimationInstance } )
 
-    return animation_data
+    return animation_data.animated_object
 end
 
-function AnimationManager:create_walk_animation(path: { AnimationOffset }): PathAnimationInstance
+function AnimationManager:create_walk_animation(path: { AnimationOffset }): AnimatedSpriteData
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation
@@ -299,22 +306,31 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Path
                 sprite_name = "idle_2",
                 duration = 20
             }
-        })
+        }),
+        animated_object = {}
     }
 
     setmetatable(instance, { __index = PathAnimationInstance })
 
-    return instance
+    return instance.animated_object
 end
 
 function AnimationManager:get_frame_data(animation: AnimationInstance): AnimationFrameData
     local offset = animation:get_animation_offset(self.global_frame)
-    local sprite_id = animation:get_sprite_frame_name(self.global_frame)
+    local frame_name = animation:get_sprite_frame_name(self.global_frame)
 
     return {
-        frame = ANIMATION_DATA[animation.animation_name][sprite_id],
+        frame = frame_name,
         offset = offset
     }
+end
+
+function AnimationManager:generate_frame_data()
+    for _, animation in ipairs(self.active_animations) do
+        local frame_data = self:get_frame_data(animation)
+        animation.animated_object.current_frame = frame_data
+        animation.animated_object.playing = animation.playing
+    end
 end
 
 return AnimationManager

@@ -1,5 +1,7 @@
-require("src/character")
+require("src/debug")
 
+require("src/character")
+local ANIMATION_DATA = require("src/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
 local BASE_HEAD_SPRITE = 256 + 64
@@ -34,21 +36,44 @@ local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint,
     return { x = base.x + diff_x, y = base.y + diff_y }
 end
 
-local function get_body_type()
-    -- local base_body_type = self.weapon.body_type
+local function get_body_type(character: Character): AnimationName
+    local base_body_type = character.weapon.body_type
 
-    -- return "STANDARD_"..base_body_type
+    return ("STANDARD_"..base_body_type) as AnimationName
+end
+
+local record RenderedAnimationFrame
+	offset: AnimationOffset
+	sprite: integer
+	anchors: { AnchorPointName: AnimationAnchorPoint }
+end
+
+local function get_animation_frame(character: Character): RenderedAnimationFrame
+	local frame_name: AnimationFrameName 
+	local offset: AnimationOffset
+	if character.animation_data ~= nil and character.animation_data.current_frame ~= nil then
+		frame_name = character.animation_data.current_frame.frame
+		offset = character.animation_data.current_frame.offset
+	else
+		frame_name = "idle_1"
+		offset = {x = 0, y = 0}
+	end
+
+    local animation_frame = ANIMATION_DATA[get_body_type(character)][frame_name]
+
+	return {
+		offset = offset,
+		sprite = BASE_UNIT_SPRITE + animation_frame.sprite,
+		anchors = animation_frame.anchors
+	}
 end
 
 -- @return the position of the "feet_center" anchor
 function CharacterRenderer.get_animation_offset(character: Character): AnimationOffset
-    return { x = 0, y = 0}
-    -- local frame_data = self.animation_data:get_frame_data()
+    local frame_data = get_animation_frame(character)
 
-    -- local body_sprite_data = ANIMATION_DATA[self:get_body_type()][frame_data.sprite_id]
-
-    -- return frame_data.x + body_sprite_data.anchors.feet_center.x,
-    --         frame_data.y + body_sprite_data.anchors.feet_center.y
+    return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
+             y = frame_data.offset.y + frame_data.anchors.feet_center.y}
 end
 
 local function set_palette(character: Character, side: Side)
@@ -90,19 +115,8 @@ function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Si
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
 
-    local frame_data: AnimationFrameData = {
-        frame = {
-            sprite_offset = 160,
-            anchors = {
-                neck = { x = 9, y = 7 },
-                main_hand = { x = 1, y = 8 },
-                off_hand = { x = 14, y = 12 },
-                feet_center = { x = 7, y = 15 }
-            }
-        },
-        offset = {x = 0, y = 0}
-    } -- TODO: have this updated in the background by animation_manager
-    local offset_x, offset_y = frame_data.offset.x, frame_data.offset.y
+	local animation_frame = get_animation_frame(character)
+    local offset_x, offset_y = animation_frame.offset.x, animation_frame.offset.y
     if not apply_animation then
         offset_x, offset_y = 0, 0
     end
@@ -115,13 +129,13 @@ function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Si
     if set_pal then
         set_palette(character, side)
     end
+LOG.debug("Drawing", animation_frame.sprite, base_point.x, base_point.y)
+    spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
-    spr(BASE_UNIT_SPRITE + frame_data.frame.sprite_offset, base_point.x, base_point.y, flip_h)
-
-    local head_anchor = get_anchor_offsets(base_point, frame_data.frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
+    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
     CharacterRenderer.draw_head(character, head_anchor, side, set_pal)
 
-    local weapon_anchor = get_anchor_offsets(base_point, frame_data.frame.anchors.main_hand, character.weapon.hand_anchor, flip_h, false)
+    local weapon_anchor = get_anchor_offsets(base_point, animation_frame.anchors.main_hand, character.weapon.hand_anchor, flip_h, false)
     spr(BASE_UNIT_SPRITE + character.weapon.sprite, weapon_anchor.x, weapon_anchor.y, flip_h)
 
     if set_pal then

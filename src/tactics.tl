@@ -10,6 +10,7 @@ require("src/draw")
 require("src/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
+require("src/animation")
 
 require("src/tactics/battle_unit")
 require("src/menu/types")
@@ -29,6 +30,7 @@ global record TacticsEngine
     combat_calculator: CombatCalculator
     event_bus: EventBus
     task_manager: TaskManager
+    animation_manager: AnimationManager
 
     battle_is_blocked: boolean
 
@@ -51,13 +53,19 @@ global record TacticsEngine
     update: function(self)
 end
 
-function TacticsEngine.new(battle_state: BattleState, tile_manager: TileManager, event_bus: EventBus): TacticsEngine
+function TacticsEngine.new(
+    battle_state: BattleState,
+    tile_manager: TileManager,
+    event_bus: EventBus,
+    animation_manager: AnimationManager
+): TacticsEngine
     local self: TacticsEngine = setmetatable({}, { __index = TacticsEngine })
     self.battle_is_blocked = false
     self.battle_state = battle_state
     self.tile_manager = tile_manager
     self.combat_calculator = CombatCalculator.new(tile_manager)
     self.event_bus = event_bus
+    self.animation_manager = animation_manager
 
     self.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self:handle_move_unit(ctx)
@@ -78,11 +86,12 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
 
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
-        unit.character:start_walk_animation(path)
-        while unit.character.animation_blocking do
+        local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+        unit.character.animation_data = animation
+        
+        while animation.playing do
             yield()
         end
-        unit.character:end_animation()
 
         self.battle_state:move_unit(unit, destination)
         unit.has_acted = true
@@ -100,11 +109,12 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
 
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
-        unit.character:start_walk_animation(path)
-        while unit.character.animation_blocking do
+        local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+        unit.character.animation_data = animation
+
+        while animation.playing do
             yield()
         end
-        unit.character:end_animation()
 
         self.battle_state:move_unit(unit, destination)
         self:do_combat(unit, target)
@@ -127,21 +137,27 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
             defender.tile.y - attacker.tile.y
     )
 
-    -- attacker:start_animation("BUMP", direction)
+    local attack_animation = self.animation_manager:create_animation("BUMP", direction)
+    attacker.character.animation_data = attack_animation
     if not step.is_hit then
-    --     defender:start_animation("DODGE", direction + 0.25)
+        local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
+        defender.character.animation_data = dodge_animation
+        while dodge_animation.playing do
+            yield()
+        end
     end
-    while attacker.character.animation_blocking or defender.character.animation_blocking do
+    while attack_animation.playing do
         yield()
     end
 
     if step.is_hit then
         defender:take_damage(step.dmg)
-    --     defender:start_animation("HURT", direction + 0.5)
-    end
+        local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
+        defender.character.animation_data = hurt_animation
 
-    while defender.character.animation_blocking do
-        yield()
+        while hurt_animation.playing do
+            yield()
+        end
     end
 
     if not defender:is_alive() then
