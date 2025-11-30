@@ -65,13 +65,9 @@ global function to_tile_path(path: { TilePoint }): { AnimationOffset }
     assert(#path > 0)
     --if #path == 0 then return path end
 
-    local base_x = path[1].x
-    local base_y = path[1].y
+    local base_point = path[1]
     return tmap(path, function(p: TilePoint): AnimationOffset
-        return {
-            x = (p.x - base_x) * CONFIG.TILE_WIDTH,
-            y = (p.y - base_y) * CONFIG.TILE_HEIGHT
-        }
+        return (p - base_point) * CONFIG.TILE_SIZE
     end)
 end
 
@@ -121,7 +117,7 @@ function Array2D:get<V>(x: integer, y: integer): V
     return self.data[x][y]
 end
 
-function Array2D:get_point<V>(p: Point<integer>): V
+function Array2D:get_point<V>(p: Point): V
     assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
     return self.data[p.x][p.y]
 end
@@ -131,7 +127,7 @@ function Array2D:set<V>(x: integer, y: integer, v: V)
     self.data[x][y] = v
 end
 
-function Array2D:set_point<V>(p: Point<integer>, v: V)
+function Array2D:set_point<V>(p: Point, v: V)
     assert(p.x >= 0 and p.y >= 0 and p.x < self.w and p.y < self.h)
     self.data[p.x][p.y] = v
 end
@@ -144,10 +140,10 @@ function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
     end
 end
 
-function Array2D:foreachpoint<V>(fn: function(point: Point<integer>, v: V))
+function Array2D:foreachpoint<V>(fn: function(point: Point, v: V))
     for x, col in ipairs(self.data) do
         for y, v in ipairs(col) do
-            fn({x = x, y = y}, v)
+            fn(TilePoint.of(x, y), v)
         end
     end
 end

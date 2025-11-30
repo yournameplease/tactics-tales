@@ -46,19 +46,19 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = { x = 9, y = 7 },
-                main_hand = { x = 1, y = 8 },
-                off_hand = { x = 14, y = 12 },
-                feet_center = { x = 7, y = 15 }
+                neck = AnimationAnchorPoint.of(9, 7),
+                main_hand = AnimationAnchorPoint.of(1, 8),
+                off_hand = AnimationAnchorPoint.of(14, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
             }
         },
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                neck = { x = 10, y = 7 },
-                main_hand = { x = 1, y = 7 },
-                off_hand = { x = 14, y = 12 },
-                feet_center = { x = 7, y = 15 }
+                neck = AnimationAnchorPoint.of(10, 7),
+                main_hand = AnimationAnchorPoint.of(1, 7),
+                off_hand = AnimationAnchorPoint.of(14, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
             }
         }
     },
@@ -66,19 +66,19 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = { x = 7, y = 7 },
-                main_hand = { x = 3, y = 12 },
-                off_hand = { x = 12, y = 12 },
-                feet_center = { x = 7, y = 15 }
+                neck = AnimationAnchorPoint.of(7, 7),
+                main_hand = AnimationAnchorPoint.of(3, 12),
+                off_hand = AnimationAnchorPoint.of(12, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
             }
         },
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               neck = { x = 6, y = 7 },
-               main_hand = { x = 4, y = 11 },
-               off_hand = { x = 11, y = 12 },
-               feet_center = { x = 7, y = 15 }
+               neck = AnimationAnchorPoint.of(6, 7),
+               main_hand = AnimationAnchorPoint.of(4, 11),
+               off_hand = AnimationAnchorPoint.of(11, 12),
+               feet_center = AnimationAnchorPoint.of(7, 15)
            }
         },
     },
@@ -86,19 +86,19 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = { x = 6, y = 7 },
-                main_hand = { x = 13, y = 9 },
-                off_hand = { x = 3, y = 11 },
-                feet_center = { x = 7, y = 15 }
+                neck = AnimationAnchorPoint.of(6, 7),
+                main_hand = AnimationAnchorPoint.of(13, 9),
+                off_hand = AnimationAnchorPoint.of(3, 11),
+                feet_center = AnimationAnchorPoint.of(7, 15)
             }
         },
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               neck = { x = 7, y = 7 },
-               main_hand = { x = 14, y = 8 },
-               off_hand = { x = 4, y = 11 },
-               feet_center = { x = 7, y = 15 }
+               neck = AnimationAnchorPoint.of(7, 7),
+               main_hand = AnimationAnchorPoint.of(14, 8),
+               off_hand = AnimationAnchorPoint.of(4, 11),
+               feet_center = AnimationAnchorPoint.of(7, 15)
            }
         }
     }

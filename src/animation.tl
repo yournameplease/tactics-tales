@@ -55,7 +55,7 @@ function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
 end
 
 local function lerp_offsets(o0: AnimationOffset, o1: AnimationOffset, frame: number, duration: number): AnimationOffset
-    return {x = o0.x + frame * (o1.x - o0.x) / duration, y = o0.y + frame * (o1.y - o0.y) / duration }
+    return o0 + flr(frame/duration) * (o1 - o0)
 end
 
 local record PathAnimationPoint
@@ -121,7 +121,7 @@ function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: 
 
     local direction = self.direction
     local offset = track[self.frame]
-    return { x = offset * cos(direction), y = offset * sin(direction)}
+    return AnimationOffset.of_angle(direction, offset)
 end
 
 global record GlobalAnimationInstance
@@ -140,7 +140,7 @@ function GlobalAnimationInstance:get_sprite_frame_name(global_frame: integer): A
 end
 
 function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): AnimationOffset
-    return { x = 0, y = 0 }
+    return AnimationOffset.of(0, 0)
 end
 
 global record AnimationFrameData

@@ -40,7 +40,7 @@ end
 local default_weapon: Weapon = {
     name = "Default Weapon",
     sprite = 104,
-    hand_anchor = { x = 1, y = 8}, -- the top left position of the handle
+    hand_anchor = AnimationAnchorPoint.of(1,8), -- the top left position of the handle
     damage = 1,
     accuracy = 90,
     type = "MELEE",
@@ -122,7 +122,7 @@ global WEAPON_DATA: {string: Weapon} = {
     greatsword = create_weapon({
         name = "Greatsword",
         sprite = 111,
-        hand_anchor = { x = 3, y = 12},
+        hand_anchor = AnimationAnchorPoint.of(3,12),
         damage = 3,
         accuracy = 70,
         body_type = "HORIZONTAL",
@@ -130,7 +130,7 @@ global WEAPON_DATA: {string: Weapon} = {
     bow = create_weapon({
         name = "Bow",
         sprite = 112,
-        hand_anchor = { x = 13, y = 9},
+        hand_anchor = AnimationAnchorPoint.of(13,9),
         damage = 2,
         accuracy = 90,
         _range = 2,

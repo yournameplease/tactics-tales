@@ -24,8 +24,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
-local TILE_WIDTH = CONFIG.TILE_WIDTH
-local TILE_HEIGHT = CONFIG.TILE_HEIGHT
+local TILE_SIZE = CONFIG.TILE_SIZE
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
@@ -42,17 +41,16 @@ function TacticsMap.new(map_width: integer, map_height: integer, props: UIElemen
     box.map_height = map_height or MAP_HEIGHT
 
     box.padding = box.decoration_padding
-    box.internal_margin = { t = WALL_HEIGHT - TILE_HEIGHT, b = 0, l = 0, r = 0 }
-    box.w = box.map_width * TILE_WIDTH + 2 * box.padding
-    box.h = box.map_height * TILE_HEIGHT + 2 * box.padding
+    box.internal_margin = { t = WALL_HEIGHT - TILE_SIZE.y, b = 0, l = 0, r = 0 }
+    box.w = box.map_width * TILE_SIZE.x + 2 * box.padding
+    box.h = box.map_height * TILE_SIZE.y + 2 * box.padding
 
     return box
 end
 
 local record AnimatedUnitPosition
     id: integer
-    x: integer
-    y: integer
+    point: WorldPoint
 end
 
 local function compute_animated_unit_positions(battle_state: BattleState): { AnimatedUnitPosition }
@@ -62,8 +60,7 @@ local function compute_animated_unit_positions(battle_state: BattleState): { Ani
                 local animation_offset = CharacterRenderer.get_animation_offset(unit.character)
                 return {
                     id = unit.id,
-                    x = flr(unit.tile.x * TILE_WIDTH + animation_offset.x),
-                    y = flr(unit.tile.y * TILE_HEIGHT + animation_offset.y)
+                    point = (unit.tile * TILE_SIZE + animation_offset) as WorldPoint,
                 }
             end
     )
@@ -81,10 +78,7 @@ local function draw_unit(unit: BattleUnit)
     local unit_tile = unit.tile
     -- local has_acted = unit.has_acted
 
-    local world_point = {
-        x = unit_tile.x * TILE_WIDTH,
-        y = unit_tile.y * TILE_HEIGHT
-    }
+    local world_point = unit_tile * TILE_SIZE
 
     -- local shadow_color
     -- if has_acted then
@@ -101,7 +95,7 @@ local function draw_unit(unit: BattleUnit)
     local hp_current = unit.hp_current
     local hp_max = unit.character.stats.hp_max
     -- TODO: make this a skeleton point
-    draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_WIDTH-2, 4)
+    draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_SIZE.x-2, 4)
 end
 
 function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
@@ -111,7 +105,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local menu = state.menu_manager
 
     local camera_x = self.x + self.padding
-    local camera_y = self.y + self.padding + WALL_HEIGHT - TILE_HEIGHT
+    local camera_y = self.y + self.padding + WALL_HEIGHT - TILE_SIZE.y
     camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
@@ -121,7 +115,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     local sorted_units = userdata("i16", 2, #unit_positions)
     for i,u in ipairs(unit_positions) do
-        sorted_units:set(0,i-1, u.y)
+        sorted_units:set(0,i-1, u.point.y)
         sorted_units:set(1,i-1, u.id)
     end
     sorted_units:sort()
@@ -131,7 +125,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local layers = state.battle_manager.map_data.userdata
     local layer_ground = layers[3].bmp
     local layer_wall = layers[2].bmp
-    local wall_offset = WALL_HEIGHT - TILE_HEIGHT
+    local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
     local cursor_tile: TilePoint = nil
     if menu.menu_state.point ~= nil then
@@ -139,7 +133,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     end
 
     for y = 0, self.map_height-1 do
-        map(layer_ground, 0, y, 0, y * TILE_HEIGHT, self.map_width, 1, nil, TILE_WIDTH, TILE_HEIGHT)
+        map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
 
         -- highlight legal tiles
@@ -178,7 +172,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
                         else
                             error("invalid state")
                         end
-                        rrectfill(x*TILE_WIDTH+1, y*TILE_HEIGHT+1, TILE_WIDTH-2, TILE_HEIGHT-2)
+                        rrectfill(x*TILE_SIZE.x+1, y*TILE_SIZE.y+1, TILE_SIZE.x-2, TILE_SIZE.y-2)
                     end
                 end
                 poke(0x550b,0x00)
@@ -187,7 +181,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
             end
         end
 
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_HEIGHT do
+        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_state:get_unit_by_id(unit_id)
             LOG.trace("drawing unit ".. unit_id .." with y="..unit.tile.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
@@ -197,17 +191,17 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
         -- TODO: this is better with transparency
         if cursor_tile ~= nil then
-            local c_x = cursor_tile.x * TILE_WIDTH
-            local c_y = cursor_tile.y * TILE_HEIGHT
+            local c_x = cursor_tile.x * TILE_SIZE.x
+            local c_y = cursor_tile.y * TILE_SIZE.y
             spr(CURSOR_SPRITE, c_x, c_y)
         end
 
-        map(layer_wall, 0, y, 0, y * TILE_HEIGHT - wall_offset, self.map_width, 1, nil, TILE_WIDTH, WALL_HEIGHT)
+        map(layer_wall, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
     end
 
     if cursor_tile ~= nil then
-        local x = cursor_tile.x * TILE_WIDTH
-        local y = cursor_tile.y * TILE_HEIGHT
+        local x = cursor_tile.x * TILE_SIZE.x
+        local y = cursor_tile.y * TILE_SIZE.y
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         local menu_selection = menu.menu_selection
@@ -216,8 +210,8 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
             local options = menu_selection.options
             local PADDING = 2
 
-            local menu_x = x + TILE_WIDTH
-            local menu_y = y + TILE_HEIGHT
+            local menu_x = x + TILE_SIZE.x
+            local menu_y = y + TILE_SIZE.y
             local menu_w = 2*PADDING + 30
             local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
             rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)

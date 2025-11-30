@@ -175,7 +175,7 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
                         -- 5. Relaxation: Is this new path better than the old one?
                         if not neighbor_info or new_total < neighbor_info.cost then
                             -- Record the new cost and the tile we came from (ux, uy)
-                            visited_info:set(vx, vy, { cost = new_total, prev = {x=ux, y=uy} })
+                            visited_info:set(vx, vy, { cost = new_total, prev = TilePoint.of(ux, uy) })
                             add(priority_queue, {x = vx, y = vy, cost = new_total})
                         end
                     end
@@ -201,11 +201,12 @@ end
 -- @return list of { { x, y } } tile coordinates from start position
 function TileManager:get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
-    local path = {{ x = tile.x, y = tile.y }}
+    local path: {TilePoint} = {}
+    add(path, tile:copy())
     local next_tile = tile
     while all_tile_costs:get_point(next_tile).prev ~= nil do
         next_tile = all_tile_costs:get_point(next_tile).prev
-        add(path, { x = next_tile.x, y = next_tile.y })
+        add(path, next_tile:copy())
     end
     return reverse_list(path)
 end

@@ -36,7 +36,7 @@ function MenuManager.new(
     local self: MenuManager = setmetatable({}, { __index = MenuManager })
 
     self.menu_state = {
-        point = {x = 0, y = 0}
+        point = TilePoint.of(0, 0)
     }
     self.menu_ctx = {}
     self.menu_selection = {}
@@ -102,7 +102,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
                 set_selected_context = function(s: GridMenuSelection, _bs: BattleState, ctx: MenuContext)
-                    ctx.destination = { point = s.point, path = s.path }
+                    ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
                 validator = function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
                      return te:grid_selection_is_empty_or_acting_unit(s, ctx)
@@ -157,7 +157,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     local new_step_data = menu_data.steps[self.menu_state.step]
     if new_step_data is GridMenuDefinition then
         local new_selection = GridMenuSelection.new(
-            self.menu_state.point,
+            self.menu_state.point:copy(),
             16,
             16
         )

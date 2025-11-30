@@ -49,13 +49,13 @@ function MapManager:_load_static(definition: StaticMapDefinition): MapData
             local tile = metatiles_layer:get(x, y)
             if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
                 local player_spawner_id = tile - BASE_PLAYER_SPAWNER_SPRITE + 1
-                map_data.metadata.player_spawners[player_spawner_id] = {x = x, y = y}
+                map_data.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
             elseif tile >= BASE_ENEMY_SPAWNER_SPRITE and tile < BASE_REINFORCEMENT_SPAWNER_SPRITE then
                 local enemy_spawner_id = tile - BASE_ENEMY_SPAWNER_SPRITE + 1
                 if map_data.metadata.enemy_spawners[enemy_spawner_id] == nil then
                     map_data.metadata.enemy_spawners[enemy_spawner_id] = {}
                 end
-                add(map_data.metadata.enemy_spawners[enemy_spawner_id], {x = x, y = y})
+                add(map_data.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
             end
         end
     end
