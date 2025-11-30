@@ -87,7 +87,7 @@ end
 function PathAnimationInstance:tick()
     self.frame = self.frame + 1
     if self.frame > self.path_points[self.current_point].duration then
-        if self.frame < #self.path_points - 1 then
+        if self.current_point < #self.path_points - 1 then
             self.current_point = self.current_point + 1
             self.frame = 0
         else
@@ -309,6 +309,7 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation
+    LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
     local path_points: { PathAnimationPoint } = tmap(path, function(p: AnimationOffset): PathAnimationPoint
@@ -336,7 +337,7 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
         animated_object = { playing = true },
         playing = true
     }
-
+LOG.debug("confirming...", #instance.path_points)
     add(self.active_animations, instance)
     setmetatable(instance, { __index = PathAnimationInstance })
 

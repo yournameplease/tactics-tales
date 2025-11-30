@@ -243,6 +243,7 @@ end
 
 function MenuManager:set_menu(menu_id: MenuId)
     self.menu_state.menu_id = menu_id
+    self.selection_history = {}
     local step = MENU_DATA[menu_id].initial_step
     self:populate_menu_state(step)
 end
