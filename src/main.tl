@@ -96,15 +96,23 @@ function _init()
 end
 
 function _update()
+    LOG.trace("Getting Joypad.")
     local joy = get_joypad()
+    LOG.trace("Updating menus.")
     menu_manager:update(joy)
+    LOG.trace("Updating battle.")
     battle_manager:update()
+    LOG.trace("Ticking animations.")
     animation_manager:tick()
+    LOG.trace("Enriching context.")
     context:enrich()
+    LOG.trace("Updating tasks.")
     task_manager:update_tasks()
 end
 
 function _draw()
+    LOG.trace("Generating frame data.")
     animation_manager:generate_frame_data()
+    LOG.trace("Drawing UI.")
     ui_manager:draw(context)
 end

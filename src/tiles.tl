@@ -130,17 +130,13 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
     -- Start node setup
     local start_cost = 0 -- Cost to be at the start is 0
 
-    -- Sanity check: If the start tile itself is blocked or expensive
-    -- (depending on your game logic, moving *off* start might cost 0 or terrain cost)
-    if start_cost > max_cost then return {} end
-
     visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
     add(priority_queue, {x = start_x, y = start_y, cost = start_cost})
 
     -- Main Loop
     while #priority_queue > 0 do
         -- 1. Pop the node with the lowest cost
-        local min_node_cost = math.huge
+        local min_node_cost = 999
         local min_index = -1
 
         for i, node in ipairs(priority_queue) do
@@ -154,6 +150,7 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
         assert(u is ShortestPathQueueEntry)
         local ux, uy, ucost = u.x, u.y, u.cost
 
+        LOG.trace("Processing shortest path point", ux, uy, ucost)
         -- 2. Check if we found a better path to this node already
         -- (Standard Dijkstra laziness check)
         local current_info = visited_info:get(ux, uy)
@@ -165,6 +162,7 @@ function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, sid
 
                 -- Calculate cost to move FROM u INTO v
                 local move_cost = self:movement_cost({ x=vx, y=vy }, side)
+                assert(move_cost > 0, "0 cost moves not yet implemented.")
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
                 if move_cost < 999 then
@@ -204,8 +202,9 @@ end
 function TileManager:get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path = { tile }
-    while all_tile_costs:get_point(tile).prev ~= nil do
-        local next = all_tile_costs:get_point(tile).prev
+    local next = tile
+    while all_tile_costs:get_point(next).prev ~= nil do
+        next = all_tile_costs:get_point(tile).prev
         add(path, next)
     end
     return reverse_list(path)

@@ -193,7 +193,7 @@ function MenuManager:handle_menu_select()
 
         if self.menu_ctx.acting_unit ~= nil then
             local acting_unit = self.menu_ctx.acting_unit.unit
-            local costs = self.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, 999) -- TODO: global battle_manager
+            local costs = self.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, acting_unit.character.stats.movement) 
             local path = self.tile_manager:get_path_to_tile(costs, menu_selection.point)
             menu_selection.path = path
         end

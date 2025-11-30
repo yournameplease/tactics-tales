@@ -129,7 +129,7 @@ function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Si
     if set_pal then
         set_palette(character, side)
     end
-LOG.debug("Drawing", animation_frame.sprite, base_point.x, base_point.y)
+
     spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
