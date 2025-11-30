@@ -3,6 +3,7 @@ require("src/util")
 require("src/character/animation_data")
 require("src/character/weapons")
 require("src/animation")
+require("src/character/character_data")
 
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
@@ -17,11 +18,6 @@ function CharacterManager.new(): CharacterManager
     self.characters = {}
     return self
 end
-
-global enum Sex
-    "male"
-    "female"
-end 
 
 global record CharacterAppearance
     sex: Sex

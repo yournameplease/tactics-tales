@@ -2,6 +2,8 @@ require("src/debug")
 require("src/types")
 
 require("src/character/character_manager")
+require("src/character/character_data")
+
 local ANIMATION_DATA = require("src/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256

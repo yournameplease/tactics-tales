@@ -1,33 +1,47 @@
 require("src/util")
 
-global record RandomOption<V>
+global interface Randomizer<V>
+	pick_random: function(self): V
+end
+
+-- Weighted Options
+
+global record WeightedOption<V>
 	value: V
 	weight: integer
 end
 
-global record RandomSelection<V>
-	options: {RandomOption<V>}
+function WeightedOption.of<V>(value: V, weight: integer): WeightedOption<V>
+	return setmetatable({
+		value = value,
+		weight = weight
+	}, { __index = WeightedOption })
+end
+
+global record WeightedOptionSelector<V>
+	is Randomizer<V>
+	options: {WeightedOption<V>}
 	total_weight: integer
 end
 
-function RandomSelection.of<V>(...: V): RandomSelection<V>
+function WeightedOptionSelector.of<V>(...: V): WeightedOptionSelector<V>
 	local array = {...}
-	local options: {RandomOption<V>} = tmap(array, function(v: V): RandomOption<V> return { value = v, weight = 1} end)
+	local options: {WeightedOption<V>} = tmap(array, function(v: V): WeightedOption<V> return { value = v, weight = 1} end)
 	return setmetatable({
 		options = options,
 		total_weight = #array
-	}, { __index = RandomSelection })
+	}, { __index = WeightedOptionSelector })
 end
 
-function RandomSelection.of_weighted<V>(...: RandomOption<V>): RandomSelection<V>
-	local array: {RandomOption<V>} = {...}
+function WeightedOptionSelector.of_weighted<V>(...: WeightedOption<V>): WeightedOptionSelector<V>
+	local array: {WeightedOption<V>} = {...}
 	return setmetatable({
 		options = array,
-		total_weight = sum(array, function(o: RandomOption<V>): number return o.weight end) as integer
-	}, { __index = RandomSelection })
+		total_weight = sum(array, function(o: WeightedOption<V>): number return o.weight end) as integer
+	}, { __index = WeightedOptionSelector })
 end
 
-function RandomSelection:pick_random(): V
+function WeightedOptionSelector:pick_random(): V
 	local i = rndi(self.total_weight)
 	if #self.options == self.total_weight then
 		return self.options[i+1].value
@@ -39,3 +53,27 @@ function RandomSelection:pick_random(): V
 	end
 	return self.options[count+1].value
 end
+
+-- Int range
+
+global record RandomRange
+	is Randomizer<integer>
+	min_value: integer
+	max_value: integer
+end
+
+function RandomRange.between(min_value: integer, max_value: integer): RandomRange
+	return setmetatable({
+		min_value = min_value,
+		max_value = max_value
+	}, { __index = RandomRange })
+end
+
+function RandomRange.of(count: integer): RandomRange
+	return RandomRange.between(0, count - 1)
+end
+
+function RandomRange:pick_random(): integer
+	return self.min_value + rndi(self.max_value - self.min_value)
+end
+
