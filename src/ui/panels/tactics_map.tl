@@ -5,6 +5,8 @@ require("src/ui/box")
 require("src/menu_manager")
 require("src/battle/battle_state")
 
+local CharacterRenderer = require("src/character/character_renderer")
+
 global record TacticsMap
     is UIElement
     map_width: integer
@@ -58,7 +60,7 @@ local function compute_animated_unit_positions(battle_state: BattleState): { Ani
     return tmap(
             battle_state:get_all_units(),
             function(unit: BattleUnit): AnimatedUnitPosition
-                local animation_offset = unit.character:get_animation_offset()
+                local animation_offset = CharacterRenderer.get_animation_offset(unit.character)
                 return {
                     id = unit.id,
                     x = flr(unit.tile.x * TILE_WIDTH + animation_offset.x),
@@ -95,7 +97,7 @@ local function draw_unit(unit: BattleUnit)
     --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
-    unit.character:draw(world_point, side, true, false)
+    CharacterRenderer.draw(unit.character, world_point, side, true, false)
 
     local hp_current = unit.hp_current
     local hp_max = unit.character.stats.hp_max
