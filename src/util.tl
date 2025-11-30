@@ -79,6 +79,15 @@ global function to_tile_path(path: { TilePoint }): { AnimationOffset }
     end)
 end
 
+global function contains<V>(table: {V}, val: V): boolean
+    for _,v in ipairs(table) do
+        if v == v then
+            return true
+        end
+    end
+    return false
+end
+
 global record IdCounter
     id_count: integer
 end

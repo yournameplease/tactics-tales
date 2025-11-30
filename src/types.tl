@@ -14,6 +14,7 @@ global interface Point
     of: function(integer,integer): self
     of_angle: function(number,number): self-- gets rounded!
     copy: function(self): self
+    metamethod __eq: function(Point, Point): boolean
     metamethod __add: function(Point, Point): Point
     metamethod __sub: function(Point, Point): Point
     metamethod __mul: function(Point|number, Point|number): Point -- gets rounded!
@@ -26,6 +27,9 @@ local record BasePoint
 end
 
 local base_point_mt = {
+    __eq = function(a: Point, b: Point): boolean
+        return a.x == b.x and a.y == b.y
+    end,
     __add = function(a: Point, b: Point): Point
         return BasePoint.of(a.x + b.x, a.y + b.y)
     end,
