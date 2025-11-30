@@ -193,7 +193,7 @@ function MenuManager:handle_menu_select()
         local validation = step_data.validator(menu_selection, self.tactics_engine, self.menu_ctx)
         if not validation then return end
 
-        if self.menu_ctx.acting_unit ~= nil then
+        if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
             local acting_unit = self.menu_ctx.acting_unit.unit
             local costs = self.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, acting_unit.character.stats.movement) 
             local path = self.tile_manager:get_path_to_tile(costs, menu_selection.point)

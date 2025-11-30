@@ -218,7 +218,7 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuSele
     if selection is GridMenuSelection then
         local target_point = selection.point
 
-        local target_unit = self.battle_state:get_at_tile(destination)
+        local target_unit = self.battle_state:get_at_tile(target_point)
         if target_unit == nil then return false end
 
         if target_unit.side == unit.side then return false end
