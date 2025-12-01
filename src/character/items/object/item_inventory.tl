@@ -43,10 +43,10 @@ local record ItemInventoryImpl
 	_current_slot_usage: integer
 end
 
-function ItemInventoryImpl:compute_current_slots(items: {InventoryItem})
+function ItemInventoryImpl:compute_current_slots()
 	self._items_by_slot = {}
 	local count = 1
-	for _,item in ipairs(items) do
+	for _,item in ipairs(self.items) do
 		item._current_slot = count
 		self._items_by_slot[count] = item
 		if (item.equip_slot) ~= nil then
@@ -86,7 +86,7 @@ end
 function ItemInventoryImpl:add_item(item: Item.Item)
 	assert(self:can_add_item(item))
 	add(self.items, { item = item })
-	self:compute_current_slots(self.items)
+	self:compute_current_slots()
 end
 
 function ItemInventoryImpl:equip_item(slot: integer)
@@ -131,13 +131,13 @@ end
 function ItemInventoryImpl:remove_item(slot: integer)
 	local item = self._items_by_slot[slot]
 	del(self.items, item) 	
-	self:compute_current_slots(self.items)
+	self:compute_current_slots()
 end
 
 function ItemInventoryImpl:move_item(slot: integer, before_slot: integer)
 	error("not implemented")
 	
-	self:compute_current_slots(self.items)
+	self:compute_current_slots()
 end
 
 function ItemInventoryModule.new(max_slots: integer): ItemInventoryModule.ItemInventory
@@ -145,7 +145,9 @@ function ItemInventoryModule.new(max_slots: integer): ItemInventoryModule.ItemIn
 		max_slots = max_slots,
 		items = {}
 	}
-	return setmetatable(inventory, { __index = ItemInventoryImpl })
+	setmetatable(inventory, { __index = ItemInventoryImpl })
+	inventory:compute_current_slots()
+	return inventory
 end
 
 return ItemInventoryModule

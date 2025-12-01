@@ -1,6 +1,8 @@
 require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
+require("src/character/items/object/item")
+require("src/character/items/object/item_inventory")
 
 global record UnitInfo
     is UIElement
@@ -48,6 +50,27 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
                 w and w.name or "Unarmed",
                 w and ("(" .. w.accuracy .. "% for " .. w.damage .. " dmg)") or "",
             }
+        end
+    }))
+    
+    info_col:add(TextNode.new({
+        rows = 5,
+        func = function(state: GameContext): {string}
+            local u = state.hovered_unit
+            if not u then return { "", "", "", "", "" } end
+
+            local items = u.character.inventory:get_items()
+
+            local out = {"Inventory:", "", "", "", ""}
+
+            for slot,item in pairs(items) do
+                out[slot+1] = item:get_name()
+                for i=2,item:get_slots() do
+                    out[slot+i] = " |"
+                end
+            end
+
+            return out
         end
     }))
 
