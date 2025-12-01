@@ -3,7 +3,7 @@ require("src/util")
 require("src/character/animation_data")
 require("src/character/weapons")
 require("src/animation")
-require("src/character/character_data")
+require("src/character/object/character")
 local CharacterGenerator = require("src/character/character_generator")
 
 -- Eventually, may want to differentiate between persistent

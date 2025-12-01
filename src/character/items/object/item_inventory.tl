@@ -8,9 +8,9 @@ local record ItemInventoryModule
 	interface ItemInventory
 
 		-- items will be indexed, to account for slots
-		get_items: function(self): { integer: Item }
+		get_items: function(self): { integer: Item.Item }
 		get_max_slots: function(self): integer
-		get_equipped_items: function(self): { EquipSlot: Item }
+		get_equipped_items: function(self): { EquipSlot: Item.Item }
 
 		can_add_item: function(self, item: Item.Item): boolean
 		add_item: function(self, item: Item.Item)
@@ -23,7 +23,7 @@ local record ItemInventoryModule
 end
 
 local record InventoryItem
-	item: Item
+	item: Item.Item
 	-- recalculate this when updated 
 	_current_slot: integer
 	equip_slot: EquipSlot
@@ -43,7 +43,7 @@ local record ItemInventoryImpl
 	_current_slot_usage: integer
 end
 
-local function compute_current_slots(items: {InventoryItem})
+function ItemInventoryImpl:compute_current_slots(items: {InventoryItem})
 	self._items_by_slot = {}
 	local count = 1
 	for _,item in ipairs(items) do
@@ -52,15 +52,15 @@ local function compute_current_slots(items: {InventoryItem})
 		if (item.equip_slot) ~= nil then
 			self._items_by_equip_slot[item.equip_slot] = item
 		end
-		count = count + item.slots
+		count = count + item.item:get_slots()
 	end
 	self._current_slot_usage = count
 end
 
-function ItemInventoryImpl:get_items(): { integer: Item }
+function ItemInventoryImpl:get_items(): { integer: Item.Item }
 	return tmap(
 		self._items_by_slot,
-		function(i: InventoryItem): Item
+		function(i: InventoryItem): Item.Item
 			return i.item
 		end
 	)
@@ -70,41 +70,40 @@ function ItemInventoryImpl:get_max_slots(): integer
 	return self.max_slots
 end
 
-function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item }
+function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 	return tmap(
-		self._items_by_slot,
-		function(i: InventoryItem): Item
+		self._items_by_equip_slot,
+		function(i: InventoryItem): Item.Item
 			return i.item
 		end
 	)
 end
 
-function ItemInventoryImpl:can_add_item(item: Item.Item)
-	local current_slot_usage = compute_current_slot_usage(self.items)
-	return current_slot_usage + item.slots <= self.max_slots	
+function ItemInventoryImpl:can_add_item(item: Item.Item): boolean
+	return self._current_slot_usage + item:get_slots() <= self.max_slots	
 end		
 
 function ItemInventoryImpl:add_item(item: Item.Item)
 	assert(self:can_add_item(item))
-	add(self.items, end)
-	compute_current_slots(self.items)
+	add(self.items, { item = item })
+	self:compute_current_slots(self.items)
 end
 
 function ItemInventoryImpl:equip_item(slot: integer)
 	local inventory_item = self._items_by_slot[slot]
 
 	local equip_slot = inventory_item.equip_slot
-	assert(inventory_item.item:get_equip_slot() ~= "NONE")
-	assert(inventory_item.item:get_equip_slot() ~= "ANY_HAND", "NOT IMPLEMENTED")
+	assert(equip_slot ~= "NONE")
+	assert(equip_slot ~= "ANY_HAND", "NOT IMPLEMENTED")
 
 	local slots_to_unequip: {EquipSlot}
-	if (equip_slot == "MAIN_HAND") then
+	if equip_slot == "MAIN_HAND" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
-	elif (equip_slot == "OFF_HAND" then
+	elseif equip_slot == "OFF_HAND" then
 		slots_to_unequip = {"OFF_HAND", "TWO_HANDS"}
-	elif (equip_slot == "TWO_HANDS" then
+	elseif equip_slot == "TWO_HANDS" then
 		slots_to_unequip = {"MAIN_HAND", "OFF_HAND", "TWO_HANDS"}
-	elif (equip_slot == "BODY" then
+	elseif equip_slot == "BODY" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
 	else
 		error()
@@ -125,20 +124,20 @@ function ItemInventoryImpl:unequip_item_in_equip_slot(slot: EquipSlot)
 end
 
 function ItemInventoryImpl:unequip_item(slot: integer)
-	local equip_slot = self._iems_by_slot[slot].equip_slot
+	local equip_slot = self._items_by_slot[slot].equip_slot
 	self:unequip_item_in_equip_slot(equip_slot)
 end
 
 function ItemInventoryImpl:remove_item(slot: integer)
 	local item = self._items_by_slot[slot]
 	del(self.items, item) 	
-	compute_current_slots(self.items)
+	self:compute_current_slots(self.items)
 end
 
 function ItemInventoryImpl:move_item(slot: integer, before_slot: integer)
 	error("not implemented")
 	
-	compute_current_slots(self.items)
+	self:compute_current_slots(self.items)
 end
 
 

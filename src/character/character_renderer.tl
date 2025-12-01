@@ -3,7 +3,7 @@ require("src/types")
 
 require("src/battle/tactics/battle_unit")
 require("src/character/character_manager")
-require("src/character/character_data")
+require("src/character/object/character")
 
 local ANIMATION_DATA = require("src/character/animation_data")
 
