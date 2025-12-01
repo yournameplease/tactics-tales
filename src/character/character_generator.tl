@@ -41,6 +41,7 @@ local function build_template(template_id: string): CharacterTemplate
 end
 
 function CharacterGenerator.generate_from_template(id: integer, template_id: string): Character
+	LOG.debug("Generating from template ", template_id)
 	local template = build_template(template_id)
 	local character: Character = {
 		id = id,
