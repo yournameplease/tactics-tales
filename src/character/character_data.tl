@@ -104,6 +104,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
         hp_max = 5
     },
 	bandit_base = {
+		parent_template = "human_base",
 		sex_options = WeightedOptionSelector.of_weighted(
 			WeightedOption.of("male", 5),
 			WeightedOption.of("female", 1)
@@ -114,11 +115,11 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 		)
 	},
     bandit_goon = {
-        parent_template = "human_base",
+        parent_template = "bandit_base",
         weapon_options = WeightedOptionSelector.of( "club", "axe" )
     },
     bandit_boss = {
-        parent_template = "bandit_goon",
+        parent_template = "bandit_base",
         hp_max = 8,
         weapon_options = WeightedOptionSelector.of( "poleaxe" )
     }

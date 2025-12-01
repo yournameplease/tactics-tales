@@ -14,20 +14,20 @@ local record CharacterGenerator
 end
 
 local function apply_template_to_parent(parent: CharacterTemplate, child: CharacterTemplate): CharacterTemplate
-	parent.movement = child.movement or parent.movement 
-	parent.hp_max = child.hp_max or parent.hp_max 
-	parent.weapon_options = child.weapon_options or parent.weapon_options 
-	parent.headwear_options = child.headwear_options or parent.headwear_options 
-	parent.body_options = child.body_options or parent.body_options 
-	parent.sex_options = child.sex_options or parent.sex_options 
-	parent.skin_color_options = child.skin_color_options or parent.skin_color_options 
-	parent.hair_color_options = child.hair_color_options or parent.hair_color_options 
-	parent.hair_options_m = child.hair_options_m or parent.hair_options_m 
-	parent.hair_options_f = child.hair_options_f or parent.hair_options_f 
-	parent.beard_options = child.beard_options or parent.beard_options 
-	parent.eye_options = child.eye_options or parent.eye_options 
-
-	return parent
+	return {
+		movement = child.movement or parent.movement, 
+		hp_max = child.hp_max or parent.hp_max, 
+		weapon_options = child.weapon_options or parent.weapon_options, 
+		headwear_options = child.headwear_options or parent.headwear_options, 
+		body_options = child.body_options or parent.body_options, 
+		sex_options = child.sex_options or parent.sex_options, 
+		skin_color_options = child.skin_color_options or parent.skin_color_options, 
+		hair_color_options = child.hair_color_options or parent.hair_color_options, 
+		hair_options_m = child.hair_options_m or parent.hair_options_m, 
+		hair_options_f = child.hair_options_f or parent.hair_options_f, 
+		beard_options = child.beard_options or parent.beard_options, 
+		eye_options = child.eye_options or parent.eye_options 
+	} as CharacterTemplate
 end
 
 local function build_template(template_id: string): CharacterTemplate
@@ -63,8 +63,12 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
         character.appearance.hair_color = template.hair_color_options:pick_random()
     end
 	character.appearance.hair_color = template.hair_color_options:pick_random()
-	character.appearance.hair = template.hair_options_m:pick_random()
-	character.appearance.beard = template.beard_options:pick_random()
+	if character.appearance.sex == "male" then
+		character.appearance.hair = template.hair_options_m:pick_random()
+		character.appearance.beard = template.beard_options:pick_random()
+	else
+		character.appearance.hair = template.hair_options_f:pick_random()
+	end
 	character.appearance.eyes = template.eye_options:pick_random()
 
     character.name = character.appearance.sex == "male" and "Bob" or "Alice"

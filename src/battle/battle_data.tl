@@ -47,8 +47,8 @@ global BATTLE_DATA: { string: BattleDefinition } = {
             type = "TURN_LIMIT"
         } },
         enemies = {
-            { template = "bandit_goon" },
-            { template = "bandit_boss" }
+            { template = "bandit_boss" },
+            { template = "bandit_goon" }
         }
     }
 }
