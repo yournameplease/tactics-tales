@@ -107,7 +107,8 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
     end
 
     spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
-    spr(BASE_EYE_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
+	-- Eye sprite currently is just the default.
+    spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
     if battle_unit.character.appearance.sex == "male" then
         spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
     else
