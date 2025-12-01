@@ -1,6 +1,7 @@
 require("src/debug")
 require("src/types")
 
+require("src/battle/tactics/battle_unit")
 require("src/character/character_manager")
 require("src/character/character_data")
 
@@ -39,10 +40,15 @@ local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint,
     return { x = base.x + diff_x, y = base.y + diff_y }
 end
 
-local function get_body_type(character: Character): AnimationName
-    local base_body_type = character.weapon.body_type
+local function get_body_type(battle_unit: BattleUnit): AnimationName
+    local base_body_type = battle_unit.character.weapon.body_type
+	local body_class = battle_unit.character.appearance.body_class
+	if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
+		body_class = "SLEEVELESS"
+	end
 
-    return ("STANDARD_"..base_body_type) as AnimationName
+	-- TODO: type safety
+    return (body_class.."_"..base_body_type) as AnimationName
 end
 
 local record RenderedAnimationFrame
@@ -51,18 +57,18 @@ local record RenderedAnimationFrame
 	anchors: { AnchorPointName: AnimationAnchorPoint }
 end
 
-local function get_animation_frame(character: Character): RenderedAnimationFrame
+local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFrame
 	local frame_name: AnimationFrameName 
 	local offset: AnimationOffset
-	if character.animation_data ~= nil and character.animation_data.current_frame ~= nil then
-		frame_name = character.animation_data.current_frame.frame
-		offset = character.animation_data.current_frame.offset
+	if battle_unit.animation_data ~= nil and battle_unit.animation_data.current_frame ~= nil then
+		frame_name = battle_unit.animation_data.current_frame.frame
+		offset = battle_unit.animation_data.current_frame.offset
 	else
 		frame_name = "idle_1"
 		offset = {x = 0, y = 0}
 	end
 
-    local animation_frame = ANIMATION_DATA[get_body_type(character)][frame_name]
+    local animation_frame = ANIMATION_DATA[get_body_type(battle_unit)][frame_name]
 
 	return {
 		offset = offset,
@@ -72,50 +78,50 @@ local function get_animation_frame(character: Character): RenderedAnimationFrame
 end
 
 -- @return the position of the "feet_center" anchor
-function CharacterRenderer.get_animation_offset(character: Character): AnimationOffset
-    local frame_data = get_animation_frame(character)
+function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): AnimationOffset
+    local frame_data = get_animation_frame(battle_unit)
 
     return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
              y = frame_data.offset.y + frame_data.anchors.feet_center.y}
 end
 
-local function set_palette(character: Character, side: Side)
+local function set_palette(battle_unit: BattleUnit, side: Side)
     if side == 1 then
         pal(16, 8)
         pal(19, 24)
     end
-    local skin = character.appearance.skin
+    local skin = battle_unit.character.appearance.skin
     pal(COLOR_SKIN, SKIN_COLORS[skin][1])
     pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-    pal(COLOR_HAIR, character.appearance.hair_color)
-    pal(COLOR_BEARD, character.appearance.beard_color)
+    pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
+    pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
-function CharacterRenderer.draw_head(character: Character, point: DrawPoint, side: Side, set_pal: boolean)
+function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean)
     local flip_h = side ~= 0
-    local sex_offset = character.appearance.sex == "male" and 0 or 1
+    local sex_offset = battle_unit.character.appearance.sex == "male" and 0 or 1
 
     if set_pal then
-        set_palette(character, side)
+        set_palette(battle_unit, side)
     end
 
     spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
-    if character.appearance.sex == "male" then
-        spr(BASE_M_HAIR_SPRITE + character.appearance.hair, point.x, point.y, flip_h)
+    if battle_unit.character.appearance.sex == "male" then
+        spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
     else
-        spr(BASE_F_HAIR_SPRITE + character.appearance.hair, point.x, point.y, flip_h)
+        spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
     end
-    if character.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + character.appearance.beard, point.x, point.y, flip_h)
+    if battle_unit.character.appearance.beard ~= nil then
+        spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
     end
 
 end
 
-function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Side, set_pal: boolean, apply_animation: boolean)
+function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean, apply_animation: boolean)
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
 
-	local animation_frame = get_animation_frame(character)
+	local animation_frame = get_animation_frame(battle_unit)
 
 	local offset = animation_frame.offset
 	if not apply_animation then
@@ -135,16 +141,16 @@ function CharacterRenderer.draw(character: Character, point: DrawPoint, side: Si
     local HEAD_NECK_Y = 7
 
     if set_pal then
-        set_palette(character, side)
+        set_palette(battle_unit, side)
     end
 
     spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
-    CharacterRenderer.draw_head(character, head_anchor, side, set_pal)
+    CharacterRenderer.draw_head(battle_unit, head_anchor, side, set_pal)
 
-    local weapon_anchor = get_anchor_offsets(base_point, animation_frame.anchors.main_hand, character.weapon.hand_anchor, flip_h, false)
-    spr(BASE_UNIT_SPRITE + character.weapon.sprite, weapon_anchor.x, weapon_anchor.y, flip_h)
+    local weapon_anchor = get_anchor_offsets(base_point, animation_frame.anchors.main_hand, battle_unit.character.weapon.hand_anchor, flip_h, false)
+    spr(BASE_UNIT_SPRITE + battle_unit.character.weapon.sprite, weapon_anchor.x, weapon_anchor.y, flip_h)
 
     if set_pal then
         pal()

@@ -1,6 +1,13 @@
 require("src/util/random")
 require("src/character/weapons")
+require("src/animation")
 
+local SKIN_COLORS: { { Color, Color } } = {
+    {15, 31},
+    {31, 4},
+    {4, 20},
+    {20, 21}
+}
 
 global enum Sex
     "male"
@@ -22,6 +29,31 @@ global enum BodyClass
 	"ROBED"
 end
 
+global record CharacterAppearance
+    sex: Sex
+    hair: integer
+    skin: integer
+    hair_color: Color
+    body_class: BodyClass
+    beard: integer
+    -- beard_color: Color
+    eyes: integer
+end
+
+global record CharacterStats
+    hp_max: integer
+    movement: integer
+    def: integer
+end
+
+global record Character
+    id: integer
+    name: string
+    appearance: CharacterAppearance
+    stats: CharacterStats
+    weapon: Weapon
+end
+
 -- all fields are optional in the templates
 global record CharacterTemplate
 	movement: integer
@@ -30,6 +62,8 @@ global record CharacterTemplate
 	headwear_options: Randomizer<HeadwearId>
 	body_options: Randomizer<BodyClass>
 	sex_options: Randomizer<Sex>
+	skin_color_options: Randomizer<integer>
+	hair_color_options: Randomizer<integer>
 	hair_options_m: Randomizer<integer>
 	hair_options_f: Randomizer<integer>
 	beard_options: Randomizer<integer>
@@ -39,7 +73,7 @@ global record CharacterTemplate
 	parent_template: string
 end
 
-local BASE_UNIT: CharacterTemplate = {
+global BASE_UNIT: CharacterTemplate = {
 	movement = 5,
 	hp_max = 5,
 	weapon_options = WeightedOptionSelector.of("dagger"),
@@ -53,15 +87,18 @@ local BASE_UNIT: CharacterTemplate = {
 		WeightedOption.of("ROBED", 1)
 	),
 	sex_options = WeightedOptionSelector.of("male", "female"),
-	hair_options_m = RandomRange.of(6),
-	hair_options_f = RandomRange.of(6),
+	skin_color_options = RandomRange.between(1,4),
+    hair_color_options = WeightedOptionSelector.of(4, 5, 6, 9, 10, 20, 21, 22, 24, 25, 31),
 	beard_options = RandomRange.of(7),
 	eye_options = RandomRange.of(8),
+	hair_options_m = RandomRange.of(6),
+	hair_options_f = RandomRange.of(6),
 
 	parent_template = nil
 }
 
-local UNIT_TEMPLATES: { string: CharacterTemplate } = {
+global UNIT_TEMPLATES: { string: CharacterTemplate } = {
+	default = BASE_UNIT,
     human_base = {
         movement = 5,
         hp_max = 5
@@ -87,4 +124,4 @@ local UNIT_TEMPLATES: { string: CharacterTemplate } = {
     }
 }
 
-
+return UNIT_TEMPLATES

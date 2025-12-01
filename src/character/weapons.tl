@@ -139,5 +139,4 @@ global WEAPON_DATA: {string: Weapon} = {
     }),
 }
 
-
 return WEAPON_DATA

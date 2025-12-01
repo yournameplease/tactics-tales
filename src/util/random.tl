@@ -47,10 +47,10 @@ function WeightedOptionSelector:pick_random(): V
 		return self.options[i+1].value
 	end
 	local count = 0
-	while i > 0 do
-		i = i-self.options[count].weight
+	repeat
 		count = count + 1
-	end
+		i = i - self.options[count].weight
+	until i <= 0
 	return self.options[count+1].value
 end
 

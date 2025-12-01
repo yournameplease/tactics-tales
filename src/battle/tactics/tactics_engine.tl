@@ -90,7 +90,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
     self.task_manager:start_routine(function()
         if #path > 1 then
             local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.character.animation_data = animation
+            unit.animation_data = animation
             LOG.debug("Animating!", animation.playing)
             while animation.playing do
                 yield()
@@ -101,7 +101,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
         unit.has_acted = true
 
         self.battle_is_blocked = false
-        unit.character.animation_data = self.animation_manager:create_idle_animation()
+        unit.animation_data = self.animation_manager:create_idle_animation()
         self.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
@@ -116,7 +116,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
     self.task_manager:start_routine(function()
         if #path > 1 then
             local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.character.animation_data = animation
+            unit.animation_data = animation
 
             while animation.playing do
                 yield()
@@ -129,8 +129,8 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
 
         self.battle_is_blocked = false
         LOG.debug("unblockiung battle")
-        unit.character.animation_data = self.animation_manager:create_idle_animation()
-        target.character.animation_data = self.animation_manager:create_idle_animation()
+        unit.animation_data = self.animation_manager:create_idle_animation()
+        target.animation_data = self.animation_manager:create_idle_animation()
         self.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
@@ -147,10 +147,10 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
     )
 
     local attack_animation = self.animation_manager:create_animation("BUMP", direction)
-    attacker.character.animation_data = attack_animation
+    attacker.animation_data = attack_animation
     if not step.is_hit then
         local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
-        defender.character.animation_data = dodge_animation
+        defender.animation_data = dodge_animation
         while dodge_animation.playing do
             yield()
         end
@@ -162,7 +162,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
     if step.is_hit then
         defender:take_damage(step.dmg)
         local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
-        defender.character.animation_data = hurt_animation
+        defender.animation_data = hurt_animation
 
         while hurt_animation.playing do
             yield()
@@ -355,9 +355,9 @@ function TacticsEngine:update()
     local all_players_acted = true
 
     for _,unit in ipairs(self.battle_state:get_all_units()) do
-        if unit.character.animation_blocking then
-            blocking_animation = true
-        end
+        -- if unit.animation_blocking then
+        --     blocking_animation = true
+        -- end
         if unit.side == SIDE_PLAYER and not unit.has_acted then
             all_players_acted = false
         end

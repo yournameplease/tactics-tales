@@ -59,7 +59,7 @@ local function compute_animated_unit_positions(battle_state: BattleState): { Ani
     return tmap(
             battle_state:get_all_units(),
             function(unit: BattleUnit): AnimatedUnitPosition
-                local animation_offset = CharacterRenderer.get_animation_offset(unit.character)
+                local animation_offset = CharacterRenderer.get_animation_offset(unit)
                 return {
                     id = unit.id,
                     point = (unit.tile * TILE_SIZE + animation_offset) as WorldPoint,
@@ -92,7 +92,7 @@ local function draw_unit(unit: BattleUnit)
     --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
-    CharacterRenderer.draw(unit.character, world_point + FOOT_GROUND_ANCHOR, side, true, true)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, side, true, true)
 
     local hp_current = unit.hp_current
     local hp_max = unit.character.stats.hp_max

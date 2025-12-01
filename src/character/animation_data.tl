@@ -9,9 +9,18 @@ local enum BaseAnimationName
 end
 
 global enum AnimationName
-    "STANDARD_BACK_HAND"
-    "STANDARD_FRONT_HAND"
-    "STANDARD_HORIZONTAL"
+    "DEFAULT_BACK_HAND"
+    "DEFAULT_HORIZONTAL"
+    "DEFAULT_FRONT_HAND"
+    "SLEEVELESS_BACK_HAND"
+    "SLEEVELESS_HORIZONTAL"
+    "SLEEVELESS_FRONT_HAND"
+    "SHIRTLESS_BACK_HAND"
+    "SHIRTLESS_HORIZONTAL"
+    "SHIRTLESS_FRONT_HAND"
+    "ROBED_BACK_HAND"
+    "ROBED_HORIZONTAL"
+    "ROBED_FRONT_HAND"
 end
 
 global enum AnimationFrameName
@@ -117,9 +126,18 @@ local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName)
 end
 
 local ANIMATION_DATA: { AnimationName: Animation } = {
-    STANDARD_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
-    STANDARD_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
-    STANDARD_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
+    DEFAULT_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
+    DEFAULT_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
+    DEFAULT_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
+    SLEEVELESS_BACK_HAND = frames_from_base_frame(162, "BACK_HAND"),
+    SLEEVELESS_HORIZONTAL = frames_from_base_frame(170, "HORIZONTAL"),
+    SLEEVELESS_FRONT_HAND = frames_from_base_frame(178, "FRONT_HAND"),
+    SHIRTLESS_BACK_HAND = frames_from_base_frame(164, "BACK_HAND"),
+    SHIRTLESS_HORIZONTAL = frames_from_base_frame(172, "HORIZONTAL"),
+    SHIRTLESS_FRONT_HAND = frames_from_base_frame(180, "FRONT_HAND"),
+    ROBED_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
+    ROBED_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
+    ROBED_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
 }
 
 return ANIMATION_DATA

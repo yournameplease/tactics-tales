@@ -1,7 +1,8 @@
 require("src/debug")
 
+require("src/animation")
 require("src/types")
-require("src/character/character_manager")
+require("src/character/character_data")
 require("src/character/weapons")
 
 -- TODO: some of this moves to character/weapon files
@@ -13,6 +14,7 @@ global record BattleUnit
     side: Side
     has_acted: boolean
 
+    animation_data: AnimatedSpriteData
     character: Character
 end
 

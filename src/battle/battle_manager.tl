@@ -33,7 +33,7 @@ end
 function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side: Side)
     local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
     local idle_animation = self.animation_manager:create_idle_animation()
-    battle_unit.character.animation_data = idle_animation
+    battle_unit.animation_data = idle_animation
     self.battle_state:spawn_unit(battle_unit, spawn_point)
 end
 
@@ -44,7 +44,7 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
         assert(spawners)
         for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
-            local character = self.character_manager:generate_character()
+            local character = self.character_manager:generate_character(enemy.template)
             self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
         end
     end
@@ -53,7 +53,7 @@ end
 function BattleManager:_spawn_players(player_spawners: { TilePoint })
     for id, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
-        local character = self.character_manager:generate_character()
+        local character = self.character_manager:generate_character("default")
         self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
     end
 end
