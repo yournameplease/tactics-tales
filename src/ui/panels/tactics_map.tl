@@ -125,8 +125,9 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local drawn_unit_count = 0
     -- TODO: preload layers
     local layers = state.battle_manager.map_data.userdata
-    local layer_ground = layers[3].bmp
-    local layer_wall = layers[2].bmp
+    local layer_ground = layers[4].bmp
+    local layer_wall_back = layers[3].bmp
+    local layer_wall_front = layers[2].bmp
     local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
     local cursor_tile: TilePoint = nil
@@ -139,6 +140,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     for y = 0, self.map_height-1 do
         map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        map(layer_wall_back, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
 
 
         -- highlight legal tiles
@@ -200,7 +202,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
             spr(CURSOR_SPRITE, c_x, c_y)
         end
 
-        map(layer_wall, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
+        map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
     end
 
     if cursor_tile ~= nil then
