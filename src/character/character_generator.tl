@@ -59,12 +59,9 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	character.appearance.body_class = template.body_options:pick_random()
 	character.appearance.sex = template.sex_options:pick_random()
 	character.appearance.skin = template.skin_color_options:pick_random()
-    while character.appearance.hair_color == nil
-            or character.appearance.hair_color == SKIN_COLORS[character.appearance.skin][1]
-    do
+    repeat
         character.appearance.hair_color = template.hair_color_options:pick_random()
-    end
-	character.appearance.hair_color = template.hair_color_options:pick_random()
+    until character.appearance.hair_color ~= SKIN_COLORS[character.appearance.skin][1]
 	if character.appearance.sex == "male" then
 		character.appearance.hair = template.hair_options_m:pick_random()
 		character.appearance.beard = template.beard_options:pick_random()
