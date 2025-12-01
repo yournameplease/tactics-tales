@@ -7,6 +7,13 @@ local record List
 	end
 end
 
+function List.MapEntry.of<K,V>(k: K, v: V): List.MapEntry<K,V>
+	return {
+		key = k,
+		value = v
+	}
+end
+
 function List.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
 	local fns = {...}
 	local result: any = list 
@@ -16,12 +23,13 @@ function List.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
 	return result as B
 end
 
-function List.pipeline<A,B>(...: function(any): any): function({A}): B
-	local args = {...}
-	return function(list: {A}): B
-		return List.do_pipeline(list, table.unpack(args))
-	end
-end
+-- This doesn't seem to work with typing rules
+-- function List.pipeline<A,B>(...: function(any): any): function({A}): B
+-- 	local args = {...}
+-- 	return function(list: {A}): B
+-- 		return List.do_pipeline(list, table.unpack(args))
+-- 	end
+-- end
 
 function List.do_reverse<A>(list: {A}): {A} 
     local out = {}
@@ -34,6 +42,22 @@ end
 function List.reverse<A>(): function({A}): {A}
 	return function(list: {A}): {A} 
 		return List.do_reverse(list) 
+	end
+end
+
+function List.do_filter<A>(list: {A}, filter: function(A): boolean): { A }
+    local out: {A} = {}
+    for _,v in ipairs(list) do
+		if filter(v) then
+	        add(out, v) 
+		end
+    end
+    return out
+end
+
+function List.filter<A>(filter: function(A): boolean): function({A}): {A}
+	return function(list: {A}): {A}
+		return List.do_filter(list, filter)
 	end
 end
 
@@ -88,3 +112,4 @@ function List.collect_map<K,V>(): function({List.MapEntry<K,V>}): { K: V }
 	end
 end
 
+return List

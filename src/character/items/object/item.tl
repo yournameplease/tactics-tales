@@ -24,7 +24,28 @@ local record ItemImpl
 	slots: integer
 
 	equip_slot: EquipSlot
-	weapon_id: string
+	weapon: Weapon
+end
+
+
+function ItemImpl:get_name(): string
+	return self.name
+end
+
+function ItemImpl:get_slots(): integer
+	return self.slots
+end
+
+function ItemImpl:get_type(): ItemType
+	return self.type
+end
+
+function ItemImpl:get_equip_slot(): EquipSlot
+	return self.equip_slot
+end
+
+function ItemImpl:get_weapon_data(): Weapon
+	return self.weapon
 end
 
 function ItemModule.new(): ItemModule.Item
