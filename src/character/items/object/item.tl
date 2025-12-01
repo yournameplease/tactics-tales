@@ -48,10 +48,21 @@ function ItemImpl:get_weapon_data(): Weapon
 	return self.weapon
 end
 
-function ItemModule.new(): ItemModule.Item
-	return setmetatable({
-		
-	}, { __index = ItemImpl })
+function ItemModule.new(
+	id: ItemId,
+	name: string,
+	type: ItemType,
+	slots: integer,
+	equip_slot: EquipSlot
+): ItemModule.Item
+	local item: ItemImpl = {
+		id = id,
+		name = name,
+		type = type,
+		slots = slots,
+		equip_slot = equip_slot
+	}
+	return setmetatable(item, { __index = ItemImpl })
 end
 
 return ItemModule

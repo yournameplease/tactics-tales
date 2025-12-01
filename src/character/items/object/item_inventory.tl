@@ -140,6 +140,12 @@ function ItemInventoryImpl:move_item(slot: integer, before_slot: integer)
 	self:compute_current_slots(self.items)
 end
 
-
+function ItemInventoryModule.new(max_slots: integer): ItemInventoryModule.ItemInventory
+	local inventory: ItemInventoryImpl = {
+		max_slots = max_slots,
+		items = {}
+	}
+	return setmetatable(inventory, { __index = ItemInventoryImpl })
+end
 
 return ItemInventoryModule

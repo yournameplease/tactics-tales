@@ -1,5 +1,7 @@
 require("src/character/character_data")
 require("src/character/weapons")
+local Item = require("src/character/items/object/item")
+local ItemInventory  = require("src/character/items/object/item_inventory")
 
 -- todo: deduplicate this from renderer
 local SKIN_COLORS: { { Color, Color } } = {
@@ -73,6 +75,24 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 
     character.name = character.appearance.sex == "male" and "Bob" or "Alice"
 
+	character.inventory = ItemInventory.new(4)
+	local item1 = Item.new(
+		"weapon_sword",
+		"sword",
+		"WEAPON",
+		1,
+		"MAIN_HAND"
+	)
+	local item2 = Item.new(
+		"weapon_greatsword",
+		"greatsword",
+		"WEAPON",
+		2,
+		"TWO_HANDS"
+	)
+	character.inventory:add_item(item1)
+	character.inventory:add_item(item2)
+	
 	return setmetatable(character, { __index = Character })
 end
 

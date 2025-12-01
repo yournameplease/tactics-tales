@@ -1,5 +1,6 @@
 require("src/types")
 require("src/character/weapons")
+local ItemInventory = require("src/character/items/object/item_inventory")
 
 local SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
@@ -51,6 +52,7 @@ global record Character
     appearance: CharacterAppearance
     stats: CharacterStats
     weapon: Weapon
+	inventory: ItemInventory.ItemInventory
 end
 
 return Character
