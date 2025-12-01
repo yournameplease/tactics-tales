@@ -12,6 +12,7 @@ local BASE_HEAD_SPRITE = 256 + 64
 local BASE_M_HAIR_SPRITE = 256 + 72
 local BASE_F_HAIR_SPRITE = 256 + 80
 local BASE_BEARD_SPRITE = 256 + 88
+local BASE_EYE_SPRITE = 256 + 120
 
 local SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
@@ -106,6 +107,7 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
     end
 
     spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
+    spr(BASE_EYE_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
     if battle_unit.character.appearance.sex == "male" then
         spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
     else
