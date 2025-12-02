@@ -79,7 +79,7 @@ function _init()
 
     local event_bus = EventBus.new()
 
-    local character_manager = CharacterManager.new()
+    local character_manager = CharacterManager.new(event_bus)
     LOG.debug(character_manager.id_counter:get_id())
 
     battle_manager = BattleManager.new("bandit_village", event_bus, character_manager, animation_manager, task_manager)

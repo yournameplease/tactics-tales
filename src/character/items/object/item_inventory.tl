@@ -47,6 +47,7 @@ end
 
 function ItemInventoryImpl:compute_current_slots()
 	self._items_by_slot = {}
+	self._items_by_equip_slot = {}
 	local count = 1
 	for _,item in ipairs(self.items) do
 		item._current_slot = count
@@ -107,18 +108,18 @@ end
 function ItemInventoryImpl:equip_item(index: integer)
 	local inventory_item = self.items[index]
 
-	local equip_slot = inventory_item.equip_slot
-	assert(equip_slot ~= "NONE")
-	assert(equip_slot ~= "ANY_HAND", "NOT IMPLEMENTED")
+	local slot_to_equip = inventory_item.item:get_equip_slot()
+	assert(slot_to_equip ~= "NONE")
+	assert(slot_to_equip ~= "ANY_HAND", "NOT IMPLEMENTED")
 
 	local slots_to_unequip: {EquipSlot}
-	if equip_slot == "MAIN_HAND" then
+	if slot_to_equip == "MAIN_HAND" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
-	elseif equip_slot == "OFF_HAND" then
+	elseif slot_to_equip == "OFF_HAND" then
 		slots_to_unequip = {"OFF_HAND", "TWO_HANDS"}
-	elseif equip_slot == "TWO_HANDS" then
+	elseif slot_to_equip == "TWO_HANDS" then
 		slots_to_unequip = {"MAIN_HAND", "OFF_HAND", "TWO_HANDS"}
-	elseif equip_slot == "BODY" then
+	elseif slot_to_equip == "BODY" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
 	else
 		error()
@@ -129,13 +130,15 @@ function ItemInventoryImpl:equip_item(index: integer)
 		self:unequip_item_in_equip_slot(s)
 	end
 
-	inventory_item.equip_slot = equip_slot
-	self._items_by_equip_slot[equip_slot] = inventory_item
+	inventory_item.equip_slot = slot_to_equip
+	self._items_by_equip_slot[slot_to_equip] = inventory_item
 end
 
 function ItemInventoryImpl:unequip_item_in_equip_slot(slot: EquipSlot)
-	self._items_by_equip_slot[slot].equip_slot = nil
-	self._items_by_equip_slot[slot] = nil
+	if (self._items_by_equip_slot[slot] ~= nil) then
+		self._items_by_equip_slot[slot].equip_slot = nil
+		self._items_by_equip_slot[slot] = nil
+	end
 end
 
 function ItemInventoryImpl:unequip_item(index: integer)

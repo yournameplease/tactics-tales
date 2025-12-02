@@ -4,6 +4,16 @@ As items are done, either delete or move to the bottom.
 
 Mark in progress with `.` and done with `x`
 
+- [ ] General Architecture
+  - [ ] Simplified type/object structure
+    - [ ] Convert existing types to interfaces where possible
+  - [ ] Add service bundle
+    - [ ] :register_service
+    - [ ] :get_services(ids)
+      - [ ] valdates services have been added
+    - [ ] re-exports the service interfaces?
+    - [ ] include in all services
+
 - [.] Items system
   - [x] Item and Inventory
   - [.] Menus
