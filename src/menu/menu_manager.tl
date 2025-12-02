@@ -107,6 +107,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 validator = function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
                     assert(s is GridMenuSelection)
                      return te:grid_selection_is_empty_or_acting_unit(s, ctx)
+                        and s.legal_tiles:get_point(s.point) ~= nil
                         and s.legal_tiles:get_point(s.point).valid_selection
                 end,
                 next_state = "SELECT_ACTION",

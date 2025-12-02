@@ -71,7 +71,7 @@ function TileManager.new(map_data: MapData, battle_state: BattleState): TileMana
 end
 
 function TileManager:get_terrain(tile: TilePoint): TerrainData
-    local tile_sprite = self.map_data.userdata[3].bmp:get(tile.x,tile.y)
+    local tile_sprite = self.map_data.userdata[4].bmp:get(tile.x,tile.y)
     local flags = fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
@@ -79,7 +79,7 @@ end
 
 -- cost to move onto x,y from any neighbor
 function TileManager:movement_cost(tile: TilePoint, side: Side): integer
-    local ground = self.map_data.userdata[3].bmp
+    local ground = self.map_data.userdata[4].bmp
     if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
@@ -116,7 +116,6 @@ end
 function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
     local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.map_data.width, self.map_data.height)
-
 
     local record ShortestPathQueueEntry
         cost: integer
@@ -218,7 +217,7 @@ function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, si
     local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
 
     -- 2. Transform it into the simple boolean map expected by existing code
-    local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h)
+    local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h, false)
 
     full_map:foreachpoint(
         function (tile: TilePoint, value: ShortestPathEntry)

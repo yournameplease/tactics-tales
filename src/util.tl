@@ -113,7 +113,7 @@ end
 global record Array2D<V>
     w: integer
     h: integer
-    _data: {{ V }}
+    _data: {integer: { integer: V }}
 end
 
 function Array2D.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
@@ -153,16 +153,16 @@ function Array2D:set_point<V>(p: Point, v: V)
 end
 
 function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
-    for x, col in ipairs(self._data) do
-        for y, v in ipairs(col) do
+    for x, col in pairs(self._data) do
+        for y, v in pairs(col) do
             fn(x-1, y-1, v)
         end
     end
 end
 
 function Array2D:foreachpoint<V>(fn: function(point: Point, v: V))
-    for x, col in ipairs(self._data) do
-        for y, v in ipairs(col) do
+    for x, col in pairs(self._data) do
+        for y, v in pairs(col) do
             fn(TilePoint.of(x-1, y-1), v)
         end
     end
