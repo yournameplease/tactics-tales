@@ -189,6 +189,10 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                         local item = ctx.selected_item.item
                         local index = ctx.selected_item.index
 
+                        if inventory:get_items()[index] == nil then
+                            return {}
+                        end
+                        
                         local options = {}
 
                         -- TODO: consumables
