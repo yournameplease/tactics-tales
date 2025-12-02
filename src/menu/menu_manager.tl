@@ -56,6 +56,7 @@ end
 
 global interface MenuStepDefinition
     type: MenuType
+    previous_state: MenuStep
 end
 
 global record GridMenuDefinition
@@ -69,6 +70,7 @@ global record GridMenuDefinition
 end
 
 function GridMenuDefinition.new(props: GridMenuDefinition): GridMenuDefinition
+    props.type = "CURSOR_GRID"
     return props
 end
 
@@ -80,6 +82,7 @@ global record ListMenuDefinition
 end
 
 function ListMenuDefinition.new(props: ListMenuDefinition): ListMenuDefinition
+    props.type = "CURSOR_VERTICAL_LIST"
     return props
 end
 
@@ -96,7 +99,6 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
-                type = "CURSOR_GRID",
                 set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
                     ctx.acting_unit = { unit = msb.battle_state:get_at_tile(s.point)}
                 end,
@@ -105,7 +107,6 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-                type = "CURSOR_GRID",
                 set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
@@ -116,12 +117,13 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                         and s.legal_tiles:get_point(s.point).valid_selection
                 end,
                 next_state = "SELECT_ACTION",
+                previous_state = "SELECT_UNIT",
                 get_legal_tiles = function (msb: MenuServiceBundle, ctx: MenuContext): Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end
             }),
             ["SELECT_ACTION"] = ListMenuDefinition.new({
-                type = "CURSOR_VERTICAL_LIST",
+                previous_state = "SELECT_DESTINATION",
                 get_options = function(msb: MenuServiceBundle, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
                     -- if target in range
@@ -146,7 +148,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 end
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
-                type = "CURSOR_GRID",
+                previous_state = "SELECT_ACTION",
                 set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
                     ctx.target_unit = { unit = msb.battle_state:get_at_tile(s.point)}
                 end,
@@ -159,7 +161,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 end
             }),
             ["SELECT_ITEM"] = ListMenuDefinition.new({
-                type = "CURSOR_VERTICAL_LIST",
+                previous_state = "SELECT_ACTION",
                 set_selected_context = function(s: VerticalListMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
@@ -181,7 +183,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 end
             }),
             ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
-                type = "CURSOR_VERTICAL_LIST",
+                previous_state = "SELECT_ITEM",
                 get_options = function(msb: MenuServiceBundle, ctx: MenuContext): {MenuOption}
                         local character = ctx.acting_unit.unit
                         local inventory = character.character.inventory
@@ -314,14 +316,17 @@ function MenuManager:handle_menu_select()
 end
 
 function MenuManager:handle_menu_back()
-    if #self.selection_history == 0 then return end
+    local previous_step = MENU_DATA[self.menu_state.menu_id].steps[self.menu_state.step]
+        .previous_state
 
-    local previous_step = self.selection_history[#self.selection_history]
-    -- TODO: use this to get last cursor position
-    -- or, just push the entire active cursor onto a list
-    self.selection_history[#self.selection_history] = nil
-    self:populate_menu_state(previous_step.step)
-    self.menu_selection = previous_step.selection
+    if previous_step == nil then
+        return
+    end
+    repeat
+        self.selection_history[#self.selection_history] = nil
+    until self.selection_history[#self.selection_history].step == previous_step
+    self:populate_menu_state(previous_step)
+    self.menu_selection = self.selection_history[#self.selection_history].selection
 end
 
 
