@@ -11,7 +11,7 @@ end
 global record MenuOption
     text: string
     next_state: MenuStep
-    finish_command: GameEvent
+    send_command: GameEvent
 end
 
 global record GridMenuSelection

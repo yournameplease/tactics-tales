@@ -8,7 +8,11 @@ require("src/joypad")
 require("src/battle/tile_manager")
 
 
-
+local record MenuServiceBundle
+    tactics_engine: TacticsEngine
+    battle_state: BattleState
+    tile_manager: TileManager
+end
 
 global record SelectionHistory
     step: MenuStep
@@ -21,9 +25,7 @@ global record MenuManager
     menu_selection: MenuSelection
     selection_history: { SelectionHistory }
 
-    tactics_engine: TacticsEngine
-    battle_state: BattleState
-    tile_manager: TileManager
+    services: MenuServiceBundle
     event_bus: EventBus
 end
 
@@ -42,9 +44,11 @@ function MenuManager.new(
     self.menu_selection = {}
     self.selection_history = {}
 
-    self.tactics_engine = tactics_engine
-    self.battle_state = battle_state
-    self.tile_manager = tile_manager
+    self.services = {
+        tactics_engine = tactics_engine,
+        battle_state = battle_state,
+        tile_manager = tile_manager,
+    }
     self.event_bus = event_bus
 
     return self
@@ -57,11 +61,11 @@ end
 global record GridMenuDefinition
     is MenuStepDefinition
     where self.type == "CURSOR_GRID"
-    set_selected_context: function(GridMenuSelection, BattleState, MenuContext)
-    validator: function(GridMenuSelection, TacticsEngine, MenuContext): boolean
+    set_selected_context: function(GridMenuSelection, MenuServiceBundle, MenuContext)
+    validator: function(GridMenuSelection, MenuServiceBundle, MenuContext): boolean
     next_state: MenuStep
-    finish_command: GameEvent
-    get_legal_tiles: function(TacticsEngine, MenuContext): Array2D<MenuTileHighlight>
+    send_command: GameEvent
+    get_legal_tiles: function(MenuServiceBundle, MenuContext): Array2D<MenuTileHighlight>
 end
 
 function GridMenuDefinition.new(props: GridMenuDefinition): GridMenuDefinition
@@ -71,7 +75,8 @@ end
 global record ListMenuDefinition
     is MenuStepDefinition
     where self.type == "CURSOR_VERTICAL_LIST" -- or horizontal
-    get_options: function(TacticsEngine, MenuContext): {MenuOption}
+    set_selected_context: function(VerticalListMenuSelection, MenuServiceBundle, MenuContext)
+    get_options: function(MenuServiceBundle, MenuContext): {MenuOption}
 end
 
 function ListMenuDefinition.new(props: ListMenuDefinition): ListMenuDefinition
@@ -92,35 +97,35 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, bs: BattleState, ctx: MenuContext)
-                    ctx.acting_unit = { unit = bs:get_at_tile(s.point)}
+                set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
+                    ctx.acting_unit = { unit = msb.battle_state:get_at_tile(s.point)}
                 end,
-                validator = function (s: MenuSelection, te: TacticsEngine, _ctx: MenuContext): boolean
-                    return te:grid_selection_is_available_player(s) end,
+                validator = function (s: MenuSelection, msb: MenuServiceBundle, _ctx: MenuContext): boolean
+                    return msb.tactics_engine:grid_selection_is_available_player(s) end,
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, _bs: BattleState, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
-                validator = function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
+                validator = function (s: MenuSelection, msb: MenuServiceBundle, ctx: MenuContext): boolean
                     assert(s is GridMenuSelection)
-                     return te:grid_selection_is_empty_or_acting_unit(s, ctx)
+                     return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
                         and s.legal_tiles:get_point(s.point).valid_selection
                 end,
                 next_state = "SELECT_ACTION",
-                get_legal_tiles = function (te: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
-                    return te:tiles_in_movement_and_attack_range(ctx)
+                get_legal_tiles = function (msb: MenuServiceBundle, ctx: MenuContext): Array2D<MenuTileHighlight>
+                    return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end
             }),
             ["SELECT_ACTION"] = ListMenuDefinition.new({
                 type = "CURSOR_VERTICAL_LIST",
-                get_options = function(te: TacticsEngine, ctx: MenuContext): {MenuOption}
+                get_options = function(msb: MenuServiceBundle, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
                     -- if target in range
-                    if te:any_target_in_range(ctx) then -- TODO: global state
+                    if msb.tactics_engine:any_target_in_range(ctx) then -- TODO: global state
                         add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"
@@ -129,7 +134,12 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
 
                     add(options, {
                         text = "Wait",
-                        finish_command = "MOVE_AND_WAIT"
+                        send_command = "MOVE_AND_WAIT"
+                    })
+
+                    add(options, {
+                        text = "Items",
+                        next_state = "SELECT_ITEM"
                     })
 
                     return options
@@ -137,15 +147,79 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 type = "CURSOR_GRID",
-                set_selected_context = function(s: GridMenuSelection, bs: BattleState, ctx: MenuContext)
-                    ctx.target_unit = { unit = bs:get_at_tile(s.point)}
+                set_selected_context = function(s: GridMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
+                    ctx.target_unit = { unit = msb.battle_state:get_at_tile(s.point)}
                 end,
-                validator =  function (s: MenuSelection, te: TacticsEngine, ctx: MenuContext): boolean
-                    return te:validate_tile_is_in_unit_attack_range(s, ctx) 
+                validator =  function (s: MenuSelection, msb: MenuServiceBundle, ctx: MenuContext): boolean
+                    return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
-                finish_command = "MOVE_AND_ATTACK",
-                get_legal_tiles = function (te: TacticsEngine, ctx: MenuContext): Array2D<MenuTileHighlight>
-                    return te:tiles_with_distance_from_unit_attacks(ctx)
+                send_command = "MOVE_AND_ATTACK",
+                get_legal_tiles = function (msb: MenuServiceBundle, ctx: MenuContext): Array2D<MenuTileHighlight>
+                    return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
+                end
+            }),
+            ["SELECT_ITEM"] = ListMenuDefinition.new({
+                type = "CURSOR_VERTICAL_LIST",
+                set_selected_context = function(s: VerticalListMenuSelection, msb: MenuServiceBundle, ctx: MenuContext)
+                    ctx.selected_item = {
+                        index = s.i,
+                        item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
+                    }
+                end,
+                get_options = function(msb: MenuServiceBundle, ctx: MenuContext): {MenuOption}
+                        local character = ctx.acting_unit.unit
+                        local items = character.character.inventory:get_items()
+
+                        local options = {}
+                        for i,item in ipairs(items) do
+                            add(options, {
+                                text = item:get_name(),
+                                next_state = "SELECT_ITEM_ACTION"
+                            })
+                        end
+                        return options
+                end
+            }),
+            ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
+                type = "CURSOR_VERTICAL_LIST",
+                get_options = function(msb: MenuServiceBundle, ctx: MenuContext): {MenuOption}
+                        local character = ctx.acting_unit.unit
+                        local inventory = character.character.inventory
+                        local items = inventory:get_items()
+                        local item = ctx.selected_item.item
+                        local index = ctx.selected_item.index
+
+                        local options = {}
+
+                        -- TODO: consumables
+                        if item:get_equip_slot() ~= "NONE" then
+                            if inventory:is_equipped(index) then
+                                add(options, {
+                                    text = "Unequip",
+                                    send_command = "INVENTORY_UNEQUIP_ITEM",
+                                    next_state = "SELECT_ITEM_ACTION",
+                                })
+                            else
+                                add(options, {
+                                    text = "Equip",
+                                    send_command = "INVENTORY_EQUIP_ITEM",
+                                    next_state = "SELECT_ITEM_ACTION",
+                                })
+                            end
+                        end
+
+                        if #items > 0 then
+                            add(options, {
+                                text = "Move",
+                            })
+                        end
+                        add(options, {
+                            text = "Discard",
+                            send_command = "INVENTORY_DISCARD_ITEM",
+                            next_state = "SELECT_ITEM",
+                        })
+                        
+                        return options
                 end
             }),
         }
@@ -165,7 +239,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
             16
         )
         if new_step_data.get_legal_tiles ~= nil then
-            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.tactics_engine, self.menu_ctx)
+            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.services, self.menu_ctx)
         else
             new_selection.legal_tiles = nil
         end
@@ -173,7 +247,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     elseif new_step_data is ListMenuDefinition then
         local new_selection = VerticalListMenuSelection.new(
             0,
-            new_step_data.get_options(self.tactics_engine, self.menu_ctx)
+            new_step_data.get_options(self.services, self.menu_ctx)
         )
         self.menu_selection = new_selection
     else
@@ -187,19 +261,19 @@ function MenuManager:handle_menu_select()
     local step_data = menu_data.steps[self.menu_state.step]
 
     local next_state: MenuStep
-    local finish_command: GameEvent
+    local send_command: GameEvent
 
     local menu_selection = self.menu_selection
 
     if step_data is GridMenuDefinition then
         assert(menu_selection is GridMenuSelection)
-        local validation = step_data.validator(menu_selection, self.tactics_engine, self.menu_ctx)
+        local validation = step_data.validator(menu_selection, self.services, self.menu_ctx)
         if not validation then return end
 
         if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
             local acting_unit = self.menu_ctx.acting_unit.unit
-            local costs = self.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, 999)
-            local path = self.tile_manager:get_path_to_tile(costs, menu_selection.point)
+            local costs = self.services.tile_manager:calculate_all_tile_costs(acting_unit.tile.x, acting_unit.tile.y, 0, 999)
+            local path = self.services.tile_manager:get_path_to_tile(costs, menu_selection.point)
             menu_selection.path = path
             LOG.debug("Path length: ", #path)
             for _, p in ipairs(path) do
@@ -208,13 +282,16 @@ function MenuManager:handle_menu_select()
         end
 
         self.menu_state.point = menu_selection.point:copy()
-        step_data.set_selected_context(menu_selection, self.battle_state, self.menu_ctx)
+        step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
         next_state = step_data.next_state
-        finish_command = step_data.finish_command
+        send_command = step_data.send_command
     elseif step_data is ListMenuDefinition then
         assert(menu_selection is VerticalListMenuSelection)
+        if step_data.set_selected_context ~= nil then
+            step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
+        end
         next_state = menu_selection.options[menu_selection.i].next_state
-        finish_command = menu_selection.options[menu_selection.i].finish_command
+        send_command = menu_selection.options[menu_selection.i].send_command
     end
 
     add(self.selection_history, {
@@ -226,9 +303,9 @@ function MenuManager:handle_menu_select()
         self:populate_menu_state(next_state)
     end
 
-    if finish_command ~= nil then
-        LOG.info("Emitting menu command ", finish_command)
-        self.event_bus:emit(finish_command, self.menu_ctx)
+    if send_command ~= nil then
+        LOG.info("Emitting menu command ", send_command)
+        self.event_bus:emit(send_command, self.menu_ctx)
     end
 end
 

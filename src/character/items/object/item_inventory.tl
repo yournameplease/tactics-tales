@@ -8,17 +8,19 @@ local record ItemInventoryModule
 	interface ItemInventory
 
 		-- items will be indexed, to account for slots
-		get_items: function(self): { integer: Item.Item }
+		get_items: function(self): { Item.Item }
+		get_items_by_slot: function(self): { integer: Item.Item }
 		get_max_slots: function(self): integer
 		get_equipped_items: function(self): { EquipSlot: Item.Item }
 
+		is_equipped: function(self, index: integer): boolean
 		can_add_item: function(self, item: Item.Item): boolean
 		add_item: function(self, item: Item.Item)
-		equip_item: function(self, slot: integer)
-		unequip_item: function(self, slot: integer)
+		equip_item: function(self, index: integer)
+		unequip_item: function(self, index: integer)
 		unequip_item_in_equip_slot: function(self, slot: EquipSlot)
-		remove_item: function(self, slot: integer)
-		move_item: function(self, slot: integer, before_slot: integer)
+		remove_item: function(self, index: integer)
+		move_item: function(self, index: integer, before_index: integer)
 	end
 end
 
@@ -57,7 +59,16 @@ function ItemInventoryImpl:compute_current_slots()
 	self._current_slot_usage = count
 end
 
-function ItemInventoryImpl:get_items(): { integer: Item.Item }
+function ItemInventoryImpl:get_items(): { Item.Item }
+	return List.do_map(
+		self.items,
+		function(i: InventoryItem): Item.Item
+			return i.item
+		end
+	)
+end
+
+function ItemInventoryImpl:get_items_by_slot(): { integer: Item.Item }
 	return tmap(
 		self._items_by_slot,
 		function(i: InventoryItem): Item.Item
@@ -79,6 +90,10 @@ function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 	)
 end
 
+function ItemInventoryImpl:is_equipped(index: integer): boolean
+	return self.items[index].equip_slot ~= nil
+end
+
 function ItemInventoryImpl:can_add_item(item: Item.Item): boolean
 	return self._current_slot_usage + item:get_slots() <= self.max_slots	
 end		
@@ -89,8 +104,8 @@ function ItemInventoryImpl:add_item(item: Item.Item)
 	self:compute_current_slots()
 end
 
-function ItemInventoryImpl:equip_item(slot: integer)
-	local inventory_item = self._items_by_slot[slot]
+function ItemInventoryImpl:equip_item(index: integer)
+	local inventory_item = self.items[index]
 
 	local equip_slot = inventory_item.equip_slot
 	assert(equip_slot ~= "NONE")
@@ -123,8 +138,8 @@ function ItemInventoryImpl:unequip_item_in_equip_slot(slot: EquipSlot)
 	self._items_by_equip_slot[slot] = nil
 end
 
-function ItemInventoryImpl:unequip_item(slot: integer)
-	local equip_slot = self._items_by_slot[slot].equip_slot
+function ItemInventoryImpl:unequip_item(index: integer)
+	local equip_slot = self.items[index].equip_slot
 	self:unequip_item_in_equip_slot(equip_slot)
 end
 
@@ -134,7 +149,7 @@ function ItemInventoryImpl:remove_item(slot: integer)
 	self:compute_current_slots()
 end
 
-function ItemInventoryImpl:move_item(slot: integer, before_slot: integer)
+function ItemInventoryImpl:move_item(index: integer, before_index: integer)
 	error("not implemented")
 	
 	self:compute_current_slots()
