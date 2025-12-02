@@ -75,6 +75,33 @@ local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer,
     rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
+local function draw_floating_menu(x: integer, y: integer, menu_selection: VerticalListMenuSelection)
+    local selected_i = menu_selection.i
+    local options = menu_selection.options
+    local PADDING = 2
+
+    local max_text_width = 0
+    for _,opt in ipairs(options) do
+        local text_width = print(opt.text, 0, -1000) as integer
+        max_text_width = max(max_text_width, text_width)
+    end
+
+    local menu_x = x + TILE_SIZE.x
+    local menu_y = y + TILE_SIZE.y
+    local menu_w = 2*PADDING + max_text_width
+    local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
+    rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+    for i,opt in ipairs(options) do
+        if i == selected_i then
+            rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
+            print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+        else
+            print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
+        end
+    end
+    rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+end
+
 local function draw_unit(unit: BattleUnit)
     local side = unit.side
     local unit_tile = unit.tile
@@ -211,24 +238,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         if menu_selection is VerticalListMenuSelection then
-            local selected_i = menu_selection.i
-            local options = menu_selection.options
-            local PADDING = 2
-
-            local menu_x = x + TILE_SIZE.x
-            local menu_y = y + TILE_SIZE.y
-            local menu_w = 2*PADDING + 30
-            local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
-            rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
-            for i,opt in ipairs(options) do
-                if i == selected_i then
-                    rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
-                else
-                    print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
-                end
-            end
-            rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+            draw_floating_menu(x, y, menu_selection)
         end
     end
 
