@@ -299,13 +299,13 @@ function MenuManager:handle_menu_select()
         selection = self.menu_selection
     })
 
-    if next_state ~= nil then
-        self:populate_menu_state(next_state)
-    end
-
     if send_command ~= nil then
         LOG.info("Emitting menu command ", send_command)
         self.event_bus:emit(send_command, self.menu_ctx)
+    end
+
+    if next_state ~= nil then
+        self:populate_menu_state(next_state)
     end
 end
 
