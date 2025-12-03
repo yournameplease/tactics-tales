@@ -1,6 +1,6 @@
 local Item = require("src/character/items/object/item")
 require("src/character/items/types")
-require("src/character/weapons")
+require("src/data/weapons")
 local List = require("src/util/list")
 require("src/util")
 

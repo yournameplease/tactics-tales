@@ -1,6 +1,6 @@
 require("src/util/random")
 require("src/character/object/character")
-require("src/character/weapons")
+require("src/data/weapons")
 require("src/animation")
 
 -- all fields are optional in the templates

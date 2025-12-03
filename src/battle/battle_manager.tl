@@ -4,7 +4,7 @@ require("src/types")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 
-require("src/battle/battle_data")
+require("src/data/battles")
 
 require("src/battle/battle_state")
 require("src/battle/tactics/battle_unit")
