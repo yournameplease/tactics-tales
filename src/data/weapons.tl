@@ -19,7 +19,7 @@ local default_weapon: Weapon = {
     properties = {}
 }
 
-local function create_weapon(data: Weapon) : Weapon
+local function weapon(data: Weapon) : Weapon
     if data._range ~= nil then
         data.min_range = data._range
         data.max_range = data._range
@@ -28,83 +28,91 @@ local function create_weapon(data: Weapon) : Weapon
     return data
 end
 
+local function melee_weapon(
+    name: string,
+    sprite: integer,
+    damage: integer,
+    accuracy: integer,
+    properties?: WeaponProperties
+): Weapon
+    return weapon({
+        name = name,
+        sprite = sprite,
+        damage = damage,
+        accuracy = accuracy,
+        properties = properties,
+        hand_anchor = AnimationAnchorPoint.of(1,8)
+    })
+end
+
+local function two_handed_weapon(
+    name: string,
+    sprite: integer,
+    damage: integer,
+    accuracy: integer,
+    properties?: WeaponProperties
+): Weapon
+    return weapon({
+        name = name,
+        sprite = sprite,
+        damage = damage,
+        accuracy = accuracy,
+        properties = properties,
+        body_type = "HORIZONTAL",
+        hand_anchor = AnimationAnchorPoint.of(3,12)
+    })
+end
+
+local function ranged_weapon(
+    name: string,
+    sprite: integer,
+    damage: integer,
+    accuracy: integer,
+    min_range: integer,
+    max_range: integer,
+    properties?: WeaponProperties
+): Weapon
+    return weapon({
+        name = name,
+        sprite = sprite,
+        damage = damage,
+        accuracy = accuracy,
+        properties = properties,
+        hand_anchor = AnimationAnchorPoint.of(13,9), 
+        min_range = min_range,
+        max_range = max_range,
+        type = "RANGED",
+        body_type = "FRONT_HAND"
+    })
+end
+
+
 global WEAPON_DATA: {string: Weapon} = {
-    dagger = create_weapon({
-        name = "Dagger",
-        sprite = 104,
-        damage = 1,
-        accuracy = 90
-    }),
-    sword = create_weapon({
-        name = "Sword",
-        sprite = 105,
-        damage = 2,
-        accuracy = 80
-    }),
-    axe = create_weapon({
-        name = "Axe",
-        sprite = 106,
-        damage = 2,
-        accuracy = 70,
-        properties = {
+    dagger = melee_weapon( "Dagger", 104, 1, 90 ),
+    sword = melee_weapon( "Sword", 105, 2, 80 ),
+    axe = melee_weapon( "Axe", 106, 2, 70, {
             shieldsplitter = true
         }
-    }),
-    spear = create_weapon({
-        name = "Spear",
-        sprite = 107,
-        damage = 1,
-        accuracy = 90,
-        properties = {
+    ),
+    spear = melee_weapon( "Spear", 107, 1, 90, {
             long = true
         }
-    }),
-    poleaxe = create_weapon({
-        name = "Poleaxe",
-        sprite = 108,
-        damage = 2,
-        accuracy = 60,
-        properties = {
+    ),
+    poleaxe = melee_weapon( "Poleaxe", 108, 2, 60, {
             long = true,
             shieldsplitter = true
         }
-    }),
-    club = create_weapon({
-        name = "Club",
-        sprite = 109,
-        damage = 1,
-        accuracy = 80,
-        properties = {
+    ),
+    club = melee_weapon( "Club", 109, 1, 80, {
             armorkiller = true
         }
-    }),
-    mace = create_weapon({
-        name = "Mace",
-        sprite = 110,
-        damage = 2,
-        accuracy = 70,
-        properties = {
+    ),
+    mace = melee_weapon( "Mace", 110, 2, 70, {
             armorkiller = true
         }
-    }),
-    greatsword = create_weapon({
-        name = "Greatsword",
-        sprite = 111,
-        hand_anchor = AnimationAnchorPoint.of(3,12),
-        damage = 3,
-        accuracy = 70,
-        body_type = "HORIZONTAL",
-    }),
-    bow = create_weapon({
-        name = "Bow",
-        sprite = 112,
-        hand_anchor = AnimationAnchorPoint.of(13,9),
-        damage = 2,
-        accuracy = 90,
-        _range = 2,
-        type = "RANGED",
-        body_type = "FRONT_HAND",
-    }),
+    ),
+    greatsword = two_handed_weapon( "Greatsword", 111, 3, 70),
+    bow = ranged_weapon( "Bow", 112, 2, 90, 2, 2 ),
 }
 
 return WEAPON_DATA
