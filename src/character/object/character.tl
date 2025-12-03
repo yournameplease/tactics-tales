@@ -1,5 +1,5 @@
 require("src/types")
-require("src/data/weapons")
+require("src/character/items/object/weapon")
 local ItemInventory = require("src/character/items/object/item_inventory")
 
 local SKIN_COLORS: { { Color, Color } } = {

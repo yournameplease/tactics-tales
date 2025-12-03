@@ -1,5 +1,5 @@
 require("src/character/items/types")
-require("src/data/weapons")
+require("src/character/items/object/weapon")
 
 local record ItemModule
 	interface Item

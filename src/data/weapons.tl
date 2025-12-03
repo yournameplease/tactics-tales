@@ -1,41 +1,9 @@
 require("src/types")
-require("src/util/data_utils")
+require("src/character/items/object/weapon")
 
 -- potential additions
 -- shields
 -- dual wielding (use front hand sprite)
-
-local enum WeaponType
-    "MELEE"
-    "RANGED"
-end
-
--- picks the relevant body sprite
-local enum WeaponBodyType
-    "BACK_HAND" -- standard 1h weapons
-    "FRONT_HAND" -- bows, rapiers,
-    "HORIZONTAL" -- heavy weapons
-end
-
-local enum WeaponProperty
-    "armorkiller"
-    "shieldsplitter"
-    "long"
-end
-
-global record Weapon
-    name: string
-    sprite: integer
-    hand_anchor: AnimationAnchorPoint
-    damage: integer
-    accuracy: integer
-    type: WeaponType
-    body_type: WeaponBodyType
-    _range: integer
-    min_range: integer
-    max_range: integer
-    properties: { WeaponProperty: boolean } -- TODO: config table per property
-end
 
 local default_weapon: Weapon = {
     name = "Default Weapon",

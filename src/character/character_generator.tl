@@ -1,5 +1,6 @@
 require("src/data/character_templates")
 require("src/data/weapons")
+require("src/character/items/object/weapon")
 local Item = require("src/character/items/object/item")
 local ItemInventory  = require("src/character/items/object/item_inventory")
 

@@ -3,7 +3,7 @@ require("src/debug")
 require("src/animation")
 require("src/types")
 require("src/character/object/character")
-require("src/data/weapons")
+require("src/character/items/object/weapon")
 
 -- TODO: some of this moves to character/weapon files
 
