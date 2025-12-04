@@ -13,14 +13,20 @@ local function get_preview_text(state: GameContext): {string}
     local defender = state.hovered_unit
     local preview = state.combat_calculator:preview_combat(attacker, defender).steps
 
-    local out = {
-        attacker.character.name .." -> ".. defender.character.name,
-        "Hit: "..preview[1].hit.."%",
-        "Dmg: "..preview[1].dmg,
-    }
+    local out: {string} = {}
+    if preview[1] ~= nil then 
+            add(out, attacker.character.name .." -> ".. defender.character.name)
+            add(out, "Hit: "..preview[1].hit_chance.."%")
+            add(out, "Dmg: "..preview[1].dmg)
+    else
+        add(out, "No attack!")
+        add(out, "")
+        add(out, "")
+        
+    end
     if preview[2] ~= nil then
         add(out, attacker.character.name .." <- ".. defender.character.name)
-        add(out, "Hit: "..preview[2].hit.."%")
+        add(out, "Hit: "..preview[2].hit_chance.."%")
         add(out, "Dmg: "..preview[2].dmg)
     else
         add(out, "No counterattack!")

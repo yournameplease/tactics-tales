@@ -100,7 +100,7 @@ end
 global record CombatPreviewStep
     attacker: BattleUnit
     defender: BattleUnit
-    hit: integer
+    hit_chance: integer
     dmg: integer
 end
 
