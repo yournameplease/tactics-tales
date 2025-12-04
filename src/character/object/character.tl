@@ -51,7 +51,6 @@ global record Character
     name: string
     appearance: CharacterAppearance
     stats: CharacterStats
-    weapon: Weapon
 	inventory: ItemInventory.ItemInventory
 end
 

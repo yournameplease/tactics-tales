@@ -1,8 +1,9 @@
 require("src/data/character_templates")
-require("src/data/weapons")
+require("src/data/items")
 require("src/character/items/object/weapon")
 local Item = require("src/character/items/object/item")
 local ItemInventory  = require("src/character/items/object/item_inventory")
+local ItemGenerator = require("src/character/items/item_generator")
 
 -- todo: deduplicate this from renderer
 local SKIN_COLORS: { { Color, Color } } = {
@@ -55,7 +56,6 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	character.stats.movement = template.movement
 	character.stats.hp_max = template.hp_max
 	character.stats.def = 0
-	character.weapon = WEAPON_DATA[template.weapon_options:pick_random()]
 	-- character..headwear_options = template.headwear_options
 	character.appearance.body_class = template.body_options:pick_random()
 	character.appearance.sex = template.sex_options:pick_random()
@@ -74,22 +74,9 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
     character.name = character.appearance.sex == "male" and "Bob" or "Alice"
 
 	character.inventory = ItemInventory.new(4)
-	local item1 = Item.new(
-		"weapon_sword",
-		"sword",
-		"WEAPON",
-		1,
-		"MAIN_HAND"
-	)
-	local item2 = Item.new(
-		"weapon_greatsword",
-		"greatsword",
-		"WEAPON",
-		2,
-		"TWO_HANDS"
-	)
-	character.inventory:add_item(item1)
-	character.inventory:add_item(item2)
+	character.inventory:add_item(ItemGenerator.generate("sword"))
+	character.inventory:add_item(ItemGenerator.generate("mace"))
+	character.inventory:add_item(ItemGenerator.generate("bow"))
 	
 	return setmetatable(character, { __index = Character })
 end

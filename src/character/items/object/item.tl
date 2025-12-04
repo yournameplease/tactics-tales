@@ -8,6 +8,7 @@ local record ItemModule
 		get_type: function(self): ItemType
 
 		get_equip_slot: function(self): EquipSlot
+		get_sprite_data: function(self): ItemSpriteData
 
 		get_weapon_data: function(self): Weapon
 
@@ -24,6 +25,7 @@ local record ItemImpl
 	slots: integer
 
 	equip_slot: EquipSlot
+	sprite_data: ItemSpriteData
 	weapon: Weapon
 end
 
@@ -44,6 +46,10 @@ function ItemImpl:get_equip_slot(): EquipSlot
 	return self.equip_slot
 end
 
+function ItemImpl:get_sprite_data(): ItemSpriteData
+	return self.sprite_data
+end
+
 function ItemImpl:get_weapon_data(): Weapon
 	return self.weapon
 end
@@ -53,14 +59,18 @@ function ItemModule.new(
 	name: string,
 	type: ItemType,
 	slots: integer,
-	equip_slot: EquipSlot
+	equip_slot: EquipSlot,
+	sprite_data: ItemSpriteData,
+	weapon: Weapon
 ): ItemModule.Item
 	local item: ItemImpl = {
 		id = id,
 		name = name,
 		type = type,
 		slots = slots,
-		equip_slot = equip_slot
+		equip_slot = equip_slot,
+		sprite_data = sprite_data,
+		weapon = weapon
 	}
 	return setmetatable(item, { __index = ItemImpl })
 end

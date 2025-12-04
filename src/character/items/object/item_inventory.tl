@@ -12,6 +12,7 @@ local record ItemInventoryModule
 		get_items_by_slot: function(self): { integer: Item.Item }
 		get_max_slots: function(self): integer
 		get_equipped_items: function(self): { EquipSlot: Item.Item }
+		get_equipped_weapons: function(self): { Weapon }
 
 		is_equipped: function(self, index: integer): boolean
 		can_add_item: function(self, item: Item.Item): boolean
@@ -89,6 +90,23 @@ function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 			return i.item
 		end
 	)
+end
+
+function ItemInventoryImpl:get_equipped_weapons(): { Weapon }
+	local out = {}
+	if self._items_by_equip_slot["TWO_HANDS"] ~= nil
+		and self._items_by_equip_slot["TWO_HANDS"].item.type == "WEAPON" then
+		add(out, self._items_by_equip_slot["TWO_HANDS"].item)
+	end
+	if self._items_by_equip_slot["MAIN_HAND"] ~= nil
+		and self._items_by_equip_slot["MAIN_HAND"].item.type == "WEAPON" then
+		add(out, self._items_by_equip_slot["MAIN_HAND"].item)
+	end
+	if self._items_by_equip_slot["OFF_HAND"] ~= nil
+		and self._items_by_equip_slot["OFF_HAND"].item.type == "WEAPON" then
+		add(out, self._items_by_equip_slot["OFF_HAND"].item)
+	end
+	return out
 end
 
 function ItemInventoryImpl:is_equipped(index: integer): boolean

@@ -42,7 +42,8 @@ local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint,
 end
 
 local function get_body_type(battle_unit: BattleUnit): AnimationName
-    local base_body_type = battle_unit.character.weapon.body_type
+    -- local base_body_type = battle_unit.character.weapon.body_type
+    local base_body_type = "BACK_HAND"
 	local body_class = battle_unit.character.appearance.body_class
 	if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
 		body_class = "SLEEVELESS"
@@ -152,8 +153,18 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
     CharacterRenderer.draw_head(battle_unit, head_anchor, side, set_pal)
 
-    local weapon_anchor = get_anchor_offsets(base_point, animation_frame.anchors.main_hand, battle_unit.character.weapon.hand_anchor, flip_h, false)
-    spr(BASE_UNIT_SPRITE + battle_unit.character.weapon.sprite, weapon_anchor.x, weapon_anchor.y, flip_h)
+	local equipment = battle_unit.character.inventory:get_equipped_items()
+	for slot,equip in pairs(equipment) do
+		if slot == "BODY" then
+
+		else
+			if equip:get_sprite_data() ~= nil then
+				local anchor: AnchorPointName = slot == "OFF_HAND" and "off_hand" or "main_hand"
+			    local equip_anchor = get_anchor_offsets(base_point, animation_frame.anchors[anchor], equip:get_sprite_data().anchor, flip_h, false)
+			    spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
+			end
+		end
+	end
 
     if set_pal then
         pal()

@@ -20,4 +20,9 @@ global enum EquipSlot
 	"NONE"
 end
 
+global record ItemSpriteData
+	sprite: integer
+	anchor: AnimationAnchorPoint
+end
+
 return ItemTypes

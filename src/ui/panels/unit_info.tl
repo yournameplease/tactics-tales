@@ -43,7 +43,12 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
             local u = state.hovered_unit
             if not u then return { "", "", "" } end
 
-            local w = u.character.weapon
+            local weapons = u.character.inventory:get_equipped_weapons()
+
+            local w: Weapon
+            if #weapons > 0 then
+                w = weapons[1]
+            end
 
             return {
                 "HP: " .. u.hp_current .. "/" .. u.character.stats.hp_max,
