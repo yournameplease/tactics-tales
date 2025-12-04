@@ -29,8 +29,8 @@ function CombatCalculator:get_damage(attacker: BattleUnit, defender: BattleUnit,
 end
 
 function CombatCalculator:is_in_combat_range(attacker: BattleUnit, defender: BattleUnit): boolean
-    local min_range = attacker.character.weapon.min_range
-    local max_range = attacker.character.weapon.max_range
+    local min_range, max_range = attacker.character:get_weapon_range()
+    
     local dist = taxicab_distance(attacker.tile, defender.tile)
 
     return dist >= min_range and dist <= max_range
@@ -56,7 +56,7 @@ global record CombatResult
     steps: { CombatStep }
 end
 
-local function get_combat_step(attacker: BattleUnit, defender: BattleUnit, weapon: Weapon)
+function CombatCalculator:get_combat_step(attacker: BattleUnit, defender: BattleUnit, weapon: Weapon): CombatStep
     if weapon ~= nil then
         local step: CombatStep = {
             attacker = attacker,
@@ -65,7 +65,7 @@ local function get_combat_step(attacker: BattleUnit, defender: BattleUnit, weapo
             dmg = self:get_damage(attacker, defender, weapon),
             hit_roll = rndi(100)
         }
-        step.is_hit = step1.hit_roll < step1.hit_chance
+        step.is_hit = step.hit_roll < step.hit_chance
         return step
     end
     return nil
@@ -75,11 +75,11 @@ function CombatCalculator:compute_combat(attacker: BattleUnit, defender: BattleU
     local result: CombatResult = { steps = {} }
 
     local virtual_hp = defender.hp_current
-    local attacker_weapons = attacker.inventory:get_equipped_weapons()
-    local defender_weapons = defender.inventory:get_equipped_weapons()
+    local attacker_weapons = attacker.character.inventory:get_equipped_weapons()
+    local defender_weapons = defender.character.inventory:get_equipped_weapons()
     
     -- attack
-    local step1 = get_combat_step(attacker, defender, attacker_weapons[1])
+    local step1 = self:get_combat_step(attacker, defender, attacker_weapons[1])
     if step1 ~= nil then
         add(result.steps, step1)
         if step1.is_hit then virtual_hp = virtual_hp - step1.dmg end
@@ -88,7 +88,7 @@ function CombatCalculator:compute_combat(attacker: BattleUnit, defender: BattleU
 
     -- defender counterattack
     if self:can_attack(defender, attacker) and virtual_hp > 0 then -- Is there a good way to extract this?
-        local step2 = get_combat_step(defender, attacker, defender_weapons[1])
+        local step2 = self:get_combat_step(defender, attacker, defender_weapons[1])
         if step2 ~= nil then
             add(result.steps, step1)
         end
@@ -111,31 +111,29 @@ end
 function CombatCalculator:preview_combat(attacker: BattleUnit, defender: BattleUnit): CombatPreviewResult
     local result = { steps = {} }
 
+    local attacker_weapons = attacker.character.inventory:get_equipped_weapons()
+    local defender_weapons = defender.character.inventory:get_equipped_weapons()
+    
     -- attack
-    local step1 = {
-        attacker = attacker,
-        defender = defender,
-        hit = self:get_hit_chance(attacker, defender),
-        dmg = self:get_damage(attacker, defender)
-    }
-
-    add(result.steps, step1)
+    local step1 = self:get_combat_step(attacker, defender, attacker_weapons[1])
+    if step1 ~= nil then
+        add(result.steps, step1)
+    end
 
     -- defender counterattack
 
     -- TODO: Lazy impl.  This won't work if ranges are more than fixed range
     -- may want some kind of "virtual unit" class
-    if not (attacker.character.weapon.min_range > defender.character.weapon.max_range or attacker.character.weapon.max_range < defender.character.weapon.min_range) then
+    local a_min_range, a_max_range = attacker.character:get_weapon_range()
+    local d_min_range, d_max_range = defender.character:get_weapon_range()
+    if not (a_min_range > d_max_range or a_max_range < d_min_range) then
     --if can_attack(defender, attacker) then
-        local step2 = {
-            attacker = defender,
-            defender = attacker,
-            hit = self:get_hit_chance(defender, attacker),
-            dmg = self:get_damage(defender, attacker)
-        }
-        add(result.steps, step2)
+        local step2 = self:get_combat_step(defender, attacker, defender_weapons[1])
+        if step2 ~= nil then
+            add(result.steps, step1)
+        end
     end
-
+    
     return result
 end
 

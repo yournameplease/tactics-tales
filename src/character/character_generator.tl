@@ -76,7 +76,7 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	character.inventory = ItemInventory.new(4)
 	character.inventory:add_item(ItemGenerator.generate("sword"))
 	character.inventory:add_item(ItemGenerator.generate("mace"))
-	character.inventory:add_item(ItemGenerator.generate("bow"))
+	-- character.inventory:add_item(ItemGenerator.generate("bow"))
 	
 	return setmetatable(character, { __index = Character })
 end

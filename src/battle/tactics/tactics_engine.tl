@@ -216,8 +216,7 @@ end
 function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuSelection, ctx: MenuContext): boolean
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
-    local min_distance = unit.character.weapon.min_range
-    local max_distance = unit.character.weapon.max_range
+    local min_range, max_range = unit.character:get_weapon_range()
 
     if selection is GridMenuSelection then
         local target_point = selection.point
@@ -227,7 +226,7 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuSele
 
         if target_unit.side == unit.side then return false end
 
-        return self.battle_state:tile_has_distance_from_tile(target_point, destination, min_distance, max_distance)
+        return self.battle_state:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
     end
     return false
 end
@@ -245,11 +244,10 @@ end
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
 function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): Array2D<MenuTileHighlight>
     local unit = ctx.acting_unit.unit
-    local min_distance = unit.character.weapon.min_range
-    local max_distance = unit.character.weapon.max_range
+    local min_range, max_range = unit.character:get_weapon_range()
 
     local destination = ctx.destination.point
-    local tiles_in_distance = self:find_tiles_with_distance_from_tile(destination.x, destination.y, min_distance, max_distance)
+    local tiles_in_distance = self:find_tiles_with_distance_from_tile(destination.x, destination.y, min_range, max_range)
 
     local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -298,8 +296,7 @@ end
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
 function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Array2D<MenuTileHighlight>
     local unit = ctx.acting_unit.unit
-    local min_range = unit.character.weapon.min_range
-    local max_range = unit.character.weapon.max_range
+    local min_range, max_range = unit.character:get_weapon_range()
 
     local reachable_tiles = self.tile_manager:find_reachable_tiles(unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 

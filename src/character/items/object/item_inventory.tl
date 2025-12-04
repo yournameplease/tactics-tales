@@ -93,18 +93,18 @@ function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 end
 
 function ItemInventoryImpl:get_equipped_weapons(): { Weapon }
-	local out = {}
+	local out: { Weapon } = {}
 	if self._items_by_equip_slot["TWO_HANDS"] ~= nil
-		and self._items_by_equip_slot["TWO_HANDS"].item.type == "WEAPON" then
-		add(out, self._items_by_equip_slot["TWO_HANDS"].item)
+		and self._items_by_equip_slot["TWO_HANDS"].item:get_type() == "WEAPON" then
+		add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
 	end
 	if self._items_by_equip_slot["MAIN_HAND"] ~= nil
-		and self._items_by_equip_slot["MAIN_HAND"].item.type == "WEAPON" then
-		add(out, self._items_by_equip_slot["MAIN_HAND"].item)
+		and self._items_by_equip_slot["MAIN_HAND"].item:get_type() == "WEAPON" then
+		add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
 	end
 	if self._items_by_equip_slot["OFF_HAND"] ~= nil
-		and self._items_by_equip_slot["OFF_HAND"].item.type == "WEAPON" then
-		add(out, self._items_by_equip_slot["OFF_HAND"].item)
+		and self._items_by_equip_slot["OFF_HAND"].item:get_type() == "WEAPON" then
+		add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
 	end
 	return out
 end
