@@ -3680,9 +3680,9 @@ function enum(list)
 end
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 04:52:05",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="main.lua#24",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 11:45:51",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="main.lua#24",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/3_walls.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 11:45:51"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -3800,28 +3800,28 @@ k01OTZ4NNE4NNBgACh4AcA0lBE5NTl0gABZOHgAPQgAfHk27AA__AQ0PMgBYHzFkAIMPMgD-----
 ----tl8QEATw8DEA------------------------------------------------vFBtPTh9fQ==
 :: gfx/3_walls.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTIyIDE3OjEyOjU5Iixtb2RpZmllZD0iMjAyNS0x
-Mi0wMSAwNToyNDoyMSIscmV2aXNpb249MzhdXWx6NACtBAAA0TcAAPARe1swXT17Ym1wPXB4dQBD
+Mi0wNCAxMTo0NTo1MCIscmV2aXNpb249MzldXWx6NACsBAAA0TcAAPARe1swXT17Ym1wPXB4dQBD
 IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sQQD-GLof
 GxAO0B4gHhAeMA4wDkA_UA4ALlAeYE4ADhA_IB4gXgBeAD4ALlcAHv8RExAD0BMgExATMAMwA0Az
 UAMAI1ATYEMAAxAzIBMg8wZRABwtFR4CADw_FR4CAD81HhUmABBcFR8VEh0CADwyHRICAD89Eh0m
-ABAfHcoAaA-wABQv8ECkABz0AfC4HxAgTjA_EBwuTD48HvxAAB8xQQAW9ALRTDA8EBEsTxA8PjEu
-QT7xHkIAHzJCABSwBQ8WBd8TBQ8WFQ4IAI8OJf0AJf0CFQMABwAhAGEOBd0FDhUGAB8F8wAcUw8V
-PxRFBQDzAyQPFAUuBQ8VJA4FLgUNJA4FLQYA8RlPFkVMlUxFnEVMRZ1FrSxtLF0MJQxNDCVcDSwN
-HA0cDSwdJW0lfQWNAgCDfQwFDG0MBQwkAG8MTUVNRU2WABw-8P8xMgAd_Qe5DxkADsAOAA4ACQ4J
-wAkOCQAOCQ4AAgARCRwADQQAASgACQQAPR4JDgIAD5AAHFsJDxkJDgIAD1cAADwZDgkCADIeKQ4C
-AD85DgkCAGIv8GjsABz-PWBPEvAATuBewB5SoCJfHwKgHR8VHRywHRwdHMBtsA5tDmAkLk0eAh8U
-QBsCLgIOAi4CC4ACLgIuArASDgIeAuAy8AALBAvwAQsEC2B7ABxD8BkHIAIAPxAnAAIAChUGAgAf
-AAIACQ9GACkDvQAfMeYCFw8YA05VTxQPFTQFAC8lBAYAAV9PFU8UXyYAEl9PFZ8UDyoAFC-wQKsA
+ABATHcoAHzHKAGAP8AAUL-BAbgEc9AHwuB8QIE4wPhAcLkw_PB78QAAfMUEAFvQC0UwwPBARLE8Q
+PD4xLkE_8R5CAB8yQgAUsAUPFgXfEwUPFhUOCACPDiX9ACX9AhUDAAcAIQBhDgXdBQ4VBgAfBfMA
+HFMPFT8URQUA8wMkDxQFLgUPFSQOBS4FDSQOBS0GAPEZTxZFTJVMRZxFTEWdRa0sbSxdDCUMTQwl
+XA0sDRwNHA0sHSVtJX0FjQIAg30MBQxtDAUMJABvDE1FTUVNLQIcP-D-McgAHPkI8LkPGQAOwA4A
+DgAJDgnACQ4JAA4JDgACABEJHAANBAABKAAJBAA9HgkOAgAPkAAcWwkPGQkOAgAPVwAAPBkOCQIA
+Mh4pDgIAPzkOCQIAYi-waOwAHP89YE8S8ABO4F7AHlKgIl8fAqAdHxUdHLAdHB0cwG2wDm0OYCQu
+TR4CHxRAGwIuAg4CLgILgAIuAi4CsBIOAh4C4DLwAAsEC-ABCwQLYCkCHTMZByACAD8QJwACAAoV
+BgIAHwACAAkPRgApD_YCTw8yAB5VTxQPFTQFAC8lBAYAAV9PFU8UXyYAEl9PFZ8UDyoAFC-wQKsA
 JkAPFCQOSwCGDiQODSUEDi0GAKVOTU5dNE4NNE4NHgAKJABATU5Nnh8AHzQeAAICQgAfTRkGHy--
-MTIAgl8bEvAAMnYCHZ-08gmfFWL_ABI5AB1--wkS8AIy8OcCKA8yANz-M9BSsGIPFZByHnAyHiIu
-UDIuIj4wMj4iThAyTiJeECJOIm4AIk4ifgASTiKOABI_Ip4SPiIuki7yAR5yfVLdQh3PHWsBHN--
-FbjyGP0a-x0AHf4EPAAc-jRS0A8VYrAecpAuIh4ycD4iLjJQTiI_MjBeIk4yEG4iTiIQfiJOIgCO
-Ik4SAJ4iPhIAci4iPvIBLhJ9ch4S3VLPHR1CcgAPgwEVDzIA3P4LMh0fHXI_Ih0eIjAiLhIdLhJQ
-Ei4SPhJwEh4GACAiPh4A8g4iPpIuABIuvxUeABI_nC4AEj6dLgASTn0_ABL_AQQAP-8TAYEBHPoR
-bx1SvpJ_MlAyTiKQIj4SsBIuEtASHhLQEg4i0ELwADIDAJ9C0CIPExLQEg3tABzRPx1yHh0yLiIw
-Ih4dIusAfx0SHhJwEj4GAAAAHwAABAPyCj4iHr8VLhIALpw_EgAunT4SAD59ThIA-gEEAE--EwES
-hwT-GGv-FaQA-gMDAC-wBFwEHk--HfAEewAeFbdyAAN4AB8FuAEnDzIA----Al8QEATw8DEA----
---------------------------------------------vFBtPTh9fQ==
+MTIAgl8bEvAAMnYCHZ-08gmfFWL_ABI5AB1--wkS8AIy8OcCKA8yANz-MtBSsGIPFZByHnAyHiIu
+UDIuIj4wMj4iThAyTiJeECJOIm4AIk4ifgASTiKOABI_Ip4SPiIuki7yAR5yfVLdQh3PZQkd3-8V
+uPIY-Rr-HQAd-gQ8ABz_NFLQDxVisB5ykC4iHjJwPiIuMlBOIj4yMF4iTjIQbiJOIhB_Ik4iAI4i
+ThIAniI_EgByLiI_8gEuEn1yHhLdUs8dHUJyAA_DARUPMgDc-gsyHR8dcj4iHR4iMCIuEh0uElAS
+LhI_EnASHgYAICI_HgDyDiI_ki4AEi6-FR4AEj6cLgASPp0uABJOfT4AEv4BBAA--xMBgQEc_hFv
+HVK_kn4yUDJOIpAiPhKwEi4S0BIeEtASDiLQQvAAMgMAn0LQIg8TEtASDe0AHNE-HXIeHTIuIjAi
+Hh0i6wB-HRIeEnASPgYAAAAfAAAEA-IKPiIevxUuEgAunD4SAC6dPhIAPn1OEgD_AQQAT-8TARKH
+BP8Ya-8VpAD_AwMAL-AEXAQeT-8d8AR7AB4Vt3IAA3gAHwW4AScPMgD---8CXxAQBPDwMQD-----
+------------------------------------------_8UG09OH19
 :: gfx/4_map_util.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI1IDA1OjQwOjU3Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNSAwNTo0Nzo0NSIscmV2aXNpb249OF1dbHo0ABoCAABqNgAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -3853,7 +3853,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 11:45:51"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -3882,7 +3882,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-04 11:45:51"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -3890,23 +3890,23 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/battle/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/character/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/combat/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/map/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/systems/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/tactics/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/ui/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/ui/panels/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: src/util/.info.pod
---[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 04:52:05"]]
+--[[pod,created="2025-11-26 23:26:51",modified="2025-12-04 11:45:51"]]
 :: [eoc]

@@ -80,11 +80,13 @@ end
 -- cost to move onto x,y from any neighbor
 function TileManager:movement_cost(tile: TilePoint, side: Side): integer
     local ground = self.map_data.userdata[4].bmp
+    local back_wall = self.map_data.userdata[3].bmp
+    local front_wall = self.map_data.userdata[2].bmp
     if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
 
-    local tile_sprite = ground:get(tile.x,tile.y)
+    local ground_sprite = ground:get(tile.x,tile.y)
     if tile == nil then return 999 end
 
     local unit = self.battle_state:get_at_tile(tile)
@@ -92,7 +94,20 @@ function TileManager:movement_cost(tile: TilePoint, side: Side): integer
         if unit.side ~= side then return 999 end
     end
 
-    local flags = fget(tile_sprite)
+    if back_wall then
+        local back_wall_sprite = back_wall:get(tile.x,tile.y)
+        if (fget(back_wall_sprite) & 0x1) == 0x1 then
+            return 999
+        end
+    end
+    if front_wall then
+        local front_wall_sprite = front_wall:get(tile.x,tile.y)
+        if (fget(front_wall_sprite) & 0x1) == 0x1 then
+            return 999
+        end
+    end
+
+    local flags = fget(ground_sprite)
     local solid = (flags & 0x1) == 0x1
     local terrain = (flags & 0xD) >> 1
 
