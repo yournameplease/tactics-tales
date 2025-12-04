@@ -322,9 +322,10 @@ function MenuManager:handle_menu_back()
     if previous_step == nil then
         return
     end
-    repeat
+    while #self.selection_history > 1 and
+        self.selection_history[#self.selection_history].step ~= previous_step do
         self.selection_history[#self.selection_history] = nil
-    until self.selection_history[#self.selection_history].step == previous_step
+    end
     self:populate_menu_state(previous_step)
     self.menu_selection = self.selection_history[#self.selection_history].selection
 end

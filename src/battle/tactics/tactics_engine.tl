@@ -33,6 +33,7 @@ global record TacticsEngine
     animation_manager: AnimationManager
 
     battle_is_blocked: boolean
+    is_player_turn: boolean
 
     -- sometimes the lsp complains if i don't do this
     -- doesn't seem consistent tho?        
@@ -75,6 +76,13 @@ function TacticsEngine.new(
     self.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self:handle_move_and_attack(ctx)
     end)
+    self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(ctx: MenuContext)
+        self.is_player_turn = true
+    end)
+    self.event_bus:on("TACTICS_END_PLAYER_TURN", function(ctx: MenuContext)
+        self.is_player_turn = false
+    end)
+
     LOG.debug("New battle.")
     return self
 end
@@ -361,7 +369,7 @@ function TacticsEngine:update()
     end
 
     if blocking_animation then return end
-    if all_players_acted then
+    if self.is_player_turn and all_players_acted then
         self.event_bus:emit("TACTICS_END_PLAYER_TURN")
     end
 end

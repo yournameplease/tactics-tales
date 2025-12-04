@@ -43,6 +43,7 @@ function TurnManager.new(
 
     self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
         self.menu_manager:set_menu("MENU_PLAYER_TURN")
+        self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
     end)
 
     self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
