@@ -7,7 +7,7 @@ require("src/animation")
 global record CharacterTemplate
 	movement: integer
 	hp_max: integer
-	weapon_options: Randomizer<string>
+	item_loadout_options: Randomizer<{string}>
 	headwear_options: Randomizer<HeadwearId>
 	body_options: Randomizer<BodyClass>
 	sex_options: Randomizer<Sex>
@@ -25,7 +25,10 @@ end
 global BASE_UNIT: CharacterTemplate = {
 	movement = 5,
 	hp_max = 5,
-	weapon_options = WeightedOptionSelector.of("dagger"),
+	item_loadout_options = ListSelector.of_randomizers(
+		WeightedOptionSelector.of("dagger")
+	),
+	
 	headwear_options = WeightedOptionSelector.of_weighted(
 		WeightedOption.of(nil, 9),
 		WeightedOption.of("glasses", 1)	
@@ -65,12 +68,16 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	},
     bandit_goon = {
         parent_template = "bandit_base",
-        weapon_options = WeightedOptionSelector.of( "club", "axe" )
+        item_loadout_options = ListSelector.of_randomizers(
+			WeightedOptionSelector.of( "club", "axe" )
+		)
     },
     bandit_boss = {
         parent_template = "bandit_base",
         hp_max = 8,
-        weapon_options = WeightedOptionSelector.of( "poleaxe" )
+        item_loadout_options = ListSelector.of_randomizers(
+			WeightedOptionSelector.of( "poleaxe" )
+		)
     }
 }
 

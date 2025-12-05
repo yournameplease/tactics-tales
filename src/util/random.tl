@@ -1,4 +1,5 @@
 require("src/util")
+local List = require("src/util/list")
 
 global interface Randomizer<V>
 	pick_random: function(self): V
@@ -52,6 +53,27 @@ function WeightedOptionSelector:pick_random(): V
 		i = i - self.options[count].weight
 	until i <= 0
 	return self.options[count].value
+end
+
+-- lists
+
+global record ListSelector<V>
+	is Randomizer<{V}>
+	selectors: {Randomizer<V>}
+end
+
+function ListSelector.of_randomizers<V>(...: Randomizer<V>): ListSelector<V>
+	local selectors = {...}
+	return setmetatable({
+		selectors = selectors,
+	}, { __index = ListSelector })
+end
+
+function ListSelector:pick_random(): {V}
+	return List.do_map(
+		self.selectors,
+		function (r: Randomizer<V>): V return r:pick_random() end
+	)
 end
 
 -- Int range

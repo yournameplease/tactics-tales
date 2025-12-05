@@ -14,6 +14,7 @@ local record ItemInventoryModule
 		get_equipped_items: function(self): { EquipSlot: Item.Item }
 		get_equipped_weapons: function(self): { Weapon }
 
+		can_equip: function(self, index: integer): boolean
 		is_equipped: function(self, index: integer): boolean
 		can_add_item: function(self, item: Item.Item): boolean
 		add_item: function(self, item: Item.Item)
@@ -107,6 +108,24 @@ function ItemInventoryImpl:get_equipped_weapons(): { Weapon }
 		add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
 	end
 	return out
+end
+
+function ItemInventoryImpl:can_equip(index: integer): boolean
+	local equip_slot = self.items[index].item:get_equip_slot()
+	if equip_slot == "TWO_HANDS" then
+		return self._items_by_equip_slot.MAIN_HAND == nil
+			and self._items_by_equip_slot.OFF_HAND == nil
+			and self._items_by_equip_slot.TWO_HANDS == nil
+	elseif equip_slot == "MAIN_HAND" then
+		return self._items_by_equip_slot.MAIN_HAND == nil
+			and self._items_by_equip_slot.TWO_HANDS == nil
+	elseif equip_slot == "OFF_HAND" then
+		return self._items_by_equip_slot.OFF_HAND == nil
+			and self._items_by_equip_slot.TWO_HANDS == nil
+	elseif equip_slot == "BODY" then
+		return self._items_by_equip_slot.BODY == nil
+	end
+	return false
 end
 
 function ItemInventoryImpl:is_equipped(index: integer): boolean

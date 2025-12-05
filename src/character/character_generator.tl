@@ -21,7 +21,7 @@ local function apply_template_to_parent(parent: CharacterTemplate, child: Charac
 	return {
 		movement = child.movement or parent.movement, 
 		hp_max = child.hp_max or parent.hp_max, 
-		weapon_options = child.weapon_options or parent.weapon_options, 
+		item_loadout_options = child.item_loadout_options or parent.item_loadout_options, 
 		headwear_options = child.headwear_options or parent.headwear_options, 
 		body_options = child.body_options or parent.body_options, 
 		sex_options = child.sex_options or parent.sex_options, 
@@ -74,9 +74,16 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
     character.name = character.appearance.sex == "male" and "Bob" or "Alice"
 
 	character.inventory = ItemInventory.new(4)
-	character.inventory:add_item(ItemGenerator.generate("sword"))
-	character.inventory:add_item(ItemGenerator.generate("mace"))
-	-- character.inventory:add_item(ItemGenerator.generate("bow"))
+	local item_ids = template.item_loadout_options:pick_random()
+	for i, item_id in ipairs(item_ids) do
+		local item = ItemGenerator.generate(item_id)
+		if character.inventory:can_add_item(item) then
+			character.inventory:add_item(item)
+			if character.inventory:can_equip(i) then
+				character.inventory:equip_item(i)
+			end
+		end
+	end
 	
 	return setmetatable(character, { __index = Character })
 end
