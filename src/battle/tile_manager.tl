@@ -71,7 +71,7 @@ function TileManager.new(map_data: MapData, battle_state: BattleState): TileMana
 end
 
 function TileManager:get_terrain(tile: TilePoint): TerrainData
-    local tile_sprite = self.map_data.userdata[4].bmp:get(tile.x,tile.y)
+    local tile_sprite = self.map_data.layers.ground:get(tile.x,tile.y)
     local flags = fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
     return TERRAIN_DATA[terrain]
@@ -79,9 +79,10 @@ end
 
 -- cost to move onto x,y from any neighbor
 function TileManager:movement_cost(tile: TilePoint, side: Side): integer
-    local ground = self.map_data.userdata[4].bmp
-    local back_wall = self.map_data.userdata[3].bmp
-    local front_wall = self.map_data.userdata[2].bmp
+    local ground = self.map_data.layers.ground
+    local back_wall = self.map_data.layers.back_wall
+    local mid_wall = self.map_data.layers.mid_wall
+    local front_wall = self.map_data.layers.front_wall
     if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
@@ -97,6 +98,12 @@ function TileManager:movement_cost(tile: TilePoint, side: Side): integer
     if back_wall then
         local back_wall_sprite = back_wall:get(tile.x,tile.y)
         if (fget(back_wall_sprite) & 0x1) == 0x1 then
+            return 999
+        end
+    end
+    if mid_wall then
+        local mid_wall_sprite = mid_wall:get(tile.x,tile.y)
+        if (fget(mid_wall_sprite) & 0x1) == 0x1 then
             return 999
         end
     end

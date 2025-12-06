@@ -21,6 +21,7 @@ version 2
 :: lib/
 :: map/
 :: sfx/
+:: src/
 :: build/animation.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
 require("src/types")
@@ -863,6 +864,16 @@ MapManager = {}
 
 
 
+__MapFetchResultEntry = {}
+
+
+
+MapFetchResult = {}
+
+MapLayers = {}
+
+
+
 
 
 
@@ -885,18 +896,68 @@ local BASE_REINFORCEMENT_SPAWNER_SPRITE = 0x418
 
 local METATILES_LAYER = 1
 local FRONT_WALL_LAYER = 2
-local BACK_WALL_LAYER = 3
-local GROUND_LAYER = 4
+local MID_WALL_LAYER = 3
+local BACK_WALL_LAYER = 4
+local GROUND_LAYER = 5
 
 
 
+function MapManager:as_map(map_data)
+   return {
+      metatiles = map_data[METATILES_LAYER].bmp,
+      front_wall = map_data[FRONT_WALL_LAYER].bmp,
+      mid_wall = map_data[MID_WALL_LAYER].bmp,
+      back_wall = map_data[BACK_WALL_LAYER].bmp,
+      ground = map_data[GROUND_LAYER].bmp,
+   }
+end
+
+function MapManager:apply_checkerboard(map_layers)
+   local ground = map_layers.ground
+   for x = 0, ground:height() - 1 do
+      for y = 0, ground:width() - 1 do
+         local tile = ground:get(x, y)
+         if x + y & 1 == 0 and fget(tile) & 0x40 == 0x40 then
+            ground:set(x, y, tile + 1)
+         end
+      end
+   end
+end
+
+function MapManager:apply_default_walls(map_layers)
+   local ground = map_layers.ground
+   local back_wall = map_layers.back_wall
+   local mid_wall = map_layers.mid_wall
+   local front_wall = map_layers.front_wall
+   for x = 0, ground:height() - 1 do
+      for y = 0, ground:width() - 1 do
+         local tile = ground:get(x, y)
+         if fget(tile) & 0x80 == 0x80 then
+            if back_wall:get(x, y) == 0 then
+               back_wall:set(x, y, tile + 2)
+            end
+            if mid_wall:get(x, y) == 0 then
+               mid_wall:set(x, y, tile + 2)
+            end
+            if front_wall:get(x, y) == 0 then
+               front_wall:set(x, y, tile + 2)
+            end
+         end
+      end
+   end
+end
 
 function MapManager:_load_static(definition)
    local map_data = {}
 
-   map_data.userdata = fetch(DATP .. definition.file)
+   local map_fetch = fetch(DATP .. definition.file)
 
-   local metatiles_layer = map_data.userdata[METATILES_LAYER].bmp
+   map_data.layers = self:as_map(map_fetch)
+
+   self:apply_checkerboard(map_data.layers)
+   self:apply_default_walls(map_data.layers)
+
+   local metatiles_layer = map_data.layers.metatiles
    map_data.width = metatiles_layer:width()
    map_data.height = metatiles_layer:height()
    map_data.metadata = {
@@ -1611,7 +1672,7 @@ function TileManager.new(map_data, battle_state)
 end
 
 function TileManager:get_terrain(tile)
-   local tile_sprite = self.map_data.userdata[4].bmp:get(tile.x, tile.y)
+   local tile_sprite = self.map_data.layers.ground:get(tile.x, tile.y)
    local flags = fget(tile_sprite)
    local terrain = (flags & 0xD) >> 1
    return TERRAIN_DATA[terrain]
@@ -1619,9 +1680,10 @@ end
 
 
 function TileManager:movement_cost(tile, side)
-   local ground = self.map_data.userdata[4].bmp
-   local back_wall = self.map_data.userdata[3].bmp
-   local front_wall = self.map_data.userdata[2].bmp
+   local ground = self.map_data.layers.ground
+   local back_wall = self.map_data.layers.back_wall
+   local mid_wall = self.map_data.layers.mid_wall
+   local front_wall = self.map_data.layers.front_wall
    if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
       return 999
    end
@@ -1637,6 +1699,12 @@ function TileManager:movement_cost(tile, side)
    if back_wall then
       local back_wall_sprite = back_wall:get(tile.x, tile.y)
       if (fget(back_wall_sprite) & 0x1) == 0x1 then
+         return 999
+      end
+   end
+   if mid_wall then
+      local mid_wall_sprite = mid_wall:get(tile.x, tile.y)
+      if (fget(mid_wall_sprite) & 0x1) == 0x1 then
          return 999
       end
    end
@@ -5071,6 +5139,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
+local HALF_HEIGHT = TILE_SIZE.y >> 1
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
 
@@ -5197,10 +5266,11 @@ function TacticsMap:draw(state, ui_theme)
 
    local drawn_unit_count = 0
 
-   local layers = state.battle_manager.map_data.userdata
-   local layer_ground = layers[4].bmp
-   local layer_wall_back = layers[3].bmp
-   local layer_wall_front = layers[2].bmp
+   local layers = state.battle_manager.map_data.layers
+   local layer_ground = layers.ground
+   local layer_wall_back = layers.back_wall
+   local layer_wall_mid = layers.mid_wall
+   local layer_wall_front = layers.front_wall
    local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
    local cursor_tile = nil
@@ -5212,9 +5282,8 @@ function TacticsMap:draw(state, ui_theme)
    end
 
    for y = 0, self.map_height - 1 do
+      map(layer_wall_back, 0, y, 0, (y - 1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
       map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-      map(layer_wall_back, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
-
 
 
       if menu_selection.type == "CURSOR_GRID" then
@@ -5260,10 +5329,18 @@ function TacticsMap:draw(state, ui_theme)
          end
       end
 
+      while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
+         local unit_id = sorted_units:get(1, drawn_unit_count)
+         local unit = battle_state:get_unit_by_id(unit_id)
+         draw_unit(unit)
+         drawn_unit_count = drawn_unit_count + 1
+      end
+
+      map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+
       while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y + 1) * TILE_SIZE.y do
          local unit_id = sorted_units:get(1, drawn_unit_count)
          local unit = battle_state:get_unit_by_id(unit_id)
-         LOG.trace("drawing unit " .. unit_id .. " with y=" .. unit.tile.y .. " at true_y=" .. sorted_units:get(0, drawn_unit_count) .. " during step_y=" .. y)
          draw_unit(unit)
          drawn_unit_count = drawn_unit_count + 1
       end
@@ -5275,7 +5352,7 @@ function TacticsMap:draw(state, ui_theme)
          spr(CURSOR_SPRITE, c_x, c_y)
       end
 
-      map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
+      map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
    end
 
    if cursor_tile ~= nil then
@@ -6037,7 +6114,7 @@ function RandomRange:pick_random()
 end
 
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-06 19:27:30",revision=73,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-06 23:17:04",revision=74,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -6055,51 +6132,51 @@ end
 
 DATP = ""
 	--DATP = "tactics.p64/"
-if not fetch "build/main.lua" then
+--if not fetch "build/main.lua" then
 	cp("/desktop/projects/tactics/build", "build")
 	cp("/desktop/projects/tactics/lib", "lib")
 	--DATP = "tactics.p64/"
-end
+--end
 
 include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 20:45:41",runtime=24,workspaces={{location="src/tiles.lua#71,4",workspace_index=1},{location="src/menu_manager.lua#33",workspace_index=1},{location="main.lua#21",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 23:48:14",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 23:48:14"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -6204,7 +6281,7 @@ GUAJagkcUBk6CRouD4kAMxVtjgAPnS5NDwwBED8PFQcMAWkIIgJPHx8dG4kAARMbiQARG4kABkYD
 Dx4CRx8cEgEeDzQDqy-w8DIA--------------8FUD0xMX19
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
-Mi0wNiAyMDo0NTo0MSIscmV2aXNpb249NTNdXWx6NACbBgAAFzwAAPARe1swXT17Ym1wPXB4dQBD
+Mi0wNiAyMzo0Njo0OCIscmV2aXNpb249NThdXWx6NAB4BgAA1TsAAPARe1swXT17Ym1wPXB4dQBD
 IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sQQAv-zEy
 AE7zBvwdXxA8LjwuXD78ck48PjwuTD78RkQAHzFFABWCFP8UADQO9AMDAB-_DAAPHwGmABxw8R1c
 MSwxLKsA9AUxLlE_8V5MMTwxLE48PjEuQT7xMrAAHzJPABTwCP8PQ0puKh4qTmouGv5AGi5aPio_
@@ -6213,28 +6290,27 @@ hAAUJf8f9gEvNjQCARYPKgIe9AX-FA7-FRj-FA6fFZ8U-xUEnxSfFRQAbxj-FRifFIUAHRD0PQD-
 AvQOnpT_BJSe9A7_GPQY-hiU8wImHzEyAEYtFR4CADw_FR4CAD81HhUmABBcFR8VEh0CADwyHRIC
 AD89Eh0mABAfHcoAaA-wABQv8EDSARwW86ABHznSAxYWGzUALzI4NQAU-xjwuhMQA9ATIBMQEzAD
 MANAM1ADACNQE2BDAAMQMyATIFMAUwAzACPXAh3-GfC6HxsQDtAeIB4QHjAOMA5APlAOAC5QHmBO
-AA4QPiAeIF4AXgA_AC4XARxTDxU-FEUFAPMDJA8UBS4FDxUkDgUuBQ0kDgUtBgDxGU8WRUyVTEWc
-RUxFnUWtLG0sXQwlDE0MJVwNLA0cDRwNLB0lbSV9BY0CAIN9DAUMbQwFDCQAbwxNRU1FTVECHFMP
-FTRPFAUALyUEBgABIE8VBAAvnxQqABMfXyYAEg9QABcvTxVnAR4IVwBADxQkDggAgw4kDg0lBA4t
-BgCTTU5Nng00Tg00GAAKHgBwDSUETk1OXSAAFk4eAA9CAB8fTQsFTh-1awMhHxZrAyEx9gUwAgAx
-ICUQAgA-APUEWAMeMPYPFlADUTAOIC4QAgA-AP4EIwEmDzIAFv8BuB8QIE4wPhAcLkw_PB78QB0J
-HaPw0UwwPBARLE8QrwgfHq8IHbAFDxYF3xMFDxYVDggAjw4l-QAl-QIVAwAHACEAYQ4F3QUOFQYA
-HwUlAU8PMgAfPs0JAAIAaw8ZCQ4ADgQAPQkOCQQABBwABgQAPR4JDgIAD5QAHBAJfwALAgAPVwAA
-PBkOCQIAMh4pDgIAPzkOCQIAYi-waOwAHP89YE8S8ABO4F7AHlKgIl8fAqAdHxUdHLAdHB0cwG2w
-Dm0OYCQuTR4CHxRAGwIuAg4CLgILgAIuAi4CsBIOAh4C4DLwAAsEC-ABCwQLYHUEHEPwGQcgAgA-
-ECcAAgAKFQYCAB8AAgAJD0YAKQ69AA8cAxUPMgD-Q18bEvAAMpQBHZ-08gmfFWL_ABI5AB1--wkS
-8AIy8AUCHVAGHxUmHgIAbxYPFgYFLQMAAUEdBR4lAgAiFQ4rACMmDhoADQMAEg4pAEMlDgYeVgAT
-DRoAD1UAMQ-mAYEyVCYQAgBTLxYGBS4DAFA1HxUlHQIAMQYdJgIAJhYOHQBCBR4FHR4AEhUdACUm
-HRsATy4GNR06AAkP0ABO-zLQUrBiDxWQch5wMh4iLlAyLiI_MDI_Ik4QMk4iXhAiTiJuACJOIn4A
-Ek4ijgASPiKeEj4iLpIu8gEecn1S3UIdz8YNHd--FbjyGP0a-x0AHf4EPAAc-jRS0A8VYrAecpAu
-Ih4ycD4iLjJQTiI_MjBeIk4yEG4iTiIQfiJOIgCOIk4SAJ4iPhIAci4iPvIBLhJ9ch4S3VLPHR1C
-cgAPUQE8wDC2gJWQBgUPFQYFDgMAE5AIAA8LAGARFQIAP4C2MMMAHC7wQCUED8QDBQ8NBAwPPQAL
-D-UDMT0FHxVXAC8vFpUACg-SAIwPdAIf-gsyHR8dcj4iHR4iMCIuEh0uElASLhI_EnASHgYAICI_
-HgDyDiI_ki4AEi6-FR4AEj6cLgASPp0uABJOfT4AEv4BBAA--xMBLQMc_hFvHVK_kn4yUDJOIpAi
-PhKwEi4S0BIeEtASDiLQQvAAMgMAn0LQIg8TEtASDe0AHNE-HXIeHTIuIjAiHh0i6wB-HRIeEnAS
-PgYAAAAfAACwBPIKPiIevxUuEgAunD4SAC6dPhIAPn1OEgD_AQQAT-8TARJNCf8Ya-8VpAD_AwMA
-L-AECAYeT-8d8AR7AB4Vt3IAA3gAD3IWGl4QEATw8HQADzEA----------------------------
-------------------8hUG09OH19
+AA4QPiAeIF4AXgA_AC5YAB1TDxU-FEUFAPMDJA8UBS4FDxUkDgUuBQ0kDgUtBgDxGU8WRUyVTEWc
+RUxFnUWtLG0sXQwlDE0MJVwNLA0cDRwNLB0lbSV9BY0CAIN9DAUMbQwFDCQAbwxNRU1FTVICHFMP
+FTRPFAUALyUEBgABIE8VBAAvnxQqABMfXyYAEg9QABcuTxV-Ag-RABhADxQkDggAgw4kDg0lBA4t
+BgCTTU5Nng00Tg00GAAKHgBwDSUETk1OXSAAFk4eAA9CAB8fTQwFTh-1bAMhHxZsAyEx9gUwAgAx
+ICUQAgA-APUEWQMeMPYPFlEDUTAOIC4QAgAvAP5FAB8v-zFWAR3-AbgfECBOMD4QHC5MPjwe-EAf
+CR2j8NFMMDwQESxPELEIHx6xCB2wBQ8WBd8TBQ8WFQ4IAI8OJf0AJf0CFQMABwAhAGEOBd0FDhUG
+AB4FSQIPJQE9L-8xigFQPkEJAAIAaw8ZCQ4ADgQAPQkOCQQABBwABgQAPh4JDgIAEykCAD85DgkC
+AGIPFQEc-z1gTxLwAE7gXsAeUqAiXx8CoB0fFR0csB0cHRzAbbAObQ5gJC5NHgIfFEAbAi4CDgIu
+AguAAi4CLgKwEg4CHgLgMvAACwQL8AELBAtgPgQcQ-AZByACAD8QJwACAAoVBgIAHwACAAkPRgAp
+Dr0AD38CPS--MUgDtA8yAFofMTIAeFAGHxUmHgIAbxYPFgYFLQMAAUEdBR4lAgAiFQ4rACMmDhoA
+DQMAEg4pAEMlDgYeVgATDRoAD1UAMQ_jAVgPMgAWMlQmEAIAUy8WBgUuAwBQNR8VJR0CADEGHSYC
+ACYWDh0AQgUeBR0eABIVHQAlJh0bAE8uBjUdOgAJD9AATv8x0FKwcpByHxVwMh4iLlAyLiI_MDI_
+Ik4QMk4iXhAiTiJuACJOIn4AEk4ijgASPiKeEj4iLpIu8gEecn1S3UIdz38NHf8D8gX-FQIC-pDy
+GP0a-x0AHfwEQQAc-jNS0HKwHxVykC4iHjJwPiIuMlBOIj4yMF4iTjIQbiJOIhB_Ik4iAI4iThIA
+niI_EgByLiI_8gEuEn1yHhLdUs8dHUJxAA9UATzAMLaAlZAGBQ8VBgUOAwATkAgADwsAYBEVAgA-
+gLYwwwAcLvBAKAQPxwMFDxAEDA89AAsP_AMxPQUfFVcALy8WlQAKD9IAjA90Ah-_CzIdHx1yPiId
+HiIwIi4SHS4SUBIuEj4ScBIeBgAgIj4eAPIOIj6SLgASLr8VHgASPpwuABI_nS4AEk59PgAS-gEE
+AD--EwEtAxz6EW8dUr6SfjJQMk4ikCI_ErASLhLQEh4S0BIOItBC8AAyAwCfQtAiDxMS0BIN7QAc
+0T8dch4dMi4iMCIeHSLrAH8dEh4ScBI_BgAAAB8AALQE8go_Ih6-FS4SAC6cPhIALp0_EgA_fU4S
+AP4BBABP-xMBEkAJKA8yANxu-xWkA-4DAwAPQQEcL-8VegAgFbduAAYDAA94ABleEBAE8PB2AA8x
+AP----------------------------------------------IVBtPTh9fQ==
 :: gfx/4_map_util.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI1IDA1OjQwOjU3Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNSAwNTo0Nzo0NSIscmV2aXNpb249OF1dbHo0ABoCAABqNgAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -6266,7 +6342,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: lib/.info.pod
---[[pod,created="2025-12-06 19:26:11",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-12-06 23:47:31",modified="2025-12-06 23:48:14"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -6547,9 +6623,9 @@ dHJ1ZQplbmQKCmZ1bmN0aW9uIF91cGRhdGUgKCkKICBpZiBlcnJvcl90aHJlYWQgdGhlbgogICAg
 Y2FsbF9lcnJvcl9ldmVudCAoZXJyb3JfdXBkYXRlKQogIGVsc2UKICAgIGNhbGxfcHJvdGVjdGVk
 ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
-bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZA==
+bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 23:48:14"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -6561,16 +6637,16 @@ Bj8AAQsSAAEGACkCBg8ADwYABR4DUQAPJAAC0QMCCAYCAQQCAAYCAQN1AEEFAggDEgAQAwwAUwEH
 AgcFGAAAFQAxBwIBDwARCQ8AEQ0GAD8EBQKRAgFfZmxvb3KRAhhQMC41fX0=
 :: map/bandit_village.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI2IDA1OjE2OjMxIixtb2RpZmllZD0iMjAyNS0x
-Mi0wNiAyMDo0MTo0MiIscmV2aXNpb249NDJdXWx6NADkAQAA3AQAAPAYe3tibXA9cHh1AEyAEBAA
+Mi0wNiAyMzo0NzoxOCIscmV2aXNpb249NTJdXWx6NAAIAgAADAUAAPAYe3tibXA9cHh1AEyAEBAA
 KwAAAAgEQgAAABMEAAkEAAoECwAAABQEDwBDAAAACw8A0TIAAAARBAIAAAASBAEGAHEFAAAAEAQQ
 GABBAwAAAQYAAhIA8RgsaGlkZGVuPWZhbHNlLG5hbWU9Im1ldGF0aWxlcyIscGFuX3g9LTMJAHZ5
 PS02LjgzAQAQLCYAUl9oPTE2CgAQdwoAinpvb209MX0svADIACICAC0CAC4CAC8CDADXCCICADUC
-ADYCADcCAAwA6QciAgAlAgA9AgA_AgA-DAB3CCICBgAAAkUAFQISAAQ-ABEBPwAAFQAHOQBlASUC
-SwAANgA1DAAAMAAADAAEJwBvAAAALyICGQEBr2Zyb250X3dhbGwbATkv-wCHAQQvaWRsAD4gBiMY
-AdcYIwIARQIARgIARwIADAAgCCMzAQgGABcCHgDUASMCPwAABiUCDgAAAAYAEQMGAAUkAI8AJQIP
-AAAfIz8BAk9iYWNr0gA_bwAKAgALAgYAFBcBDAAPBgAOFwEMAA9aABJhEAIACAICBgAvABAkAAAD
-VAAxEAIBIQApAggbAAknAGEQAgQIAgoGAHEIEAIfCAIHNgAfDQYAAR4HSAAPBQE3LwAKCgMDT2xv
-b3LGASVQbT0xfX0=
+ADYCADcCAAwAIAciwQCJAD0CAD4CAD8MAHcIIgIGAAACRQAVAhIABD8ARwEiAgozADVNAAAtADUM
+AAAnABoMYwA0LyICEAE0dHJ1DwGvZnJvbnRfd2FsbBEBOXEGIwIAJQIOBgARBwYAAIIAAQYARAgj
+AgYGAAIbAEEGAAACGwChASUCPwAABiUCDi0AAgYAFAM5AI8AJQIPAAAfI8YAAT9taWTEAD4XIEsB
+FwAMABcyDAAXbQwAHzBwAgNPYmFja5wAPm8ACgIACwIGABQXAQwADwYADtsBCgIARQIARgIARwIA
+DAAfC1oAAWEQAgAIAgIGAC8AECQAAANUADEQAgEhACkCCBsACScAdhACBAgCAxB1ABEDEgBxCBAC
+HwgCB0IAHQ0GABcBMABOCBACB2AADx0BNz8ACgLjAQFfZmxvb3LeASVQbT0xfX0=
 :: map/castle.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI0IDA1OjA5OjU2Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjoxNCIscmV2aXNpb249Nl1dbHo0AJEAAACLAwAA8Sx7e2JtcD1weHUATIAQEADC
@@ -6578,11 +6654,13 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 20:45:41"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-06 23:48:14"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
 AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
+:: src/.info.pod
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-06 23:48:14"]]
 :: [eoc]

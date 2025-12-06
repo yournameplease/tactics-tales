@@ -25,6 +25,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
+local HALF_HEIGHT = TILE_SIZE.y >> 1
 local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
@@ -151,10 +152,11 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     local drawn_unit_count = 0
     -- TODO: preload layers
-    local layers = state.battle_manager.map_data.userdata
-    local layer_ground = layers[4].bmp
-    local layer_wall_back = layers[3].bmp
-    local layer_wall_front = layers[2].bmp
+    local layers = state.battle_manager.map_data.layers
+    local layer_ground = layers.ground
+    local layer_wall_back = layers.back_wall
+    local layer_wall_mid = layers.mid_wall
+    local layer_wall_front = layers.front_wall
     local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
     local cursor_tile: TilePoint = nil
@@ -166,9 +168,8 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     end
 
     for y = 0, self.map_height-1 do
+        map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
         map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-        map(layer_wall_back, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
-
 
         -- highlight legal tiles
         if menu_selection is GridMenuSelection then
@@ -214,10 +215,18 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
             end
         end
 
+        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
+            local unit_id = sorted_units:get(1, drawn_unit_count)
+            local unit = battle_state:get_unit_by_id(unit_id)
+            draw_unit(unit)
+            drawn_unit_count = drawn_unit_count + 1
+        end
+
+        map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_state:get_unit_by_id(unit_id)
-            LOG.trace("drawing unit ".. unit_id .." with y="..unit.tile.y.." at true_y="..sorted_units:get(0,drawn_unit_count) .." during step_y="..y)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1
         end
@@ -229,7 +238,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
             spr(CURSOR_SPRITE, c_x, c_y)
         end
 
-        map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y - wall_offset, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
+        map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
 
     if cursor_tile ~= nil then
