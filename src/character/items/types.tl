@@ -7,6 +7,7 @@ global type ItemId = string
 global enum ItemType
 	"WEAPON"
 	"ARMOR"
+	"SHIELD"
 	"CONSUMABLE"
 	"MISC"
 end

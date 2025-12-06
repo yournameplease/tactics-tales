@@ -1,6 +1,7 @@
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
 require("src/debug")
+local List = require("src/util/list")
 
 global record CombatCalculator
     tile_manager: TileManager
@@ -69,6 +70,46 @@ function CombatCalculator:get_combat_step(attacker: BattleUnit, defender: Battle
         return step
     end
     return nil
+end
+
+local record AttackDouble
+    damage: integer
+    hit: integer
+end
+
+local record CombatDouble
+    tile: TilePoint
+    current_hp: integer
+    max_hp: integer
+    defense: { DefenseType: integer }
+    avoid: { AvoidType: integer }
+    attacks: { AttackDouble }
+end
+
+function CombatCalculator:build_attack_double(weapon: Weapon, unit: BattleUnit): AttackDouble
+    local double = {
+        damage = weapon.damage,
+        hit = weapon.accuracy
+    }
+    return double
+end
+
+function CombatCalculator:build_combat_double(unit: BattleUnit): CombatDouble
+    local double = {
+        tile = unit.tile,
+        current_hp = unit.hp_current,
+        max_hp = unit.character.stats.hp_max,
+        defense = {  },
+        avoid = {  },
+        attacks = List.do_map(
+            unit.character.inventory:get_equipped_weapons(),
+            function(weapon: Weapon): AttackDouble
+                return build_attack_double(weapon, unit)
+            end
+        )
+    }
+
+    return double
 end
 
 function CombatCalculator:compute_combat(attacker: BattleUnit, defender: BattleUnit): CombatResult
