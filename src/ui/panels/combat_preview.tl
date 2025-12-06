@@ -11,7 +11,8 @@ setmetatable(CombatPreview, { __index = Box })
 local function get_preview_text(state: GameContext): {string}
     local attacker = state.acting_unit
     local defender = state.hovered_unit
-    local preview = state.combat_calculator:preview_combat(attacker, defender).steps
+    local attacker_tile = state.destination
+    local preview = state.combat_calculator:preview_combat(attacker, defender, attacker_tile).steps
 
     local out: {string} = {}
     if preview[1] ~= nil then 

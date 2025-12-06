@@ -53,7 +53,8 @@ local function weapon(
         equip_slot = equip_slot,
         sprite_data = sprite_data,
 
-        weapon_definition = data
+        weapon_definition = data,
+        equipment_effects = effects or {}
     }
 end
 

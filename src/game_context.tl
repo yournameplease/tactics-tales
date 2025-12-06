@@ -25,6 +25,7 @@ global record GameContext
 
     hovered_unit: BattleUnit
     acting_unit: BattleUnit
+    destination: TilePoint
 end
 
 function GameContext.new(
@@ -81,6 +82,10 @@ function GameContext:enrich()
 
     if self.menu_manager.menu_ctx.acting_unit ~= nil then
         self.acting_unit = self.menu_manager.menu_ctx.acting_unit.unit
+    end
+
+    if self.menu_manager.menu_ctx.destination ~= nil then
+        self.destination = self.menu_manager.menu_ctx.destination.point
     end
 
 end

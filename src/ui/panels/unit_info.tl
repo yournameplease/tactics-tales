@@ -71,9 +71,10 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
             local count = 1
             for i,item in ipairs(items) do
                 out[count+1] = item:get_name()
+                count = count + 1
                 for i=2,item:get_slots() do
-                    count = count + 1
                     out[count+1] = " |"
+                    count = count + 1
                 end
             end
 

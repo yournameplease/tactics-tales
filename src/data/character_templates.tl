@@ -26,7 +26,8 @@ global BASE_UNIT: CharacterTemplate = {
 	movement = 5,
 	hp_max = 5,
 	item_loadout_options = ListSelector.of_randomizers(
-		WeightedOptionSelector.of("dagger")
+		WeightedOptionSelector.of("dagger"),
+		WeightedOptionSelector.of("shield", "sword")
 	),
 	
 	headwear_options = WeightedOptionSelector.of_weighted(
@@ -69,7 +70,8 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
     bandit_goon = {
         parent_template = "bandit_base",
         item_loadout_options = ListSelector.of_randomizers(
-			WeightedOptionSelector.of( "club", "axe" )
+			WeightedOptionSelector.of( "club", "axe" ),
+			WeightedOptionSelector.of("shield", "axe")
 		)
     },
     bandit_boss = {

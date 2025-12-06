@@ -24,6 +24,7 @@ function ItemGenerator.generate(item_id: string): Item.Item
 		data.slots,
 		data.equip_slot,
 		data.sprite_data,
+		data.equipment_effects,
 		generate_weapon(data.weapon_definition)
 	)
 end

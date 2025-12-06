@@ -66,6 +66,7 @@ function ItemModule.new(
 	slots: integer,
 	equip_slot: EquipSlot,
 	sprite_data: ItemSpriteData,
+	equipment_effects: {EquipmentEffect},
 	weapon: Weapon
 ): ItemModule.Item
 	local item: ItemImpl = {
@@ -75,6 +76,7 @@ function ItemModule.new(
 		slots = slots,
 		equip_slot = equip_slot,
 		sprite_data = sprite_data,
+		equipment_effects = equipment_effects, -- note: copied by reference
 		weapon = weapon
 	}
 	return setmetatable(item, { __index = ItemImpl })
