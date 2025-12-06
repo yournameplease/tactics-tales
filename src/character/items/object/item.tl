@@ -12,7 +12,7 @@ local record ItemModule
 
 		get_weapon_data: function(self): Weapon
 
-		-- get_effects_data(): EquipmentEffects
+		get_equipment_effects: function(self): { EquipmentEffect } 
 	end
 end
 
@@ -27,6 +27,7 @@ local record ItemImpl
 	equip_slot: EquipSlot
 	sprite_data: ItemSpriteData
 	weapon: Weapon
+	equipment_effects: { EquipmentEffect }
 end
 
 
@@ -52,6 +53,10 @@ end
 
 function ItemImpl:get_weapon_data(): Weapon
 	return self.weapon
+end
+
+function ItemImpl:get_equipment_effects(): { EquipmentEffect }
+	return self.equipment_effects
 end
 
 function ItemModule.new(

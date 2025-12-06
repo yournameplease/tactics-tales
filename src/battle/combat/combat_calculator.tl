@@ -95,20 +95,49 @@ function CombatCalculator:build_attack_double(weapon: Weapon, unit: BattleUnit):
 end
 
 function CombatCalculator:build_combat_double(unit: BattleUnit): CombatDouble
-    local double = {
+    local double: CombatDouble = {
         tile = unit.tile,
         current_hp = unit.hp_current,
         max_hp = unit.character.stats.hp_max,
-        defense = {  },
-        avoid = {  },
+        defense = { },
+        avoid = { },
         attacks = List.do_map(
             unit.character.inventory:get_equipped_weapons(),
             function(weapon: Weapon): AttackDouble
-                return build_attack_double(weapon, unit)
+                return self:build_attack_double(weapon, unit)
             end
         )
     }
 
+    local equipped_items = unit.character.inventory:get_equipped_items()
+
+    for _slot, item in pairs(equipped_items) do
+        for _, effect in ipairs(item:get_equipment_effects()) do
+
+            
+            if effect is IncreaseDefenseEffect then
+                double.defense[effect.defense_type] = (double.defense[effect.defense_type] or 0) + effect.amount
+            end
+        
+            if effect is IncreaseAvoidEffect then
+                double.avoid[effect.avoid_type] = (double.avoid[effect.avoid_type] or 0) + effect.amount  
+            end
+        
+            if effect is LongReachEffect then
+
+            end
+        
+            if effect is ShieldsplitterEffect then
+
+            end
+        
+            if effect is ArmorkillerEffect then
+
+            end
+                   
+        end
+    end
+    
     return double
 end
 
