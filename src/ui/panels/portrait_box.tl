@@ -1,6 +1,7 @@
 require("src/types")
 require("src/ui/box")
 local CharacterRenderer = require("src/character/character_renderer")
+local Colors = require("src/colors")
 
 global record PortraitBox
     is UIElement
@@ -28,8 +29,10 @@ function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
 
     local unit = self.get_selected_unit(state)
     if unit then
+        Colors.apply_palette("paper")
         local self_pos: Point = DrawPoint.of(self.x, self.y)
-        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as DrawPoint, unit.side, true, false)
+        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as DrawPoint, unit.side, false, false)
+        pal()
     end
 end
 
