@@ -21,8 +21,8 @@ function PageDivider:draw(state: GameContext, ui_theme: UITheme)
     local t = self.y
     local b = self.y + self.h
 
-    for i=0,self.w-1 do
-        local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_HIGHLIGHT or ui_theme.COLOR_DECORATION_PRIMARY
+    for i=0,((self.w+1)>>1)-1 do
+        local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
         local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_SHADOW or ui_theme.COLOR_DECORATION_PRIMARY
 
         line(l + i, t + i, l + i, b, c_l)

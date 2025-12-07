@@ -11,7 +11,12 @@ setmetatable(PortraitBox, { __index = Box })
 local BACKGROUND_SPRITE = 7 + 3 * 256
 
 function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): PortraitBox
-    local box = Box.new({ w=20, h=24 }) as PortraitBox
+    local box = Box.new({
+        w=24, h=28,
+        padding = 4,
+        decoration_padding = 3,
+        decoration = 'border'
+    }) as PortraitBox
     setmetatable(box, {__index = PortraitBox})
     box.get_selected_unit = get_selected_unit
     return box

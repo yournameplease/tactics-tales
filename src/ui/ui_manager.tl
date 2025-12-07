@@ -40,10 +40,18 @@ function UIManager.new(): UIManager
     end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(_state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
 
-    local page_divider = PageDivider.new(5)
+    local page_divider = PageDivider.new(7)
 
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", transparent = false})
+        local battle_root = Box.new({
+            x=0, y=0,
+            w=480, h=270,
+            internal_margin = {t = 4},
+            gap=0,
+            padding=0, 
+            dir="row",
+            transparent = true
+        })
 
         -- Left Sidebar
         local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
@@ -57,10 +65,16 @@ function UIManager.new(): UIManager
         self.layouts["TACTICS"]= { root = battle_root }
     end
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", transparent = false})
+        local battle_root = Box.new({
+            x=0, y=0,
+            w=480, h=270,
+            internal_margin = {t = 4},
+            dir="row",
+            transparent = true
+        })
 
         -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 0}))
         left:add(battle_summary)
         left:add(CombatPreview.new({ padding = 0, decoration = "border"  }))
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))

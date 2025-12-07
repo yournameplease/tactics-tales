@@ -101,11 +101,11 @@ function Box.new(props: UIElement): Box
 
     -- Layout properties
     self.dir = props.dir or "col" -- "row" or "col"
-    self.gap = props.gap or 3
+    self.gap = props.gap or 1
     self.padding = props.padding or 2
     self.decoration_padding = props.decoration_padding or self.padding - 1
     self.decoration = props.decoration -- "embossed" or "recessed"
-    self.transparent = props.transparent ~= false
+    self.transparent = props.transparent == true
     
     self.children = {}
 
@@ -422,10 +422,10 @@ function Box:draw_border(ui_theme: UITheme)
 end
 
 function Box:draw_solid(ui_theme: UITheme)
-    local x = self.x + self.internal_margin.l
-    local y = self.y + self.internal_margin.t
-    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
-    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+    local x = self.x
+    local y = self.y
+    local w = self.w
+    local h = self.h
     rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
