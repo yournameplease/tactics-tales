@@ -15,6 +15,7 @@ version 2
 :: build/systems/
 :: build/types/
 :: build/ui/
+:: build/ui/decoration/
 :: build/ui/panels/
 :: build/util/
 :: gfx/
@@ -2061,20 +2062,12 @@ return ANIMATION_DATA
 
 :: build/character/character_generator.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/data/character_templates")
+require("src/character/object/character")
 require("src/data/items")
 require("src/character/items/object/weapon")
 local Item = require("src/character/items/object/item")
 local ItemInventory = require("src/character/items/object/item_inventory")
 local ItemGenerator = require("src/character/items/item_generator")
-
-
-local SKIN_COLORS = {
-   { 15, 31 },
-   { 31, 4 },
-   { 4, 20 },
-   { 20, 21 },
-}
-
 
 local CharacterGenerator = {}
 
@@ -2242,13 +2235,6 @@ require("src/character/sprite_data")
 local ANIMATION_DATA = require("src/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
-
-local SKIN_COLORS = {
-   { 15, 31 },
-   { 31, 4 },
-   { 4, 20 },
-   { 20, 21 },
-}
 
 local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
@@ -2914,7 +2900,7 @@ require("src/types")
 require("src/character/items/object/weapon")
 local ItemInventory = require("src/character/items/object/item_inventory")
 
-local SKIN_COLORS = {
+SKIN_COLORS = {
    { 15, 31 },
    { 31, 4 },
    { 4, 20 },
@@ -4677,7 +4663,9 @@ DecorationStyle = {}
 
 
 
+
 UIElement = {}
+
 
 
 
@@ -4761,6 +4749,7 @@ function Box.new(props)
    self.padding = props.padding or 2
    self.decoration_padding = props.decoration_padding or self.padding - 1
    self.decoration = props.decoration
+   self.transparent = props.transparent ~= false
 
    self.children = {}
 
@@ -5066,12 +5055,37 @@ function Box:draw_recessed(ui_theme)
    self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
+function Box:draw_border(ui_theme)
+   local x = self.x + self.internal_margin.l
+   local y = self.y + self.internal_margin.t
+   local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+   local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+   local pad = self.decoration_padding
+   local r = max(0, pad - 1)
+   rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
+end
+
+function Box:draw_solid(ui_theme)
+   local x = self.x + self.internal_margin.l
+   local y = self.y + self.internal_margin.t
+   local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+   local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+   rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
+end
+
 function Box._draw(self, state, ui_theme)
    local box = self
+
+   if not box.transparent then
+      box:draw_solid(ui_theme)
+   end
+
    if box.decoration == 'embossed' then
       box:draw_embossed(ui_theme)
    elseif box.decoration == 'recessed' then
       box:draw_recessed(ui_theme)
+   elseif box.decoration == 'border' then
+      box:draw_border(ui_theme)
    end
 
 
@@ -5101,6 +5115,41 @@ function Box:draw(state, ui_theme)
 end
 
 return Box
+
+:: build/ui/decoration/page_divider.lua
+require("src/ui/box")
+
+local PageDivider = {}
+
+
+
+setmetatable(PageDivider, { __index = Box })
+
+
+function PageDivider.new(width)
+   local box = Box.new({ w = width, cross_stretch = true })
+   setmetatable(box, { __index = PageDivider })
+   return box
+end
+
+function PageDivider:draw(state, ui_theme)
+
+
+   local l = self.x
+   local r = self.x + self.w
+   local t = self.y
+   local b = self.y + self.h
+
+   for i = 0, self.w - 1 do
+      local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_HIGHLIGHT or ui_theme.COLOR_DECORATION_PRIMARY
+      local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_SHADOW or ui_theme.COLOR_DECORATION_PRIMARY
+
+      line(l + i, t + i, l + i, b, c_l)
+      line(r - i, t + i, r - i, b, c_r)
+   end
+end
+
+return PageDivider
 
 :: build/ui/panels/combat_preview.lua
 require("src/ui/box")
@@ -5684,13 +5733,13 @@ function UnitInfo.new(props)
 
          local out = { "Inventory:", "", "", "", "" }
 
-         local count = 1
-         for i, item in ipairs(items) do
-            out[count + 1] = item:get_name()
-            count = count + 1
-            for i = 2, item:get_slots() do
-               out[count + 1] = " |"
-               count = count + 1
+         local index = 1
+         for _, item in ipairs(items) do
+            out[index + 1] = item:get_name()
+            index = index + 1
+            for _ = 2, item:get_slots() do
+               out[index + 1] = " |"
+               index = index + 1
             end
          end
 
@@ -5727,6 +5776,8 @@ require("src/ui/panels/combat_preview")
 require("src/ui/panels/text_node")
 require("src/ui/panels/event_message_log")
 
+local PageDivider = require("src/ui/decoration/page_divider")
+
 require("src/ui/validator")
 
 UILayout = {}
@@ -5746,36 +5797,41 @@ function UIManager.new()
 
    self.layouts = {}
 
-   local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
+   local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border" })
    battle_summary:add(TextNode.new({ func = function(_state) return { "BATTLE" } end, justify = "center" }))
    battle_summary:add(TextNode.new({ func = function(state)
       local turn = state.turn_manager.turn
       return { "Turn " .. turn }
    end, justify = "center", }))
    battle_summary:add(TextNode.new({ func = function(_state) return { "Defeat all" } end, justify = "center" }))
+
+   local page_divider = PageDivider.new(5)
+
    do
-      local battle_root = Box.new({ x = 0, y = 0, w = 480, h = 270, dir = "row", decoration = "embossed" })
+      local battle_root = Box.new({ x = 0, y = 0, w = 480, h = 270, dir = "row", transparent = false })
 
 
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, decoration = "recessed" }))
+      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1 }))
       left:add(battle_summary)
-      left:add(UnitInfo.new({ padding = 0 }))
-      left:add(EventMessageLog.new({ flex_grow = 1 }))
+      left:add(UnitInfo.new({ padding = 0, decoration = "border" }))
+      left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
-      battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, { decoration = "recessed" }))
+      battle_root:add(page_divider)
+      battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, { decoration = "border" }))
 
       self.layouts["TACTICS"] = { root = battle_root }
    end
    do
-      local battle_root = Box.new({ x = 0, y = 0, w = 480, h = 270, dir = "row", decoration = "embossed" })
+      local battle_root = Box.new({ x = 0, y = 0, w = 480, h = 270, dir = "row", transparent = false })
 
 
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, decoration = "recessed" }))
+      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1 }))
       left:add(battle_summary)
-      left:add(CombatPreview.new({ padding = 0 }))
-      left:add(EventMessageLog.new({ flex_grow = 1 }))
+      left:add(CombatPreview.new({ padding = 0, decoration = "border" }))
+      left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
-      battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, { decoration = "recessed" }))
+      battle_root:add(page_divider)
+      battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, { decoration = "border" }))
 
       self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
    end
@@ -5788,12 +5844,21 @@ function UIManager.new()
 
    self.current_layout = self.layouts.TACTICS
 
+
+
+
+
+
+
+
+
    self.theme = {
-      COLOR_DECORATION_PRIMARY = 22,
-      COLOR_DECORATION_HIGHLIGHT = 6,
-      COLOR_DECORATION_SHADOW = 5,
-      COLOR_INTERIOR = 21,
-      COLOR_INTERIOR_TEXT = 7,
+      COLOR_DECORATION_PRIMARY = 4,
+      COLOR_DECORATION_HIGHLIGHT = 31,
+      COLOR_DECORATION_SHADOW = 20,
+      COLOR_INTERIOR = 15,
+      COLOR_INTERIOR_TEXT = 21,
+      COLOR_CLEAR = 20,
    }
 
    return self
@@ -5808,6 +5873,7 @@ function UIManager:draw(game_context)
    root:layout(root.x, root.y)
 
 
+   cls(self.theme.COLOR_CLEAR)
    root:draw(game_context, self.theme)
 end
 
@@ -6228,12 +6294,12 @@ function WeightedOptionSelector:pick_random()
    if #self.options == self.total_weight then
       return self.options[i].value
    end
-   local count = 0
+   local index = 0
    repeat
-      count = count + 1
-      i = i - self.options[count].weight
+      index = index + 1
+      i = i - self.options[index].weight
    until i <= 0
-   return self.options[count].value
+   return self.options[index].value
 end
 
 
@@ -6272,8 +6338,8 @@ function RandomRange.between(min_value, max_value)
    }, { __index = RandomRange })
 end
 
-function RandomRange.of(count)
-   return RandomRange.between(0, count - 1)
+function RandomRange.of(n)
+   return RandomRange.between(0, n - 1)
 end
 
 function RandomRange:pick_random()
@@ -6309,48 +6375,51 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 15:50:28",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 18:31:32",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
+:: build/ui/decoration/.info.pod
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 18:31:32"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
-MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
+Mi0wNyAxNzoxNjowNSIscmV2aXNpb249MTVdXWx6NAACAQAAljEAAPMhe1swXT17Ym1wPXB4dQBD
 IBAQBPBWBxAHwBfQF8AHEAfwVixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sPgDwAv8WArYF
-LgavFQUuBg0HDQcdBACQBS4GrQUuxf4DGwAfowQAAz-F-gFrABwv8PAxAP8P8A0UEAQAEdARAAEX
-AbABFxEHAdABBwEAAfAAAfCSBgAhAAETABERHwARASsAD5AAHg8xAP----------------------
-----------------------------------------TlBtPTh9fQ==
+LgavFQUuBg0HDQcdBACQBS4GrQUuxf4DGwAfowQAAz-F-gFrAB3-Dg9VDxUvDw8Vzw8PFR8PDxX-
+DxiPH28PhG6PFP4kTQAcL-DwMQDd8A0UEAQAEdARAAEXAbABFxEHAdABBwEAAfAAAfCSBgAhAAET
+ABERHwARASsAD5AAHg8xAP------------------------------------------------------
+--------TlBtPTh9fQ==
 :: gfx/1_units.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE2OjU2OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wNyAxNTo0OTo1OCIscmV2aXNpb249MTYzXV1sejQAOggAAHI-AADzIXtbMF09e2JtcD1weHUA
@@ -6520,7 +6589,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-07 15:50:27",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-07 18:31:32",modified="2025-12-07 18:31:32"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -6803,7 +6872,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 18:31:32"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -6815,17 +6884,16 @@ Bj8AAQsSAAEGACkCBg8ADwYABR4DUQAPJAAC0QMCCAYCAQQCAAYCAQN1AEEFAggDEgAQAwwAUwEH
 AgcFGAAAFQAxBwIBDwARCQ8AEQ0GAD8EBQKRAgFfZmxvb3KRAhhQMC41fX0=
 :: map/bandit_village.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI2IDA1OjE2OjMxIixtb2RpZmllZD0iMjAyNS0x
-Mi0wNyAwMTo1MTozOSIscmV2aXNpb249NjRdXWx6NAAkAgAAGwUAAPAYe3tibXA9cHh1AEyAEBAA
+Mi0wNyAxNTo1NjoxNCIscmV2aXNpb249NjVdXWx6NAAEAgAALAQAAPAYe3tibXA9cHh1AEyAEBAA
 KwAAAAgEQgAAABMEAAkEAAoECwAAABQEDwBDAAAACw8A0TIAAAARBAIAAAASBAEGAHEFAAAAEAQQ
 GABBAwAAAQYAAhIA8RksaGlkZGVuPWZhbHNlLG5hbWU9Im1ldGF0aWxlcyIscGFuX3g9LTExCgCG
 eT0tMTguODMBABAsKABSX2g9MTYKABB3CgCKem9vbT0xfSy_AMgAIgIALQIALgIALwIMANcIIgIA
 NQIANgIANwIADAAgByLDAIkAPQIAPgIAPwwAdwgiAgYAAAJFABUCEgAEPwBHASICCjMANU0AAC0A
 NQwAACcAFwwkAG8QAAAfIgISAQGnZnJvbnRfd2FsbBQBEzAUAUUzLjE2AQAfNxIBGPADBiMCADQC
 DiMCADwCByMCADoC5gABBgBECCMCBgYAAhsAQQYAAAIbAPECAToCPwAABToCADkCDgAAADwGACAy
-AtMBBEIAXw8AAB8jygACPG1pZMgAD9wBMBcgUgEXAAwAFzIMABdtDAAfMHkCA09iYWNrZgE_bwAK
-AgALAgYAFBcBDAAPBgAO2wEKAgBFAgBGAgBHAgAMAB8LWgABYRACAAgCAgYALwAQJAAAA1QAMRAC
-ASEAKQIIGwAJJwB2EAIECAIDEHUAEQMSABQEYwBBHwgCB0gAHQ0GABcBNgBOCBACB2YADyMBNy8A
-ClADA09sb29y5AElUG09MX19
+AtMBBEIAXw8AAB8jygACPG1pZMgAD9wBMBcgUgEXAAwAFzIMABdtDAAfMHkCA09iYWNrngBBxwwC
+AEUCAEYCAEcCAAwAoQgMAgAQAgAIAgIGACMAEBIAEQEMAOYCCAIHDAIBEAIECAIDEDYAEQMSABQE
+OQBBHwgCBzMAHQ0GABcBNgCPCBACBwgCHwxfAgNPbG9vcvMAJ1BtPTF9fQ==
 :: map/castle.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI0IDA1OjA5OjU2Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjoxNCIscmV2aXNpb249Nl1dbHo0AJEAAACLAwAA8Sx7e2JtcD1weHUATIAQEADC
@@ -6833,7 +6901,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 18:31:32"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -6841,5 +6909,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 15:50:28"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 18:31:32"]]
 :: [eoc]

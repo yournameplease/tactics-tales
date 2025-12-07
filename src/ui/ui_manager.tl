@@ -11,6 +11,8 @@ require("src/ui/panels/combat_preview")
 require("src/ui/panels/text_node")
 require("src/ui/panels/event_message_log")
 
+local PageDivider = require("src/ui/decoration/page_divider")
+
 require("src/ui/validator")
 
 global record UILayout
@@ -37,8 +39,11 @@ function UIManager.new(): UIManager
         return { "Turn " .. turn }
     end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(_state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
+
+    local page_divider = PageDivider.new(5)
+
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row"})
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", transparent = false})
 
         -- Left Sidebar
         local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
@@ -46,12 +51,13 @@ function UIManager.new(): UIManager
         left:add(UnitInfo.new({ padding = 0, decoration = "border"  }))
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
+        battle_root:add(page_divider)
         battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
 
         self.layouts["TACTICS"]= { root = battle_root }
     end
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row"})
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", transparent = false})
 
         -- Left Sidebar
         local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
@@ -59,6 +65,7 @@ function UIManager.new(): UIManager
         left:add(CombatPreview.new({ padding = 0, decoration = "border"  }))
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
+        battle_root:add(page_divider)
         battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
 
         self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
@@ -86,6 +93,7 @@ function UIManager.new(): UIManager
         COLOR_DECORATION_SHADOW = 20,
         COLOR_INTERIOR = 15,
         COLOR_INTERIOR_TEXT = 21,
+        COLOR_CLEAR = 20
     }
 
     return self
@@ -100,7 +108,7 @@ function UIManager:draw(game_context: GameContext)
     root:layout(root.x, root.y)
 
     -- Render
-    cls(self.theme.COLOR_INTERIOR)
+    cls(self.theme.COLOR_CLEAR)
     root:draw(game_context, self.theme)
 end
 

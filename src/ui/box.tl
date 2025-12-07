@@ -37,6 +37,7 @@ global interface UIElement
     padding: integer
     decoration_padding: integer
     decoration: DecorationStyle
+    transparent: boolean
     children: { Box }
 
     add: function(self, UIElement): UIElement
@@ -104,7 +105,8 @@ function Box.new(props: UIElement): Box
     self.padding = props.padding or 2
     self.decoration_padding = props.decoration_padding or self.padding - 1
     self.decoration = props.decoration -- "embossed" or "recessed"
-
+    self.transparent = props.transparent ~= false
+    
     self.children = {}
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
@@ -419,8 +421,21 @@ function Box:draw_border(ui_theme: UITheme)
     rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
+function Box:draw_solid(ui_theme: UITheme)
+    local x = self.x + self.internal_margin.l
+    local y = self.y + self.internal_margin.t
+    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+    rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
+end
+
 function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
-    local box = self as Box -- Cast!  All classes subclass to box though
+    local box = self as Box -- Cast!  All classes inherit from box though
+
+    if not box.transparent then
+        box:draw_solid(ui_theme)
+    end
+    
     if box.decoration == 'embossed' then
         box:draw_embossed(ui_theme)
     elseif box.decoration == 'recessed' then
