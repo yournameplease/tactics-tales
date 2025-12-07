@@ -20,6 +20,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
     self:add(PortraitBox.new(function(state: GameContext): BattleUnit return state.hovered_unit end))
+    self:add(Box.new({ flex_grow = 1}))
 
     local info_col = self:add(Box.new({
         auto_height = true,
