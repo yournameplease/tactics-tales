@@ -10,7 +10,7 @@ end
 
 setmetatable(PortraitBox, { __index = Box })
 
-local FEET_ANCHOR = AnimationAnchorPoint.of(12, 22)
+local FEET_ANCHOR = AnimationAnchorPoint.of(11, 22)
 
 function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): PortraitBox
     local box = Box.new({
@@ -29,6 +29,14 @@ function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
 
     local unit = self.get_selected_unit(state)
     if unit then
+        local shadow_color = ui_theme.COLOR_DECORATION_SHADOW
+        draw_shadow(shadow_color,
+                function(draw_x: integer,draw_y: integer)
+                    local draw_pos: Point = DrawPoint.of(draw_x, draw_y)
+                    CharacterRenderer.draw(unit, (FEET_ANCHOR+draw_pos) as DrawPoint, unit.side, false, false)
+                end,
+                self.x, self.y)
+
         Colors.apply_palette("paper")
         local self_pos: Point = DrawPoint.of(self.x, self.y)
         CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as DrawPoint, unit.side, false, false)
