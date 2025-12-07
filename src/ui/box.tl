@@ -106,13 +106,24 @@ function Box.new(props: UIElement): Box
     self.decoration_padding = props.decoration_padding or self.padding - 1
     self.decoration = props.decoration -- "embossed" or "recessed"
     self.transparent = props.transparent == true
-    
+
     self.children = {}
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
     assert(not (self.flex_grow > 0  and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
-    assert(self.decoration_padding < self.padding or self.decoration_padding == 0)
+    assert(
+        self.decoration_padding == 0
+        or
+        self.decoration_padding < self.padding
+        or
+        (
+            self.decoration_padding < self.internal_margin.t and
+            self.decoration_padding < self.internal_margin.b and
+            self.decoration_padding < self.internal_margin.l and
+            self.decoration_padding < self.internal_margin.r
+        )
+    )
     return self
 end
 
@@ -129,8 +140,8 @@ function Box:measure()
     -- A. If we are fixed size, we don't care about children (optimization)
     -- EXCEPT if we contain content that might overflow (not handled here yet)
     if not self.auto_width and not self.auto_height then
-        self._calculated_w = self.w + self.internal_margin.l + self.internal_margin.r
-        self._calculated_h = self.h + self.internal_margin.t + self.internal_margin.b
+        self._calculated_w = self.w
+        self._calculated_h = self.h
         --LOG.info("Measured", self._calculated_w, self._calculated_h)
         -- We still measure children so they know their own size
         for _, child in ipairs(self.children) do
@@ -152,8 +163,8 @@ function Box:measure()
         end
 
         -- Get child's total footprint (Size + Margins)
-        local child_outer_w = (child._calculated_w or child.w) + (child.internal_margin and (child.internal_margin.l + child.internal_margin.r) or 0)
-        local child_outer_h = (child._calculated_h or child.h) + (child.internal_margin and (child.internal_margin.t + child.internal_margin.b) or 0)
+        local child_outer_w = (child._calculated_w or child.w) 
+        local child_outer_h = (child._calculated_h or child.h) 
 
         if is_row then
             content_w = content_w + child_outer_w
@@ -167,8 +178,8 @@ function Box:measure()
     end
 
     -- C. Set our calculated size (Content + Padding)
-    self._calculated_w = self.auto_width and (content_w + self.padding*2) or self.w
-    self._calculated_h = self.auto_height and (content_h + self.padding*2) or self.h
+    self._calculated_w = self.auto_width and content_w or self.w
+    self._calculated_h = self.auto_height and content_h or self.h
 end
 
 -- =========================================================
@@ -188,7 +199,7 @@ function Box:layout(parent_x: integer, parent_y: integer)
     local is_row = (self.dir == "row")
 
     -- 1. Calculate Free Space for Flex
-    local used_space = self.padding * 2
+    local used_space = 0
     local total_flex = 0
 
     -- We assume margins were accounted for in the Measure pass size
@@ -206,19 +217,18 @@ function Box:layout(parent_x: integer, parent_y: integer)
         else
             local child_w = child._calculated_w or child.w
             local child_h = child._calculated_h or child.h
-            local cm = child.internal_margin or {t=0,b=0,l=0,r=0}
 
             if is_row then
-                used_space = used_space + child_w + cm.l + cm.r
+                used_space = used_space + child_w
             else
-                used_space = used_space + child_h + cm.t + cm.b
+                used_space = used_space + child_h
             end
         end
     end
 
     -- 2. Distribute Children
-    local cx = self.x + self.padding + self.internal_margin.l
-    local cy = self.y + self.padding + self.internal_margin.t
+    local cx = self.x
+    local cy = self.y
     local total_size = is_row and my_w or my_h
     local remaining = max(0, total_size - used_space)
     local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
@@ -237,9 +247,9 @@ function Box:layout(parent_x: integer, parent_y: integer)
 
         if self.cross_stretch then
             if is_row then
-                child_h = self.h - (self.padding * 2)
+                child_h = self.h 
             else
-                child_w = self.w - (self.padding * 2)
+                child_w = self.w 
             end
         end
         -- Recurse Layout
@@ -445,8 +455,8 @@ function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
     end
 
     -- Debug rectangle
-    --LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
-    --LOG.info(box.x, box.y, box.w, box.h)
+    LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
+    LOG.info(box.x, box.y, box.w, box.h)
     --rrect(
     --        box.x+box.padding+box.internal_margin.l,
     --        box.y+box.padding+box.internal_margin.t,
