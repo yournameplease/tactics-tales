@@ -82,13 +82,16 @@ function Box.new(props: UIElement): Box
             l = props.internal_margin.l or 0,
             r = props.internal_margin.r or 0
         }
+        self.decoration_padding = props.decoration_padding or 0
     else
+        self.padding = props.padding or 2
         self.internal_margin = {
-            t = 0,
-            b = 0,
-            l = 0,
-            r = 0
+            t = self.padding,
+            b = self.padding,
+            l = self.padding,
+            r = self.padding
         }
+        self.decoration_padding = props.decoration_padding or self.padding - 1
     end
 
     -- calculate width/height based on children
@@ -102,8 +105,6 @@ function Box.new(props: UIElement): Box
     -- Layout properties
     self.dir = props.dir or "col" -- "row" or "col"
     self.gap = props.gap or 1
-    self.padding = props.padding or 2
-    self.decoration_padding = props.decoration_padding or self.padding - 1
     self.decoration = props.decoration -- "embossed" or "recessed"
     self.transparent = props.transparent == true
 
@@ -114,8 +115,6 @@ function Box.new(props: UIElement): Box
     assert(not (self.flex_grow > 0  and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
     assert(
         self.decoration_padding == 0
-        or
-        self.decoration_padding < self.padding
         or
         (
             self.decoration_padding < self.internal_margin.t and
@@ -178,8 +177,8 @@ function Box:measure()
     end
 
     -- C. Set our calculated size (Content + Padding)
-    self._calculated_w = self.auto_width and content_w or self.w
-    self._calculated_h = self.auto_height and content_h or self.h
+    self._calculated_w = self.auto_width and (content_w+self.internal_margin.l+self.internal_margin.r) or self.w
+    self._calculated_h = self.auto_height and (content_h+self.internal_margin.t+self.internal_margin.b) or self.h
 end
 
 -- =========================================================
@@ -188,8 +187,8 @@ end
 -- =========================================================
 function Box:layout(parent_x: integer, parent_y: integer)
     -- Use calculated sizes if available, otherwise fixed
-    local my_w = self._calculated_w or self.w
-    local my_h = self._calculated_h or self.h
+    local my_w = (self._calculated_w or self.w) - self.internal_margin.l - self.internal_margin.r
+    local my_h = (self._calculated_h or self.h) - self.internal_margin.t - self.internal_margin.b
 
     -- Apply our own position (usually passed from parent)
     -- If no parent (root), use self.x/y
@@ -215,8 +214,10 @@ function Box:layout(parent_x: integer, parent_y: integer)
             total_flex = total_flex + child.flex_grow
             -- Don't add to used_space yet, flex takes remainder
         else
-            local child_w = child._calculated_w or child.w
-            local child_h = child._calculated_h or child.h
+            local c_m = child.internal_margin
+            
+            local child_w = (child._calculated_w or child.w)
+            local child_h = (child._calculated_h or child.h)
 
             if is_row then
                 used_space = used_space + child_w
@@ -227,8 +228,8 @@ function Box:layout(parent_x: integer, parent_y: integer)
     end
 
     -- 2. Distribute Children
-    local cx = self.x + self.padding + self.internal_margin.l
-    local cy = self.y + self.padding + self.internal_margin.t
+    local cx = self.x + self.internal_margin.l
+    local cy = self.y + self.internal_margin.t
     local total_size = is_row and my_w or my_h
     local remaining = max(0, total_size - used_space)
     local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
@@ -247,9 +248,9 @@ function Box:layout(parent_x: integer, parent_y: integer)
 
         if self.cross_stretch then
             if is_row then
-                child_h = self.h 
+                child_h = self.h - self.internal_margin.t - self.internal_margin.b
             else
-                child_w = self.w 
+                child_w = self.w - self.internal_margin.l - self.internal_margin.r 
             end
         end
         -- Recurse Layout
@@ -422,12 +423,12 @@ function Box:draw_recessed(ui_theme: UITheme)
 end
 
 function Box:draw_border(ui_theme: UITheme)
-    local x = self.x + self.internal_margin.l
-    local y = self.y + self.internal_margin.t
-    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
-    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
-    local pad = self.decoration_padding
-    local r = max(0, pad-1)
+    local d_pad = self.decoration_padding
+    local x = self.x + self.internal_margin.l - d_pad
+    local y = self.y + self.internal_margin.t - d_pad
+    local w = self.w - (self.internal_margin.l + self.internal_margin.r - 2*d_pad)
+    local h = self.h - (self.internal_margin.t + self.internal_margin.b - 2*d_pad)
+    local r = max(0, d_pad-1)
     rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
@@ -455,20 +456,20 @@ function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
     end
 
     -- Debug rectangle
-    LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
-    LOG.info(box.x, box.y, box.w, box.h)
-    --rrect(
-    --        box.x+box.padding+box.internal_margin.l,
-    --        box.y+box.padding+box.internal_margin.t,
-    --        box.w - 2*box.padding,
-    --        box.h - 2*box.padding,
-    --        0, 14)
-    --rrect(
-    --        box.x+box.padding+box.internal_margin.l,
-    --        box.y+box.padding+box.internal_margin.t,
-    --        box._calculated_w - 2*box.padding,
-    --        box._calculated_h - 2*box.padding,
-    --        0, 28)
+    -- LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
+    -- LOG.info(box.x, box.y, box.w, box.h)
+    --     rrect(
+    --             box.x+box.internal_margin.l-box.decoration_padding,
+    --             box.y+box.internal_margin.t-box.decoration_padding,
+    --             box.w - (box.internal_margin.l+box.internal_margin.r)+2*box.decoration_padding,
+    --             box.h - (box.internal_margin.t+box.internal_margin.b)+2*box.decoration_padding,
+    --             0, 14)
+        -- rrect(
+        --         box.x+box.padding+box.internal_margin.l,
+        --         box.y+box.padding+box.internal_margin.t,
+        --         box._calculated_w - 2*box.padding,
+        --         box._calculated_h - 2*box.padding,
+        --         0, 28)
 
     -- 2. Draw Children
     for _, child in ipairs(box.children) do

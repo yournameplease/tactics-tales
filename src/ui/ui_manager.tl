@@ -42,6 +42,13 @@ function UIManager.new(): UIManager
 
     local page_divider = PageDivider.new(7)
 
+    local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+            {
+                decoration_padding = 2,
+                decoration = "border",
+                internal_margin = { t = 5, b = 5, l = 4, r = 4 }
+            })
+    
     do
         local battle_root = Box.new({
             x=0, y=0,
@@ -54,18 +61,13 @@ function UIManager.new(): UIManager
         })
 
         -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
         left:add(battle_summary)
-        left:add(UnitInfo.new({ padding = 0, decoration = "border"  }))
-        left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
+        left:add(UnitInfo.new({ padding = 2, decoration = "border"  }))
+        left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
 
         battle_root:add(page_divider)
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
-            {
-                decoration_padding = 2,
-                decoration = "border",
-                internal_margin = { t = 5, b = 3, l = 4, r = 4 }
-            }))
+        battle_root:add(tactics_map)
 
         self.layouts["TACTICS"]= { root = battle_root }
     end
@@ -79,18 +81,13 @@ function UIManager.new(): UIManager
         })
 
         -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 0}))
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
         left:add(battle_summary)
         left:add(CombatPreview.new({ padding = 0, decoration = "border"  }))
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
         battle_root:add(page_divider)
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
-            {
-                decoration_padding = 2,
-                decoration = "border",
-                internal_margin = { t = 5, b = 3, l = 4, r = 4 }
-            }))
+        battle_root:add(tactics_map)
 
         self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
     end

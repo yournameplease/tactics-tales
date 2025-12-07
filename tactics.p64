@@ -4726,13 +4726,16 @@ function Box.new(props)
          l = props.internal_margin.l or 0,
          r = props.internal_margin.r or 0,
       }
+      self.decoration_padding = props.decoration_padding or 0
    else
+      self.padding = props.padding or 2
       self.internal_margin = {
-         t = 0,
-         b = 0,
-         l = 0,
-         r = 0,
+         t = self.padding,
+         b = self.padding,
+         l = self.padding,
+         r = self.padding,
       }
+      self.decoration_padding = props.decoration_padding or self.padding - 1
    end
 
 
@@ -4746,8 +4749,6 @@ function Box.new(props)
 
    self.dir = props.dir or "col"
    self.gap = props.gap or 1
-   self.padding = props.padding or 2
-   self.decoration_padding = props.decoration_padding or self.padding - 1
    self.decoration = props.decoration
    self.transparent = props.transparent == true
 
@@ -4758,8 +4759,6 @@ function Box.new(props)
    assert(not (self.flex_grow > 0 and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
    assert(
    self.decoration_padding == 0 or
-
-   self.decoration_padding < self.padding or
 
    (
    self.decoration_padding < self.internal_margin.t and
@@ -4784,8 +4783,8 @@ function Box:measure()
 
 
    if not self.auto_width and not self.auto_height then
-      self._calculated_w = self.w + self.internal_margin.l + self.internal_margin.r
-      self._calculated_h = self.h + self.internal_margin.t + self.internal_margin.b
+      self._calculated_w = self.w
+      self._calculated_h = self.h
 
 
       for _, child in ipairs(self.children) do
@@ -4807,8 +4806,8 @@ function Box:measure()
       end
 
 
-      local child_outer_w = (child._calculated_w or child.w) + (child.internal_margin and (child.internal_margin.l + child.internal_margin.r) or 0)
-      local child_outer_h = (child._calculated_h or child.h) + (child.internal_margin and (child.internal_margin.t + child.internal_margin.b) or 0)
+      local child_outer_w = (child._calculated_w or child.w)
+      local child_outer_h = (child._calculated_h or child.h)
 
       if is_row then
          content_w = content_w + child_outer_w
@@ -4822,8 +4821,8 @@ function Box:measure()
    end
 
 
-   self._calculated_w = self.auto_width and (content_w + self.padding * 2) or self.w
-   self._calculated_h = self.auto_height and (content_h + self.padding * 2) or self.h
+   self._calculated_w = self.auto_width and (content_w + self.internal_margin.l + self.internal_margin.r) or self.w
+   self._calculated_h = self.auto_height and (content_h + self.internal_margin.t + self.internal_margin.b) or self.h
 end
 
 
@@ -4832,8 +4831,8 @@ end
 
 function Box:layout(parent_x, parent_y)
 
-   local my_w = self._calculated_w or self.w
-   local my_h = self._calculated_h or self.h
+   local my_w = (self._calculated_w or self.w) - self.internal_margin.l - self.internal_margin.r
+   local my_h = (self._calculated_h or self.h) - self.internal_margin.t - self.internal_margin.b
 
 
 
@@ -4843,7 +4842,7 @@ function Box:layout(parent_x, parent_y)
    local is_row = (self.dir == "row")
 
 
-   local used_space = self.padding * 2
+   local used_space = 0
    local total_flex = 0
 
 
@@ -4859,21 +4858,22 @@ function Box:layout(parent_x, parent_y)
          total_flex = total_flex + child.flex_grow
 
       else
-         local child_w = child._calculated_w or child.w
-         local child_h = child._calculated_h or child.h
-         local cm = child.internal_margin or { t = 0, b = 0, l = 0, r = 0 }
+         local c_m = child.internal_margin
+
+         local child_w = (child._calculated_w or child.w)
+         local child_h = (child._calculated_h or child.h)
 
          if is_row then
-            used_space = used_space + child_w + cm.l + cm.r
+            used_space = used_space + child_w
          else
-            used_space = used_space + child_h + cm.t + cm.b
+            used_space = used_space + child_h
          end
       end
    end
 
 
-   local cx = self.x + self.padding + self.internal_margin.l
-   local cy = self.y + self.padding + self.internal_margin.t
+   local cx = self.x + self.internal_margin.l
+   local cy = self.y + self.internal_margin.t
    local total_size = is_row and my_w or my_h
    local remaining = max(0, total_size - used_space)
    local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
@@ -4892,9 +4892,9 @@ function Box:layout(parent_x, parent_y)
 
       if self.cross_stretch then
          if is_row then
-            child_h = self.h - (self.padding * 2)
+            child_h = self.h - self.internal_margin.t - self.internal_margin.b
          else
-            child_w = self.w - (self.padding * 2)
+            child_w = self.w - self.internal_margin.l - self.internal_margin.r
          end
       end
 
@@ -5067,12 +5067,12 @@ function Box:draw_recessed(ui_theme)
 end
 
 function Box:draw_border(ui_theme)
-   local x = self.x + self.internal_margin.l
-   local y = self.y + self.internal_margin.t
-   local w = self.w - (self.internal_margin.l + self.internal_margin.r)
-   local h = self.h - (self.internal_margin.t + self.internal_margin.b)
-   local pad = self.decoration_padding
-   local r = max(0, pad - 1)
+   local d_pad = self.decoration_padding
+   local x = self.x + self.internal_margin.l - d_pad
+   local y = self.y + self.internal_margin.t - d_pad
+   local w = self.w - (self.internal_margin.l + self.internal_margin.r - 2 * d_pad)
+   local h = self.h - (self.internal_margin.t + self.internal_margin.b - 2 * d_pad)
+   local r = max(0, d_pad - 1)
    rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
@@ -5100,14 +5100,14 @@ function Box._draw(self, state, ui_theme)
    end
 
 
-
-
-
-
-
-
-
-
+   LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
+   LOG.info(box.x, box.y, box.w, box.h)
+   rrect(
+   box.x + box.internal_margin.l - box.decoration_padding,
+   box.y + box.internal_margin.t - box.decoration_padding,
+   box.w - (box.internal_margin.l + box.internal_margin.r) + 2 * box.decoration_padding,
+   box.h - (box.internal_margin.t + box.internal_margin.b) + 2 * box.decoration_padding,
+   0, 14)
 
 
 
@@ -5147,16 +5147,20 @@ function PageDivider:draw(state, ui_theme)
 
 
    local l = self.x
-   local r = self.x + self.w
+   local r = self.x + self.w - 1
    local t = self.y
    local b = self.y + self.h
 
-   for i = 0, ((self.w + 1) >> 1) - 1 do
+   local w = ((self.w + 1) >> 1) - 1
+   for i = 0, w do
+
       local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
-      local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_SHADOW or ui_theme.COLOR_DECORATION_PRIMARY
+      local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_SHADOW
 
       line(l + i, t + i, l + i, b, c_l)
-      line(r - i, t + i, r - i, b, c_r)
+      if i < w or w & 1 == 0 then
+         line(r - i, t + i, r - i, b, c_r)
+      end
    end
 end
 
@@ -5390,8 +5394,8 @@ function TacticsMap.new(map_width, map_height, props)
    box.map_width = map_width or MAP_WIDTH
    box.map_height = map_height or MAP_HEIGHT
 
-   box.w = box.map_width * TILE_SIZE.x + 2 * box.padding + box.internal_margin.l + box.internal_margin.r
-   box.h = box.map_height * TILE_SIZE.y + 2 * box.padding + box.internal_margin.t + box.internal_margin.b
+   box.w = box.map_width * TILE_SIZE.x + box.internal_margin.l + box.internal_margin.r
+   box.h = box.map_height * TILE_SIZE.y + box.internal_margin.t + box.internal_margin.b
 
    return box
 end
@@ -5479,8 +5483,8 @@ function TacticsMap:draw(state, ui_theme)
    local battle_state = state.battle_state
    local menu = state.menu_manager
 
-   local camera_x = self.x + self.padding
-   local camera_y = self.y + self.padding + HALF_HEIGHT
+   local camera_x = self.x + self.internal_margin.l
+   local camera_y = self.y + self.internal_margin.t
    camera(-camera_x, -camera_y)
 
 
@@ -5833,10 +5837,10 @@ function UIManager.new()
       })
 
 
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1 }))
+      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
       left:add(battle_summary)
-      left:add(UnitInfo.new({ padding = 0, decoration = "border" }))
-      left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
+      left:add(UnitInfo.new({ padding = 2, decoration = "border" }))
+      left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
 
       battle_root:add(page_divider)
       battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
@@ -5858,7 +5862,7 @@ function UIManager.new()
       })
 
 
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 0 }))
+      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
       left:add(battle_summary)
       left:add(CombatPreview.new({ padding = 0, decoration = "border" }))
       left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
@@ -6413,43 +6417,43 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 19:36:55",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 20:45:03",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:54"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 20:45:03"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wNyAxNzoxNjowNSIscmV2aXNpb249MTVdXWx6NAACAQAAljEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -6627,7 +6631,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-07 19:31:59",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-07 20:42:57",modified="2025-12-07 20:45:03"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -6910,7 +6914,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 20:45:03"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -6939,7 +6943,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 20:45:03"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -6947,5 +6951,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 19:36:55"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 20:45:03"]]
 :: [eoc]

@@ -42,8 +42,8 @@ function TacticsMap.new(map_width: integer, map_height: integer, props: UIElemen
     box.map_width = map_width or MAP_WIDTH
     box.map_height = map_height or MAP_HEIGHT
 
-    box.w = box.map_width * TILE_SIZE.x + 2 * box.padding + box.internal_margin.l + box.internal_margin.r
-    box.h = box.map_height * TILE_SIZE.y + 2 * box.padding + box.internal_margin.t + box.internal_margin.b
+    box.w = box.map_width * TILE_SIZE.x + box.internal_margin.l + box.internal_margin.r
+    box.h = box.map_height * TILE_SIZE.y + box.internal_margin.t + box.internal_margin.b
 
     return box
 end
@@ -131,8 +131,8 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local battle_state = state.battle_state
     local menu = state.menu_manager
 
-    local camera_x = self.x + self.padding
-    local camera_y = self.y + self.padding + HALF_HEIGHT
+    local camera_x = self.x + self.internal_margin.l
+    local camera_y = self.y + self.internal_margin.t
     camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
