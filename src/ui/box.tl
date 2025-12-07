@@ -17,6 +17,7 @@ end
 global enum DecorationStyle
     "embossed"
     "recessed"
+    "border"
 end
 
 global interface UIElement
@@ -408,12 +409,24 @@ function Box:draw_recessed(ui_theme: UITheme)
     self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
+function Box:draw_border(ui_theme: UITheme)
+    local x = self.x + self.internal_margin.l
+    local y = self.y + self.internal_margin.t
+    local w = self.w - (self.internal_margin.l + self.internal_margin.r)
+    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
+    local pad = self.decoration_padding
+    local r = max(0, pad-1)
+    rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
+end
+
 function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
     local box = self as Box -- Cast!  All classes subclass to box though
     if box.decoration == 'embossed' then
         box:draw_embossed(ui_theme)
     elseif box.decoration == 'recessed' then
         box:draw_recessed(ui_theme)
+    elseif box.decoration == 'border' then
+        box:draw_border(ui_theme)
     end
 
     -- Debug rectangle

@@ -30,36 +30,36 @@ function UIManager.new(): UIManager
     -- 1. Create the BATTLE layout tree
     self.layouts = {}
 
-    local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
-    battle_summary:add(TextNode.new({ func = function(_state: GameContext): { string } return { "BATTLE" }  end, justify = "center" }))
+    local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
+    battle_summary:add(TextNode.new({ func = function(_state: GameContext): { string } return { "BATTLE" }  end, justify = "center"}))
     battle_summary:add(TextNode.new({ func = function(state: GameContext): { string }
         local turn = state.turn_manager.turn
         return { "Turn " .. turn }
     end, justify = "center" }))
     battle_summary:add(TextNode.new({ func = function(_state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row"})
 
         -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
         left:add(battle_summary)
-        left:add(UnitInfo.new({ padding = 0 }))
-        left:add(EventMessageLog.new({ flex_grow = 1}))
+        left:add(UnitInfo.new({ padding = 0, decoration = "border"  }))
+        left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
 
         self.layouts["TACTICS"]= { root = battle_root }
     end
     do
-        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row", decoration = "embossed"})
+        local battle_root = Box.new({x=0, y=0, w=480, h=270, dir="row"})
 
         -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, decoration = "recessed" }))
+        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1}))
         left:add(battle_summary)
-        left:add(CombatPreview.new({ padding = 0 }))
-        left:add(EventMessageLog.new({ flex_grow = 1}))
+        left:add(CombatPreview.new({ padding = 0, decoration = "border"  }))
+        left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "recessed"}))
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
 
         self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
     end
@@ -72,12 +72,20 @@ function UIManager.new(): UIManager
     -- Set initial
     self.current_layout = self.layouts.TACTICS
 
+    -- old "stone" theme
+    -- self.theme = {
+    --     COLOR_DECORATION_PRIMARY = 22,
+    --     COLOR_DECORATION_HIGHLIGHT = 6,
+    --     COLOR_DECORATION_SHADOW = 5,
+    --     COLOR_INTERIOR = 21,
+    --     COLOR_INTERIOR_TEXT = 7,
+    -- }
     self.theme = {
-        COLOR_DECORATION_PRIMARY = 22,
-        COLOR_DECORATION_HIGHLIGHT = 6,
-        COLOR_DECORATION_SHADOW = 5,
-        COLOR_INTERIOR = 21,
-        COLOR_INTERIOR_TEXT = 7,
+        COLOR_DECORATION_PRIMARY = 4,
+        COLOR_DECORATION_HIGHLIGHT = 31,
+        COLOR_DECORATION_SHADOW = 20,
+        COLOR_INTERIOR = 15,
+        COLOR_INTERIOR_TEXT = 21,
     }
 
     return self
@@ -92,6 +100,7 @@ function UIManager:draw(game_context: GameContext)
     root:layout(root.x, root.y)
 
     -- Render
+    cls(self.theme.COLOR_INTERIOR)
     root:draw(game_context, self.theme)
 end
 
