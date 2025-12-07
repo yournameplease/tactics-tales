@@ -1,3 +1,4 @@
+require("src/types")
 require("src/ui/box")
 local CharacterRenderer = require("src/character/character_renderer")
 
@@ -8,7 +9,7 @@ end
 
 setmetatable(PortraitBox, { __index = Box })
 
-local BACKGROUND_SPRITE = 7 + 3 * 256
+local FEET_ANCHOR = AnimationAnchorPoint.of(12, 22)
 
 function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): PortraitBox
     local box = Box.new({
@@ -27,10 +28,8 @@ function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
 
     local unit = self.get_selected_unit(state)
     if unit then
-        -- TODO: magic numbers galore
-        spr(BACKGROUND_SPRITE, self.x, self.y+8)
-        -- Use the renderer we defined previously
-        CharacterRenderer.draw(unit, { x = self.x+8, y = self.y+28}, unit.side, true, false)
+        local self_pos: Point = DrawPoint.of(self.x, self.y)
+        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as DrawPoint, unit.side, true, false)
     end
 end
 

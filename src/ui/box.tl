@@ -126,6 +126,21 @@ function Box.new(props: UIElement): Box
     return self
 end
 
+-- utility constructors
+
+function Box.flex_col(): Box
+    return Box.new({ dir = "col", auto_width = true})
+end
+
+function Box.flex_row(): Box
+    return Box.new({ dir = "row", auto_width = true})
+end
+
+-- good for lazy justification
+function Box.spacer(): Box
+    return Box.new({ flex_grow = 1})
+end
+
 function Box:add(child: UIElement): UIElement
     add(self.children, child as Box) -- Note: casting
     return child -- Return child for chaining

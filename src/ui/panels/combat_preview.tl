@@ -47,7 +47,13 @@ function CombatPreview.new(props: UIElement): CombatPreview
     setmetatable(self, { __index = CombatPreview })
 
     local attacker_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.acting_unit end)
+    local left = Box.flex_col()
+    left:add(attacker_portrait)
+    left:add(Box.spacer())
     local defender_portrait = PortraitBox.new(function(state: GameContext): BattleUnit return state.hovered_unit end)
+    local right = Box.flex_col()
+    right:add(defender_portrait)
+    right:add(Box.spacer())
 
     local preview_text = TextNode.new({
         flex_grow = 1,
@@ -55,9 +61,9 @@ function CombatPreview.new(props: UIElement): CombatPreview
         func = get_preview_text
     })
 
-    self:add(attacker_portrait)
+    self:add(left)
     self:add(preview_text)
-    self:add(defender_portrait)
+    self:add(right)
 
     return self
 end
