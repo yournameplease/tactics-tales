@@ -25,7 +25,7 @@ function PageDivider:draw(state: GameContext, ui_theme: UITheme)
     for i=0,w do
 
         local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
-        local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_SHADOW
+        local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
 
         line(l + i, t + i, l + i, b, c_l)
         if i < w or w & 1 == 0 then
