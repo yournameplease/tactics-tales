@@ -25,6 +25,20 @@ local function shield(name: string, sprite_id: integer, slots: integer, defense:
     }
 end
 
+local function armor(name: string, slots: integer, defense: integer, avoid: integer): ItemDefinition
+    return {
+        name = name,
+        type = "ARMOR",
+        slots = slots,
+        equip_slot = "BODY",
+
+        equipment_effects = {
+            IncreaseDefenseEffect.of(defense, "ARMOR"),
+            IncreaseAvoidEffect.of(avoid, "ARMOR")
+        }        
+    }
+end
+
 local default_weapon: WeaponDefinition = {
     name = "Default Weapon",
     sprite = 104,
@@ -166,7 +180,8 @@ global ITEM_DATA: {string: ItemDefinition} = {
     ),
     greatsword = two_handed_weapon( "Greatsword", 111, 3, 70, 2),
     bow = ranged_weapon( "Bow", 112, 2, 90, 2, 2, 2 ),
-    shield = shield("Shield", 113, 1, 1, 20)
+    shield = shield("Shield", 113, 1, 1, 20),
+    armor = armor("Armor", 2, 1, 20)
 }
 
 return ITEM_DATA

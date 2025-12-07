@@ -17,6 +17,7 @@ end
 global enum HeadwearId
 	"glasses"
 	"hood"
+	"cultist_hood"
 	"wizard_hat"
 	"hooded_wizard_hat"
 end

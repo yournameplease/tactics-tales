@@ -80,7 +80,40 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
         item_loadout_options = ListSelector.of_randomizers(
 			WeightedOptionSelector.of( "poleaxe" )
 		)
-    }
+    },
+	militia_base = {
+		parent_template = "human_base",
+		body_options = WeightedOptionSelector.of_weighted(
+			WeightedOption.of("DEFAULT", 1),
+			WeightedOption.of("SLEEVELESS", 1)
+		)
+	},
+	militia_spearman = {
+		parent_template = "militia_base",
+        item_loadout_options = ListSelector.of_randomizers(
+			WeightedOptionSelector.of( "spear" ),
+			WeightedOptionSelector.of("shield" )
+		)
+	}, 
+	militia_armor = {
+		parent_template = "militia_base",
+        item_loadout_options = ListSelector.of_randomizers(
+			WeightedOptionSelector.of( "mace" ),
+			WeightedOptionSelector.of("shield" ),
+			WeightedOptionSelector.of("armor" )
+		)
+	}, 
+	militia_archer = {
+		parent_template = "militia_base",
+        item_loadout_options = ListSelector.of_randomizers(
+			WeightedOptionSelector.of( "bow" )
+		)
+	}, 
+	cultist_base = {
+		parent_template = "human_base",
+		body_options = WeightedOptionSelector.of("ROBED"),
+		headwear_options = WeightedOptionSelector.of("cultist_hood")
+	},
 }
 
 return UNIT_TEMPLATES
