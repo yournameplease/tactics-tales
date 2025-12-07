@@ -227,8 +227,8 @@ function Box:layout(parent_x: integer, parent_y: integer)
     end
 
     -- 2. Distribute Children
-    local cx = self.x
-    local cy = self.y
+    local cx = self.x + self.padding + self.internal_margin.l
+    local cy = self.y + self.padding + self.internal_margin.t
     local total_size = is_row and my_w or my_h
     local remaining = max(0, total_size - used_space)
     local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
