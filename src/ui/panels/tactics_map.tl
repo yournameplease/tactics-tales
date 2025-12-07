@@ -42,10 +42,8 @@ function TacticsMap.new(map_width: integer, map_height: integer, props: UIElemen
     box.map_width = map_width or MAP_WIDTH
     box.map_height = map_height or MAP_HEIGHT
 
-    box.padding = box.decoration_padding
-    box.internal_margin = { t = HALF_HEIGHT, b = 0, l = 0, r = 0 }
-    box.w = box.map_width * TILE_SIZE.x + 2 * box.padding
-    box.h = box.map_height * TILE_SIZE.y + 2 * box.padding
+    box.w = box.map_width * TILE_SIZE.x + 2 * box.padding + box.internal_margin.l + box.internal_margin.r
+    box.h = box.map_height * TILE_SIZE.y + 2 * box.padding + box.internal_margin.t + box.internal_margin.b
 
     return box
 end

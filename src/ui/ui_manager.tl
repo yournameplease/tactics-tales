@@ -60,7 +60,12 @@ function UIManager.new(): UIManager
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
         battle_root:add(page_divider)
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+            {
+                decoration_padding = 2,
+                decoration = "border",
+                internal_margin = { t = 5, b = 3, l = 4, r = 4 }
+            }))
 
         self.layouts["TACTICS"]= { root = battle_root }
     end
@@ -80,7 +85,12 @@ function UIManager.new(): UIManager
         left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
 
         battle_root:add(page_divider)
-        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT, {decoration = "border"}))
+        battle_root:add(TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+            {
+                decoration_padding = 2,
+                decoration = "border",
+                internal_margin = { t = 5, b = 3, l = 4, r = 4 }
+            }))
 
         self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
     end
