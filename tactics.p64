@@ -2028,6 +2028,7 @@ local function apply_template_to_parent(parent, child)
       movement = child.movement or parent.movement,
       hp_max = child.hp_max or parent.hp_max,
       item_loadout_options = child.item_loadout_options or parent.item_loadout_options,
+      eyewear_options = child.eyewear_options or parent.eyewear_options,
       headwear_options = child.headwear_options or parent.headwear_options,
       body_options = child.body_options or parent.body_options,
       sex_options = child.sex_options or parent.sex_options,
@@ -2062,7 +2063,8 @@ function CharacterGenerator.generate_from_template(id, template_id)
    character.stats.movement = template.movement
    character.stats.hp_max = template.hp_max
    character.stats.def = 0
-
+   character.appearance.eyewear = template.eyewear_options:pick_random()
+   character.appearance.headwear = template.headwear_options:pick_random()
    character.appearance.body_class = template.body_options:pick_random()
    character.appearance.sex = template.sex_options:pick_random()
    character.appearance.skin = template.skin_color_options:pick_random()
@@ -2178,6 +2180,7 @@ require("src/types")
 require("src/battle/tactics/battle_unit")
 require("src/character/character_manager")
 require("src/character/object/character")
+require("src/character/sprite_data")
 
 local ANIMATION_DATA = require("src/character/animation_data")
 
@@ -2281,16 +2284,33 @@ function CharacterRenderer.draw_head(battle_unit, point, side, set_pal)
       set_palette(battle_unit, side)
    end
 
+   local headwear = nil
+   if battle_unit.character.appearance.headwear then
+      headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]
+   end
+
    spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
 
-   spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
-   if battle_unit.character.appearance.sex == "male" then
-      spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-   else
-      spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+   if headwear == nil or headwear.draw_eyewear then
+      spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
+      if battle_unit.character.appearance.eyewear ~= nil then
+         spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+      end
    end
-   if battle_unit.character.appearance.beard ~= nil then
-      spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+   if headwear == nil or headwear.draw_hair then
+      if battle_unit.character.appearance.sex == "male" then
+         spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+      else
+         spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+      end
+   end
+   if headwear == nil or headwear.draw_beard then
+      if battle_unit.character.appearance.beard ~= nil then
+         spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+      end
+   end
+   if headwear ~= nil then
+      spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
    end
 
 end
@@ -2884,6 +2904,8 @@ CharacterAppearance = {}
 
 
 
+
+
 CharacterStats = {}
 
 
@@ -2910,6 +2932,43 @@ function Character:get_weapon_range()
 end
 
 return Character
+
+:: build/character/sprite_data.lua
+require("src/character/object/character")
+
+HeadwearSpriteData = {}
+
+
+
+
+
+
+HEADWEAR_SPRITE_DATA = {
+   hood = {
+      draw_hair = false,
+      draw_beard = true,
+      draw_eyewear = true,
+      sprite = 100,
+   },
+   cultist_hood = {
+      draw_hair = false,
+      draw_beard = false,
+      draw_eyewear = false,
+      sprite = 98,
+   },
+   wizard_hat = {
+      draw_hair = false,
+      draw_beard = true,
+      draw_eyewear = true,
+      sprite = 97,
+   },
+   hooded_wizard_hat = {
+      draw_hair = false,
+      draw_beard = false,
+      draw_eyewear = false,
+      sprite = 99,
+   },
+}
 
 :: build/config.lua
 require("src/types")
@@ -3042,6 +3101,7 @@ CharacterTemplate = {}
 
 
 
+
 BASE_UNIT = {
    movement = 5,
    hp_max = 5,
@@ -3051,8 +3111,13 @@ BASE_UNIT = {
 
 
    headwear_options = WeightedOptionSelector.of_weighted(
+   WeightedOption.of(nil, 8),
+   WeightedOption.of("wizard_hat", 1),
+   WeightedOption.of("hood", 1)),
+
+   eyewear_options = WeightedOptionSelector.of_weighted(
    WeightedOption.of(nil, 9),
-   WeightedOption.of("glasses", 1)),
+   WeightedOption.of(96, 1)),
 
    body_options = WeightedOptionSelector.of_weighted(
    WeightedOption.of("DEFAULT", 8),
@@ -3086,6 +3151,9 @@ UNIT_TEMPLATES = {
       WeightedOption.of("SLEEVELESS", 1),
       WeightedOption.of("SHIRTLESS", 5)),
 
+      headwear_options = WeightedOptionSelector.of_weighted(
+      WeightedOption.of(nil, 1)),
+
    },
    bandit_goon = {
       parent_template = "bandit_base",
@@ -3100,6 +3168,39 @@ UNIT_TEMPLATES = {
       item_loadout_options = ListSelector.of_randomizers(
       WeightedOptionSelector.of("poleaxe")),
 
+   },
+   militia_base = {
+      parent_template = "human_base",
+      body_options = WeightedOptionSelector.of_weighted(
+      WeightedOption.of("DEFAULT", 1),
+      WeightedOption.of("SLEEVELESS", 1)),
+
+   },
+   militia_spearman = {
+      parent_template = "militia_base",
+      item_loadout_options = ListSelector.of_randomizers(
+      WeightedOptionSelector.of("spear"),
+      WeightedOptionSelector.of("shield")),
+
+   },
+   militia_armor = {
+      parent_template = "militia_base",
+      item_loadout_options = ListSelector.of_randomizers(
+      WeightedOptionSelector.of("mace"),
+      WeightedOptionSelector.of("shield"),
+      WeightedOptionSelector.of("armor")),
+
+   },
+   militia_archer = {
+      parent_template = "militia_base",
+      item_loadout_options = ListSelector.of_randomizers(
+      WeightedOptionSelector.of("bow")),
+
+   },
+   cultist_base = {
+      parent_template = "human_base",
+      body_options = WeightedOptionSelector.of("ROBED"),
+      headwear_options = WeightedOptionSelector.of("cultist_hood"),
    },
 }
 
@@ -3129,6 +3230,20 @@ local function shield(name, sprite_id, slots, defense, avoid)
       equipment_effects = {
          IncreaseDefenseEffect.of(defense, "SHIELD"),
          IncreaseAvoidEffect.of(avoid, "SHIELD"),
+      },
+   }
+end
+
+local function armor(name, slots, defense, avoid)
+   return {
+      name = name,
+      type = "ARMOR",
+      slots = slots,
+      equip_slot = "BODY",
+
+      equipment_effects = {
+         IncreaseDefenseEffect.of(defense, "ARMOR"),
+         IncreaseAvoidEffect.of(avoid, "ARMOR"),
       },
    }
 end
@@ -3275,6 +3390,7 @@ ITEM_DATA = {
    greatsword = two_handed_weapon("Greatsword", 111, 3, 70, 2),
    bow = ranged_weapon("Bow", 112, 2, 90, 2, 2, 2),
    shield = shield("Shield", 113, 1, 1, 20),
+   armor = armor("Armor", 2, 1, 20),
 }
 
 return ITEM_DATA
@@ -6055,9 +6171,9 @@ function WeightedOptionSelector.of_weighted(...)
 end
 
 function WeightedOptionSelector:pick_random()
-   local i = rndi(self.total_weight)
+   local i = rndi(self.total_weight) + 1
    if #self.options == self.total_weight then
-      return self.options[i + 1].value
+      return self.options[i].value
    end
    local count = 0
    repeat
@@ -6140,41 +6256,41 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 13:53:11",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 13:53:11"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMiAyMTowMTo1NCIscmV2aXNpb249MTRdXWx6NADhAAAAejEAAPMhe1swXT17Ym1wPXB4dQBD
@@ -6284,40 +6400,40 @@ OgkSLw_JADMVbY4AD5UvTQ8MARA-DxUHDAFpCCICTx8fHRuJAAETG4kAERuJAAZGAw8eAkcfHBIB
 Hg80A6sv8PAyAP--------------BVA9MTF9fQ==
 :: gfx/2_tiles.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTE2IDE3OjAyOjA0Iixtb2RpZmllZD0iMjAyNS0x
-Mi0wNyAwMTo1MToyOSIscmV2aXNpb249ODJdXWx6NABJBwAAbj0AAPARe1swXT17Ym1wPXB4dQBD
+Mi0wNyAxMzo1MzoxMSIscmV2aXNpb249OTRdXWx6NABhBwAAiT0AAPARe1swXT17Ym1wPXB4dQBD
 IBQQBPBwBxAH8AEX8AIX8AELAPMAcCxmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sQQAv-zEy
 AE7zBvwdXxA8LjwuXD78ck48PjwuTD78RkQAHzFFABWCFP8UADQO9AMDAB-_DAAPHwGmABxw8R1c
 MSwxLKsA9AUxLlE_8V5MMTwxLE48PjEuQT7xMrAAHzJPABTwCP8PQ0puKh4qTmouGv5AGi5aPio_
 Kl46DQADSwAfNEoAFLH4BR8VOB4YHjgeKAYAURgeSD5YAgATSBAAESgGAF84HvgaHikAFBQFzwAP
-hAAUJf8f9gEvNjQCARYPKgIe9AX-FA7-FRj-FA6fFZ8U-xUEnxSfFRQAbxj-FRifFIUAHRD0PQD-
-AvQOnpT_BJSe9A7_GPQY-hiU8wImHzEyAEYtFR4CADw_FR4CAD81HhUmABBcFR8VEh0CADwyHRIC
-AD89Eh0mABAfHcoAaA-wABQv8EDSARwW86ABHznSAxYWGzUALzI4NQAU-xjwuhMQA9ATIBMQEzAD
-MANAM1ADACNQE2BDAAMQMyATIFMAUwAzACPXAh3-GfC6HxsQDtAeIB4QHjAOMA5APlAOAC5QHmBO
-AA4QPiAeIF4AXgA_AC5YAB1TDxU-FEUFAPMDJA8UBS4FDxUkDgUuBQ0kDgUtBgDxGU8WRUyVTEWc
-RUxFnUWtLG0sXQwlDE0MJVwNLA0cDRwNLB0lbSV9BY0CAIN9DAUMbQwFDCQAbwxNRU1FTVICHFMP
-FTRPFAUALyUEBgABIE8VBAAvnxQqABMfXyYAEg9QABcuTxV-Ag-RABhADxQkDggAgw4kDg0lBA4t
-BgCTTU5Nng00Tg00GAAKHgBwDSUETk1OXSAAFk4eAA9CAB8fTQwFTh-1bAMhHxZsAyEx9gUwAgAx
-ICUQAgA-APUEWQMeMPYPFlEDUTAOIC4QAgAvAP5FAB8v-zFWAR3-AbgfECBOMD4QHC5MPjwe-EAf
-CR2j8NFMMDwQESxPELEIHx6xCB2wBQ8WBd8TBQ8WFQ4IAI8OJf0AJf0CFQMABwAhAGEOBd0FDhUG
-AB4FSQIPJQE9L-8xigEePuEJAAIAaw8ZCQ4ADgQAPQkOCQQABBwABwQAD7QAHT9BCQCBADo_HgkO
-AgATKQIAPzkOCQIAYg8VARz-PWBPEvAATuBewB5SoCJfHwKgHR8VHRywHRwdHMBtsA5tDmAkLk0e
-Ah8UQBsCLgIOAi4CC4ACLgIuArASDgIeAuAy8AALBAvwAQsEC2CNBBxD8BkHIAIAPxAnAAIAChUG
-AgAfAAIACQ9GACkOvQAPMwMVDzIAgg8hBSEPMgCCHzEyAHhQBh8VJh4CAG8WDxYGBS0DAAFBHQUe
-JQIAIhUOKwAjJg4aAA0DABIOKQBDJQ4GHlYAEw0aAA9VADEPcQEcwDC2gJWQBgUPFQYFDgMAE5AI
-AA8LAGARFQIAP4C2MMMAHPQHgA8VJg7gBS8WBuAFLQbgDiUO0A4mDgwAJ-AADQAPGQAGH1BEAh0y
-VCYQAgBTLxYGBS4DAFA1HxUlHQIAMQYdJgIAJhYOHQBCBR4FHR4AEhUdACUmHRsATy4GNR06AAkP
-ngAdHUgTAQbuAAwLAQMQAA-GBR3-MdBSsHKQch8VcDIeIi5QMi4iPjAyPiJOEDJOIl4QIk4ibgAi
-TiJ_ABJOIo4AEj4inhI_Ii6SLvIBHnJ9Ut1CHc-TDh3-A-IF-xUCAv6Q8hj9Gv8dAB38BEEAHP8z
-UtBysB8VcpAuIh4ycD4iLjJQTiI_MjBeIk4yEG4iTiIQfiJOIgCOIk4SAJ4iPhIAci4iPvIBLhJ9
-ch4S3VLPHR1CcQAcUfBJJvAAhAElDxWBASovFn4BD4kCLnBABhAmICZwmQRwLgYVLgZgBYUCsQUu
-BmANJh0mJQ1gRAKwDSYNUA0lHTUuBlBiAgAsABJQYgJQDg0lDVCaAjAFJg0zABAWOwACrwIARABf
-JR1VDWCUACEBAgABMAUWLgEDBCADIhUN5gImJg0eADIuBg0dAC8lDT8DBQ89ABIPrQAcAJQADGQF
-Ly8WrgUKD6IFDQ89AD0O0gAPEAUlDXICDw0ENP4LMh0fHXI_Ih0eIjAiLhIdLhJQEi4SPhJwEh4G
-ACAiPh4A8g4iPpIuABIuvxUeABI_nC4AEj6dLgASTn0_ABL_AQQAP-8TAYcAHPoRbx1SvpJ_MlAy
-TiKQIj4SsBIuEtASHhLQEg4i0ELwADIDAJ9C0CIPExLQEg1wBhzRPx1yHh0yLiIwIh4dIusAfx0S
-HhJwEj4GAAAAHwAA_QTyCj4iHr8VLhIALpw_EgAunT4SAD59ThIA-gEEAE--EwESigooDzIA3G7-
-FaQD-gMDAA9BARwv-xV6ACAVt24ABgMAD3gAGV4QEATw8HYADzEA------------------------
-----------------------8hUG09OH19
+hAAUJf8f9gEvMTkDARcGNQAvMjhfAhZSHh8fEB4CABMAPwAvNjQ_ABgSDzwADz4AIPQF-xQO-xUY
+-xQOnxWfFP8VBJ8UnxUUAG8Y-xUYnxRSAB0Q9D0A-wL0Dp6U-gSUnvQO-hj0GP4YlJoCHC0VHgIA
+PD4VHgIAPzUeFSYAEFwVHxUSHQIAPDIdEgIAPz0SHSYAEB4dRwIPygBWD-AAFC-wQG4BHB-z6gIh
+HxvqAiH-F7oTEAPQEyATEBMwAzADQDNQAwAjUBNgQwADEDMgEyBTAFMAMwAjcwId-xnwuh8bEA7Q
+HiAeEB4wDjAOQD5QDgAuUB5gTgAOED4gHiBeAF4APgAuWAAdUw8VPxRFBQDzAyQPFAUuBQ8VJA4F
+LgUNJA4FLQYA8RlPFkVMlUxFnEVMRZ1FrSxtLF0MJQxNDCVcDSwNHA0cDSwdJW0lfQWNAgCDfQwF
+DG0MBQwkAG8MTUVNRU1SAhxTDxU0TxQFAC8lBAYAASBPFQQAL58UKgATH18mABIPUAAXLk8VfwIP
+0QAYQA8UJA4IAIMOJA4NJQQOLQYAk01OTZ4NNE4NNBgACh4AcA0lBE5NTl0gABZOHgAPQgAfH027
+ABwGGggPvgEVH-VsAyEfFmwDITH2BTACADEgJRACAD8A9QRZAx4w9g8WUQNRMA4gLhACAC4A-kUA
+Dz4JPv8C8LgfECBOMD4QHC5MPjwe-EA6CR2j8NFMMDwQESxPEMwIHx7MCB2wBQ8WBd8TBQ8WFQ4I
+AI8OJf0AJf0CFQMABwAhAGEOBd0FDhUGAB4FSQIPJQE9L-8xigEePuEJAAIAaw8ZCQ4ADgQAPQkO
+CQQABBwABwQAD7QAHT9BCQCBADo_HgkOAgATKQIAPzkOCQIAYg8VARz-PWBPEvAATuBewB5SoCJf
+HwKgHR8VHRywHRwdHMBtsA5tDmAkLk0eAh8UQBsCLgIOAi4CC4ACLgIuArASDgIeAuAy8AALBAvw
+AQsEC2CNBBxD8BkHIAIAPxAnAAIAChUGAgAfAAIACQ9GACkOvQAPMwMVDzIAgg8hBSEPMgCCHzEy
+AHhQBh8VJh4CAG8WDxYGBS0DAAFBHQUeJQIAIhUOKwAjJg4aAA0DABIOKQBDJQ4GHlYAEw0aAA9V
+ADEPcQEcwDC2gJWQBgUPFQYFDgMAE5AIAA8LAGARFQIAP4C2MMMAHPQHgA8VJg7gBS8WBuAFLQbg
+DiUO0A4mDgwAJ-AADQAPGQAGH1BEAh0yVCYQAgBTLxYGBS4DAFA1HxUlHQIAMQYdJgIAJhYOHQBC
+BR4FHR4AEhUdACUmHRsATy4GNR06AAkPngAdHUgTAQbuAAwLAQMQAA-GBR3-MdBSsHKQch8VcDIe
+Ii5QMi4iPjAyPiJOEDJOIl4QIk4ibgAiTiJ_ABJOIo4AEj4inhI_Ii6SLvIBHnJ9Ut1CHc-TDh3-
+A-IF-xUCAv6Q8hj9Gv8dAB38BEEAHP8zUtBysB8VcpAuIh4ycD4iLjJQTiI_MjBeIk4yEG4iTiIQ
+fiJOIgCOIk4SAJ4iPhIAci4iPvIBLhJ9ch4S3VLPHR1CcQAcUfBJJvAAhAElDxWBASovFn4BD4kC
+LnBABhAmICZwmQRwLgYVLgZgBYUCsQUuBmANJh0mJQ1gRAKwDSYNUA0lHTUuBlBiAgAsABJQYgJQ
+Dg0lDVCaAjAFJg0zABAWOwACrwIARABfJR1VDWCUACEBAgABMAUWLgEDBCADIhUN5gImJg0eADIu
+Bg0dAC8lDT8DBQ89ABIPrQAcAJQADGQFLy8WrgUKD6IFDQ89AD0O0gAPEAUlDXICDw0ENP4LMh0f
+HXI_Ih0eIjAiLhIdLhJQEi4SPhJwEh4GACAiPh4A8g4iPpIuABIuvxUeABI_nC4AEj6dLgASTn0_
+ABL_AQQAP-8TAYcAHPoRbx1SvpJ_MlAyTiKQIj4SsBIuEtASHhLQEg4i0ELwADIDAJ9C0CIPExLQ
+Eg1wBhzRPx1yHh0yLiIwIh4dIusAfx0SHhJwEj4GAAAAHwAA_QTyCj4iHr8VLhIALpw_EgAunT4S
+AD59ThIA-gEEAE--EwESigooDzIA3G7-FaQD-gMDAA9BARwv-xV6ACAVt24ABgMAD3gAGV4QEATw
+8HYADzEA----------------------------------------------8hUG09OH19
 :: gfx/4_map_util.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTExLTI1IDA1OjQwOjU3Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNSAwNTo0Nzo0NSIscmV2aXNpb249OF1dbHo0ABoCAABqNgAA8yF7WzBdPXtibXA9cHh1AEMg
@@ -6349,7 +6465,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: lib/.info.pod
---[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
+--[[pod,created="2025-12-07 13:52:34",modified="2025-12-07 13:53:11"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -6632,7 +6748,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 13:53:11"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -6662,7 +6778,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 13:53:11"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -6670,5 +6786,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-07 13:53:11"]]
 :: [eoc]
