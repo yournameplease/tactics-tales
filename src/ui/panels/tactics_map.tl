@@ -26,7 +26,6 @@ local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
 local HALF_HEIGHT = TILE_SIZE.y >> 1
-local WALL_HEIGHT = CONFIG.WALL_HEIGHT
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
 local UNIT_OFFSET_Y = -3
@@ -44,7 +43,7 @@ function TacticsMap.new(map_width: integer, map_height: integer, props: UIElemen
     box.map_height = map_height or MAP_HEIGHT
 
     box.padding = box.decoration_padding
-    box.internal_margin = { t = WALL_HEIGHT - TILE_SIZE.y, b = 0, l = 0, r = 0 }
+    box.internal_margin = { t = HALF_HEIGHT, b = 0, l = 0, r = 0 }
     box.w = box.map_width * TILE_SIZE.x + 2 * box.padding
     box.h = box.map_height * TILE_SIZE.y + 2 * box.padding
 
@@ -135,7 +134,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local menu = state.menu_manager
 
     local camera_x = self.x + self.padding
-    local camera_y = self.y + self.padding + WALL_HEIGHT - TILE_SIZE.y
+    local camera_y = self.y + self.padding + HALF_HEIGHT
     camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
@@ -157,7 +156,6 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     local layer_wall_back = layers.back_wall
     local layer_wall_mid = layers.mid_wall
     local layer_wall_front = layers.front_wall
-    local wall_offset = WALL_HEIGHT - TILE_SIZE.y
 
     local cursor_tile: TilePoint = nil
     local menu_selection = menu.menu_selection
@@ -168,7 +166,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     end
 
     for y = 0, self.map_height-1 do
-        map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, WALL_HEIGHT)
+        map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
         map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
