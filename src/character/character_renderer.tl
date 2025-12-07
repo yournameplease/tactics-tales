@@ -103,6 +103,11 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
 
     spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
+	if headwear == nil or headwear.draw_beard then
+	    if battle_unit.character.appearance.beard ~= nil then
+	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+	    end
+	end
 	if headwear == nil or headwear.draw_eyewear then
 	    spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
 		if battle_unit.character.appearance.eyewear ~= nil then
@@ -111,11 +116,6 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
 	end
 	if headwear == nil or headwear.draw_hair then
         spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-	end
-	if headwear == nil or headwear.draw_beard then
-	    if battle_unit.character.appearance.beard ~= nil then
-	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
-	    end
 	end
 	if headwear ~= nil then
         spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
