@@ -47,12 +47,12 @@ function WeightedOptionSelector:pick_random(): V
 	if #self.options == self.total_weight then
 		return self.options[i].value
 	end
-	local count = 0
+	local index = 0
 	repeat
-		count = count + 1
-		i = i - self.options[count].weight
+		index = index + 1
+		i = i - self.options[index].weight
 	until i <= 0
-	return self.options[count].value
+	return self.options[index].value
 end
 
 -- lists
@@ -91,8 +91,8 @@ function RandomRange.between(min_value: integer, max_value: integer): RandomRang
 	}, { __index = RandomRange })
 end
 
-function RandomRange.of(count: integer): RandomRange
-	return RandomRange.between(0, count - 1)
+function RandomRange.of(n: integer): RandomRange
+	return RandomRange.between(0, n - 1)
 end
 
 function RandomRange:pick_random(): integer

@@ -1,18 +1,10 @@
 require("src/data/character_templates")
+require("src/character/object/character")
 require("src/data/items")
 require("src/character/items/object/weapon")
 local Item = require("src/character/items/object/item")
 local ItemInventory  = require("src/character/items/object/item_inventory")
 local ItemGenerator = require("src/character/items/item_generator")
-
--- todo: deduplicate this from renderer
-local SKIN_COLORS: { { Color, Color } } = {
-    {15, 31},
-    {31, 4},
-    {4, 20},
-    {20, 21}
-}
-
 
 local record CharacterGenerator
 end

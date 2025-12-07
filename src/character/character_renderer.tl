@@ -10,13 +10,6 @@ local ANIMATION_DATA = require("src/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
 
-local SKIN_COLORS: { { Color, Color } } = {
-    {15, 31},
-    {31, 4},
-    {4, 20},
-    {20, 21}
-}
-
 local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23

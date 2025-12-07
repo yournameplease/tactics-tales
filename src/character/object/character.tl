@@ -2,7 +2,7 @@ require("src/types")
 require("src/character/items/object/weapon")
 local ItemInventory = require("src/character/items/object/item_inventory")
 
-local SKIN_COLORS: { { Color, Color } } = {
+global SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
     {31, 4},
     {4, 20},

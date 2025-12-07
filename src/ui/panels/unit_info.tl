@@ -68,13 +68,13 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
             local out = {"Inventory:", "", "", "", ""}
 
-            local count = 1
-            for i,item in ipairs(items) do
-                out[count+1] = item:get_name()
-                count = count + 1
-                for i=2,item:get_slots() do
-                    out[count+1] = " |"
-                    count = count + 1
+            local index = 1
+            for _,item in ipairs(items) do
+                out[index+1] = item:get_name()
+                index = index + 1
+                for _=2,item:get_slots() do
+                    out[index+1] = " |"
+                    index = index + 1
                 end
             end
 
