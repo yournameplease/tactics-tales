@@ -26,6 +26,8 @@ end
 global enum AnimationFrameName
     "idle_1"
     "idle_2"
+    "walk_1"
+    "walk_2"
 end
 
 global enum AnchorPointName
@@ -69,7 +71,25 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
                 off_hand = AnimationAnchorPoint.of(14, 12),
                 feet_center = AnimationAnchorPoint.of(7, 15)
             }
-        }
+        },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = AnimationAnchorPoint.of(9, 7),
+                main_hand = AnimationAnchorPoint.of(1, 8),
+                off_hand = AnimationAnchorPoint.of(14, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = AnimationAnchorPoint.of(9, 7),
+                main_hand = AnimationAnchorPoint.of(1, 8),
+                off_hand = AnimationAnchorPoint.of(14, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
     },
     HORIZONTAL = {
         idle_1 = {
@@ -90,6 +110,24 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
                feet_center = AnimationAnchorPoint.of(7, 15)
            }
         },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = AnimationAnchorPoint.of(7, 7),
+                main_hand = AnimationAnchorPoint.of(3, 12),
+                off_hand = AnimationAnchorPoint.of(12, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = AnimationAnchorPoint.of(7, 7),
+                main_hand = AnimationAnchorPoint.of(3, 12),
+                off_hand = AnimationAnchorPoint.of(12, 12),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
     },
     FRONT_HAND = {
         idle_1 = {
@@ -109,7 +147,25 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
                off_hand = AnimationAnchorPoint.of(4, 11),
                feet_center = AnimationAnchorPoint.of(7, 15)
            }
-        }
+        },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = AnimationAnchorPoint.of(6, 7),
+                main_hand = AnimationAnchorPoint.of(13, 9),
+                off_hand = AnimationAnchorPoint.of(3, 11),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = AnimationAnchorPoint.of(6, 7),
+                main_hand = AnimationAnchorPoint.of(13, 9),
+                off_hand = AnimationAnchorPoint.of(3, 11),
+                feet_center = AnimationAnchorPoint.of(7, 15)
+            }
+        },
     }
 }
 
@@ -126,18 +182,18 @@ local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName)
 end
 
 local ANIMATION_DATA: { AnimationName: Animation } = {
-    DEFAULT_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
-    DEFAULT_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
-    DEFAULT_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
-    SLEEVELESS_BACK_HAND = frames_from_base_frame(162, "BACK_HAND"),
-    SLEEVELESS_HORIZONTAL = frames_from_base_frame(170, "HORIZONTAL"),
-    SLEEVELESS_FRONT_HAND = frames_from_base_frame(178, "FRONT_HAND"),
-    SHIRTLESS_BACK_HAND = frames_from_base_frame(164, "BACK_HAND"),
-    SHIRTLESS_HORIZONTAL = frames_from_base_frame(172, "HORIZONTAL"),
-    SHIRTLESS_FRONT_HAND = frames_from_base_frame(180, "FRONT_HAND"),
-    ROBED_BACK_HAND = frames_from_base_frame(166, "BACK_HAND"),
-    ROBED_HORIZONTAL = frames_from_base_frame(174, "HORIZONTAL"),
-    ROBED_FRONT_HAND = frames_from_base_frame(182, "FRONT_HAND"),
+    DEFAULT_BACK_HAND = frames_from_base_frame(128, "BACK_HAND"),
+    DEFAULT_HORIZONTAL = frames_from_base_frame(136, "HORIZONTAL"),
+    DEFAULT_FRONT_HAND = frames_from_base_frame(144, "FRONT_HAND"),
+    SLEEVELESS_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
+    SLEEVELESS_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
+    SLEEVELESS_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
+    SHIRTLESS_BACK_HAND = frames_from_base_frame(192, "BACK_HAND"),
+    SHIRTLESS_HORIZONTAL = frames_from_base_frame(198, "HORIZONTAL"),
+    SHIRTLESS_FRONT_HAND = frames_from_base_frame(206, "FRONT_HAND"),
+    ROBED_BACK_HAND = frames_from_base_frame(224, "BACK_HAND"),
+    ROBED_HORIZONTAL = frames_from_base_frame(232, "HORIZONTAL"),
+    ROBED_FRONT_HAND = frames_from_base_frame(240, "FRONT_HAND"),
 }
 
 return ANIMATION_DATA

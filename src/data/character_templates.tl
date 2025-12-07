@@ -48,10 +48,10 @@ global BASE_UNIT: CharacterTemplate = {
 	sex_options = WeightedOptionSelector.of("male", "female"),
 	skin_color_options = RandomRange.between(1,4),
     hair_color_options = WeightedOptionSelector.of(4, 5, 6, 9, 10, 20, 21, 22, 24, 25, 31),
-	beard_options = RandomRange.of(7),
-	eye_options = RandomRange.of(8),
-	hair_options_m = RandomRange.of(6),
-	hair_options_f = RandomRange.of(6),
+	beard_options = RandomRange.between(88, 95),
+	eye_options = RandomRange.between(120, 120),
+	hair_options_m = RandomRange.between(72, 77),
+	hair_options_f = RandomRange.between(80, 85),
 
 	parent_template = nil
 }
@@ -95,6 +95,10 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 		body_options = WeightedOptionSelector.of_weighted(
 			WeightedOption.of("DEFAULT", 1),
 			WeightedOption.of("SLEEVELESS", 1)
+		),
+		headwear_options = WeightedOptionSelector.of_weighted(
+			WeightedOption.of(nil, 3),
+			WeightedOption.of("hood", 1)
 		)
 	},
 	militia_spearman = {

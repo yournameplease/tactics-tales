@@ -327,12 +327,12 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
         path_points = path_points,
         sprites = SpriteFrameData.new({
             {
-                sprite_name = "idle_1",
-                duration = 20
+                sprite_name = "walk_1",
+                duration = DURATION_PER_TILE
             },
             {
-                sprite_name = "idle_2",
-                duration = 20
+                sprite_name = "walk_2",
+                duration = DURATION_PER_TILE
             }
         }),
         animated_object = { playing = true },

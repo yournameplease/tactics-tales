@@ -9,11 +9,6 @@ require("src/character/sprite_data")
 local ANIMATION_DATA = require("src/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
-local BASE_HEAD_SPRITE = 256 + 64
-local BASE_M_HAIR_SPRITE = 256 + 72
-local BASE_F_HAIR_SPRITE = 256 + 80
-local BASE_BEARD_SPRITE = 256 + 88
-local BASE_EYE_SPRITE = 256 + 120
 
 local SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
@@ -67,6 +62,7 @@ local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFr
 		frame_name = battle_unit.animation_data.current_frame.frame
 		offset = battle_unit.animation_data.current_frame.offset
 	else
+		LOG.debug("Unrecognized animation frame.")
 		frame_name = "idle_1"
 		offset = {x = 0, y = 0}
 	end
@@ -102,7 +98,6 @@ end
 
 function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean)
     local flip_h = side ~= 0
-    local sex_offset = battle_unit.character.appearance.sex == "male" and 0 or 1
 
     if set_pal then
         set_palette(battle_unit, side)
@@ -113,24 +108,20 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
 		headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]	
 	end
 
-    spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
+    spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
 	if headwear == nil or headwear.draw_eyewear then
-	    spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
+	    spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
 		if battle_unit.character.appearance.eyewear ~= nil then
 	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
 		end
 	end
 	if headwear == nil or headwear.draw_hair then
-	    if battle_unit.character.appearance.sex == "male" then
-	        spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-	    else
-	        spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-	    end
+        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
 	end
 	if headwear == nil or headwear.draw_beard then
 	    if battle_unit.character.appearance.beard ~= nil then
-	        spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
 	    end
 	end
 	if headwear ~= nil then

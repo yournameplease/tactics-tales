@@ -31,6 +31,7 @@ end
 
 global record CharacterAppearance
     sex: Sex
+	head: integer
     hair: integer
     skin: integer
     hair_color: Color
