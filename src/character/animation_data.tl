@@ -135,9 +135,9 @@ local ANIMATION_DATA: { AnimationName: Animation } = {
     SHIRTLESS_BACK_HAND = frames_from_base_frame(164, "BACK_HAND"),
     SHIRTLESS_HORIZONTAL = frames_from_base_frame(172, "HORIZONTAL"),
     SHIRTLESS_FRONT_HAND = frames_from_base_frame(180, "FRONT_HAND"),
-    ROBED_BACK_HAND = frames_from_base_frame(160, "BACK_HAND"),
-    ROBED_HORIZONTAL = frames_from_base_frame(168, "HORIZONTAL"),
-    ROBED_FRONT_HAND = frames_from_base_frame(176, "FRONT_HAND"),
+    ROBED_BACK_HAND = frames_from_base_frame(166, "BACK_HAND"),
+    ROBED_HORIZONTAL = frames_from_base_frame(174, "HORIZONTAL"),
+    ROBED_FRONT_HAND = frames_from_base_frame(182, "FRONT_HAND"),
 }
 
 return ANIMATION_DATA
