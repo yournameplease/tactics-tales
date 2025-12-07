@@ -43,9 +43,9 @@ function WeightedOptionSelector.of_weighted<V>(...: WeightedOption<V>): Weighted
 end
 
 function WeightedOptionSelector:pick_random(): V
-	local i = rndi(self.total_weight)
+	local i = rndi(self.total_weight)+1
 	if #self.options == self.total_weight then
-		return self.options[i+1].value
+		return self.options[i].value
 	end
 	local count = 0
 	repeat

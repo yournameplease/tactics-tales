@@ -6142,37 +6142,37 @@ include "lib/error_explorer.lua"
 :: .info.pod
 --[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: gfx/.info.pod
 --[[pod,created="2025-11-13 21:07:43",modified="2025-12-07 02:09:48"]]
 :: gfx/0.gfx
@@ -6349,7 +6349,7 @@ RMkAT_AE8BDJAB1wFA8UBw8VF2YCwQ8UJzRANA5UQEQORAQA-xJUDjRALjQOFFAkPiRQlFAkTgRg
 FA5EDmA0LgRwdHBU8BqSAh4PMQD-------------------------------------------------
 -----------1UG09N319
 :: lib/.info.pod
---[[pod,created="2025-12-07 02:09:47",modified="2025-12-07 02:09:48"]]
+--[[pod,created="2025-12-07 11:19:25",modified="2025-12-07 11:19:25"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv

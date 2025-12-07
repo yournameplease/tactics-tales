@@ -15,7 +15,6 @@ global enum Sex
 end 
 
 global enum HeadwearId
-	"glasses"
 	"hood"
 	"cultist_hood"
 	"wizard_hat"
@@ -39,6 +38,8 @@ global record CharacterAppearance
     beard: integer
     -- beard_color: Color
     eyes: integer
+	eyewear: integer
+	headwear: HeadwearId
 end
 
 global record CharacterStats

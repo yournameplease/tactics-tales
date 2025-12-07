@@ -22,6 +22,7 @@ local function apply_template_to_parent(parent: CharacterTemplate, child: Charac
 		movement = child.movement or parent.movement, 
 		hp_max = child.hp_max or parent.hp_max, 
 		item_loadout_options = child.item_loadout_options or parent.item_loadout_options, 
+		eyewear_options = child.eyewear_options or parent.eyewear_options, 
 		headwear_options = child.headwear_options or parent.headwear_options, 
 		body_options = child.body_options or parent.body_options, 
 		sex_options = child.sex_options or parent.sex_options, 
@@ -56,7 +57,8 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	character.stats.movement = template.movement
 	character.stats.hp_max = template.hp_max
 	character.stats.def = 0
-	-- character..headwear_options = template.headwear_options
+	character.appearance.eyewear = template.eyewear_options:pick_random()
+	character.appearance.headwear = template.headwear_options:pick_random()
 	character.appearance.body_class = template.body_options:pick_random()
 	character.appearance.sex = template.sex_options:pick_random()
 	character.appearance.skin = template.skin_color_options:pick_random()

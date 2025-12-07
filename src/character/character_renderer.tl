@@ -4,6 +4,7 @@ require("src/types")
 require("src/battle/tactics/battle_unit")
 require("src/character/character_manager")
 require("src/character/object/character")
+require("src/character/sprite_data")
 
 local ANIMATION_DATA = require("src/character/animation_data")
 
@@ -107,17 +108,34 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
         set_palette(battle_unit, side)
     end
 
+	local headwear: HeadwearSpriteData = nil
+	if battle_unit.character.appearance.headwear then
+		headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]	
+	end
+
     spr(BASE_HEAD_SPRITE + 4 * sex_offset, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
-    spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
-    if battle_unit.character.appearance.sex == "male" then
-        spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-    else
-        spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
-    end
-    if battle_unit.character.appearance.beard ~= nil then
-        spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
-    end
+	if headwear == nil or headwear.draw_eyewear then
+	    spr(BASE_EYE_SPRITE, point.x, point.y, flip_h)
+		if battle_unit.character.appearance.eyewear ~= nil then
+	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+		end
+	end
+	if headwear == nil or headwear.draw_hair then
+	    if battle_unit.character.appearance.sex == "male" then
+	        spr(BASE_M_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+	    else
+	        spr(BASE_F_HAIR_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+	    end
+	end
+	if headwear == nil or headwear.draw_beard then
+	    if battle_unit.character.appearance.beard ~= nil then
+	        spr(BASE_BEARD_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+	    end
+	end
+	if headwear ~= nil then
+        spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
+	end
 
 end
 

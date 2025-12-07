@@ -8,6 +8,7 @@ global record CharacterTemplate
 	movement: integer
 	hp_max: integer
 	item_loadout_options: Randomizer<{string}>
+	eyewear_options: Randomizer<integer>
 	headwear_options: Randomizer<HeadwearId>
 	body_options: Randomizer<BodyClass>
 	sex_options: Randomizer<Sex>
@@ -29,10 +30,15 @@ global BASE_UNIT: CharacterTemplate = {
 		WeightedOptionSelector.of("dagger"),
 		WeightedOptionSelector.of("shield", "sword")
 	),
-	
+
 	headwear_options = WeightedOptionSelector.of_weighted(
+		WeightedOption.of(nil, 8),
+		WeightedOption.of("wizard_hat", 1),	
+		WeightedOption.of("hood", 1)
+	),
+	eyewear_options = WeightedOptionSelector.of_weighted(
 		WeightedOption.of(nil, 9),
-		WeightedOption.of("glasses", 1)	
+		WeightedOption.of(96, 1)	
 	),
 	body_options = WeightedOptionSelector.of_weighted(
 		WeightedOption.of("DEFAULT", 8),
@@ -65,6 +71,9 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 		body_options = WeightedOptionSelector.of_weighted(
 			WeightedOption.of("SLEEVELESS", 1),
 			WeightedOption.of("SHIRTLESS", 5)
+		),
+		headwear_options = WeightedOptionSelector.of_weighted(
+			WeightedOption.of(nil, 1)
 		)
 	},
     bandit_goon = {
