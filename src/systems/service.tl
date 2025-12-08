@@ -1,11 +1,12 @@
 
-local enum ServiceId
+global enum ServiceId
 	-- persistent
 	'service_manager'
 	'ui_manager'
 	'animation_manager'
 	'task_manager'
 	'event_bus'
+	'character_manager'
 	
 	-- transient
 	'battle_manager'
@@ -14,6 +15,9 @@ local enum ServiceId
 	'turn_manager'
 	'battle_state'
 	'enemy_ai_engine'
+	'menu_manager'
+	'combat_calculator'
+	'game_context'
 
 end
 
@@ -23,7 +27,7 @@ global interface GameService
 	id: ServiceId
 	dependencies: { ServiceId }
 	-- handles getting other services
-	init: function(self, services: { ServiceId: GameService })
+	init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService })
 end
 
 global interface TransientGameService is GameService
@@ -58,23 +62,23 @@ function ServiceManager:dependencies_exist(ids: { ServiceId }): boolean
 	return true
 end
 
-function ServiceManager:register(service: GameService): GameService
+function ServiceManager:register<S is GameService>(service: S): S
 	local id = service.id
 	assert(self.persistent_services[id] == nil)
 	assert(self.transient_services[id] == nil)
 	assert(self:dependencies_exist(service.dependencies))
 	self.persistent_services[id] = service
-	service:init(self:get_services())
+	service:init(self, self:get_services())
 	return service
 end
 
-function ServiceManager:register_transient(service: TransientGameService): TransientGameService
+function ServiceManager:register_transient<S is TransientGameService>(service: S): S
 	local id = service.id
 	assert(self.persistent_services[id] == nil)
 	assert(self.transient_services[id] == nil)
 	assert(self:dependencies_exist(service.dependencies))
 	self.transient_services[id] = service
-	service:init(self:get_services())
+	service:init(self, self:get_services())
 	return service
 end
 
@@ -85,15 +89,22 @@ function ServiceManager:teardown_transient(service: TransientGameService)
 	self.transient_services[id] = nil
 end
 
+function ServiceManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+	self.persistent_services = {}
+	self.transient_services = {}
+end
+
 function ServiceManager.new(): ServiceManager
 	local self: ServiceManager = {
 		id = 'service_manager',
-		persistent_services = {},
-		transient_services = {},
+		dependencies = {},
 	}
 	setmetatable(self, { __index = ServiceManager })
 
-	self:register(self)
-
 	return self
 end
+
+
+return {
+	ServiceManager = ServiceManager
+}

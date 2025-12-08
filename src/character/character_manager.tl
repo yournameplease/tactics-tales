@@ -6,11 +6,14 @@ require("src/character/animation_data")
 require("src/character/items/object/weapon")
 require("src/animation")
 require("src/character/object/character")
+require("src/systems/service")
 local CharacterGenerator = require("src/character/character_generator")
 
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
 global record CharacterManager
+    is GameService
+    where self.id == 'character_manager'
     id_counter: IdCounter
     characters: { Character }
 
@@ -48,14 +51,11 @@ function CharacterManager:handle_discard_item(ctx: MenuContext)
     character.inventory:remove_item(item_index)
 end
 
-function CharacterManager.new(
-    event_bus: EventBus
-): CharacterManager
-    local self: CharacterManager = setmetatable({}, { __index = CharacterManager})
+function CharacterManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.id_counter = IdCounter.new()
     self.characters = {}
 
-    self.event_bus = event_bus
+    self.event_bus = services.event_bus as EventBus
 
     self.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
         self:handle_equip_item(ctx)
@@ -66,6 +66,13 @@ function CharacterManager.new(
     self.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
         self:handle_discard_item(ctx)
     end)
+end
+
+function CharacterManager.new(): CharacterManager
+    local self: CharacterManager = setmetatable({
+        id = "character_manager",
+        dependencies = {},
+    }, { __index = CharacterManager})
     
     return self
 end

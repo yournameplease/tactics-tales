@@ -8,6 +8,7 @@ require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/battle/battle_state")
+require("src/systems/service")
 
 --[[
 AI Mk 1:
@@ -19,7 +20,8 @@ AI Mk 1:
 ]]
 
 global record EnemyAIEngine
-    battle_manager: BattleManager
+    is TransientGameService
+    where self.id == 'enemy_ai_engine'
     battle_state: BattleState
     tactics_engine: TacticsEngine
     event_bus: EventBus
@@ -37,7 +39,7 @@ local record MovementOption
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
-    local tile_manager = self.battle_manager.tile_manager -- TODO: global state
+    local tile_manager = self.tile_manager
     local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.tile.x, unit.tile.y, unit.side, 999) 
 
     local enemies = self.tactics_engine.battle_state:get_units(unit_is_player)
@@ -121,24 +123,21 @@ function EnemyAIEngine:handle_enemy_turn()
     end)
 end
 
-function EnemyAIEngine.new(
-    battle_manager: BattleManager,
-    battle_state: BattleState,
-    tactics_engine: TacticsEngine,
-    event_bus: EventBus,
-    task_manager: TaskManager,
-    tile_manager: TileManager
-): EnemyAIEngine
-    local self: EnemyAIEngine = setmetatable({}, { __index = EnemyAIEngine })
-
-    self.battle_manager = battle_manager
-    self.battle_state = battle_state
-    self.tactics_engine = tactics_engine
-    self.event_bus = event_bus
-    self.task_manager = task_manager
-    self.tile_manager = tile_manager
+function EnemyAIEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+    self.battle_state = services.battle_state as BattleState
+    self.tactics_engine = services.tactics_engine as TacticsEngine
+    self.event_bus = services.event_bus as EventBus
+    self.task_manager = services.task_manager as TaskManager
+    self.tile_manager = services.tile_manager as TileManager
 
     self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
+end
+
+function EnemyAIEngine.new(): EnemyAIEngine
+    local self: EnemyAIEngine = setmetatable({
+        id = "enemy_ai_engine",
+        dependencies = {},
+    }, { __index = EnemyAIEngine })
     return self
 end
 

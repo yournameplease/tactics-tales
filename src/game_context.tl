@@ -11,6 +11,8 @@ require("src/battle/combat/combat_calculator")
 global type UILayoutId
 
 global record GameContext
+    is TransientGameService
+    where self.id == 'game_context'
     battle_manager: BattleManager
     tactics: TacticsEngine
     battle_state: BattleState
@@ -28,30 +30,38 @@ global record GameContext
     destination: TilePoint
 end
 
-function GameContext.new(
-    battle_manager: BattleManager,
-    turn_manager: TurnManager,
-    character_manager: CharacterManager,
-    menu_manager: MenuManager,
-    event_bus: EventBus
-): GameContext
-    local context: GameContext = {
-        battle_manager = battle_manager,
-        tactics = battle_manager.tactics_engine,
-        battle_state = battle_manager.battle_state,
-        turn_manager = turn_manager,
-        tile_manager = battle_manager.tactics_engine.tile_manager,
-        character_manager = character_manager,
-        menu_manager = menu_manager,
-        event_bus = event_bus,
-        combat_calculator = battle_manager.tactics_engine.combat_calculator,
+function GameContext:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+    self.battle_manager = services.battle_manager as BattleManager
+    self.tactics = services.tactics_engine as TacticsEngine
+    self.battle_state = services.battle_state as BattleState
+    self.turn_manager = services.turn_manager as TurnManager
+    self.tile_manager = services.tile_manager as TileManager
+    self.character_manager = services.character_manager as CharacterManager
+    self.menu_manager = services.menu_manager as MenuManager
+    self.event_bus = services.event_bus as EventBus
+    self.combat_calculator = services.combat_calculator as CombatCalculator
 
-        layout = "TACTICS",
+    self.layout = "TACTICS"
 
-        hovered_unit = nil,
-        acting_unit = nil,
-    }
-    setmetatable(context, { __index = GameContext })
+    self.hovered_unit = nil
+    self.acting_unit = nil
+end
+
+function GameContext.new(): GameContext
+    local context: GameContext = setmetatable({
+        id = "game_context",
+        dependencies = {
+            "battle_manager",
+            "tactics_engine",
+            "battle_state",
+            "turn_manager",
+            "tile_manager",
+            "character_manager",
+            "menu_manager",
+            "event_bus",
+            "combat_calculator",
+        }
+    }, { __index = GameContext })
     return context
 end
 

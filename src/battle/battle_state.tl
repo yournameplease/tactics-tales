@@ -3,8 +3,15 @@ require("src/util")
 require("src/battle/tactics/battle_unit")
 
 global record BattleState
+    is TransientGameService
+    where self.id == 'battle_state'
+
     units_by_id: { integer: BattleUnit }
     units_by_x_y: Array2D<BattleUnit>
+end
+
+function BattleState:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+
 end
 
 function BattleState.new(width: integer, height: integer): BattleState

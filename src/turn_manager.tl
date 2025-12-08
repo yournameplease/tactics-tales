@@ -5,6 +5,7 @@ require("src/menu/menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")
+require("src/systems/service")
 require("src/battle/battle_manager")
 
 local enum Phase
@@ -12,7 +13,9 @@ local enum Phase
     "ENEMY"
 end
 
-global record TurnManager 
+global record TurnManager
+    is TransientGameService
+    where self.id == 'turn_manager'
     turn: integer
     phase: Phase
 
@@ -23,23 +26,15 @@ global record TurnManager
     enemy_ai_engine: EnemyAIEngine
 end
 
-function TurnManager.new(
-    event_bus: EventBus,
-    tactics_engine: TacticsEngine,
-    battle_manager: BattleManager,
-    menu_manager: MenuManager,
-    enemy_ai_engine: EnemyAIEngine
-): TurnManager
-    local self: TurnManager = setmetatable({}, { __index = TurnManager })
-
+function TurnManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.turn = 1
     self.phase = "PLAYER"
 
-    self.event_bus = event_bus
-    self.tactics_engine = tactics_engine
-    self.battle_manager = battle_manager
-    self.menu_manager = menu_manager
-    self.enemy_ai_engine = enemy_ai_engine
+    self.event_bus = services.event_bus as EventBus
+    self.tactics_engine = services.tactics_engine as TacticsEngine
+    self.battle_manager = services.battle_manager as BattleManager
+    self.menu_manager = services.menu_manager as MenuManager
+    self.enemy_ai_engine = services.enemy_ai_engine as EnemyAIEngine
 
     self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
         self.menu_manager:set_menu("MENU_PLAYER_TURN")
@@ -101,6 +96,19 @@ function TurnManager.new(
     self.event_bus:on("BATTLE_END_DEFEAT", function()
         LOG.info("You lose!")
     end)
+end
+
+function TurnManager.new(): TurnManager
+    local self: TurnManager = setmetatable({
+        id = 'turn_manager',
+        dependencies = { 
+            "event_bus",
+            "tactics_engine",
+            "battle_manager",
+            "menu_manager",
+            "enemy_ai_engine"
+        }
+    }, { __index = TurnManager })
 
     return self
 end

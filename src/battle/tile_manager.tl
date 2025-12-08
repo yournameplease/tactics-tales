@@ -3,6 +3,7 @@ require("src/types")
 require("src/util")
 require("src/battle/battle_state")
 require("src/battle/map/map_manager")
+require("src/systems/service")
 
 -- tile flags:
 -- 0: empty/solid
@@ -57,15 +58,23 @@ local TERRAIN_DATA: { integer: TerrainData } = {
 }
 
 global record TileManager
+    is TransientGameService
+    where self.id == 'tile_manager'
     map_data: MapData
     battle_state: BattleState
 end
 
-function TileManager.new(map_data: MapData, battle_state: BattleState): TileManager
-    local self: TileManager = setmetatable({}, { __index = TileManager })
+function TileManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+    self.battle_state = services.battle_state as BattleState
+end
+
+function TileManager.new(map_data: MapData): TileManager
+    local self: TileManager = setmetatable({
+        id = "tile_manager",
+        dependencies = {},
+    }, { __index = TileManager })
 
     self.map_data = map_data
-    self.battle_state = battle_state
 
     return self
 end

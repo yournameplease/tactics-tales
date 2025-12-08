@@ -40,10 +40,9 @@ require("src/systems/tasks")
 require("src/debug")
 
 require("src/systems/event_bus")
+require("src/systems/service")
 
 require("src/game_context")
-require("src/turn_manager")
-require("src/menu/menu_manager")
 require("src/character/character_manager")
 require("src/battle/combat/combat_calculator")
 require("src/animation")
@@ -51,7 +50,6 @@ require("src/ui/ui_manager")
 require("src/game_context")
 require("src/battle/battle_manager")
 
-require("src/battle/map/map_manager")
 
 require("src/battle/tactics/enemy_ai")
 require("src/joypad")
@@ -66,57 +64,40 @@ local task_manager: TaskManager
 local battle_manager: BattleManager
 local menu_manager: MenuManager
 
+local service_manager: ServiceManager
+
+
 function _init()
-    task_manager = TaskManager.new()
-    ui_manager =  UIManager.new()
-    animation_manager =  AnimationManager.new()
+    service_manager = ServiceManager.new()
+    service_manager:register(service_manager)
+    
+    task_manager = service_manager:register(TaskManager.new())
+    ui_manager = service_manager:register(UIManager.new())
+    animation_manager = service_manager:register(AnimationManager.new())
 
-    local event_bus = EventBus.new()
+    service_manager:register(EventBus.new())
 
-    local character_manager = CharacterManager.new(event_bus)
-    LOG.debug(character_manager.id_counter:get_id())
+    CharacterManager.new()
 
-    battle_manager = BattleManager.new("bandit_village", event_bus, character_manager, animation_manager, task_manager)
-    local tactics_engine = battle_manager.tactics_engine
-    local tile_manager = battle_manager.tile_manager
-    local battle_state = battle_manager.battle_state
+    battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
-    menu_manager =  MenuManager.new(tactics_engine, battle_state, tile_manager, event_bus)
-    local enemy_ai_engine = EnemyAIEngine.new(battle_manager,battle_state,tactics_engine,event_bus,task_manager,tile_manager)
 
-    local turn_manager =  TurnManager.new(event_bus, tactics_engine, battle_manager, menu_manager, enemy_ai_engine)
+    context = service_manager:register(GameContext.new())
 
-        
-
-    context = GameContext.new(
-        battle_manager,
-        turn_manager,
-        character_manager,
-        menu_manager,
-        event_bus
-    )
-
-    event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
 function _update()
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
-    LOG.trace("Updating menus.")
     menu_manager:update(joy)
-    LOG.trace("Updating battle.")
     battle_manager:update()
-    LOG.trace("Ticking animations.")
     animation_manager:tick()
-    LOG.trace("Enriching context.")
     context:enrich()
-    LOG.trace("Updating tasks.")
     task_manager:update_tasks()
 end
 
 function _draw()
     LOG.trace("Generating frame data.")
     animation_manager:generate_frame_data()
-    LOG.trace("Drawing UI.")
     ui_manager:draw(context)
 end

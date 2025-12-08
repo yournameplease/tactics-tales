@@ -11,6 +11,7 @@ require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
+require("src/systems/service")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")
@@ -25,6 +26,8 @@ local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
 global record TacticsEngine
+    is TransientGameService
+    where self.id == 'tactics_engine'
     tile_manager: TileManager
     battle_state: BattleState
     combat_calculator: CombatCalculator
@@ -54,21 +57,14 @@ global record TacticsEngine
     update: function(self)
 end
 
-function TacticsEngine.new(
-    battle_state: BattleState,
-    tile_manager: TileManager,
-    event_bus: EventBus,
-    animation_manager: AnimationManager,
-    task_manager: TaskManager
-): TacticsEngine
-    local self: TacticsEngine = setmetatable({}, { __index = TacticsEngine })
+function TacticsEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.battle_is_blocked = false
-    self.battle_state = battle_state
-    self.tile_manager = tile_manager
-    self.combat_calculator = CombatCalculator.new(tile_manager)
-    self.event_bus = event_bus
-    self.animation_manager = animation_manager
-    self.task_manager = task_manager
+    self.battle_state = services.battle_state as BattleState
+    self.tile_manager = services.tile_manager as TileManager
+    self.combat_calculator = service_manager:register_transient(CombatCalculator.new(self.tile_manager))
+    self.event_bus = services.event_bus as EventBus
+    self.animation_manager = services.animation_manager as AnimationManager
+    self.task_manager = services.task_manager as TaskManager
 
     self.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self:handle_move_unit(ctx)
@@ -84,6 +80,19 @@ function TacticsEngine.new(
     end)
 
     LOG.debug("New battle.")
+end
+
+function TacticsEngine.new(): TacticsEngine
+    local self: TacticsEngine = setmetatable({
+        id = "tactics_engine",
+        dependencies = {
+            "battle_state",
+            "tile_manager",
+            "event_bus",
+            "animation_manager",
+            "task_manager",
+        },
+    }, { __index = TacticsEngine })
     return self
 end
 

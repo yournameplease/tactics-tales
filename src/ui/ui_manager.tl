@@ -1,3 +1,4 @@
+require("src/systems/service")
 require("src/types")
 require("src/ui/types")
 
@@ -20,15 +21,24 @@ global record UILayout
 end
 
 global record UIManager
+    is GameService
+    where self.id == "ui_manager"
     layouts: { UILayoutId: UILayout }
     current_layout: UILayout
     theme: UITheme
 end
 
+function UIManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+
+end
+
 -- Define Layouts
 function UIManager.new(): UIManager
 
-    local self: UIManager = setmetatable({}, { __index = UIManager }) 
+    local self: UIManager = setmetatable({
+        id = "ui_manager",
+        dependencies = {},
+    }, { __index = UIManager }) 
     -- 1. Create the BATTLE layout tree
     self.layouts = {}
 

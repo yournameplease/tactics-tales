@@ -2,10 +2,10 @@ require("src/debug")
 require ("src/types")
 require ("src/menu/types")
 require ("src/menu/menu_selection")
--- TODO: tactics is only needed for lazy dijkstra animation.
 require("src/battle/tactics/tactics_engine")
 require("src/joypad")
 require("src/battle/tile_manager")
+require("src/systems/service")
 
 
 local record MenuServiceBundle
@@ -20,6 +20,8 @@ global record SelectionHistory
 end
 
 global record MenuManager
+    is TransientGameService
+    where self.id == 'menu_manager'
     menu_state: MenuState
     menu_ctx: MenuContext
     menu_selection: MenuSelection
@@ -29,14 +31,7 @@ global record MenuManager
     event_bus: EventBus
 end
 
-function MenuManager.new(
-    tactics_engine: TacticsEngine,
-    battle_state: BattleState,
-    tile_manager: TileManager,
-    event_bus: EventBus
-): MenuManager
-    local self: MenuManager = setmetatable({}, { __index = MenuManager })
-
+function MenuManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.menu_state = {
         point = TilePoint.of(0, 0)
     }
@@ -45,11 +40,24 @@ function MenuManager.new(
     self.selection_history = {}
 
     self.services = {
-        tactics_engine = tactics_engine,
-        battle_state = battle_state,
-        tile_manager = tile_manager,
+        tactics_engine = services.tactics_engine as TacticsEngine,
+        battle_state = services.battle_state as BattleState,
+        tile_manager = services.tile_manager as TileManager,
     }
-    self.event_bus = event_bus
+    self.event_bus = services.event_bus as EventBus
+end
+
+-- TODO: this should be a subclass of a more generic menu manager
+function MenuManager.new(): MenuManager
+    local self: MenuManager = setmetatable({
+        id = "menu_manager",
+        dependencies = {
+            "tactics_engine",
+            "battle_state",
+            "tile_manager",
+            "event_bus"
+        },
+    }, { __index = MenuManager })
 
     return self
 end

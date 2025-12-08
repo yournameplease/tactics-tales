@@ -12,12 +12,20 @@ require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/battle/map/map_manager")
 require("src/menu/menu_manager")
+require("src/systems/service")
 require("src/character/character_manager")
+require("src/turn_manager")
+require("src/battle/tactics/enemy_ai")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
 global record BattleManager
+    is TransientGameService
+    where self.id == 'battle_manager'
+
+    battle_id: string
+
     battle_state: BattleState
     tile_manager: TileManager
     character_manager: CharacterManager
@@ -25,6 +33,10 @@ global record BattleManager
     event_bus: EventBus
     animation_manager: AnimationManager
     task_manager: TaskManager
+
+    menu_manager: MenuManager
+    enemy_ai_engine: EnemyAIEngine
+    turn_manager: TurnManager
 
     map_data: MapData
 end
@@ -58,31 +70,46 @@ function BattleManager:_spawn_players(player_spawners: { TilePoint })
     end
 end
 
---- Main entry point.
--- @param battle_id: Key from BATTLES
--- @return Initialized 'Tactics' state (or BattleState)
-function BattleManager.new(battle_id: string, event_bus: EventBus, character_manager: CharacterManager, animation_manager: AnimationManager, task_manager: TaskManager): BattleManager
-    local battle_definition = BATTLE_DATA[battle_id]
-    assert(battle_definition ~= nil)
 
-    local self: BattleManager = setmetatable({}, { __index = BattleManager })
+function BattleManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+    local battle_definition = BATTLE_DATA[self.battle_id]
 
-    self.event_bus = event_bus
-    self.animation_manager = animation_manager
-    self.task_manager = task_manager
-
-    self.character_manager = character_manager
+    self.event_bus = services.event_bus as EventBus
+    self.animation_manager = services.animation_manager as AnimationManager
+    self.task_manager = services.task_manager as TaskManager
+    self.character_manager = services.character_manager as CharacterManager
 
     self.map_data = MapManager:load_map(battle_definition.map_id)
     
-    self.battle_state = BattleState.new(self.map_data.width, self.map_data.height)
+    self.battle_state = service_manager:register_transient(BattleState.new(self.map_data.width, self.map_data.height))
 
-    self.tile_manager = TileManager.new(self.map_data, self.battle_state)
+    self.tile_manager = service_manager:register_transient(TileManager.new(self.map_data))
 
     self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
     self:_spawn_players(self.map_data.metadata.player_spawners)
 
-    self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, self.animation_manager, self.task_manager)
+    self.tactics_engine = service_manager:register_transient(TacticsEngine.new())
+
+    self.menu_manager = service_manager:register_transient(MenuManager.new())
+    self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
+    self.turn_manager = service_manager:register_transient(TurnManager.new())
+
+    self.event_bus:emit("TACTICS_BEGIN_BATTLE")
+end
+
+function BattleManager.new(battle_id: string): BattleManager 
+    assert(BATTLE_DATA[battle_id] ~= nil)
+
+    local self: BattleManager = setmetatable({
+        id = 'battle_manager',
+        dependencies = {
+            "event_bus",
+            "animation_manager",
+            "task_manager",
+            "character_manager",
+        }
+    }, { __index = BattleManager })
+    self.battle_id = battle_id
 
     return self
 end

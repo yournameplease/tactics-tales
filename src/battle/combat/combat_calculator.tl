@@ -6,12 +6,22 @@ local List = require("src/util/list")
 
 
 global record CombatCalculator
+    is TransientGameService
+    where self.id == 'combat_calculator'
+
     tile_manager: TileManager
 end
 
+function CombatCalculator:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+    self.tile_manager = services.tile_manager as TileManager
+end
+
 function CombatCalculator.new(tile_manager: TileManager): CombatCalculator
-    local self = setmetatable({
-        tile_manager = tile_manager
+    local self: CombatCalculator = setmetatable({
+        id = 'combat_calculator',
+        dependencies = {
+            'tile_manager'
+        }
     }, { __index = CombatCalculator })
     return self
 end

@@ -1,3 +1,4 @@
+require("src/systems/service")
 require("src/debug")
 require("src/types")
 require("src/util")
@@ -233,8 +234,14 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
 
 
 global record AnimationManager
+    is GameService
+    where self.id == "animation_manager"
     active_animations: { AnimationInstance }
     global_frame: integer
+end
+
+function AnimationManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+
 end
 
 function AnimationManager.new(): AnimationManager

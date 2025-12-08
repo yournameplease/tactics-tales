@@ -1,3 +1,4 @@
+require("src/systems/service")
 require("src/debug")
 
 global enum GameEvent
@@ -21,14 +22,24 @@ end
 global type EventListener = function(args: any)
 
 global record EventBus
+    is GameService
+    where self.id == "event_bus"
     event_history: { GameEvent }
     listeners: { GameEvent: {EventListener}}
+end
+
+function EventBus:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+
 end
 
 local MAX_EVENT_HISTORY = 99
 
 function EventBus.new(): EventBus
-    local self = setmetatable({}, { __index = EventBus })
+    local self: EventBus = setmetatable({
+        id = "event_bus",
+        dependencies = {},
+    }, { __index = EventBus })
+
     self.event_history = {}
     self.listeners = {}
     return self
