@@ -17,8 +17,13 @@ local enum ServiceId
 
 end
 
+
+-- possible todo: don't require all be manually init'd in the correct dependency order
 global interface GameService
 	id: ServiceId
+	dependencies: { ServiceId }
+	-- handles getting other services
+	init: function(self, services: { ServiceId: GameService })
 end
 
 global interface TransientGameService is GameService
@@ -32,16 +37,45 @@ global record ServiceManager
 	transient_services: { ServiceId: TransientGameService }	
 end
 
-function ServiceManager:register(service: GameService)
-	local id = service.id
-	assert(self.persistent_services[id] == nil)
-	self.persistent_services[id] = service
+function ServiceManager:get_services(): { ServiceId: GameService}
+	local out: { ServiceId: GameService } = {}
+	for k,v in pairs(self.transient_services) do
+		out[k] = v
+	end
+	for k,v in pairs(self.persistent_services) do
+		out[k] = v
+	end
+	return out
 end
 
-function ServiceManager:register_transient(service: TransientGameService)
+function ServiceManager:dependencies_exist(ids: { ServiceId }): boolean
+	for _,id in ipairs(ids) do
+		if self.persistent_services[id] == nil
+			and self.transient_services[id] == nil then
+			return false
+		end
+	end
+	return true
+end
+
+function ServiceManager:register(service: GameService): GameService
 	local id = service.id
+	assert(self.persistent_services[id] == nil)
 	assert(self.transient_services[id] == nil)
+	assert(self:dependencies_exist(service.dependencies))
+	self.persistent_services[id] = service
+	service:init(self:get_services())
+	return service
+end
+
+function ServiceManager:register_transient(service: TransientGameService): TransientGameService
+	local id = service.id
+	assert(self.persistent_services[id] == nil)
+	assert(self.transient_services[id] == nil)
+	assert(self:dependencies_exist(service.dependencies))
 	self.transient_services[id] = service
+	service:init(self:get_services())
+	return service
 end
 
 function ServiceManager:teardown_transient(service: TransientGameService)
