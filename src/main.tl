@@ -67,12 +67,6 @@ local battle_manager: BattleManager
 local menu_manager: MenuManager
 
 function _init()
-    local a = TilePoint.of(1, 2)
-    local b = TilePoint.of(2, 2)
-    LOG.info(getmetatable(a).__add(a, b))
-    
-    LOG.info(a,b,a+b)
-
     task_manager = TaskManager.new()
     ui_manager =  UIManager.new()
     animation_manager =  AnimationManager.new()
