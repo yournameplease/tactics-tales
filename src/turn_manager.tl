@@ -6,7 +6,7 @@ require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/service")
-require("src/battle/battle_manager")
+require("src/battle/battle_objective_service")
 
 local enum Phase
     "PLAYER"
@@ -21,7 +21,7 @@ global record TurnManager
 
     event_bus: EventBus
     tactics_engine: TacticsEngine
-    battle_manager: BattleManager
+    battle_objective_service: BattleObjectiveService
     menu_manager: MenuManager
     enemy_ai_engine: EnemyAIEngine
 end
@@ -32,7 +32,7 @@ function TurnManager:init(service_manager: ServiceManager, services: { ServiceId
 
     self.event_bus = services.event_bus as EventBus
     self.tactics_engine = services.tactics_engine as TacticsEngine
-    self.battle_manager = services.battle_manager as BattleManager
+    self.battle_objective_service = services.battle_objective_service as BattleObjectiveService
     self.menu_manager = services.menu_manager as MenuManager
     self.enemy_ai_engine = services.enemy_ai_engine as EnemyAIEngine
 
@@ -80,7 +80,7 @@ function TurnManager:init(service_manager: ServiceManager, services: { ServiceId
 
         self.turn = self.turn + 1
 
-        local battle_result = self.battle_manager:check_for_end()
+        local battle_result = self.battle_objective_service:check_for_end()
 
         if not battle_result.finished then
             self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
@@ -104,7 +104,7 @@ function TurnManager.new(): TurnManager
         dependencies = { 
             "event_bus",
             "tactics_engine",
-            "battle_manager",
+            "battle_objective_service",
             "menu_manager",
             "enemy_ai_engine"
         }

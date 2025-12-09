@@ -118,34 +118,4 @@ function BattleManager:update()
     self.tactics_engine:update()
 end
 
-global record BattleFinishState
-    finished: boolean
-    command: GameEvent
-end
-
--- legacy function, doesn't support different end conditions
-function BattleManager:check_for_end(): BattleFinishState
-    if self.tactics_engine:is_blocked() then
-        return { finished = false }
-    end
-
-    local players = self.battle_state:get_units(unit_is_player)
-    local enemies = self.battle_state:get_units(unit_is_enemy)
-
-    if (#players == 0) then
-        return { finished = true, command = "BATTLE_END_VICTORY" }
-    elseif (#enemies == 0) then
-        return { finished = true, command = "BATTLE_END_DEFEAT" }
-    else
-        return { finished = false }
-    end
-end
-
---- Checks if current state satisfies Victory/Failure conditions
--- Called by TurnManager at end of actions
-function BattleManager:check_objectives(): BattleFinishState
-    -- returns "WIN", "LOSS", or nil (continue)
-    return self:check_for_end()
-end
-
 return BattleManager
