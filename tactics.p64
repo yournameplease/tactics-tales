@@ -532,7 +532,6 @@ end
 function BattleManager:update(joy)
    self.battle_menu_manager:update(joy)
    self.tactics_engine:update()
-   self.battle_context:enrich()
 end
 
 return BattleManager
@@ -725,8 +724,6 @@ require("src/menu/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")
 require("src/battle/combat/combat_calculator")
-
-
 
 
 
@@ -4090,109 +4087,6 @@ end
 
 return draw_util
 
-:: build/game_context.lua
-require("src/ui/types")
-require("src/battle/tactics/tactics_engine")
-require("src/turn_manager")
-require("src/battle/tile_manager")
-require("src/menu/battle_menu_manager")
-require("src/character/character_manager")
-require("src/systems/event_bus")
-require("src/battle/combat/combat_calculator")
-
-
-
-
-
-GameContext = {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function GameContext:init(service_manager, services)
-   self.tactics = services.tactics_engine
-   self.battle_state = services.battle_state
-   self.turn_manager = services.turn_manager
-   self.tile_manager = services.tile_manager
-   self.character_manager = services.character_manager
-   self.battle_menu_manager = services.battle_menu_manager
-   self.event_bus = services.event_bus
-   self.combat_calculator = services.combat_calculator
-
-   self.layout = "TACTICS"
-
-   self.hovered_unit = nil
-   self.acting_unit = nil
-end
-
-function GameContext.new()
-   local context = setmetatable({
-      id = "game_context",
-      dependencies = {
-         "tactics_engine",
-         "battle_state",
-         "turn_manager",
-         "tile_manager",
-         "character_manager",
-         "battle_menu_manager",
-         "event_bus",
-         "combat_calculator",
-      },
-   }, { __index = GameContext })
-   return context
-end
-
-function GameContext:enrich()
-   self.layout = "TACTICS"
-
-
-   local selection = self.battle_menu_manager.menu_selection
-
-   if selection.type == "CURSOR_GRID" then
-      if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
-         local point = selection.point
-         local unit = self.battle_state:get_at_tile(point)
-         if unit then
-            self.hovered_unit = unit
-         end
-      end
-
-      if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
-         local point = selection.point
-         local unit = self.battle_state:get_at_tile(point)
-         if unit then
-            self.layout = "COMBAT_PREVIEW"
-            self.hovered_unit = unit
-         end
-      end
-   end
-
-   if self.battle_menu_manager.menu_ctx.acting_unit ~= nil then
-      self.acting_unit = self.battle_menu_manager.menu_ctx.acting_unit.unit
-   end
-
-   if self.battle_menu_manager.menu_ctx.destination ~= nil then
-      self.destination = self.battle_menu_manager.menu_ctx.destination.point
-   end
-
-end
-
-return GameContext
-
 :: build/joypad.lua
 
 Joypad = {}
@@ -4259,9 +4153,6 @@ end
 
 
 
-
-
-
 require("src/systems/tasks")
 
 require("src/debug")
@@ -4275,8 +4166,8 @@ require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_ui_context")
-require("src/battle/battle_manager")
-
+require("src/story/story_manager")
+require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
 require("src/joypad")
@@ -4288,7 +4179,7 @@ local animation_manager
 local ui_manager
 local task_manager
 
-local battle_manager
+local story_manager
 
 local service_manager
 
@@ -4304,23 +4195,26 @@ function _init()
 
    service_manager:register(CharacterManager.new())
 
-   battle_manager = service_manager:register(BattleManager.new("bandit_village"))
+   story_manager = service_manager:register(StoryManager.new("test_story"))
 
 
-   context = service_manager.transient_services.battle_ui_context
+
+   context = service_manager:register(UIContextManager.new())
 end
 
 function _update()
    animation_manager:tick()
    LOG.trace("Getting Joypad.")
    local joy = get_joypad()
-   battle_manager:update(joy)
+   story_manager:update(joy)
+
    task_manager:update_tasks()
 end
 
 function _draw()
    LOG.trace("Generating frame data.")
    animation_manager:generate_frame_data()
+   context:enrich()
    ui_manager:draw(context)
 end
 
@@ -4343,18 +4237,7 @@ require("src/menu/menu_manager")
 
 
 
-SelectionHistory = {}
-
-
-
-
 BattleMenuManager = {}
-
-
-
-
-
-
 
 
 
@@ -4828,6 +4711,65 @@ end
 
 return MenuManager
 
+:: build/menu/story_menu_manager.lua
+require("src/debug")
+require("src/types")
+require("src/menu/types")
+require("src/menu/menu_manager")
+require("src/joypad")
+require("src/story/story_page_state")
+require("src/systems/service")
+require("src/menu/menu_manager")
+
+
+
+
+
+
+
+StoryMenuManager = {}
+
+
+
+
+
+local MENU_DATA = {
+   ["MENU_STORY_TEXT"] = {
+      initial_step = "ADVANCE_TEXT",
+      steps = {
+         ["ADVANCE_TEXT"] = ListMenuDefinition.new({
+            get_options = function(msb, ctx)
+               local options = {}
+
+               add(options, {
+                  text = "Continue",
+                  send_command = "STORY_ADVANCE_TEXT",
+               })
+
+               return options
+            end,
+         }),
+      },
+   },
+}
+
+function StoryMenuManager.new()
+   return BaseMenuManager.new(
+   "battle_menu_manager",
+   {
+      "story_page_state",
+   },
+   MENU_DATA,
+   function(services)
+      return {
+         story_page_state = services.story_page_state,
+      }
+   end)
+
+end
+
+return StoryMenuManager
+
 :: build/menu/types.lua
 require("src/types")
 require("src/joypad")
@@ -4895,22 +4837,33 @@ require("src/systems/tasks")
 
 require("src/data/battles")
 
-require("src/battle/battle_state")
-require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
-require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_manager")
+require("src/battle/battle_manager")
 require("src/menu/menu_manager")
+require("src/menu/story_menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
+require("src/story/story_ui_context")
+require("src/story/story_page_state")
+
 local Story = require("src/story/types")
 
 local STORY_DATA = require("src/data/story")
 
 
 StoryManager = { NodePosition = {} }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4940,16 +4893,19 @@ end
 function StoryManager:handle_new_node()
    local story_definition = STORY_DATA[self.story_id]
    local node = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
-
+   local new_node_type = node.type
    if node.type == 'jump' then
       self:jump_to_node(node.next_node)
    end
    if node.type == 'text' then
-
+      self.story_page_state:add_text_line(node.text)
+      self.menu_manager:set_menu("MENU_STORY_TEXT")
    end
    if node.type == 'battle' then
-
+      local battle_id = node.battle_id
+      self.battle_manager = self.service_manager:register_transient(BattleManager.new(battle_id))
    end
+   self.current_node_type = new_node_type
 end
 
 function StoryManager:advance_node()
@@ -4957,10 +4913,25 @@ function StoryManager:advance_node()
    self:handle_new_node()
 end
 
-function StoryManager:init(_service_manager, services)
+function StoryManager:advance_text()
+   self:advance_node()
+end
+
+function StoryManager:init(service_manager, services)
    local story_definition = STORY_DATA[self.story_id]
 
+   self.event_bus = services.event_bus
+   self.service_manager = services.service_manager
+
+   self.story_page_state = service_manager:register_transient(StoryPageState.new())
+   self.story_ui_context = service_manager:register_transient(StoryUIContext.new())
+   self.menu_manager = service_manager:register_transient(StoryMenuManager.new())
+
    self:jump_to_node(story_definition.starting_node)
+
+   self.event_bus:on("STORY_ADVANCE_TEXT", function()
+      self:advance_text()
+   end)
 end
 
 function StoryManager.new(story_id)
@@ -4969,6 +4940,7 @@ function StoryManager.new(story_id)
    local self = setmetatable({
       id = 'story_manager',
       dependencies = {
+         "service_manager",
          "event_bus",
          "animation_manager",
          "task_manager",
@@ -4980,12 +4952,93 @@ function StoryManager.new(story_id)
    return self
 end
 
-function StoryManager:update()
+function StoryManager:update(joy)
+   if self.current_node_type == 'text' then
+      self.menu_manager:update(joy)
+   elseif self.current_node_type == 'battle' then
 
+   elseif self.current_node_type == 'jump' then
 
+   end
 end
 
 return StoryManager
+
+:: build/story/story_page_state.lua
+require("src/types")
+require("src/util")
+
+StoryPageState = {}
+
+
+
+
+
+
+function StoryPageState:init(_service_manager, _services)
+   self.text = {}
+end
+
+function StoryPageState.new()
+   local self = setmetatable({
+      id = 'story_page_state',
+      dependencies = {},
+   }, { __index = StoryPageState })
+   return self
+end
+
+
+
+function StoryPageState:add_text_line(text)
+   add(self.text, text)
+end
+
+function StoryPageState:clear_page()
+   self.text = {}
+end
+
+
+
+return StoryPageState
+
+:: build/story/story_ui_context.lua
+require("src/ui/types")
+require("src/battle/tactics/tactics_engine")
+require("src/turn_manager")
+require("src/story/story_page_state")
+
+
+
+StoryUIContext = {}
+
+
+
+
+
+
+
+
+function StoryUIContext:init(_service_manager, services)
+   self.layout = "STORY_PAGE"
+
+   self.story_page_state = services.story_page_state
+end
+
+function StoryUIContext.new()
+   local context = setmetatable({
+      id = "story_ui_context",
+      dependencies = {},
+
+   }, { __index = StoryUIContext })
+   return context
+end
+
+function StoryUIContext:enrich()
+   self.layout = "STORY_PAGE"
+
+end
+
+return StoryUIContext
 
 :: build/story/types.lua
 
@@ -5053,6 +5106,7 @@ local Story = {}
 return {
    Story = Story,
    StoryNode = StoryNode,
+   StoryNodeType = StoryNodeType,
    TextNode = TextNode,
    BattleNode = BattleNode,
    JumpNode = JumpNode,
@@ -5063,6 +5117,8 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/debug")
 
 GameEvent = {}
+
+
 
 
 
@@ -5169,6 +5225,9 @@ ServiceId = {}
 
 
 
+
+
+
 GameService = {}
 
 
@@ -5236,8 +5295,6 @@ function ServiceManager:teardown_transient(service)
 end
 
 function ServiceManager:init(_service_manager, _services)
-   self.persistent_services = {}
-   self.transient_services = {}
 end
 
 function ServiceManager.new()
@@ -5246,6 +5303,9 @@ function ServiceManager.new()
       dependencies = {},
    }
    setmetatable(self, { __index = ServiceManager })
+
+   self.persistent_services = {}
+   self.transient_services = {}
 
    self:init(self, {})
    self:register(self)
@@ -6735,6 +6795,7 @@ UILayoutId = {}
 require("src/ui/types")
 require("src/systems/service")
 require("src/battle/battle_ui_context")
+require("src/story/story_ui_context")
 
 
 
@@ -6752,14 +6813,16 @@ UIContextManager = {}
 
 
 
-function UIContextManager:init(_service_manager, services)
 
+function UIContextManager:init(_service_manager, services)
    self.layout = "TACTICS"
+
+   self.service_manager = services.service_manager
 end
 
 function UIContextManager.new()
    local context = setmetatable({
-      id = "battle_ui_context",
+      id = "ui_context_manager",
       dependencies = {
          "service_manager",
       },
@@ -6776,10 +6839,18 @@ function UIContextManager:enrich()
       self.battle_ui_context:enrich()
    end
 
+   self.story_ui_context = self.service_manager.transient_services.story_ui_context
+   if self.story_ui_context ~= nil then
+      self.story_ui_context:enrich()
+   end
+
 
 
    if self.battle_ui_context ~= nil then
-      self.layout = self.battle_ui_context.layout
+      LOG.debug("yes battle ui context")
+   end
+   if self.story_ui_context ~= nil then
+      self.layout = self.story_ui_context.layout
    end
 end
 
@@ -6888,6 +6959,33 @@ function UIManager.new()
       battle_root:add(tactics_map)
 
       self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
+   end
+   do
+      local story_root = Box.new({
+         x = 0, y = 0,
+         w = 480, h = 270,
+         internal_margin = { t = 4 },
+         dir = "row",
+         transparent = true,
+      })
+
+
+      local left = story_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
+      left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
+
+      local story_page = MessageLog.new({
+         dir = "col",
+         flex_grow = 1,
+         padding = 2,
+         func = function(state, _row_limit)
+            return state.story_ui_context.story_page_state.text
+         end,
+      })
+
+      story_root:add(page_divider)
+      story_root:add(story_page)
+
+      self.layouts["STORY_PAGE"] = { root = story_root }
    end
 
 
@@ -7429,47 +7527,47 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 05:44:38",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 14:14:56",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 14:14:56"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -7649,7 +7747,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-09 05:41:59",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-09 14:14:05",modified="2025-12-09 14:14:56"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -7932,7 +8030,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 14:14:56"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -7961,7 +8059,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 14:14:56"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -7969,5 +8067,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-09 05:44:38"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-09 14:14:56"]]
 :: [eoc]

@@ -53,9 +53,9 @@ function UIContextManager:enrich()
     -- pick layout from contexts
 
     if self.battle_ui_context ~= nil then
+        self.layout = self.battle_ui_context.layout
         LOG.debug("yes battle ui context")
-    end 
-    if self.story_ui_context ~= nil then
+    elseif self.story_ui_context ~= nil then
         self.layout = self.story_ui_context.layout
     end
 end

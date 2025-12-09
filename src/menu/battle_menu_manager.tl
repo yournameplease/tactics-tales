@@ -1,7 +1,7 @@
 require("src/debug")
-require ("src/types")
-require ("src/menu/types")
-require ("src/menu/menu_manager")
+require("src/types")
+require("src/menu/types")
+require("src/menu/menu_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/joypad")
 require("src/battle/tile_manager")
@@ -16,21 +16,10 @@ local record BattleMenuServiceBundle
     tile_manager: TileManager
 end
 
-global record SelectionHistory
-    step: MenuStep
-    selection: MenuSelection
-end
-
 global record BattleMenuManager
     is TransientGameService, MenuManager<BattleMenuServiceBundle>
     where self.id == 'battle_menu_manager'
-    menu_state: MenuState
-    menu_ctx: MenuContext
-    menu_selection: MenuSelection
-    selection_history: { SelectionHistory }
 
-    services: BattleMenuServiceBundle
-    event_bus: EventBus
 end
 
 -- kind

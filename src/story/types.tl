@@ -63,6 +63,7 @@ end
 return {
 	Story = Story,
 	StoryNode = StoryNode,
+	StoryNodeType = StoryNodeType,
 	TextNode = TextNode,
 	BattleNode = BattleNode,
 	JumpNode = JumpNode,

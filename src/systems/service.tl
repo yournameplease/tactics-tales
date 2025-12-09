@@ -25,6 +25,7 @@ global enum ServiceId
 
 	'menu_manager'
 	'battle_menu_manager'
+	'story_menu_manager'
 
 	'battle_ui_context'
 	'story_ui_context'
@@ -85,8 +86,8 @@ end
 
 function ServiceManager:register_transient<S is TransientGameService>(service: S): S
 	local id = service.id
-	assert(self.persistent_services[id] == nil, "Persistent services are nil!")
-	assert(self.transient_services[id] == nil, "Persistent services are nil!")
+	assert(self.persistent_services[id] == nil, "Persistent service "..id.." already exists!")
+	assert(self.transient_services[id] == nil, "Transient service "..id.." already exists!")
 	self:assert_dependencies_exist(service.dependencies)
 	self.transient_services[id] = service
 	service:init(self, self:get_services())
