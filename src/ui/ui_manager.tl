@@ -101,6 +101,32 @@ function UIManager.new(): UIManager
 
         self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
     end
+    do
+        local story_root = Box.new({
+            x=0, y=0,
+            w=480, h=270,
+            internal_margin = {t = 4},
+            dir="row",
+            transparent = true
+        })
+
+        -- Left Sidebar
+        local left = story_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
+
+        local story_page = MessageLog.new({
+            dir="col",
+            flex_grow = 1,
+            padding = 2,
+            func = function(state: UIContextManager, _row_limit: integer): { string }
+                return state.story_ui_context.story_page_state.text
+            end
+        })
+
+        story_root:add(page_divider)
+        story_root:add(story_page)
+
+        self.layouts["STORY_PAGE"] = { root = story_root }
+    end
 
     -- Validate all layouts
     for id, v in pairs(self.layouts) do

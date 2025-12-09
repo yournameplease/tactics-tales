@@ -1,6 +1,7 @@
 require("src/ui/types")
 require("src/systems/service")
 require("src/battle/battle_ui_context")
+require("src/story/story_ui_context")
 
 global type UILayoutId
 
@@ -13,6 +14,7 @@ global record UIContextManager
     service_manager: ServiceManager
 
     battle_ui_context: BattleUIContext
+    story_ui_context: StoryUIContext
 
     layout: UILayoutId
     
@@ -43,14 +45,19 @@ function UIContextManager:enrich()
         self.battle_ui_context:enrich()
     end
 
+    self.story_ui_context = self.service_manager.transient_services.story_ui_context as StoryUIContext
+    if self.story_ui_context ~= nil then
+        self.story_ui_context:enrich()
+    end
+
     -- pick layout from contexts
 
     if self.battle_ui_context ~= nil then
         LOG.debug("yes battle ui context")
-        self.layout = self.battle_ui_context.layout
-    else
-        LOG.debug("no battle ui context!")
     end 
+    if self.story_ui_context ~= nil then
+        self.layout = self.story_ui_context.layout
+    end
 end
 
 return UIContextManager

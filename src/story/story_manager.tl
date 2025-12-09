@@ -95,7 +95,7 @@ function StoryManager.new(story_id: StoryId): StoryManager
     return self
 end
 
-function StoryManager:update()
+function StoryManager:update(joy: Joypad)
     
 end
 

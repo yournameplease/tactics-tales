@@ -4,10 +4,7 @@
 --[[
 -- TODO: LIST
 -- Next Goals
--- get helix on laptop to work on vacation
 -- battle goal
-- enemy/player spawn point map tiles
-- multi map support
 
 -- mid term goals
 - mouse control
@@ -48,7 +45,7 @@ require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_ui_context")
-require("src/battle/battle_manager")
+require("src/story/story_manager")
 require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
@@ -61,7 +58,7 @@ local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: TaskManager
 
-local battle_manager: BattleManager
+local story_manager: StoryManager
 
 local service_manager: ServiceManager
 
@@ -77,7 +74,8 @@ function _init()
 
     service_manager:register(CharacterManager.new())
 
-    battle_manager = service_manager:register(BattleManager.new("bandit_village"))
+    story_manager = service_manager:register(StoryManager.new("test_story"))
+    -- battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
     -- TODO: context should have a generic base which is required by ui manager
     context = service_manager:register(UIContextManager.new())
@@ -87,7 +85,8 @@ function _update()
     animation_manager:tick()
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
-    battle_manager:update(joy)
+    story_manager:update(joy)
+    -- battle_manager:update(joy)
     task_manager:update_tasks()
 end
 
