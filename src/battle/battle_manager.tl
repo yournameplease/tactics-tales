@@ -7,7 +7,7 @@ require("src/systems/tasks")
 
 require("src/data/battles")
 
-require("src/game_context")
+require("src/battle/battle_ui_context")
 require("src/battle/battle_state")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")

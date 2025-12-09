@@ -1,5 +1,5 @@
 require("src/types")
-require("src/game_context")
+require("src/battle/battle_ui_context")
 require("src/ui/theme")
 
 global record Margin

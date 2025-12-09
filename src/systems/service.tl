@@ -18,7 +18,7 @@ global enum ServiceId
 	'battle_state'
 	'enemy_ai_engine'
 	'combat_calculator'
-	'game_context'
+	'battle_ui_context'
 	'battle_objective_service'
 
 	'menu_manager'

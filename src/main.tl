@@ -42,12 +42,12 @@ require("src/debug")
 require("src/systems/event_bus")
 require("src/systems/service")
 
-require("src/game_context")
+require("src/battle/battle_ui_context")
 require("src/character/character_manager")
 require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
-require("src/game_context")
+require("src/battle/battle_ui_context")
 require("src/battle/battle_manager")
 
 
@@ -80,7 +80,7 @@ function _init()
     battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
     -- TODO: context should have a generic base which is required by ui manager
-    context = service_manager.transient_services.game_context as GameContext
+    context = service_manager.transient_services.battle_ui_context as GameContext
 end
 
 function _update()

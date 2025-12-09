@@ -2,7 +2,7 @@ require("src/systems/service")
 require("src/types")
 require("src/ui/types")
 
-require("src/game_context")
+require("src/battle/battle_ui_context")
 require("src/config")
 
 require("src/ui/panels/tactics_map")
@@ -130,8 +130,8 @@ function UIManager.new(): UIManager
     return self
 end
 
-function UIManager:draw(game_context: GameContext)
-    self.current_layout = self.layouts[game_context.layout]
+function UIManager:draw(battle_ui_context: GameContext)
+    self.current_layout = self.layouts[battle_ui_context.layout]
 
     local root = self.current_layout.root
     -- Recalculate size and positions
@@ -140,7 +140,7 @@ function UIManager:draw(game_context: GameContext)
 
     -- Render
     cls(self.theme.COLOR_CLEAR)
-    root:draw(game_context, self.theme)
+    root:draw(battle_ui_context, self.theme)
 end
 
 return UIManager

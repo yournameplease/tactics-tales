@@ -13,7 +13,7 @@ global type UILayoutId
 -- agregate multiple contexts to send to ui renderer
 global record GameContext
     is TransientGameService
-    where self.id == 'game_context'
+    where self.id == 'battle_ui_context'
     tactics: TacticsEngine
     battle_state: BattleState
     turn_manager: TurnManager
@@ -48,7 +48,7 @@ end
 
 function GameContext.new(): GameContext
     local context: GameContext = setmetatable({
-        id = "game_context",
+        id = "battle_ui_context",
         dependencies = {
             "tactics_engine",
             "battle_state",
