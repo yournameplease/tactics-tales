@@ -1,16 +1,83 @@
 require("src/debug")
 require ("src/types")
 require ("src/menu/types")
-require ("src/menu/menu_selection")
-require("src/battle/tactics/tactics_engine")
 require("src/joypad")
-require("src/battle/tile_manager")
 require("src/systems/service")
+require("src/battle/tactics/battle_unit")
+
 
 
 global interface MenuServiceBundle
-
+    
 end
+
+global interface MenuSelection
+    type: MenuType
+    update: function(self, Joypad) 
+end
+
+global record MenuOption
+    text: string
+    next_state: MenuStep
+    send_command: GameEvent
+end
+
+global record GridMenuSelection
+    is MenuSelection
+    where self.type == "CURSOR_GRID"
+    point: TilePoint
+    x_max: integer
+    y_max: integer
+    path: { TilePoint }
+    legal_tiles: Array2D<MenuTileHighlight>
+end
+
+function GridMenuSelection.new(point: TilePoint, x_max: integer, y_max: integer): GridMenuSelection
+    local self: GridMenuSelection = {
+        type = "CURSOR_GRID",
+        point = point, 
+        x_max = x_max,
+        y_max = y_max
+    }
+    return setmetatable(self, { __index = GridMenuSelection })
+end
+
+function GridMenuSelection:update(joy: Joypad)
+        self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
+        self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
+end
+
+global record VerticalListMenuSelection
+    is MenuSelection
+    where self.type == "CURSOR_VERTICAL_LIST"
+    i: integer
+    options: { MenuOption }
+end
+
+function VerticalListMenuSelection.new(i: integer, options: {MenuOption}): VerticalListMenuSelection
+    local self: VerticalListMenuSelection = {
+        type = "CURSOR_VERTICAL_LIST",
+        i = i,
+        options = options
+    }
+    return setmetatable(self, { __index = VerticalListMenuSelection })
+end
+
+function VerticalListMenuSelection:update(joy: Joypad)
+    self.i = mid(1, self.i + joy.dyp, #self.options)
+end
+
+global record HorizontalListMenuSelection
+    is MenuSelection
+    where self.type == "CURSOR_HORIZONTAL_LIST"
+    i: integer
+    options: { MenuOption }
+end
+
+function HorizontalListMenuSelection:update(joy: Joypad)
+    self.i = mid(1, self.i + joy.dxp, #self.options)
+end
+
 
 global record SelectionHistory
     step: MenuStep
@@ -25,6 +92,7 @@ end
 global record GridMenuDefinition<MSB is MenuServiceBundle>
     is MenuStepDefinition
     where self.type == "CURSOR_GRID"
+
     set_selected_context: function(GridMenuSelection, MSB, MenuContext)
     validator: function(GridMenuSelection, MSB, MenuContext): boolean
     next_state: MenuStep
@@ -69,7 +137,10 @@ global interface MenuManager<MSB is MenuServiceBundle>
     event_bus: EventBus
 
     init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
-    new: function(): MenuServiceBundle
+    -- new: function(
+    --     menu_definitions: { MenuId: MenuDefinition },
+    --     get_menu_service_bundle: function(services: { ServiceId: GameService }): MSB
+    -- ): MenuManager<MSB>
     populate_menu_state: function(self, new_step: MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)
@@ -77,7 +148,14 @@ global interface MenuManager<MSB is MenuServiceBundle>
     update: function(self, joy: Joypad)
 end
 
-function MenuManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+global record BaseMenuManager<BMSB is MenuServiceBundle>
+    is MenuManager<BMSB>
+
+    menu_definitions: { MenuId: MenuDefinition }
+    get_menu_service_bundle: function(services: { ServiceId: GameService }): BMSB
+end
+
+function BaseMenuManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.menu_state = {
         point = TilePoint.of(0, 0)
     }
@@ -85,32 +163,36 @@ function MenuManager:init(service_manager: ServiceManager, services: { ServiceId
     self.menu_selection = {}
     self.selection_history = {}
 
-    self.services = {} -- todo: ...?
+    self.services = self.get_menu_service_bundle(services) -- todo: ...?
     self.event_bus = services.event_bus as EventBus
+
 end
 
-function MenuManager.new(
+function BaseMenuManager.new(
+    id: ServiceId,
+    dependencies: { ServiceId },
+
     menu_definitions: { MenuId: MenuDefinition },
-    get_menu_service_bundle: function(services: { ServiceId: GameService }): MSB
-): MenuManager
-    local self: MenuManager<MSB> = setmetatable({
-        id = "menu_manager",
-        dependencies = {
-            "event_bus",
-        },
-    }, { __index = MenuManager })
+    get_menu_service_bundle: function(services: { ServiceId: GameService }): BMSB
+): MenuManager<BMSB>
+    add(dependencies, "event_bus")
+    local self: BaseMenuManager<BMSB> = setmetatable({
+        id = id,
+        dependencies = dependencies,
+    }, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
+    self.get_menu_service_bundle = get_menu_service_bundle
 
     return self
 end
 
-function MenuManager:populate_menu_state(new_step: MenuStep)
+function BaseMenuManager:populate_menu_state(new_step: MenuStep)
     self.menu_state.step = new_step
 
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
-    if new_step_data is GridMenuDefinition<MSB> then
+    if new_step_data is GridMenuDefinition<BMSB> then
         local new_selection = GridMenuSelection.new(
             self.menu_state.point:copy(),
             16,
@@ -122,7 +204,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
             new_selection.legal_tiles = nil
         end
         self.menu_selection = new_selection
-    elseif new_step_data is ListMenuDefinition<MSB> then
+    elseif new_step_data is ListMenuDefinition<BMSB> then
         local new_selection = VerticalListMenuSelection.new(
             0,
             new_step_data.get_options(self.services, self.menu_ctx)
@@ -133,7 +215,7 @@ function MenuManager:populate_menu_state(new_step: MenuStep)
     end
 end
 
-function MenuManager:handle_menu_select()
+function BaseMenuManager:handle_menu_select()
     LOG.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local step_data = menu_data.steps[self.menu_state.step]
@@ -143,7 +225,7 @@ function MenuManager:handle_menu_select()
 
     local menu_selection = self.menu_selection
 
-    if step_data is GridMenuDefinition<MSB> then
+    if step_data is GridMenuDefinition<BMSB> then
         assert(menu_selection is GridMenuSelection)
         local validation = step_data.validator(menu_selection, self.services, self.menu_ctx)
         if not validation then return end
@@ -158,7 +240,7 @@ function MenuManager:handle_menu_select()
         step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
         next_state = step_data.next_state
         send_command = step_data.send_command
-    elseif step_data is ListMenuDefinition<MSB> then
+    elseif step_data is ListMenuDefinition<BMSB> then
         assert(menu_selection is VerticalListMenuSelection)
         if step_data.set_selected_context ~= nil then
             step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
@@ -182,7 +264,7 @@ function MenuManager:handle_menu_select()
     end
 end
 
-function MenuManager:handle_menu_back()
+function BaseMenuManager:handle_menu_back()
     local previous_step = self.menu_definitions[self.menu_state.menu_id].steps[self.menu_state.step]
         .previous_state
 
@@ -198,7 +280,7 @@ function MenuManager:handle_menu_back()
 end
 
 
-function MenuManager:set_menu(menu_id: MenuId)
+function BaseMenuManager:set_menu(menu_id: MenuId)
     self.menu_state.menu_id = menu_id
     self.selection_history = {}
     local step = self.menu_definitions[menu_id].initial_step
@@ -206,7 +288,7 @@ function MenuManager:set_menu(menu_id: MenuId)
 end
 
 
-function MenuManager:update(joy: Joypad)
+function BaseMenuManager:update(joy: Joypad)
     if joy.lp then
         -- DEBUG Only for now.  consider where to put
         self.event_bus:emit("TACTICS_END_PLAYER_TURN")

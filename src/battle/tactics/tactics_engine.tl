@@ -2,7 +2,7 @@ require("src/config")
 require("src/debug")
 
 require ("src/menu/types")
-require ("src/menu/menu_selection")
+require ("src/menu/menu_manager")
 
 require("src/util")
 require("src/battle/tile_manager")

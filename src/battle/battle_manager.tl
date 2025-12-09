@@ -38,7 +38,7 @@ global record BattleManager
     task_manager: TaskManager
     battle_objective_service: BattleObjectiveService
 
-    menu_manager: MenuManager
+    battle_menu_manager: BattleMenuManager
     enemy_ai_engine: EnemyAIEngine
     turn_manager: TurnManager
 
@@ -98,7 +98,7 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
 
     self.battle_objective_service = service_manager:register_transient(BattleObjectiveService.new())
 
-    self.menu_manager = service_manager:register_transient(MenuManager.new())
+    self.battle_menu_manager = service_manager:register_transient(BattleMenuManager.new())
     self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
     self.turn_manager = service_manager:register_transient(TurnManager.new())
 
@@ -125,7 +125,7 @@ function BattleManager.new(battle_id: string): BattleManager
 end
 
 function BattleManager:update(joy: Joypad)
-    self.menu_manager:update(joy)
+    self.battle_menu_manager:update(joy)
     self.tactics_engine:update()
     self.battle_context:enrich()
 end

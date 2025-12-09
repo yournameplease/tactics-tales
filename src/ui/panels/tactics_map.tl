@@ -2,7 +2,7 @@ require("src/debug")
 require("src/config")
 
 require("src/ui/box")
-require("src/menu/menu_manager")
+require("src/menu/battle_menu_manager")
 require("src/battle/battle_state")
 
 local CharacterRenderer = require("src/character/character_renderer")
@@ -129,7 +129,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
     local battle_state = state.battle_state
-    local menu = state.menu_manager
+    local menu = state.battle_menu_manager
 
     local camera_x = self.x + self.internal_margin.l
     local camera_y = self.y + self.internal_margin.t

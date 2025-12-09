@@ -55,7 +55,7 @@ function GameContext.new(): GameContext
             "turn_manager",
             "tile_manager",
             "character_manager",
-            "menu_manager",
+            "battle_menu_manager",
             "event_bus",
             "combat_calculator",
         }

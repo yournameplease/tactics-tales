@@ -1,7 +1,7 @@
 require("src/debug")
 require ("src/types")
 require ("src/menu/types")
-require ("src/menu/menu_selection")
+require ("src/menu/menu_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/joypad")
 require("src/battle/tile_manager")
@@ -31,37 +31,6 @@ global record BattleMenuManager
 
     services: BattleMenuServiceBundle
     event_bus: EventBus
-end
-
-function BattleMenuManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.menu_state = {
-        point = TilePoint.of(0, 0)
-    }
-    self.menu_ctx = {}
-    self.menu_selection = {}
-    self.selection_history = {}
-
-    self.services = {
-        tactics_engine = services.tactics_engine as TacticsEngine,
-        battle_state = services.battle_state as BattleState,
-        tile_manager = services.tile_manager as TileManager,
-    }
-    self.event_bus = services.event_bus as EventBus
-end
-
--- TODO: this should be a subclass of a more generic menu manager
-function BattleMenuManager.new(): BattleMenuManager
-    local self: BattleMenuManager = setmetatable({
-        id = "battle_menu_manager",
-        dependencies = {
-            "tactics_engine",
-            "battle_state",
-            "tile_manager",
-            "event_bus"
-        },
-    }, { __index = BattleMenuManager })
-
-    return self
 end
 
 -- kind
@@ -204,5 +173,25 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         }
     }
 }
+
+function BattleMenuManager.new(): BattleMenuManager
+    return BaseMenuManager.new(
+        "battle_menu_manager",
+        {
+            "tactics_engine",
+            "battle_state",
+            "tile_manager",
+            "event_bus"
+        },
+        MENU_DATA,
+        function(services: { ServiceId: GameService }): BattleMenuServiceBundle
+            return {
+                tactics_engine = services.tactics_engine as TacticsEngine,
+                battle_state = services.battle_state as BattleState,
+                tile_manager = services.tile_manager as TileManager,
+            }
+        end
+    ) as BattleMenuManager
+end
 
 return BattleMenuManager

@@ -62,7 +62,6 @@ local ui_manager: UIManager
 local task_manager: TaskManager
 
 local battle_manager: BattleManager
-local menu_manager: MenuManager
 
 local service_manager: ServiceManager
 
