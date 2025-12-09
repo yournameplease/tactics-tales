@@ -12,11 +12,11 @@ global record CombatCalculator
     tile_manager: TileManager
 end
 
-function CombatCalculator:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function CombatCalculator:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.tile_manager = services.tile_manager as TileManager
 end
 
-function CombatCalculator.new(tile_manager: TileManager): CombatCalculator
+function CombatCalculator.new(): CombatCalculator
     local self: CombatCalculator = setmetatable({
         id = 'combat_calculator',
         dependencies = {

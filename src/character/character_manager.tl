@@ -51,7 +51,7 @@ function CharacterManager:handle_discard_item(ctx: MenuContext)
     character.inventory:remove_item(item_index)
 end
 
-function CharacterManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function CharacterManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.id_counter = IdCounter.new()
     self.characters = {}
 

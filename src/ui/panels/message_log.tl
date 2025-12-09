@@ -1,9 +1,10 @@
 require("src/ui/box")
 require("src/ui/panels/text_node")
+require("src/ui/ui_context_manager")
 
 global record MessageLog
     is UIElement, TextUIElement
-    func: function(GameContext, integer): { string }
+    func: function(UIContextManager, integer): { string }
 end 
 
 local TEXT_HEIGHT = 8
@@ -35,7 +36,7 @@ function MessageLog.new(props: MessageLog): MessageLog
     return box
 end
 
-function MessageLog:draw(state: GameContext, ui_theme: UITheme)
+function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
     local row_count = self.rows or flr(self.h / TEXT_ROW_HEIGHT)

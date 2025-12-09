@@ -12,7 +12,7 @@ global record BattleObjectiveService
     tactics_engine: TacticsEngine
 end
 
-function BattleObjectiveService:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function BattleObjectiveService:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.tactics_engine = services.tactics_engine as TacticsEngine
     self.battle_state = services.battle_state as BattleState
 end

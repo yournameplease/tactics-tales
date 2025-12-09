@@ -61,7 +61,7 @@ function TacticsEngine:init(service_manager: ServiceManager, services: { Service
     self.battle_is_blocked = false
     self.battle_state = services.battle_state as BattleState
     self.tile_manager = services.tile_manager as TileManager
-    self.combat_calculator = service_manager:register_transient(CombatCalculator.new(self.tile_manager))
+    self.combat_calculator = service_manager:register_transient(CombatCalculator.new())
     self.event_bus = services.event_bus as EventBus
     self.animation_manager = services.animation_manager as AnimationManager
     self.task_manager = services.task_manager as TaskManager
@@ -72,10 +72,10 @@ function TacticsEngine:init(service_manager: ServiceManager, services: { Service
     self.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self:handle_move_and_attack(ctx)
     end)
-    self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(ctx: MenuContext)
+    self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_ctx: MenuContext)
         self.is_player_turn = true
     end)
-    self.event_bus:on("TACTICS_END_PLAYER_TURN", function(ctx: MenuContext)
+    self.event_bus:on("TACTICS_END_PLAYER_TURN", function(_ctx: MenuContext)
         self.is_player_turn = false
     end)
 

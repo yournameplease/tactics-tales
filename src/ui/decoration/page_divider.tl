@@ -1,4 +1,5 @@
 require("src/ui/box")
+require("src/ui/ui_context_manager")
 
 local record PageDivider
     is UIElement
@@ -13,7 +14,7 @@ function PageDivider.new(width: integer): PageDivider
     return box
 end
 
-function PageDivider:draw(state: GameContext, ui_theme: UITheme)
+function PageDivider:draw(state: UIContextManager, ui_theme: UITheme)
     -- Box._draw(self, state, ui_theme)
 
     local l = self.x

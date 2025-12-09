@@ -64,7 +64,7 @@ global record TileManager
     battle_state: BattleState
 end
 
-function TileManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function TileManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.battle_state = services.battle_state as BattleState
 end
 

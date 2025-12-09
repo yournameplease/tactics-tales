@@ -1,3 +1,4 @@
+require("src/ui/ui_context_manager")
 require("src/ui/box")
 
 global enum TextJustify
@@ -14,7 +15,7 @@ end
 
 global record TextNode
     is UIElement, TextUIElement
-    func: function(GameContext): { string }
+    func: function(UIContextManager): { string }
 end
 
 setmetatable(TextNode, { __index = Box })
@@ -56,7 +57,7 @@ global function draw_text_row(self: TextUIElement, i: integer, text: string, ui_
     print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
 end
 
-function TextNode:draw(state: GameContext, ui_theme: UITheme)
+function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
     local text = self.func(state)

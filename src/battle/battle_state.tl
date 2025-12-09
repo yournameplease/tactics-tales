@@ -10,7 +10,7 @@ global record BattleState
     units_by_x_y: Array2D<BattleUnit>
 end
 
-function BattleState:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function BattleState:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
 
 end
 

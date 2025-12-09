@@ -42,7 +42,7 @@ global record BattleManager
     enemy_ai_engine: EnemyAIEngine
     turn_manager: TurnManager
 
-    battle_context: GameContext
+    battle_context: BattleUIContext
 
     map_data: MapData
 end
@@ -69,7 +69,7 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
 end
 
 function BattleManager:_spawn_players(player_spawners: { TilePoint })
-    for id, spawn_point in ipairs(player_spawners) do
+    for _id, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
         local character = self.character_manager:generate_character("default")
         self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
@@ -102,7 +102,7 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
     self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
     self.turn_manager = service_manager:register_transient(TurnManager.new())
 
-    self.battle_context = service_manager:register_transient(GameContext.new())
+    self.battle_context = service_manager:register_transient(BattleUIContext.new())
     
     self.event_bus:emit("TACTICS_BEGIN_BATTLE")
 end

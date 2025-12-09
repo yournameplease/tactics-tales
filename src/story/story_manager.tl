@@ -68,7 +68,7 @@ function StoryManager:advance_node()
     self:handle_new_node()
 end
 
-function StoryManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function StoryManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     local story_definition = STORY_DATA[self.story_id]
 
     self:jump_to_node(story_definition.starting_node)

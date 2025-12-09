@@ -49,7 +49,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, _msb: BattleMenuServiceBundle, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
                 validator = function (s: MenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext): boolean
@@ -104,13 +104,13 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_ITEM"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: VerticalListMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: VerticalListMenuSelection, _msb: BattleMenuServiceBundle, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
                     }
                 end,
-                get_options = function(msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(_msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
                         local character = ctx.acting_unit.unit
                         local items = character.character.inventory:get_items()
 
@@ -126,7 +126,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ITEM",
-                get_options = function(msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(_msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
                         local character = ctx.acting_unit.unit
                         local inventory = character.character.inventory
                         local items = inventory:get_items()

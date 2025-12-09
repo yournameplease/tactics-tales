@@ -28,7 +28,7 @@ global record EventBus
     listeners: { GameEvent: {EventListener}}
 end
 
-function EventBus:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function EventBus:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
 
 end
 

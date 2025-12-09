@@ -122,7 +122,7 @@ function EnemyAIEngine:handle_enemy_turn()
     end)
 end
 
-function EnemyAIEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function EnemyAIEngine:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.battle_state = services.battle_state as BattleState
     self.tactics_engine = services.tactics_engine as TacticsEngine
     self.event_bus = services.event_bus as EventBus

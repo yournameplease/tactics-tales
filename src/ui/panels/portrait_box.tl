@@ -1,18 +1,19 @@
 require("src/types")
+require("src/ui/ui_context_manager")
 require("src/ui/box")
 local CharacterRenderer = require("src/character/character_renderer")
 local Colors = require("src/colors")
 
 global record PortraitBox
     is UIElement
-    get_selected_unit: function(GameContext): BattleUnit
+    get_selected_unit: function(UIContextManager): BattleUnit
 end
 
 setmetatable(PortraitBox, { __index = Box })
 
 local FEET_ANCHOR = AnimationAnchorPoint.of(11, 22)
 
-function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): PortraitBox
+function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUnit): PortraitBox
     local box = Box.new({
         w=24, h=28,
         padding = 4,
@@ -24,7 +25,7 @@ function PortraitBox.new(get_selected_unit: function(GameContext): BattleUnit): 
     return box
 end
 
-function PortraitBox:draw(state: GameContext, ui_theme: UITheme)
+function PortraitBox:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
     local unit = self.get_selected_unit(state)

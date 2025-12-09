@@ -1,3 +1,4 @@
+require("src/types")
 
 local record ItemTypes
 end

@@ -3,6 +3,7 @@ require("src/config")
 
 require("src/ui/box")
 require("src/menu/battle_menu_manager")
+require("src/ui/ui_context_manager")
 require("src/battle/battle_state")
 
 local CharacterRenderer = require("src/character/character_renderer")
@@ -125,11 +126,11 @@ local function draw_unit(unit: BattleUnit)
     draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_SIZE.x-2, 4)
 end
 
-function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
+function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local battle_state = state.battle_state
-    local menu = state.battle_menu_manager
+    local battle_state = state.battle_ui_context.battle_state
+    local menu = state.battle_ui_context.battle_menu_manager
 
     local camera_x = self.x + self.internal_margin.l
     local camera_y = self.y + self.internal_margin.t
@@ -138,7 +139,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
     -- draw row-by row, top to bottom aka back to front
 
     -- pre-compute actor animations for z-ordering
-    local unit_positions = compute_animated_unit_positions(state.battle_state)
+    local unit_positions = compute_animated_unit_positions(state.battle_ui_context.battle_state)
 
     local sorted_units = userdata("i16", 2, #unit_positions)
     for i,u in ipairs(unit_positions) do
@@ -149,7 +150,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     local drawn_unit_count = 0
     -- TODO: preload layers
-    local layers = state.tile_manager.map_data.layers
+    local layers = state.battle_ui_context.tile_manager.map_data.layers
     local layer_ground = layers.ground
     local layer_wall_back = layers.back_wall
     local layer_wall_mid = layers.mid_wall

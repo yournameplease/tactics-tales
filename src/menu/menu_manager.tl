@@ -155,7 +155,7 @@ global record BaseMenuManager<BMSB is MenuServiceBundle>
     get_menu_service_bundle: function(services: { ServiceId: GameService }): BMSB
 end
 
-function BaseMenuManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function BaseMenuManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.menu_state = {
         point = TilePoint.of(0, 0)
     }
@@ -231,7 +231,6 @@ function BaseMenuManager:handle_menu_select()
         if not validation then return end
 
         if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
-            local acting_unit = self.menu_ctx.acting_unit.unit
             -- TODO: keep path in the cursor data, and let battle menu manager do dijkstra
             menu_selection.path = { TilePoint.of(0, 0)  }
         end

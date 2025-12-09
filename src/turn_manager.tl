@@ -26,7 +26,7 @@ global record TurnManager
     enemy_ai_engine: EnemyAIEngine
 end
 
-function TurnManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function TurnManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.turn = 1
     self.phase = "PLAYER"
 

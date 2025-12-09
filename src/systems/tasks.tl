@@ -7,7 +7,7 @@ global record TaskManager
     tasks: { any }
 end
 
-function TaskManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function TaskManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
     self.tasks = {}
 end
 

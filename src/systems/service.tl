@@ -8,6 +8,8 @@ global enum ServiceId
 	'event_bus'
 	'character_manager'
 	
+	'ui_context_manager'
+	
 	-- transient
 	'story_manager'
 	
@@ -18,11 +20,12 @@ global enum ServiceId
 	'battle_state'
 	'enemy_ai_engine'
 	'combat_calculator'
-	'battle_ui_context'
 	'battle_objective_service'
 
 	'menu_manager'
 	'battle_menu_manager'
+
+	'battle_ui_context'
 	
 
 end
@@ -95,9 +98,7 @@ function ServiceManager:teardown_transient(service: TransientGameService)
 	self.transient_services[id] = nil
 end
 
-function ServiceManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-	self.persistent_services = {}
-	self.transient_services = {}
+function ServiceManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
 end
 
 function ServiceManager.new(): ServiceManager
@@ -107,6 +108,9 @@ function ServiceManager.new(): ServiceManager
 	}
 	setmetatable(self, { __index = ServiceManager })
 
+	self.persistent_services = {}
+	self.transient_services = {}
+	
 	self:init(self, {})
 	self:register(self)
 	return self

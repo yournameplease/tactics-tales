@@ -1,5 +1,6 @@
 require("src/types")
 require("src/battle/battle_ui_context")
+require("src/ui/ui_context_manager")
 require("src/ui/theme")
 
 global record Margin
@@ -43,7 +44,7 @@ global interface UIElement
     add: function(self, UIElement): UIElement
     measure: function(self)
     layout: function(self, integer, integer)
-    draw: function(self, GameContext, UITheme)
+    draw: function(self, UIContextManager, UITheme)
 end
 
 global record Box
@@ -229,8 +230,6 @@ function Box:layout(parent_x: integer, parent_y: integer)
             total_flex = total_flex + child.flex_grow
             -- Don't add to used_space yet, flex takes remainder
         else
-            local c_m = child.internal_margin
-            
             local child_w = (child._calculated_w or child.w)
             local child_h = (child._calculated_h or child.h)
 
@@ -455,7 +454,7 @@ function Box:draw_solid(ui_theme: UITheme)
     rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
-function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
+function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
     local box = self as Box -- Cast!  All classes inherit from box though
 
     if not box.transparent then
@@ -492,7 +491,7 @@ function Box._draw(self: UIElement, state: GameContext, ui_theme: UITheme)
     end
 end
 
-function Box:draw(state: GameContext, ui_theme: UITheme)
+function Box:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 end
 

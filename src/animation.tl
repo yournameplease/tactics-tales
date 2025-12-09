@@ -240,7 +240,7 @@ global record AnimationManager
     global_frame: integer
 end
 
-function AnimationManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function AnimationManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.active_animations = {}
     self.global_frame = 0
 end

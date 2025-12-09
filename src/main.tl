@@ -49,14 +49,14 @@ require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_ui_context")
 require("src/battle/battle_manager")
-
+require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
 require("src/joypad")
 
 -- TODO: local battle_manager
 
-local context: GameContext = {}
+local context: UIContextManager = {}
 local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: TaskManager
@@ -80,7 +80,7 @@ function _init()
     battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
     -- TODO: context should have a generic base which is required by ui manager
-    context = service_manager.transient_services.battle_ui_context as GameContext
+    context = service_manager:register(UIContextManager.new())
 end
 
 function _update()
@@ -94,5 +94,6 @@ end
 function _draw()
     LOG.trace("Generating frame data.")
     animation_manager:generate_frame_data()
+    context:enrich()
     ui_manager:draw(context)
 end

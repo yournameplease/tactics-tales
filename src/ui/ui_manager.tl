@@ -28,7 +28,7 @@ global record UIManager
     theme: UITheme
 end
 
-function UIManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function UIManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
 
 end
 
@@ -43,12 +43,12 @@ function UIManager.new(): UIManager
     self.layouts = {}
 
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
-    battle_summary:add(TextNode.new({ func = function(_state: GameContext): { string } return { "BATTLE" }  end, justify = "center"}))
-    battle_summary:add(TextNode.new({ func = function(state: GameContext): { string }
-        local turn = state.turn_manager.turn
+    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, justify = "center"}))
+    battle_summary:add(TextNode.new({ func = function(state: UIContextManager): { string }
+        local turn = state.battle_ui_context.turn_manager.turn
         return { "Turn " .. turn }
     end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function(_state: GameContext): {string} return { "Defeat all" }  end, justify = "center" }))
+    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, justify = "center" }))
 
     local page_divider = PageDivider.new(7)
 
@@ -130,7 +130,7 @@ function UIManager.new(): UIManager
     return self
 end
 
-function UIManager:draw(battle_ui_context: GameContext)
+function UIManager:draw(battle_ui_context: UIContextManager)
     self.current_layout = self.layouts[battle_ui_context.layout]
 
     local root = self.current_layout.root

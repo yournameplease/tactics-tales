@@ -11,7 +11,7 @@ global type UILayoutId
 
 -- TODO: split out the battle specific context
 -- agregate multiple contexts to send to ui renderer
-global record GameContext
+global record BattleUIContext
     is TransientGameService
     where self.id == 'battle_ui_context'
     tactics: TacticsEngine
@@ -20,7 +20,7 @@ global record GameContext
     tile_manager: TileManager
     character_manager: CharacterManager
     battle_menu_manager: BattleMenuManager
-    event_bus: EventBus
+    event_bus: EventBus -- move to a debug context
     combat_calculator: CombatCalculator
 
     layout: UILayoutId
@@ -30,7 +30,7 @@ global record GameContext
     destination: TilePoint
 end
 
-function GameContext:init(service_manager: ServiceManager, services: { ServiceId: GameService })
+function BattleUIContext:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.tactics = services.tactics_engine as TacticsEngine
     self.battle_state = services.battle_state as BattleState
     self.turn_manager = services.turn_manager as TurnManager
@@ -46,8 +46,8 @@ function GameContext:init(service_manager: ServiceManager, services: { ServiceId
     self.acting_unit = nil
 end
 
-function GameContext.new(): GameContext
-    local context: GameContext = setmetatable({
+function BattleUIContext.new(): BattleUIContext
+    local context: BattleUIContext = setmetatable({
         id = "battle_ui_context",
         dependencies = {
             "tactics_engine",
@@ -59,11 +59,11 @@ function GameContext.new(): GameContext
             "event_bus",
             "combat_calculator",
         }
-    }, { __index = GameContext })
+    }, { __index = BattleUIContext })
     return context
 end
 
-function GameContext:enrich()
+function BattleUIContext:enrich()
     self.layout = "TACTICS"
 
 
@@ -98,4 +98,4 @@ function GameContext:enrich()
 
 end
 
-return GameContext
+return BattleUIContext

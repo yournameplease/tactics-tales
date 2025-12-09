@@ -2,6 +2,7 @@ require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
 require("src/character/items/object/item")
+require("src/ui/ui_context_manager")
 require("src/character/items/object/item_inventory")
 
 global record UnitInfo
@@ -20,7 +21,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
     local left = self:add(Box.flex_col())
-    left:add(PortraitBox.new(function(state: GameContext): BattleUnit return state.hovered_unit end))
+    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_ui_context.hovered_unit end))
     left:add(Box.spacer())
 
     local info_col = self:add(Box.new({
@@ -31,8 +32,8 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
     -- ROW 1: Name and Level
     info_col:add(TextNode.new({
-        func = function(state: GameContext): {string}
-            local u = state.hovered_unit
+        func = function(state: UIContextManager): {string}
+            local u = state.battle_ui_context.hovered_unit
             if not u then return { "No Unit Selected" } end
             return { u.character.name .. " Lv." .. 1 }
         end
@@ -41,8 +42,8 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     -- ROW 2-4: HP, Weapon
     info_col:add(TextNode.new({
         rows = 3,
-        func = function(state: GameContext): {string}
-            local u = state.hovered_unit
+        func = function(state: UIContextManager): {string}
+            local u = state.battle_ui_context.hovered_unit
             if not u then return { "", "", "" } end
 
             local weapons = u.character.inventory:get_equipped_weapons()
@@ -62,8 +63,8 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     
     info_col:add(TextNode.new({
         rows = 5,
-        func = function(state: GameContext): {string}
-            local u = state.hovered_unit
+        func = function(state: UIContextManager): {string}
+            local u = state.battle_ui_context.hovered_unit
             if not u then return { "", "", "", "", "" } end
 
             local items = u.character.inventory:get_items()
