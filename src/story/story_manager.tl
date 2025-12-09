@@ -6,16 +6,14 @@ require("src/systems/tasks")
 
 require("src/data/battles")
 
-require("src/battle/battle_state")
-require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
-require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_manager")
+require("src/battle/battle_manager")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
+require("src/story/story_ui_context")
+require("src/story/story_page_state")
 local Story = require("src/story/types")
 
 local STORY_DATA = require("src/data/story")
@@ -33,6 +31,9 @@ global record StoryManager
     story_id: StoryId
 
     current_node: NodePosition
+
+    story_page_state: StoryPageState
+    story_ui_context: StoryUIContext
 
     jump_to_node: function(self, node_id: string)
     handle_new_node: function(self)
@@ -56,7 +57,7 @@ function StoryManager:handle_new_node()
         self:jump_to_node(node.next_node)
     end
     if node is Story.TextNode then
-
+        self.story_page_state:add_text_line(node.text)
     end
     if node is Story.BattleNode then
 
@@ -68,8 +69,11 @@ function StoryManager:advance_node()
     self:handle_new_node()
 end
 
-function StoryManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
+function StoryManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     local story_definition = STORY_DATA[self.story_id]
+
+    self.story_page_state = service_manager:register_transient(StoryPageState.new())
+    self.story_ui_context = service_manager:register_transient(StoryUIContext.new())
 
     self:jump_to_node(story_definition.starting_node)
 end
@@ -92,8 +96,7 @@ function StoryManager.new(story_id: StoryId): StoryManager
 end
 
 function StoryManager:update()
-
-
+    
 end
 
 return StoryManager

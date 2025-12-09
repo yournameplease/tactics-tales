@@ -12,6 +12,7 @@ global enum ServiceId
 	
 	-- transient
 	'story_manager'
+	'story_page_state'
 	
 	'battle_manager'
 	'tactics_engine'
@@ -26,6 +27,7 @@ global enum ServiceId
 	'battle_menu_manager'
 
 	'battle_ui_context'
+	'story_ui_context'
 	
 
 end

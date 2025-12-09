@@ -127,7 +127,6 @@ end
 function BattleManager:update(joy: Joypad)
     self.battle_menu_manager:update(joy)
     self.tactics_engine:update()
-    self.battle_context:enrich()
 end
 
 return BattleManager

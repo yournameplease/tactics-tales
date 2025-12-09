@@ -9,8 +9,6 @@ require("src/battle/combat/combat_calculator")
 
 global type UILayoutId
 
--- TODO: split out the battle specific context
--- agregate multiple contexts to send to ui renderer
 global record BattleUIContext
     is TransientGameService
     where self.id == 'battle_ui_context'
