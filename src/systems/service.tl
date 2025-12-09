@@ -10,16 +10,20 @@ global enum ServiceId
 	
 	-- transient
 	'story_manager'
+	
 	'battle_manager'
 	'tactics_engine'
 	'tile_manager'
 	'turn_manager'
 	'battle_state'
 	'enemy_ai_engine'
-	'menu_manager'
 	'combat_calculator'
 	'game_context'
 	'battle_objective_service'
+
+	'menu_manager'
+	'battle_menu_manager'
+	
 
 end
 

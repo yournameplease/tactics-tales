@@ -2,7 +2,7 @@ require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
 require("src/battle/tile_manager")
-require("src/menu/menu_manager")
+require("src/menu/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")
 require("src/battle/combat/combat_calculator")
@@ -19,7 +19,7 @@ global record GameContext
     turn_manager: TurnManager
     tile_manager: TileManager
     character_manager: CharacterManager
-    menu_manager: MenuManager
+    battle_menu_manager: BattleMenuManager
     event_bus: EventBus
     combat_calculator: CombatCalculator
 
@@ -36,7 +36,7 @@ function GameContext:init(service_manager: ServiceManager, services: { ServiceId
     self.turn_manager = services.turn_manager as TurnManager
     self.tile_manager = services.tile_manager as TileManager
     self.character_manager = services.character_manager as CharacterManager
-    self.menu_manager = services.menu_manager as MenuManager
+    self.battle_menu_manager = services.battle_menu_manager as BattleMenuManager
     self.event_bus = services.event_bus as EventBus
     self.combat_calculator = services.combat_calculator as CombatCalculator
 
@@ -67,10 +67,10 @@ function GameContext:enrich()
     self.layout = "TACTICS"
 
 
-    local selection = self.menu_manager.menu_selection
+    local selection = self.battle_menu_manager.menu_selection
 
     if selection is GridMenuSelection then
-        if self.menu_manager.menu_state.step == "SELECT_UNIT" then
+        if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
             local unit = self.battle_state:get_at_tile(point)
             if unit then
@@ -78,7 +78,7 @@ function GameContext:enrich()
             end
         end
 
-        if self.menu_manager.menu_state.step == "SELECT_TARGET" then
+        if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
             local point = selection.point
             local unit = self.battle_state:get_at_tile(point)
             if unit then
@@ -88,12 +88,12 @@ function GameContext:enrich()
         end
     end
 
-    if self.menu_manager.menu_ctx.acting_unit ~= nil then
-        self.acting_unit = self.menu_manager.menu_ctx.acting_unit.unit
+    if self.battle_menu_manager.menu_ctx.acting_unit ~= nil then
+        self.acting_unit = self.battle_menu_manager.menu_ctx.acting_unit.unit
     end
 
-    if self.menu_manager.menu_ctx.destination ~= nil then
-        self.destination = self.menu_manager.menu_ctx.destination.point
+    if self.battle_menu_manager.menu_ctx.destination ~= nil then
+        self.destination = self.battle_menu_manager.menu_ctx.destination.point
     end
 
 end

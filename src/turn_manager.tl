@@ -1,7 +1,7 @@
 require("src/debug")
 
 require("src/battle/tactics/enemy_ai")
-require("src/menu/menu_manager")
+require("src/menu/battle_menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")
@@ -22,7 +22,7 @@ global record TurnManager
     event_bus: EventBus
     tactics_engine: TacticsEngine
     battle_objective_service: BattleObjectiveService
-    menu_manager: MenuManager
+    battle_menu_manager: BattleMenuManager
     enemy_ai_engine: EnemyAIEngine
 end
 
@@ -33,18 +33,18 @@ function TurnManager:init(service_manager: ServiceManager, services: { ServiceId
     self.event_bus = services.event_bus as EventBus
     self.tactics_engine = services.tactics_engine as TacticsEngine
     self.battle_objective_service = services.battle_objective_service as BattleObjectiveService
-    self.menu_manager = services.menu_manager as MenuManager
+    self.battle_menu_manager = services.battle_menu_manager as BattleMenuManager
     self.enemy_ai_engine = services.enemy_ai_engine as EnemyAIEngine
 
     self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
-        self.menu_manager:set_menu("MENU_PLAYER_TURN")
+        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
     end)
 
     self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
         if self.phase == "PLAYER" then
             LOG.debug("Setting to player turn menu")
-            self.menu_manager:set_menu("MENU_PLAYER_TURN")
+            self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         end        
     end)
 
@@ -52,7 +52,7 @@ function TurnManager:init(service_manager: ServiceManager, services: { ServiceId
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
         self.tactics_engine:refresh_all_units()
-        self.menu_manager:set_menu("MENU_PLAYER_TURN")
+        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
     end)
 
     self.event_bus:on("TACTICS_END_PLAYER_TURN", function()
@@ -105,7 +105,7 @@ function TurnManager.new(): TurnManager
             "event_bus",
             "tactics_engine",
             "battle_objective_service",
-            "menu_manager",
+            "battle_menu_manager",
             "enemy_ai_engine"
         }
     }, { __index = TurnManager })
