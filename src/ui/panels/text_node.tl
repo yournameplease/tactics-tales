@@ -7,11 +7,18 @@ global enum TextJustify
     "right"
 end
 
+global enum TextDirection
+    "down"
+    "up"
+end
+
 global interface TextUIElement
     is UIElement
     justify: TextJustify
     rows: integer
+    text_direction: TextDirection
 end
+
 
 global record TextNode
     is UIElement, TextUIElement

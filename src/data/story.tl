@@ -9,11 +9,10 @@ local STORIES: {StoryId: Story.Story} = {
 		starting_node = 'part_1',
 		nodes = {
 			part_1 = {
-				Story.TextNode.of('text 1.1'),
+				Story.TextNode.of("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
 				Story.TextNode.of('text 1.2'),
 				Story.TextNode.of('text 1.3'),
 				Story.TextNode.of('text 1.4'),
-				Story.TextNode.of('text 1.5'),
 				Story.JumpNode.of('part_2')
 			},
 			part_2 = {

@@ -32,6 +32,7 @@ function MessageLog.new(props: MessageLog): MessageLog
         end
     end
     box.justify = props.justify or "left"  -- "left", "right", "center"
+    box.text_direction = props.text_direction or "up"
 
     return box
 end
