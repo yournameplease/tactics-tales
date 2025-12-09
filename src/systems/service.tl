@@ -54,11 +54,11 @@ function ServiceManager:get_services(): { ServiceId: GameService}
 	return out
 end
 
-function ServiceManager:dependencies_exist(ids: { ServiceId }): boolean
+function ServiceManager:assert_dependencies_exist(ids: { ServiceId }): boolean
 	for _,id in ipairs(ids) do
 		if self.persistent_services[id] == nil
 			and self.transient_services[id] == nil then
-			return false
+			error("Service '"..id.."' was expected but has not yet been initialized!" )
 		end
 	end
 	return true
@@ -68,7 +68,7 @@ function ServiceManager:register<S is GameService>(service: S): S
 	local id = service.id
 	assert(self.persistent_services[id] == nil)
 	assert(self.transient_services[id] == nil)
-	assert(self:dependencies_exist(service.dependencies))
+	self:assert_dependencies_exist(service.dependencies)
 	self.persistent_services[id] = service
 	service:init(self, self:get_services())
 	return service
@@ -76,9 +76,9 @@ end
 
 function ServiceManager:register_transient<S is TransientGameService>(service: S): S
 	local id = service.id
-	assert(self.persistent_services[id] == nil)
-	assert(self.transient_services[id] == nil)
-	assert(self:dependencies_exist(service.dependencies))
+	assert(self.persistent_services[id] == nil, "Persistent services are nil!")
+	assert(self.transient_services[id] == nil, "Persistent services are nil!")
+	self:assert_dependencies_exist(service.dependencies)
 	self.transient_services[id] = service
 	service:init(self, self:get_services())
 	return service
@@ -103,6 +103,8 @@ function ServiceManager.new(): ServiceManager
 	}
 	setmetatable(self, { __index = ServiceManager })
 
+	self:init(self, {})
+	self:register(self)
 	return self
 end
 

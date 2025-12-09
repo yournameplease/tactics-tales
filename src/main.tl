@@ -69,7 +69,6 @@ local service_manager: ServiceManager
 
 function _init()
     service_manager = ServiceManager.new()
-    service_manager:register(service_manager)
     
     task_manager = service_manager:register(TaskManager.new())
     ui_manager = service_manager:register(UIManager.new())
@@ -77,22 +76,19 @@ function _init()
 
     service_manager:register(EventBus.new())
 
-    CharacterManager.new()
+    service_manager:register(CharacterManager.new())
 
     battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
-
-    context = service_manager:register(GameContext.new())
-
+    -- TODO: context should have a generic base which is required by ui manager
+    context = service_manager.transient_services.game_context as GameContext
 end
 
 function _update()
+    animation_manager:tick()
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
-    menu_manager:update(joy)
-    battle_manager:update()
-    animation_manager:tick()
-    context:enrich()
+    battle_manager:update(joy)
     task_manager:update_tasks()
 end
 

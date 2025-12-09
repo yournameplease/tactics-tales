@@ -1,11 +1,13 @@
 require("src/debug")
 
 require("src/types")
+require("src/joypad")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 
 require("src/data/battles")
 
+require("src/game_context")
 require("src/battle/battle_state")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
@@ -16,6 +18,7 @@ require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
+require("src/battle/battle_objective_service")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -33,10 +36,13 @@ global record BattleManager
     event_bus: EventBus
     animation_manager: AnimationManager
     task_manager: TaskManager
+    battle_objective_service: BattleObjectiveService
 
     menu_manager: MenuManager
     enemy_ai_engine: EnemyAIEngine
     turn_manager: TurnManager
+
+    battle_context: GameContext
 
     map_data: MapData
 end
@@ -90,10 +96,14 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
 
     self.tactics_engine = service_manager:register_transient(TacticsEngine.new())
 
+    self.battle_objective_service = service_manager:register_transient(BattleObjectiveService.new())
+
     self.menu_manager = service_manager:register_transient(MenuManager.new())
     self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
     self.turn_manager = service_manager:register_transient(TurnManager.new())
 
+    self.battle_context = service_manager:register_transient(GameContext.new())
+    
     self.event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
@@ -114,8 +124,10 @@ function BattleManager.new(battle_id: string): BattleManager
     return self
 end
 
-function BattleManager:update()
+function BattleManager:update(joy: Joypad)
+    self.menu_manager:update(joy)
     self.tactics_engine:update()
+    self.battle_context:enrich()
 end
 
 return BattleManager

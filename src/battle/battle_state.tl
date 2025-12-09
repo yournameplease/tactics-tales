@@ -15,7 +15,10 @@ function BattleState:init(service_manager: ServiceManager, services: { ServiceId
 end
 
 function BattleState.new(width: integer, height: integer): BattleState
-    local self: BattleState = setmetatable({}, { __index = BattleState })
+    local self: BattleState = setmetatable({
+        id = 'battle_state',
+        dependencies = {},
+    }, { __index = BattleState })
     self.units_by_id = {}
     -- map of [x][y] for each entity in the map
     self.units_by_x_y = Array2D.new(width, height)

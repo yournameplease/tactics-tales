@@ -149,7 +149,7 @@ function TacticsMap:draw(state: GameContext, ui_theme: UITheme)
 
     local drawn_unit_count = 0
     -- TODO: preload layers
-    local layers = state.battle_manager.map_data.layers
+    local layers = state.tile_manager.map_data.layers
     local layer_ground = layers.ground
     local layer_wall_back = layers.back_wall
     local layer_wall_mid = layers.mid_wall

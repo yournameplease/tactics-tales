@@ -13,6 +13,7 @@ version 2
 :: build/corpora/
 :: build/data/
 :: build/menu/
+:: build/story/
 :: build/systems/
 :: build/types/
 :: build/ui/
@@ -25,7 +26,8 @@ version 2
 :: sfx/
 :: src/
 :: build/animation.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/systems/service")
+require("src/debug")
 require("src/types")
 require("src/util")
 require("src/character/animation_data")
@@ -264,10 +266,17 @@ AnimationManager = {}
 
 
 
+
+
+function AnimationManager:init(service_manager, services)
+   self.active_animations = {}
+   self.global_frame = 0
+end
+
 function AnimationManager.new()
    return setmetatable({
-      active_animations = {},
-      global_frame = 0,
+      id = "animation_manager",
+      dependencies = {},
    }, { __index = AnimationManager })
 end
 
@@ -408,12 +417,24 @@ require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/battle/map/map_manager")
 require("src/menu/menu_manager")
+require("src/systems/service")
 require("src/character/character_manager")
+require("src/turn_manager")
+require("src/battle/tactics/enemy_ai")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
 BattleManager = {}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -455,30 +476,45 @@ function BattleManager:_spawn_players(player_spawners)
 end
 
 
+function BattleManager:init(service_manager, services)
+   local battle_definition = BATTLE_DATA[self.battle_id]
 
-
-function BattleManager.new(battle_id, event_bus, character_manager, animation_manager, task_manager)
-   local battle_definition = BATTLE_DATA[battle_id]
-   assert(battle_definition ~= nil)
-
-   local self = setmetatable({}, { __index = BattleManager })
-
-   self.event_bus = event_bus
-   self.animation_manager = animation_manager
-   self.task_manager = task_manager
-
-   self.character_manager = character_manager
+   self.event_bus = services.event_bus
+   self.animation_manager = services.animation_manager
+   self.task_manager = services.task_manager
+   self.character_manager = services.character_manager
 
    self.map_data = MapManager:load_map(battle_definition.map_id)
 
-   self.battle_state = BattleState.new(self.map_data.width, self.map_data.height)
+   self.battle_state = service_manager:register_transient(BattleState.new(self.map_data.width, self.map_data.height))
 
-   self.tile_manager = TileManager.new(self.map_data, self.battle_state)
+   self.tile_manager = service_manager:register_transient(TileManager.new(self.map_data))
 
    self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
    self:_spawn_players(self.map_data.metadata.player_spawners)
 
-   self.tactics_engine = TacticsEngine.new(self.battle_state, self.tile_manager, self.event_bus, self.animation_manager, self.task_manager)
+   self.tactics_engine = service_manager:register_transient(TacticsEngine.new())
+
+   self.menu_manager = service_manager:register_transient(MenuManager.new())
+   self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
+   self.turn_manager = service_manager:register_transient(TurnManager.new())
+
+   self.event_bus:emit("TACTICS_BEGIN_BATTLE")
+end
+
+function BattleManager.new(battle_id)
+   assert(BATTLE_DATA[battle_id] ~= nil)
+
+   local self = setmetatable({
+      id = 'battle_manager',
+      dependencies = {
+         "event_bus",
+         "animation_manager",
+         "task_manager",
+         "character_manager",
+      },
+   }, { __index = BattleManager })
+   self.battle_id = battle_id
 
    return self
 end
@@ -487,13 +523,45 @@ function BattleManager:update()
    self.tactics_engine:update()
 end
 
+return BattleManager
+
+:: build/battle/battle_objective_service.lua
+
+require("src/systems/service")
+require("src/systems/event_bus")
+require("src/battle/battle_state")
+require("src/battle/tactics/tactics_engine")
+
+BattleObjectiveService = {}
+
+
+
+
+
+
+
+function BattleObjectiveService:init(service_manager, services)
+end
+
+function BattleObjectiveService.new()
+   local self = setmetatable({
+      id = 'battle_objective_service',
+      dependencies = {
+         "tactics_engine",
+         "battle_state",
+      },
+   }, { __index = BattleObjectiveService })
+
+   return self
+end
+
 BattleFinishState = {}
 
 
 
 
 
-function BattleManager:check_for_end()
+function BattleObjectiveService:check_for_end()
    if self.tactics_engine:is_blocked() then
       return { finished = false }
    end
@@ -512,12 +580,12 @@ end
 
 
 
-function BattleManager:check_objectives()
+function BattleObjectiveService:check_objectives()
 
    return self:check_for_end()
 end
 
-return BattleManager
+return BattleObjectiveService
 
 :: build/battle/battle_state.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/types")
@@ -529,8 +597,18 @@ BattleState = {}
 
 
 
+
+
+
+function BattleState:init(service_manager, services)
+
+end
+
 function BattleState.new(width, height)
-   local self = setmetatable({}, { __index = BattleState })
+   local self = setmetatable({
+      id = 'battle_state',
+      dependencies = {},
+   }, { __index = BattleState })
    self.units_by_id = {}
 
    self.units_by_x_y = Array2D.new(width, height)
@@ -636,9 +714,19 @@ CombatCalculator = {}
 
 
 
+
+
+
+function CombatCalculator:init(service_manager, services)
+   self.tile_manager = services.tile_manager
+end
+
 function CombatCalculator.new(tile_manager)
    local self = setmetatable({
-      tile_manager = tile_manager,
+      id = 'combat_calculator',
+      dependencies = {
+         'tile_manager',
+      },
    }, { __index = CombatCalculator })
    return self
 end
@@ -1080,11 +1168,11 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/menu/menu_manager")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
-require("src/battle/battle_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/battle/battle_state")
+require("src/systems/service")
 
 
 
@@ -1113,8 +1201,9 @@ EnemyAIEngine = {}
 
 
 
+
 function EnemyAIEngine:compute_enemy_ai(unit)
-   local tile_manager = self.battle_manager.tile_manager
+   local tile_manager = self.tile_manager
    local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.tile.x, unit.tile.y, unit.side, 999)
 
    local enemies = self.tactics_engine.battle_state:get_units(unit_is_player)
@@ -1198,24 +1287,21 @@ function EnemyAIEngine:handle_enemy_turn()
    end)
 end
 
-function EnemyAIEngine.new(
-   battle_manager,
-   battle_state,
-   tactics_engine,
-   event_bus,
-   task_manager,
-   tile_manager)
-
-   local self = setmetatable({}, { __index = EnemyAIEngine })
-
-   self.battle_manager = battle_manager
-   self.battle_state = battle_state
-   self.tactics_engine = tactics_engine
-   self.event_bus = event_bus
-   self.task_manager = task_manager
-   self.tile_manager = tile_manager
+function EnemyAIEngine:init(service_manager, services)
+   self.battle_state = services.battle_state
+   self.tactics_engine = services.tactics_engine
+   self.event_bus = services.event_bus
+   self.task_manager = services.task_manager
+   self.tile_manager = services.tile_manager
 
    self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
+end
+
+function EnemyAIEngine.new()
+   local self = setmetatable({
+      id = "enemy_ai_engine",
+      dependencies = {},
+   }, { __index = EnemyAIEngine })
    return self
 end
 
@@ -1235,6 +1321,7 @@ require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
+require("src/systems/service")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")
@@ -1278,21 +1365,16 @@ TacticsEngine = {}
 
 
 
-function TacticsEngine.new(
-   battle_state,
-   tile_manager,
-   event_bus,
-   animation_manager,
-   task_manager)
 
-   local self = setmetatable({}, { __index = TacticsEngine })
+
+function TacticsEngine:init(service_manager, services)
    self.battle_is_blocked = false
-   self.battle_state = battle_state
-   self.tile_manager = tile_manager
-   self.combat_calculator = CombatCalculator.new(tile_manager)
-   self.event_bus = event_bus
-   self.animation_manager = animation_manager
-   self.task_manager = task_manager
+   self.battle_state = services.battle_state
+   self.tile_manager = services.tile_manager
+   self.combat_calculator = service_manager:register_transient(CombatCalculator.new(self.tile_manager))
+   self.event_bus = services.event_bus
+   self.animation_manager = services.animation_manager
+   self.task_manager = services.task_manager
 
    self.event_bus:on("MOVE_AND_WAIT", function(ctx)
       self:handle_move_unit(ctx)
@@ -1308,6 +1390,19 @@ function TacticsEngine.new(
    end)
 
    LOG.debug("New battle.")
+end
+
+function TacticsEngine.new()
+   local self = setmetatable({
+      id = "tactics_engine",
+      dependencies = {
+         "battle_state",
+         "tile_manager",
+         "event_bus",
+         "animation_manager",
+         "task_manager",
+      },
+   }, { __index = TacticsEngine })
    return self
 end
 
@@ -1606,6 +1701,7 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/util")
 require("src/battle/battle_state")
 require("src/battle/map/map_manager")
+require("src/systems/service")
 
 
 
@@ -1664,11 +1760,19 @@ TileManager = {}
 
 
 
-function TileManager.new(map_data, battle_state)
-   local self = setmetatable({}, { __index = TileManager })
+
+
+function TileManager:init(service_manager, services)
+   self.battle_state = services.battle_state
+end
+
+function TileManager.new(map_data)
+   local self = setmetatable({
+      id = "tile_manager",
+      dependencies = {},
+   }, { __index = TileManager })
 
    self.map_data = map_data
-   self.battle_state = battle_state
 
    return self
 end
@@ -2162,11 +2266,14 @@ require("src/character/animation_data")
 require("src/character/items/object/weapon")
 require("src/animation")
 require("src/character/object/character")
+require("src/systems/service")
 local CharacterGenerator = require("src/character/character_generator")
 
 
 
 CharacterManager = {}
+
+
 
 
 
@@ -2204,14 +2311,11 @@ function CharacterManager:handle_discard_item(ctx)
    character.inventory:remove_item(item_index)
 end
 
-function CharacterManager.new(
-   event_bus)
-
-   local self = setmetatable({}, { __index = CharacterManager })
+function CharacterManager:init(service_manager, services)
    self.id_counter = IdCounter.new()
    self.characters = {}
 
-   self.event_bus = event_bus
+   self.event_bus = services.event_bus
 
    self.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx)
       self:handle_equip_item(ctx)
@@ -2222,6 +2326,13 @@ function CharacterManager.new(
    self.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx)
       self:handle_discard_item(ctx)
    end)
+end
+
+function CharacterManager.new()
+   local self = setmetatable({
+      id = "character_manager",
+      dependencies = {},
+   }, { __index = CharacterManager })
 
    return self
 end
@@ -3114,6 +3225,8 @@ return CONFIG
 
 
 
+
+
 local NAMES = {
    MALE = {
       "James",
@@ -3730,6 +3843,40 @@ MAP_DEFINITIONS = {
 
 return MAP_DEFINITIONS
 
+:: build/data/story.lua
+local Story = require('src/story/types')
+
+StoryId = {}
+
+
+
+local STORIES = {
+   test_story = {
+      starting_node = 'part_1',
+      nodes = {
+         part_1 = {
+            Story.TextNode.of('text 1.1'),
+            Story.TextNode.of('text 1.2'),
+            Story.JumpNode.of('part_2'),
+         },
+         part_2 = {
+            Story.TextNode.of('text 2.1'),
+            Story.TextNode.of('text 2.2'),
+            Story.JumpNode.of('part_2'),
+         },
+         part_3 = {
+            Story.TextNode.of('text 3.1'),
+            Story.BattleNode.of('bandit_village'),
+            Story.TextNode.of('text 3.2'),
+            Story.JumpNode.of('part_2'),
+         },
+      },
+   },
+}
+
+
+return STORIES
+
 :: build/debug.lua
 local type = type; require("src/config")
 
@@ -3839,6 +3986,8 @@ require("src/battle/combat/combat_calculator")
 
 
 
+
+
 GameContext = {}
 
 
@@ -3857,30 +4006,40 @@ GameContext = {}
 
 
 
-function GameContext.new(
-   battle_manager,
-   turn_manager,
-   character_manager,
-   menu_manager,
-   event_bus)
 
-   local context = {
-      battle_manager = battle_manager,
-      tactics = battle_manager.tactics_engine,
-      battle_state = battle_manager.battle_state,
-      turn_manager = turn_manager,
-      tile_manager = battle_manager.tactics_engine.tile_manager,
-      character_manager = character_manager,
-      menu_manager = menu_manager,
-      event_bus = event_bus,
-      combat_calculator = battle_manager.tactics_engine.combat_calculator,
 
-      layout = "TACTICS",
+function GameContext:init(service_manager, services)
+   self.battle_manager = services.battle_manager
+   self.tactics = services.tactics_engine
+   self.battle_state = services.battle_state
+   self.turn_manager = services.turn_manager
+   self.tile_manager = services.tile_manager
+   self.character_manager = services.character_manager
+   self.menu_manager = services.menu_manager
+   self.event_bus = services.event_bus
+   self.combat_calculator = services.combat_calculator
 
-      hovered_unit = nil,
-      acting_unit = nil,
-   }
-   setmetatable(context, { __index = GameContext })
+   self.layout = "TACTICS"
+
+   self.hovered_unit = nil
+   self.acting_unit = nil
+end
+
+function GameContext.new()
+   local context = setmetatable({
+      id = "game_context",
+      dependencies = {
+         "battle_manager",
+         "tactics_engine",
+         "battle_state",
+         "turn_manager",
+         "tile_manager",
+         "character_manager",
+         "menu_manager",
+         "event_bus",
+         "combat_calculator",
+      },
+   }, { __index = GameContext })
    return context
 end
 
@@ -3995,10 +4154,9 @@ require("src/systems/tasks")
 require("src/debug")
 
 require("src/systems/event_bus")
+require("src/systems/service")
 
 require("src/game_context")
-require("src/turn_manager")
-require("src/menu/menu_manager")
 require("src/character/character_manager")
 require("src/battle/combat/combat_calculator")
 require("src/animation")
@@ -4006,7 +4164,6 @@ require("src/ui/ui_manager")
 require("src/game_context")
 require("src/battle/battle_manager")
 
-require("src/battle/map/map_manager")
 
 require("src/battle/tactics/enemy_ai")
 require("src/joypad")
@@ -4021,64 +4178,40 @@ local task_manager
 local battle_manager
 local menu_manager
 
+local service_manager
+
+
 function _init()
-   local a = TilePoint.of(1, 2)
-   local b = TilePoint.of(2, 2)
-   LOG.info(getmetatable(a).__add(a, b))
+   service_manager = ServiceManager.new()
 
-   LOG.info(a, b, a + b)
+   task_manager = service_manager:register(TaskManager.new())
+   ui_manager = service_manager:register(UIManager.new())
+   animation_manager = service_manager:register(AnimationManager.new())
 
-   task_manager = TaskManager.new()
-   ui_manager = UIManager.new()
-   animation_manager = AnimationManager.new()
+   service_manager:register(EventBus.new())
 
-   local event_bus = EventBus.new()
+   service_manager:register(CharacterManager.new())
 
-   local character_manager = CharacterManager.new(event_bus)
-   LOG.debug(character_manager.id_counter:get_id())
-
-   battle_manager = BattleManager.new("bandit_village", event_bus, character_manager, animation_manager, task_manager)
-   local tactics_engine = battle_manager.tactics_engine
-   local tile_manager = battle_manager.tile_manager
-   local battle_state = battle_manager.battle_state
-
-   menu_manager = MenuManager.new(tactics_engine, battle_state, tile_manager, event_bus)
-   local enemy_ai_engine = EnemyAIEngine.new(battle_manager, battle_state, tactics_engine, event_bus, task_manager, tile_manager)
-
-   local turn_manager = TurnManager.new(event_bus, tactics_engine, battle_manager, menu_manager, enemy_ai_engine)
+   battle_manager = service_manager:register(BattleManager.new("bandit_village"))
 
 
+   context = service_manager:register(GameContext.new())
 
-   context = GameContext.new(
-   battle_manager,
-   turn_manager,
-   character_manager,
-   menu_manager,
-   event_bus)
-
-
-   event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
 function _update()
    LOG.trace("Getting Joypad.")
    local joy = get_joypad()
-   LOG.trace("Updating menus.")
    menu_manager:update(joy)
-   LOG.trace("Updating battle.")
    battle_manager:update()
-   LOG.trace("Ticking animations.")
    animation_manager:tick()
-   LOG.trace("Enriching context.")
    context:enrich()
-   LOG.trace("Updating tasks.")
    task_manager:update_tasks()
 end
 
 function _draw()
    LOG.trace("Generating frame data.")
    animation_manager:generate_frame_data()
-   LOG.trace("Drawing UI.")
    ui_manager:draw(context)
 end
 
@@ -4087,10 +4220,10 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/types")
 require("src/menu/types")
 require("src/menu/menu_selection")
-
 require("src/battle/tactics/tactics_engine")
 require("src/joypad")
 require("src/battle/tile_manager")
+require("src/systems/service")
 
 
 
@@ -4114,14 +4247,9 @@ MenuManager = {}
 
 
 
-function MenuManager.new(
-   tactics_engine,
-   battle_state,
-   tile_manager,
-   event_bus)
 
-   local self = setmetatable({}, { __index = MenuManager })
 
+function MenuManager:init(service_manager, services)
    self.menu_state = {
       point = TilePoint.of(0, 0),
    }
@@ -4130,11 +4258,24 @@ function MenuManager.new(
    self.selection_history = {}
 
    self.services = {
-      tactics_engine = tactics_engine,
-      battle_state = battle_state,
-      tile_manager = tile_manager,
+      tactics_engine = services.tactics_engine,
+      battle_state = services.battle_state,
+      tile_manager = services.tile_manager,
    }
-   self.event_bus = event_bus
+   self.event_bus = services.event_bus
+end
+
+
+function MenuManager.new()
+   local self = setmetatable({
+      id = "menu_manager",
+      dependencies = {
+         "tactics_engine",
+         "battle_state",
+         "tile_manager",
+         "event_bus",
+      },
+   }, { __index = MenuManager })
 
    return self
 end
@@ -4569,8 +4710,137 @@ MenuStep = {}
 
 MenuState = {}
 
+:: build/story/story_manager.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/debug")
+
+require("src/types")
+require("src/systems/event_bus")
+require("src/systems/tasks")
+
+require("src/data/battles")
+
+require("src/battle/battle_state")
+require("src/battle/tactics/battle_unit")
+require("src/battle/tile_manager")
+require("src/battle/tactics/tactics_engine")
+require("src/battle/map/map_manager")
+require("src/menu/menu_manager")
+require("src/systems/service")
+require("src/character/character_manager")
+require("src/turn_manager")
+require("src/battle/tactics/enemy_ai")
+
+local STORY_DATA = require("src/data/story")
+
+StoryManager = {}
+
+
+
+
+
+
+
+
+function StoryManager:init(service_manager, services)
+   local story_definition = STORY_DATA[self.story_id]
+
+end
+
+function StoryManager.new(story_id)
+   assert(STORY_DATA[story_id] ~= nil)
+
+   local self = setmetatable({
+      id = 'story_manager',
+      dependencies = {
+         "event_bus",
+         "animation_manager",
+         "task_manager",
+         "character_manager",
+      },
+   }, { __index = StoryManager })
+   self.story_id = story_id
+
+   return self
+end
+
+function StoryManager:update()
+end
+
+return StoryManager
+
+:: build/story/types.lua
+
+
+
+
+
+
+
+
+
+
+
+local TextNode = {}
+
+
+
+
+
+function TextNode.of(text)
+   local self = {
+      type = 'text',
+      text = text,
+   }
+   return setmetatable(self, { __index = TextNode })
+end
+
+local BattleNode = {}
+
+
+
+
+
+function BattleNode.of(battle_id)
+   local self = {
+      type = 'battle',
+      battle_id = battle_id,
+   }
+   return setmetatable(self, { __index = BattleNode })
+end
+
+
+local JumpNode = {}
+
+
+
+
+
+function JumpNode.of(next_node)
+   local self = {
+      type = 'jump',
+      next_node = next_node,
+   }
+   return setmetatable(self, { __index = JumpNode })
+end
+
+
+
+
+local Story = {}
+
+
+
+
+return {
+   Story = Story,
+   TextNode = TextNode,
+   BattleNode = BattleNode,
+   JumpNode = JumpNode,
+}
+
 :: build/systems/event_bus.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/systems/service")
+require("src/debug")
 
 GameEvent = {}
 
@@ -4597,10 +4867,20 @@ EventBus = {}
 
 
 
+
+
+function EventBus:init(service_manager, services)
+
+end
+
 local MAX_EVENT_HISTORY = 99
 
 function EventBus.new()
-   local self = setmetatable({}, { __index = EventBus })
+   local self = setmetatable({
+      id = "event_bus",
+      dependencies = {},
+   }, { __index = EventBus })
+
    self.event_history = {}
    self.listeners = {}
    return self
@@ -4634,15 +4914,141 @@ end
 
 return EventBus
 
+:: build/systems/service.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local pairs = _tl_compat and _tl_compat.pairs or pairs
+ServiceId = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GameService = {}
+
+
+
+
+
+
+TransientGameService = {}
+
+
+
+ServiceManager = {}
+
+
+
+
+
+
+function ServiceManager:get_services()
+   local out = {}
+   for k, v in pairs(self.transient_services) do
+      out[k] = v
+   end
+   for k, v in pairs(self.persistent_services) do
+      out[k] = v
+   end
+   return out
+end
+
+function ServiceManager:assert_dependencies_exist(ids)
+   for _, id in ipairs(ids) do
+      if self.persistent_services[id] == nil and
+         self.transient_services[id] == nil then
+         error("Service '" .. id .. "' was expected but has not yet been initialized!")
+      end
+   end
+   return true
+end
+
+function ServiceManager:register(service)
+   local id = service.id
+   assert(self.persistent_services[id] == nil)
+   assert(self.transient_services[id] == nil)
+   self:assert_dependencies_exist(service.dependencies)
+   self.persistent_services[id] = service
+   service:init(self, self:get_services())
+   return service
+end
+
+function ServiceManager:register_transient(service)
+   local id = service.id
+   assert(self.persistent_services[id] == nil, "Persistent services are nil!")
+   assert(self.transient_services[id] == nil, "Persistent services are nil!")
+   self:assert_dependencies_exist(service.dependencies)
+   self.transient_services[id] = service
+   service:init(self, self:get_services())
+   return service
+end
+
+function ServiceManager:teardown_transient(service)
+   local id = service.id
+   assert(self.transient_services[id] ~= nil)
+   service:teardown()
+   self.transient_services[id] = nil
+end
+
+function ServiceManager:init(service_manager, services)
+   self.persistent_services = {}
+   self.transient_services = {}
+end
+
+function ServiceManager.new()
+   local self = {
+      id = 'service_manager',
+      dependencies = {},
+   }
+   setmetatable(self, { __index = ServiceManager })
+
+   self:init(self, {})
+   self:register(self)
+   return self
+end
+
+
+return {
+   ServiceManager = ServiceManager,
+}
+
 :: build/systems/tasks.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/systems/service")
+require("src/debug")
 
 TaskManager = {}
 
 
 
+
+
+function TaskManager:init(service_manager, services)
+   self.tasks = {}
+end
+
 function TaskManager.new()
-   return setmetatable({ tasks = {} }, { __index = TaskManager })
+   return setmetatable({
+      id = "task_manager",
+      dependencies = {},
+   }, { __index = TaskManager })
 end
 
 function TaskManager:start_routine(func)
@@ -4672,7 +5078,8 @@ require("src/menu/menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/battle_manager")
+require("src/systems/service")
+require("src/battle/battle_objective_service")
 
 
 
@@ -4690,23 +5097,17 @@ TurnManager = {}
 
 
 
-function TurnManager.new(
-   event_bus,
-   tactics_engine,
-   battle_manager,
-   menu_manager,
-   enemy_ai_engine)
 
-   local self = setmetatable({}, { __index = TurnManager })
 
+function TurnManager:init(service_manager, services)
    self.turn = 1
    self.phase = "PLAYER"
 
-   self.event_bus = event_bus
-   self.tactics_engine = tactics_engine
-   self.battle_manager = battle_manager
-   self.menu_manager = menu_manager
-   self.enemy_ai_engine = enemy_ai_engine
+   self.event_bus = services.event_bus
+   self.tactics_engine = services.tactics_engine
+   self.battle_objective_service = services.battle_objective_service
+   self.menu_manager = services.menu_manager
+   self.enemy_ai_engine = services.enemy_ai_engine
 
    self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
       self.menu_manager:set_menu("MENU_PLAYER_TURN")
@@ -4752,7 +5153,7 @@ function TurnManager.new(
 
       self.turn = self.turn + 1
 
-      local battle_result = self.battle_manager:check_for_end()
+      local battle_result = self.battle_objective_service:check_for_end()
 
       if not battle_result.finished then
          self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
@@ -4768,6 +5169,19 @@ function TurnManager.new(
    self.event_bus:on("BATTLE_END_DEFEAT", function()
       LOG.info("You lose!")
    end)
+end
+
+function TurnManager.new()
+   local self = setmetatable({
+      id = 'turn_manager',
+      dependencies = {
+         "event_bus",
+         "tactics_engine",
+         "battle_objective_service",
+         "menu_manager",
+         "enemy_ai_engine",
+      },
+   }, { __index = TurnManager })
 
    return self
 end
@@ -6084,7 +6498,8 @@ UITheme = {}
 UILayoutId = {}
 
 :: build/ui/ui_manager.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/types")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/systems/service")
+require("src/types")
 require("src/ui/types")
 
 require("src/game_context")
@@ -6112,9 +6527,18 @@ UIManager = {}
 
 
 
+
+function UIManager:init(service_manager, services)
+
+end
+
+
 function UIManager.new()
 
-   local self = setmetatable({}, { __index = UIManager })
+   local self = setmetatable({
+      id = "ui_manager",
+      dependencies = {},
+   }, { __index = UIManager })
 
    self.layouts = {}
 
@@ -6717,45 +7141,47 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-08 01:51:01",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 01:07:24",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
+:: build/story/.info.pod
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 01:07:24"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -6935,7 +7361,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-08 01:50:45",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-09 01:03:05",modified="2025-12-09 01:07:24"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -7218,7 +7644,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 01:07:24"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -7247,7 +7673,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-09 01:07:24"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -7255,5 +7681,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-08 01:51:01"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-09 01:07:24"]]
 :: [eoc]

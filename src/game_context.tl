@@ -1,6 +1,5 @@
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/battle_manager")
 require("src/turn_manager")
 require("src/battle/tile_manager")
 require("src/menu/menu_manager")
@@ -15,7 +14,6 @@ global type UILayoutId
 global record GameContext
     is TransientGameService
     where self.id == 'game_context'
-    battle_manager: BattleManager
     tactics: TacticsEngine
     battle_state: BattleState
     turn_manager: TurnManager
@@ -33,7 +31,6 @@ global record GameContext
 end
 
 function GameContext:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.battle_manager = services.battle_manager as BattleManager
     self.tactics = services.tactics_engine as TacticsEngine
     self.battle_state = services.battle_state as BattleState
     self.turn_manager = services.turn_manager as TurnManager
@@ -53,7 +50,6 @@ function GameContext.new(): GameContext
     local context: GameContext = setmetatable({
         id = "game_context",
         dependencies = {
-            "battle_manager",
             "tactics_engine",
             "battle_state",
             "turn_manager",

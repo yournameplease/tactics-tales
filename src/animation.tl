@@ -241,13 +241,14 @@ global record AnimationManager
 end
 
 function AnimationManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-
+    self.active_animations = {}
+    self.global_frame = 0
 end
 
 function AnimationManager.new(): AnimationManager
     return setmetatable({
-        active_animations = {},
-        global_frame = 0
+        id = "animation_manager",
+        dependencies = {},
     }, { __index = AnimationManager })
 end
 
