@@ -61,7 +61,7 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
         -- this needs unit tests x.x
         local out: {string} = {}
         local line_start = 1
-        local previous_word_end: integer
+        local previous_word_end: integer = -1
         local line_width: integer
         -- LOG.debug("Begin wrap loop")
         while true do
@@ -95,8 +95,8 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
             else
                 -- LOG.debug("need hypmenate",  line_start, line_end)
                 -- need to hyphenate
-                add(out, line)
-                return out
+                add(out, sub(text, line_start, line_end-2)..'-')
+				line_start = line_end - 1
             end
         end
     end
