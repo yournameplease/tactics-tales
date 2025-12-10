@@ -33,6 +33,7 @@ function MessageLog.new(props: MessageLog): MessageLog
     end
     box.justify = props.justify or "left"  -- "left", "right", "center"
     box.text_direction = props.text_direction or "up"
+    box.wrap_mode = "wrap"
 
     return box
 end
@@ -45,10 +46,12 @@ function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
     local text = self.func(state, row_count)
 
     -- TODO: text wrapping?  and cutoff text if not wrap
-    local rows_to_render = min(row_count, #text)
-    for i=1,rows_to_render do
-        draw_text_row(self, i, text[#text-i+1], ui_theme)
-    end
+    -- local rows_to_render = min(row_count, #text)
+    -- for i=1,rows_to_render do
+    --     draw_text_row(self, i, text[#text-i+1], ui_theme)
+    -- end
+
+    draw_text(self, text, ui_theme)
 
 end
 

@@ -5734,7 +5734,7 @@ function Box.new(props)
 
    if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
-   assert(not (self.flex_grow > 0 and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
+   assert(not (self.flex_grow > 0 and (self.auto_width and self.auto_height)), "Cannot flex grow with auto_width and auto_height")
    assert(
    self.decoration_padding == 0 or
 
@@ -6289,6 +6289,7 @@ function MessageLog.new(props)
    end
    box.justify = props.justify or "left"
    box.text_direction = props.text_direction or "up"
+   box.wrap_mode = "wrap"
 
    return box
 end
@@ -6301,10 +6302,12 @@ function MessageLog:draw(state, ui_theme)
    local text = self.func(state, row_count)
 
 
-   local rows_to_render = min(row_count, #text)
-   for i = 1, rows_to_render do
-      draw_text_row(self, i, text[#text - i + 1], ui_theme)
-   end
+
+
+
+
+
+   draw_text(self, text, ui_theme)
 
 end
 
@@ -6681,15 +6684,15 @@ local function text_width(text)
 end
 
 function draw_text_row(self, i, text, ui_theme)
-   local text_width = text_width(text)
+   local line_width = text_width(text)
 
    local t_x
    if self.justify == "left" then
       t_x = self.x + self.padding + 1
    elseif self.justify == "center" then
-      t_x = self.x + (self.w - 2 * (self.padding + 1) - text_width) // 2
+      t_x = self.x + (self.w - 2 * (self.padding + 1) - line_width) // 2
    elseif self.justify == "right" then
-      t_x = self.x + self.w - self.padding - 1 - text_width - 1
+      t_x = self.x + self.w - self.padding - 1 - line_width - 1
    else
       error("Unexpected value!")
    end
@@ -6698,6 +6701,10 @@ function draw_text_row(self, i, text, ui_theme)
 end
 
 local function apply_text_wrapping(text, width, wrap_mode)
+   if text == '' then
+      return { text }
+   end
+
    if wrap_mode == "no_wrap" then
       return { text }
    elseif wrap_mode == "ellipsis" then
@@ -6709,22 +6716,27 @@ local function apply_text_wrapping(text, width, wrap_mode)
          out = sub(text, 1, char_count)
          out_width = text_width(out)
       until out_width > width or char_count == #text
-      if char_count < #text then
-         return { sub(out, 1, char_count - 3) .. "..." }
+      if out_width > width then
+         LOG.debug("WIDTH", out_width, width)
+         return { sub(text, 1, char_count - 3) .. "..." }
       else
-         return { out }
+         return { text }
       end
    elseif wrap_mode == "wrap" then
 
       local out = {}
-      local line
       local line_start = 1
       local previous_word_end
       local line_width
       while true do
+         LOG.debug("WRAP loop")
          while line_start <= #text and sub(text, line_start, true) == ' ' do
             line_start = line_start + 1
          end
+         if line_start > #text then
+            return out
+         end
+         LOG.info("line_start", line_start, text)
          local line_end = line_start
          local line = sub(text, line_start, line_end)
          while line_end <= #text and text_width(line) <= width do
@@ -6737,17 +6749,30 @@ local function apply_text_wrapping(text, width, wrap_mode)
 
          if previous_word_end >= line_start then
             add(out, sub(text, line_start, previous_word_end))
-         elseif line_start > #text then
-            return out
          else
 
+            add(out, line)
+            return out
          end
       end
    end
 end
 
-function draw_text(text)
+function draw_text(self, text, ui_theme)
+   local wrapped_text = {}
+   for _, t in ipairs(text) do
+      LOG.info("wrapping text", t, self.w, self.wrap_mode)
+      add(wrapped_text, apply_text_wrapping(t, self.w, self.wrap_mode))
 
+   end
+
+   local row_count = 0
+   for i, paragraph in ipairs(wrapped_text) do
+      for _, text_row in ipairs(paragraph) do
+         row_count = row_count + 1
+         draw_text_row(self, row_count, text_row, ui_theme)
+      end
+   end
 end
 
 function TextNode:draw(state, ui_theme)
@@ -6760,19 +6785,7 @@ function TextNode:draw(state, ui_theme)
    self.rows, "`func` should return expected number of rows")
 
 
-   local wrapped_text = {}
-   for _, t in ipairs(text) do
-      add(wrapped_text, apply_text_wrapping(t, self.w, self.wrap_mode))
-   end
-
-   local row_count = 0
-   for i, paragraph in ipairs(wrapped_text) do
-      for _, text_row in ipairs(paragraph) do
-         row_count = row_count + 1
-         draw_text_row(self, row_count, text_row, ui_theme)
-      end
-   end
-
+   draw_text(self, text, ui_theme)
 end
 
 return TextNode
@@ -6806,6 +6819,7 @@ function UnitInfo.new(props)
 
    local info_col = self:add(Box.new({
       auto_height = true,
+      flex_grow = 1,
       dir = "col",
       gap = 2,
    }))
@@ -7617,47 +7631,47 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 02:53:46",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -7837,7 +7851,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-10 02:39:11",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -8118,9 +8132,9 @@ dHJ1ZQplbmQKCmZ1bmN0aW9uIF91cGRhdGUgKCkKICBpZiBlcnJvcl90aHJlYWQgdGhlbgogICAg
 Y2FsbF9lcnJvcl9ldmVudCAoZXJyb3JfdXBkYXRlKQogIGVsc2UKICAgIGNhbGxfcHJvdGVjdGVk
 ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
-bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZA==
+bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -8149,7 +8163,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -8157,5 +8171,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-10 02:53:46"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-10 03:16:58"]]
 :: [eoc]
