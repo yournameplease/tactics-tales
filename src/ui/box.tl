@@ -113,7 +113,7 @@ function Box.new(props: UIElement): Box
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
-    assert(not (self.flex_grow > 0  and (self.auto_width or self.auto_height)), "Cannot flex grow with auto_width or auto_height")
+    assert(not (self.flex_grow > 0  and (self.auto_width and self.auto_height)), "Cannot flex grow with auto_width and auto_height")
     assert(
         self.decoration_padding == 0
         or

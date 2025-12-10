@@ -61,7 +61,7 @@
 --- @param pos0 integer
 --- @param pos1? integer | boolean
 --- @return string
--- global sub: function(str: any, pos0: any, pos1: any) 
+global sub: function(str: string, pos0: integer, pos1: integer | boolean): string 
 
 --- Converts a value to a string.
 --- @param value any The value to convert.

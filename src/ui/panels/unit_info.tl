@@ -26,6 +26,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
     local info_col = self:add(Box.new({
         auto_height = true,
+        flex_grow = 1,
         dir = "col",
         gap = 2
     }))

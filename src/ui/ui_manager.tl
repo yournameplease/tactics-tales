@@ -118,6 +118,7 @@ function UIManager.new(): UIManager
             flex_grow = 1,
             padding = 2,
             text_direction = "down",
+            wrap_mode = "ellipsis",
             func = function(state: UIContextManager, _row_limit: integer): { string }
                 return state.story_ui_context.story_page_state.text
             end
