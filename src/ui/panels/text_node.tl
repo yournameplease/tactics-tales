@@ -1,35 +1,17 @@
 require("src/ui/ui_context_manager")
 require("src/ui/box")
-
-global enum TextJustify
-    "left"
-    "center"
-    "right"
-end
-
-global enum TextDirection
-    "down"
-    "up"
-end
-
-global enum WrapMode
-    "no_wrap"
-    "ellipsis"
-    "wrap"
-end
+local Text = require("src/util/text")
 
 global interface TextUIElement
     is UIElement
-    justify: TextJustify
-    rows: integer
-    text_direction: TextDirection
-    wrap_mode: WrapMode
+    draw_properties: Text.TextDrawProperties
 end
 
 
 global record TextNode
     is UIElement, TextUIElement
     func: function(UIContextManager): { string }
+    rows: integer
 end
 
 setmetatable(TextNode, { __index = Box })
@@ -49,115 +31,18 @@ function TextNode.new(props: TextNode): TextNode
     box.func = props.func or error("Need text getter `func`")
     box.rows = props.rows or 1
     box.h = (box.rows) * (TEXT_HEIGHT + 2)
-    box.justify = props.justify or "left"  -- "left", "right", "center"
-    box.wrap_mode = props.wrap_mode or "ellipsis"
+
+    props.draw_properties = props.draw_properties or {}
+    box.draw_properties = {
+        justify = "left",
+        text_direction = "down",
+        wrap_mode = "ellipsis",
+    }
+    box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
+    box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
+    box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
 
     return box
-end
-
-local function text_width(text: string): integer
-    return print(text, 0, -1000) as integer
-end
-
-global function draw_text_row(self: TextUIElement, i: integer, text: string, ui_theme: UITheme)
-    local line_width = text_width(text)
-
-    local t_x: integer
-    if self.justify == "left" then
-        t_x = self.x + self.padding + 1
-    elseif self.justify == "center" then
-        t_x = self.x + (self.w - 2 * (self.padding + 1) - line_width) // 2
-    elseif self.justify == "right" then
-        t_x = self.x + self.w - self.padding - 1 - line_width - 1
-    else
-        error("Unexpected value!")
-    end
-
-    print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
-end
-
-local function apply_text_wrapping(text: string, width: integer, wrap_mode: WrapMode): {string}
-    if text == '' then
-        return {text}
-    end
-
-    if wrap_mode == "no_wrap" then
-        return {text}
-    elseif wrap_mode == "ellipsis" then
-        local out: string
-        local char_count = 0
-        local out_width: integer
-        repeat
-            char_count = char_count + 1
-            out = sub(text,1, char_count)
-            out_width = text_width(out)
-        until out_width > width or char_count == #text
-        if out_width > width then
-        -- LOG.debug("WIDTH", out_width, width)
-            return {sub(text, 1,char_count-3).."..."}
-        else
-            return {text}
-        end
-    elseif wrap_mode == "wrap" then
-        -- this needs unit tests x.x
-        local out: {string} = {}
-        local line_start = 1
-        local previous_word_end: integer
-        local line_width: integer
-        -- LOG.debug("Begin wrap loop")
-        while true do
-            -- LOG.debug("WRAP loop")
-            while line_start <= #text and sub(text, line_start, true) == ' ' do
-                line_start = line_start + 1
-            end
-            if line_start > #text then 
-                return out
-            end
-            -- LOG.info("line_start", line_start, text)
-            local line_end = line_start
-            local line = sub(text, line_start, line_end)
-            while line_end <= #text and text_width(line) <= width do
-                line_end = line_end + 1
-                line = sub(text, line_start, line_end)
-                if (sub(text, line_end, true) == ' ' and sub(text, line_end-1, true) ~= ' ') then
-                    previous_word_end = line_end - 1
-                end
-            end
-
-            if line_end > #text and text_width(line) <= width then
-                -- LOG.info("text done", line_start, line_end)
-                -- end of text without overflow
-                add(out, line)
-                return out
-            elseif previous_word_end >= line_start then
-                -- LOG.info("add line", line_start, line_end)
-                add(out, sub(text, line_start, previous_word_end))
-                line_start = previous_word_end + 1
-            else
-                -- LOG.debug("need hypmenate",  line_start, line_end)
-                -- need to hyphenate
-                add(out, line)
-                return out
-            end
-        end
-    end
-end
-
-global function draw_text(self: TextUIElement, text: {string}, ui_theme: UITheme )
-    local wrapped_text: {{string}} = {}
-    for _, t in ipairs(text) do
-        LOG.info("wrapping text", t, self.w, self.wrap_mode)
-        add(wrapped_text, apply_text_wrapping(t, self.w, self.wrap_mode))
-        
-    end
-
-    local row_count = 0
-    for i, paragraph in ipairs(wrapped_text) do
-        for _, text_row in ipairs(paragraph) do
-            row_count = row_count + 1
-            draw_text_row(self, row_count, text_row, ui_theme)
-        end
-    end
 end
 
 function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
@@ -170,7 +55,12 @@ function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
             self.rows, "`func` should return expected number of rows"
     )
 
-    draw_text(self, text, ui_theme)
+    Text.draw(text,
+        self.x+self.internal_margin.l,
+        self.y+self.internal_margin.t,
+        self.w-self.internal_margin.l-self.internal_margin.r,
+        self.h-self.internal_margin.t-self.internal_margin.b,
+        ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
 end
 
 return TextNode

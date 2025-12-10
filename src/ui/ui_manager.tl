@@ -43,12 +43,12 @@ function UIManager.new(): UIManager
     self.layouts = {}
 
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
-    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, justify = "center"}))
+    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, draw_properties = {justify = "center"}}))
     battle_summary:add(TextNode.new({ func = function(state: UIContextManager): { string }
         local turn = state.battle_ui_context.turn_manager.turn
         return { "Turn " .. turn }
-    end, justify = "center" }))
-    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, justify = "center" }))
+    end, draw_properties = {justify = "center"} }))
+    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, draw_properties = {justify = "center"} }))
 
     local page_divider = PageDivider.new(7)
 
@@ -117,8 +117,10 @@ function UIManager.new(): UIManager
             dir="col",
             flex_grow = 1,
             padding = 2,
-            text_direction = "down",
-            wrap_mode = "ellipsis",
+            draw_properties = {
+                text_direction = "down",
+                wrap_mode = "ellipsis",
+            },
             func = function(state: UIContextManager, _row_limit: integer): { string }
                 return state.story_ui_context.story_page_state.text
             end
