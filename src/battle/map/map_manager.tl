@@ -23,7 +23,7 @@ local MID_WALL_LAYER = 3
 local BACK_WALL_LAYER = 4
 local GROUND_LAYER = 5
 
-function MapManager:as_map(battle_map: MapFetchResult): MapLayers
+local function as_map(battle_map: MapFetchResult): MapLayers
     return {
         metatiles = battle_map[METATILES_LAYER].bmp,
         front_wall = battle_map[FRONT_WALL_LAYER].bmp,
@@ -33,7 +33,7 @@ function MapManager:as_map(battle_map: MapFetchResult): MapLayers
     }
 end
 
-function MapManager:apply_checkerboard(map_layers: MapLayers)
+local function apply_checkerboard(map_layers: MapLayers)
     local ground = map_layers.ground
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
@@ -45,7 +45,7 @@ function MapManager:apply_checkerboard(map_layers: MapLayers)
     end
 end
 
-function MapManager:apply_default_walls(map_layers: MapLayers)
+local function apply_default_walls(map_layers: MapLayers)
     local ground = map_layers.ground
     local back_wall = map_layers.back_wall
     local mid_wall = map_layers.mid_wall
@@ -68,17 +68,17 @@ function MapManager:apply_default_walls(map_layers: MapLayers)
     end
 end
 
-function MapManager:_load_static(definition: StaticMapDefinition): BattleMap
-    local battle_map: = {}
-
+local function load_static(definition: StaticMapDefinition): BattleMap
     local map_fetch = fetch(DATP..definition.file) as MapFetchResult
 
-    battle_map.layers = self:as_map(map_fetch)
+    local layers = as_map(map_fetch)
     
-    self:apply_checkerboard(battle_map.layers)
-    self:apply_default_walls(battle_map.layers)
+    apply_checkerboard(layers)
+    apply_default_walls(layers)
 
-    local metatiles_layer = battle_map.layers.metatiles
+    local metatiles_layer = layers.metatiles
+    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height())
+    battle_map.layers = layers
     battle_map.width = metatiles_layer:width()
     battle_map.height = metatiles_layer:height()
     battle_map.metadata = {
@@ -117,7 +117,7 @@ function MapManager:load_map(map_id: string): BattleMap
 
     local battle_map: BattleMap
     if definition is StaticMapDefinition then
-        battle_map = self:_load_static(definition)
+        battle_map = load_static(definition)
     -- elseif definition is ProceduralMapDefinition then
 
     end

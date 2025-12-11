@@ -18,48 +18,17 @@ require("src/systems/service")
 -- 7
 
 -- cost to move onto x,y from any neighbor
-local function movement_cost(tile: TilePoint, battle_map: BattleMap, side: Side): integer
-    local ground = battle_map.layers.ground
-    local back_wall = battle_map.layers.back_wall
-    local mid_wall = battle_map.layers.mid_wall
-    local front_wall = battle_map.layers.front_wall
-    if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
-        return 999
-    end
-
-    local ground_sprite = ground:get(tile.x,tile.y)
-    if tile == nil then return 999 end
+local function movement_cost(battle_map: BattleMap, tile: TilePoint, side: Side): integer
+    local terrain = battle_map:get_terrain(tile)
+    if terrain == nil then return 999 end
 
     local unit = battle_map:get_at_tile(tile)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
 
-    if back_wall then
-        local back_wall_sprite = back_wall:get(tile.x,tile.y)
-        if (fget(back_wall_sprite) & 0x1) == 0x1 then
-            return 999
-        end
-    end
-    if mid_wall then
-        local mid_wall_sprite = mid_wall:get(tile.x,tile.y)
-        if (fget(mid_wall_sprite) & 0x1) == 0x1 then
-            return 999
-        end
-    end
-    if front_wall then
-        local front_wall_sprite = front_wall:get(tile.x,tile.y)
-        if (fget(front_wall_sprite) & 0x1) == 0x1 then
-            return 999
-        end
-    end
-
-    local flags = fget(ground_sprite)
-    local solid = (flags & 0x1) == 0x1
-    local terrain = (flags & 0xD) >> 1
-
-    if solid then return 999 end
-    return TERRAIN_DATA[terrain].movement_cost
+    if terrain.solid then return 999 end
+    return terrain.movement_cost
 end
 
 
@@ -122,7 +91,7 @@ local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, star
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = self:movement_cost({ x=vx, y=vy }, side)
+                local move_cost = movement_cost(battle_map, { x=vx, y=vy }, side)
                 assert(move_cost > 0, "0 cost moves not yet implemented.")
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)

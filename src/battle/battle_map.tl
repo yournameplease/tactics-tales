@@ -3,6 +3,7 @@ require("src/util")
 require("src/battle/tactics/battle_unit")
 
 global record TerrainData
+    solid: boolean
     movement_cost: integer
     dodge: integer
 end
@@ -77,10 +78,43 @@ end
 -- data access
 
 function BattleMap:get_terrain(tile: TilePoint): TerrainData
-    local tile_sprite = self.layers.ground:get(tile.x,tile.y)
+    local ground = self.layers.ground
+    local back_wall = self.layers.back_wall
+    local mid_wall = self.layers.mid_wall
+    local front_wall = self.layers.front_wall
+    
+    local tile_sprite = ground:get(tile.x,tile.y)
+    if tile_sprite == nil then return nil end
+    
     local flags = fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
-    return TERRAIN_DATA[terrain]
+    local terrain_data = TERRAIN_DATA[terrain]
+
+    local solid = flags & 0x1 == 0x1
+    if back_wall then
+        local back_wall_sprite = back_wall:get(tile.x,tile.y)
+        if (fget(back_wall_sprite) & 0x1) == 0x1 then
+            solid = true
+        end
+    end
+    if mid_wall then
+        local mid_wall_sprite = mid_wall:get(tile.x,tile.y)
+        if (fget(mid_wall_sprite) & 0x1) == 0x1 then
+            solid = true
+        end
+    end
+    if front_wall then
+        local front_wall_sprite = front_wall:get(tile.x,tile.y)
+        if (fget(front_wall_sprite) & 0x1) == 0x1 then
+            solid = true
+        end
+    end
+    
+    return {
+        solid = solid,
+        movement_cost = terrain_data.movement_cost,
+        dodge = terrain_data.dodge,
+    }
 end
 
 function BattleMap:get_unit_by_id(id: integer): BattleUnit

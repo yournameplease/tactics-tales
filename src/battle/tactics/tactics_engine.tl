@@ -311,7 +311,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Arr
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local reachable_tiles = Pathfinding:find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+    local reachable_tiles = Pathfinding.find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
     local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
