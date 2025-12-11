@@ -2,7 +2,7 @@ require("src/debug")
 
 require("src/menu/menu_manager")
 require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
@@ -25,7 +25,6 @@ global record EnemyAIEngine
     tactics_engine: TacticsEngine
     event_bus: EventBus
     task_manager: TaskManager
-    tile_manager: TileManager
 end
 
 local record AttackOption
@@ -38,8 +37,7 @@ local record MovementOption
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
-    local tile_manager = self.tile_manager
-    local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.tile.x, unit.tile.y, unit.side, 999) 
+    local all_tile_costs = Pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
 
     local enemies = self.tactics_engine.battle_map:get_units(unit_is_player)
 
@@ -69,7 +67,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         local choice = potential_attacks[1]
 
         local destination = choice.destination
-        local path = tile_manager:get_path_to_tile(all_tile_costs, destination)
+        local path = Pathfinding.get_path_to_tile(all_tile_costs, destination)
 
         local action_ctx: MenuContext = {
             acting_unit = { unit = unit},
@@ -94,7 +92,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             point = all_tile_costs:get_point(point).prev
         end
 
-        local path = tile_manager:get_path_to_tile(all_tile_costs, point)
+        local path = Pathfinding.get_path_to_tile(all_tile_costs, point)
 
         local action_ctx = {
             acting_unit = { unit = unit },
@@ -127,7 +125,6 @@ function EnemyAIEngine:init(_service_manager: ServiceManager, services: { Servic
     self.tactics_engine = services.tactics_engine as TacticsEngine
     self.event_bus = services.event_bus as EventBus
     self.task_manager = services.task_manager as TaskManager
-    self.tile_manager = services.tile_manager as TileManager
 
     self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
 end

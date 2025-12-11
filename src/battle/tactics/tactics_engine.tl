@@ -5,9 +5,9 @@ require ("src/menu/types")
 require ("src/menu/menu_manager")
 
 require("src/util")
-require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/tile_manager")
 require("src/draw")
-require("src/battle/combat/combat_calculator")
+local CombatCalculator = require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
@@ -28,9 +28,7 @@ local SIDE_ENEMY = 1
 global record TacticsEngine
     is TransientGameService
     where self.id == 'tactics_engine'
-    tile_manager: TileManager
     battle_map: BattleMap
-    combat_calculator: CombatCalculator
     event_bus: EventBus
     task_manager: TaskManager
     animation_manager: AnimationManager
@@ -60,8 +58,6 @@ end
 function TacticsEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.battle_is_blocked = false
     self.battle_map = services.battle_map as BattleMap
-    self.tile_manager = services.tile_manager as TileManager
-    self.combat_calculator = service_manager:register_transient(CombatCalculator.new())
     self.event_bus = services.event_bus as EventBus
     self.animation_manager = services.animation_manager as AnimationManager
     self.task_manager = services.task_manager as TaskManager
@@ -192,7 +188,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
 end
 
 function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
-    local combat_result = self.combat_calculator:compute_combat(attacker, defender)
+    local combat_result = CombatCalculator.compute_combat(attacker, defender, self.battle_map)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)
@@ -315,7 +311,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Arr
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local reachable_tiles = self.tile_manager:find_reachable_tiles(unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+    local reachable_tiles = Pathfinding:find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
     local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 

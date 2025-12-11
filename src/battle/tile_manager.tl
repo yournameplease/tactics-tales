@@ -18,11 +18,11 @@ require("src/systems/service")
 -- 7
 
 -- cost to move onto x,y from any neighbor
-local function movement_cost(tile: TilePoint, side: Side): integer
-    local ground = self.battle_map.layers.ground
-    local back_wall = self.battle_map.layers.back_wall
-    local mid_wall = self.battle_map.layers.mid_wall
-    local front_wall = self.battle_map.layers.front_wall
+local function movement_cost(tile: TilePoint, battle_map: BattleMap, side: Side): integer
+    local ground = battle_map.layers.ground
+    local back_wall = battle_map.layers.back_wall
+    local mid_wall = battle_map.layers.mid_wall
+    local front_wall = battle_map.layers.front_wall
     if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
@@ -30,7 +30,7 @@ local function movement_cost(tile: TilePoint, side: Side): integer
     local ground_sprite = ground:get(tile.x,tile.y)
     if tile == nil then return 999 end
 
-    local unit = self.battle_map:get_at_tile(tile)
+    local unit = battle_map:get_at_tile(tile)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -75,9 +75,9 @@ end
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-local function _dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
+local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
-    local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.battle_map.width, self.battle_map.height)
+    local visited_info: Array2D<ShortestPathEntry> = Array2D.new(battle_map.width, battle_map.height)
 
     local record ShortestPathQueueEntry
         cost: integer
@@ -152,15 +152,18 @@ end
 -- Public API
 -- --------------------------------------------------------------------------
 
---- Calculates the cost and shortest path to ALL reachable tiles.
--- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-local function calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): Array2D<ShortestPathEntry>
-    local limit = max_limit or 99999
-    return self:_dijkstra_traversal(start_x, start_y, side, limit)
+local record Pathfinding
 end
 
+--- Calculates the cost and shortest path to ALL reachable tiles.
+-- @return A table where map[x][y] = { cost = number, prev = {x, y} }
+function Pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): Array2D<ShortestPathEntry>
+    local limit = max_limit or 99999
+    return _dijkstra_traversal(battle_map, start_x, start_y, side, limit)
+end 
+
 -- @return list of { { x, y } } tile coordinates from start position
-local function get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
+function Pathfinding.get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path: {TilePoint} = {}
     add(path, tile:copy())
@@ -174,9 +177,9 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-local function find_reachable_tiles(start_x: integer, start_y: integer, side: Side, total_cost: integer): Array2D<boolean>
+function Pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): Array2D<boolean>
     -- 1. Get the detailed map from the core engine
-    local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
+    local full_map = _dijkstra_traversal(battle_map, start_x, start_y, side, total_cost)
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: Array2D<boolean> = Array2D.new(full_map.w, full_map.h, false)
@@ -195,8 +198,4 @@ local function find_reachable_tiles(start_x: integer, start_y: integer, side: Si
     return reachable
 end
 
-return {
-    find_reachable_tiles = find_reachable_tiles,
-    get_path_to_tile = get_path_to_tile,
-    get_all_tile_costs = get_all_tile_costs,
-}
+return Pathfinding

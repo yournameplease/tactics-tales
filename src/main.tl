@@ -41,7 +41,6 @@ require("src/systems/service")
 
 require("src/battle/battle_ui_context")
 require("src/character/character_manager")
-require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_ui_context")

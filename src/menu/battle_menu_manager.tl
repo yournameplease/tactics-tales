@@ -13,7 +13,6 @@ local record BattleMenuServiceBundle
     is MenuServiceBundle
     tactics_engine: TacticsEngine
     battle_map: BattleMap
-    tile_manager: TileManager
 end
 
 global record BattleMenuManager
@@ -169,7 +168,6 @@ function BattleMenuManager.new(): BattleMenuManager
         {
             "tactics_engine",
             "battle_map",
-            "tile_manager",
             "event_bus"
         },
         MENU_DATA,
@@ -177,7 +175,6 @@ function BattleMenuManager.new(): BattleMenuManager
             return {
                 tactics_engine = services.tactics_engine as TacticsEngine,
                 battle_map = services.battle_map as BattleMap,
-                tile_manager = services.tile_manager as TileManager,
             }
         end
     ) as BattleMenuManager

@@ -2,6 +2,7 @@ require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
 require("src/ui/ui_context_manager")
+local CombatCalculator = require("src/battle/combat/combat_calculator")
 
 global record CombatPreview
     is UIElement
@@ -13,7 +14,8 @@ local function get_preview_text(state: UIContextManager): {string}
     local attacker = state.battle_ui_context.acting_unit
     local defender = state.battle_ui_context.hovered_unit
     local attacker_tile = state.battle_ui_context.destination
-    local preview = state.battle_ui_context.combat_calculator:preview_combat(attacker, defender, attacker_tile).steps
+    local battle_map = state.battle_ui_context.battle_map
+    local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
 
     local out: {string} = {}
     if preview[1] ~= nil then 

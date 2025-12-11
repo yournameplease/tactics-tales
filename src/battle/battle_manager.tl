@@ -80,8 +80,6 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
     
     self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
 
-    self.battle_context.tile_manager = TileManager.new(self.battle_context.battle_map)
-
     self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
     self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
 

@@ -17,7 +17,6 @@ global record BattleContext
 	
     battle_map: BattleMap
 
-    tile_manager: TileManager
     tactics_engine: TacticsEngine
     battle_objective_service: BattleObjectiveService
     enemy_ai_engine: EnemyAIEngine

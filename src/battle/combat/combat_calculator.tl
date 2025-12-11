@@ -5,25 +5,7 @@ local List = require("src/util/list")
 
 
 
-global record CombatCalculator
-    is TransientGameService
-    where self.id == 'combat_calculator'
-
-    tile_manager: TileManager
-end
-
-function CombatCalculator:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.tile_manager = services.tile_manager as TileManager
-end
-
-function CombatCalculator.new(): CombatCalculator
-    local self: CombatCalculator = setmetatable({
-        id = 'combat_calculator',
-        dependencies = {
-            'tile_manager'
-        }
-    }, { __index = CombatCalculator })
-    return self
+local record CombatCalculator
 end
 
 local record AttackDouble
@@ -43,7 +25,7 @@ local record CombatDouble
     unit: BattleUnit
 end
 
-function CombatCalculator:build_attack_double(weapon: Weapon, unit: BattleUnit): AttackDouble
+local function build_attack_double(weapon: Weapon, unit: BattleUnit): AttackDouble
     local double = {
         damage = weapon.damage,
         accuracy = weapon.accuracy,
@@ -53,7 +35,7 @@ function CombatCalculator:build_attack_double(weapon: Weapon, unit: BattleUnit):
     return double
 end
 
-function CombatCalculator:build_combat_double(unit: BattleUnit): CombatDouble
+local function build_combat_double(unit: BattleUnit): CombatDouble
     local double: CombatDouble = {
         tile = unit.tile,
         hp_current = unit.hp_current,
@@ -63,7 +45,7 @@ function CombatCalculator:build_combat_double(unit: BattleUnit): CombatDouble
         attacks = List.do_map(
             unit.character.inventory:get_equipped_weapons(),
             function(weapon: Weapon): AttackDouble
-                return self:build_attack_double(weapon, unit)
+                return build_attack_double(weapon, unit)
             end
         ),
         unit = unit
@@ -101,10 +83,10 @@ function CombatCalculator:build_combat_double(unit: BattleUnit): CombatDouble
     return double
 end
 
-function CombatCalculator:get_hit_chance(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
+local function get_hit_chance(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): integer
     local accuracy = weapon.accuracy
 
-    local terrain = self.tile_manager:get_terrain(defender.tile)
+    local terrain = battle_map:get_terrain(defender.tile)
     local terrain_avoid = (terrain.dodge or 0)
 
     local unit_avoid = 0
@@ -116,7 +98,7 @@ function CombatCalculator:get_hit_chance(attacker: CombatDouble, defender: Comba
     return mid(0, accuracy - unit_avoid - terrain_avoid, 100)
 end
 
-function CombatCalculator:get_damage(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
+local function get_damage(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
     local atk = weapon.damage
     local def = 0
 
@@ -131,15 +113,15 @@ function CombatCalculator:get_damage(attacker: CombatDouble, defender: CombatDou
     return damage
 end
 
-function CombatCalculator:is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
+local function is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
   
     local dist = taxicab_distance(attacker.tile, defender.tile)
 
     return dist >= attack.min_range and dist <= attack.max_range
 end
 
-function CombatCalculator:can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
-    return self:is_in_combat_range(attacker, defender, attack)
+local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
+    return is_in_combat_range(attacker, defender, attack)
             and attacker.hp_current > 0
             and defender.hp_current > 0
 end
@@ -157,13 +139,13 @@ global record CombatResult
     steps: { CombatStep }
 end
 
-function CombatCalculator:get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): CombatStep
+local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): CombatStep
     if weapon ~= nil then
         local step: CombatStep = {
             attacker = attacker.unit,
             defender = defender.unit,
-            hit_chance = self:get_hit_chance(attacker, defender, weapon),
-            dmg = self:get_damage(attacker, defender, weapon),
+            hit_chance = get_hit_chance(attacker, defender, weapon, battle_map),
+            dmg = get_damage(attacker, defender, weapon),
             hit_roll = rndi(100)
         }
         step.is_hit = step.hit_roll < step.hit_chance
@@ -172,17 +154,17 @@ function CombatCalculator:get_combat_step(attacker: CombatDouble, defender: Comb
     return nil
 end
 
-function CombatCalculator:compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit): CombatResult
+function CombatCalculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): CombatResult
     local result: CombatResult = { steps = {} }
 
-    local attacker = self:build_combat_double(attacker_unit)
-    local defender = self:build_combat_double(defender_unit)
+    local attacker = build_combat_double(attacker_unit)
+    local defender = build_combat_double(defender_unit)
 
     local attacker_attacks = attacker.attacks
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = self:get_combat_step(attacker, defender, attacker_attacks[1])
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
         add(result.steps, step1)
         if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
@@ -190,8 +172,8 @@ function CombatCalculator:compute_combat(attacker_unit: BattleUnit, defender_uni
 
 
     -- defender counterattack
-    if self:can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
-        local step2 = self:get_combat_step(defender, attacker, defender_attacks[1])
+    if can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             add(result.steps, step2)
         end
@@ -211,26 +193,26 @@ global record CombatPreviewResult
     steps: { CombatPreviewStep }
 end
 
-function CombatCalculator:preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: TilePoint): CombatPreviewResult
+function CombatCalculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: TilePoint, battle_map: BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
-    local attacker = self:build_combat_double(attacker_unit)
+    local attacker = build_combat_double(attacker_unit)
     attacker.tile = attacker_tile
-    local defender = self:build_combat_double(defender_unit)
+    local defender = build_combat_double(defender_unit)
 
     local attacker_attacks = attacker.attacks
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = self:get_combat_step(attacker, defender, attacker_attacks[1])
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
         add(result.steps, step1)
     end
 
     -- defender counterattack
 
-    if self:can_attack(defender, attacker, defender_attacks[1]) then
-        local step2 = self:get_combat_step(defender, attacker, defender_attacks[1])
+    if can_attack(defender, attacker, defender_attacks[1]) then
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             add(result.steps, step2)
         end

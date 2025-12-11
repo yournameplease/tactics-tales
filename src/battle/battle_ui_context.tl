@@ -5,7 +5,6 @@ require("src/battle/tile_manager")
 require("src/menu/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")
-require("src/battle/combat/combat_calculator")
 
 global type UILayoutId
 
@@ -15,11 +14,9 @@ global record BattleUIContext
     tactics: TacticsEngine
     battle_map: BattleMap
     turn_manager: TurnManager
-    tile_manager: TileManager
     character_manager: CharacterManager
     battle_menu_manager: BattleMenuManager
     event_bus: EventBus -- move to a debug context
-    combat_calculator: CombatCalculator
 
     layout: UILayoutId
 
@@ -32,11 +29,9 @@ function BattleUIContext:init(_service_manager: ServiceManager, services: { Serv
     self.tactics = services.tactics_engine as TacticsEngine
     self.battle_map = services.battle_map as BattleMap
     self.turn_manager = services.turn_manager as TurnManager
-    self.tile_manager = services.tile_manager as TileManager
     self.character_manager = services.character_manager as CharacterManager
     self.battle_menu_manager = services.battle_menu_manager as BattleMenuManager
     self.event_bus = services.event_bus as EventBus
-    self.combat_calculator = services.combat_calculator as CombatCalculator
 
     self.layout = "TACTICS"
 
@@ -55,7 +50,6 @@ function BattleUIContext.new(): BattleUIContext
             "character_manager",
             "battle_menu_manager",
             "event_bus",
-            "combat_calculator",
         }
     }, { __index = BattleUIContext })
     return context

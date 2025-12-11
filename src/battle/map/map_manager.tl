@@ -22,10 +22,8 @@ local FRONT_WALL_LAYER = 2
 local MID_WALL_LAYER = 3
 local BACK_WALL_LAYER = 4
 local GROUND_LAYER = 5
--- battle_map
---
 
-function MapManager:as_map(battle_map: MapFetchResult): BattleMap.MapLayers
+function MapManager:as_map(battle_map: MapFetchResult): MapLayers
     return {
         metatiles = battle_map[METATILES_LAYER].bmp,
         front_wall = battle_map[FRONT_WALL_LAYER].bmp,
@@ -35,7 +33,7 @@ function MapManager:as_map(battle_map: MapFetchResult): BattleMap.MapLayers
     }
 end
 
-function MapManager:apply_checkerboard(map_layers: BattleMap.MapLayers)
+function MapManager:apply_checkerboard(map_layers: MapLayers)
     local ground = map_layers.ground
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
@@ -47,7 +45,7 @@ function MapManager:apply_checkerboard(map_layers: BattleMap.MapLayers)
     end
 end
 
-function MapManager:apply_default_walls(map_layers: BattleMap.MapLayers)
+function MapManager:apply_default_walls(map_layers: MapLayers)
     local ground = map_layers.ground
     local back_wall = map_layers.back_wall
     local mid_wall = map_layers.mid_wall
@@ -71,7 +69,7 @@ function MapManager:apply_default_walls(map_layers: BattleMap.MapLayers)
 end
 
 function MapManager:_load_static(definition: StaticMapDefinition): BattleMap
-    local battle_map: BattleMap = {}
+    local battle_map: = {}
 
     local map_fetch = fetch(DATP..definition.file) as MapFetchResult
 
