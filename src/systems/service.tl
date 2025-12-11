@@ -15,19 +15,11 @@ global enum ServiceId
 	'story_page_state'
 	
 	'battle_manager'
-	'tactics_engine'
-	'tile_manager'
-	'turn_manager'
-	'battle_map'
-	'enemy_ai_engine'
-	'combat_calculator'
-	'battle_objective_service'
 
 	'menu_manager'
 	'battle_menu_manager'
 	'story_menu_manager'
 
-	'battle_ui_context'
 	'story_ui_context'
 	
 

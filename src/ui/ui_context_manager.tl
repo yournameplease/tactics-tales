@@ -5,8 +5,6 @@ require("src/story/story_ui_context")
 
 global type UILayoutId
 
--- TODO: split out the battle specific context
--- agregate multiple contexts to send to ui renderer
 global record UIContextManager
     is TransientGameService
     where self.id == 'ui_context_manager'

@@ -10,6 +10,7 @@ require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
+require("src/systems/service/game_service_bundle")
 
 global record BattleContext
 	
@@ -22,4 +23,6 @@ global record BattleContext
     enemy_ai_engine: EnemyAIEngine
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
+
+    services: GameServiceBundle
 end

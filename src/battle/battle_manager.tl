@@ -31,11 +31,6 @@ global record BattleManager
 
     battle_context: BattleContext
     
-    character_manager: CharacterManager
-    
-    event_bus: EventBus
-    animation_manager: AnimationManager
-    task_manager: TaskManager
 end
 
 
@@ -93,22 +88,33 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
     self.event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
-function BattleManager.new(battle_id: string): BattleManager 
+function BattleManager.new(battle_id: string, game_services: GameServiceBundle): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
-    local self: BattleManager = setmetatable({
-        id = 'battle_manager',
-        dependencies = {
-            "event_bus",
-            "animation_manager",
-            "task_manager",
-            "character_manager",
-        }
-    }, { __index = BattleManager })
+    local self: BattleManager = setmetatable({}, { __index = BattleManager })
     self.battle_context = {
         battle_id = battle_id
     }
 
+    local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
+
+    self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
+    
+    self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
+
+    self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
+    self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
+
+    self.battle_context.tactics_engine = TacticsEngine.new()
+
+    self.battle_context.battle_objective_service = BattleObjectiveService.new()
+
+    self.battle_context.battle_menu_manager = BattleMenuManager.new()
+    self.battle_context.enemy_ai_engine = EnemyAIEngine.new()
+    self.battle_context.turn_manager = TurnManager.new()
+    self.battle_context.services = game_services
+
+    self.battle_context.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
     return self
 end
 
