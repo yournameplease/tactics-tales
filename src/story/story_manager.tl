@@ -13,7 +13,7 @@ require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
-require("src/story/story_ui_context")
+require("src/story/story_context")
 require("src/story/story_page")
 require("src/story/story_context")
 
@@ -69,7 +69,7 @@ function StoryManager:handle_new_node()
     end
     if node is Story.BattleNode then
         local battle_id = node.battle_id
-        self.story_ctx.battle_manager = BattleManager.new(battle_id, self.story_ctx.services)
+        self.story_ctx.battle_manager = BattleManager.new(battle_id, self.story_ctx)
     end
 end
 
@@ -89,6 +89,8 @@ function StoryManager.new(story_id: StoryId, services: GameServiceBundle): Story
     self.story_id = story_id
     self.story_ctx = StoryContext.new(services)
 
+    self.story_ctx.character_manager = CharacterManager.new(self.story_ctx)
+
     local story_definition = STORY_DATA[self.story_id]
 
     self.story_ctx.story_page = StoryPage.new()
@@ -99,6 +101,8 @@ function StoryManager.new(story_id: StoryId, services: GameServiceBundle): Story
     self.story_ctx.services.event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
     end)
+
+    
     
     return self
 end

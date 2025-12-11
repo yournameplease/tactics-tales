@@ -7,7 +7,7 @@ global type UILayoutId
 
 global record StoryUIContext
     is TransientGameService
-    where self.id == 'story_ui_context'
+    where self.id == 'story_context'
 
     story_page: StoryPage
 
@@ -22,7 +22,7 @@ end
 
 function StoryUIContext.new(): StoryUIContext
     local context: StoryUIContext = setmetatable({
-        id = "story_ui_context",
+        id = "story_context",
         dependencies = {
         }
     }, { __index = StoryUIContext })

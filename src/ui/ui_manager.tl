@@ -2,7 +2,7 @@ require("src/systems/service")
 require("src/types")
 require("src/ui/types")
 
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/config")
 
 require("src/ui/panels/tactics_map")
@@ -45,7 +45,7 @@ function UIManager.new(): UIManager
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
     battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, draw_properties = {justify = "center"}}))
     battle_summary:add(TextNode.new({ func = function(state: UIContextManager): { string }
-        local turn = state.battle_ui_context.turn_manager.turn
+        local turn = state.battle_context.turn_manager.turn
         return { "Turn " .. turn }
     end, draw_properties = {justify = "center"} }))
     battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, draw_properties = {justify = "center"} }))
@@ -122,7 +122,7 @@ function UIManager.new(): UIManager
                 wrap_mode = "ellipsis",
             },
             func = function(state: UIContextManager, _row_limit: integer): { string }
-                return state.story_ui_context.story_page.text
+                return state.story_context.story_page.text
             end
         })
 
@@ -160,8 +160,8 @@ function UIManager.new(): UIManager
     return self
 end
 
-function UIManager:draw(battle_ui_context: UIContextManager)
-    self.current_layout = self.layouts[battle_ui_context.layout]
+function UIManager:draw(battle_context: UIContextManager)
+    self.current_layout = self.layouts[battle_context.layout]
 
     local root = self.current_layout.root
     -- Recalculate size and positions
@@ -170,7 +170,7 @@ function UIManager:draw(battle_ui_context: UIContextManager)
 
     -- Render
     cls(self.theme.COLOR_CLEAR)
-    root:draw(battle_ui_context, self.theme)
+    root:draw(battle_context, self.theme)
 end
 
 return UIManager

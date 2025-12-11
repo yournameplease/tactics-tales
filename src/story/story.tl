@@ -14,7 +14,7 @@ require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
-require("src/story/story_ui_context")
+require("src/story/story_context")
 require("src/story/story_page")
 
 local Story = require("src/story/types")
@@ -36,7 +36,7 @@ global record Story
     service_manager: ServiceManager
 
     story_page: StoryPage
-    story_ui_context: StoryUIContext
+    story_context: StoryUIContext
     menu_manager: StoryMenuManager
 
     battle_manager: BattleManager
@@ -90,7 +90,7 @@ function StoryManager:init(service_manager: ServiceManager, services: { ServiceI
     self.service_manager = services.service_manager as ServiceManager
     
     self.story_page = service_manager:register_transient(StoryPage.new())
-    self.story_ui_context = service_manager:register_transient(StoryUIContext.new())
+    self.story_context = service_manager:register_transient(StoryUIContext.new())
     self.menu_manager = service_manager:register_transient(StoryMenuManager.new())
 
     self:jump_to_node(story_definition.starting_node)

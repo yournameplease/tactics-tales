@@ -49,11 +49,11 @@ function CombatPreview.new(props: UIElement): CombatPreview
     local self = Box.new(props) as CombatPreview
     setmetatable(self, { __index = CombatPreview })
 
-    local attacker_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_ui_context.acting_unit end)
+    local attacker_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end)
     local left = Box.flex_col()
     left:add(attacker_portrait)
     left:add(Box.spacer())
-    local defender_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_ui_context.hovered_unit end)
+    local defender_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end)
     local right = Box.flex_col()
     right:add(defender_portrait)
     right:add(Box.spacer())

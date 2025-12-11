@@ -20,7 +20,7 @@ global enum ServiceId
 	'battle_menu_manager'
 	'story_menu_manager'
 
-	'story_ui_context'
+	'story_context'
 	
 
 end

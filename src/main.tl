@@ -39,11 +39,11 @@ require("src/debug")
 require("src/systems/event_bus")
 require("src/systems/service")
 
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/character/character_manager")
 require("src/animation")
 require("src/ui/ui_manager")
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/story/story_manager")
 require("src/ui/ui_context_manager")
 
@@ -52,7 +52,7 @@ require("src/joypad")
 
 -- TODO: local battle_manager
 
-local context: UIContextManager = {}
+local ui_context: UIContextManager = {}
 local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: TaskManager
@@ -71,13 +71,17 @@ function _init()
 
     service_manager:register(EventBus.new())
 
-    service_manager:register(CharacterManager.new())
-
-    story_manager = service_manager:register(StoryManager.new("test_story"))
-    -- battle_manager = service_manager:register(BattleManager.new("bandit_village"))
-
-    -- TODO: context should have a generic base which is required by ui manager
-    context = service_manager:register(UIContextManager.new())
+    ui_context = UIContextManager.new()
+    
+    -- once there is a full game manager, this would go there
+    local game_services: GameServiceBundle = {
+    	event_bus = service_manager.persistent_services.event_bus as EventBus,
+    	task_manager = service_manager.persistent_services.task_manager as TaskManager,
+    	animation_manager = service_manager.persistent_services.animation_manager as AnimationManager,
+        ui_context = ui_context
+    }
+    
+    story_manager = StoryManager.new("test_story", game_services)
 end
 
 function _update()
@@ -85,13 +89,11 @@ function _update()
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
     story_manager:update(joy)
-    -- battle_manager:update(joy)
     task_manager:update_tasks()
 end
 
 function _draw()
-    LOG.trace("Generating frame data.")
     animation_manager:generate_frame_data()
-    context:enrich()
-    ui_manager:draw(context)
+    ui_context:enrich()
+    ui_manager:draw(ui_context)
 end

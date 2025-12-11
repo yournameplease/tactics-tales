@@ -1,5 +1,5 @@
 require("src/types")
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/ui/ui_context_manager")
 require("src/ui/theme")
 

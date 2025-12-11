@@ -1,7 +1,7 @@
 require("src/ui/types")
 require("src/systems/service")
-require("src/battle/battle_ui_context")
-require("src/story/story_ui_context")
+require("src/battle/battle_context")
+require("src/story/story_context")
 require("src/game_context")
 
 global type UILayoutId

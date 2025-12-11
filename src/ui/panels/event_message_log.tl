@@ -10,7 +10,7 @@ end
  
 function EventMessageLog.new(props: MessageLog): EventMessageLog
     props.func = function(state: UIContextManager, _row_limit: integer): { string }
-        return tmap(state.battle_ui_context.event_bus:get_event_history(), function(e: GameEvent): string return "> "..e  end)
+        return tmap(state.battle_context.event_bus:get_event_history(), function(e: GameEvent): string return "> "..e  end)
     end
 
     return MessageLog.new(props) as EventMessageLog
