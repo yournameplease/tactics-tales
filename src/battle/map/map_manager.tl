@@ -1,5 +1,6 @@
 require("src/types")
 require("src/data/maps")
+local MapData = require("src/battle/map/battle_map")
 
 global record MapManager
 
@@ -11,25 +12,6 @@ end
 
 global type MapFetchResult = { __MapFetchResultEntry }
 
-global record MapLayers
-    metatiles: Userdata
-    front_wall: Userdata
-    mid_wall: Userdata
-    back_wall: Userdata
-    ground: Userdata
-end
-
-global record MapMetadata
-    player_spawners: { integer: TilePoint }
-    enemy_spawners: { integer: { TilePoint } }
-end
-
-global record MapData
-    width: integer
-    height: integer
-    layers: MapLayers 
-    metadata: MapMetadata
-end
 
 local BASE_PLAYER_SPAWNER_SPRITE = 0x408
 local BASE_ENEMY_SPAWNER_SPRITE = 0x410

@@ -19,6 +19,8 @@ require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
+local BattleContext = require("src/battle/battle_context")
+
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -27,24 +29,13 @@ global record BattleManager
     is TransientGameService
     where self.id == 'battle_manager'
 
-    battle_id: string
-
-    battle_state: BattleState
-    tile_manager: TileManager
+    battle_context: BattleContext.BattleContext
+    
     character_manager: CharacterManager
-    tactics_engine: TacticsEngine
+    
     event_bus: EventBus
     animation_manager: AnimationManager
     task_manager: TaskManager
-    battle_objective_service: BattleObjectiveService
-
-    battle_menu_manager: BattleMenuManager
-    enemy_ai_engine: EnemyAIEngine
-    turn_manager: TurnManager
-
-    battle_context: BattleUIContext
-
-    map_data: MapData
 end
 
 
@@ -52,7 +43,7 @@ function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side
     local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
     local idle_animation = self.animation_manager:create_idle_animation()
     battle_unit.animation_data = idle_animation
-    self.battle_state:spawn_unit(battle_unit, spawn_point)
+    self.battle_context.battle_state:spawn_unit(battle_unit, spawn_point)
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
@@ -78,32 +69,29 @@ end
 
 
 function BattleManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-    local battle_definition = BATTLE_DATA[self.battle_id]
+    local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
 
     self.event_bus = services.event_bus as EventBus
     self.animation_manager = services.animation_manager as AnimationManager
     self.task_manager = services.task_manager as TaskManager
     self.character_manager = services.character_manager as CharacterManager
 
-    self.map_data = MapManager:load_map(battle_definition.map_id)
+    self.battle_context.map_data = MapManager:load_map(battle_definition.map_id)
     
-    self.battle_state = service_manager:register_transient(BattleState.new(self.map_data.width, self.map_data.height))
+    self.battle_context.battle_state = BattleState.new(self.battle_context.map_data.width, self.battle_context.map_data.height)
 
-    self.tile_manager = service_manager:register_transient(TileManager.new(self.map_data))
+    self.battle_context.tile_manager = TileManager.new(self.battle_context.map_data)
 
-    self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
-    self:_spawn_players(self.map_data.metadata.player_spawners)
+    self:_spawn_enemies(battle_definition.enemies, self.battle_context.map_data.metadata.enemy_spawners)
+    self:_spawn_players(self.battle_context.map_data.metadata.player_spawners)
 
-    self.tactics_engine = service_manager:register_transient(TacticsEngine.new())
+    self.battle_context.tactics_engine = TacticsEngine.new()
 
-    self.battle_objective_service = service_manager:register_transient(BattleObjectiveService.new())
+    self.battle_context.battle_objective_service = BattleObjectiveService.new()
 
-    self.battle_menu_manager = service_manager:register_transient(BattleMenuManager.new())
-    self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
-    self.turn_manager = service_manager:register_transient(TurnManager.new())
-
-    self.battle_context = service_manager:register_transient(BattleUIContext.new())
-    
+    self.battle_context.battle_menu_manager = BattleMenuManager.new()
+    self.battle_context.enemy_ai_engine = EnemyAIEngine.new()
+    self.battle_context.turn_manager = TurnManager.new()
     self.event_bus:emit("TACTICS_BEGIN_BATTLE")
 end
 
@@ -119,14 +107,16 @@ function BattleManager.new(battle_id: string): BattleManager
             "character_manager",
         }
     }, { __index = BattleManager })
-    self.battle_id = battle_id
+    self.battle_context = {
+        battle_id = battle_id
+    }
 
     return self
 end
 
 function BattleManager:update(joy: Joypad)
-    self.battle_menu_manager:update(joy)
-    self.tactics_engine:update()
+    self.battle_context.battle_menu_manager:update(joy)
+    self.battle_context.tactics_engine:update()
 end
 
 return BattleManager
