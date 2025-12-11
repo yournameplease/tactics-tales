@@ -1,6 +1,6 @@
 require("src/types")
 require("src/data/maps")
-local MapData = require("src/battle/map/battle_map")
+local BattleMap = require("src/battle/battle_map")
 
 global record MapManager
 
@@ -22,20 +22,20 @@ local FRONT_WALL_LAYER = 2
 local MID_WALL_LAYER = 3
 local BACK_WALL_LAYER = 4
 local GROUND_LAYER = 5
--- map_data
+-- battle_map
 --
 
-function MapManager:as_map(map_data: MapFetchResult): MapLayers
+function MapManager:as_map(battle_map: MapFetchResult): BattleMap.MapLayers
     return {
-        metatiles = map_data[METATILES_LAYER].bmp,
-        front_wall = map_data[FRONT_WALL_LAYER].bmp,
-        mid_wall = map_data[MID_WALL_LAYER].bmp,
-        back_wall = map_data[BACK_WALL_LAYER].bmp,
-        ground = map_data[GROUND_LAYER].bmp
+        metatiles = battle_map[METATILES_LAYER].bmp,
+        front_wall = battle_map[FRONT_WALL_LAYER].bmp,
+        mid_wall = battle_map[MID_WALL_LAYER].bmp,
+        back_wall = battle_map[BACK_WALL_LAYER].bmp,
+        ground = battle_map[GROUND_LAYER].bmp
     }
 end
 
-function MapManager:apply_checkerboard(map_layers: MapLayers)
+function MapManager:apply_checkerboard(map_layers: BattleMap.MapLayers)
     local ground = map_layers.ground
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
@@ -47,7 +47,7 @@ function MapManager:apply_checkerboard(map_layers: MapLayers)
     end
 end
 
-function MapManager:apply_default_walls(map_layers: MapLayers)
+function MapManager:apply_default_walls(map_layers: BattleMap.MapLayers)
     local ground = map_layers.ground
     local back_wall = map_layers.back_wall
     local mid_wall = map_layers.mid_wall
@@ -70,20 +70,20 @@ function MapManager:apply_default_walls(map_layers: MapLayers)
     end
 end
 
-function MapManager:_load_static(definition: StaticMapDefinition): MapData
-    local map_data: MapData = {}
+function MapManager:_load_static(definition: StaticMapDefinition): BattleMap
+    local battle_map: BattleMap = {}
 
     local map_fetch = fetch(DATP..definition.file) as MapFetchResult
 
-    map_data.layers = self:as_map(map_fetch)
+    battle_map.layers = self:as_map(map_fetch)
     
-    self:apply_checkerboard(map_data.layers)
-    self:apply_default_walls(map_data.layers)
+    self:apply_checkerboard(battle_map.layers)
+    self:apply_default_walls(battle_map.layers)
 
-    local metatiles_layer = map_data.layers.metatiles
-    map_data.width = metatiles_layer:width()
-    map_data.height = metatiles_layer:height()
-    map_data.metadata = {
+    local metatiles_layer = battle_map.layers.metatiles
+    battle_map.width = metatiles_layer:width()
+    battle_map.height = metatiles_layer:height()
+    battle_map.metadata = {
         player_spawners = {},
         enemy_spawners = {},
     }
@@ -93,18 +93,18 @@ function MapManager:_load_static(definition: StaticMapDefinition): MapData
             local tile = metatiles_layer:get(x, y)
             if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
                 local player_spawner_id = tile - BASE_PLAYER_SPAWNER_SPRITE + 1
-                map_data.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
+                battle_map.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
             elseif tile >= BASE_ENEMY_SPAWNER_SPRITE and tile < BASE_REINFORCEMENT_SPAWNER_SPRITE then
                 local enemy_spawner_id = tile - BASE_ENEMY_SPAWNER_SPRITE + 1
-                if map_data.metadata.enemy_spawners[enemy_spawner_id] == nil then
-                    map_data.metadata.enemy_spawners[enemy_spawner_id] = {}
+                if battle_map.metadata.enemy_spawners[enemy_spawner_id] == nil then
+                    battle_map.metadata.enemy_spawners[enemy_spawner_id] = {}
                 end
-                add(map_data.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
+                add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
             end
         end
     end
 
-    return map_data
+    return battle_map
 end
 
 -- function MapManager:_generate_procedural(definition) end
@@ -113,18 +113,18 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function MapManager:load_map(map_id: string): MapData
+function MapManager:load_map(map_id: string): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
-    local map_data: MapData
+    local battle_map: BattleMap
     if definition is StaticMapDefinition then
-        map_data = self:_load_static(definition)
+        battle_map = self:_load_static(definition)
     -- elseif definition is ProceduralMapDefinition then
 
     end
 
-    return map_data
+    return battle_map
 end
 
 return MapManager

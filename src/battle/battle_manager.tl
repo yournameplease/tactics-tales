@@ -76,14 +76,14 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
     self.task_manager = services.task_manager as TaskManager
     self.character_manager = services.character_manager as CharacterManager
 
-    self.battle_context.map_data = MapManager:load_map(battle_definition.map_id)
+    self.battle_context.battle_map = MapManager:load_map(battle_definition.map_id)
     
-    self.battle_context.battle_state = BattleState.new(self.battle_context.map_data.width, self.battle_context.map_data.height)
+    self.battle_context.battle_state = BattleState.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
 
-    self.battle_context.tile_manager = TileManager.new(self.battle_context.map_data)
+    self.battle_context.tile_manager = TileManager.new(self.battle_context.battle_map)
 
-    self:_spawn_enemies(battle_definition.enemies, self.battle_context.map_data.metadata.enemy_spawners)
-    self:_spawn_players(self.battle_context.map_data.metadata.player_spawners)
+    self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
+    self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
 
     self.battle_context.tactics_engine = TacticsEngine.new()
 

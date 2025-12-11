@@ -3,7 +3,7 @@ require("src/battle/battle_state")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_manager")
+local BattleMap = require("src/battle/battle_map")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
@@ -16,7 +16,7 @@ local record BattleContext
     battle_id: string
 	
     battle_state: BattleState
-    map_data: MapData
+    battle_map: BattleMap.BattleMap
 
     tile_manager: TileManager
     tactics_engine: TacticsEngine

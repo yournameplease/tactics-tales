@@ -17,81 +17,12 @@ require("src/systems/service")
 -- 6 deep water
 -- 7
 
-global record TerrainData
-    movement_cost: integer
-    dodge: integer
-end
-
-local TERRAIN_DATA: { integer: TerrainData } = {
-    [0] = {
-        movement_cost = 1,
-        dodge = 0
-    },
-    [1] = {
-        movement_cost = 2,
-        dodge = 0
-    },
-    [2] = {
-        movement_cost = 2,
-        dodge = 0
-    },
-    [3] = {
-        movement_cost = 3,
-        dodge = 0
-    },
-    [4] = {
-        movement_cost = 4,
-        dodge = 0
-    },
-    [5] = {
-        movement_cost = 3,
-        dodge = 0
-    },
-    [6] = {
-        movement_cost = 5,
-        dodge = 0
-    },
-    [7] = {
-        movement_cost = 2,
-        dodge = 0
-    }
-}
-
-global record TileManager
-    is TransientGameService
-    where self.id == 'tile_manager'
-    map_data: MapData
-    battle_state: BattleState
-end
-
-function TileManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.battle_state = services.battle_state as BattleState
-end
-
-function TileManager.new(map_data: MapData): TileManager
-    local self: TileManager = setmetatable({
-        id = "tile_manager",
-        dependencies = {},
-    }, { __index = TileManager })
-
-    self.map_data = map_data
-
-    return self
-end
-
-function TileManager:get_terrain(tile: TilePoint): TerrainData
-    local tile_sprite = self.map_data.layers.ground:get(tile.x,tile.y)
-    local flags = fget(tile_sprite)
-    local terrain = (flags & 0xD) >> 1
-    return TERRAIN_DATA[terrain]
-end
-
 -- cost to move onto x,y from any neighbor
-function TileManager:movement_cost(tile: TilePoint, side: Side): integer
-    local ground = self.map_data.layers.ground
-    local back_wall = self.map_data.layers.back_wall
-    local mid_wall = self.map_data.layers.mid_wall
-    local front_wall = self.map_data.layers.front_wall
+local function movement_cost(tile: TilePoint, side: Side): integer
+    local ground = self.battle_map.layers.ground
+    local back_wall = self.battle_map.layers.back_wall
+    local mid_wall = self.battle_map.layers.mid_wall
+    local front_wall = self.battle_map.layers.front_wall
     if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
         return 999
     end
@@ -144,9 +75,9 @@ end
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:_dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
+local function _dijkstra_traversal(start_x: integer, start_y: integer, side: Side, max_cost: integer): Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
-    local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.map_data.width, self.map_data.height)
+    local visited_info: Array2D<ShortestPathEntry> = Array2D.new(self.battle_map.width, self.battle_map.height)
 
     local record ShortestPathQueueEntry
         cost: integer
@@ -223,13 +154,13 @@ end
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function TileManager:calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): Array2D<ShortestPathEntry>
+local function calculate_all_tile_costs(start_x: integer, start_y: integer, side: Side, max_limit: integer): Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
     return self:_dijkstra_traversal(start_x, start_y, side, limit)
 end
 
 -- @return list of { { x, y } } tile coordinates from start position
-function TileManager:get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
+local function get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path: {TilePoint} = {}
     add(path, tile:copy())
@@ -243,7 +174,7 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, side: Side, total_cost: integer): Array2D<boolean>
+local function find_reachable_tiles(start_x: integer, start_y: integer, side: Side, total_cost: integer): Array2D<boolean>
     -- 1. Get the detailed map from the core engine
     local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
 
@@ -264,4 +195,8 @@ function TileManager:find_reachable_tiles(start_x: integer, start_y: integer, si
     return reachable
 end
 
-return TileManager
+return {
+    find_reachable_tiles = find_reachable_tiles,
+    get_path_to_tile = get_path_to_tile,
+    get_all_tile_costs = get_all_tile_costs,
+}
