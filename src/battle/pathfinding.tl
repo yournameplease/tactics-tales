@@ -2,7 +2,7 @@ require("src/types")
 
 require("src/util")
 require("src/battle/battle_map")
-require("src/battle/map/map_manager")
+require("src/battle/map/map_generator")
 require("src/systems/service")
 
 -- tile flags:

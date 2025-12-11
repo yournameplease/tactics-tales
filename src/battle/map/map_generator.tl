@@ -2,7 +2,7 @@ require("src/types")
 require("src/data/maps")
 require("src/battle/battle_map")
 
-global record MapManager
+global record MapGenerator
 
 end
 
@@ -105,13 +105,13 @@ local function load_static(definition: StaticMapDefinition): BattleMap
     return battle_map
 end
 
--- function MapManager:_generate_procedural(definition) end
+-- function MapGenerator:_generate_procedural(definition) end
 
 --- Returns a grid table and metadata table
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function MapManager:load_map(map_id: string): BattleMap
+function MapGenerator:load_map(map_id: string): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
@@ -125,4 +125,4 @@ function MapManager:load_map(map_id: string): BattleMap
     return battle_map
 end
 
-return MapManager
+return MapGenerator

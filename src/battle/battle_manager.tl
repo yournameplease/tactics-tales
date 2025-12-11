@@ -12,7 +12,7 @@ require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
 require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_manager")
+require("src/battle/map/map_generator")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
@@ -76,7 +76,7 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
     self.task_manager = services.task_manager as TaskManager
     self.character_manager = services.character_manager as CharacterManager
 
-    self.battle_context.battle_map = MapManager:load_map(battle_definition.map_id)
+    self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
     
     self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
 
