@@ -36,7 +36,7 @@ end
 
 function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side: Side)
     local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
-    local idle_animation = self.animation_manager:create_idle_animation()
+    local idle_animation = self.battle_context.services.animation_manager:create_idle_animation()
     battle_unit.animation_data = idle_animation
     self.battle_context.battle_map:spawn_unit(battle_unit, spawn_point)
 end
@@ -92,9 +92,8 @@ function BattleManager.new(battle_id: string, game_services: GameServiceBundle):
     assert(BATTLE_DATA[battle_id] ~= nil)
 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
-    self.battle_context = {
-        battle_id = battle_id
-    }
+    self.battle_context = BattleContext.new(game_services)
+    self.battle_context.battle_id = battle_id
 
     local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
 
@@ -105,14 +104,13 @@ function BattleManager.new(battle_id: string, game_services: GameServiceBundle):
     self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
     self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
 
-    self.battle_context.tactics_engine = TacticsEngine.new()
+    self.battle_context.tactics_engine = TacticsEngine.new(self.battle_context)
 
-    self.battle_context.battle_objective_service = BattleObjectiveService.new()
+    self.battle_context.battle_objective_service = BattleObjectiveService.new(self.battle_context)
 
-    self.battle_context.battle_menu_manager = BattleMenuManager.new()
-    self.battle_context.enemy_ai_engine = EnemyAIEngine.new()
-    self.battle_context.turn_manager = TurnManager.new()
-    self.battle_context.services = game_services
+    self.battle_context.battle_menu_manager = BattleMenuManager.new(self.battle_context)
+    self.battle_context.enemy_ai_engine = EnemyAIEngine.new(self.battle_context)
+    self.battle_context.turn_manager = TurnManager.new(self.battle_context)
 
     self.battle_context.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
     return self

@@ -12,6 +12,7 @@ require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
 require("src/systems/service")
+require("src/battle/battle_context")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")
@@ -26,12 +27,7 @@ local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
 global record TacticsEngine
-    is TransientGameService
-    where self.id == 'tactics_engine'
-    battle_map: BattleMap
-    event_bus: EventBus
-    task_manager: TaskManager
-    animation_manager: AnimationManager
+    ctx: BattleContext
 
     battle_is_blocked: boolean
     is_player_turn: boolean
@@ -56,39 +52,28 @@ global record TacticsEngine
 end
 
 function TacticsEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.battle_is_blocked = false
-    self.battle_map = services.battle_map as BattleMap
-    self.event_bus = services.event_bus as EventBus
-    self.animation_manager = services.animation_manager as AnimationManager
-    self.task_manager = services.task_manager as TaskManager
+end
 
-    self.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
+function TacticsEngine.new(ctx: BattleContext): TacticsEngine
+    local self: TacticsEngine = setmetatable({
+        ctx = ctx
+    }, { __index = TacticsEngine })
+    self.battle_is_blocked = false
+
+    self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self:handle_move_unit(ctx)
     end)
-    self.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
+    self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self:handle_move_and_attack(ctx)
     end)
-    self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_ctx: MenuContext)
+    self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_ctx: MenuContext)
         self.is_player_turn = true
     end)
-    self.event_bus:on("TACTICS_END_PLAYER_TURN", function(_ctx: MenuContext)
+    self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function(_ctx: MenuContext)
         self.is_player_turn = false
     end)
 
     LOG.debug("New battle.")
-end
-
-function TacticsEngine.new(): TacticsEngine
-    local self: TacticsEngine = setmetatable({
-        id = "tactics_engine",
-        dependencies = {
-            "battle_map",
-            "tile_manager",
-            "event_bus",
-            "animation_manager",
-            "task_manager",
-        },
-    }, { __index = TacticsEngine })
     return self
 end
 
@@ -100,9 +85,9 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
     local path = ctx.destination.path
 
     self.battle_is_blocked = true
-    self.task_manager:start_routine(function()
+    self.ctx.services.task_manager:start_routine(function()
         if #path > 1 then
-            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+            local animation = self.ctx.services.animation_manager:create_walk_animation(to_tile_path(path))
             unit.animation_data = animation
             LOG.debug("Animating!", animation.playing)
             while animation.playing do
@@ -110,12 +95,12 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
             end
         end
 
-        self.battle_map:move_unit(unit, destination)
+        self.ctx.battle_map:move_unit(unit, destination)
         unit.has_acted = true
 
         self.battle_is_blocked = false
-        unit.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        unit.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+        self.ctx.services.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
 
@@ -126,9 +111,9 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
     local target = ctx.target_unit.unit
 
     self.battle_is_blocked = true
-    self.task_manager:start_routine(function()
+    self.ctx.services.task_manager:start_routine(function()
         if #path > 1 then
-            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+            local animation = self.ctx.services.animation_manager:create_walk_animation(to_tile_path(path))
             unit.animation_data = animation
 
             while animation.playing do
@@ -136,15 +121,15 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
             end
         end
 
-        self.battle_map:move_unit(unit, destination)
+        self.ctx.battle_map:move_unit(unit, destination)
         self:do_combat(unit, target)
         unit.has_acted = true
 
         self.battle_is_blocked = false
         LOG.debug("unblockiung battle")
-        unit.animation_data = self.animation_manager:create_idle_animation()
-        target.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        unit.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+        target.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+        self.ctx.services.event_bus:emit("TACTICS_UNIT_END_ACTION")
     end)
 end
 
@@ -159,10 +144,10 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
             defender.tile.y - attacker.tile.y
     )
 
-    local attack_animation = self.animation_manager:create_animation("BUMP", direction)
+    local attack_animation = self.ctx.services.animation_manager:create_animation("BUMP", direction)
     attacker.animation_data = attack_animation
     if not step.is_hit then
-        local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
+        local dodge_animation = self.ctx.services.animation_manager:create_animation("DODGE", direction + 0.25)
         defender.animation_data = dodge_animation
         while dodge_animation.playing do
             yield()
@@ -174,7 +159,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
 
     if step.is_hit then
         defender:take_damage(step.dmg)
-        local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
+        local hurt_animation = self.ctx.services.animation_manager:create_animation("HURT", direction + 0.5)
         defender.animation_data = hurt_animation
 
         while hurt_animation.playing do
@@ -183,12 +168,12 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
     end
 
     if not defender:is_alive() then
-        self.battle_map:kill_unit(defender)
+        self.ctx.battle_map:kill_unit(defender)
     end
 end
 
 function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
-    local combat_result = CombatCalculator.compute_combat(attacker, defender, self.battle_map)
+    local combat_result = CombatCalculator.compute_combat(attacker, defender, self.ctx.battle_map)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)
@@ -203,7 +188,7 @@ function TacticsEngine:refresh_all_units()
 end
 
 function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)
-    local units_to_refresh = self.battle_map:get_units(filter)
+    local units_to_refresh = self.ctx.battle_map:get_units(filter)
 
     for _,unit in ipairs(units_to_refresh) do
         unit.has_acted = false
@@ -234,12 +219,12 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuSele
     if selection is GridMenuSelection then
         local target_point = selection.point
 
-        local target_unit = self.battle_map:get_at_tile(target_point)
+        local target_unit = self.ctx.battle_map:get_at_tile(target_point)
         if target_unit == nil then return false end
 
         if target_unit.side == unit.side then return false end
 
-        return self.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
+        return self.ctx.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
     end
     return false
 end
@@ -248,7 +233,7 @@ function TacticsEngine:any_target_in_range(ctx: MenuContext): boolean
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
     
-    local units_in_range = self.battle_map:get_targets_in_range(unit.id, destination)
+    local units_in_range = self.ctx.battle_map:get_targets_in_range(unit.id, destination)
     return #units_in_range > 0
 end
 
@@ -311,7 +296,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Arr
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local reachable_tiles = Pathfinding.find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+    local reachable_tiles = Pathfinding.find_reachable_tiles(self.ctx.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
     local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -340,7 +325,7 @@ end
 
 function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: MenuSelection, ctx: MenuContext): boolean
     assert(grid_selection is GridMenuSelection)
-    local destination_unit = self.battle_map:get_at_tile(grid_selection.point)
+    local destination_unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
     if destination_unit == nil then
         return true
     end
@@ -350,7 +335,7 @@ end
 
 function TacticsEngine:grid_selection_is_available_player(grid_selection: MenuSelection): boolean
     assert(grid_selection is GridMenuSelection)
-    local unit = self.battle_map:get_at_tile(grid_selection.point)
+    local unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end
     if unit.side ~= SIDE_PLAYER then return false end
@@ -364,7 +349,7 @@ function TacticsEngine:update()
     local blocking_animation = false
     local all_players_acted = true
 
-    for _,unit in ipairs(self.battle_map:get_all_units()) do
+    for _,unit in ipairs(self.ctx.battle_map:get_all_units()) do
         -- if unit.animation_blocking then
         --     blocking_animation = true
         -- end
@@ -375,7 +360,7 @@ function TacticsEngine:update()
 
     if blocking_animation then return end
     if self.is_player_turn and all_players_acted then
-        self.event_bus:emit("TACTICS_END_PLAYER_TURN")
+        self.ctx.services.event_bus:emit("TACTICS_END_PLAYER_TURN")
     end
 end
 

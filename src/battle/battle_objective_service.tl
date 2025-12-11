@@ -2,28 +2,16 @@
 require("src/systems/service")
 require("src/systems/event_bus")
 require("src/battle/battle_map")
+require("src/battle/battle_context")
 require("src/battle/tactics/tactics_engine")
 
 global record BattleObjectiveService
-    is TransientGameService
-    where self.id == 'battle_objective_service'
-
-    battle_map: BattleMap
-    tactics_engine: TacticsEngine
+    ctx: BattleContext
 end
 
-function BattleObjectiveService:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.tactics_engine = services.tactics_engine as TacticsEngine
-    self.battle_map = services.battle_map as BattleMap
-end
-
-function BattleObjectiveService.new(): BattleObjectiveService 
+function BattleObjectiveService.new(ctx: BattleContext): BattleObjectiveService 
     local self: BattleObjectiveService = setmetatable({
-        id = 'battle_objective_service',
-        dependencies = {
-            "tactics_engine",
-            "battle_map",
-        }
+        ctx = ctx
     }, { __index = BattleObjectiveService })
 
     return self
@@ -36,12 +24,12 @@ end
 
 -- legacy function, doesn't support different end conditions
 function BattleObjectiveService:check_for_end(): BattleFinishState
-    if self.tactics_engine:is_blocked() then
+    if self.ctx.tactics_engine:is_blocked() then
         return { finished = false }
     end
 
-    local players = self.battle_map:get_units(unit_is_player)
-    local enemies = self.battle_map:get_units(unit_is_enemy)
+    local players = self.ctx.battle_map:get_units(unit_is_player)
+    local enemies = self.ctx.battle_map:get_units(unit_is_enemy)
 
     if (#players == 0) then
         return { finished = true, command = "BATTLE_END_VICTORY" }

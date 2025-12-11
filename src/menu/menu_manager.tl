@@ -4,6 +4,8 @@ require ("src/menu/types")
 require("src/joypad")
 require("src/systems/service")
 require("src/battle/tactics/battle_unit")
+require("src/battle/battle_context")
+require("src/game_context")
 
 
 
@@ -122,9 +124,7 @@ global record MenuDefinition
     steps: { MenuStep: MenuStepDefinition }
 end
 
-global interface MenuManager<MSB is MenuServiceBundle>
-    is TransientGameService
-    where self.id == 'menu_manager'
+global interface MenuManager<MSB is GameContext>
     
     menu_definitions: { MenuId: MenuDefinition }
 
@@ -133,7 +133,7 @@ global interface MenuManager<MSB is MenuServiceBundle>
     menu_selection: MenuSelection
     selection_history: { SelectionHistory }
 
-    services: MSB
+    game_ctx: MSB
     event_bus: EventBus
 
     init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
@@ -148,14 +148,20 @@ global interface MenuManager<MSB is MenuServiceBundle>
     update: function(self, joy: Joypad)
 end
 
-global record BaseMenuManager<BMSB is MenuServiceBundle>
+global record BaseMenuManager<BMSB is GameContext>
     is MenuManager<BMSB>
 
     menu_definitions: { MenuId: MenuDefinition }
-    get_menu_service_bundle: function(services: { ServiceId: GameService }): BMSB
 end
 
-function BaseMenuManager:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
+function BaseMenuManager.new(
+    menu_definitions: { MenuId: MenuDefinition },
+    ctx: GameContext
+): MenuManager<BMSB>
+    local self: BaseMenuManager<BMSB> = setmetatable({}, { __index = BaseMenuManager })
+
+    self.menu_definitions = menu_definitions
+
     self.menu_state = {
         point = TilePoint.of(0, 0)
     }
@@ -163,26 +169,8 @@ function BaseMenuManager:init(_service_manager: ServiceManager, services: { Serv
     self.menu_selection = {}
     self.selection_history = {}
 
-    self.services = self.get_menu_service_bundle(services) -- todo: ...?
-    self.event_bus = services.event_bus as EventBus
-
-end
-
-function BaseMenuManager.new(
-    id: ServiceId,
-    dependencies: { ServiceId },
-
-    menu_definitions: { MenuId: MenuDefinition },
-    get_menu_service_bundle: function(services: { ServiceId: GameService }): BMSB
-): MenuManager<BMSB>
-    add(dependencies, "event_bus")
-    local self: BaseMenuManager<BMSB> = setmetatable({
-        id = id,
-        dependencies = dependencies,
-    }, { __index = BaseMenuManager })
-
-    self.menu_definitions = menu_definitions
-    self.get_menu_service_bundle = get_menu_service_bundle
+    self.game_ctx = ctx
+    self.event_bus = ctx.services.event_bus as EventBus
 
     return self
 end

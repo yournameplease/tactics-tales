@@ -162,21 +162,10 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
     }
 }
 
-function BattleMenuManager.new(): BattleMenuManager
+function BattleMenuManager.new(ctx: BattleContext): BattleMenuManager
     return BaseMenuManager.new(
-        "battle_menu_manager",
-        {
-            "tactics_engine",
-            "battle_map",
-            "event_bus"
-        },
         MENU_DATA,
-        function(services: { ServiceId: GameService }): BattleMenuServiceBundle
-            return {
-                tactics_engine = services.tactics_engine as TacticsEngine,
-                battle_map = services.battle_map as BattleMap,
-            }
-        end
+        ctx
     ) as BattleMenuManager
 end
 
