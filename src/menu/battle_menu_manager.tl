@@ -7,18 +7,11 @@ require("src/joypad")
 require("src/battle/pathfinding")
 require("src/systems/service")
 require("src/menu/menu_manager")
+require("src/battle/battle_context")
 
-
-local record BattleMenuServiceBundle
-    is MenuServiceBundle
-    tactics_engine: TacticsEngine
-    battle_map: BattleMap
-end
 
 global record BattleMenuManager
-    is TransientGameService, MenuManager<BattleMenuServiceBundle>
-    where self.id == 'battle_menu_manager'
-
+    is MenuManager<BattleContext>
 end
 
 -- kind
@@ -29,18 +22,18 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
                     ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator = function (s: MenuSelection, msb: BattleMenuServiceBundle, _ctx: MenuContext): boolean
+                validator = function (s: MenuSelection, msb: BattleContext, _ctx: MenuContext): boolean
                     return msb.tactics_engine:grid_selection_is_available_player(s) end,
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuSelection, _msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, _msb: BattleContext, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
-                validator = function (s: MenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext): boolean
+                validator = function (s: MenuSelection, msb: BattleContext, ctx: MenuContext): boolean
                     assert(s is GridMenuSelection)
                      return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
@@ -48,13 +41,13 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 end,
                 next_state = "SELECT_ACTION",
                 previous_state = "SELECT_UNIT",
-                get_legal_tiles = function (msb: BattleMenuServiceBundle, ctx: MenuContext): Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end
             }),
             ["SELECT_ACTION"] = ListMenuDefinition.new({
                 previous_state = "SELECT_DESTINATION",
-                get_options = function(msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(msb: BattleContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
                     -- if target in range
                     if msb.tactics_engine:any_target_in_range(ctx) then -- TODO: global state
@@ -79,26 +72,26 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: GridMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
                     ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator =  function (s: MenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext): boolean
+                validator =  function (s: MenuSelection, msb: BattleContext, ctx: MenuContext): boolean
                     return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
                 send_command = "MOVE_AND_ATTACK",
-                get_legal_tiles = function (msb: BattleMenuServiceBundle, ctx: MenuContext): Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
                 end
             }),
             ["SELECT_ITEM"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: VerticalListMenuSelection, _msb: BattleMenuServiceBundle, ctx: MenuContext)
+                set_selected_context = function(s: VerticalListMenuSelection, _msb: BattleContext, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
                     }
                 end,
-                get_options = function(_msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(_msb: BattleContext, ctx: MenuContext): {MenuOption}
                         local character = ctx.acting_unit.unit
                         local items = character.character.inventory:get_items()
 
@@ -114,7 +107,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ITEM",
-                get_options = function(_msb: BattleMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(_msb: BattleContext, ctx: MenuContext): {MenuOption}
                         local character = ctx.acting_unit.unit
                         local inventory = character.character.inventory
                         local items = inventory:get_items()

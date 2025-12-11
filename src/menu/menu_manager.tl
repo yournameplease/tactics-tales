@@ -8,11 +8,6 @@ require("src/battle/battle_context")
 require("src/game_context")
 
 
-
-global interface MenuServiceBundle
-    
-end
-
 global interface MenuSelection
     type: MenuType
     update: function(self, Joypad) 
@@ -91,7 +86,7 @@ global interface MenuStepDefinition
     previous_state: MenuStep
 end
 
-global record GridMenuDefinition<MSB is MenuServiceBundle>
+global record GridMenuDefinition<MSB is GameContext>
     is MenuStepDefinition
     where self.type == "CURSOR_GRID"
 
@@ -107,7 +102,7 @@ function GridMenuDefinition.new(props: GridMenuDefinition<MSB>): GridMenuDefinit
     return props
 end
 
-global record ListMenuDefinition<MSB is MenuServiceBundle>
+global record ListMenuDefinition<MSB is GameContext>
     is MenuStepDefinition
     where self.type == "CURSOR_VERTICAL_LIST" -- or horizontal
     set_selected_context: function(VerticalListMenuSelection, MSB, MenuContext)
@@ -187,7 +182,7 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
             16
         )
         if new_step_data.get_legal_tiles ~= nil then
-            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.services, self.menu_ctx)
+            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.game_ctx, self.menu_ctx)
         else
             new_selection.legal_tiles = nil
         end
@@ -195,7 +190,7 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
     elseif new_step_data is ListMenuDefinition<BMSB> then
         local new_selection = VerticalListMenuSelection.new(
             0,
-            new_step_data.get_options(self.services, self.menu_ctx)
+            new_step_data.get_options(self.game_ctx, self.menu_ctx)
         )
         self.menu_selection = new_selection
     else
@@ -215,7 +210,7 @@ function BaseMenuManager:handle_menu_select()
 
     if step_data is GridMenuDefinition<BMSB> then
         assert(menu_selection is GridMenuSelection)
-        local validation = step_data.validator(menu_selection, self.services, self.menu_ctx)
+        local validation = step_data.validator(menu_selection, self.game_ctx, self.menu_ctx)
         if not validation then return end
 
         if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
@@ -224,13 +219,13 @@ function BaseMenuManager:handle_menu_select()
         end
 
         self.menu_state.point = menu_selection.point:copy()
-        step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
+        step_data.set_selected_context(menu_selection, self.game_ctx, self.menu_ctx)
         next_state = step_data.next_state
         send_command = step_data.send_command
     elseif step_data is ListMenuDefinition<BMSB> then
         assert(menu_selection is VerticalListMenuSelection)
         if step_data.set_selected_context ~= nil then
-            step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
+            step_data.set_selected_context(menu_selection, self.game_ctx, self.menu_ctx)
         end
         next_state = menu_selection.options[menu_selection.i].next_state
         send_command = menu_selection.options[menu_selection.i].send_command

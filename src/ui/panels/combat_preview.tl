@@ -11,10 +11,10 @@ end
 setmetatable(CombatPreview, { __index = Box })
 
 local function get_preview_text(state: UIContextManager): {string}
-    local attacker = state.battle_ui_context.acting_unit
-    local defender = state.battle_ui_context.hovered_unit
-    local attacker_tile = state.battle_ui_context.destination
-    local battle_map = state.battle_ui_context.battle_map
+    local attacker = state.battle_context.acting_unit
+    local defender = state.battle_context.hovered_unit
+    local attacker_tile = state.battle_context.destination
+    local battle_map = state.battle_context.battle_map
     local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
 
     local out: {string} = {}
