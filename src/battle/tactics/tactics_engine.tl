@@ -5,7 +5,7 @@ require ("src/menu/types")
 require ("src/menu/menu_manager")
 
 require("src/util")
-local Pathfinding = require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/pathfinding")
 require("src/draw")
 local CombatCalculator = require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")

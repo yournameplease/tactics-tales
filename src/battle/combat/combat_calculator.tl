@@ -1,5 +1,5 @@
 require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/debug")
 local List = require("src/util/list")
 

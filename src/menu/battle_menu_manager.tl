@@ -4,7 +4,7 @@ require("src/menu/types")
 require("src/menu/menu_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/joypad")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/systems/service")
 require("src/menu/menu_manager")
 

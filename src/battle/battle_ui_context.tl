@@ -1,7 +1,7 @@
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/menu/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")

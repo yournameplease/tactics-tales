@@ -1,7 +1,7 @@
 require("src/battle/battle_ui_context")
 require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
 require("src/battle/battle_map")
 require("src/menu/menu_manager")

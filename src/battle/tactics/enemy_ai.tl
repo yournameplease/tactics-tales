@@ -2,7 +2,7 @@ require("src/debug")
 
 require("src/menu/menu_manager")
 require("src/battle/tactics/battle_unit")
-local Pathfinding = require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
