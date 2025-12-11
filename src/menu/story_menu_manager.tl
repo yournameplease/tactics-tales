@@ -3,14 +3,14 @@ require("src/types")
 require("src/menu/types")
 require("src/menu/menu_manager")
 require("src/joypad")
-require("src/story/story_page_state")
+require("src/story/story_page")
 require("src/systems/service")
 require("src/menu/menu_manager")
 
 
 local record StoryMenuServiceBundle
     is MenuServiceBundle
-    story_page_state: StoryPageState
+    story_page: StoryPage
 end
 
 global record StoryMenuManager
@@ -43,12 +43,12 @@ function StoryMenuManager.new(): StoryMenuManager
     return BaseMenuManager.new(
         "story_menu_manager",
         {
-            "story_page_state"
+            "story_page"
         },
         MENU_DATA,
         function(services: { ServiceId: GameService }): StoryMenuServiceBundle
             return {
-                story_page_state = services.story_page_state as StoryPageState,
+                story_page = services.story_page as StoryPage,
             }
         end
     ) as StoryMenuManager

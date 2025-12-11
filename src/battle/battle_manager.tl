@@ -20,6 +20,7 @@ require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
 require("src/battle/battle_context")
+require("src/story/story_context")
 
 
 local SIDE_PLAYER = 0
@@ -30,6 +31,7 @@ global record BattleManager
     where self.id == 'battle_manager'
 
     battle_context: BattleContext
+    story_context: StoryContext
     
 end
 
@@ -48,7 +50,7 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
         assert(spawners)
         for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
-            local character = self.character_manager:generate_character(enemy.template)
+            local character = self.story_context.character_manager:generate_character(enemy.template)
             self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
         end
     end
@@ -57,43 +59,19 @@ end
 function BattleManager:_spawn_players(player_spawners: { TilePoint })
     for _id, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
-        local character = self.character_manager:generate_character("default")
+        local character = self.story_context.character_manager:generate_character("default")
         self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
     end
 end
 
 
-function BattleManager:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-    local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
-
-    self.event_bus = services.event_bus as EventBus
-    self.animation_manager = services.animation_manager as AnimationManager
-    self.task_manager = services.task_manager as TaskManager
-    self.character_manager = services.character_manager as CharacterManager
-
-    self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
-    
-    self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
-
-    self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
-    self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
-
-    self.battle_context.tactics_engine = TacticsEngine.new()
-
-    self.battle_context.battle_objective_service = BattleObjectiveService.new()
-
-    self.battle_context.battle_menu_manager = BattleMenuManager.new()
-    self.battle_context.enemy_ai_engine = EnemyAIEngine.new()
-    self.battle_context.turn_manager = TurnManager.new()
-    self.event_bus:emit("TACTICS_BEGIN_BATTLE")
-end
-
-function BattleManager.new(battle_id: string, game_services: GameServiceBundle): BattleManager 
+function BattleManager.new(battle_id: string, story_context: StoryContext): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
-    self.battle_context = BattleContext.new(game_services)
+    self.battle_context = BattleContext.new(story_context.services)
     self.battle_context.battle_id = battle_id
+    self.story_context = story_context
 
     local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
 

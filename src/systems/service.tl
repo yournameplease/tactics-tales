@@ -12,7 +12,7 @@ global enum ServiceId
 	
 	-- transient
 	'story_manager'
-	'story_page_state'
+	'story_page'
 	
 	'battle_manager'
 

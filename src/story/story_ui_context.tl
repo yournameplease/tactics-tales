@@ -1,7 +1,7 @@
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
-require("src/story/story_page_state")
+require("src/story/story_page")
 
 global type UILayoutId
 
@@ -9,7 +9,7 @@ global record StoryUIContext
     is TransientGameService
     where self.id == 'story_ui_context'
 
-    story_page_state: StoryPageState
+    story_page: StoryPage
 
     layout: UILayoutId
 end
@@ -17,7 +17,7 @@ end
 function StoryUIContext:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.layout = "STORY_PAGE"
 
-    self.story_page_state = services.story_page_state as StoryPageState
+    self.story_page = services.story_page as StoryPage
 end
 
 function StoryUIContext.new(): StoryUIContext

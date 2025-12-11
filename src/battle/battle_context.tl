@@ -1,4 +1,5 @@
 require('src/game_context')
+
 global type BattleMap 
 global type TacticsEngine 
 global type BattleObjectiveService 

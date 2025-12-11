@@ -122,7 +122,7 @@ function UIManager.new(): UIManager
                 wrap_mode = "ellipsis",
             },
             func = function(state: UIContextManager, _row_limit: integer): { string }
-                return state.story_ui_context.story_page_state.text
+                return state.story_ui_context.story_page.text
             end
         })
 
