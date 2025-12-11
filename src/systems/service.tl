@@ -18,7 +18,7 @@ global enum ServiceId
 	'tactics_engine'
 	'tile_manager'
 	'turn_manager'
-	'battle_state'
+	'battle_map'
 	'enemy_ai_engine'
 	'combat_calculator'
 	'battle_objective_service'

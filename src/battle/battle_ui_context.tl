@@ -13,7 +13,7 @@ global record BattleUIContext
     is TransientGameService
     where self.id == 'battle_ui_context'
     tactics: TacticsEngine
-    battle_state: BattleState
+    battle_map: BattleMap
     turn_manager: TurnManager
     tile_manager: TileManager
     character_manager: CharacterManager
@@ -30,7 +30,7 @@ end
 
 function BattleUIContext:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.tactics = services.tactics_engine as TacticsEngine
-    self.battle_state = services.battle_state as BattleState
+    self.battle_map = services.battle_map as BattleMap
     self.turn_manager = services.turn_manager as TurnManager
     self.tile_manager = services.tile_manager as TileManager
     self.character_manager = services.character_manager as CharacterManager
@@ -49,7 +49,7 @@ function BattleUIContext.new(): BattleUIContext
         id = "battle_ui_context",
         dependencies = {
             "tactics_engine",
-            "battle_state",
+            "battle_map",
             "turn_manager",
             "tile_manager",
             "character_manager",
@@ -70,7 +70,7 @@ function BattleUIContext:enrich()
     if selection is GridMenuSelection then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
-            local unit = self.battle_state:get_at_tile(point)
+            local unit = self.battle_map:get_at_tile(point)
             if unit then
                 self.hovered_unit = unit
             end
@@ -78,7 +78,7 @@ function BattleUIContext:enrich()
 
         if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
             local point = selection.point
-            local unit = self.battle_state:get_at_tile(point)
+            local unit = self.battle_map:get_at_tile(point)
             if unit then
                 self.layout = "COMBAT_PREVIEW"
                 self.hovered_unit = unit

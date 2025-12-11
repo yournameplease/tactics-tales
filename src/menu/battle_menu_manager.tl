@@ -12,7 +12,7 @@ require("src/menu/menu_manager")
 local record BattleMenuServiceBundle
     is MenuServiceBundle
     tactics_engine: TacticsEngine
-    battle_state: BattleState
+    battle_map: BattleMap
     tile_manager: TileManager
 end
 
@@ -31,7 +31,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
                 set_selected_context = function(s: GridMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
-                    ctx.acting_unit = { unit = msb.battle_state:get_at_tile(s.point)}
+                    ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
                 validator = function (s: MenuSelection, msb: BattleMenuServiceBundle, _ctx: MenuContext): boolean
                     return msb.tactics_engine:grid_selection_is_available_player(s) end,
@@ -81,7 +81,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
                 set_selected_context = function(s: GridMenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext)
-                    ctx.target_unit = { unit = msb.battle_state:get_at_tile(s.point)}
+                    ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
                 validator =  function (s: MenuSelection, msb: BattleMenuServiceBundle, ctx: MenuContext): boolean
                     return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
@@ -168,7 +168,7 @@ function BattleMenuManager.new(): BattleMenuManager
         "battle_menu_manager",
         {
             "tactics_engine",
-            "battle_state",
+            "battle_map",
             "tile_manager",
             "event_bus"
         },
@@ -176,7 +176,7 @@ function BattleMenuManager.new(): BattleMenuManager
         function(services: { ServiceId: GameService }): BattleMenuServiceBundle
             return {
                 tactics_engine = services.tactics_engine as TacticsEngine,
-                battle_state = services.battle_state as BattleState,
+                battle_map = services.battle_map as BattleMap,
                 tile_manager = services.tile_manager as TileManager,
             }
         end

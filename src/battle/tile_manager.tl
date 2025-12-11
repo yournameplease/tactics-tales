@@ -1,7 +1,7 @@
 require("src/types")
 
 require("src/util")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/battle/map/map_manager")
 require("src/systems/service")
 
@@ -30,7 +30,7 @@ local function movement_cost(tile: TilePoint, side: Side): integer
     local ground_sprite = ground:get(tile.x,tile.y)
     if tile == nil then return 999 end
 
-    local unit = self.battle_state:get_at_tile(tile)
+    local unit = self.battle_map:get_at_tile(tile)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end

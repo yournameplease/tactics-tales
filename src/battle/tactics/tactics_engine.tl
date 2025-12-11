@@ -29,7 +29,7 @@ global record TacticsEngine
     is TransientGameService
     where self.id == 'tactics_engine'
     tile_manager: TileManager
-    battle_state: BattleState
+    battle_map: BattleMap
     combat_calculator: CombatCalculator
     event_bus: EventBus
     task_manager: TaskManager
@@ -59,7 +59,7 @@ end
 
 function TacticsEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
     self.battle_is_blocked = false
-    self.battle_state = services.battle_state as BattleState
+    self.battle_map = services.battle_map as BattleMap
     self.tile_manager = services.tile_manager as TileManager
     self.combat_calculator = service_manager:register_transient(CombatCalculator.new())
     self.event_bus = services.event_bus as EventBus
@@ -86,7 +86,7 @@ function TacticsEngine.new(): TacticsEngine
     local self: TacticsEngine = setmetatable({
         id = "tactics_engine",
         dependencies = {
-            "battle_state",
+            "battle_map",
             "tile_manager",
             "event_bus",
             "animation_manager",
@@ -114,7 +114,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
             end
         end
 
-        self.battle_state:move_unit(unit, destination)
+        self.battle_map:move_unit(unit, destination)
         unit.has_acted = true
 
         self.battle_is_blocked = false
@@ -140,7 +140,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
             end
         end
 
-        self.battle_state:move_unit(unit, destination)
+        self.battle_map:move_unit(unit, destination)
         self:do_combat(unit, target)
         unit.has_acted = true
 
@@ -187,7 +187,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
     end
 
     if not defender:is_alive() then
-        self.battle_state:kill_unit(defender)
+        self.battle_map:kill_unit(defender)
     end
 end
 
@@ -207,7 +207,7 @@ function TacticsEngine:refresh_all_units()
 end
 
 function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)
-    local units_to_refresh = self.battle_state:get_units(filter)
+    local units_to_refresh = self.battle_map:get_units(filter)
 
     for _,unit in ipairs(units_to_refresh) do
         unit.has_acted = false
@@ -238,12 +238,12 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuSele
     if selection is GridMenuSelection then
         local target_point = selection.point
 
-        local target_unit = self.battle_state:get_at_tile(target_point)
+        local target_unit = self.battle_map:get_at_tile(target_point)
         if target_unit == nil then return false end
 
         if target_unit.side == unit.side then return false end
 
-        return self.battle_state:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
+        return self.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
     end
     return false
 end
@@ -252,7 +252,7 @@ function TacticsEngine:any_target_in_range(ctx: MenuContext): boolean
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
     
-    local units_in_range = self.battle_state:get_targets_in_range(unit.id, destination)
+    local units_in_range = self.battle_map:get_targets_in_range(unit.id, destination)
     return #units_in_range > 0
 end
 
@@ -344,7 +344,7 @@ end
 
 function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: MenuSelection, ctx: MenuContext): boolean
     assert(grid_selection is GridMenuSelection)
-    local destination_unit = self.battle_state:get_at_tile(grid_selection.point)
+    local destination_unit = self.battle_map:get_at_tile(grid_selection.point)
     if destination_unit == nil then
         return true
     end
@@ -354,7 +354,7 @@ end
 
 function TacticsEngine:grid_selection_is_available_player(grid_selection: MenuSelection): boolean
     assert(grid_selection is GridMenuSelection)
-    local unit = self.battle_state:get_at_tile(grid_selection.point)
+    local unit = self.battle_map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end
     if unit.side ~= SIDE_PLAYER then return false end
@@ -368,7 +368,7 @@ function TacticsEngine:update()
     local blocking_animation = false
     local all_players_acted = true
 
-    for _,unit in ipairs(self.battle_state:get_all_units()) do
+    for _,unit in ipairs(self.battle_map:get_all_units()) do
         -- if unit.animation_blocking then
         --     blocking_animation = true
         -- end

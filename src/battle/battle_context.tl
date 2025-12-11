@@ -1,9 +1,9 @@
 require("src/battle/battle_ui_context")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
-local BattleMap = require("src/battle/battle_map")
+require("src/battle/battle_map")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
@@ -11,12 +11,11 @@ require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
 
-local record BattleContext
+global record BattleContext
 	
     battle_id: string
 	
-    battle_state: BattleState
-    battle_map: BattleMap.BattleMap
+    battle_map: BattleMap
 
     tile_manager: TileManager
     tactics_engine: TacticsEngine
@@ -25,7 +24,3 @@ local record BattleContext
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
 end
-
-return {
-	BattleContext = BattleContext
-}

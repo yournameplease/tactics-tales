@@ -1,6 +1,6 @@
 require("src/types")
 require("src/data/maps")
-local BattleMap = require("src/battle/battle_map")
+require("src/battle/battle_map")
 
 global record MapManager
 

@@ -1,20 +1,20 @@
 
 require("src/systems/service")
 require("src/systems/event_bus")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/battle/tactics/tactics_engine")
 
 global record BattleObjectiveService
     is TransientGameService
     where self.id == 'battle_objective_service'
 
-    battle_state: BattleState
+    battle_map: BattleMap
     tactics_engine: TacticsEngine
 end
 
 function BattleObjectiveService:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
     self.tactics_engine = services.tactics_engine as TacticsEngine
-    self.battle_state = services.battle_state as BattleState
+    self.battle_map = services.battle_map as BattleMap
 end
 
 function BattleObjectiveService.new(): BattleObjectiveService 
@@ -22,7 +22,7 @@ function BattleObjectiveService.new(): BattleObjectiveService
         id = 'battle_objective_service',
         dependencies = {
             "tactics_engine",
-            "battle_state",
+            "battle_map",
         }
     }, { __index = BattleObjectiveService })
 
@@ -40,8 +40,8 @@ function BattleObjectiveService:check_for_end(): BattleFinishState
         return { finished = false }
     end
 
-    local players = self.battle_state:get_units(unit_is_player)
-    local enemies = self.battle_state:get_units(unit_is_enemy)
+    local players = self.battle_map:get_units(unit_is_player)
+    local enemies = self.battle_map:get_units(unit_is_enemy)
 
     if (#players == 0) then
         return { finished = true, command = "BATTLE_END_VICTORY" }

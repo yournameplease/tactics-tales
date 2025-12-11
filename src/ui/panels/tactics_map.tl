@@ -4,7 +4,7 @@ require("src/config")
 require("src/ui/box")
 require("src/menu/battle_menu_manager")
 require("src/ui/ui_context_manager")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 
 local CharacterRenderer = require("src/character/character_renderer")
 
@@ -54,9 +54,9 @@ local record AnimatedUnitPosition
     point: WorldPoint
 end
 
-local function compute_animated_unit_positions(battle_state: BattleState): { AnimatedUnitPosition }
+local function compute_animated_unit_positions(battle_map: BattleMap): { AnimatedUnitPosition }
     return tmap(
-            battle_state:get_all_units(),
+            battle_map:get_all_units(),
             function(unit: BattleUnit): AnimatedUnitPosition
                 local animation_offset = CharacterRenderer.get_animation_offset(unit)
                 return {
@@ -129,7 +129,7 @@ end
 function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local battle_state = state.battle_ui_context.battle_state
+    local battle_map = state.battle_ui_context.battle_map
     local menu = state.battle_ui_context.battle_menu_manager
 
     local camera_x = self.x + self.internal_margin.l
@@ -139,7 +139,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     -- draw row-by row, top to bottom aka back to front
 
     -- pre-compute actor animations for z-ordering
-    local unit_positions = compute_animated_unit_positions(state.battle_ui_context.battle_state)
+    local unit_positions = compute_animated_unit_positions(state.battle_ui_context.battle_map)
 
     local sorted_units = userdata("i16", 2, #unit_positions)
     for i,u in ipairs(unit_positions) do
@@ -214,7 +214,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_state:get_unit_by_id(unit_id)
+            local unit = battle_map:get_unit_by_id(unit_id)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1
         end
@@ -223,7 +223,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
             local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_state:get_unit_by_id(unit_id)
+            local unit = battle_map:get_unit_by_id(unit_id)
             draw_unit(unit)
             drawn_unit_count = drawn_unit_count + 1
         end

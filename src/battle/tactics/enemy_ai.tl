@@ -6,7 +6,7 @@ require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/systems/service")
 
 --[[
@@ -21,7 +21,7 @@ AI Mk 1:
 global record EnemyAIEngine
     is TransientGameService
     where self.id == 'enemy_ai_engine'
-    battle_state: BattleState
+    battle_map: BattleMap
     tactics_engine: TacticsEngine
     event_bus: EventBus
     task_manager: TaskManager
@@ -41,7 +41,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     local tile_manager = self.tile_manager
     local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.tile.x, unit.tile.y, unit.side, 999) 
 
-    local enemies = self.tactics_engine.battle_state:get_units(unit_is_player)
+    local enemies = self.tactics_engine.battle_map:get_units(unit_is_player)
 
     local potential_attacks: {AttackOption} = {}
     local deep_moves: {MovementOption} = {}
@@ -54,7 +54,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
                 local shortest_path_tile = all_tile_costs:get_point(tile) -- if could calculate
                 if shortest_path_tile ~= nil then
                     if shortest_path_tile.cost <= unit.character.stats.movement then
-                        if self.battle_state:tile_is_legal_destination(unit, tile ) then
+                        if self.battle_map:tile_is_legal_destination(unit, tile ) then
                             add(potential_attacks, { destination = tile, target = e})
                         end
                     else
@@ -90,7 +90,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         -- follow until first tile in range
         local point = min_cost_deep_move.destination
         while all_tile_costs:get_point(point).cost > unit.character.stats.movement
-            or not self.battle_state:tile_is_legal_destination(unit, point) do
+            or not self.battle_map:tile_is_legal_destination(unit, point) do
             point = all_tile_costs:get_point(point).prev
         end
 
@@ -109,7 +109,7 @@ end
 
 function EnemyAIEngine:handle_enemy_turn()
     self.task_manager:start_routine(function()
-        local enemies = self.battle_state:get_units(unit_is_enemy)
+        local enemies = self.battle_map:get_units(unit_is_enemy)
 
         for _,enemy in ipairs(enemies) do
             self:compute_enemy_ai(enemy)
@@ -123,7 +123,7 @@ function EnemyAIEngine:handle_enemy_turn()
 end
 
 function EnemyAIEngine:init(_service_manager: ServiceManager, services: { ServiceId: GameService })
-    self.battle_state = services.battle_state as BattleState
+    self.battle_map = services.battle_map as BattleMap
     self.tactics_engine = services.tactics_engine as TacticsEngine
     self.event_bus = services.event_bus as EventBus
     self.task_manager = services.task_manager as TaskManager

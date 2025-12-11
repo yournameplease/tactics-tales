@@ -8,7 +8,7 @@ require("src/systems/tasks")
 require("src/data/battles")
 
 require("src/battle/battle_ui_context")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
 require("src/battle/tile_manager")
 require("src/battle/tactics/tactics_engine")
@@ -19,7 +19,7 @@ require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
-local BattleContext = require("src/battle/battle_context")
+require("src/battle/battle_context")
 
 
 local SIDE_PLAYER = 0
@@ -29,7 +29,7 @@ global record BattleManager
     is TransientGameService
     where self.id == 'battle_manager'
 
-    battle_context: BattleContext.BattleContext
+    battle_context: BattleContext
     
     character_manager: CharacterManager
     
@@ -43,7 +43,7 @@ function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side
     local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
     local idle_animation = self.animation_manager:create_idle_animation()
     battle_unit.animation_data = idle_animation
-    self.battle_context.battle_state:spawn_unit(battle_unit, spawn_point)
+    self.battle_context.battle_map:spawn_unit(battle_unit, spawn_point)
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
@@ -78,7 +78,7 @@ function BattleManager:init(service_manager: ServiceManager, services: { Service
 
     self.battle_context.battle_map = MapManager:load_map(battle_definition.map_id)
     
-    self.battle_context.battle_state = BattleState.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
+    self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
 
     self.battle_context.tile_manager = TileManager.new(self.battle_context.battle_map)
 
