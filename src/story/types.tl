@@ -6,10 +6,22 @@ local enum StoryNodeType
 	'text'
 	'battle'
 	'jump'
+	'new_page'
 end
 
 local interface StoryNode
 	type: StoryNodeType
+end
+
+local record NewPageNode
+	is StoryNode
+	where self.type == 'new_page'
+end
+
+function NewPageNode.of(): NewPageNode
+	return {
+		type = 'new_page'
+	}
 end
 
 local record TextNode
@@ -75,4 +87,5 @@ return {
 	TextNode = TextNode,
 	BattleNode = BattleNode,
 	JumpNode = JumpNode,
+	NewPageNode = NewPageNode,
 }

@@ -66,6 +66,10 @@ function Story:handle_new_node()
         local battle_id = node_definition.battle_id
         self.battle_manager = BattleManager.new(battle_id, self.story_ctx)
     end
+    if node_definition is StoryTypes.NewPageNode then
+        self.story_ctx.story_page:clear_page()
+        self:advance_node()
+    end
 end
 
 function Story:advance_node()

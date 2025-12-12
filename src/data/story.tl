@@ -12,6 +12,7 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 				StoryTypes.JumpNode.of('part_2')
 			},
 			part_2 = {
+				StoryTypes.NewPageNode.of(),
 				StoryTypes.TextNode.of('text 2.1'),
 				StoryTypes.TextNode.of('text 2.2'),
 				StoryTypes.JumpNode.of('part_3')
@@ -19,15 +20,23 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 			part_3 = {
 				StoryTypes.TextNode.of('text 3.1'),
 				StoryTypes.BattleNode.of('bandit_village', 'part_4_v', 'part_4_f'),
+				StoryTypes.NewPageNode.of(),
 				StoryTypes.TextNode.of('text 3.2'),
 				StoryTypes.JumpNode.of('part_4')
 			},
 			part_4_v = {
-				StoryTypes.TextNode.of("You Win!")
+				StoryTypes.TextNode.of("You Win!"),
+				StoryTypes.JumpNode.of('part_5'),
 			},
 			part_4_f = {
-				StoryTypes.TextNode.of("You Lose...")
-			}
+				StoryTypes.TextNode.of("You Lose..."),
+				StoryTypes.JumpNode.of('part_5'),
+			},
+			part_5 = {
+				StoryTypes.TextNode.of("Restarting the story"),
+				StoryTypes.NewPageNode.of(),
+				StoryTypes.JumpNode.of('part_1')
+			},
 		}
 	}
 }
