@@ -58,20 +58,6 @@ function TacticsEngine.new(ctx: BattleContext): TacticsEngine
     }, { __index = TacticsEngine })
     self.battle_is_blocked = false
 
-    self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
-        self:handle_move_unit(ctx)
-    end)
-    self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
-        self:handle_move_and_attack(ctx)
-    end)
-    self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_ctx: MenuContext)
-        self.is_player_turn = true
-    end)
-    self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function(_ctx: MenuContext)
-        self.is_player_turn = false
-    end)
-
-    LOG.debug("New battle.")
     return self
 end
 

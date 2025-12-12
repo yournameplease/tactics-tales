@@ -47,6 +47,7 @@ function EventBus.new(): EventBus
         dependencies = {},
     }, { __index = EventBus })
 
+    self.id_counter = IdCounter.new()
     self.event_history = {}
     self.listeners = {}
     return self

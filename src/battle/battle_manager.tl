@@ -96,6 +96,7 @@ end
 
 function BattleManager:teardown()
     self.battle_context.services.ui_context:unregister_context('battle')
+    self.battle_context.turn_manager:teardown()
 end
 
 function BattleManager:update(joy: Joypad)

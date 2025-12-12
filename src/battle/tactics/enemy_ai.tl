@@ -121,7 +121,6 @@ function EnemyAIEngine.new(ctx: BattleContext): EnemyAIEngine
     local self: EnemyAIEngine = setmetatable({
         ctx = ctx
     }, { __index = EnemyAIEngine })
-    self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
     return self
 end
 

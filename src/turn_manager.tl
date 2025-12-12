@@ -95,6 +95,26 @@ function TurnManager.new(ctx: BattleContext): TurnManager
         LOG.info("You lose!")
     end))
     
+    add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
+        self.ctx.tactics_engine:handle_move_unit(ctx)
+    end))
+
+    add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
+        self.ctx.tactics_engine:handle_move_and_attack(ctx)
+    end))
+
+    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+        self.ctx.tactics_engine.is_player_turn = true
+    end))
+
+    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+        self.ctx.tactics_engine.is_player_turn = false
+    end))
+
+    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+        self.ctx.enemy_ai_engine:handle_enemy_turn()
+    end))
+    
     return self
 end
 

@@ -82,7 +82,8 @@ end
 function Story:handle_battle_victory()
     local node_definition = self.current_node.definition
     assert(node_definition is StoryTypes.BattleNode)
-    
+
+    self.battle_manager:teardown()    
     self:jump_to_node(node_definition.next_node_victory)
 end
 
@@ -90,6 +91,7 @@ function Story:handle_battle_defeat()
     local node_definition = self.current_node.definition
     assert(node_definition is StoryTypes.BattleNode)
     
+    self.battle_manager:teardown()
     self:jump_to_node(node_definition.next_node_victory)
 end
 

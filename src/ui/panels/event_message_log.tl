@@ -14,6 +14,8 @@ function EventMessageLog.new(props: MessageLog): EventMessageLog
         return tmap(state.story_context.ctx.services.event_bus:get_event_history(), function(e: GameEvent): string return "> "..e  end)
     end
 
+    props.draw_properties = props.draw_properties or {}
+    props.draw_properties.text_direction = props.draw_properties.text_direction or 'up'
     return MessageLog.new(props) as EventMessageLog
 end
 
