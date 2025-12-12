@@ -13,6 +13,7 @@ require("src/systems/tasks")
 require("src/animation")
 require("src/systems/service")
 require("src/battle/battle_context")
+require("src/systems/service/game_service_bundle")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")

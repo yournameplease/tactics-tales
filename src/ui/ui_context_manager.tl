@@ -1,7 +1,9 @@
 require("src/ui/types")
 require("src/systems/service")
 require("src/battle/battle_context")
+require("src/battle/battle_ui_context")
 require("src/story/story_context")
+require("src/story/story_ui_context")
 require("src/game_context")
 
 global type UILayoutId
@@ -23,7 +25,11 @@ end
 function UIContextManager:register_context(ctx: GameContext)
     if ctx is BattleContext then
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
-        self.battle_context = ctx
+        self.battle_context = BattleUIContext.new(ctx)
+    end
+    if ctx is StoryContext then
+        assert(self.story_context == nil, "Attempt to register battle context which was already registered!")
+        self.story_context = StoryUIContext.new(ctx)
     end
 end
 

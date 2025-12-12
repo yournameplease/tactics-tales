@@ -12,3 +12,4 @@ global record GameServiceBundle
 end
 
 
+return GameServiceBundle

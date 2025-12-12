@@ -3,6 +3,7 @@ require("src/types")
 require("src/ui/types")
 
 require("src/battle/battle_context")
+require("src/story/story_context")
 require("src/config")
 
 require("src/ui/panels/tactics_map")
@@ -45,7 +46,7 @@ function UIManager.new(): UIManager
     local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
     battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, draw_properties = {justify = "center"}}))
     battle_summary:add(TextNode.new({ func = function(state: UIContextManager): { string }
-        local turn = state.battle_context.turn_manager.turn
+        local turn = state.battle_context.ctx.turn_manager.turn
         return { "Turn " .. turn }
     end, draw_properties = {justify = "center"} }))
     battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, draw_properties = {justify = "center"} }))
@@ -122,7 +123,7 @@ function UIManager.new(): UIManager
                 wrap_mode = "ellipsis",
             },
             func = function(state: UIContextManager, _row_limit: integer): { string }
-                return state.story_context.story_page.text
+                return state.story_context.ctx.story_page.text
             end
         })
 

@@ -1,4 +1,6 @@
 
+local type StoryId = string
+
 local enum StoryNodeType
 	'text'
 	'battle'
@@ -55,13 +57,14 @@ end
 
 
 
-local record Story
+local record StoryDefinition
 	nodes: { string: {StoryNode}}
 	starting_node: string
 end
 
 return {
-	Story = Story,
+	StoryId = StoryId,
+	StoryDefinition = StoryDefinition,
 	StoryNode = StoryNode,
 	StoryNodeType = StoryNodeType,
 	TextNode = TextNode,

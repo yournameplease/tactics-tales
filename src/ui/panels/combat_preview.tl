@@ -2,6 +2,7 @@ require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
 require("src/ui/ui_context_manager")
+require("src/battle/battle_context")
 local CombatCalculator = require("src/battle/combat/combat_calculator")
 
 global record CombatPreview
@@ -14,7 +15,7 @@ local function get_preview_text(state: UIContextManager): {string}
     local attacker = state.battle_context.acting_unit
     local defender = state.battle_context.hovered_unit
     local attacker_tile = state.battle_context.destination
-    local battle_map = state.battle_context.battle_map
+    local battle_map = state.battle_context.ctx.battle_map
     local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
 
     local out: {string} = {}

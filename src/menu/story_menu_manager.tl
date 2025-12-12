@@ -6,15 +6,12 @@ require("src/joypad")
 require("src/story/story_page")
 require("src/systems/service")
 require("src/menu/menu_manager")
+require("src/story/story_context")
 
 
-local record StoryMenuServiceBundle
-    is MenuServiceBundle
-    story_page: StoryPage
-end
 
 global record StoryMenuManager
-    is TransientGameService, MenuManager<StoryMenuServiceBundle>
+    is TransientGameService, MenuManager<StoryContext>
     where self.id == 'story_menu_manager'
 
 end
@@ -24,7 +21,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         initial_step = "ADVANCE_TEXT",
         steps = {
             ["ADVANCE_TEXT"] = ListMenuDefinition.new({
-                get_options = function(msb: StoryMenuServiceBundle, ctx: MenuContext): {MenuOption}
+                get_options = function(msb: StoryContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     add(options, {
@@ -39,18 +36,10 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
     }
 }
 
-function StoryMenuManager.new(): StoryMenuManager
+function StoryMenuManager.new(ctx: StoryContext): StoryMenuManager
     return BaseMenuManager.new(
-        "story_menu_manager",
-        {
-            "story_page"
-        },
         MENU_DATA,
-        function(services: { ServiceId: GameService }): StoryMenuServiceBundle
-            return {
-                story_page = services.story_page as StoryPage,
-            }
-        end
+        ctx
     ) as StoryMenuManager
 end
 

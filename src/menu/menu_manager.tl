@@ -6,6 +6,7 @@ require("src/systems/service")
 require("src/battle/tactics/battle_unit")
 require("src/battle/battle_context")
 require("src/game_context")
+require("src/systems/service/game_service_bundle")
 
 
 global interface MenuSelection

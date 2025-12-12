@@ -9,6 +9,7 @@ require("src/systems/tasks")
 require("src/battle/battle_map")
 require("src/systems/service")
 require("src/battle/battle_context")
+require("src/systems/service/game_service_bundle")
 
 --[[
 AI Mk 1:

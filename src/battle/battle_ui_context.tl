@@ -18,8 +18,10 @@ global record BattleUIContext
     destination: TilePoint
 end
 
-function BattleUIContext.new(): BattleUIContext
+function BattleUIContext.new(ctx: BattleContext): BattleUIContext
     local self: BattleUIContext = setmetatable({}, { __index = BattleUIContext })
+
+    self.ctx = ctx
 
     self.layout = "TACTICS"
 

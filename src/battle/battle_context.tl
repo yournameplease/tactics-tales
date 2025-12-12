@@ -10,7 +10,7 @@ global type GameServiceBundle
 
 global record BattleContext
     is GameContext
-    where type == 'battle'
+    where self.type == 'battle'
 	
     battle_id: string
 	
