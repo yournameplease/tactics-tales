@@ -24,14 +24,14 @@ local STORY_DATA = require("src/data/story")
 
 
 global record Story
-    record NodePosition
+    record ActiveNode
         node_id: string
         node_step: integer
+        definition: StoryTypes.StoryNode
     end
     
     story_ctx: StoryContext
-    current_node: NodePosition
-    current_node_type: StoryTypes.StoryNodeType
+    current_node: ActiveNode
 
     battle_manager: BattleManager
 
@@ -41,40 +41,56 @@ global record Story
 end
 
 function Story:jump_to_node(node_id: string)
+    local story_definition = STORY_DATA[self.story_ctx.story_id]
+    local node_definition = story_definition.nodes[node_id][1]
     self.current_node = {
         node_id = node_id,
-        node_step = 1
+        node_step = 1,
+        definition = node_definition
     }
 
     self:handle_new_node()
 end
 
 function Story:handle_new_node()
-    local story_definition = STORY_DATA[self.story_ctx.story_id]
-    local node = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
-    local new_node_type = node.type
-    self.current_node_type = new_node_type
-    LOG.debug("Handling new node: ", new_node_type)
-    if node is StoryTypes.JumpNode then
-        self:jump_to_node(node.next_node)
+    local node_definition = self.current_node.definition
+    LOG.debug("Handling new node: ", node_definition.type)
+    if node_definition is StoryTypes.JumpNode then
+        self:jump_to_node(node_definition.next_node)
     end
-    if node is StoryTypes.TextNode then
-        self.story_ctx.story_page:add_text_line(node.text)
+    if node_definition is StoryTypes.TextNode then
+        self.story_ctx.story_page:add_text_line(node_definition.text)
         self.story_ctx.menu_manager:set_menu("MENU_STORY_TEXT")
     end
-    if node is StoryTypes.BattleNode then
-        local battle_id = node.battle_id
+    if node_definition is StoryTypes.BattleNode then
+        local battle_id = node_definition.battle_id
         self.battle_manager = BattleManager.new(battle_id, self.story_ctx)
     end
 end
 
 function Story:advance_node()
+    local story_definition = STORY_DATA[self.story_ctx.story_id]
     self.current_node.node_step = self.current_node.node_step + 1
+    self.current_node.definition = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
     self:handle_new_node()
 end
 
 function Story:advance_text()
     self:advance_node()
+end
+
+function Story:handle_battle_victory()
+    local node_definition = self.current_node.definition
+    assert(node_definition is StoryTypes.BattleNode)
+    
+    self:jump_to_node(node_definition.next_node_victory)
+end
+
+function Story:handle_battle_defeat()
+    local node_definition = self.current_node.definition
+    assert(node_definition is StoryTypes.BattleNode)
+    
+    self:jump_to_node(node_definition.next_node_victory)
 end
 
 function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): Story 
@@ -101,15 +117,23 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
 
     services.ui_context:register_context(self.story_ctx)
 
+    services.event_bus:on("BATTLE_END_VICTORY", function()
+        self:handle_battle_victory( )
+    end)
+    services.event_bus:on("BATTLE_END_DEFEAT", function()
+        self:handle_battle_defeat( )
+    end)
+
     return self
 end
 
 function Story:update(joy: Joypad)
-    if self.current_node_type == 'text' then
+    local current_node = self.current_node.definition
+    if current_node is StoryTypes.TextNode then
         self.story_ctx.menu_manager:update(joy)
-    elseif self.current_node_type == 'battle' then
+    elseif current_node is StoryTypes.BattleNode then
         self.battle_manager:update(joy)
-    elseif self.current_node_type == 'jump' then
+    elseif current_node is StoryTypes.JumpNode then
         error('in a jump node during update')
     end
 end

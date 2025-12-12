@@ -5,13 +5,13 @@
 
 global type GameServiceBundle
 
-global enum ContextType
+global enum GameContextType
     "battle"
     "story"
 end
 
 global interface GameContext
-	type: ContextType
+	type: GameContextType
 	-- I don't like this here but it is convenient
 	-- Use sparringly!!!
 	services: GameServiceBundle

@@ -18,12 +18,15 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 			},
 			part_3 = {
 				StoryTypes.TextNode.of('text 3.1'),
-				StoryTypes.BattleNode.of('bandit_village'),
+				StoryTypes.BattleNode.of('bandit_village', 'part_4_v', 'part_4_f'),
 				StoryTypes.TextNode.of('text 3.2'),
 				StoryTypes.JumpNode.of('part_4')
 			},
-			part_4 = {
+			part_4_v = {
 				StoryTypes.TextNode.of("You Win!")
+			},
+			part_4_f = {
+				StoryTypes.TextNode.of("You Lose...")
 			}
 		}
 	}

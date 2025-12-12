@@ -94,6 +94,10 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
     return self
 end
 
+function BattleManager:teardown()
+    self.battle_context.services.ui_context:unregister_context('battle')
+end
+
 function BattleManager:update(joy: Joypad)
     self.battle_context.battle_menu_manager:update(joy)
     self.battle_context.tactics_engine:update()

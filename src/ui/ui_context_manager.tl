@@ -33,6 +33,17 @@ function UIContextManager:register_context(ctx: GameContext)
     end
 end
 
+function UIContextManager:unregister_context(ctx_type: GameContextType)
+    if ctx_type == 'battle' then
+        assert(self.battle_context ~= nil, "Attempt to unregister battle context which was not registered!")
+        self.battle_context = nil
+    end
+    if ctx_type == 'story' then
+        assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
+        self.story_context = nil
+    end
+end
+
 function UIContextManager.new(): UIContextManager
     local self: UIContextManager = setmetatable({}, { __index = UIContextManager })
     self.layout = "TACTICS"

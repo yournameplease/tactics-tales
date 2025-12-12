@@ -1,5 +1,6 @@
 
 local type StoryId = string
+local type NodeId = string
 
 local enum StoryNodeType
 	'text'
@@ -29,12 +30,16 @@ local record BattleNode
 	is StoryNode
 	where self.type == 'battle'
 	battle_id: string
+	next_node_victory: NodeId
+	next_node_failure: NodeId
 end
 
-function BattleNode.of(battle_id: string): BattleNode
+function BattleNode.of(battle_id: string, next_node_victory: NodeId, next_node_failure: NodeId): BattleNode
 	local self = {
 		type = 'battle',
-		battle_id = battle_id
+		battle_id = battle_id,
+		next_node_victory = next_node_victory,
+		next_node_failure = next_node_failure,
 	}
 	return setmetatable(self, { __index = BattleNode})
 end
@@ -43,10 +48,10 @@ end
 local record JumpNode
 	is StoryNode
 	where self.type == 'jump'
-	next_node: string
+	next_node: NodeId
 end
 
-function JumpNode.of(next_node: string): JumpNode
+function JumpNode.of(next_node: NodeId): JumpNode
 	local self = {
 		type = 'jump',
 		next_node = next_node

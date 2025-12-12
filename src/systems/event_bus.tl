@@ -1,4 +1,5 @@
 require("src/systems/service")
+require("src/util")
 require("src/debug")
 
 global enum GameEvent
@@ -21,11 +22,15 @@ global enum GameEvent
     "STORY_ADVANCE_TEXT"
 end
 
-global type EventListener = function(args: any)
+global record EventListener
+    id: integer
+    callback: function(args: any)
+end
 
 global record EventBus
     is GameService
     where self.id == "event_bus"
+    id_counter: IdCounter
     event_history: { GameEvent }
     listeners: { GameEvent: {EventListener}}
 end
@@ -47,11 +52,33 @@ function EventBus.new(): EventBus
     return self
 end
 
-function EventBus:on(event_name: GameEvent, callback: function(args: any))
+function EventBus:on(event_name: GameEvent, callback: function(args: any)): integer
     if not self.listeners[event_name] then
         self.listeners[event_name] = {}
     end
-    add(self.listeners[event_name], callback)
+    add(self.listeners[event_name], {
+        id = self.id_counter:get_id(),
+        callback = callback
+    })
+end
+
+function EventBus:remove(id: integer)
+    -- lazy
+    for _,slots in pairs(self.listeners) do
+        for i,listener in ipairs(slots) do
+            if listener.id == id then
+                deli(slots, i)
+                return
+            end
+        end
+    end
+    error("failed to remove listener")
+end
+
+function EventBus:remove_all(ids: {integer})
+    for _, id in ipairs(ids) do
+        self:remove(id)
+    end
 end
 
 function EventBus:emit(event_name: GameEvent, args?: any)
@@ -63,8 +90,8 @@ function EventBus:emit(event_name: GameEvent, args?: any)
 
     local slots = self.listeners[event_name]
     if slots then
-        for _,callback in ipairs(slots) do
-            callback(args)
+        for _,listener in ipairs(slots) do
+            listener.callback(args)
         end
     end
 end
