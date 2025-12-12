@@ -5,12 +5,9 @@ global record StoryPage
     text: {string}
 end
 
-function StoryPage:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
-    self.text = {}
-end
-
 function StoryPage.new(): StoryPage
     local self: StoryPage = setmetatable({}, { __index = StoryPage })
+    self.text = {}
     return self
 end
 

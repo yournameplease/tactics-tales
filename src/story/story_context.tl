@@ -22,7 +22,7 @@ end
 
 function StoryContext.new(services: GameServiceBundle): StoryContext
     return {
-        type = 'battle',
+        type = 'story',
         services = services,
     }
 end

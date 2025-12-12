@@ -76,8 +76,6 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
     local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
 
     self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
-    
-    self.battle_context.battle_map = BattleMap.new(self.battle_context.battle_map.width, self.battle_context.battle_map.height)
 
     self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
     self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
@@ -89,6 +87,8 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
     self.battle_context.battle_menu_manager = BattleMenuManager.new(self.battle_context)
     self.battle_context.enemy_ai_engine = EnemyAIEngine.new(self.battle_context)
     self.battle_context.turn_manager = TurnManager.new(self.battle_context)
+
+    story_context.services.ui_context:register_context(self.battle_context)
 
     self.battle_context.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
     return self

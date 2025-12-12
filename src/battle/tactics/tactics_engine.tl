@@ -52,9 +52,6 @@ global record TacticsEngine
     update: function(self)
 end
 
-function TacticsEngine:init(service_manager: ServiceManager, services: { ServiceId: GameService })
-end
-
 function TacticsEngine.new(ctx: BattleContext): TacticsEngine
     local self: TacticsEngine = setmetatable({
         ctx = ctx

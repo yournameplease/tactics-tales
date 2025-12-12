@@ -16,6 +16,7 @@ require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/story/story_context")
 require("src/story/story_page")
+require("src/ui/ui_context_manager")
 
 local StoryTypes = require("src/story/types")
 
@@ -86,6 +87,8 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
     local story_definition = STORY_DATA[self.story_ctx.story_id]
 
     self.story_ctx.services.event_bus = services.event_bus as EventBus
+
+    self.story_ctx.character_manager = CharacterManager.new(self.story_ctx)
     
     self.story_ctx.story_page = StoryPage.new()
     self.story_ctx.menu_manager = StoryMenuManager.new(self.story_ctx)
@@ -95,6 +98,8 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
     self.story_ctx.services.event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
     end)
+
+    services.ui_context:register_context(self.story_ctx)
 
     return self
 end

@@ -8,6 +8,7 @@ require("src/animation")
 require("src/character/object/character")
 require("src/systems/service")
 require("src/story/story_context")
+require("src/systems/service/game_service_bundle")
 local CharacterGenerator = require("src/character/character_generator")
 
 -- Eventually, may want to differentiate between persistent

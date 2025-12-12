@@ -120,6 +120,8 @@ function MapGenerator:load_map(map_id: string): BattleMap
         battle_map = load_static(definition)
     -- elseif definition is ProceduralMapDefinition then
 
+    else
+        error("unknown map type")
     end
 
     return battle_map

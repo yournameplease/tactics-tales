@@ -84,7 +84,7 @@ function BattleMap:get_terrain(tile: TilePoint): TerrainData
     local front_wall = self.layers.front_wall
     
     local tile_sprite = ground:get(tile.x,tile.y)
-    if tile_sprite == nil then return nil end
+    if tile_sprite == 0 then return nil end
     
     local flags = fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
