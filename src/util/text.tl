@@ -52,7 +52,6 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
             out_width = Text.width(out)
         until out_width > width or char_count == #text
         if out_width > width then
-        -- LOG.debug("WIDTH", out_width, width)
             return {sub(text, 1,char_count-3).."..."}
         else
             return {text}
@@ -63,16 +62,13 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
         local line_start = 1
         local previous_word_end: integer = -1
         local line_width: integer
-        -- LOG.debug("Begin wrap loop")
         while true do
-            -- LOG.debug("WRAP loop")
             while line_start <= #text and sub(text, line_start, true) == ' ' do
                 line_start = line_start + 1
             end
             if line_start > #text then 
                 return out
             end
-            -- LOG.info("line_start", line_start, text)
             local line_end = line_start
             local line = sub(text, line_start, line_end)
             while line_end <= #text and Text.width(line) <= width do
@@ -84,16 +80,13 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
             end
 
             if line_end > #text and Text.width(line) <= width then
-                -- LOG.info("text done", line_start, line_end)
                 -- end of text without overflow
                 add(out, line)
                 return out
             elseif previous_word_end >= line_start then
-                -- LOG.info("add line", line_start, line_end)
                 add(out, sub(text, line_start, previous_word_end))
                 line_start = previous_word_end + 1
             else
-                -- LOG.debug("need hypmenate",  line_start, line_end)
                 -- need to hyphenate
                 add(out, sub(text, line_start, line_end-2)..'-')
 				line_start = line_end - 1
@@ -137,7 +130,6 @@ function Text.draw(text: {string}, x: integer, y: integer, w: integer, h: intege
 
     local wrapped_text: {{string}} = {}
     for _, t in ipairs(text) do
-        LOG.info("wrapping text", t, w, properties.wrap_mode)
         add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
         
     end

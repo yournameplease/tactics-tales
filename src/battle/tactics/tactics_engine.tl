@@ -110,7 +110,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
         unit.has_acted = true
 
         self.battle_is_blocked = false
-        LOG.debug("unblockiung battle")
+        LOG.debug("unblocking battle")
         unit.animation_data = self.ctx.services.animation_manager:create_idle_animation()
         target.animation_data = self.ctx.services.animation_manager:create_idle_animation()
         self.ctx.services.event_bus:emit("TACTICS_UNIT_END_ACTION")

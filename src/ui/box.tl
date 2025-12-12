@@ -157,7 +157,6 @@ function Box:measure()
     if not self.auto_width and not self.auto_height then
         self._calculated_w = self.w
         self._calculated_h = self.h
-        --LOG.info("Measured", self._calculated_w, self._calculated_h)
         -- We still measure children so they know their own size
         for _, child in ipairs(self.children) do
             if child.measure then child:measure() end
@@ -470,8 +469,7 @@ function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
     end
 
     -- Debug rectangle
-    -- LOG.info(box.x, box.y, box._calculated_w, box._calculated_h)
-    -- LOG.info(box.x, box.y, box.w, box.h)
+    -- LOG.trace(box.x, box.y, box.w, box.h)
     --     rrect(
     --             box.x+box.internal_margin.l-box.decoration_padding,
     --             box.y+box.internal_margin.t-box.decoration_padding,
