@@ -3,6 +3,8 @@ require("src/util")
 require("src/debug")
 
 global enum GameEvent
+    "GAME_BEGIN_STORY"
+    
     "TACTICS_BEGIN_PLAYER_TURN"
     "TACTICS_END_PLAYER_TURN"
     "TACTICS_BEGIN_ENEMY_TURN"

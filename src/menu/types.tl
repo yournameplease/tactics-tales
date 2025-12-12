@@ -17,6 +17,7 @@ global enum MenuType
     "CURSOR_GRID"
     "CURSOR_VERTICAL_LIST"
     "CURSOR_HORIZONTAL_LIST"
+    "CURSOR_BUTTON_ADVANCE"
 end
 
 global record TileSelection
@@ -41,7 +42,7 @@ global enum MenuContextId
     "selected_item"
 end
 
--- todo: can I use the ContextId without losing type information?
+-- todo: this should be an interface
 global record MenuContext
     acting_unit: UnitSelection
     destination: TileSelection

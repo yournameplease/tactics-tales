@@ -65,17 +65,39 @@ function VerticalListMenuSelection:update(joy: Joypad)
     self.i = mid(1, self.i + joy.dyp, #self.options)
 end
 
-global record HorizontalListMenuSelection
+-- global record MultipleOptionsMenuSelection
+--     is MenuSelection
+--     where self.type == "CURSOR_VERTICAL_LIST"
+--     i: integer
+-- end
+
+-- function MultipleOptionsMenuSelection.new(i: integer, options: {MenuOption}): MultipleOptionsMenuSelection
+--     local self: MultipleOptionsMenuSelection = {
+--         type = "CURSOR_VERTICAL_LIST",
+--         i = i,
+--         options = options
+--     }
+--     return setmetatable(self, { __index = MultipleOptionsMenuSelection })
+-- end
+
+-- function MultipleOptionsMenuSelection:update(joy: Joypad)
+--     self.i = mid(1, self.i + joy.dyp, #self.options)
+-- end
+
+global record ButtonAdvanceMenuSelection
     is MenuSelection
-    where self.type == "CURSOR_HORIZONTAL_LIST"
-    i: integer
-    options: { MenuOption }
+    where self.type == "CURSOR_BUTTON_ADVANCE"
 end
 
-function HorizontalListMenuSelection:update(joy: Joypad)
-    self.i = mid(1, self.i + joy.dxp, #self.options)
+function ButtonAdvanceMenuSelection.new(): ButtonAdvanceMenuSelection
+    local self: ButtonAdvanceMenuSelection = {
+        type = "CURSOR_BUTTON_ADVANCE",
+    }
+    return setmetatable(self, { __index = ButtonAdvanceMenuSelection })
 end
 
+function ButtonAdvanceMenuSelection:update(_joy: Joypad)
+end
 
 global record SelectionHistory
     step: MenuStep
@@ -105,13 +127,25 @@ end
 
 global record ListMenuDefinition<MSB is GameContext>
     is MenuStepDefinition
-    where self.type == "CURSOR_VERTICAL_LIST" -- or horizontal
+    where self.type == "CURSOR_VERTICAL_LIST"
     set_selected_context: function(VerticalListMenuSelection, MSB, MenuContext)
     get_options: function(MSB, MenuContext): {MenuOption}
 end
 
 function ListMenuDefinition.new(props: ListMenuDefinition<MSB>): ListMenuDefinition<MSB>
     props.type = "CURSOR_VERTICAL_LIST"
+    return props
+end
+
+global record ButtonAdvanceMenuDefinition<MSB is GameContext>
+    is MenuStepDefinition
+    where self.type == "CURSOR_BUTTON_ADVANCE" 
+    next_state: MenuStep
+    send_command: GameEvent
+end
+
+function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<MSB>): ButtonAdvanceMenuDefinition<MSB>
+    props.type = "CURSOR_BUTTON_ADVANCE"
     return props
 end
 
@@ -230,6 +264,11 @@ function BaseMenuManager:handle_menu_select()
         end
         next_state = menu_selection.options[menu_selection.i].next_state
         send_command = menu_selection.options[menu_selection.i].send_command
+    elseif step_data is ButtonAdvanceMenuDefinition<BMSB> then
+        next_state = step_data.next_state
+        send_command = step_data.send_command
+    else
+        error("Unexpected menu state: "..step_data.type)
     end
 
     add(self.selection_history, {

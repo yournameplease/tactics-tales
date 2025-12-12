@@ -18,23 +18,47 @@ global record GameMenuManager
 end
 
 local MENU_DATA: { MenuId: MenuDefinition } = {
-    ["MENU_STORY_TEXT"] = {
-        initial_step = "ADVANCE_TEXT",
+    ["MENU_MAIN_MENU"] = {
+        initial_step = "TITLE_SCREEN",
         steps = {
-            ["ADVANCE_TEXT"] = ListMenuDefinition.new({
+            ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
+                next_state = "MAIN_MENU",
+            }),
+            ["MAIN_MENU"] = ListMenuDefinition.new({
                 get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     add(options, {
-                        text = "Continue",
-                        send_command = "STORY_ADVANCE_TEXT"
+                        text = "Play",
+                        send_command = "GAME_BEGIN_STORY",
+                    })
+                    add(options, {
+                        text = "Options",
+                        next_state = "OPTIONS_MENU",
                     })
 
                     return options
                 end
             }),
+            -- ["OPTIONS_MENU"] = MultipleOptionsMenuDefinition.new({
+            --     get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
+            --         local options: {MenuOption} = {}
+
+            --         add(options, {
+            --             text = "Play",
+            --             send_command = "GAME_BEGIN_STORY",
+            --         })
+            --         add(options, {
+            --             text = "Options",
+            --             next_state = "OPTIONS_MENU",
+            --         })
+
+            --         return options
+            --     end
+            -- }),
         }
     }
+
 }
 
 function GameMenuManager.new(ctx: BaseGameContext): GameMenuManager
