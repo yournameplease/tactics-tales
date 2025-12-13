@@ -74,7 +74,7 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
-function ListMenuCursor:handle_selection(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
     end

@@ -63,13 +63,13 @@ function GridMenuCursor:update(joy: Joypad)
         self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
 end
 
-function GridMenuCursor:handle_selection(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
         local validation = self.validator(self, game_ctx, menu_ctx)
         if not validation then return end
 
         -- if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
         --     -- TODO: keep path in the cursor data, and let battle menu manager do dijkstra
-        --     menu_cursor.path = { TilePoint.of(0, 0)  }
+            self.path = { TilePoint.of(0, 0)  }
         -- end
 
         menu_state.point = self.point:copy()
