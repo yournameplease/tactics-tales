@@ -4,26 +4,24 @@ require("src/character/items/object/weapon")
 local List = require("src/util/list")
 require("src/util")
 
-local record ItemInventoryModule
-	interface ItemInventory
+local interface ItemInventory
 
-		-- items will be indexed, to account for slots
-		get_items: function(self): { Item.Item }
-		get_items_by_slot: function(self): { integer: Item.Item }
-		get_max_slots: function(self): integer
-		get_equipped_items: function(self): { EquipSlot: Item.Item }
-		get_equipped_weapons: function(self): { Weapon }
+	-- items will be indexed, to account for slots
+	get_items: function(self): { Item.Item }
+	get_items_by_slot: function(self): { integer: Item.Item }
+	get_max_slots: function(self): integer
+	get_equipped_items: function(self): { EquipSlot: Item.Item }
+	get_equipped_weapons: function(self): { Weapon }
 
-		can_equip: function(self, index: integer): boolean
-		is_equipped: function(self, index: integer): boolean
-		can_add_item: function(self, item: Item.Item): boolean
-		add_item: function(self, item: Item.Item)
-		equip_item: function(self, index: integer)
-		unequip_item: function(self, index: integer)
-		unequip_item_in_equip_slot: function(self, slot: EquipSlot)
-		remove_item: function(self, index: integer)
-		move_item: function(self, index: integer, before_index: integer)
-	end
+	can_equip: function(self, index: integer): boolean
+	is_equipped: function(self, index: integer): boolean
+	can_add_item: function(self, item: Item.Item): boolean
+	add_item: function(self, item: Item.Item)
+	equip_item: function(self, index: integer)
+	unequip_item: function(self, index: integer)
+	unequip_item_in_equip_slot: function(self, slot: EquipSlot)
+	remove_item: function(self, index: integer)
+	move_item: function(self, index: integer, before_index: integer)
 end
 
 local record InventoryItem
@@ -36,7 +34,7 @@ end
 
 
 local record ItemInventoryImpl
-	is ItemInventoryModule.ItemInventory
+	is ItemInventory
 
 	items: { InventoryItem }
 	max_slots: integer
@@ -195,7 +193,7 @@ function ItemInventoryImpl:move_item(index: integer, before_index: integer)
 	self:compute_current_slots()
 end
 
-function ItemInventoryModule.new(max_slots: integer): ItemInventoryModule.ItemInventory
+local function new(max_slots: integer): ItemInventory
 	local inventory: ItemInventoryImpl = {
 		max_slots = max_slots,
 		items = {}
@@ -205,4 +203,7 @@ function ItemInventoryModule.new(max_slots: integer): ItemInventoryModule.ItemIn
 	return inventory
 end
 
-return ItemInventoryModule
+return {
+	ItemInventory = ItemInventory,
+	new = new
+}
