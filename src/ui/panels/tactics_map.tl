@@ -75,7 +75,7 @@ local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer,
     rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor)
+local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor<BattleContext>)
     local selected_i = menu_cursor.i
     local options = menu_cursor.options
     local PADDING = 2
@@ -159,7 +159,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
     local cursor_tile: TilePoint = nil
     local menu_cursor = menu.menu_cursor
-    if menu_cursor is GridMenuCursor then
+    if menu_cursor is GridMenuCursor<BattleContext> then
         cursor_tile = menu_cursor.point
     elseif menu.menu_state.point ~= nil then
         cursor_tile = menu.menu_state.point
@@ -170,7 +170,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
-        if menu_cursor is GridMenuCursor then
+        if menu_cursor is GridMenuCursor<BattleContext> then
             if menu_cursor.legal_tiles ~= nil then
                 fillp(
                 -- 1:2 diagonal slashes
@@ -244,7 +244,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         local y = cursor_tile.y * TILE_SIZE.y
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if menu_cursor is ListMenuCursor then
+        if menu_cursor is ListMenuCursor<BattleContext> then
             draw_floating_menu(x, y, menu_cursor)
         end
     end

@@ -15,16 +15,8 @@ global record MenuOption
     send_command: GameEvent
 end
 
-global record ListMenuDefinition<GC is GameContext>
-    is MenuStepDefinition<ListMenuCursor<GC>>
-    where self.type == "CURSOR_LIST"
-    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
-    get_options: function(GC, MenuContext): {MenuOption}
-    wrap: boolean
-end
-
 global record ListMenuCursor<GC is GameContext>
-    is MenuCursor<GC, ListMenuDefinition<GC>>
+    is MenuCursor<GC>
     where self.type == "CURSOR_LIST"
     i: integer
     options: { MenuOption }
@@ -35,12 +27,21 @@ global record ListMenuCursor<GC is GameContext>
     set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
 end
 
+global record ListMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<GC>
+    where self.type == "CURSOR_LIST"
+    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
+    get_options: function(GC, MenuContext): {MenuOption}
+    wrap: boolean
+end
+
 function ListMenuDefinition.new(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
     props.type = "CURSOR_LIST"
     return props
 end
 
-function ListMenuCursor.new(step_definition: ListMenuDefinition<GC>, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
+function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
+    assert(step_definition is ListMenuDefinition<GC>)
     local self: ListMenuCursor<GC> = {
         type = "CURSOR_LIST",
         i = 1,

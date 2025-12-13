@@ -18,7 +18,7 @@ require("src/menu/cursor/multiple_options_cursor")
 
 global record SelectionHistory<GC is GameContext>
     step: MenuStep
-    selection: MenuCursor<GC, MenuDefinition<GC>>
+    selection: MenuCursor<GC>
 end
 
 global record MenuDefinition<GC is GameContext>
@@ -32,7 +32,7 @@ global interface MenuManager<GC is GameContext>
 
     menu_state: MenuState
     menu_ctx: MenuContext
-    menu_cursor: MenuCursor<GC, MenuDefinition<GC>>
+    menu_cursor: MenuCursor<GC>
     selection_history: { SelectionHistory<GC> }
 
     game_ctx: GC
@@ -89,16 +89,23 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
             self.game_ctx,
             self.menu_ctx,
             self.menu_state
-        ) as MenuCursor<GC, >
-    elseif new_step_data is ListMenuDefinition<GC> then
+        ) as MenuCursor<GC>
+    end
+    if new_step_data is ListMenuDefinition<GC> then
         self.menu_cursor = ListMenuCursor.new(
             new_step_data,
             self.game_ctx,
             self.menu_ctx,
             self.menu_state
-        )
-    else
-        error("not implemented")
+        ) as MenuCursor<GC>
+    end
+    if new_step_data is ButtonAdvanceMenuDefinition<GC> then
+        self.menu_cursor = ButtonAdvanceCursor.new(
+            new_step_data,
+            self.game_ctx,
+            self.menu_ctx,
+            self.menu_state
+        ) as MenuCursor<GC>
     end
 end
 
@@ -108,7 +115,7 @@ function BaseMenuManager:handle_menu_select()
     local step_data = menu_data.steps[self.menu_state.step]
 
 
-    local next_state, send_command = self.menu_cursor:handle_menu_select(self.game_ctx, self.menu_ctx, self.menu_state)
+    local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
     
     add(self.selection_history, {
         step = self.menu_state.step,

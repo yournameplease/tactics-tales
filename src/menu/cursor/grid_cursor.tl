@@ -4,19 +4,8 @@ require("src/game_context")
 global type MenuState
 global type MenuContext
 
-global record GridMenuDefinition<GC is GameContext>
-    is MenuStepDefinition<GC>
-    where self.type == "CURSOR_GRID"
-
-    set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
-    validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
-    next_state: MenuStep
-    send_command: GameEvent
-    get_legal_tiles: function(GC, MenuContext): Array2D<MenuTileHighlight>
-end
-
 global record GridMenuCursor<GC is GameContext>
-    is MenuCursor<GC, GridMenuDefinition<GC>>
+    is MenuCursor<GC>
     where self.type == "CURSOR_GRID"
     point: TilePoint
     x_max: integer
@@ -31,12 +20,24 @@ global record GridMenuCursor<GC is GameContext>
     send_command: GameEvent
 end
 
+global record GridMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<GC>
+    where self.type == "CURSOR_GRID"
+
+    set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
+    validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
+    next_state: MenuStep
+    send_command: GameEvent
+    get_legal_tiles: function(GC, MenuContext): Array2D<MenuTileHighlight>
+end
+
 function GridMenuDefinition.new(props: GridMenuDefinition<GC>): GridMenuDefinition<GC>
     props.type = "CURSOR_GRID"
     return props
 end
 
-function GridMenuCursor.new(step_definition: GridMenuDefinition<GC>, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): GridMenuCursor<GC>
+function GridMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): GridMenuCursor<GC>
+    assert(step_definition is GridMenuDefinition<GC>)
     local self: GridMenuCursor<GC> = {
         type = "CURSOR_GRID",
         point = menu_state.point, 

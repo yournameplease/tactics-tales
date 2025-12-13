@@ -4,18 +4,18 @@ require("src/game_context")
 global type MenuState
 global type MenuContext
 
-global record ButtonAdvanceMenuDefinition<GC is GameContext>
-    is MenuStepDefinition<GC>
-    where self.type == "CURSOR_BUTTON_ADVANCE" 
+global record ButtonAdvanceCursor<GC is GameContext>
+    is MenuCursor<GC>
+    where self.type == "CURSOR_BUTTON_ADVANCE"
+
+    -- from definition
     next_state: MenuStep
     send_command: GameEvent
 end
 
-global record ButtonAdvanceCursor<GC is GameContext>
-    is MenuCursor<GC, ButtonAdvanceMenuDefinition<GC>>
-    where self.type == "CURSOR_BUTTON_ADVANCE"
-
-    -- from definition
+global record ButtonAdvanceMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<GC>
+    where self.type == "CURSOR_BUTTON_ADVANCE" 
     next_state: MenuStep
     send_command: GameEvent
 end
@@ -26,7 +26,8 @@ function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<GC>)
 end
 
 
-function ButtonAdvanceCursor.new(step_definition: ButtonAdvanceMenuDefinition<GC>, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): ButtonAdvanceCursor<GC>
+function ButtonAdvanceCursor.new(step_definition: any, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): ButtonAdvanceCursor<GC>
+    assert(step_definition is ButtonAdvanceMenuDefinition<GC>)
     local self: ButtonAdvanceCursor<GC> = {
         type = "CURSOR_BUTTON_ADVANCE",
     }
