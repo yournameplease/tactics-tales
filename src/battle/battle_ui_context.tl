@@ -2,7 +2,7 @@ require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
 require("src/battle/pathfinding")
-require("src/menu/battle_menu_manager")
+require("src/battle/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")
 
@@ -34,7 +34,7 @@ function BattleUIContext:enrich()
     self.layout = "TACTICS"
 
 
-    local selection = self.ctx.battle_menu_manager.menu_selection
+    local selection = self.ctx.battle_menu_manager.menu_cursor
 
     if selection is GridMenuSelection then
         if self.ctx.battle_menu_manager.menu_state.step == "SELECT_UNIT" then

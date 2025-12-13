@@ -7,12 +7,8 @@ require("src/battle/tactics/battle_unit")
 require("src/battle/battle_context")
 require("src/game_context")
 require("src/systems/service/game_service_bundle")
+require("src/menu/menu_cursor")
 
-
-global interface MenuSelection
-    type: MenuType
-    update: function(self, Joypad) 
-end
 
 global record MenuOption
     text: string
@@ -21,7 +17,7 @@ global record MenuOption
 end
 
 global record GridMenuSelection
-    is MenuSelection
+    is MenuCursor
     where self.type == "CURSOR_GRID"
     point: TilePoint
     x_max: integer
@@ -51,7 +47,7 @@ global enum ListDirection
 end
 
 global record VerticalListMenuSelection
-    is MenuSelection
+    is MenuCursor
     where self.type == "CURSOR_LIST"
     i: integer
     options: { MenuOption }
@@ -95,7 +91,7 @@ end
 
 global record MenuMultipleOptionSelection
     text: string -- label
-    selection: MenuSelection
+    selection: MenuCursor
     must_select: boolean -- true if must be picked before using.  Default to false
 end
 
@@ -106,7 +102,7 @@ global enum MultipleOptionsDirection
 end
 
 global record MultipleOptionsMenuSelection
-    is MenuSelection
+    is MenuCursor
     where self.type == "CURSOR_MULTIPLE_OPTIONS"
     i: integer
     primary_direction: MultipleOptionsDirection
@@ -121,8 +117,8 @@ function MultipleOptionsMenuSelection.new(i: integer, options: {MenuDefinition})
         i = i,
         options = List.do_map(
             options,
-            function(o: MenuDefinition): MenuSelection
-                return MenuSelection.of(o)
+            function(o: MenuDefinition): MenuCursor
+                return MenuCursor.of(o)
             end
         ),
     }
@@ -162,7 +158,7 @@ function MultipleOptionsMenuSelection:update(joy: Joypad)
 end
 
 global record ButtonAdvanceMenuSelection
-    is MenuSelection
+    is MenuCursor
     where self.type == "CURSOR_BUTTON_ADVANCE"
 end
 
@@ -178,7 +174,7 @@ end
 
 global record SelectionHistory
     step: MenuStep
-    selection: MenuSelection
+    selection: MenuCursor
 end
 
 global interface MenuStepDefinition
@@ -237,7 +233,7 @@ global interface MenuManager<MSB is GameContext>
 
     menu_state: MenuState
     menu_ctx: MenuContext
-    menu_selection: MenuSelection
+    menu_cursor: MenuCursor
     selection_history: { SelectionHistory }
 
     game_ctx: MSB
@@ -273,7 +269,7 @@ function BaseMenuManager.new(
         point = TilePoint.of(0, 0)
     }
     self.menu_ctx = {}
-    self.menu_selection = {}
+    self.menu_cursor = {}
     self.selection_history = {}
 
     self.game_ctx = ctx
@@ -298,13 +294,13 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
         else
             new_selection.legal_tiles = nil
         end
-        self.menu_selection = new_selection
+        self.menu_cursor = new_selection
     elseif new_step_data is ListMenuDefinition<BMSB> then
         local new_selection = VerticalListMenuSelection.new(
             0,
             new_step_data.get_options(self.game_ctx, self.menu_ctx)
         )
-        self.menu_selection = new_selection
+        self.menu_cursor = new_selection
     else
         error("not implemented")
     end
@@ -318,29 +314,29 @@ function BaseMenuManager:handle_menu_select()
     local next_state: MenuStep
     local send_command: GameEvent
 
-    local menu_selection = self.menu_selection
+    local menu_cursor = self.menu_cursor
 
     if step_data is GridMenuDefinition<BMSB> then
-        assert(menu_selection is GridMenuSelection)
-        local validation = step_data.validator(menu_selection, self.game_ctx, self.menu_ctx)
+        assert(menu_cursor is GridMenuSelection)
+        local validation = step_data.validator(menu_cursor, self.game_ctx, self.menu_ctx)
         if not validation then return end
 
         if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
             -- TODO: keep path in the cursor data, and let battle menu manager do dijkstra
-            menu_selection.path = { TilePoint.of(0, 0)  }
+            menu_cursor.path = { TilePoint.of(0, 0)  }
         end
 
-        self.menu_state.point = menu_selection.point:copy()
-        step_data.set_selected_context(menu_selection, self.game_ctx, self.menu_ctx)
+        self.menu_state.point = menu_cursor.point:copy()
+        step_data.set_selected_context(menu_cursor, self.game_ctx, self.menu_ctx)
         next_state = step_data.next_state
         send_command = step_data.send_command
     elseif step_data is ListMenuDefinition<BMSB> then
-        assert(menu_selection is VerticalListMenuSelection)
+        assert(menu_cursor is VerticalListMenuSelection)
         if step_data.set_selected_context ~= nil then
-            step_data.set_selected_context(menu_selection, self.game_ctx, self.menu_ctx)
+            step_data.set_selected_context(menu_cursor, self.game_ctx, self.menu_ctx)
         end
-        next_state = menu_selection.options[menu_selection.i].next_state
-        send_command = menu_selection.options[menu_selection.i].send_command
+        next_state = menu_cursor.options[menu_cursor.i].next_state
+        send_command = menu_cursor.options[menu_cursor.i].send_command
     elseif step_data is ButtonAdvanceMenuDefinition<BMSB> then
         next_state = step_data.next_state
         send_command = step_data.send_command
@@ -350,7 +346,7 @@ function BaseMenuManager:handle_menu_select()
 
     add(self.selection_history, {
         step = self.menu_state.step,
-        selection = self.menu_selection
+        selection = self.menu_cursor
     })
 
     if send_command ~= nil then
@@ -375,7 +371,7 @@ function BaseMenuManager:handle_menu_back()
         self.selection_history[#self.selection_history] = nil
     end
     self:populate_menu_state(previous_step)
-    self.menu_selection = self.selection_history[#self.selection_history].selection
+    self.menu_cursor = self.selection_history[#self.selection_history].selection
 end
 
 
@@ -396,7 +392,7 @@ function BaseMenuManager:update(joy: Joypad)
     elseif joy.ap then
         self:handle_menu_select()
     else
-        self.menu_selection:update(joy)
+        self.menu_cursor:update(joy)
     end
 end
 

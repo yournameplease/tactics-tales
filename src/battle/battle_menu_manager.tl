@@ -25,7 +25,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
                     ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator = function (s: MenuSelection, msb: BattleContext, _ctx: MenuContext): boolean
+                validator = function (s: MenuCursor, msb: BattleContext, _ctx: MenuContext): boolean
                     return msb.tactics_engine:grid_selection_is_available_player(s) end,
                 next_state = "SELECT_DESTINATION"
             }),
@@ -33,7 +33,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 set_selected_context = function(s: GridMenuSelection, _msb: BattleContext, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
-                validator = function (s: MenuSelection, msb: BattleContext, ctx: MenuContext): boolean
+                validator = function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
                     assert(s is GridMenuSelection)
                      return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
@@ -75,7 +75,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
                     ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator =  function (s: MenuSelection, msb: BattleContext, ctx: MenuContext): boolean
+                validator =  function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
                     return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
                 send_command = "MOVE_AND_ATTACK",

@@ -1,7 +1,7 @@
 require("src/debug")
 
 require("src/battle/tactics/enemy_ai")
-require("src/menu/battle_menu_manager")
+require("src/battle/battle_menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")

@@ -2,7 +2,7 @@ require("src/debug")
 require("src/config")
 
 require("src/ui/box")
-require("src/menu/battle_menu_manager")
+require("src/battle/battle_menu_manager")
 require("src/ui/ui_context_manager")
 require("src/battle/battle_map")
 require("src/battle/battle_context")
@@ -75,9 +75,9 @@ local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer,
     rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_floating_menu(x: integer, y: integer, menu_selection: VerticalListMenuSelection)
-    local selected_i = menu_selection.i
-    local options = menu_selection.options
+local function draw_floating_menu(x: integer, y: integer, menu_cursor: VerticalListMenuSelection)
+    local selected_i = menu_cursor.i
+    local options = menu_cursor.options
     local PADDING = 2
 
     local max_text_width = 0
@@ -158,9 +158,9 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     local layer_wall_front = layers.front_wall
 
     local cursor_tile: TilePoint = nil
-    local menu_selection = menu.menu_selection
-    if menu_selection is GridMenuSelection then
-        cursor_tile = menu_selection.point
+    local menu_cursor = menu.menu_cursor
+    if menu_cursor is GridMenuSelection then
+        cursor_tile = menu_cursor.point
     elseif menu.menu_state.point ~= nil then
         cursor_tile = menu.menu_state.point
     end
@@ -170,8 +170,8 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
-        if menu_selection is GridMenuSelection then
-            if menu_selection.legal_tiles ~= nil then
+        if menu_cursor is GridMenuSelection then
+            if menu_cursor.legal_tiles ~= nil then
                 fillp(
                 -- 1:2 diagonal slashes
                 --0b00111111,
@@ -195,7 +195,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                 poke(0x550b,0x3f)
                 palt()
                 for x = 0, self.map_width-1 do
-                    local highlighted_tile = menu_selection.legal_tiles:get(x, y)
+                    local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                     if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
                         if (highlighted_tile.reachable) then
                             color(28)
@@ -244,8 +244,8 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         local y = cursor_tile.y * TILE_SIZE.y
         spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if menu_selection is VerticalListMenuSelection then
-            draw_floating_menu(x, y, menu_selection)
+        if menu_cursor is VerticalListMenuSelection then
+            draw_floating_menu(x, y, menu_cursor)
         end
     end
 

@@ -9,7 +9,7 @@ require("src/data/battles")
 
 require("src/battle/battle_manager")
 require("src/menu/menu_manager")
-require("src/menu/story_menu_manager")
+require("src/story/story_menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
