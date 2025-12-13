@@ -142,12 +142,12 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     -- pre-compute actor animations for z-ordering
     local unit_positions = compute_animated_unit_positions(state.battle_context.ctx.battle_map)
 
-    local sorted_units = userdata("i16", 2, #unit_positions)
-    for i,u in ipairs(unit_positions) do
-        sorted_units:set(0,i-1, u.point.y)
-        sorted_units:set(1,i-1, u.id)
-    end
-    sorted_units:sort()
+    -- local sorted_units = userdata("i16", 2, #unit_positions) as Userdata
+    -- for i,u in ipairs(unit_positions) do
+    --     sorted_units:set(0,i-1, u.point.y)
+    --     sorted_units:set(1,i-1, u.id)
+    -- end
+    -- sorted_units:sort()
 
     local drawn_unit_count = 0
     -- TODO: preload layers
@@ -213,21 +213,21 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
             end
         end
 
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
-            local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit)
-            drawn_unit_count = drawn_unit_count + 1
-        end
+        -- while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
+        --     local unit_id = sorted_units:get(1, drawn_unit_count)
+        --     local unit = battle_map:get_unit_by_id(unit_id)
+        --     draw_unit(unit)
+        --     drawn_unit_count = drawn_unit_count + 1
+        -- end
 
         map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
-            local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit)
-            drawn_unit_count = drawn_unit_count + 1
-        end
+        -- while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
+        --     local unit_id = sorted_units:get(1, drawn_unit_count)
+        --     local unit = battle_map:get_unit_by_id(unit_id)
+        --     draw_unit(unit)
+        --     drawn_unit_count = drawn_unit_count + 1
+        -- end
 
         -- TODO: this is better with transparency
         if cursor_tile ~= nil then

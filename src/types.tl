@@ -14,12 +14,12 @@ global interface Point
     of: function(integer,integer): self
     of_angle: function(number,number): self-- gets rounded!
     copy: function(self): self
-    metamethod __eq: function(Point, Point): boolean
-    metamethod __add: function(Point, Point): Point
-    metamethod __sub: function(Point, Point): Point
-    metamethod __mul: function(Point|number, Point|number): Point -- gets rounded!
-    metamethod __unm: function(Point): Point
-    metamethod __tostring: function(Point): string
+    metamethod __eq: function<A is Point, B is Point>(A|any, B|any): boolean
+    metamethod __add: function<A is Point, B is Point>(A|any, B|any): A--|B
+    metamethod __sub: function<A is Point, B is Point>(A|any, B|any): A--|B
+    metamethod __mul: function<A is Point, B is Point>(A|number|any, B|number|any): A--|B -- gets rounded!
+    metamethod __unm: function<A is Point>(A): A
+    metamethod __tostring: function<A is Point>(A): string
 end
 
 local record BasePoint
