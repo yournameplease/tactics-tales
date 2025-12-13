@@ -12,9 +12,12 @@ version 2
 :: build/character/object/
 :: build/corpora/
 :: build/data/
+:: build/game/
 :: build/menu/
+:: build/menu/cursor/
 :: build/story/
 :: build/systems/
+:: build/systems/service/
 :: build/types/
 :: build/ui/
 :: build/ui/decoration/
@@ -402,6 +405,41 @@ end
 
 return AnimationManager
 
+:: build/battle/battle_context.lua
+require('src/game_context')
+
+
+
+
+
+
+
+
+
+BattleContext = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function BattleContext.new(services)
+   return {
+      type = 'battle',
+      services = services,
+   }
+end
+
 :: build/battle/battle_manager.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
 
@@ -412,18 +450,21 @@ require("src/systems/tasks")
 
 require("src/data/battles")
 
-require("src/battle/battle_ui_context")
-require("src/battle/battle_state")
+require("src/battle/battle_context")
+require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_manager")
+require("src/battle/map/map_generator")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
+require("src/battle/battle_context")
+require("src/story/story_context")
+
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -438,26 +479,11 @@ BattleManager = {}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function BattleManager:_spawn_unit(unit, spawn_point, side)
    local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
-   local idle_animation = self.animation_manager:create_idle_animation()
+   local idle_animation = self.battle_context.services.animation_manager:create_idle_animation()
    battle_unit.animation_data = idle_animation
-   self.battle_state:spawn_unit(battle_unit, spawn_point)
+   self.battle_context.battle_map:spawn_unit(battle_unit, spawn_point)
 end
 
 
@@ -467,7 +493,7 @@ function BattleManager:_spawn_enemies(enemies, enemy_spawners)
       assert(spawners)
       for _, spawn_point in ipairs(enemy_spawners[i]) do
 
-         local character = self.character_manager:generate_character(enemy.template)
+         local character = self.story_context.character_manager:generate_character(enemy.template)
          self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
       end
    end
@@ -476,93 +502,438 @@ end
 function BattleManager:_spawn_players(player_spawners)
    for _id, spawn_point in ipairs(player_spawners) do
 
-      local character = self.character_manager:generate_character("default")
+      local character = self.story_context.character_manager:generate_character("default")
       self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
    end
 end
 
 
-function BattleManager:init(service_manager, services)
-   local battle_definition = BATTLE_DATA[self.battle_id]
-
-   self.event_bus = services.event_bus
-   self.animation_manager = services.animation_manager
-   self.task_manager = services.task_manager
-   self.character_manager = services.character_manager
-
-   self.map_data = MapManager:load_map(battle_definition.map_id)
-
-   self.battle_state = service_manager:register_transient(BattleState.new(self.map_data.width, self.map_data.height))
-
-   self.tile_manager = service_manager:register_transient(TileManager.new(self.map_data))
-
-   self:_spawn_enemies(battle_definition.enemies, self.map_data.metadata.enemy_spawners)
-   self:_spawn_players(self.map_data.metadata.player_spawners)
-
-   self.tactics_engine = service_manager:register_transient(TacticsEngine.new())
-
-   self.battle_objective_service = service_manager:register_transient(BattleObjectiveService.new())
-
-   self.battle_menu_manager = service_manager:register_transient(BattleMenuManager.new())
-   self.enemy_ai_engine = service_manager:register_transient(EnemyAIEngine.new())
-   self.turn_manager = service_manager:register_transient(TurnManager.new())
-
-   self.battle_context = service_manager:register_transient(BattleUIContext.new())
-
-   self.event_bus:emit("TACTICS_BEGIN_BATTLE")
-end
-
-function BattleManager.new(battle_id)
+function BattleManager.new(battle_id, story_context)
    assert(BATTLE_DATA[battle_id] ~= nil)
 
-   local self = setmetatable({
-      id = 'battle_manager',
-      dependencies = {
-         "event_bus",
-         "animation_manager",
-         "task_manager",
-         "character_manager",
-      },
-   }, { __index = BattleManager })
-   self.battle_id = battle_id
+   local self = setmetatable({}, { __index = BattleManager })
+   self.battle_context = BattleContext.new(story_context.services)
+   self.battle_context.battle_id = battle_id
+   self.story_context = story_context
 
+   local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
+
+   self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
+
+   self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
+   self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
+
+   self.battle_context.tactics_engine = TacticsEngine.new(self.battle_context)
+
+   self.battle_context.battle_objective_service = BattleObjectiveService.new(self.battle_context)
+
+   self.battle_context.battle_menu_manager = BattleMenuManager.new(self.battle_context)
+   self.battle_context.enemy_ai_engine = EnemyAIEngine.new(self.battle_context)
+   self.battle_context.turn_manager = TurnManager.new(self.battle_context)
+
+   story_context.services.ui_context:register_context(self.battle_context)
+
+   self.battle_context.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
    return self
 end
 
+function BattleManager:teardown()
+   self.battle_context.services.ui_context:unregister_context('battle')
+   self.battle_context.turn_manager:teardown()
+end
+
 function BattleManager:update(joy)
-   self.battle_menu_manager:update(joy)
-   self.tactics_engine:update()
+   self.battle_context.battle_menu_manager:update(joy)
+   self.battle_context.tactics_engine:update()
 end
 
 return BattleManager
+
+:: build/battle/battle_map.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/types")
+require("src/util")
+require("src/battle/tactics/battle_unit")
+
+TerrainData = {}
+
+
+
+
+
+local TERRAIN_DATA = {
+   [0] = {
+      movement_cost = 1,
+      dodge = 0,
+   },
+   [1] = {
+      movement_cost = 2,
+      dodge = 0,
+   },
+   [2] = {
+      movement_cost = 2,
+      dodge = 0,
+   },
+   [3] = {
+      movement_cost = 3,
+      dodge = 0,
+   },
+   [4] = {
+      movement_cost = 4,
+      dodge = 0,
+   },
+   [5] = {
+      movement_cost = 3,
+      dodge = 0,
+   },
+   [6] = {
+      movement_cost = 5,
+      dodge = 0,
+   },
+   [7] = {
+      movement_cost = 2,
+      dodge = 0,
+   },
+}
+
+MapLayers = {}
+
+
+
+
+
+
+
+MapMetadata = {}
+
+
+
+
+BattleMap = {}
+
+
+
+
+
+
+
+
+
+
+function BattleMap.new(width, height)
+   local self = setmetatable({
+      units_by_id = {},
+      units_by_x_y = Array2D.new(width, height),
+   }, { __index = BattleMap })
+   return self
+end
+
+
+
+function BattleMap:get_terrain(tile)
+   local ground = self.layers.ground
+   local back_wall = self.layers.back_wall
+   local mid_wall = self.layers.mid_wall
+   local front_wall = self.layers.front_wall
+
+   local tile_sprite = ground:get(tile.x, tile.y)
+   if tile_sprite == 0 then return nil end
+
+   local flags = fget(tile_sprite)
+   local terrain = (flags & 0xD) >> 1
+   local terrain_data = TERRAIN_DATA[terrain]
+
+   local solid = flags & 0x1 == 0x1
+   if back_wall then
+      local back_wall_sprite = back_wall:get(tile.x, tile.y)
+      if (fget(back_wall_sprite) & 0x1) == 0x1 then
+         solid = true
+      end
+   end
+   if mid_wall then
+      local mid_wall_sprite = mid_wall:get(tile.x, tile.y)
+      if (fget(mid_wall_sprite) & 0x1) == 0x1 then
+         solid = true
+      end
+   end
+   if front_wall then
+      local front_wall_sprite = front_wall:get(tile.x, tile.y)
+      if (fget(front_wall_sprite) & 0x1) == 0x1 then
+         solid = true
+      end
+   end
+
+   return {
+      solid = solid,
+      movement_cost = terrain_data.movement_cost,
+      dodge = terrain_data.dodge,
+   }
+end
+
+function BattleMap:get_unit_by_id(id)
+   return self.units_by_id[id]
+end
+
+function BattleMap:get_at_tile(tile)
+   return self.units_by_x_y:get_point(tile)
+end
+
+function BattleMap:spawn_unit(unit, tile)
+   if self:get_at_tile(tile) ~= nil then
+      error("Tried to spawn unit in an occupied tile! (" .. tile.x .. "," .. tile.y .. ")")
+   end
+
+   local id = unit.id
+   self.units_by_id[id] = unit
+   self.units_by_x_y:set_point(tile, unit)
+end
+
+function BattleMap:tile_is_legal_destination(unit, tile)
+   local unit_id_at_destination = self.units_by_x_y:get_point(tile)
+   return (unit_id_at_destination == nil or
+   unit_id_at_destination.id == unit.id)
+end
+
+function BattleMap:move_unit(unit, tile)
+   assert(self:tile_is_legal_destination(unit, tile))
+
+   self.units_by_x_y:set_point(unit.tile, nil)
+   self.units_by_x_y:set_point(tile, unit)
+   unit.tile = tile
+end
+
+function BattleMap:kill_unit(unit)
+   self.units_by_x_y:set_point(unit.tile, nil)
+   self.units_by_id[unit.id] = nil
+   unit:die()
+end
+
+
+
+
+
+function BattleMap:tile_has_distance_from_tile(t1, t2, min_distance, max_distance)
+   max_distance = max_distance or min_distance
+   local distance = taxicab_distance(t1, t2)
+   return distance >= min_distance and distance <= max_distance
+end
+
+function BattleMap:get_targets_in_range(unit_id, tile)
+   local targets = {}
+   local attacker = self.units_by_id[unit_id]
+   local min_range, max_range = attacker.character:get_weapon_range()
+   for _, target in pairs(self.units_by_id) do
+      if target.id ~= attacker.id then
+         if target.side ~= attacker.side and
+            self:tile_has_distance_from_tile(
+            tile,
+            target.tile,
+            min_range, max_range) then
+
+            add(targets, target)
+         end
+      end
+   end
+   return targets
+end
+
+function BattleMap:get_units(filter)
+   local units = {}
+   for _, unit in pairs(self.units_by_id) do
+      if filter(unit) then
+         add(units, unit)
+      end
+   end
+   return units
+end
+
+function BattleMap:get_all_units()
+   return self:get_units(fn_true)
+end
+
+:: build/battle/battle_menu_manager.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+require("src/types")
+require("src/menu/types")
+require("src/menu/menu_manager")
+require("src/battle/tactics/tactics_engine")
+require("src/joypad")
+require("src/battle/pathfinding")
+require("src/systems/service")
+require("src/menu/menu_manager")
+require("src/battle/battle_context")
+
+require("src/menu/cursor/grid_cursor")
+require("src/menu/cursor/list_cursor")
+
+
+BattleMenuManager = {}
+
+
+
+
+
+
+local MENU_DATA = {
+   ["MENU_PLAYER_TURN"] = {
+      initial_step = "SELECT_UNIT",
+      steps = {
+         ["SELECT_UNIT"] = GridMenuDefinition.new({
+            set_selected_context = function(s, msb, ctx)
+               ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point) }
+            end,
+            validator = function(s, msb, _ctx)
+               return msb.tactics_engine:grid_selection_is_available_player(s) end,
+            next_state = "SELECT_DESTINATION",
+         }),
+         ["SELECT_DESTINATION"] = GridMenuDefinition.new({
+            set_selected_context = function(s, _msb, ctx)
+               ctx.destination = { point = s.point:copy(), path = s.path }
+            end,
+            validator = function(s, msb, ctx)
+               return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx) and
+               s.legal_tiles:get_point(s.point) ~= nil and
+               s.legal_tiles:get_point(s.point).valid_selection
+            end,
+            next_state = "SELECT_ACTION",
+            previous_state = "SELECT_UNIT",
+            get_legal_tiles = function(msb, ctx)
+               return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
+            end,
+         }),
+         ["SELECT_ACTION"] = ListMenuDefinition.new({
+            previous_state = "SELECT_DESTINATION",
+            get_options = function(msb, ctx)
+               local options = {}
+
+               if msb.tactics_engine:any_target_in_range(ctx) then
+                  add(options, {
+                     text = "Attack",
+                     next_state = "SELECT_TARGET",
+                  })
+               end
+
+               add(options, {
+                  text = "Wait",
+                  send_command = "MOVE_AND_WAIT",
+               })
+
+               add(options, {
+                  text = "Items",
+                  next_state = "SELECT_ITEM",
+               })
+
+               return options
+            end,
+         }),
+         ["SELECT_TARGET"] = GridMenuDefinition.new({
+            previous_state = "SELECT_ACTION",
+            set_selected_context = function(s, msb, ctx)
+               ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point) }
+            end,
+            validator = function(s, msb, ctx)
+               return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx)
+            end,
+            send_command = "MOVE_AND_ATTACK",
+            get_legal_tiles = function(msb, ctx)
+               return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
+            end,
+         }),
+         ["SELECT_ITEM"] = ListMenuDefinition.new({
+            previous_state = "SELECT_ACTION",
+            set_selected_context = function(s, _msb, ctx)
+               ctx.selected_item = {
+                  index = s.i,
+                  item = ctx.acting_unit.unit.character.inventory:get_items()[s.i],
+               }
+            end,
+            get_options = function(_msb, ctx)
+               local character = ctx.acting_unit.unit
+               local items = character.character.inventory:get_items()
+
+               local options = {}
+               for i, item in ipairs(items) do
+                  add(options, {
+                     text = item:get_name(),
+                     next_state = "SELECT_ITEM_ACTION",
+                  })
+               end
+               return options
+            end,
+         }),
+         ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
+            previous_state = "SELECT_ITEM",
+            get_options = function(_msb, ctx)
+               local character = ctx.acting_unit.unit
+               local inventory = character.character.inventory
+               local items = inventory:get_items()
+               local item = ctx.selected_item.item
+               local index = ctx.selected_item.index
+
+               if inventory:get_items()[index] == nil then
+                  return {}
+               end
+
+               local options = {}
+
+
+               if item:get_equip_slot() ~= "NONE" then
+                  if inventory:is_equipped(index) then
+                     add(options, {
+                        text = "Unequip",
+                        send_command = "INVENTORY_UNEQUIP_ITEM",
+                        next_state = "SELECT_ITEM_ACTION",
+                     })
+                  else
+                     add(options, {
+                        text = "Equip",
+                        send_command = "INVENTORY_EQUIP_ITEM",
+                        next_state = "SELECT_ITEM_ACTION",
+                     })
+                  end
+               end
+
+               if #items > 0 then
+                  add(options, {
+                     text = "Move",
+                  })
+               end
+               add(options, {
+                  text = "Discard",
+                  send_command = "INVENTORY_DISCARD_ITEM",
+                  next_state = "SELECT_ITEM",
+               })
+
+               return options
+            end,
+         }),
+      },
+   },
+}
+
+function BattleMenuManager.new(ctx)
+   return BaseMenuManager.new(
+   MENU_DATA,
+   ctx)
+
+end
+
+return BattleMenuManager
 
 :: build/battle/battle_objective_service.lua
 
 require("src/systems/service")
 require("src/systems/event_bus")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
+require("src/battle/battle_context")
 require("src/battle/tactics/tactics_engine")
 
 BattleObjectiveService = {}
 
 
 
-
-
-
-
-function BattleObjectiveService:init(_service_manager, services)
-   self.tactics_engine = services.tactics_engine
-   self.battle_state = services.battle_state
-end
-
-function BattleObjectiveService.new()
+function BattleObjectiveService.new(ctx)
    local self = setmetatable({
-      id = 'battle_objective_service',
-      dependencies = {
-         "tactics_engine",
-         "battle_state",
-      },
+      ctx = ctx,
    }, { __index = BattleObjectiveService })
 
    return self
@@ -575,12 +946,12 @@ BattleFinishState = {}
 
 
 function BattleObjectiveService:check_for_end()
-   if self.tactics_engine:is_blocked() then
+   if self.ctx.tactics_engine:is_blocked() then
       return { finished = false }
    end
 
-   local players = self.battle_state:get_units(unit_is_player)
-   local enemies = self.battle_state:get_units(unit_is_enemy)
+   local players = self.ctx.battle_map:get_units(unit_is_player)
+   local enemies = self.ctx.battle_map:get_units(unit_is_enemy)
 
    if (#players == 0) then
       return { finished = true, command = "BATTLE_END_VICTORY" }
@@ -600,130 +971,14 @@ end
 
 return BattleObjectiveService
 
-:: build/battle/battle_state.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/types")
-require("src/util")
-require("src/battle/tactics/battle_unit")
-
-BattleState = {}
-
-
-
-
-
-
-
-function BattleState:init(_service_manager, _services)
-
-end
-
-function BattleState.new(width, height)
-   local self = setmetatable({
-      id = 'battle_state',
-      dependencies = {},
-   }, { __index = BattleState })
-   self.units_by_id = {}
-
-   self.units_by_x_y = Array2D.new(width, height)
-   return self
-end
-
-
-
-
-function BattleState:get_unit_by_id(id)
-   return self.units_by_id[id]
-end
-
-function BattleState:get_at_tile(tile)
-   return self.units_by_x_y:get_point(tile)
-end
-
-function BattleState:spawn_unit(unit, tile)
-   if self:get_at_tile(tile) ~= nil then
-      error("Tried to spawn unit in an occupied tile! (" .. tile.x .. "," .. tile.y .. ")")
-   end
-
-   local id = unit.id
-   self.units_by_id[id] = unit
-   self.units_by_x_y:set_point(tile, unit)
-end
-
-function BattleState:tile_is_legal_destination(unit, tile)
-   local unit_id_at_destination = self.units_by_x_y:get_point(tile)
-   return (unit_id_at_destination == nil or
-   unit_id_at_destination.id == unit.id)
-end
-
-function BattleState:move_unit(unit, tile)
-   assert(self:tile_is_legal_destination(unit, tile))
-
-   self.units_by_x_y:set_point(unit.tile, nil)
-   self.units_by_x_y:set_point(tile, unit)
-   unit.tile = tile
-end
-
-function BattleState:kill_unit(unit)
-   self.units_by_x_y:set_point(unit.tile, nil)
-   self.units_by_id[unit.id] = nil
-   unit:die()
-end
-
-
-
-
-
-function BattleState:tile_has_distance_from_tile(t1, t2, min_distance, max_distance)
-   max_distance = max_distance or min_distance
-   local distance = taxicab_distance(t1, t2)
-   return distance >= min_distance and distance <= max_distance
-end
-
-function BattleState:get_targets_in_range(unit_id, tile)
-   local targets = {}
-   local attacker = self.units_by_id[unit_id]
-   local min_range, max_range = attacker.character:get_weapon_range()
-   for _, target in pairs(self.units_by_id) do
-      if target.id ~= attacker.id then
-         if target.side ~= attacker.side and
-            self:tile_has_distance_from_tile(
-            tile,
-            target.tile,
-            min_range, max_range) then
-
-            add(targets, target)
-         end
-      end
-   end
-   return targets
-end
-
-function BattleState:get_units(filter)
-   local units = {}
-   for _, unit in pairs(self.units_by_id) do
-      if filter(unit) then
-         add(units, unit)
-      end
-   end
-   return units
-end
-
-function BattleState:get_all_units()
-   return self:get_units(fn_true)
-end
-
-
-return BattleState
-
 :: build/battle/battle_ui_context.lua
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
-require("src/battle/tile_manager")
-require("src/menu/battle_menu_manager")
+require("src/battle/pathfinding")
+require("src/battle/battle_menu_manager")
 require("src/character/character_manager")
 require("src/systems/event_bus")
-require("src/battle/combat/combat_calculator")
 
 
 
@@ -737,66 +992,36 @@ BattleUIContext = {}
 
 
 
+function BattleUIContext.new(ctx)
+   local self = setmetatable({}, { __index = BattleUIContext })
 
-
-
-
-
-
-
-
-
-function BattleUIContext:init(_service_manager, services)
-   self.tactics = services.tactics_engine
-   self.battle_state = services.battle_state
-   self.turn_manager = services.turn_manager
-   self.tile_manager = services.tile_manager
-   self.character_manager = services.character_manager
-   self.battle_menu_manager = services.battle_menu_manager
-   self.event_bus = services.event_bus
-   self.combat_calculator = services.combat_calculator
+   self.ctx = ctx
 
    self.layout = "TACTICS"
 
    self.hovered_unit = nil
    self.acting_unit = nil
-end
-
-function BattleUIContext.new()
-   local context = setmetatable({
-      id = "battle_ui_context",
-      dependencies = {
-         "tactics_engine",
-         "battle_state",
-         "turn_manager",
-         "tile_manager",
-         "character_manager",
-         "battle_menu_manager",
-         "event_bus",
-         "combat_calculator",
-      },
-   }, { __index = BattleUIContext })
-   return context
+   return self
 end
 
 function BattleUIContext:enrich()
    self.layout = "TACTICS"
 
 
-   local selection = self.battle_menu_manager.menu_selection
+   local selection = self.ctx.battle_menu_manager.menu_cursor
 
    if selection.type == "CURSOR_GRID" then
-      if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+      if self.ctx.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
          local point = selection.point
-         local unit = self.battle_state:get_at_tile(point)
+         local unit = self.ctx.battle_map:get_at_tile(point)
          if unit then
             self.hovered_unit = unit
          end
       end
 
-      if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
+      if self.ctx.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
          local point = selection.point
-         local unit = self.battle_state:get_at_tile(point)
+         local unit = self.ctx.battle_map:get_at_tile(point)
          if unit then
             self.layout = "COMBAT_PREVIEW"
             self.hovered_unit = unit
@@ -804,12 +1029,12 @@ function BattleUIContext:enrich()
       end
    end
 
-   if self.battle_menu_manager.menu_ctx.acting_unit ~= nil then
-      self.acting_unit = self.battle_menu_manager.menu_ctx.acting_unit.unit
+   if self.ctx.battle_menu_manager.menu_ctx.acting_unit ~= nil then
+      self.acting_unit = self.ctx.battle_menu_manager.menu_ctx.acting_unit.unit
    end
 
-   if self.battle_menu_manager.menu_ctx.destination ~= nil then
-      self.destination = self.battle_menu_manager.menu_ctx.destination.point
+   if self.ctx.battle_menu_manager.menu_ctx.destination ~= nil then
+      self.destination = self.ctx.battle_menu_manager.menu_ctx.destination.point
    end
 
 end
@@ -818,32 +1043,13 @@ return BattleUIContext
 
 :: build/battle/combat/combat_calculator.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+require("src/battle/pathfinding")
 require("src/debug")
 local List = require("src/util/list")
 
 
 
-CombatCalculator = {}
-
-
-
-
-
-
-function CombatCalculator:init(_service_manager, services)
-   self.tile_manager = services.tile_manager
-end
-
-function CombatCalculator.new()
-   local self = setmetatable({
-      id = 'combat_calculator',
-      dependencies = {
-         'tile_manager',
-      },
-   }, { __index = CombatCalculator })
-   return self
-end
+local CombatCalculator = {}
 
 
 
@@ -862,7 +1068,8 @@ end
 
 
 
-function CombatCalculator:build_attack_double(weapon, unit)
+
+local function build_attack_double(weapon, unit)
    local double = {
       damage = weapon.damage,
       accuracy = weapon.accuracy,
@@ -872,7 +1079,7 @@ function CombatCalculator:build_attack_double(weapon, unit)
    return double
 end
 
-function CombatCalculator:build_combat_double(unit)
+local function build_combat_double(unit)
    local double = {
       tile = unit.tile,
       hp_current = unit.hp_current,
@@ -882,7 +1089,7 @@ function CombatCalculator:build_combat_double(unit)
       attacks = List.do_map(
       unit.character.inventory:get_equipped_weapons(),
       function(weapon)
-         return self:build_attack_double(weapon, unit)
+         return build_attack_double(weapon, unit)
       end),
 
       unit = unit,
@@ -920,10 +1127,10 @@ function CombatCalculator:build_combat_double(unit)
    return double
 end
 
-function CombatCalculator:get_hit_chance(attacker, defender, weapon)
+local function get_hit_chance(attacker, defender, weapon, battle_map)
    local accuracy = weapon.accuracy
 
-   local terrain = self.tile_manager:get_terrain(defender.tile)
+   local terrain = battle_map:get_terrain(defender.tile)
    local terrain_avoid = (terrain.dodge or 0)
 
    local unit_avoid = 0
@@ -935,7 +1142,7 @@ function CombatCalculator:get_hit_chance(attacker, defender, weapon)
    return mid(0, accuracy - unit_avoid - terrain_avoid, 100)
 end
 
-function CombatCalculator:get_damage(attacker, defender, weapon)
+local function get_damage(attacker, defender, weapon)
    local atk = weapon.damage
    local def = 0
 
@@ -950,15 +1157,15 @@ function CombatCalculator:get_damage(attacker, defender, weapon)
    return damage
 end
 
-function CombatCalculator:is_in_combat_range(attacker, defender, attack)
+local function is_in_combat_range(attacker, defender, attack)
 
    local dist = taxicab_distance(attacker.tile, defender.tile)
 
    return dist >= attack.min_range and dist <= attack.max_range
 end
 
-function CombatCalculator:can_attack(attacker, defender, attack)
-   return self:is_in_combat_range(attacker, defender, attack) and
+local function can_attack(attacker, defender, attack)
+   return is_in_combat_range(attacker, defender, attack) and
    attacker.hp_current > 0 and
    defender.hp_current > 0
 end
@@ -976,13 +1183,13 @@ CombatResult = {}
 
 
 
-function CombatCalculator:get_combat_step(attacker, defender, weapon)
+local function get_combat_step(attacker, defender, weapon, battle_map)
    if weapon ~= nil then
       local step = {
          attacker = attacker.unit,
          defender = defender.unit,
-         hit_chance = self:get_hit_chance(attacker, defender, weapon),
-         dmg = self:get_damage(attacker, defender, weapon),
+         hit_chance = get_hit_chance(attacker, defender, weapon, battle_map),
+         dmg = get_damage(attacker, defender, weapon),
          hit_roll = rndi(100),
       }
       step.is_hit = step.hit_roll < step.hit_chance
@@ -991,17 +1198,17 @@ function CombatCalculator:get_combat_step(attacker, defender, weapon)
    return nil
 end
 
-function CombatCalculator:compute_combat(attacker_unit, defender_unit)
+function CombatCalculator.compute_combat(attacker_unit, defender_unit, battle_map)
    local result = { steps = {} }
 
-   local attacker = self:build_combat_double(attacker_unit)
-   local defender = self:build_combat_double(defender_unit)
+   local attacker = build_combat_double(attacker_unit)
+   local defender = build_combat_double(defender_unit)
 
    local attacker_attacks = attacker.attacks
    local defender_attacks = defender.attacks
 
 
-   local step1 = self:get_combat_step(attacker, defender, attacker_attacks[1])
+   local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
    if step1 ~= nil then
       add(result.steps, step1)
       if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
@@ -1009,8 +1216,8 @@ function CombatCalculator:compute_combat(attacker_unit, defender_unit)
 
 
 
-   if self:can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then
-      local step2 = self:get_combat_step(defender, attacker, defender_attacks[1])
+   if can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then
+      local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
       if step2 ~= nil then
          add(result.steps, step2)
       end
@@ -1030,26 +1237,26 @@ CombatPreviewResult = {}
 
 
 
-function CombatCalculator:preview_combat(attacker_unit, defender_unit, attacker_tile)
+function CombatCalculator.preview_combat(attacker_unit, defender_unit, attacker_tile, battle_map)
    local result = { steps = {} }
 
-   local attacker = self:build_combat_double(attacker_unit)
+   local attacker = build_combat_double(attacker_unit)
    attacker.tile = attacker_tile
-   local defender = self:build_combat_double(defender_unit)
+   local defender = build_combat_double(defender_unit)
 
    local attacker_attacks = attacker.attacks
    local defender_attacks = defender.attacks
 
 
-   local step1 = self:get_combat_step(attacker, defender, attacker_attacks[1])
+   local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
    if step1 ~= nil then
       add(result.steps, step1)
    end
 
 
 
-   if self:can_attack(defender, attacker, defender_attacks[1]) then
-      local step2 = self:get_combat_step(defender, attacker, defender_attacks[1])
+   if can_attack(defender, attacker, defender_attacks[1]) then
+      local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
       if step2 ~= nil then
          add(result.steps, step2)
       end
@@ -1060,11 +1267,12 @@ end
 
 return CombatCalculator
 
-:: build/battle/map/map_manager.lua
+:: build/battle/map/map_generator.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/types")
 require("src/data/maps")
+require("src/battle/battle_map")
 
-MapManager = {}
+MapGenerator = {}
 
 
 
@@ -1073,25 +1281,6 @@ __MapFetchResultEntry = {}
 
 
 MapFetchResult = {}
-
-MapLayers = {}
-
-
-
-
-
-
-
-MapMetadata = {}
-
-
-
-
-MapData = {}
-
-
-
-
 
 
 local BASE_PLAYER_SPAWNER_SPRITE = 0x408
@@ -1104,19 +1293,17 @@ local MID_WALL_LAYER = 3
 local BACK_WALL_LAYER = 4
 local GROUND_LAYER = 5
 
-
-
-function MapManager:as_map(map_data)
+local function as_map(battle_map)
    return {
-      metatiles = map_data[METATILES_LAYER].bmp,
-      front_wall = map_data[FRONT_WALL_LAYER].bmp,
-      mid_wall = map_data[MID_WALL_LAYER].bmp,
-      back_wall = map_data[BACK_WALL_LAYER].bmp,
-      ground = map_data[GROUND_LAYER].bmp,
+      metatiles = battle_map[METATILES_LAYER].bmp,
+      front_wall = battle_map[FRONT_WALL_LAYER].bmp,
+      mid_wall = battle_map[MID_WALL_LAYER].bmp,
+      back_wall = battle_map[BACK_WALL_LAYER].bmp,
+      ground = battle_map[GROUND_LAYER].bmp,
    }
 end
 
-function MapManager:apply_checkerboard(map_layers)
+local function apply_checkerboard(map_layers)
    local ground = map_layers.ground
    for x = 0, ground:height() - 1 do
       for y = 0, ground:width() - 1 do
@@ -1128,7 +1315,7 @@ function MapManager:apply_checkerboard(map_layers)
    end
 end
 
-function MapManager:apply_default_walls(map_layers)
+local function apply_default_walls(map_layers)
    local ground = map_layers.ground
    local back_wall = map_layers.back_wall
    local mid_wall = map_layers.mid_wall
@@ -1151,20 +1338,20 @@ function MapManager:apply_default_walls(map_layers)
    end
 end
 
-function MapManager:_load_static(definition)
-   local map_data = {}
-
+local function load_static(definition)
    local map_fetch = fetch(DATP .. definition.file)
 
-   map_data.layers = self:as_map(map_fetch)
+   local layers = as_map(map_fetch)
 
-   self:apply_checkerboard(map_data.layers)
-   self:apply_default_walls(map_data.layers)
+   apply_checkerboard(layers)
+   apply_default_walls(layers)
 
-   local metatiles_layer = map_data.layers.metatiles
-   map_data.width = metatiles_layer:width()
-   map_data.height = metatiles_layer:height()
-   map_data.metadata = {
+   local metatiles_layer = layers.metatiles
+   local battle_map = BattleMap.new(metatiles_layer:width(), metatiles_layer:height())
+   battle_map.layers = layers
+   battle_map.width = metatiles_layer:width()
+   battle_map.height = metatiles_layer:height()
+   battle_map.metadata = {
       player_spawners = {},
       enemy_spawners = {},
    }
@@ -1174,18 +1361,18 @@ function MapManager:_load_static(definition)
          local tile = metatiles_layer:get(x, y)
          if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
             local player_spawner_id = tile - BASE_PLAYER_SPAWNER_SPRITE + 1
-            map_data.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
+            battle_map.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
          elseif tile >= BASE_ENEMY_SPAWNER_SPRITE and tile < BASE_REINFORCEMENT_SPAWNER_SPRITE then
             local enemy_spawner_id = tile - BASE_ENEMY_SPAWNER_SPRITE + 1
-            if map_data.metadata.enemy_spawners[enemy_spawner_id] == nil then
-               map_data.metadata.enemy_spawners[enemy_spawner_id] = {}
+            if battle_map.metadata.enemy_spawners[enemy_spawner_id] == nil then
+               battle_map.metadata.enemy_spawners[enemy_spawner_id] = {}
             end
-            add(map_data.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
+            add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
          end
       end
    end
 
-   return map_data
+   return battle_map
 end
 
 
@@ -1194,21 +1381,195 @@ end
 
 
 
-function MapManager:load_map(map_id)
+function MapGenerator:load_map(map_id)
    local definition = MAP_DEFINITIONS[map_id]
    assert(definition ~= nil)
 
-   local map_data
+   local battle_map
    if definition.type == "static" then
-      map_data = self:_load_static(definition)
+      battle_map = load_static(definition)
 
 
+   else
+      error("unknown map type")
    end
 
-   return map_data
+   return battle_map
 end
 
-return MapManager
+return MapGenerator
+
+:: build/battle/pathfinding.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local type = type; require("src/types")
+
+require("src/util")
+require("src/battle/battle_map")
+require("src/battle/map/map_generator")
+require("src/systems/service")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local function movement_cost(battle_map, tile, side)
+   local terrain = battle_map:get_terrain(tile)
+   if terrain == nil then return 999 end
+
+   local unit = battle_map:get_at_tile(tile)
+   if unit ~= nil then
+      if unit.side ~= side then return 999 end
+   end
+
+   if terrain.solid then return 999 end
+   return terrain.movement_cost
+end
+
+
+
+local NEIGHBORS = { { x = 0, y = 1 }, { x = 0, y = -1 }, { x = 1, y = 0 }, { x = -1, y = 0 } }
+
+ShortestPathEntry = {}
+
+
+
+
+
+
+
+
+local function _dijkstra_traversal(battle_map, start_x, start_y, side, max_cost)
+
+   local visited_info = Array2D.new(battle_map.width, battle_map.height)
+
+
+
+
+
+
+
+
+   local priority_queue = {}
+
+
+   local start_cost = 0
+
+   visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
+   add(priority_queue, { x = start_x, y = start_y, cost = start_cost })
+
+
+   while #priority_queue > 0 do
+
+      local min_node_cost = 999
+      local min_index = -1
+
+      for i, node in ipairs(priority_queue) do
+         if node.cost < min_node_cost then
+            min_node_cost = node.cost
+            min_index = i
+         end
+      end
+
+      local u = deli(priority_queue, min_index)
+      assert(type(u) == "table")
+      local ux, uy, ucost = u.x, u.y, u.cost
+
+      LOG.trace("Processing shortest path point", ux, uy, ucost)
+
+
+      local current_info = visited_info:get(ux, uy)
+      if current_info and ucost <= current_info.cost then
+
+
+         for _, offset in ipairs(NEIGHBORS) do
+            local vx, vy = ux + offset.x, uy + offset.y
+
+
+            local move_cost = movement_cost(battle_map, { x = vx, y = vy }, side)
+            assert(move_cost > 0, "0 cost moves not yet implemented.")
+
+
+            if move_cost < 999 then
+               local new_total = ucost + move_cost
+
+
+               if new_total <= max_cost then
+                  local neighbor_info = visited_info:get(vx, vy)
+
+
+                  if not neighbor_info or new_total < neighbor_info.cost then
+
+                     visited_info:set(vx, vy, { cost = new_total, prev = TilePoint.of(ux, uy) })
+                     add(priority_queue, { x = vx, y = vy, cost = new_total })
+                  end
+               end
+            end
+         end
+      end
+   end
+
+   return visited_info
+end
+
+
+
+
+
+local Pathfinding = {}
+
+
+
+
+function Pathfinding.calculate_all_tile_costs(battle_map, start_x, start_y, side, max_limit)
+   local limit = max_limit or 99999
+   return _dijkstra_traversal(battle_map, start_x, start_y, side, limit)
+end
+
+
+function Pathfinding.get_path_to_tile(all_tile_costs, tile)
+   assert(all_tile_costs:get_point(tile) ~= nil)
+   local path = {}
+   add(path, tile:copy())
+   local next_tile = tile
+   while all_tile_costs:get_point(next_tile).prev ~= nil do
+      next_tile = all_tile_costs:get_point(next_tile).prev
+      add(path, next_tile:copy())
+   end
+   return reverse_list(path)
+end
+
+
+
+function Pathfinding.find_reachable_tiles(battle_map, start_x, start_y, side, total_cost)
+
+   local full_map = _dijkstra_traversal(battle_map, start_x, start_y, side, total_cost)
+
+
+   local reachable = Array2D.new(full_map.w, full_map.h, false)
+
+   full_map:foreachpoint(
+   function(tile, value)
+
+
+
+      if (value.cost <= total_cost) then
+         reachable:set_point(tile, true)
+      end
+   end)
+
+
+   return reachable
+end
+
+return Pathfinding
 
 :: build/battle/tactics/battle_unit.lua
 require("src/debug")
@@ -1281,12 +1642,14 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 
 require("src/menu/menu_manager")
 require("src/battle/tactics/battle_unit")
-require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/event_bus")
 require("src/systems/tasks")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
 require("src/systems/service")
+require("src/battle/battle_context")
+require("src/systems/service/game_service_bundle")
 
 
 
@@ -1310,30 +1673,23 @@ EnemyAIEngine = {}
 
 
 
-
-
-
-
-
-
 function EnemyAIEngine:compute_enemy_ai(unit)
-   local tile_manager = self.tile_manager
-   local all_tile_costs = tile_manager:calculate_all_tile_costs(unit.tile.x, unit.tile.y, unit.side, 999)
+   local all_tile_costs = Pathfinding.calculate_all_tile_costs(self.ctx.battle_map, unit.tile.x, unit.tile.y, unit.side, 999)
 
-   local enemies = self.tactics_engine.battle_state:get_units(unit_is_player)
+   local enemies = self.ctx.battle_map:get_units(unit_is_player)
 
    local potential_attacks = {}
    local deep_moves = {}
 
    for _, e in ipairs(enemies) do
       local min_range, max_range = unit.character:get_weapon_range()
-      local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
+      local tiles_in_range = self.ctx.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
       tiles_in_range:foreachpoint(function(tile, in_range)
          if in_range then
             local shortest_path_tile = all_tile_costs:get_point(tile)
             if shortest_path_tile ~= nil then
                if shortest_path_tile.cost <= unit.character.stats.movement then
-                  if self.battle_state:tile_is_legal_destination(unit, tile) then
+                  if self.ctx.battle_map:tile_is_legal_destination(unit, tile) then
                      add(potential_attacks, { destination = tile, target = e })
                   end
                else
@@ -1348,7 +1704,7 @@ function EnemyAIEngine:compute_enemy_ai(unit)
       local choice = potential_attacks[1]
 
       local destination = choice.destination
-      local path = tile_manager:get_path_to_tile(all_tile_costs, destination)
+      local path = Pathfinding.get_path_to_tile(all_tile_costs, destination)
 
       local action_ctx = {
          acting_unit = { unit = unit },
@@ -1356,7 +1712,7 @@ function EnemyAIEngine:compute_enemy_ai(unit)
          target_unit = { unit = choice.target },
       }
       LOG.info(unit.id .. " will attack " .. choice.target.id)
-      self.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
+      self.ctx.services.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
    elseif #deep_moves > 0 then
       local min_cost_deep_move = deep_moves[1]
       local min_cost = 999
@@ -1369,52 +1725,41 @@ function EnemyAIEngine:compute_enemy_ai(unit)
 
       local point = min_cost_deep_move.destination
       while all_tile_costs:get_point(point).cost > unit.character.stats.movement or
-         not self.battle_state:tile_is_legal_destination(unit, point) do
+         not self.ctx.battle_map:tile_is_legal_destination(unit, point) do
          point = all_tile_costs:get_point(point).prev
       end
 
-      local path = tile_manager:get_path_to_tile(all_tile_costs, point)
+      local path = Pathfinding.get_path_to_tile(all_tile_costs, point)
 
       local action_ctx = {
          acting_unit = { unit = unit },
          destination = { point = point, path = path },
       }
       LOG.info(unit.id .. " will move to " .. point.x .. "," .. point.y)
-      self.event_bus:emit("MOVE_AND_WAIT", action_ctx)
+      self.ctx.services.event_bus:emit("MOVE_AND_WAIT", action_ctx)
    else
       LOG.warn("WARN: No valid moves for " .. unit.id .. "!")
    end
 end
 
 function EnemyAIEngine:handle_enemy_turn()
-   self.task_manager:start_routine(function()
-      local enemies = self.battle_state:get_units(unit_is_enemy)
+   self.ctx.services.task_manager:start_routine(function()
+      local enemies = self.ctx.battle_map:get_units(unit_is_enemy)
 
       for _, enemy in ipairs(enemies) do
          self:compute_enemy_ai(enemy)
-         while self.tactics_engine:is_blocked() do
+         while self.ctx.tactics_engine:is_blocked() do
             yield()
          end
       end
 
-      self.event_bus:emit("TACTICS_END_ENEMY_TURN")
+      self.ctx.services.event_bus:emit("TACTICS_END_ENEMY_TURN")
    end)
 end
 
-function EnemyAIEngine:init(_service_manager, services)
-   self.battle_state = services.battle_state
-   self.tactics_engine = services.tactics_engine
-   self.event_bus = services.event_bus
-   self.task_manager = services.task_manager
-   self.tile_manager = services.tile_manager
-
-   self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function() self:handle_enemy_turn() end)
-end
-
-function EnemyAIEngine.new()
+function EnemyAIEngine.new(ctx)
    local self = setmetatable({
-      id = "enemy_ai_engine",
-      dependencies = {},
+      ctx = ctx,
    }, { __index = EnemyAIEngine })
    return self
 end
@@ -1422,23 +1767,26 @@ end
 return EnemyAIEngine
 
 :: build/battle/tactics/tactics_engine.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/config")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/config")
 require("src/debug")
 
 require("src/menu/types")
 require("src/menu/menu_manager")
 
 require("src/util")
-require("src/battle/tile_manager")
+local Pathfinding = require("src/battle/pathfinding")
 require("src/draw")
-require("src/battle/combat/combat_calculator")
+local CombatCalculator = require("src/battle/combat/combat_calculator")
 require("src/systems/event_bus")
 require("src/systems/tasks")
 require("src/animation")
 require("src/systems/service")
+require("src/battle/battle_context")
+require("src/systems/service/game_service_bundle")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")
+require("src/menu/cursor/grid_cursor")
 
 
 
@@ -1474,49 +1822,12 @@ TacticsEngine = {}
 
 
 
-
-
-
-
-
-
-
-function TacticsEngine:init(service_manager, services)
-   self.battle_is_blocked = false
-   self.battle_state = services.battle_state
-   self.tile_manager = services.tile_manager
-   self.combat_calculator = service_manager:register_transient(CombatCalculator.new())
-   self.event_bus = services.event_bus
-   self.animation_manager = services.animation_manager
-   self.task_manager = services.task_manager
-
-   self.event_bus:on("MOVE_AND_WAIT", function(ctx)
-      self:handle_move_unit(ctx)
-   end)
-   self.event_bus:on("MOVE_AND_ATTACK", function(ctx)
-      self:handle_move_and_attack(ctx)
-   end)
-   self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_ctx)
-      self.is_player_turn = true
-   end)
-   self.event_bus:on("TACTICS_END_PLAYER_TURN", function(_ctx)
-      self.is_player_turn = false
-   end)
-
-   LOG.debug("New battle.")
-end
-
-function TacticsEngine.new()
+function TacticsEngine.new(ctx)
    local self = setmetatable({
-      id = "tactics_engine",
-      dependencies = {
-         "battle_state",
-         "tile_manager",
-         "event_bus",
-         "animation_manager",
-         "task_manager",
-      },
+      ctx = ctx,
    }, { __index = TacticsEngine })
+   self.battle_is_blocked = false
+
    return self
 end
 
@@ -1528,9 +1839,9 @@ function TacticsEngine:handle_move_unit(ctx)
    local path = ctx.destination.path
 
    self.battle_is_blocked = true
-   self.task_manager:start_routine(function()
+   self.ctx.services.task_manager:start_routine(function()
       if #path > 1 then
-         local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+         local animation = self.ctx.services.animation_manager:create_walk_animation(to_tile_path(path))
          unit.animation_data = animation
          LOG.debug("Animating!", animation.playing)
          while animation.playing do
@@ -1538,12 +1849,12 @@ function TacticsEngine:handle_move_unit(ctx)
          end
       end
 
-      self.battle_state:move_unit(unit, destination)
+      self.ctx.battle_map:move_unit(unit, destination)
       unit.has_acted = true
 
       self.battle_is_blocked = false
-      unit.animation_data = self.animation_manager:create_idle_animation()
-      self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+      unit.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+      self.ctx.services.event_bus:emit("TACTICS_UNIT_END_ACTION")
    end)
 end
 
@@ -1554,9 +1865,9 @@ function TacticsEngine:handle_move_and_attack(ctx)
    local target = ctx.target_unit.unit
 
    self.battle_is_blocked = true
-   self.task_manager:start_routine(function()
+   self.ctx.services.task_manager:start_routine(function()
       if #path > 1 then
-         local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
+         local animation = self.ctx.services.animation_manager:create_walk_animation(to_tile_path(path))
          unit.animation_data = animation
 
          while animation.playing do
@@ -1564,15 +1875,15 @@ function TacticsEngine:handle_move_and_attack(ctx)
          end
       end
 
-      self.battle_state:move_unit(unit, destination)
+      self.ctx.battle_map:move_unit(unit, destination)
       self:do_combat(unit, target)
       unit.has_acted = true
 
       self.battle_is_blocked = false
-      LOG.debug("unblockiung battle")
-      unit.animation_data = self.animation_manager:create_idle_animation()
-      target.animation_data = self.animation_manager:create_idle_animation()
-      self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+      LOG.debug("unblocking battle")
+      unit.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+      target.animation_data = self.ctx.services.animation_manager:create_idle_animation()
+      self.ctx.services.event_bus:emit("TACTICS_UNIT_END_ACTION")
    end)
 end
 
@@ -1587,10 +1898,10 @@ function TacticsEngine:apply_combat_step(step)
    defender.tile.y - attacker.tile.y)
 
 
-   local attack_animation = self.animation_manager:create_animation("BUMP", direction)
+   local attack_animation = self.ctx.services.animation_manager:create_animation("BUMP", direction)
    attacker.animation_data = attack_animation
    if not step.is_hit then
-      local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
+      local dodge_animation = self.ctx.services.animation_manager:create_animation("DODGE", direction + 0.25)
       defender.animation_data = dodge_animation
       while dodge_animation.playing do
          yield()
@@ -1602,7 +1913,7 @@ function TacticsEngine:apply_combat_step(step)
 
    if step.is_hit then
       defender:take_damage(step.dmg)
-      local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
+      local hurt_animation = self.ctx.services.animation_manager:create_animation("HURT", direction + 0.5)
       defender.animation_data = hurt_animation
 
       while hurt_animation.playing do
@@ -1611,12 +1922,12 @@ function TacticsEngine:apply_combat_step(step)
    end
 
    if not defender:is_alive() then
-      self.battle_state:kill_unit(defender)
+      self.ctx.battle_map:kill_unit(defender)
    end
 end
 
 function TacticsEngine:do_combat(attacker, defender)
-   local combat_result = self.combat_calculator:compute_combat(attacker, defender)
+   local combat_result = CombatCalculator.compute_combat(attacker, defender, self.ctx.battle_map)
 
    for i, combat_step in ipairs(combat_result.steps) do
       LOG.debug("Combat step: ", i)
@@ -1631,7 +1942,7 @@ function TacticsEngine:refresh_all_units()
 end
 
 function TacticsEngine:refresh_units(filter)
-   local units_to_refresh = self.battle_state:get_units(filter)
+   local units_to_refresh = self.ctx.battle_map:get_units(filter)
 
    for _, unit in ipairs(units_to_refresh) do
       unit.has_acted = false
@@ -1659,24 +1970,21 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection, ctx)
    local destination = ctx.destination.point
    local min_range, max_range = unit.character:get_weapon_range()
 
-   if selection.type == "CURSOR_GRID" then
-      local target_point = selection.point
+   local target_point = selection.point
 
-      local target_unit = self.battle_state:get_at_tile(target_point)
-      if target_unit == nil then return false end
+   local target_unit = self.ctx.battle_map:get_at_tile(target_point)
+   if target_unit == nil then return false end
 
-      if target_unit.side == unit.side then return false end
+   if target_unit.side == unit.side then return false end
 
-      return self.battle_state:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
-   end
-   return false
+   return self.ctx.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
 end
 
 function TacticsEngine:any_target_in_range(ctx)
    local unit = ctx.acting_unit.unit
    local destination = ctx.destination.point
 
-   local units_in_range = self.battle_state:get_targets_in_range(unit.id, destination)
+   local units_in_range = self.ctx.battle_map:get_targets_in_range(unit.id, destination)
    return #units_in_range > 0
 end
 
@@ -1739,7 +2047,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx)
    local unit = ctx.acting_unit.unit
    local min_range, max_range = unit.character:get_weapon_range()
 
-   local reachable_tiles = self.tile_manager:find_reachable_tiles(unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+   local reachable_tiles = Pathfinding.find_reachable_tiles(self.ctx.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
    local tiles = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
 
@@ -1767,8 +2075,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx)
 end
 
 function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection, ctx)
-   assert(grid_selection.type == "CURSOR_GRID")
-   local destination_unit = self.battle_state:get_at_tile(grid_selection.point)
+   local destination_unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
    if destination_unit == nil then
       return true
    end
@@ -1777,8 +2084,7 @@ function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection, ct
 end
 
 function TacticsEngine:grid_selection_is_available_player(grid_selection)
-   assert(grid_selection.type == "CURSOR_GRID")
-   local unit = self.battle_state:get_at_tile(grid_selection.point)
+   local unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
 
    if unit == nil then return false end
    if unit.side ~= SIDE_PLAYER then return false end
@@ -1792,7 +2098,7 @@ function TacticsEngine:update()
    local blocking_animation = false
    local all_players_acted = true
 
-   for _, unit in ipairs(self.battle_state:get_all_units()) do
+   for _, unit in ipairs(self.ctx.battle_map:get_all_units()) do
 
 
 
@@ -1803,280 +2109,11 @@ function TacticsEngine:update()
 
    if blocking_animation then return end
    if self.is_player_turn and all_players_acted then
-      self.event_bus:emit("TACTICS_END_PLAYER_TURN")
+      self.ctx.services.event_bus:emit("TACTICS_END_PLAYER_TURN")
    end
 end
 
 return TacticsEngine
-
-:: build/battle/tile_manager.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local type = type; require("src/types")
-
-require("src/util")
-require("src/battle/battle_state")
-require("src/battle/map/map_manager")
-require("src/systems/service")
-
-
-
-
-
-
-
-
-
-
-
-
-
-TerrainData = {}
-
-
-
-
-local TERRAIN_DATA = {
-   [0] = {
-      movement_cost = 1,
-      dodge = 0,
-   },
-   [1] = {
-      movement_cost = 2,
-      dodge = 0,
-   },
-   [2] = {
-      movement_cost = 2,
-      dodge = 0,
-   },
-   [3] = {
-      movement_cost = 3,
-      dodge = 0,
-   },
-   [4] = {
-      movement_cost = 4,
-      dodge = 0,
-   },
-   [5] = {
-      movement_cost = 3,
-      dodge = 0,
-   },
-   [6] = {
-      movement_cost = 5,
-      dodge = 0,
-   },
-   [7] = {
-      movement_cost = 2,
-      dodge = 0,
-   },
-}
-
-TileManager = {}
-
-
-
-
-
-
-function TileManager:init(_service_manager, services)
-   self.battle_state = services.battle_state
-end
-
-function TileManager.new(map_data)
-   local self = setmetatable({
-      id = "tile_manager",
-      dependencies = {},
-   }, { __index = TileManager })
-
-   self.map_data = map_data
-
-   return self
-end
-
-function TileManager:get_terrain(tile)
-   local tile_sprite = self.map_data.layers.ground:get(tile.x, tile.y)
-   local flags = fget(tile_sprite)
-   local terrain = (flags & 0xD) >> 1
-   return TERRAIN_DATA[terrain]
-end
-
-
-function TileManager:movement_cost(tile, side)
-   local ground = self.map_data.layers.ground
-   local back_wall = self.map_data.layers.back_wall
-   local mid_wall = self.map_data.layers.mid_wall
-   local front_wall = self.map_data.layers.front_wall
-   if tile.x < 0 or tile.y < 0 or tile.x >= ground:width() or tile.y >= ground:height() then
-      return 999
-   end
-
-   local ground_sprite = ground:get(tile.x, tile.y)
-   if tile == nil then return 999 end
-
-   local unit = self.battle_state:get_at_tile(tile)
-   if unit ~= nil then
-      if unit.side ~= side then return 999 end
-   end
-
-   if back_wall then
-      local back_wall_sprite = back_wall:get(tile.x, tile.y)
-      if (fget(back_wall_sprite) & 0x1) == 0x1 then
-         return 999
-      end
-   end
-   if mid_wall then
-      local mid_wall_sprite = mid_wall:get(tile.x, tile.y)
-      if (fget(mid_wall_sprite) & 0x1) == 0x1 then
-         return 999
-      end
-   end
-   if front_wall then
-      local front_wall_sprite = front_wall:get(tile.x, tile.y)
-      if (fget(front_wall_sprite) & 0x1) == 0x1 then
-         return 999
-      end
-   end
-
-   local flags = fget(ground_sprite)
-   local solid = (flags & 0x1) == 0x1
-   local terrain = (flags & 0xD) >> 1
-
-   if solid then return 999 end
-   return TERRAIN_DATA[terrain].movement_cost
-end
-
-
-
-local NEIGHBORS = { { x = 0, y = 1 }, { x = 0, y = -1 }, { x = 1, y = 0 }, { x = -1, y = 0 } }
-
-ShortestPathEntry = {}
-
-
-
-
-
-
-
-
-function TileManager:_dijkstra_traversal(start_x, start_y, side, max_cost)
-
-   local visited_info = Array2D.new(self.map_data.width, self.map_data.height)
-
-
-
-
-
-
-
-
-   local priority_queue = {}
-
-
-   local start_cost = 0
-
-   visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
-   add(priority_queue, { x = start_x, y = start_y, cost = start_cost })
-
-
-   while #priority_queue > 0 do
-
-      local min_node_cost = 999
-      local min_index = -1
-
-      for i, node in ipairs(priority_queue) do
-         if node.cost < min_node_cost then
-            min_node_cost = node.cost
-            min_index = i
-         end
-      end
-
-      local u = deli(priority_queue, min_index)
-      assert(type(u) == "table")
-      local ux, uy, ucost = u.x, u.y, u.cost
-
-      LOG.trace("Processing shortest path point", ux, uy, ucost)
-
-
-      local current_info = visited_info:get(ux, uy)
-      if current_info and ucost <= current_info.cost then
-
-
-         for _, offset in ipairs(NEIGHBORS) do
-            local vx, vy = ux + offset.x, uy + offset.y
-
-
-            local move_cost = self:movement_cost({ x = vx, y = vy }, side)
-            assert(move_cost > 0, "0 cost moves not yet implemented.")
-
-
-            if move_cost < 999 then
-               local new_total = ucost + move_cost
-
-
-               if new_total <= max_cost then
-                  local neighbor_info = visited_info:get(vx, vy)
-
-
-                  if not neighbor_info or new_total < neighbor_info.cost then
-
-                     visited_info:set(vx, vy, { cost = new_total, prev = TilePoint.of(ux, uy) })
-                     add(priority_queue, { x = vx, y = vy, cost = new_total })
-                  end
-               end
-            end
-         end
-      end
-   end
-
-   return visited_info
-end
-
-
-
-
-
-
-
-function TileManager:calculate_all_tile_costs(start_x, start_y, side, max_limit)
-   local limit = max_limit or 99999
-   return self:_dijkstra_traversal(start_x, start_y, side, limit)
-end
-
-
-function TileManager:get_path_to_tile(all_tile_costs, tile)
-   assert(all_tile_costs:get_point(tile) ~= nil)
-   local path = {}
-   add(path, tile:copy())
-   local next_tile = tile
-   while all_tile_costs:get_point(next_tile).prev ~= nil do
-      next_tile = all_tile_costs:get_point(next_tile).prev
-      add(path, next_tile:copy())
-   end
-   return reverse_list(path)
-end
-
-
-
-function TileManager:find_reachable_tiles(start_x, start_y, side, total_cost)
-
-   local full_map = self:_dijkstra_traversal(start_x, start_y, side, total_cost)
-
-
-   local reachable = Array2D.new(full_map.w, full_map.h, false)
-
-   full_map:foreachpoint(
-   function(tile, value)
-
-
-
-      if (value.cost <= total_cost) then
-         reachable:set_point(tile, true)
-      end
-   end)
-
-
-   return reachable
-end
-
-return TileManager
 
 :: build/character/animation_data.lua
 require("src/util")
@@ -2380,13 +2417,13 @@ require("src/character/items/object/weapon")
 require("src/animation")
 require("src/character/object/character")
 require("src/systems/service")
+require("src/story/story_context")
+require("src/systems/service/game_service_bundle")
 local CharacterGenerator = require("src/character/character_generator")
 
 
 
 CharacterManager = {}
-
-
 
 
 
@@ -2424,28 +2461,23 @@ function CharacterManager:handle_discard_item(ctx)
    character.inventory:remove_item(item_index)
 end
 
-function CharacterManager:init(_service_manager, services)
+function CharacterManager.new(ctx)
+   local self = setmetatable({
+      ctx = ctx,
+   }, { __index = CharacterManager })
+
    self.id_counter = IdCounter.new()
    self.characters = {}
 
-   self.event_bus = services.event_bus
-
-   self.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx)
+   self.ctx.services.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx)
       self:handle_equip_item(ctx)
    end)
-   self.event_bus:on("INVENTORY_UNEQUIP_ITEM", function(ctx)
+   self.ctx.services.event_bus:on("INVENTORY_UNEQUIP_ITEM", function(ctx)
       self:handle_unequip_item(ctx)
    end)
-   self.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx)
+   self.ctx.services.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx)
       self:handle_discard_item(ctx)
    end)
-end
-
-function CharacterManager.new()
-   local self = setmetatable({
-      id = "character_manager",
-      dependencies = {},
-   }, { __index = CharacterManager })
 
    return self
 end
@@ -3958,36 +3990,44 @@ MAP_DEFINITIONS = {
 return MAP_DEFINITIONS
 
 :: build/data/story.lua
-local Story = require('src/story/types')
-
-StoryId = {}
-
-
+local StoryTypes = require('src/story/types')
 
 local STORIES = {
    test_story = {
       starting_node = 'part_1',
       nodes = {
          part_1 = {
-            Story.TextNode.of("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
-            Story.TextNode.of('text 1.2'),
-            Story.TextNode.of('text 1.3'),
-            Story.TextNode.of('text 1.4'),
-            Story.JumpNode.of('part_2'),
+            StoryTypes.TextNode.of("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
+            StoryTypes.TextNode.of('Thisisalotoftext.Awhooooooooooooooooooooooooooooooooooooooolelot.Totriggerhyphenation.'),
+            StoryTypes.TextNode.of('text 1.3'),
+            StoryTypes.TextNode.of('text 1.4'),
+            StoryTypes.JumpNode.of('part_2'),
          },
          part_2 = {
-            Story.TextNode.of('text 2.1'),
-            Story.TextNode.of('text 2.2'),
-            Story.JumpNode.of('part_3'),
+            StoryTypes.NewPageNode.of(),
+            StoryTypes.TextNode.of('text 2.1'),
+            StoryTypes.TextNode.of('text 2.2'),
+            StoryTypes.JumpNode.of('part_3'),
          },
          part_3 = {
-            Story.TextNode.of('text 3.1'),
-            Story.BattleNode.of('bandit_village'),
-            Story.TextNode.of('text 3.2'),
-            Story.JumpNode.of('part_4'),
+            StoryTypes.TextNode.of('text 3.1'),
+            StoryTypes.BattleNode.of('bandit_village', 'part_4_v', 'part_4_f'),
+            StoryTypes.NewPageNode.of(),
+            StoryTypes.TextNode.of('text 3.2'),
+            StoryTypes.JumpNode.of('part_4'),
          },
-         part_4 = {
-            Story.TextNode.of("You Win!"),
+         part_4_v = {
+            StoryTypes.TextNode.of("You Win!"),
+            StoryTypes.JumpNode.of('part_5'),
+         },
+         part_4_f = {
+            StoryTypes.TextNode.of("You Lose..."),
+            StoryTypes.JumpNode.of('part_5'),
+         },
+         part_5 = {
+            StoryTypes.TextNode.of("Restarting the story"),
+            StoryTypes.NewPageNode.of(),
+            StoryTypes.JumpNode.of('part_1'),
          },
       },
    },
@@ -4092,6 +4132,171 @@ end
 
 return draw_util
 
+:: build/game/base_game_context.lua
+require("src/game_context")
+
+
+
+BaseGameContext = {}
+
+
+
+
+function BaseGameContext.new(services)
+   return {
+      services = services,
+   }
+end
+
+:: build/game/game.lua
+
+
+require("src/debug")
+
+require("src/types")
+require("src/systems/event_bus")
+require("src/systems/tasks")
+
+require("src/data/battles")
+
+require("src/battle/battle_manager")
+require("src/menu/menu_manager")
+require("src/game/game_menu_manager")
+require("src/systems/service")
+require("src/character/character_manager")
+require("src/turn_manager")
+require("src/battle/tactics/enemy_ai")
+require("src/story/story_context")
+require("src/story/story")
+require("src/story/story_page")
+require("src/ui/ui_context_manager")
+require("src/game/base_game_context")
+
+
+Game = {}
+
+
+
+
+
+
+
+function Game:begin_story()
+   self.story = Story.new("test_story", self.game_ctx.services)
+end
+
+function Game.new(services)
+
+   local self = setmetatable({}, { __index = Game })
+   self.game_ctx = BaseGameContext.new(services)
+
+   self.game_ctx.menu_manager = GameMenuManager.new(self.game_ctx)
+
+   services.ui_context:register_context(self.game_ctx)
+
+   services.event_bus:on("BATTLE_END_DEFEAT", function()
+      self:begin_story()
+   end)
+
+   return self
+end
+
+function Game:update(joy)
+   self.game_ctx.menu_manager:update(joy)
+end
+
+return Game
+
+:: build/game/game_menu_manager.lua
+
+require("src/debug")
+require("src/types")
+require("src/menu/types")
+require("src/menu/menu_manager")
+require("src/joypad")
+require("src/story/story_page")
+require("src/systems/service")
+require("src/menu/menu_manager")
+require("src/story/story_context")
+require("src/game/base_game_context")
+require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/button_advance_cursor")
+
+
+GameMenuManager = {}
+
+
+
+
+
+local MENU_DATA = {
+   ["MENU_MAIN_MENU"] = {
+      initial_step = "TITLE_SCREEN",
+      steps = {
+         ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
+            next_state = "MAIN_MENU",
+         }),
+         ["MAIN_MENU"] = ListMenuDefinition.new({
+            get_options = function(msb, ctx)
+               local options = {}
+
+               add(options, {
+                  text = "Play",
+                  send_command = "GAME_BEGIN_STORY",
+               })
+               add(options, {
+                  text = "Options",
+                  next_state = "OPTIONS_MENU",
+               })
+
+               return options
+            end,
+         }),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      },
+   },
+
+}
+
+function GameMenuManager.new(ctx)
+   return BaseMenuManager.new(
+   MENU_DATA,
+   ctx)
+
+end
+
+return GameMenuManager
+
+:: build/game_context.lua
+
+
+
+
+
+
+
+GameContextType = {}
+
+
+
+
+GameContext = {}
+
 :: build/joypad.lua
 
 Joypad = {}
@@ -4165,13 +4370,12 @@ require("src/debug")
 require("src/systems/event_bus")
 require("src/systems/service")
 
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/character/character_manager")
-require("src/battle/combat/combat_calculator")
 require("src/animation")
 require("src/ui/ui_manager")
-require("src/battle/battle_ui_context")
-require("src/story/story_manager")
+require("src/battle/battle_context")
+require("src/story/story")
 require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
@@ -4179,12 +4383,12 @@ require("src/joypad")
 
 
 
-local context = {}
+local ui_context = {}
 local animation_manager
 local ui_manager
 local task_manager
 
-local story_manager
+local story
 
 local service_manager
 
@@ -4198,41 +4402,41 @@ function _init()
 
    service_manager:register(EventBus.new())
 
-   service_manager:register(CharacterManager.new())
-
-   story_manager = service_manager:register(StoryManager.new("test_story"))
+   ui_context = UIContextManager.new()
 
 
+   local game_services = {
+      event_bus = service_manager.persistent_services.event_bus,
+      task_manager = service_manager.persistent_services.task_manager,
+      animation_manager = service_manager.persistent_services.animation_manager,
+      ui_context = ui_context,
+   }
 
-   context = service_manager:register(UIContextManager.new())
+   story = Story.new("test_story", game_services)
 end
 
 function _update()
    animation_manager:tick()
    LOG.trace("Getting Joypad.")
    local joy = get_joypad()
-   story_manager:update(joy)
-
+   story:update(joy)
    task_manager:update_tasks()
 end
 
 function _draw()
-   LOG.trace("Generating frame data.")
    animation_manager:generate_frame_data()
-   context:enrich()
-   ui_manager:draw(context)
+   ui_context:enrich()
+   ui_manager:draw(ui_context)
 end
 
-:: build/menu/battle_menu_manager.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
-require("src/types")
-require("src/menu/types")
-require("src/menu/menu_manager")
-require("src/battle/tactics/tactics_engine")
-require("src/joypad")
-require("src/battle/tile_manager")
-require("src/systems/service")
-require("src/menu/menu_manager")
+:: build/menu/cursor/button_advance_cursor.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
+require("src/game_context")
+
+
+
+
+ButtonAdvanceCursor = {}
 
 
 
@@ -4241,264 +4445,59 @@ require("src/menu/menu_manager")
 
 
 
-
-BattleMenuManager = {}
-
+ButtonAdvanceMenuDefinition = {}
 
 
 
 
 
 
-
-local MENU_DATA = {
-   ["MENU_PLAYER_TURN"] = {
-      initial_step = "SELECT_UNIT",
-      steps = {
-         ["SELECT_UNIT"] = GridMenuDefinition.new({
-            set_selected_context = function(s, msb, ctx)
-               ctx.acting_unit = { unit = msb.battle_state:get_at_tile(s.point) }
-            end,
-            validator = function(s, msb, _ctx)
-               return msb.tactics_engine:grid_selection_is_available_player(s) end,
-            next_state = "SELECT_DESTINATION",
-         }),
-         ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-            set_selected_context = function(s, _msb, ctx)
-               ctx.destination = { point = s.point:copy(), path = s.path }
-            end,
-            validator = function(s, msb, ctx)
-               assert(s.type == "CURSOR_GRID")
-               return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx) and
-               s.legal_tiles:get_point(s.point) ~= nil and
-               s.legal_tiles:get_point(s.point).valid_selection
-            end,
-            next_state = "SELECT_ACTION",
-            previous_state = "SELECT_UNIT",
-            get_legal_tiles = function(msb, ctx)
-               return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
-            end,
-         }),
-         ["SELECT_ACTION"] = ListMenuDefinition.new({
-            previous_state = "SELECT_DESTINATION",
-            get_options = function(msb, ctx)
-               local options = {}
-
-               if msb.tactics_engine:any_target_in_range(ctx) then
-                  add(options, {
-                     text = "Attack",
-                     next_state = "SELECT_TARGET",
-                  })
-               end
-
-               add(options, {
-                  text = "Wait",
-                  send_command = "MOVE_AND_WAIT",
-               })
-
-               add(options, {
-                  text = "Items",
-                  next_state = "SELECT_ITEM",
-               })
-
-               return options
-            end,
-         }),
-         ["SELECT_TARGET"] = GridMenuDefinition.new({
-            previous_state = "SELECT_ACTION",
-            set_selected_context = function(s, msb, ctx)
-               ctx.target_unit = { unit = msb.battle_state:get_at_tile(s.point) }
-            end,
-            validator = function(s, msb, ctx)
-               return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx)
-            end,
-            send_command = "MOVE_AND_ATTACK",
-            get_legal_tiles = function(msb, ctx)
-               return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
-            end,
-         }),
-         ["SELECT_ITEM"] = ListMenuDefinition.new({
-            previous_state = "SELECT_ACTION",
-            set_selected_context = function(s, _msb, ctx)
-               ctx.selected_item = {
-                  index = s.i,
-                  item = ctx.acting_unit.unit.character.inventory:get_items()[s.i],
-               }
-            end,
-            get_options = function(_msb, ctx)
-               local character = ctx.acting_unit.unit
-               local items = character.character.inventory:get_items()
-
-               local options = {}
-               for i, item in ipairs(items) do
-                  add(options, {
-                     text = item:get_name(),
-                     next_state = "SELECT_ITEM_ACTION",
-                  })
-               end
-               return options
-            end,
-         }),
-         ["SELECT_ITEM_ACTION"] = ListMenuDefinition.new({
-            previous_state = "SELECT_ITEM",
-            get_options = function(_msb, ctx)
-               local character = ctx.acting_unit.unit
-               local inventory = character.character.inventory
-               local items = inventory:get_items()
-               local item = ctx.selected_item.item
-               local index = ctx.selected_item.index
-
-               if inventory:get_items()[index] == nil then
-                  return {}
-               end
-
-               local options = {}
-
-
-               if item:get_equip_slot() ~= "NONE" then
-                  if inventory:is_equipped(index) then
-                     add(options, {
-                        text = "Unequip",
-                        send_command = "INVENTORY_UNEQUIP_ITEM",
-                        next_state = "SELECT_ITEM_ACTION",
-                     })
-                  else
-                     add(options, {
-                        text = "Equip",
-                        send_command = "INVENTORY_EQUIP_ITEM",
-                        next_state = "SELECT_ITEM_ACTION",
-                     })
-                  end
-               end
-
-               if #items > 0 then
-                  add(options, {
-                     text = "Move",
-                  })
-               end
-               add(options, {
-                  text = "Discard",
-                  send_command = "INVENTORY_DISCARD_ITEM",
-                  next_state = "SELECT_ITEM",
-               })
-
-               return options
-            end,
-         }),
-      },
-   },
-}
-
-function BattleMenuManager.new()
-   return BaseMenuManager.new(
-   "battle_menu_manager",
-   {
-      "tactics_engine",
-      "battle_state",
-      "tile_manager",
-      "event_bus",
-   },
-   MENU_DATA,
-   function(services)
-      return {
-         tactics_engine = services.tactics_engine,
-         battle_state = services.battle_state,
-         tile_manager = services.tile_manager,
-      }
-   end)
-
+function ButtonAdvanceMenuDefinition.new(props)
+   props.type = "CURSOR_BUTTON_ADVANCE"
+   return props
 end
 
-return BattleMenuManager
 
-:: build/menu/menu_manager.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/debug")
-require("src/types")
-require("src/menu/types")
-require("src/joypad")
-require("src/systems/service")
-require("src/battle/tactics/battle_unit")
-
-
-
-MenuServiceBundle = {}
-
-
-
-MenuSelection = {}
-
-
-
-
-MenuOption = {}
-
-
-
-
-
-GridMenuSelection = {}
-
-
-
-
-
-
-
-
-
-function GridMenuSelection.new(point, x_max, y_max)
+function ButtonAdvanceCursor.new(step_definition, game_context, menu_ctx, menu_state)
+   assert(step_definition.type == "CURSOR_BUTTON_ADVANCE")
    local self = {
-      type = "CURSOR_GRID",
-      point = point,
-      x_max = x_max,
-      y_max = y_max,
+      type = "CURSOR_BUTTON_ADVANCE",
    }
-   return setmetatable(self, { __index = GridMenuSelection })
+   return setmetatable(self, { __index = function(t, k)
+      if (ButtonAdvanceCursor)[k] then
+         return (ButtonAdvanceCursor)[k]
+      end
+      return (step_definition)[k]
+   end,
+   })
 end
 
-function GridMenuSelection:update(joy)
-   self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
-   self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
+function ButtonAdvanceCursor:update(_joy)
 end
 
-VerticalListMenuSelection = {}
-
-
-
-
-
-
-function VerticalListMenuSelection.new(i, options)
-   local self = {
-      type = "CURSOR_VERTICAL_LIST",
-      i = i,
-      options = options,
-   }
-   return setmetatable(self, { __index = VerticalListMenuSelection })
+function ButtonAdvanceCursor:handle_select(game_context, menu_ctx, menu_state)
+   return self.next_state, self.send_command
 end
 
-function VerticalListMenuSelection:update(joy)
-   self.i = mid(1, self.i + joy.dyp, #self.options)
-end
-
-HorizontalListMenuSelection = {}
+:: build/menu/cursor/grid_cursor.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
+require("src/game_context")
 
 
 
 
-
-
-function HorizontalListMenuSelection:update(joy)
-   self.i = mid(1, self.i + joy.dxp, #self.options)
-end
-
-
-SelectionHistory = {}
+GridMenuCursor = {}
 
 
 
 
-MenuStepDefinition = {}
+
+
+
+
+
+
+
 
 
 
@@ -4519,6 +4518,77 @@ function GridMenuDefinition.new(props)
    return props
 end
 
+function GridMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
+   assert(step_definition.type == "CURSOR_GRID")
+   local self = {
+      type = "CURSOR_GRID",
+      point = menu_state.point,
+      x_max = 16,
+      y_max = 16,
+   }
+   if step_definition.get_legal_tiles ~= nil then
+      self.legal_tiles = step_definition.get_legal_tiles(game_ctx, menu_ctx)
+   else
+      self.legal_tiles = nil
+   end
+   return setmetatable(self, { __index = function(t, k)
+      if (GridMenuCursor)[k] then
+         return (GridMenuCursor)[k]
+      end
+      return (step_definition)[k]
+   end,
+   })
+end
+
+function GridMenuCursor:update(joy)
+   self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
+   self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
+end
+
+function GridMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
+   local validation = self.validator(self, game_ctx, menu_ctx)
+   if not validation then return end
+
+
+
+
+
+
+   menu_state.point = self.point:copy()
+   self.set_selected_context(self, game_ctx, menu_ctx)
+   return self.next_state, self.send_command
+end
+
+:: build/menu/cursor/list_cursor.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
+require("src/game_context")
+
+
+
+
+ListDirection = {}
+
+
+
+
+MenuOption = {}
+
+
+
+
+
+ListMenuCursor = {}
+
+
+
+
+
+
+
+
+
+
+
 ListMenuDefinition = {}
 
 
@@ -4526,10 +4596,101 @@ ListMenuDefinition = {}
 
 
 
+
 function ListMenuDefinition.new(props)
-   props.type = "CURSOR_VERTICAL_LIST"
+   props.type = "CURSOR_LIST"
    return props
 end
+
+function ListMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
+   assert(step_definition.type == "CURSOR_LIST")
+   local self = {
+      type = "CURSOR_LIST",
+      i = 1,
+      options = step_definition.get_options(game_ctx, menu_ctx),
+      direction = "vertical",
+   }
+   return setmetatable(self, { __index = function(t, k)
+      if (ListMenuCursor)[k] then
+         return (ListMenuCursor)[k]
+      end
+      return (step_definition)[k]
+   end,
+   })
+end
+
+function ListMenuCursor:update(joy)
+   local new_i = self.i
+   if self.direction == "vertical" then
+      new_i = new_i + joy.dyp
+   elseif self.direction == "horizontal" then
+      new_i = new_i + joy.dxp
+   else
+      error()
+   end
+
+   if self.wrap then
+      self.i = new_i % #self.options + 1
+   else
+      self.i = mid(1, new_i, #self.options)
+   end
+end
+
+function ListMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
+   if self.set_selected_context ~= nil then
+      self.set_selected_context(self, game_ctx, menu_ctx)
+   end
+   return self.options[self.i].next_state, self.options[self.i].send_command
+end
+
+:: build/menu/cursor/multiple_options_cursor.lua
+
+
+:: build/menu/menu_cursor.lua
+require("src/menu/types")
+require("src/game_context")
+require("src/joypad")
+require("src/systems/event_bus")
+
+
+
+
+
+MenuCursor = {}
+
+
+
+
+
+
+
+
+
+MenuStepDefinition = {}
+
+:: build/menu/menu_manager.lua
+require("src/debug")
+require("src/types")
+require("src/menu/types")
+require("src/joypad")
+require("src/systems/service")
+require("src/battle/tactics/battle_unit")
+require("src/battle/battle_context")
+require("src/game_context")
+require("src/systems/service/game_service_bundle")
+
+require("src/menu/menu_cursor")
+require("src/menu/cursor/button_advance_cursor")
+require("src/menu/cursor/grid_cursor")
+require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/multiple_options_cursor")
+
+
+
+SelectionHistory = {}
+
+
+
 
 MenuDefinition = {}
 
@@ -4560,43 +4721,29 @@ MenuManager = {}
 
 
 
-
-
 BaseMenuManager = {}
 
 
 
 
 
+function BaseMenuManager.new(
+   menu_definitions,
+   ctx)
 
-function BaseMenuManager:init(_service_manager, services)
+   local self = setmetatable({}, { __index = BaseMenuManager })
+
+   self.menu_definitions = menu_definitions
+
    self.menu_state = {
       point = TilePoint.of(0, 0),
    }
    self.menu_ctx = {}
-   self.menu_selection = {}
+   self.menu_cursor = {}
    self.selection_history = {}
 
-   self.services = self.get_menu_service_bundle(services)
-   self.event_bus = services.event_bus
-
-end
-
-function BaseMenuManager.new(
-   id,
-   dependencies,
-
-   menu_definitions,
-   get_menu_service_bundle)
-
-   add(dependencies, "event_bus")
-   local self = setmetatable({
-      id = id,
-      dependencies = dependencies,
-   }, { __index = BaseMenuManager })
-
-   self.menu_definitions = menu_definitions
-   self.get_menu_service_bundle = get_menu_service_bundle
+   self.game_ctx = ctx
+   self.event_bus = ctx.services.event_bus
 
    return self
 end
@@ -4606,26 +4753,33 @@ function BaseMenuManager:populate_menu_state(new_step)
 
    local menu_data = self.menu_definitions[self.menu_state.menu_id]
    local new_step_data = menu_data.steps[self.menu_state.step]
+
    if new_step_data.type == "CURSOR_GRID" then
-      local new_selection = GridMenuSelection.new(
-      self.menu_state.point:copy(),
-      16,
-      16)
+      LOG.info("Making GridMenuDefinition")
+      self.menu_cursor = GridMenuCursor.new(
+      new_step_data,
+      self.game_ctx,
+      self.menu_ctx,
+      self.menu_state)
 
-      if new_step_data.get_legal_tiles ~= nil then
-         new_selection.legal_tiles = new_step_data.get_legal_tiles(self.services, self.menu_ctx)
-      else
-         new_selection.legal_tiles = nil
-      end
-      self.menu_selection = new_selection
-   elseif new_step_data.type == "CURSOR_VERTICAL_LIST" then
-      local new_selection = VerticalListMenuSelection.new(
-      0,
-      new_step_data.get_options(self.services, self.menu_ctx))
+   elseif new_step_data.type == "CURSOR_LIST" then
+      LOG.info("Making ListMenuDefinition")
+      self.menu_cursor = ListMenuCursor.new(
+      new_step_data,
+      self.game_ctx,
+      self.menu_ctx,
+      self.menu_state)
 
-      self.menu_selection = new_selection
+   elseif new_step_data.type == "CURSOR_BUTTON_ADVANCE" then
+      LOG.info("Making ButtonAdvanceMenuDefinition")
+      self.menu_cursor = ButtonAdvanceCursor.new(
+      new_step_data,
+      self.game_ctx,
+      self.menu_ctx,
+      self.menu_state)
+
    else
-      error("not implemented")
+      error("Failed to populate menu state")
    end
 end
 
@@ -4634,37 +4788,12 @@ function BaseMenuManager:handle_menu_select()
    local menu_data = self.menu_definitions[self.menu_state.menu_id]
    local step_data = menu_data.steps[self.menu_state.step]
 
-   local next_state
-   local send_command
 
-   local menu_selection = self.menu_selection
-
-   if step_data.type == "CURSOR_GRID" then
-      assert(menu_selection.type == "CURSOR_GRID")
-      local validation = step_data.validator(menu_selection, self.services, self.menu_ctx)
-      if not validation then return end
-
-      if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
-
-         menu_selection.path = { TilePoint.of(0, 0) }
-      end
-
-      self.menu_state.point = menu_selection.point:copy()
-      step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
-      next_state = step_data.next_state
-      send_command = step_data.send_command
-   elseif step_data.type == "CURSOR_VERTICAL_LIST" then
-      assert(menu_selection.type == "CURSOR_VERTICAL_LIST")
-      if step_data.set_selected_context ~= nil then
-         step_data.set_selected_context(menu_selection, self.services, self.menu_ctx)
-      end
-      next_state = menu_selection.options[menu_selection.i].next_state
-      send_command = menu_selection.options[menu_selection.i].send_command
-   end
+   local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
 
    add(self.selection_history, {
       step = self.menu_state.step,
-      selection = self.menu_selection,
+      selection = self.menu_cursor,
    })
 
    if send_command ~= nil then
@@ -4689,7 +4818,7 @@ function BaseMenuManager:handle_menu_back()
       self.selection_history[#self.selection_history] = nil
    end
    self:populate_menu_state(previous_step)
-   self.menu_selection = self.selection_history[#self.selection_history].selection
+   self.menu_cursor = self.selection_history[#self.selection_history].selection
 end
 
 
@@ -4710,70 +4839,11 @@ function BaseMenuManager:update(joy)
    elseif joy.ap then
       self:handle_menu_select()
    else
-      self.menu_selection:update(joy)
+      self.menu_cursor:update(joy)
    end
 end
 
 return MenuManager
-
-:: build/menu/story_menu_manager.lua
-require("src/debug")
-require("src/types")
-require("src/menu/types")
-require("src/menu/menu_manager")
-require("src/joypad")
-require("src/story/story_page_state")
-require("src/systems/service")
-require("src/menu/menu_manager")
-
-
-
-
-
-
-
-StoryMenuManager = {}
-
-
-
-
-
-local MENU_DATA = {
-   ["MENU_STORY_TEXT"] = {
-      initial_step = "ADVANCE_TEXT",
-      steps = {
-         ["ADVANCE_TEXT"] = ListMenuDefinition.new({
-            get_options = function(msb, ctx)
-               local options = {}
-
-               add(options, {
-                  text = "Continue",
-                  send_command = "STORY_ADVANCE_TEXT",
-               })
-
-               return options
-            end,
-         }),
-      },
-   },
-}
-
-function StoryMenuManager.new()
-   return BaseMenuManager.new(
-   "story_menu_manager",
-   {
-      "story_page_state",
-   },
-   MENU_DATA,
-   function(services)
-      return {
-         story_page_state = services.story_page_state,
-      }
-   end)
-
-end
-
-return StoryMenuManager
 
 :: build/menu/types.lua
 require("src/types")
@@ -4792,6 +4862,7 @@ MenuTileHighlight = {}
 
 
 MenuType = {}
+
 
 
 
@@ -4833,8 +4904,9 @@ MenuStep = {}
 
 MenuState = {}
 
-:: build/story/story_manager.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/debug")
+:: build/story/story.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert
+require("src/debug")
 
 require("src/types")
 require("src/systems/event_bus")
@@ -4844,20 +4916,21 @@ require("src/data/battles")
 
 require("src/battle/battle_manager")
 require("src/menu/menu_manager")
-require("src/menu/story_menu_manager")
+require("src/story/story_menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
-require("src/story/story_ui_context")
-require("src/story/story_page_state")
+require("src/story/story_context")
+require("src/story/story_page")
+require("src/ui/ui_context_manager")
 
-local Story = require("src/story/types")
+local StoryTypes = require("src/story/types")
 
 local STORY_DATA = require("src/data/story")
 
 
-StoryManager = { NodePosition = {} }
+Story = { ActiveNode = {} }
 
 
 
@@ -4874,144 +4947,225 @@ StoryManager = { NodePosition = {} }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-function StoryManager:jump_to_node(node_id)
+function Story:jump_to_node(node_id)
+   local story_definition = STORY_DATA[self.story_ctx.story_id]
+   local node_definition = story_definition.nodes[node_id][1]
    self.current_node = {
       node_id = node_id,
       node_step = 1,
+      definition = node_definition,
    }
 
    self:handle_new_node()
 end
 
-function StoryManager:handle_new_node()
-   local story_definition = STORY_DATA[self.story_id]
-   local node = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
-   local new_node_type = node.type
-   self.current_node_type = new_node_type
-   LOG.debug("Handling new node: ", new_node_type)
-   if node.type == 'jump' then
-      self:jump_to_node(node.next_node)
+function Story:handle_new_node()
+   local node_definition = self.current_node.definition
+   LOG.debug("Handling new node: ", node_definition.type)
+   if node_definition.type == 'jump' then
+      self:jump_to_node(node_definition.next_node)
    end
-   if node.type == 'text' then
-      self.story_page_state:add_text_line(node.text)
-      self.menu_manager:set_menu("MENU_STORY_TEXT")
+   if node_definition.type == 'text' then
+      self.story_ctx.story_page:add_text_line(node_definition.text)
+      self.story_ctx.menu_manager:set_menu("MENU_STORY_TEXT")
    end
-   if node.type == 'battle' then
-      local battle_id = node.battle_id
-      self.battle_manager = self.service_manager:register_transient(BattleManager.new(battle_id))
+   if node_definition.type == 'battle' then
+      local battle_id = node_definition.battle_id
+      self.battle_manager = BattleManager.new(battle_id, self.story_ctx)
+   end
+   if node_definition.type == 'new_page' then
+      self.story_ctx.story_page:clear_page()
+      self:advance_node()
    end
 end
 
-function StoryManager:advance_node()
+function Story:advance_node()
+   local story_definition = STORY_DATA[self.story_ctx.story_id]
    self.current_node.node_step = self.current_node.node_step + 1
+   self.current_node.definition = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
    self:handle_new_node()
 end
 
-function StoryManager:advance_text()
+function Story:advance_text()
    self:advance_node()
 end
 
-function StoryManager:init(service_manager, services)
-   local story_definition = STORY_DATA[self.story_id]
+function Story:handle_battle_victory()
+   local node_definition = self.current_node.definition
+   assert(node_definition.type == 'battle')
 
-   self.event_bus = services.event_bus
-   self.service_manager = services.service_manager
+   self.battle_manager:teardown()
+   self:jump_to_node(node_definition.next_node_victory)
+end
 
-   self.story_page_state = service_manager:register_transient(StoryPageState.new())
-   self.story_ui_context = service_manager:register_transient(StoryUIContext.new())
-   self.menu_manager = service_manager:register_transient(StoryMenuManager.new())
+function Story:handle_battle_defeat()
+   local node_definition = self.current_node.definition
+   assert(node_definition.type == 'battle')
+
+   self.battle_manager:teardown()
+   self:jump_to_node(node_definition.next_node_victory)
+end
+
+function Story.new(story_id, services)
+   assert(STORY_DATA[story_id] ~= nil)
+
+   local self = setmetatable({}, { __index = Story })
+   self.story_ctx = StoryContext.new(services)
+   self.story_ctx.story_id = story_id
+
+   local story_definition = STORY_DATA[self.story_ctx.story_id]
+
+   self.story_ctx.services.event_bus = services.event_bus
+
+   self.story_ctx.character_manager = CharacterManager.new(self.story_ctx)
+
+   self.story_ctx.story_page = StoryPage.new()
+   self.story_ctx.menu_manager = StoryMenuManager.new(self.story_ctx)
 
    self:jump_to_node(story_definition.starting_node)
 
-   self.event_bus:on("STORY_ADVANCE_TEXT", function()
+   self.story_ctx.services.event_bus:on("STORY_ADVANCE_TEXT", function()
       self:advance_text()
    end)
-end
 
-function StoryManager.new(story_id)
-   assert(STORY_DATA[story_id] ~= nil)
+   services.ui_context:register_context(self.story_ctx)
 
-   local self = setmetatable({
-      id = 'story_manager',
-      dependencies = {
-         "service_manager",
-         "event_bus",
-         "animation_manager",
-         "task_manager",
-         "character_manager",
-      },
-   }, { __index = StoryManager })
-   self.story_id = story_id
+   services.event_bus:on("BATTLE_END_VICTORY", function()
+      self:handle_battle_victory()
+   end)
+   services.event_bus:on("BATTLE_END_DEFEAT", function()
+      self:handle_battle_defeat()
+   end)
 
    return self
 end
 
-function StoryManager:update(joy)
-   if self.current_node_type == 'text' then
-      self.menu_manager:update(joy)
-   elseif self.current_node_type == 'battle' then
+function Story:update(joy)
+   local current_node = self.current_node.definition
+   if current_node.type == 'text' then
+      self.story_ctx.menu_manager:update(joy)
+   elseif current_node.type == 'battle' then
       self.battle_manager:update(joy)
-   elseif self.current_node_type == 'jump' then
-
+   elseif current_node.type == 'jump' then
+      error('in a jump node during update')
    end
 end
 
-return StoryManager
+return Story
 
-:: build/story/story_page_state.lua
+:: build/story/story_context.lua
+require('src/game_context')
+local StoryTypes = require('src/story/types')
+
+
+
+
+
+
+
+
+StoryContext = {}
+
+
+
+
+
+
+
+
+
+
+
+function StoryContext.new(services)
+   return {
+      type = 'story',
+      services = services,
+   }
+end
+
+:: build/story/story_menu_manager.lua
+require("src/debug")
+require("src/types")
+require("src/menu/types")
+require("src/menu/menu_manager")
+require("src/joypad")
+require("src/story/story_page")
+require("src/systems/service")
+require("src/menu/menu_manager")
+require("src/story/story_context")
+require("src/menu/cursor/list_cursor")
+
+
+
+StoryMenuManager = {}
+
+
+
+
+
+local MENU_DATA = {
+   ["MENU_STORY_TEXT"] = {
+      initial_step = "ADVANCE_TEXT",
+      steps = {
+         ["ADVANCE_TEXT"] = ListMenuDefinition.new({
+            get_options = function(msb, ctx)
+               local options = {}
+
+               add(options, {
+                  text = "Continue",
+                  send_command = "STORY_ADVANCE_TEXT",
+               })
+
+               return options
+            end,
+         }),
+      },
+   },
+}
+
+function StoryMenuManager.new(ctx)
+   return BaseMenuManager.new(
+   MENU_DATA,
+   ctx)
+
+end
+
+return StoryMenuManager
+
+:: build/story/story_page.lua
 require("src/types")
 require("src/util")
 
-StoryPageState = {}
+StoryPage = {}
 
 
 
-
-
-
-function StoryPageState:init(_service_manager, _services)
+function StoryPage.new()
+   local self = setmetatable({}, { __index = StoryPage })
    self.text = {}
-end
-
-function StoryPageState.new()
-   local self = setmetatable({
-      id = 'story_page_state',
-      dependencies = {},
-   }, { __index = StoryPageState })
    return self
 end
 
 
 
-function StoryPageState:add_text_line(text)
+function StoryPage:add_text_line(text)
    add(self.text, text)
 end
 
-function StoryPageState:clear_page()
+function StoryPage:clear_page()
    self.text = {}
 end
 
 
 
-return StoryPageState
+return StoryPage
 
 :: build/story/story_ui_context.lua
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
-require("src/story/story_page_state")
+require("src/story/story_page")
+require("src/story/story_context")
 
 
 
@@ -5021,20 +5175,9 @@ StoryUIContext = {}
 
 
 
-
-
-
-function StoryUIContext:init(_service_manager, services)
-   self.layout = "STORY_PAGE"
-
-   self.story_page_state = services.story_page_state
-end
-
-function StoryUIContext.new()
+function StoryUIContext.new(ctx)
    local context = setmetatable({
-      id = "story_ui_context",
-      dependencies = {},
-
+      ctx = ctx,
    }, { __index = StoryUIContext })
    return context
 end
@@ -5058,6 +5201,21 @@ return StoryUIContext
 
 
 
+
+
+
+
+local NewPageNode = {}
+
+
+
+
+function NewPageNode.of()
+   return {
+      type = 'new_page',
+   }
+end
+
 local TextNode = {}
 
 
@@ -5078,10 +5236,14 @@ local BattleNode = {}
 
 
 
-function BattleNode.of(battle_id)
+
+
+function BattleNode.of(battle_id, next_node_victory, next_node_failure)
    local self = {
       type = 'battle',
       battle_id = battle_id,
+      next_node_victory = next_node_victory,
+      next_node_failure = next_node_failure,
    }
    return setmetatable(self, { __index = BattleNode })
 end
@@ -5104,22 +5266,25 @@ end
 
 
 
-local Story = {}
+local StoryDefinition = {}
 
 
 
 
 return {
-   Story = Story,
+   StoryId = StoryId,
+   StoryDefinition = StoryDefinition,
    StoryNode = StoryNode,
    StoryNodeType = StoryNodeType,
    TextNode = TextNode,
    BattleNode = BattleNode,
    JumpNode = JumpNode,
+   NewPageNode = NewPageNode,
 }
 
 :: build/systems/event_bus.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/systems/service")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local pairs = _tl_compat and _tl_compat.pairs or pairs; require("src/systems/service")
+require("src/util")
 require("src/debug")
 
 GameEvent = {}
@@ -5142,9 +5307,15 @@ GameEvent = {}
 
 
 
+
+
 EventListener = {}
 
+
+
+
 EventBus = {}
+
 
 
 
@@ -5163,6 +5334,7 @@ function EventBus.new()
       dependencies = {},
    }, { __index = EventBus })
 
+   self.id_counter = IdCounter.new()
    self.event_history = {}
    self.listeners = {}
    return self
@@ -5172,7 +5344,29 @@ function EventBus:on(event_name, callback)
    if not self.listeners[event_name] then
       self.listeners[event_name] = {}
    end
-   add(self.listeners[event_name], callback)
+   add(self.listeners[event_name], {
+      id = self.id_counter:get_id(),
+      callback = callback,
+   })
+end
+
+function EventBus:remove(id)
+
+   for _, slots in pairs(self.listeners) do
+      for i, listener in ipairs(slots) do
+         if listener.id == id then
+            deli(slots, i)
+            return
+         end
+      end
+   end
+   error("failed to remove listener")
+end
+
+function EventBus:remove_all(ids)
+   for _, id in ipairs(ids) do
+      self:remove(id)
+   end
 end
 
 function EventBus:emit(event_name, args)
@@ -5184,8 +5378,8 @@ function EventBus:emit(event_name, args)
 
    local slots = self.listeners[event_name]
    if slots then
-      for _, callback in ipairs(slots) do
-         callback(args)
+      for _, listener in ipairs(slots) do
+         listener.callback(args)
       end
    end
 end
@@ -5199,14 +5393,6 @@ return EventBus
 :: build/systems/service.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local pairs = _tl_compat and _tl_compat.pairs or pairs
 ServiceId = {}
-
-
-
-
-
-
-
-
 
 
 
@@ -5323,6 +5509,23 @@ return {
    ServiceManager = ServiceManager,
 }
 
+:: build/systems/service/game_service_bundle.lua
+
+
+
+
+
+
+GameServiceBundle = {}
+
+
+
+
+
+
+
+return GameServiceBundle
+
 :: build/systems/tasks.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/systems/service")
 require("src/debug")
@@ -5367,12 +5570,14 @@ end
 require("src/debug")
 
 require("src/battle/tactics/enemy_ai")
-require("src/menu/battle_menu_manager")
+require("src/battle/battle_menu_manager")
 require("src/util/data_utils")
 require("src/systems/event_bus")
 require("src/battle/tactics/tactics_engine")
 require("src/systems/service")
 require("src/battle/battle_objective_service")
+require("src/battle/battle_context")
+require("src/systems/service/game_service_bundle")
 
 
 
@@ -5388,40 +5593,36 @@ TurnManager = {}
 
 
 
+function TurnManager.new(ctx)
+   local self = setmetatable({
+      ctx = ctx,
+   }, { __index = TurnManager })
 
-
-
-
-function TurnManager:init(_service_manager, services)
    self.turn = 1
    self.phase = "PLAYER"
 
-   self.event_bus = services.event_bus
-   self.tactics_engine = services.tactics_engine
-   self.battle_objective_service = services.battle_objective_service
-   self.battle_menu_manager = services.battle_menu_manager
-   self.enemy_ai_engine = services.enemy_ai_engine
+   self.event_listener_ids = {}
 
-   self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
-      self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-      self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
-   end)
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_BATTLE", function()
+      self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+      self.ctx.services.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
+   end))
 
-   self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_UNIT_END_ACTION", function()
       if self.phase == "PLAYER" then
          LOG.debug("Setting to player turn menu")
-         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+         self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
       end
-   end)
+   end))
 
-   self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
       LOG.info("Begin player turn!")
       self.phase = "PLAYER"
-      self.tactics_engine:refresh_all_units()
-      self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-   end)
+      self.ctx.tactics_engine:refresh_all_units()
+      self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+   end))
 
-   self.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
       if self.phase ~= "PLAYER" then
          LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was " .. self.phase .. ".  Ignoring message.")
          return
@@ -5429,15 +5630,15 @@ function TurnManager:init(_service_manager, services)
 
       LOG.info("End player turn!")
 
-      self.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.tactics_engine)
-   end)
+      self.ctx.services.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.ctx.tactics_engine)
+   end))
 
-   self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
       self.phase = "ENEMY"
       LOG.info("Begin enemy turn!")
-   end)
+   end))
 
-   self.event_bus:on("TACTICS_END_ENEMY_TURN", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_ENEMY_TURN", function()
       if self.phase ~= "ENEMY" then
          LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was " .. self.phase .. ".  Ignoring message.")
          return
@@ -5446,37 +5647,48 @@ function TurnManager:init(_service_manager, services)
 
       self.turn = self.turn + 1
 
-      local battle_result = self.battle_objective_service:check_for_end()
+      local battle_result = self.ctx.battle_objective_service:check_for_end()
 
       if not battle_result.finished then
-         self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
+         self.ctx.services.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
       else
-         self.event_bus:emit(battle_result.command)
+         self.ctx.services.event_bus:emit(battle_result.command)
       end
-   end)
+   end))
 
-   self.event_bus:on("BATTLE_END_VICTORY", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_VICTORY", function()
       LOG.info("You win!")
-   end)
+   end))
 
-   self.event_bus:on("BATTLE_END_DEFEAT", function()
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_DEFEAT", function()
       LOG.info("You lose!")
-   end)
-end
+   end))
 
-function TurnManager.new()
-   local self = setmetatable({
-      id = 'turn_manager',
-      dependencies = {
-         "event_bus",
-         "tactics_engine",
-         "battle_objective_service",
-         "battle_menu_manager",
-         "enemy_ai_engine",
-      },
-   }, { __index = TurnManager })
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx)
+      self.ctx.tactics_engine:handle_move_unit(ctx)
+   end))
+
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx)
+      self.ctx.tactics_engine:handle_move_and_attack(ctx)
+   end))
+
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+      self.ctx.tactics_engine.is_player_turn = true
+   end))
+
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+      self.ctx.tactics_engine.is_player_turn = false
+   end))
+
+   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+      self.ctx.enemy_ai_engine:handle_enemy_turn()
+   end))
 
    return self
+end
+
+function TurnManager:teardown()
+   self.ctx.services.event_bus:remove_all(self.event_listener_ids)
 end
 
 return TurnManager
@@ -5620,7 +5832,7 @@ ItemDefinition = {}
 
 :: build/ui/box.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/types")
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
 require("src/ui/ui_context_manager")
 require("src/ui/theme")
 
@@ -5778,7 +5990,6 @@ function Box:measure()
    if not self.auto_width and not self.auto_height then
       self._calculated_w = self.w
       self._calculated_h = self.h
-
 
       for _, child in ipairs(self.children) do
          if child.measure then child:measure() end
@@ -6106,7 +6317,6 @@ function Box._draw(self, state, ui_theme)
 
 
 
-
    for _, child in ipairs(box.children) do
       child:draw(state, ui_theme)
    end
@@ -6163,6 +6373,8 @@ require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/panels/portrait_box")
 require("src/ui/ui_context_manager")
+require("src/battle/battle_context")
+local CombatCalculator = require("src/battle/combat/combat_calculator")
 
 CombatPreview = {}
 
@@ -6171,10 +6383,11 @@ CombatPreview = {}
 setmetatable(CombatPreview, { __index = Box })
 
 local function get_preview_text(state)
-   local attacker = state.battle_ui_context.acting_unit
-   local defender = state.battle_ui_context.hovered_unit
-   local attacker_tile = state.battle_ui_context.destination
-   local preview = state.battle_ui_context.combat_calculator:preview_combat(attacker, defender, attacker_tile).steps
+   local attacker = state.battle_context.acting_unit
+   local defender = state.battle_context.hovered_unit
+   local attacker_tile = state.battle_context.destination
+   local battle_map = state.battle_context.ctx.battle_map
+   local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
 
    local out = {}
    if preview[1] ~= nil then
@@ -6208,11 +6421,11 @@ function CombatPreview.new(props)
    local self = Box.new(props)
    setmetatable(self, { __index = CombatPreview })
 
-   local attacker_portrait = PortraitBox.new(function(state) return state.battle_ui_context.acting_unit end)
+   local attacker_portrait = PortraitBox.new(function(state) return state.battle_context.acting_unit end)
    local left = Box.flex_col()
    left:add(attacker_portrait)
    left:add(Box.spacer())
-   local defender_portrait = PortraitBox.new(function(state) return state.battle_ui_context.hovered_unit end)
+   local defender_portrait = PortraitBox.new(function(state) return state.battle_context.hovered_unit end)
    local right = Box.flex_col()
    right:add(defender_portrait)
    right:add(Box.spacer())
@@ -6238,6 +6451,7 @@ require("src/systems/event_bus")
 require("src/ui/panels/text_node")
 require("src/ui/panels/message_log")
 require("src/ui/ui_context_manager")
+require("src/story/story_context")
 
 EventMessageLog = {}
 
@@ -6245,9 +6459,11 @@ EventMessageLog = {}
 
 function EventMessageLog.new(props)
    props.func = function(state, _row_limit)
-      return tmap(state.battle_ui_context.event_bus:get_event_history(), function(e) return "> " .. e end)
+      return tmap(state.story_context.ctx.services.event_bus:get_event_history(), function(e) return "> " .. e end)
    end
 
+   props.draw_properties = props.draw_properties or {}
+   props.draw_properties.text_direction = props.draw_properties.text_direction or 'up'
    return MessageLog.new(props)
 end
 
@@ -6257,14 +6473,13 @@ return EventMessageLog
 require("src/ui/box")
 require("src/ui/panels/text_node")
 require("src/ui/ui_context_manager")
+local Text = require("src/util/text")
 
 MessageLog = {}
 
 
 
 
-local TEXT_HEIGHT = 8
-local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 
 
@@ -6277,19 +6492,16 @@ function MessageLog.new(props)
    box.padding = props.padding or 1
    box.decoration_padding = 0
    box.func = props.func or error("Need text getter `func`")
-   if not box.auto_height then
-      if props.rows then
-         box.rows = props.rows or 1
-         box.h = (box.rows) * (TEXT_HEIGHT + 2)
-      elseif box.h then
 
-      else
-         error("Need height for MessageLog")
-      end
-   end
-   box.justify = props.justify or "left"
-   box.text_direction = props.text_direction or "up"
-   box.wrap_mode = "wrap"
+   props.draw_properties = props.draw_properties or {}
+   box.draw_properties = box.draw_properties or {
+      justify = "left",
+      text_direction = "up",
+      wrap_mode = "wrap",
+   }
+   box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
+   box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
+   box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
 
    return box
 end
@@ -6297,9 +6509,7 @@ end
 function MessageLog:draw(state, ui_theme)
    Box._draw(self, state, ui_theme)
 
-   local row_count = self.rows or flr(self.h / TEXT_ROW_HEIGHT)
-
-   local text = self.func(state, row_count)
+   local text = self.func(state, 999)
 
 
 
@@ -6307,8 +6517,12 @@ function MessageLog:draw(state, ui_theme)
 
 
 
-   draw_text(self, text, ui_theme)
-
+   Text.draw(text,
+   self.x + self.internal_margin.l,
+   self.y + self.internal_margin.t,
+   self.w - self.internal_margin.l - self.internal_margin.r,
+   self.h - self.internal_margin.t - self.internal_margin.b,
+   ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
 end
 
 setmetatable(MessageLog, { __index = Box })
@@ -6370,9 +6584,10 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/config")
 
 require("src/ui/box")
-require("src/menu/battle_menu_manager")
+require("src/battle/battle_menu_manager")
 require("src/ui/ui_context_manager")
-require("src/battle/battle_state")
+require("src/battle/battle_map")
+require("src/battle/battle_context")
 
 local CharacterRenderer = require("src/character/character_renderer")
 
@@ -6422,9 +6637,9 @@ end
 
 
 
-local function compute_animated_unit_positions(battle_state)
+local function compute_animated_unit_positions(battle_map)
    return tmap(
-   battle_state:get_all_units(),
+   battle_map:get_all_units(),
    function(unit)
       local animation_offset = CharacterRenderer.get_animation_offset(unit)
       return {
@@ -6442,9 +6657,9 @@ local function draw_health_bar(hp_current, hp_max, x, y, width, height)
    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_floating_menu(x, y, menu_selection)
-   local selected_i = menu_selection.i
-   local options = menu_selection.options
+local function draw_floating_menu(x, y, menu_cursor)
+   local selected_i = menu_cursor.i
+   local options = menu_cursor.options
    local PADDING = 2
 
    local max_text_width = 0
@@ -6497,8 +6712,8 @@ end
 function TacticsMap:draw(state, ui_theme)
    Box._draw(self, state, ui_theme)
 
-   local battle_state = state.battle_ui_context.battle_state
-   local menu = state.battle_ui_context.battle_menu_manager
+   local battle_map = state.battle_context.ctx.battle_map
+   local menu = state.battle_context.ctx.battle_menu_manager
 
    local camera_x = self.x + self.internal_margin.l
    local camera_y = self.y + self.internal_margin.t
@@ -6507,7 +6722,7 @@ function TacticsMap:draw(state, ui_theme)
 
 
 
-   local unit_positions = compute_animated_unit_positions(state.battle_ui_context.battle_state)
+   local unit_positions = compute_animated_unit_positions(state.battle_context.ctx.battle_map)
 
    local sorted_units = userdata("i16", 2, #unit_positions)
    for i, u in ipairs(unit_positions) do
@@ -6518,16 +6733,16 @@ function TacticsMap:draw(state, ui_theme)
 
    local drawn_unit_count = 0
 
-   local layers = state.battle_ui_context.tile_manager.map_data.layers
+   local layers = state.battle_context.ctx.battle_map.layers
    local layer_ground = layers.ground
    local layer_wall_back = layers.back_wall
    local layer_wall_mid = layers.mid_wall
    local layer_wall_front = layers.front_wall
 
    local cursor_tile = nil
-   local menu_selection = menu.menu_selection
-   if menu_selection.type == "CURSOR_GRID" then
-      cursor_tile = menu_selection.point
+   local menu_cursor = menu.menu_cursor
+   if menu_cursor.type == "CURSOR_GRID" then
+      cursor_tile = menu_cursor.point
    elseif menu.menu_state.point ~= nil then
       cursor_tile = menu.menu_state.point
    end
@@ -6537,8 +6752,8 @@ function TacticsMap:draw(state, ui_theme)
       map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
 
-      if menu_selection.type == "CURSOR_GRID" then
-         if menu_selection.legal_tiles ~= nil then
+      if menu_cursor.type == "CURSOR_GRID" then
+         if menu_cursor.legal_tiles ~= nil then
             fillp(
 
 
@@ -6562,7 +6777,7 @@ function TacticsMap:draw(state, ui_theme)
             poke(0x550b, 0x3f)
             palt()
             for x = 0, self.map_width - 1 do
-               local highlighted_tile = menu_selection.legal_tiles:get(x, y)
+               local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack) then
                   if (highlighted_tile.reachable) then
                      color(28)
@@ -6582,7 +6797,7 @@ function TacticsMap:draw(state, ui_theme)
 
       while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
          local unit_id = sorted_units:get(1, drawn_unit_count)
-         local unit = battle_state:get_unit_by_id(unit_id)
+         local unit = battle_map:get_unit_by_id(unit_id)
          draw_unit(unit)
          drawn_unit_count = drawn_unit_count + 1
       end
@@ -6591,7 +6806,7 @@ function TacticsMap:draw(state, ui_theme)
 
       while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y + 1) * TILE_SIZE.y do
          local unit_id = sorted_units:get(1, drawn_unit_count)
-         local unit = battle_state:get_unit_by_id(unit_id)
+         local unit = battle_map:get_unit_by_id(unit_id)
          draw_unit(unit)
          drawn_unit_count = drawn_unit_count + 1
       end
@@ -6611,8 +6826,8 @@ function TacticsMap:draw(state, ui_theme)
       local y = cursor_tile.y * TILE_SIZE.y
       spr(CURSOR_SPRITE, x, y)
 
-      if menu_selection.type == "CURSOR_VERTICAL_LIST" then
-         draw_floating_menu(x, y, menu_selection)
+      if menu_cursor.type == "CURSOR_LIST" then
+         draw_floating_menu(x, y, menu_cursor)
       end
    end
 
@@ -6622,25 +6837,9 @@ end
 return TacticsMap
 
 :: build/ui/panels/text_node.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/ui/ui_context_manager")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/ui/ui_context_manager")
 require("src/ui/box")
-
-TextJustify = {}
-
-
-
-
-
-TextDirection = {}
-
-
-
-
-WrapMode = {}
-
-
-
-
+local Text = require("src/util/text")
 
 TextUIElement = {}
 
@@ -6648,10 +6847,8 @@ TextUIElement = {}
 
 
 
-
-
-
 TextNode = {}
+
 
 
 
@@ -6673,106 +6870,18 @@ function TextNode.new(props)
    box.func = props.func or error("Need text getter `func`")
    box.rows = props.rows or 1
    box.h = (box.rows) * (TEXT_HEIGHT + 2)
-   box.justify = props.justify or "left"
-   box.wrap_mode = props.wrap_mode or "ellipsis"
+
+   props.draw_properties = props.draw_properties or {}
+   box.draw_properties = {
+      justify = "left",
+      text_direction = "down",
+      wrap_mode = "ellipsis",
+   }
+   box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
+   box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
+   box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
 
    return box
-end
-
-local function text_width(text)
-   return print(text, 0, -1000)
-end
-
-function draw_text_row(self, i, text, ui_theme)
-   local line_width = text_width(text)
-
-   local t_x
-   if self.justify == "left" then
-      t_x = self.x + self.padding + 1
-   elseif self.justify == "center" then
-      t_x = self.x + (self.w - 2 * (self.padding + 1) - line_width) // 2
-   elseif self.justify == "right" then
-      t_x = self.x + self.w - self.padding - 1 - line_width - 1
-   else
-      error("Unexpected value!")
-   end
-
-   print(text, t_x, self.y + self.padding + 1 + ((i - 1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
-end
-
-local function apply_text_wrapping(text, width, wrap_mode)
-   if text == '' then
-      return { text }
-   end
-
-   if wrap_mode == "no_wrap" then
-      return { text }
-   elseif wrap_mode == "ellipsis" then
-      local out
-      local char_count = 0
-      local out_width
-      repeat
-         char_count = char_count + 1
-         out = sub(text, 1, char_count)
-         out_width = text_width(out)
-      until out_width > width or char_count == #text
-      if out_width > width then
-         LOG.debug("WIDTH", out_width, width)
-         return { sub(text, 1, char_count - 3) .. "..." }
-      else
-         return { text }
-      end
-   elseif wrap_mode == "wrap" then
-
-      local out = {}
-      local line_start = 1
-      local previous_word_end
-      local line_width
-      while true do
-         LOG.debug("WRAP loop")
-         while line_start <= #text and sub(text, line_start, true) == ' ' do
-            line_start = line_start + 1
-         end
-         if line_start > #text then
-            return out
-         end
-         LOG.info("line_start", line_start, text)
-         local line_end = line_start
-         local line = sub(text, line_start, line_end)
-         while line_end <= #text and text_width(line) <= width do
-            line_end = line_end + 1
-            line = sub(text, line_start, line_end)
-            if (sub(text, line_end, true) == ' ' and sub(text, line_end - 1, true) ~= ' ') then
-               previous_word_end = line_end - 1
-            end
-         end
-
-         if previous_word_end >= line_start then
-            add(out, sub(text, line_start, previous_word_end))
-         else
-
-            add(out, line)
-            return out
-         end
-      end
-   end
-end
-
-function draw_text(self, text, ui_theme)
-   local wrapped_text = {}
-   for _, t in ipairs(text) do
-      LOG.info("wrapping text", t, self.w, self.wrap_mode)
-      add(wrapped_text, apply_text_wrapping(t, self.w, self.wrap_mode))
-
-   end
-
-   local row_count = 0
-   for i, paragraph in ipairs(wrapped_text) do
-      for _, text_row in ipairs(paragraph) do
-         row_count = row_count + 1
-         draw_text_row(self, row_count, text_row, ui_theme)
-      end
-   end
 end
 
 function TextNode:draw(state, ui_theme)
@@ -6785,7 +6894,12 @@ function TextNode:draw(state, ui_theme)
    self.rows, "`func` should return expected number of rows")
 
 
-   draw_text(self, text, ui_theme)
+   Text.draw(text,
+   self.x + self.internal_margin.l,
+   self.y + self.internal_margin.t,
+   self.w - self.internal_margin.l - self.internal_margin.r,
+   self.h - self.internal_margin.t - self.internal_margin.b,
+   ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
 end
 
 return TextNode
@@ -6797,6 +6911,7 @@ require("src/ui/panels/portrait_box")
 require("src/character/items/object/item")
 require("src/ui/ui_context_manager")
 require("src/character/items/object/item_inventory")
+require("src/battle/battle_context")
 
 UnitInfo = {}
 
@@ -6814,7 +6929,7 @@ function UnitInfo.new(props)
    setmetatable(self, { __index = UnitInfo })
 
    local left = self:add(Box.flex_col())
-   left:add(PortraitBox.new(function(state) return state.battle_ui_context.hovered_unit end))
+   left:add(PortraitBox.new(function(state) return state.battle_context.hovered_unit end))
    left:add(Box.spacer())
 
    local info_col = self:add(Box.new({
@@ -6827,7 +6942,7 @@ function UnitInfo.new(props)
 
    info_col:add(TextNode.new({
       func = function(state)
-         local u = state.battle_ui_context.hovered_unit
+         local u = state.battle_context.hovered_unit
          if not u then return { "No Unit Selected" } end
          return { u.character.name .. " Lv." .. 1 }
       end,
@@ -6837,7 +6952,7 @@ function UnitInfo.new(props)
    info_col:add(TextNode.new({
       rows = 3,
       func = function(state)
-         local u = state.battle_ui_context.hovered_unit
+         local u = state.battle_context.hovered_unit
          if not u then return { "", "", "" } end
 
          local weapons = u.character.inventory:get_equipped_weapons()
@@ -6858,7 +6973,7 @@ function UnitInfo.new(props)
    info_col:add(TextNode.new({
       rows = 5,
       func = function(state)
-         local u = state.battle_ui_context.hovered_unit
+         local u = state.battle_context.hovered_unit
          if not u then return { "", "", "", "", "" } end
 
          local items = u.character.inventory:get_items()
@@ -6895,11 +7010,17 @@ UITheme = {}
 UILayoutId = {}
 
 :: build/ui/ui_context_manager.lua
-require("src/ui/types")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/ui/types")
 require("src/systems/service")
+require("src/battle/battle_context")
 require("src/battle/battle_ui_context")
+require("src/story/story_context")
 require("src/story/story_ui_context")
+require("src/game_context")
 
+
+
+context_type = {}
 
 
 
@@ -6913,47 +7034,52 @@ UIContextManager = {}
 
 
 
+function UIContextManager:register_context(ctx)
+   if ctx.type == 'battle' then
+      assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
+      self.battle_context = BattleUIContext.new(ctx)
+   end
+   if ctx.type == 'story' then
+      assert(self.story_context == nil, "Attempt to register battle context which was already registered!")
+      self.story_context = StoryUIContext.new(ctx)
+   end
+end
 
-
-
-
-function UIContextManager:init(_service_manager, services)
-   self.layout = "TACTICS"
-
-   self.service_manager = services.service_manager
+function UIContextManager:unregister_context(ctx_type)
+   if ctx_type == 'battle' then
+      assert(self.battle_context ~= nil, "Attempt to unregister battle context which was not registered!")
+      self.battle_context = nil
+   end
+   if ctx_type == 'story' then
+      assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
+      self.story_context = nil
+   end
 end
 
 function UIContextManager.new()
-   local context = setmetatable({
-      id = "ui_context_manager",
-      dependencies = {
-         "service_manager",
-      },
-   }, { __index = UIContextManager })
-   return context
+   local self = setmetatable({}, { __index = UIContextManager })
+   self.layout = "TACTICS"
+   return self
 end
 
 function UIContextManager:enrich()
    self.layout = "TACTICS"
 
 
-   self.battle_ui_context = self.service_manager.transient_services.battle_ui_context
-   if self.battle_ui_context ~= nil then
-      self.battle_ui_context:enrich()
+   if self.battle_context ~= nil then
+      self.battle_context:enrich()
    end
 
-   self.story_ui_context = self.service_manager.transient_services.story_ui_context
-   if self.story_ui_context ~= nil then
-      self.story_ui_context:enrich()
+   if self.story_context ~= nil then
+      self.story_context:enrich()
    end
 
 
 
-   if self.battle_ui_context ~= nil then
-      self.layout = self.battle_ui_context.layout
-      LOG.debug("yes battle ui context")
-   elseif self.story_ui_context ~= nil then
-      self.layout = self.story_ui_context.layout
+   if self.battle_context ~= nil then
+      self.layout = self.battle_context.layout
+   elseif self.story_context ~= nil then
+      self.layout = self.story_context.layout
    end
 end
 
@@ -6964,7 +7090,8 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/types")
 require("src/ui/types")
 
-require("src/battle/battle_ui_context")
+require("src/battle/battle_context")
+require("src/story/story_context")
 require("src/config")
 
 require("src/ui/panels/tactics_map")
@@ -7005,12 +7132,12 @@ function UIManager.new()
    self.layouts = {}
 
    local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border" })
-   battle_summary:add(TextNode.new({ func = function(_state) return { "BATTLE" } end, justify = "center" }))
+   battle_summary:add(TextNode.new({ func = function(_state) return { "BATTLE" } end, draw_properties = { justify = "center" } }))
    battle_summary:add(TextNode.new({ func = function(state)
-      local turn = state.battle_ui_context.turn_manager.turn
+      local turn = state.battle_context.ctx.turn_manager.turn
       return { "Turn " .. turn }
-   end, justify = "center", }))
-   battle_summary:add(TextNode.new({ func = function(_state) return { "Defeat all" } end, justify = "center" }))
+   end, draw_properties = { justify = "center" }, }))
+   battle_summary:add(TextNode.new({ func = function(_state) return { "Defeat all" } end, draw_properties = { justify = "center" } }))
 
    local page_divider = PageDivider.new(7)
 
@@ -7079,10 +7206,12 @@ function UIManager.new()
          dir = "col",
          flex_grow = 1,
          padding = 2,
-         text_direction = "down",
-         wrap_mode = "ellipsis",
+         draw_properties = {
+            text_direction = "down",
+            wrap_mode = "ellipsis",
+         },
          func = function(state, _row_limit)
-            return state.story_ui_context.story_page_state.text
+            return state.story_context.ctx.story_page.text
          end,
       })
 
@@ -7120,8 +7249,8 @@ function UIManager.new()
    return self
 end
 
-function UIManager:draw(battle_ui_context)
-   self.current_layout = self.layouts[battle_ui_context.layout]
+function UIManager:draw(battle_context)
+   self.current_layout = self.layouts[battle_context.layout]
 
    local root = self.current_layout.root
 
@@ -7130,7 +7259,7 @@ function UIManager:draw(battle_ui_context)
 
 
    cls(self.theme.COLOR_CLEAR)
-   root:draw(battle_ui_context, self.theme)
+   root:draw(battle_context, self.theme)
 end
 
 return UIManager
@@ -7602,6 +7731,158 @@ function RandomRange:pick_random()
    return self.min_value + rndi(self.max_value - self.min_value)
 end
 
+:: build/util/text.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+require("src/util")
+
+
+
+TextJustify = {}
+
+
+
+
+
+TextDirection = {}
+
+
+
+
+WrapMode = {}
+
+
+
+
+
+local TEXT_HEIGHT = 8
+local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
+
+local Text = { TextDrawProperties = {} }
+
+
+
+
+
+
+
+function Text.width(text)
+   return print(text, 0, -1000)
+end
+
+function Text.apply_text_wrapping(text, width, wrap_mode)
+   if text == '' then
+      return { text }
+   end
+
+   if wrap_mode == "no_wrap" then
+      return { text }
+   elseif wrap_mode == "ellipsis" then
+      local out
+      local char_count = 0
+      local out_width
+      repeat
+         char_count = char_count + 1
+         out = sub(text, 1, char_count)
+         out_width = Text.width(out)
+      until out_width > width or char_count == #text
+      if out_width > width then
+         return { sub(text, 1, char_count - 3) .. "..." }
+      else
+         return { text }
+      end
+   elseif wrap_mode == "wrap" then
+
+      local out = {}
+      local line_start = 1
+      local previous_word_end = -1
+      local line_width
+      while true do
+         while line_start <= #text and sub(text, line_start, true) == ' ' do
+            line_start = line_start + 1
+         end
+         if line_start > #text then
+            return out
+         end
+         local line_end = line_start
+         local line = sub(text, line_start, line_end)
+         while line_end <= #text and Text.width(line) <= width do
+            line_end = line_end + 1
+            line = sub(text, line_start, line_end)
+            if (sub(text, line_end, true) == ' ' and sub(text, line_end - 1, true) ~= ' ') then
+               previous_word_end = line_end - 1
+            end
+         end
+
+         if line_end > #text and Text.width(line) <= width then
+
+            add(out, line)
+            return out
+         elseif previous_word_end >= line_start then
+            add(out, sub(text, line_start, previous_word_end))
+            line_start = previous_word_end + 1
+         else
+
+            add(out, sub(text, line_start, line_end - 2) .. '-')
+            line_start = line_end - 1
+         end
+      end
+   end
+end
+
+function Text.draw_text_row(text, x, y, color)
+
+
+
+
+
+
+
+
+
+
+
+   print(text, x, y, color)
+end
+
+function Text.get_text_alignment_offset(text, w, justify)
+   local line_width = Text.width(text)
+   if justify == "left" then
+      return 0
+   elseif justify == "center" then
+      return (w - line_width) // 2
+   elseif justify == "right" then
+      return w - line_width - 1
+   else
+      error("Unexpected value!")
+   end
+end
+
+function Text.draw(text, x, y, w, h, color, properties)
+
+   local row_count = flr(h / TEXT_ROW_HEIGHT)
+
+
+   local wrapped_text = {}
+   for _, t in ipairs(text) do
+      add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
+
+   end
+
+   local row_count = 0
+   for i, paragraph in ipairs(wrapped_text) do
+      for _, text_row in ipairs(paragraph) do
+         row_count = row_count + 1
+         local x_offset = Text.get_text_alignment_offset(text_row, w, properties.justify)
+
+         local t_x = x + x_offset
+         local t_y = y + ((row_count - 1) * (TEXT_HEIGHT + 2))
+         Text.draw_text_row(text_row, t_x, t_y, color)
+      end
+   end
+end
+
+return Text
+
 :: main.lua
 --[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-06 23:17:04",revision=74,xstickers={}]]
 -- tactics game
@@ -7631,47 +7912,53 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49",runtime=24,workspaces={{location="main.lua#26",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+:: build/game/.info.pod
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+:: build/menu/cursor/.info.pod
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+:: build/systems/service/.info.pod
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -7851,7 +8138,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-10 03:16:58",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -8134,7 +8421,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -8163,7 +8450,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -8171,5 +8458,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-10 03:16:58"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 05:09:49"]]
 :: [eoc]
