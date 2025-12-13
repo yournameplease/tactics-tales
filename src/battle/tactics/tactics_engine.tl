@@ -17,6 +17,7 @@ require("src/systems/service/game_service_bundle")
 
 require("src/battle/tactics/battle_unit")
 require("src/menu/types")
+require("src/menu/cursor/grid_cursor")
 
 global type MenuContext
 global type MenuCursor
@@ -42,13 +43,13 @@ global record TacticsEngine
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
     is_blocked: function(self): boolean
-    validate_tile_is_in_unit_attack_range: function(self, MenuCursor, MenuContext): boolean
+    validate_tile_is_in_unit_attack_range: function(self, GridMenuCursor<BattleContext>, MenuContext): boolean
     any_target_in_range: function(self, MenuContext): boolean
     tiles_with_distance_from_unit_attacks: function(self, MenuContext): Array2D<MenuTileHighlight>
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): Array2D<boolean>
     tiles_in_movement_and_attack_range: function(self, MenuContext): Array2D<MenuTileHighlight>
-    grid_selection_is_empty_or_acting_unit: function(self, MenuCursor, MenuContext): boolean
-    grid_selection_is_available_player: function(self, MenuCursor): boolean
+    grid_selection_is_empty_or_acting_unit: function(self, GridMenuCursor<BattleContext>, MenuContext): boolean
+    grid_selection_is_available_player: function(self, GridMenuCursor<BattleContext>): boolean
     update: function(self)
 end
 
@@ -195,22 +196,19 @@ end
 
 -- validators
 
-function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuCursor, ctx: MenuContext): boolean
+function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: GridMenuCursor<BattleContext>, ctx: MenuContext): boolean
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
     local min_range, max_range = unit.character:get_weapon_range()
 
-    if selection is GridMenuCursor then
-        local target_point = selection.point
+    local target_point = selection.point
 
-        local target_unit = self.ctx.battle_map:get_at_tile(target_point)
-        if target_unit == nil then return false end
+    local target_unit = self.ctx.battle_map:get_at_tile(target_point)
+    if target_unit == nil then return false end
 
-        if target_unit.side == unit.side then return false end
+    if target_unit.side == unit.side then return false end
 
-        return self.ctx.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
-    end
-    return false
+    return self.ctx.battle_map:tile_has_distance_from_tile(target_point, destination, min_range, max_range)
 end
 
 function TacticsEngine:any_target_in_range(ctx: MenuContext): boolean
@@ -307,8 +305,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Arr
     return tiles
 end
 
-function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: MenuCursor, ctx: MenuContext): boolean
-    assert(grid_selection is GridMenuCursor)
+function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: GridMenuCursor<BattleContext>, ctx: MenuContext): boolean
     local destination_unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
     if destination_unit == nil then
         return true
@@ -317,8 +314,7 @@ function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: Me
     return destination_unit.id == acting_unit.id
 end
 
-function TacticsEngine:grid_selection_is_available_player(grid_selection: MenuCursor): boolean
-    assert(grid_selection is GridMenuCursor)
+function TacticsEngine:grid_selection_is_available_player(grid_selection: GridMenuCursor<BattleContext>): boolean
     local unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end

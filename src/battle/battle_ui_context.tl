@@ -36,7 +36,7 @@ function BattleUIContext:enrich()
 
     local selection = self.ctx.battle_menu_manager.menu_cursor
 
-    if selection is GridMenuCursor then
+    if selection is GridMenuCursor<BattleContext> then
         if self.ctx.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
             local unit = self.ctx.battle_map:get_at_tile(point)

@@ -9,6 +9,9 @@ require("src/systems/service")
 require("src/menu/menu_manager")
 require("src/battle/battle_context")
 
+require("src/menu/cursor/grid_cursor")
+require("src/menu/cursor/list_cursor")
+
 
 global record BattleMenuManager
     is MenuManager<BattleContext>
@@ -17,24 +20,23 @@ end
 -- kind
 -- selected_data_mapper -- returns (success bool, data) to store
 -- select_transition
-local MENU_DATA: { MenuId: MenuDefinition } = {
+local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
     ["MENU_PLAYER_TURN"] = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuCursor, msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor<BattleContext>, msb: BattleContext, ctx: MenuContext)
                     ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator = function (s: MenuCursor, msb: BattleContext, _ctx: MenuContext): boolean
+                validator = function (s: GridMenuCursor<BattleContext>, msb: BattleContext, _ctx: MenuContext): boolean
                     return msb.tactics_engine:grid_selection_is_available_player(s) end,
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuCursor, _msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor<BattleContext>, _msb: BattleContext, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
-                validator = function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
-                    assert(s is GridMenuCursor)
+                validator = function (s: GridMenuCursor<BattleContext>, msb: BattleContext, ctx: MenuContext): boolean
                      return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
                         and s.legal_tiles:get_point(s.point).valid_selection
@@ -72,10 +74,10 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: GridMenuCursor, msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor<BattleContext>, msb: BattleContext, ctx: MenuContext)
                     ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator =  function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
+                validator =  function (s: GridMenuCursor<BattleContext>, msb: BattleContext, ctx: MenuContext): boolean
                     return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
                 send_command = "MOVE_AND_ATTACK",
@@ -85,7 +87,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_ITEM"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: ListMenuCursor, _msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: ListMenuCursor<BattleContext>, _msb: BattleContext, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]

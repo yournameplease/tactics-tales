@@ -9,6 +9,8 @@ require("src/systems/service")
 require("src/menu/menu_manager")
 require("src/story/story_context")
 require("src/game/base_game_context")
+require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/button_advance_cursor")
 
 
 global record GameMenuManager
@@ -17,7 +19,7 @@ global record GameMenuManager
 
 end
 
-local MENU_DATA: { MenuId: MenuDefinition } = {
+local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
         steps = {

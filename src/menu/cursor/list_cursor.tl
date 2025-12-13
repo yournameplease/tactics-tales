@@ -1,6 +1,9 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
 
+global type MenuState
+global type MenuContext
+
 global enum ListDirection
     "vertical"
     "horizontal"
@@ -12,24 +15,45 @@ global record MenuOption
     send_command: GameEvent
 end
 
-global record ListMenuCursor
-    is MenuCursor
+global record ListMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<ListMenuCursor<GC>>
+    where self.type == "CURSOR_LIST"
+    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
+    get_options: function(GC, MenuContext): {MenuOption}
+    wrap: boolean
+end
+
+global record ListMenuCursor<GC is GameContext>
+    is MenuCursor<GC, ListMenuDefinition<GC>>
     where self.type == "CURSOR_LIST"
     i: integer
     options: { MenuOption }
     direction: ListDirection
+
+    -- from definition
     wrap: boolean
+    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
 end
 
-function ListMenuCursor.new(i: integer, options: {MenuOption}, wrap: boolean): ListMenuCursor
-    local self: ListMenuCursor = {
+function ListMenuDefinition.new(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
+    props.type = "CURSOR_LIST"
+    return props
+end
+
+function ListMenuCursor.new(step_definition: ListMenuDefinition<GC>, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
+    local self: ListMenuCursor<GC> = {
         type = "CURSOR_LIST",
-        i = i,
-        options = options,
+        i = 1,
+        options = step_definition.get_options(game_ctx, menu_ctx),
         direction = "vertical",
-        wrap = wrap,
     }
-    return setmetatable(self, { __index = ListMenuCursor })
+    return setmetatable(self, { __index = function(t: any, k: string): any 
+            if (ListMenuCursor as {string: any})[k] then
+                return (ListMenuCursor as {string: any})[k]
+            end
+            return (step_definition as {string: any})[k]
+        end
+        })
 end
 
 function ListMenuCursor:update(joy: Joypad)
@@ -49,14 +73,9 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
-global record ListMenuDefinition<MSB is GameContext>
-    is MenuStepDefinition
-    where self.type == "CURSOR_LIST"
-    set_selected_context: function(ListMenuCursor, MSB, MenuContext)
-    get_options: function(MSB, MenuContext): {MenuOption}
-end
-
-function ListMenuDefinition.new(props: ListMenuDefinition<MSB>): ListMenuDefinition<MSB>
-    props.type = "CURSOR_LIST"
-    return props
+function ListMenuCursor:handle_selection(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+    if self.set_selected_context ~= nil then
+        self.set_selected_context(self, game_ctx, menu_ctx)
+    end
+    return self.options[self.i].next_state, self.options[self.i].send_command
 end

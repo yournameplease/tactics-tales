@@ -1,29 +1,47 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
 
-global record ButtonAdvanceCursor
-    is MenuCursor
-    where self.type == "CURSOR_BUTTON_ADVANCE"
-end
+global type MenuState
+global type MenuContext
 
-function ButtonAdvanceCursor.new(): ButtonAdvanceCursor
-    local self: ButtonAdvanceCursor = {
-        type = "CURSOR_BUTTON_ADVANCE",
-    }
-    return setmetatable(self, { __index = ButtonAdvanceCursor })
-end
-
-function ButtonAdvanceCursor:update(_joy: Joypad)
-end
-
-global record ButtonAdvanceMenuDefinition<MSB is GameContext>
-    is MenuStepDefinition
+global record ButtonAdvanceMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<GC>
     where self.type == "CURSOR_BUTTON_ADVANCE" 
     next_state: MenuStep
     send_command: GameEvent
 end
 
-function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<MSB>): ButtonAdvanceMenuDefinition<MSB>
+global record ButtonAdvanceCursor<GC is GameContext>
+    is MenuCursor<GC, ButtonAdvanceMenuDefinition<GC>>
+    where self.type == "CURSOR_BUTTON_ADVANCE"
+
+    -- from definition
+    next_state: MenuStep
+    send_command: GameEvent
+end
+
+function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<GC>): ButtonAdvanceMenuDefinition<GC>
     props.type = "CURSOR_BUTTON_ADVANCE"
     return props
+end
+
+
+function ButtonAdvanceCursor.new(step_definition: ButtonAdvanceMenuDefinition<GC>, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): ButtonAdvanceCursor<GC>
+    local self: ButtonAdvanceCursor<GC> = {
+        type = "CURSOR_BUTTON_ADVANCE",
+    }
+    return setmetatable(self, { __index = function(t: any, k: string): any 
+            if (ButtonAdvanceCursor as {string: any})[k] then
+                return (ButtonAdvanceCursor as {string: any})[k]
+            end
+            return (step_definition as {string: any})[k]
+        end
+        })
+end
+
+function ButtonAdvanceCursor:update(_joy: Joypad)
+end
+
+function ButtonAdvanceCursor:handle_select(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+    return self.next_state, self.send_command
 end

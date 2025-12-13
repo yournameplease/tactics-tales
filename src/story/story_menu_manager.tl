@@ -7,6 +7,7 @@ require("src/story/story_page")
 require("src/systems/service")
 require("src/menu/menu_manager")
 require("src/story/story_context")
+require("src/menu/cursor/list_cursor")
 
 
 
@@ -16,7 +17,7 @@ global record StoryMenuManager
 
 end
 
-local MENU_DATA: { MenuId: MenuDefinition } = {
+local MENU_DATA: { MenuId: MenuDefinition<StoryContext> } = {
     ["MENU_STORY_TEXT"] = {
         initial_step = "ADVANCE_TEXT",
         steps = {

@@ -7,37 +7,42 @@ require("src/battle/tactics/battle_unit")
 require("src/battle/battle_context")
 require("src/game_context")
 require("src/systems/service/game_service_bundle")
+
 require("src/menu/menu_cursor")
+require("src/menu/cursor/button_advance_cursor")
+require("src/menu/cursor/grid_cursor")
+require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/multiple_options_cursor")
 
 
 
-global record SelectionHistory
+global record SelectionHistory<GC is GameContext>
     step: MenuStep
-    selection: MenuCursor
+    selection: MenuCursor<GC, MenuDefinition<GC>>
 end
 
-global record MenuDefinition
+global record MenuDefinition<GC is GameContext>
     initial_step: MenuStep
-    steps: { MenuStep: MenuStepDefinition }
+    steps: { MenuStep: MenuStepDefinition<GC> }
 end
 
-global interface MenuManager<MSB is GameContext>
+global interface MenuManager<GC is GameContext>
     
     menu_definitions: { MenuId: MenuDefinition }
 
     menu_state: MenuState
     menu_ctx: MenuContext
-    menu_cursor: MenuCursor
-    selection_history: { SelectionHistory }
+    menu_cursor: MenuCursor<GC, MenuDefinition<GC>>
+    selection_history: { SelectionHistory<GC> }
 
-    game_ctx: MSB
+    game_ctx: GC
     event_bus: EventBus
 
     init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
     -- new: function(
     --     menu_definitions: { MenuId: MenuDefinition },
-    --     get_menu_service_bundle: function(services: { ServiceId: GameService }): MSB
-    -- ): MenuManager<MSB>
+    --     get_menu_service_bundle: function(services: { ServiceId: GameService }): GC
+    -- ): MenuManager<GC>
     populate_menu_state: function(self, new_step: MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)
@@ -45,17 +50,17 @@ global interface MenuManager<MSB is GameContext>
     update: function(self, joy: Joypad)
 end
 
-global record BaseMenuManager<BMSB is GameContext>
-    is MenuManager<BMSB>
+global record BaseMenuManager<GC is GameContext>
+    is MenuManager<GC>
 
-    menu_definitions: { MenuId: MenuDefinition }
+    menu_definitions: { MenuId: MenuDefinition<GC> }
 end
 
 function BaseMenuManager.new(
     menu_definitions: { MenuId: MenuDefinition },
     ctx: GameContext
-): MenuManager<BMSB>
-    local self: BaseMenuManager<BMSB> = setmetatable({}, { __index = BaseMenuManager })
+): MenuManager<GC>
+    local self: BaseMenuManager<GC> = setmetatable({}, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
 
@@ -77,24 +82,21 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
 
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
-    if new_step_data is GridMenuDefinition<BMSB> then
-        local new_selection = GridMenuCursor.new(
-            self.menu_state.point:copy(),
-            16,
-            16
+    
+    if new_step_data is GridMenuDefinition<GC> then
+        self.menu_cursor = GridMenuCursor.new(
+            new_step_data,
+            self.game_ctx,
+            self.menu_ctx,
+            self.menu_state
+        ) as MenuCursor<GC, >
+    elseif new_step_data is ListMenuDefinition<GC> then
+        self.menu_cursor = ListMenuCursor.new(
+            new_step_data,
+            self.game_ctx,
+            self.menu_ctx,
+            self.menu_state
         )
-        if new_step_data.get_legal_tiles ~= nil then
-            new_selection.legal_tiles = new_step_data.get_legal_tiles(self.game_ctx, self.menu_ctx)
-        else
-            new_selection.legal_tiles = nil
-        end
-        self.menu_cursor = new_selection
-    elseif new_step_data is ListMenuDefinition<BMSB> then
-        local new_selection = ListMenuCursor.new(
-            0,
-            new_step_data.get_options(self.game_ctx, self.menu_ctx)
-        )
-        self.menu_cursor = new_selection
     else
         error("not implemented")
     end
@@ -105,39 +107,9 @@ function BaseMenuManager:handle_menu_select()
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local step_data = menu_data.steps[self.menu_state.step]
 
-    local next_state: MenuStep
-    local send_command: GameEvent
 
-    local menu_cursor = self.menu_cursor
-
-    if step_data is GridMenuDefinition<BMSB> then
-        assert(menu_cursor is GridMenuCursor)
-        local validation = step_data.validator(menu_cursor, self.game_ctx, self.menu_ctx)
-        if not validation then return end
-
-        if self.menu_ctx.acting_unit ~= nil and self.menu_state.step == "SELECT_DESTINATION" then
-            -- TODO: keep path in the cursor data, and let battle menu manager do dijkstra
-            menu_cursor.path = { TilePoint.of(0, 0)  }
-        end
-
-        self.menu_state.point = menu_cursor.point:copy()
-        step_data.set_selected_context(menu_cursor, self.game_ctx, self.menu_ctx)
-        next_state = step_data.next_state
-        send_command = step_data.send_command
-    elseif step_data is ListMenuDefinition<BMSB> then
-        assert(menu_cursor is ListMenuCursor)
-        if step_data.set_selected_context ~= nil then
-            step_data.set_selected_context(menu_cursor, self.game_ctx, self.menu_ctx)
-        end
-        next_state = menu_cursor.options[menu_cursor.i].next_state
-        send_command = menu_cursor.options[menu_cursor.i].send_command
-    elseif step_data is ButtonAdvanceMenuDefinition<BMSB> then
-        next_state = step_data.next_state
-        send_command = step_data.send_command
-    else
-        error("Unexpected menu state: "..step_data.type)
-    end
-
+    local next_state, send_command = self.menu_cursor:handle_menu_select(self.game_ctx, self.menu_ctx, self.menu_state)
+    
     add(self.selection_history, {
         step = self.menu_state.step,
         selection = self.menu_cursor
