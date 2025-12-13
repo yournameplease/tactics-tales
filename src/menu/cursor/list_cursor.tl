@@ -37,7 +37,7 @@ end
 
 function ListMenuDefinition.new(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
     props.type = "CURSOR_LIST"
-    return props
+    return setmetatable(props, { __index = ListMenuDefinition })
 end
 
 function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
@@ -79,4 +79,8 @@ function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_
         self.set_selected_context(self, game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state, self.options[self.i].send_command
+end
+
+function ListMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    return ListMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end

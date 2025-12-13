@@ -22,7 +22,7 @@ end
 
 function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<GC>): ButtonAdvanceMenuDefinition<GC>
     props.type = "CURSOR_BUTTON_ADVANCE"
-    return props
+    return setmetatable(props, { __index = ButtonAdvanceMenuDefinition })
 end
 
 
@@ -45,4 +45,8 @@ end
 
 function ButtonAdvanceCursor:handle_select(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
     return self.next_state, self.send_command
+end
+
+function ButtonAdvanceMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    return ButtonAdvanceCursor.new(self, game_context, menu_ctx, menu_state)
 end

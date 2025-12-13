@@ -1,6 +1,6 @@
 -- require("src/menu/menu_cursor")
 -- require("src/game_context")
--- require("src/util/list")
+-- local List = require("src/util/list")
 
 -- global type MenuState
 
@@ -22,8 +22,8 @@
 --     "select"
 -- end
 
--- global record MultipleOptionsMenuCursor
---     is MenuCursor
+-- global record MultipleOptionsMenuCursor<GC is GameContext>
+--     is MenuCursor<GC>
 --     where self.type == "CURSOR_MULTIPLE_OPTIONS"
 --     i: integer
 --     primary_direction: MultipleOptionsDirection
@@ -32,13 +32,22 @@
 --     options: { MenuMultipleOptionSelection }
 -- end
 
--- function MultipleOptionsMenuCursor.new(step_definition: MenuStepDefinition<MenuCursor<GC>>, menu_state: MenuState): MultipleOptionsMenuCursor
---     local self: MultipleOptionsMenuCursor = {
+-- global record ListMenuDefinition<GC is GameContext>
+--     is MenuStepDefinition<GC>
+--     where self.type == "CURSOR_LIST"
+--     set_selected_context: function(MultipleOptionsMenuCursor<GC>, GC, MenuContext)
+--     get_options_definitions: function(GC, MenuContext): {MenuMultipleOptionDefinition}
+--     wrap: boolean
+-- end
+
+-- function MultipleOptionsMenuCursor.new(step_definition: any, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuCursor<GC>
+--     assert(step_definition is MultipleOptionsMenuCursor<GC>)
+--     local self: MultipleOptionsMenuCursor<GC> = {
 --         type = "CURSOR_MULTIPLE_OPTIONS",
---         i = i,
+--         i = 0,
 --         options = List.do_map(
 --             options,
---             function(o: MenuStepDefinition): MenuCursor
+--             function(o: MenuStepDefinition<GC>): MenuCursor<GC>
 --                 return MenuCursor.of(o)
 --             end
 --         ),

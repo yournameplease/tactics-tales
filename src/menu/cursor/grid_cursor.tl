@@ -33,7 +33,7 @@ end
 
 function GridMenuDefinition.new(props: GridMenuDefinition<GC>): GridMenuDefinition<GC>
     props.type = "CURSOR_GRID"
-    return props
+    return setmetatable(props, { __index = GridMenuDefinition })
 end
 
 function GridMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): GridMenuCursor<GC>
@@ -75,4 +75,8 @@ function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_
         menu_state.point = self.point:copy()
         self.set_selected_context(self, game_ctx, menu_ctx)
         return self.next_state, self.send_command
+end
+
+function GridMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    return GridMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end

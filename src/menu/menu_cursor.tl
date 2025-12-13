@@ -20,4 +20,5 @@ end
 global interface MenuStepDefinition<GC is GameContext>
     type: MenuType
     previous_state: MenuStep
+    to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
 end

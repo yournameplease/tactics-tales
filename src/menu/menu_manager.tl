@@ -83,33 +83,7 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
     
-    if new_step_data is GridMenuDefinition<GC> then
-        LOG.info("Making GridMenuDefinition")
-        self.menu_cursor = GridMenuCursor.new(
-            new_step_data,
-            self.game_ctx,
-            self.menu_ctx,
-            self.menu_state
-        ) as MenuCursor<GC>
-    elseif new_step_data is ListMenuDefinition<GC> then
-        LOG.info("Making ListMenuDefinition")
-        self.menu_cursor = ListMenuCursor.new(
-            new_step_data,
-            self.game_ctx,
-            self.menu_ctx,
-            self.menu_state
-        ) as MenuCursor<GC>
-    elseif new_step_data is ButtonAdvanceMenuDefinition<GC> then
-        LOG.info("Making ButtonAdvanceMenuDefinition")
-        self.menu_cursor = ButtonAdvanceCursor.new(
-            new_step_data,
-            self.game_ctx,
-            self.menu_ctx,
-            self.menu_state
-        ) as MenuCursor<GC>
-    else
-        error("Failed to populate menu state")
-    end
+    self.menu_cursor = new_step_data:to_cursor(self.game_ctx, self.menu_ctx, self.menu_state)
 end
 
 function BaseMenuManager:handle_menu_select()

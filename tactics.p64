@@ -4479,6 +4479,10 @@ function ButtonAdvanceCursor:handle_select(game_context, menu_ctx, menu_state)
    return self.next_state, self.send_command
 end
 
+function ButtonAdvanceMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
+   return ButtonAdvanceCursor.new(self, game_context, menu_ctx, menu_state)
+end
+
 :: build/menu/cursor/grid_cursor.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
 require("src/game_context")
@@ -4551,12 +4555,16 @@ function GridMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
 
 
 
-
+   self.path = { TilePoint.of(0, 0) }
 
 
    menu_state.point = self.point:copy()
    self.set_selected_context(self, game_ctx, menu_ctx)
    return self.next_state, self.send_command
+end
+
+function GridMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
+   return GridMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end
 
 :: build/menu/cursor/list_cursor.lua
@@ -4641,6 +4649,10 @@ function ListMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
       self.set_selected_context(self, game_ctx, menu_ctx)
    end
    return self.options[self.i].next_state, self.options[self.i].send_command
+end
+
+function ListMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
+   return ListMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end
 
 :: build/menu/cursor/multiple_options_cursor.lua
@@ -4754,33 +4766,34 @@ function BaseMenuManager:populate_menu_state(new_step)
    local menu_data = self.menu_definitions[self.menu_state.menu_id]
    local new_step_data = menu_data.steps[self.menu_state.step]
 
-   if new_step_data.type == "CURSOR_GRID" then
-      LOG.info("Making GridMenuDefinition")
-      self.menu_cursor = GridMenuCursor.new(
-      new_step_data,
-      self.game_ctx,
-      self.menu_ctx,
-      self.menu_state)
+   self.menu_cursor = new_step_data:to_cursor(self.game_ctx, self.menu_ctx, self.menu_state)
 
-   elseif new_step_data.type == "CURSOR_LIST" then
-      LOG.info("Making ListMenuDefinition")
-      self.menu_cursor = ListMenuCursor.new(
-      new_step_data,
-      self.game_ctx,
-      self.menu_ctx,
-      self.menu_state)
 
-   elseif new_step_data.type == "CURSOR_BUTTON_ADVANCE" then
-      LOG.info("Making ButtonAdvanceMenuDefinition")
-      self.menu_cursor = ButtonAdvanceCursor.new(
-      new_step_data,
-      self.game_ctx,
-      self.menu_ctx,
-      self.menu_state)
 
-   else
-      error("Failed to populate menu state")
-   end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 function BaseMenuManager:handle_menu_select()
@@ -7912,53 +7925,53 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49",runtime=24,workspaces={{location="main.lua#26",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01",runtime=24,workspaces={{location="main.lua#26",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/game/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/menu/cursor/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/systems/service/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -8138,7 +8151,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-13 05:06:45",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -8421,7 +8434,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -8450,7 +8463,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -8458,5 +8471,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 05:09:49"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 05:33:01"]]
 :: [eoc]
