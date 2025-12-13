@@ -200,7 +200,7 @@ function TacticsEngine:validate_tile_is_in_unit_attack_range(selection: MenuCurs
     local destination = ctx.destination.point
     local min_range, max_range = unit.character:get_weapon_range()
 
-    if selection is GridMenuSelection then
+    if selection is GridMenuCursor then
         local target_point = selection.point
 
         local target_unit = self.ctx.battle_map:get_at_tile(target_point)
@@ -308,7 +308,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Arr
 end
 
 function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: MenuCursor, ctx: MenuContext): boolean
-    assert(grid_selection is GridMenuSelection)
+    assert(grid_selection is GridMenuCursor)
     local destination_unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
     if destination_unit == nil then
         return true
@@ -318,7 +318,7 @@ function TacticsEngine:grid_selection_is_empty_or_acting_unit(grid_selection: Me
 end
 
 function TacticsEngine:grid_selection_is_available_player(grid_selection: MenuCursor): boolean
-    assert(grid_selection is GridMenuSelection)
+    assert(grid_selection is GridMenuCursor)
     local unit = self.ctx.battle_map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end

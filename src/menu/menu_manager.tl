@@ -16,7 +16,7 @@ global record MenuOption
     send_command: GameEvent
 end
 
-global record GridMenuSelection
+global record GridMenuCursor
     is MenuCursor
     where self.type == "CURSOR_GRID"
     point: TilePoint
@@ -26,17 +26,17 @@ global record GridMenuSelection
     legal_tiles: Array2D<MenuTileHighlight>
 end
 
-function GridMenuSelection.new(point: TilePoint, x_max: integer, y_max: integer): GridMenuSelection
-    local self: GridMenuSelection = {
+function GridMenuCursor.new(point: TilePoint, x_max: integer, y_max: integer): GridMenuCursor
+    local self: GridMenuCursor = {
         type = "CURSOR_GRID",
         point = point, 
         x_max = x_max,
         y_max = y_max
     }
-    return setmetatable(self, { __index = GridMenuSelection })
+    return setmetatable(self, { __index = GridMenuCursor })
 end
 
-function GridMenuSelection:update(joy: Joypad)
+function GridMenuCursor:update(joy: Joypad)
         self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
         self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
 end
@@ -46,7 +46,7 @@ global enum ListDirection
     "horizontal"
 end
 
-global record VerticalListMenuSelection
+global record ListMenuCursor
     is MenuCursor
     where self.type == "CURSOR_LIST"
     i: integer
@@ -55,18 +55,18 @@ global record VerticalListMenuSelection
     wrap: boolean
 end
 
-function VerticalListMenuSelection.new(i: integer, options: {MenuOption}, wrap: boolean): VerticalListMenuSelection
-    local self: VerticalListMenuSelection = {
+function ListMenuCursor.new(i: integer, options: {MenuOption}, wrap: boolean): ListMenuCursor
+    local self: ListMenuCursor = {
         type = "CURSOR_LIST",
         i = i,
         options = options,
         direction = "vertical",
         wrap = wrap,
     }
-    return setmetatable(self, { __index = VerticalListMenuSelection })
+    return setmetatable(self, { __index = ListMenuCursor })
 end
 
-function VerticalListMenuSelection:update(joy: Joypad)
+function ListMenuCursor:update(joy: Joypad)
     local new_i = self.i
     if self.direction == "vertical" then
         new_i = new_i + joy.dyp
@@ -101,7 +101,7 @@ global enum MultipleOptionsDirection
     "select"
 end
 
-global record MultipleOptionsMenuSelection
+global record MultipleOptionsMenuCursor
     is MenuCursor
     where self.type == "CURSOR_MULTIPLE_OPTIONS"
     i: integer
@@ -111,8 +111,8 @@ global record MultipleOptionsMenuSelection
     options: { MenuMultipleOptionSelection }
 end
 
-function MultipleOptionsMenuSelection.new(i: integer, options: {MenuDefinition}): MultipleOptionsMenuSelection
-    local self: MultipleOptionsMenuSelection = {
+function MultipleOptionsMenuCursor.new(i: integer, options: {MenuDefinition}): MultipleOptionsMenuCursor
+    local self: MultipleOptionsMenuCursor = {
         type = "CURSOR_MULTIPLE_OPTIONS",
         i = i,
         options = List.do_map(
@@ -122,17 +122,17 @@ function MultipleOptionsMenuSelection.new(i: integer, options: {MenuDefinition})
             end
         ),
     }
-    return setmetatable(self, { __index = MultipleOptionsMenuSelection })
+    return setmetatable(self, { __index = MultipleOptionsMenuCursor })
 end
 
-function MultipleOptionsMenuSelection:update_option(joy: Joypad)
+function MultipleOptionsMenuCursor:update_option(joy: Joypad)
     local current_selection = self.options[self.i]
     if self.is_option_selected or not current_selection.must_select then
         current_selection.selection:update(joy)
     end
 end
 
-function MultipleOptionsMenuSelection:update(joy: Joypad)
+function MultipleOptionsMenuCursor:update(joy: Joypad)
     local new_i = self.i
     if self.primary_direction == "vertical" then
         if joy.dyp ~= 0 then
@@ -157,19 +157,19 @@ function MultipleOptionsMenuSelection:update(joy: Joypad)
     end
 end
 
-global record ButtonAdvanceMenuSelection
+global record ButtonAdvanceCursor
     is MenuCursor
     where self.type == "CURSOR_BUTTON_ADVANCE"
 end
 
-function ButtonAdvanceMenuSelection.new(): ButtonAdvanceMenuSelection
-    local self: ButtonAdvanceMenuSelection = {
+function ButtonAdvanceCursor.new(): ButtonAdvanceCursor
+    local self: ButtonAdvanceCursor = {
         type = "CURSOR_BUTTON_ADVANCE",
     }
-    return setmetatable(self, { __index = ButtonAdvanceMenuSelection })
+    return setmetatable(self, { __index = ButtonAdvanceCursor })
 end
 
-function ButtonAdvanceMenuSelection:update(_joy: Joypad)
+function ButtonAdvanceCursor:update(_joy: Joypad)
 end
 
 global record SelectionHistory
@@ -186,8 +186,8 @@ global record GridMenuDefinition<MSB is GameContext>
     is MenuStepDefinition
     where self.type == "CURSOR_GRID"
 
-    set_selected_context: function(GridMenuSelection, MSB, MenuContext)
-    validator: function(GridMenuSelection, MSB, MenuContext): boolean
+    set_selected_context: function(GridMenuCursor, MSB, MenuContext)
+    validator: function(GridMenuCursor, MSB, MenuContext): boolean
     next_state: MenuStep
     send_command: GameEvent
     get_legal_tiles: function(MSB, MenuContext): Array2D<MenuTileHighlight>
@@ -201,7 +201,7 @@ end
 global record ListMenuDefinition<MSB is GameContext>
     is MenuStepDefinition
     where self.type == "CURSOR_LIST"
-    set_selected_context: function(VerticalListMenuSelection, MSB, MenuContext)
+    set_selected_context: function(ListMenuCursor, MSB, MenuContext)
     get_options: function(MSB, MenuContext): {MenuOption}
 end
 
@@ -284,7 +284,7 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
     local new_step_data = menu_data.steps[self.menu_state.step]
     if new_step_data is GridMenuDefinition<BMSB> then
-        local new_selection = GridMenuSelection.new(
+        local new_selection = GridMenuCursor.new(
             self.menu_state.point:copy(),
             16,
             16
@@ -296,7 +296,7 @@ function BaseMenuManager:populate_menu_state(new_step: MenuStep)
         end
         self.menu_cursor = new_selection
     elseif new_step_data is ListMenuDefinition<BMSB> then
-        local new_selection = VerticalListMenuSelection.new(
+        local new_selection = ListMenuCursor.new(
             0,
             new_step_data.get_options(self.game_ctx, self.menu_ctx)
         )
@@ -317,7 +317,7 @@ function BaseMenuManager:handle_menu_select()
     local menu_cursor = self.menu_cursor
 
     if step_data is GridMenuDefinition<BMSB> then
-        assert(menu_cursor is GridMenuSelection)
+        assert(menu_cursor is GridMenuCursor)
         local validation = step_data.validator(menu_cursor, self.game_ctx, self.menu_ctx)
         if not validation then return end
 
@@ -331,7 +331,7 @@ function BaseMenuManager:handle_menu_select()
         next_state = step_data.next_state
         send_command = step_data.send_command
     elseif step_data is ListMenuDefinition<BMSB> then
-        assert(menu_cursor is VerticalListMenuSelection)
+        assert(menu_cursor is ListMenuCursor)
         if step_data.set_selected_context ~= nil then
             step_data.set_selected_context(menu_cursor, self.game_ctx, self.menu_ctx)
         end

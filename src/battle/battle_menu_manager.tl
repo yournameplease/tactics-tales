@@ -22,7 +22,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor, msb: BattleContext, ctx: MenuContext)
                     ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
                 validator = function (s: MenuCursor, msb: BattleContext, _ctx: MenuContext): boolean
@@ -30,11 +30,11 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
                 next_state = "SELECT_DESTINATION"
             }),
             ["SELECT_DESTINATION"] = GridMenuDefinition.new({
-                set_selected_context = function(s: GridMenuSelection, _msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor, _msb: BattleContext, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
                 validator = function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
-                    assert(s is GridMenuSelection)
+                    assert(s is GridMenuCursor)
                      return msb.tactics_engine:grid_selection_is_empty_or_acting_unit(s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
                         and s.legal_tiles:get_point(s.point).valid_selection
@@ -72,7 +72,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_TARGET"] = GridMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: GridMenuSelection, msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: GridMenuCursor, msb: BattleContext, ctx: MenuContext)
                     ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
                 validator =  function (s: MenuCursor, msb: BattleContext, ctx: MenuContext): boolean
@@ -85,7 +85,7 @@ local MENU_DATA: { MenuId: MenuDefinition } = {
             }),
             ["SELECT_ITEM"] = ListMenuDefinition.new({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: VerticalListMenuSelection, _msb: BattleContext, ctx: MenuContext)
+                set_selected_context = function(s: ListMenuCursor, _msb: BattleContext, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
