@@ -15,9 +15,9 @@ end
 
 global enum MenuType
     "CURSOR_GRID"
-    "CURSOR_VERTICAL_LIST"
-    "CURSOR_HORIZONTAL_LIST"
+    "CURSOR_LIST"
     "CURSOR_BUTTON_ADVANCE"
+    "CURSOR_MULTIPLE_OPTIONS"
 end
 
 global record TileSelection
