@@ -14,14 +14,13 @@ require("src/menu/cursor/button_advance_cursor")
 
 
 global record GameMenuManager
-    is TransientGameService, MenuManager<BaseGameContext>
-    where self.id == 'story_menu_manager'
-
+    is MenuManager<BaseGameContext>
 end
 
 local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
+        -- initial_step = "MAIN_MENU",
         steps = {
             ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
                 next_state = "MAIN_MENU",

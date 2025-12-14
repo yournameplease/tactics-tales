@@ -142,6 +142,7 @@ function BaseMenuManager:update(joy: Joypad)
     elseif joy.ap then
         self:handle_menu_select()
     else
+        LOG.trace("Update cursor", self.menu_cursor.type)
         self.menu_cursor:update(joy)
     end
 end

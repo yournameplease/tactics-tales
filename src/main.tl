@@ -45,6 +45,7 @@ require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_context")
 require("src/story/story")
+require("src/game/game")
 require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
@@ -57,7 +58,7 @@ local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: TaskManager
 
-local story: Story
+local game: Game
 
 local service_manager: ServiceManager
 
@@ -81,14 +82,14 @@ function _init()
         ui_context = ui_context
     }
     
-    story = Story.new("test_story", game_services)
+    game = Game.new(game_services)
 end
 
 function _update()
     animation_manager:tick()
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
-    story:update(joy)
+    game:update(joy)
     task_manager:update_tasks()
 end
 

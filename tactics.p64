@@ -3345,7 +3345,7 @@ Config = {}
 
 CONFIG = {
 
-   LOG_LEVEL = "DEBUG",
+   LOG_LEVEL = "TRACE",
 
    SCREEN_WIDTH = 480,
    SCREEN_HEIGHT = 270,
@@ -4227,11 +4227,10 @@ GameMenuManager = {}
 
 
 
-
-
 local MENU_DATA = {
    ["MENU_MAIN_MENU"] = {
-      initial_step = "TITLE_SCREEN",
+
+      initial_step = "MAIN_MENU",
       steps = {
          ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
             next_state = "MAIN_MENU",
@@ -4376,6 +4375,7 @@ require("src/animation")
 require("src/ui/ui_manager")
 require("src/battle/battle_context")
 require("src/story/story")
+require("src/game/game")
 require("src/ui/ui_context_manager")
 
 require("src/battle/tactics/enemy_ai")
@@ -4388,7 +4388,7 @@ local animation_manager
 local ui_manager
 local task_manager
 
-local story
+local game
 
 local service_manager
 
@@ -4412,14 +4412,14 @@ function _init()
       ui_context = ui_context,
    }
 
-   story = Story.new("test_story", game_services)
+   game = Game.new(game_services)
 end
 
 function _update()
    animation_manager:tick()
    LOG.trace("Getting Joypad.")
    local joy = get_joypad()
-   story:update(joy)
+   game:update(joy)
    task_manager:update_tasks()
 end
 
@@ -4454,7 +4454,7 @@ ButtonAdvanceMenuDefinition = {}
 
 function ButtonAdvanceMenuDefinition.new(props)
    props.type = "CURSOR_BUTTON_ADVANCE"
-   return props
+   return setmetatable(props, { __index = ButtonAdvanceMenuDefinition })
 end
 
 
@@ -4519,7 +4519,7 @@ GridMenuDefinition = {}
 
 function GridMenuDefinition.new(props)
    props.type = "CURSOR_GRID"
-   return props
+   return setmetatable(props, { __index = GridMenuDefinition })
 end
 
 function GridMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
@@ -4607,7 +4607,7 @@ ListMenuDefinition = {}
 
 function ListMenuDefinition.new(props)
    props.type = "CURSOR_LIST"
-   return props
+   return setmetatable(props, { __index = ListMenuDefinition })
 end
 
 function ListMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
@@ -4656,7 +4656,104 @@ function ListMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
 end
 
 :: build/menu/cursor/multiple_options_cursor.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
+require("src/game_context")
+local List = require("src/util/list")
 
+
+
+MenuMultipleOptionDefinition = {}
+
+
+
+
+
+MenuMultipleOptionSelection = {}
+
+
+
+
+
+MultipleOptionsDirection = {}
+
+
+
+
+
+MultipleOptionsMenuCursor = {}
+
+
+
+
+
+
+
+
+
+MultipleOptionsMenuDefinition = {}
+
+
+
+
+
+
+
+function MultipleOptionsMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
+   assert(step_definition.type == "CURSOR_LIST")
+   local self = {
+      type = "CURSOR_MULTIPLE_OPTIONS",
+      i = 0,
+      options = List.do_map(
+      step_definition.get_options_definitions(game_ctx, menu_ctx),
+      function(o)
+         return {
+            text = o.text,
+            cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
+            must_select = o.must_select,
+         }
+      end),
+
+   }
+   return setmetatable(self, { __index = function(t, k)
+      if (MultipleOptionsMenuCursor)[k] then
+         return (MultipleOptionsMenuCursor)[k]
+      end
+      return (step_definition)[k]
+   end,
+   })
+end
+
+function MultipleOptionsMenuCursor:update_option(joy)
+   local current_selection = self.options[self.i]
+   if self.is_option_selected or not current_selection.must_select then
+      current_selection.cursor:update(joy)
+   end
+end
+
+function MultipleOptionsMenuCursor:update(joy)
+   local new_i = self.i
+   if self.primary_direction == "vertical" then
+      if joy.dyp ~= 0 then
+         new_i = new_i + joy.dyp
+      else
+         self:update_option(joy)
+      end
+   elseif self.primary_direction == "horizontal" then
+      if joy.dxp ~= 0 then
+         new_i = new_i + joy.dxp
+      else
+         self:update_option(joy)
+      end
+   elseif self.primary_direction == "select" then
+
+   end
+
+   if self.wrap then
+      self.i = new_i % #self.options + 1
+   else
+      self.i = mid(1, new_i, #self.options)
+   end
+end
 
 :: build/menu/menu_cursor.lua
 require("src/menu/types")
@@ -4767,33 +4864,6 @@ function BaseMenuManager:populate_menu_state(new_step)
    local new_step_data = menu_data.steps[self.menu_state.step]
 
    self.menu_cursor = new_step_data:to_cursor(self.game_ctx, self.menu_ctx, self.menu_state)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 end
 
 function BaseMenuManager:handle_menu_select()
@@ -4852,6 +4922,7 @@ function BaseMenuManager:update(joy)
    elseif joy.ap then
       self:handle_menu_select()
    else
+      LOG.trace("Update cursor", self.menu_cursor.type)
       self.menu_cursor:update(joy)
    end
 end
@@ -5111,8 +5182,6 @@ require("src/menu/cursor/list_cursor")
 
 
 StoryMenuManager = {}
-
-
 
 
 
@@ -6737,12 +6806,12 @@ function TacticsMap:draw(state, ui_theme)
 
    local unit_positions = compute_animated_unit_positions(state.battle_context.ctx.battle_map)
 
-   local sorted_units = userdata("i16", 2, #unit_positions)
-   for i, u in ipairs(unit_positions) do
-      sorted_units:set(0, i - 1, u.point.y)
-      sorted_units:set(1, i - 1, u.id)
-   end
-   sorted_units:sort()
+
+
+
+
+
+
 
    local drawn_unit_count = 0
 
@@ -6808,21 +6877,21 @@ function TacticsMap:draw(state, ui_theme)
          end
       end
 
-      while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
-         local unit_id = sorted_units:get(1, drawn_unit_count)
-         local unit = battle_map:get_unit_by_id(unit_id)
-         draw_unit(unit)
-         drawn_unit_count = drawn_unit_count + 1
-      end
+
+
+
+
+
+
 
       map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-      while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y + 1) * TILE_SIZE.y do
-         local unit_id = sorted_units:get(1, drawn_unit_count)
-         local unit = battle_map:get_unit_by_id(unit_id)
-         draw_unit(unit)
-         drawn_unit_count = drawn_unit_count + 1
-      end
+
+
+
+
+
+
 
 
       if cursor_tile ~= nil then
@@ -7232,6 +7301,34 @@ function UIManager.new()
       story_root:add(story_page)
 
       self.layouts["STORY_PAGE"] = { root = story_root }
+   end
+   do
+      local title_screen_root = Box.new({
+         x = 0, y = 0,
+         w = 480, h = 270,
+         internal_margin = { t = 4 },
+         dir = "row",
+         transparent = true,
+      })
+
+
+      local left = title_screen_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
+
+      self.layouts["TITLE_SCREEN"] = { root = title_screen_root }
+   end
+   do
+      local main_menu_root = Box.new({
+         x = 0, y = 0,
+         w = 480, h = 270,
+         internal_margin = { t = 4 },
+         dir = "row",
+         transparent = true,
+      })
+
+
+      local left = main_menu_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
+
+      self.layouts["MAIN_MENU_PAGE"] = { root = main_menu_root }
    end
 
 
@@ -7925,53 +8022,53 @@ include "build/main.lua"
 
 include "lib/error_explorer.lua"
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01",runtime=24,workspaces={{location="main.lua#26",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/game/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/menu/cursor/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/systems/service/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -8151,7 +8248,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-13 05:30:40",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -8434,7 +8531,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -8463,7 +8560,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -8471,5 +8568,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 05:33:01"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 23:05:50"]]
 :: [eoc]

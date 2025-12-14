@@ -9,7 +9,6 @@ require("src/systems/tasks")
 require("src/data/battles")
 
 require("src/battle/battle_manager")
-require("src/menu/menu_manager")
 require("src/game/game_menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
@@ -40,6 +39,7 @@ function Game.new(services: GameServiceBundle): Game
     self.game_ctx = BaseGameContext.new(services)
 
 	self.game_ctx.menu_manager = GameMenuManager.new(self.game_ctx)
+    self.game_ctx.menu_manager:set_menu("MENU_MENU_MENU")
 
     services.ui_context:register_context(self.game_ctx)
 

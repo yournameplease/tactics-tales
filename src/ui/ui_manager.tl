@@ -132,6 +132,34 @@ function UIManager.new(): UIManager
 
         self.layouts["STORY_PAGE"] = { root = story_root }
     end
+    do
+        local title_screen_root = Box.new({
+            x=0, y=0,
+            w=480, h=270,
+            internal_margin = {t = 4},
+            dir="row",
+            transparent = true
+        })
+
+        -- Left Sidebar
+        local left = title_screen_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
+
+        self.layouts["TITLE_SCREEN"] = { root = title_screen_root }
+    end
+    do
+        local main_menu_root = Box.new({
+            x=0, y=0,
+            w=480, h=270,
+            internal_margin = {t = 4},
+            dir="row",
+            transparent = true
+        })
+
+        -- Left Sidebar
+        local left = main_menu_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
+
+        self.layouts["MAIN_MENU_PAGE"] = { root = main_menu_root }
+    end
 
     -- Validate all layouts
     for id, v in pairs(self.layouts) do

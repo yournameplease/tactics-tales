@@ -12,9 +12,7 @@ require("src/menu/cursor/list_cursor")
 
 
 global record StoryMenuManager
-    is TransientGameService, MenuManager<StoryContext>
-    where self.id == 'story_menu_manager'
-
+    is MenuManager<StoryContext>
 end
 
 local MENU_DATA: { MenuId: MenuDefinition<StoryContext> } = {
