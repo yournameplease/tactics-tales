@@ -10,6 +10,7 @@ require("src/menu/menu_manager")
 require("src/story/story_context")
 require("src/game/base_game_context")
 require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/multiple_options_cursor")
 require("src/menu/cursor/button_advance_cursor")
 
 

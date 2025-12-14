@@ -43,7 +43,7 @@ function Game.new(services: GameServiceBundle): Game
 
     services.ui_context:register_context(self.game_ctx)
 
-    services.event_bus:on("BATTLE_END_DEFEAT", function()
+    services.event_bus:on("GAME_BEGIN_STORY", function()
         self:begin_story()
     end)
 
@@ -51,7 +51,11 @@ function Game.new(services: GameServiceBundle): Game
 end
 
 function Game:update(joy: Joypad)
-    self.game_ctx.menu_manager:update(joy)
+    if self.story ~= nil then
+        self.story:update(joy)
+    else
+        self.game_ctx.menu_manager:update(joy)
+    end
 end
 
 return Game
