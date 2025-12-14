@@ -1,7 +1,7 @@
 require("src/ui/box")
 require("src/systems/event_bus")
-require("src/ui/panels/text_node")
-require("src/ui/panels/message_log")
+require("src/ui/components/text_node")
+require("src/ui/components/message_log")
 require("src/ui/ui_context_manager")
 require("src/story/story_context")
 

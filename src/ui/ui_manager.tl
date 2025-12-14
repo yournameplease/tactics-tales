@@ -2,21 +2,17 @@ require("src/systems/service")
 require("src/types")
 require("src/ui/types")
 
-require("src/battle/battle_context")
-require("src/story/story_context")
 require("src/config")
 
-require("src/ui/panels/tactics_map")
 require("src/ui/box")
-require("src/ui/panels/unit_info")
-require("src/ui/panels/combat_preview")
-require("src/ui/panels/text_node")
-require("src/ui/panels/event_message_log")
-
-local PageDivider = require("src/ui/decoration/page_divider")
 
 require("src/ui/validator")
 
+local tactics_main = require("src/ui/layout/tactics_main")
+local combat_preview = require("src/ui/layout/combat_preview")
+local story_page = require("src/ui/layout/story_page")
+local title_screen = require("src/ui/layout/title_screen")
+local main_menu = require("src/ui/layout/main_menu")
 global record UILayout
     root: UIElement
 end
@@ -43,123 +39,11 @@ function UIManager.new(): UIManager
     -- 1. Create the BATTLE layout tree
     self.layouts = {}
 
-    local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border"  })
-    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end, draw_properties = {justify = "center"}}))
-    battle_summary:add(TextNode.new({ func = function(state: UIContextManager): { string }
-        local turn = state.battle_context.ctx.turn_manager.turn
-        return { "Turn " .. turn }
-    end, draw_properties = {justify = "center"} }))
-    battle_summary:add(TextNode.new({ func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, draw_properties = {justify = "center"} }))
-
-    local page_divider = PageDivider.new(7)
-
-    local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
-            {
-                decoration_padding = 2,
-                decoration = "border",
-                internal_margin = { t = 5, b = 5, l = 4, r = 4 }
-            })
-    
-    do
-        local battle_root = Box.new({
-            x=0, y=0,
-            w=480, h=270,
-            internal_margin = {t = 4},
-            gap=0,
-            padding=0, 
-            dir="row",
-            transparent = true
-        })
-
-        -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
-        left:add(battle_summary)
-        left:add(UnitInfo.new({ padding = 2, decoration = "border"  }))
-        left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
-
-        battle_root:add(page_divider)
-        battle_root:add(tactics_map)
-
-        self.layouts["TACTICS"]= { root = battle_root }
-    end
-    do
-        local battle_root = Box.new({
-            x=0, y=0,
-            w=480, h=270,
-            internal_margin = {t = 4},
-            dir="row",
-            transparent = true
-        })
-
-        -- Left Sidebar
-        local left = battle_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
-        left:add(battle_summary)
-        left:add(CombatPreview.new({ padding = 0, decoration = "border"  }))
-        left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
-
-        battle_root:add(page_divider)
-        battle_root:add(tactics_map)
-
-        self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
-    end
-    do
-        local story_root = Box.new({
-            x=0, y=0,
-            w=480, h=270,
-            internal_margin = {t = 4},
-            dir="row",
-            transparent = true
-        })
-
-        -- Left Sidebar
-        local left = story_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
-
-        local story_page = MessageLog.new({
-            dir="col",
-            flex_grow = 1,
-            padding = 2,
-            draw_properties = {
-                text_direction = "down",
-                wrap_mode = "ellipsis",
-            },
-            func = function(state: UIContextManager, _row_limit: integer): { string }
-                return state.story_context.ctx.story_page.text
-            end
-        })
-
-        story_root:add(page_divider)
-        story_root:add(story_page)
-
-        self.layouts["STORY_PAGE"] = { root = story_root }
-    end
-    do
-        local title_screen_root = Box.new({
-            x=0, y=0,
-            w=480, h=270,
-            internal_margin = {t = 4},
-            dir="row",
-            transparent = true
-        })
-
-        -- Left Sidebar
-        local left = title_screen_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
-
-        self.layouts["TITLE_SCREEN"] = { root = title_screen_root }
-    end
-    do
-        local main_menu_root = Box.new({
-            x=0, y=0,
-            w=480, h=270,
-            internal_margin = {t = 4},
-            dir="row",
-            transparent = true
-        })
-
-        -- Left Sidebar
-        local left = main_menu_root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
-
-        self.layouts["MAIN_MENU_PAGE"] = { root = main_menu_root }
-    end
+    self.layouts["TACTICS"] = tactics_main
+    self.layouts["COMBAT_PREVIEW"] = combat_preview
+    self.layouts["STORY_PAGE"] = story_page
+    self.layouts["TITLE_SCREEN"] = title_screen
+    self.layouts["MAIN_MENU_PAGE"] = main_menu
 
     -- Validate all layouts
     for id, v in pairs(self.layouts) do

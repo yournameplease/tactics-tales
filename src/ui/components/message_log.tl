@@ -1,5 +1,5 @@
 require("src/ui/box")
-require("src/ui/panels/text_node")
+require("src/ui/components/text_node")
 require("src/ui/ui_context_manager")
 local Text = require("src/util/text")
 
