@@ -8,6 +8,7 @@ require("src/config")
 
 require("src/ui/panels/tactics_map")
 require("src/ui/box")
+require("src/ui/components/text_node")
 require("src/ui/panels/unit_info")
 require("src/ui/panels/combat_preview")
 require("src/ui/panels/event_message_log")
@@ -27,6 +28,6 @@ local root = Box.new({
 })
 
 -- Left Sidebar
-root:add(Box.new({ dir="col", flex_grow = 1, padding = 2}))
+root:add(TextNode.new( { text = {"Title Screen"} } ))
 
 return { root = root }

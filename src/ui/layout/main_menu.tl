@@ -18,6 +18,7 @@ require("src/ui/validator")
 
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
-local root = SplitPages.new(left, left)
+local right = TextNode.new( { flex_grow = 1, text = {"Main Menu"} } )
+local root = SplitPages.new(left, right)
 
 return { root = root }

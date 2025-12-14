@@ -11,6 +11,7 @@ end
 global record TextNode
     is UIElement, TextUIElement
     func: function(UIContextManager): { string }
+    text: { string }
     rows: integer
 end
 
@@ -28,7 +29,13 @@ function TextNode.new(props: TextNode): TextNode
 
     box.padding = props.padding or 0
     box.decoration_padding = 0
-    box.func = props.func or error("Need text getter `func`")
+    if props.text then
+        box.text = props.text
+    elseif props.func then
+        box.func = props.func
+    else
+        error("Need either `text` or `func` for text node!")
+    end
     box.rows = props.rows or 1
     box.h = (box.rows) * (TEXT_HEIGHT + 2)
 
@@ -48,7 +55,7 @@ end
 function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local text = self.func(state)
+    local text = self.text or self.func(state)
 
     assert(
             #text ==
