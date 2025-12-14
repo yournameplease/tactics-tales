@@ -4,11 +4,13 @@ global type GameMenuManager
 
 global record BaseGameContext
 	is GameContext
+	where self.type == "game"
 	menu_manager: GameMenuManager 
 end
 
 function BaseGameContext.new(services: GameServiceBundle): BaseGameContext
 	return {
-		services = services
+		type = "game",
+		services = services,
 	}
 end

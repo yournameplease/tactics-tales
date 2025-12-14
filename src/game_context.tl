@@ -6,6 +6,7 @@
 global type GameServiceBundle
 
 global enum GameContextType
+    "game"
     "battle"
     "story"
 end

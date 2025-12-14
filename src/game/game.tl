@@ -39,7 +39,7 @@ function Game.new(services: GameServiceBundle): Game
     self.game_ctx = BaseGameContext.new(services)
 
 	self.game_ctx.menu_manager = GameMenuManager.new(self.game_ctx)
-    self.game_ctx.menu_manager:set_menu("MENU_MENU_MENU")
+    self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
 
     services.ui_context:register_context(self.game_ctx)
 
