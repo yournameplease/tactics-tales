@@ -36,7 +36,7 @@ end
 --- @param id integer
 --- @param label string | function
 --- @param action function
-function pt.menuitem(id?: integer | __MenuItem, label?: any, action?: any) 
+function pt.menuitem(id, label, action) 
 	menuitem(id , label, action)
 end
 --- @meta
@@ -49,7 +49,7 @@ end
 --- @param length? integer The length of the sound effect to play in notes (0-63).
 --- @param pan? integer The panning of the sound effect (-128 to 127).
 --- @param mix_volume? integer The volume of the sound effect (0-255). Takes priority over the value at `0x553a`.
-function pt.sfx(n: integer, channel?: integer, offset?: integer, length?: integer, pan?: integer, mix_volume?: integer)
+function pt.sfx(n, channel, offset, length, pan, mix_volume)
 	sfx(n, channel, offset, length, pan, mix_volume)
 end
 
@@ -60,7 +60,7 @@ end
 --- @param n integer
 --- @param fade_len? integer
 --- @param channel_mask? integer
-function pt.music(n: integer, fade_len?: integer, channel_mask?: integer) 
+function pt.music(n, fade_len, channel_mask) 
 	music(n, fade_len, channel_mask)
 end
 
@@ -83,7 +83,7 @@ end
 --- @param channel integer
 --- @param retrig boolean
 --- @param panning integer
-function pt.note(pitch: integer, inst: integer, vol: integer, effect: integer, effect_p: integer, channel: integer, retrig: boolean, panning: integer) 
+function pt.note(pitch, inst, vol, effect, effect_p, channel, retrig, panning) 
 	note(pitch, inst, vol, effect, effect_p, channel, retrig, panning)
 end
 ---@meta
@@ -112,7 +112,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COCREATE)
 --- @param func function
 --- @return thread
-function pt.cocreate(func: any)
+function pt.cocreate(func)
 	cocreate(func)
 end
 
@@ -122,7 +122,7 @@ end
 --- @param ... any
 --- @return boolean error
 --- @return ... any
-function pt.coresume(c: any, ...: any)
+function pt.coresume(c, ...)
 	coresume(c, ...)
 end
 
@@ -130,14 +130,14 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COSTATUS)
 --- @param c thread
 --- @return string
-function pt.costatus(c: any) : string
-	costatus(c)
+function pt.costatus(c)
+	return costatus(c)
 end
 
 --- Yield the coroutine back to the caller
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#YIELD)
 --- @param ... any
-function pt.yield(...: any) 
+function pt.yield(...) 
 	yield(...)
 end
 --- @meta
@@ -157,7 +157,7 @@ end
 --- Change the current working directory
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cd)
 --- @param path string
-function pt.cd(path: any) 
+function pt.cd(path) 
 	cd(path)
 end
 
@@ -167,7 +167,7 @@ end
 --- @return string | nil type
 --- @return number | nil size
 --- @return string | nil origin
-function pt.fstat(path: any)
+function pt.fstat(path)
 	fstat(path)
 end
 
@@ -175,23 +175,23 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fullpath)
 --- @param filename string
 --- @return string
-function pt.fullpath(filename: any) : string
-	fullpath(filename)
+function pt.fullpath(filename)
+	return fullpath(filename)
 end
 
 --- Lists the contents of a folder
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ls)
 --- @param path? string
 --- @return string[]
-function pt.ls(path?: any) : {string}
-	ls(path)
+function pt.ls(path)
+	return ls(path)
 end
 
 --- Copy a file from src to dest. Folders are copied recursively and the dest is overwritten.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cp)
 --- @param src string
 --- @param dest string
-function pt.cp(src: any, dest: any) 
+function pt.cp(src, dest) 
 	cp(src, dest)
 end
 
@@ -199,14 +199,14 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mv)
 --- @param src string
 --- @param dest string
-function pt.mv(src: any, dest: any) 
+function pt.mv(src, dest) 
 	mv(src, dest)
 end
 
 --- Delete a file or folder (recursive)
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#rm)
 --- @param filename string
-function pt.rm(filename: any) 
+function pt.rm(filename) 
 	rm(filename)
 end
 
@@ -222,7 +222,7 @@ end
 --- @param filename string
 --- @return any
 --- @return __FileMetadata?
-function pt.fetch(filename: any)
+function pt.fetch(filename)
 	fetch(filename)
 end
 
@@ -231,7 +231,7 @@ end
 --- @param filename string
 --- @param object table | string | userdata | boolean | number
 --- @param metadata? __FileMetadata
-function pt.store(filename: string, object: any, metadata: __FileMetadata) 
+function pt.store(filename, object, metadata) 
 	store(filename, object, metadata)
 end
 
@@ -239,7 +239,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fetch_metadata)
 --- @param filename string
 --- @return __FileMetadata | nil
-function pt.fetch_metadata(filename: string)
+function pt.fetch_metadata(filename)
 	fetch_metadata(filename)
 end
 
@@ -247,14 +247,14 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#store_metadata)
 --- @param filename string
 --- @param metadata __FileMetadata
-function pt.store_metadata(filename: any, metadata: __FileMetadata) 
+function pt.store_metadata(filename, metadata) 
 	store_metadata(filename, metadata)
 end
 
 --- Create a directory
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mkdir)
 --- @param name string
-function pt.mkdir(name: any) 
+function pt.mkdir(name) 
 	mkdir(name)
 end
 
@@ -267,7 +267,7 @@ end
 --- View implementation in /system/lib/fs.lua
 --- @param target string
 --- @param origin string
-function pt.mount(target: string, origin: string) 
+function pt.mount(target, origin) 
 	mount(target, origin)
 end
 
@@ -275,8 +275,8 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#include)
 --- @param filename string The path to the file relative to the working directory. Must include the file extension.
 --- @return any? #The return value of the file, if any.
-function pt.include(filename: string) : any
-	include(filename)
+function pt.include(filename)
+	return include(filename)
 end
 --- @meta
 
@@ -286,14 +286,14 @@ end
 --- 4 is 160x90
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#vid)
 --- @param mode 0 | 3 | 4
-function pt.vid(mode: integer) 
+function pt.vid(mode) 
 	vid(mode)
 end
 
 --- Clears the screen and resets the clipping rectangle
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cls)
 --- @param col? integer
-function pt.cls(col?: integer) 
+function pt.cls(col) 
 	cls(col)
 end
 
@@ -305,8 +305,8 @@ end
 --- @param col? integer The color index to print in.
 --- @return integer new_x The x coordinate of the next character to be printed.
 --- @return integer new_y The y coordinate of the next character to be printed.
--- global print: function(value: integer, x: integer, y: integer, col: integer): integer, integer
-
+-- global print: function(value: integer, x: integer, y: integer, col: integer)
+return 
 --- Sets the clipping rectangle for drawing operations.
 --- If clip_previous is set, the new region will be clipped by the old region
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#clip)
@@ -315,7 +315,7 @@ end
 --- @param w integer
 --- @param h integer
 --- @param clip_previous? boolean
-function pt.clip(x: integer, y: integer, w: integer, h: integer, clip_previous?: boolean) 
+function pt.clip(x, y, w, h, clip_previous) 
 	clip(x, y, w, h, clip_previous)
 end
 
@@ -325,15 +325,15 @@ end
 --- @return integer y
 --- @return integer w
 --- @return integer h
--- global clip: function(): integer, integer, integer, integer 
-
+-- global clip: function()
+return 
 --- Sets the pixel to at x, y to the color index 0 to 63
 --- If color is not specified, uses the current draw color instead
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pset)
 --- @param x integer
 --- @param y integer
 --- @param col? integer
-function pt.pset(x: integer, y: integer, col?: integer) 
+function pt.pset(x, y, col) 
 	pset(x, y, col)
 end
 
@@ -343,8 +343,8 @@ end
 --- @param x integer
 --- @param y integer
 --- @return integer
-function pt.pget(x: integer, y: integer) : integer
-	pget(x, y)
+function pt.pget(x, y)
+	return pget(x, y)
 end
 
 -- These are in the docs, but they don't appear to be implemented
@@ -358,13 +358,13 @@ end
 --- @param n integer
 --- @param f integer
 --- @return boolean
--- global fget: function(n: integer, f: integer) : boolean
-function pt.fget_one(n: integer, f: integer) : integer
-	fget(n, f)
+-- global fget: function(n: integer, f: integer)
+return function pt.fget_one(n, f)
+	return fget(n, f)
 end
 
-function pt.fget(n: integer) : integer
-	fget(n)
+function pt.fget(n)
+	return fget(n)
 end
 
 --- Set the value of a sprite n's flag f (0-7)
@@ -372,7 +372,7 @@ end
 --- @param n integer
 --- @param f integer
 --- @param val boolean
-function pt.fset(n: integer, f: integer, val: boolean) 
+function pt.fset(n, f, val) 
 	fset(n, f, val)
 end
 
@@ -382,7 +382,7 @@ end
 --- @param x integer
 --- @param y integer
 --- @param col? integer
-function pt.cursor(x: integer, y: integer, col?: integer) 
+function pt.cursor(x, y, col) 
 	cursor(x, y, col)
 end
 
@@ -390,7 +390,7 @@ end
 --- If color is not specified, set the current color to 6
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#color)
 --- @param col integer
-function pt.set_color(col: integer) 
+function pt.set_color(col) 
 	color(col)
 end
 
@@ -404,8 +404,8 @@ end
 --- @param y integer
 --- @return integer x
 --- @return integer y
-function pt.set_camera(x: integer, y: integer) : integer, integer
-	camera(x, y)
+function pt.set_camera(x, y)
+	return camera(x, y)
 end
 
 --- Reset the camera offset
@@ -422,7 +422,7 @@ end
 --- @param y integer
 --- @param r integer
 --- @param col? integer
-function pt.circ(x: integer, y: integer, r: integer, col?: integer) 
+function pt.circ(x, y, r, col) 
 	circ(x, y, r, col)
 end
 
@@ -432,7 +432,7 @@ end
 --- @param y integer
 --- @param r integer
 --- @param col? integer
-function pt.circfill(x: integer, y: integer, r: integer, col?: integer) 
+function pt.circfill(x, y, r, col) 
 	circfill(x, y, r, col)
 end
 
@@ -443,7 +443,7 @@ end
 --- @param x1 integer
 --- @param y1 integer
 --- @param col? integer
-function pt.oval(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+function pt.oval(x0, y0, x1, y1, col) 
 	oval(x0, y0, x1, y1, col)
 end
 
@@ -454,7 +454,7 @@ end
 --- @param x1 integer
 --- @param y1 integer
 --- @param col? integer
-function pt.ovalfill(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+function pt.ovalfill(x0, y0, x1, y1, col) 
 	ovalfill(x0, y0, x1, y1, col)
 end
 
@@ -466,7 +466,7 @@ end
 --- @param x1? integer
 --- @param y1? integer
 --- @param col? integer
-function pt.line(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+function pt.line(x0, y0, x1, y1, col) 
 	line(x0, y0, x1, y1, col)
 end
 
@@ -481,10 +481,10 @@ end
 --- @param x1 integer
 --- @param y1 integer
 --- @param col? integer
-function pt.rect(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+function pt.rect(x0, y0, x1, y1, col) 
 	rect(x0, y0, x1, y1, col)
 end
-function pt.rrect(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
+function pt.rrect(x, y, w, h, radius, col) 
 	rrect(x, y, w, h, radius, col)
 end
 
@@ -495,10 +495,10 @@ end
 --- @param x1 integer
 --- @param y1 integer
 --- @param col? integer
-function pt.rectfill(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+function pt.rectfill(x0, y0, x1, y1, col) 
 	rectfill(x0, y0, x1, y1, col)
 end
-function pt.rrectfill(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
+function pt.rrectfill(x, y, w, h, radius, col) 
 	rrectfill(x, y, w, h, radius, col)
 end
 
@@ -507,7 +507,7 @@ end
 --- @param c0 integer The index to remap.
 --- @param c1 integer The index to map c0 to.
 --- @param p? 0 | 1 0 to swap during drawing, 1 to swap the entire screen. Defaults to 0.
-function pt.pal(c0?: integer, c1?: integer, p?: integer) 
+function pt.pal(c0, c1, p) 
 	pal(c0, c1, p)
 end
 
@@ -533,7 +533,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
 --- @param c integer
 --- @param is_transparent boolean
-function pt.palt(c?: integer, is_transparent?: boolean) 
+function pt.palt(c, is_transparent) 
 	palt(c, is_transparent)
 end
 
@@ -550,7 +550,7 @@ end
 --- @param y? integer
 --- @param flip_x? boolean
 --- @param flip_y? boolean
-function pt.spr(s: integer, x?: number, y?: number, flip_x?: boolean, flip_y?: boolean) 
+function pt.spr(s, x, y, flip_x, flip_y) 
 	spr(s, x, y, flip_x, flip_y)
 end
 
@@ -567,7 +567,7 @@ end
 --- @param dh? integer The height of the destination rectangle. Defaults to sh.
 --- @param flip_x? boolean Whether to flip the sprite horizontally. Defaults to false.
 --- @param flip_y? boolean Whether to flip the sprite vertically. Defaults to false.
-function pt.sspr(s: integer, sx?: integer, sy?: integer, sw?: integer, sh?: integer, dx?: integer, dy?: integer, dw?: integer, dh?: integer, flip_x?: boolean, flip_y?: boolean) 
+function pt.sspr(s, sx, sy, sw, sh, dx, dy, dw, dh, flip_x, flip_y) 
 	sspr(s, sx, sy, sw, sh, dx, dy, dw, dh, flip_x, flip_y)
 end
 
@@ -576,7 +576,7 @@ end
 --- @param p integer
 --- @param ... integer
 -- global fillp: function(p?: integer, ...: integer) 
-function pt.fillp(...: any) 
+function pt.fillp(...) 
 	fillp(...)
 end
 
@@ -584,22 +584,22 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_spr)
 --- @param index integer
 --- @return userdata
-function pt.get_spr(index: integer) : Userdata
-	get_spr(index)
+function pt.get_spr(index)
+	return get_spr(index)
 end
 
 --- Set the sprite for a given index
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_spr)
 --- @param index integer
 --- @param ud userdata
-function pt.set_spr(index: integer, ud: Userdata) 
+function pt.set_spr(index, ud) 
 	set_spr(index, ud)
 end
 
 --- Copies the graphics buffer to the screen, then syncronizes to the next frame
 --- [View Online](https://pico-8.fandom.com/wiki/Flip)
 --- @param flags? integer
-function pt.flip(flags?: integer) 
+function pt.flip(flags) 
 	flip(flags)
 end
 -- --- @meta
@@ -688,9 +688,9 @@ end
 --- @param button integer
 --- @param player? integer
 --- @return number | false
--- global btn: function(button: integer, player?: integer) : number | boolean
-function pt.btn(button: integer, player?: integer) : boolean
-	btn(button, player)
+-- global btn: function(button: integer, player?: integer)
+return function pt.btn(button, player)
+	return btn(button, player)
 end
 
 --- Get the state of a button held down.
@@ -706,8 +706,8 @@ end
 --- @param button integer
 --- @param player? integer
 --- @return number | false
--- global btnp: function(button: integer, player?: integer): number | boolean 
-function pt.btnp(button: integer, player?: integer)
+-- global btnp: function(button: integer, player?: integer)
+return function pt.btnp(button, player)
 	btnp(button, player)
 end
 
@@ -717,8 +717,8 @@ end
 --- @param k string
 --- @param raw? boolean
 --- @return boolean
-function pt.key(k: string, raw?: boolean) : boolean
-	key(k, raw)
+function pt.key(k, raw)
+	return key(k, raw)
 end
 
 --- Get the state of a key held down
@@ -727,14 +727,14 @@ end
 --- @param k string
 --- @param raw? boolean
 --- @return boolean
-function pt.keyp(k: string, raw?: boolean)
+function pt.keyp(k, raw)
 	keyp(k, raw)
 end
 
 --- Reset the state of a key until the end of frame
 --- View implementation in /system/lib/events.lua
 --- @param k string
-function pt.clear_key(k: string) 
+function pt.clear_key(k) 
 	clear_key(k)
 end
 
@@ -749,7 +749,7 @@ end
 --- If clear is set, discard remaining text
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#readtext)
 --- @param clear? boolean
-function pt.readtext(clear?: boolean) 
+function pt.readtext(clear) 
 	readtext(clear)
 end
 
@@ -767,7 +767,7 @@ end
 --- @return integer mouse_b
 --- @return number wheel_x
 --- @return number wheel_y
-function pt.mouse(new_mx: number, new_my: number)
+function pt.mouse(new_mx, new_my)
 	mouse(new_mx, new_my)
 end
 
@@ -782,7 +782,7 @@ end
 --- @param move_sensitivity number
 --- @return number dx
 --- @return number dy
-function pt.mouselock(lock: boolean, event_sensitivity: number, move_sensitivity: number)
+function pt.mouselock(lock, event_sensitivity, move_sensitivity)
 	mouselock(lock, event_sensitivity, move_sensitivity)
 end
 global DATP: string--- @meta
@@ -810,14 +810,14 @@ global DATP: string--- @meta
 --- @param p8layers? any
 --- @param tile_w? any
 --- @param tile_h? any
-function pt.map(src: any, tile_x: any, tile_y: any, sx?: any, sy?: any, tiles_x?: any, tiles_y?: any, p8layers?: any, tile_w?: any, tile_h?: any) 
+function pt.map(src, tile_x, tile_y, sx, sy, tiles_x, tiles_y, p8layers, tile_w, tile_h) 
 	map(src, tile_x, tile_y, sx, sy, tiles_x, tiles_y, p8layers, tile_w, tile_h)
 end
 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mget)
 --- @param x any
 --- @param y any
-function pt.mget(x: any, y: any) 
+function pt.mget(x, y) 
 	mget(x, y)
 end
 
@@ -825,7 +825,7 @@ end
 --- @param x any
 --- @param y any
 --- @param val any
-function pt.mset(x: any, y: any, val: any) 
+function pt.mset(x, y, val) 
 	mset(x, y, val)
 end
 
@@ -842,7 +842,7 @@ end
 --- @param w0 any
 --- @param w1 any
 --- @param flags any
-function pt.tline3d(src_ud: any, x0: any, y0: any, x1: any, y1: any, u0: any, v0: any, u1: any, v1: any, w0: any, w1: any, flags: any) 
+function pt.tline3d(src_ud, x0, y0, x1, y1, u0, v0, u1, v1, w0, w1, flags) 
 	tline3d(src_ud, x0, y0, x1, y1, u0, v0, u1, v1, w0, w1, flags)
 end
 --- @meta
@@ -852,9 +852,9 @@ end
 --- @param x number
 --- @param y number
 --- @return number
--- global min: function(x: number, y: number) : number
-function pt.min(x: integer, y: integer) : integer
-	min(x, y)
+-- global min: function(x: number, y: number)
+return function pt.min(x, y)
+	return min(x, y)
 end
 
 --- Returns the maximum of two numbers
@@ -862,9 +862,9 @@ end
 --- @param x number
 --- @param y number
 --- @return number
--- global max: function(x: number, y: number) : number
-function pt.max(x: integer, y: integer) : integer
-	max(x, y)
+-- global max: function(x: number, y: number)
+return function pt.max(x, y)
+	return max(x, y)
 end
 
 --- Returns the middle value of two numbers
@@ -873,25 +873,25 @@ end
 --- @param y number
 --- @param z number
 --- @return number
--- global mid: function(x: number, y: number, z: number) : number
-function pt.mid(x: integer, y: integer, z: integer) : integer
-	mid(x, y, z)
+-- global mid: function(x: number, y: number, z: number)
+return function pt.mid(x, y, z)
+	return mid(x, y, z)
 end
 
 --- Returns the nearest integer at or below a number
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#FLR)
 --- @param x number
 --- @return integer
-function pt.flr(x: number) : integer
-	flr(x)
+function pt.flr(x)
+	return flr(x)
 end
 
 --- Returns the nearest integer at or above a number
 --- [View Online](https://pico-8.fandom.com/wiki/Ceil)
 --- @param val number
 --- @return integer
-function pt.ceil(val: number) : integer
-	ceil(val)
+function pt.ceil(val)
+	return ceil(val)
 end
 
 --- Generate a random number under the given limit
@@ -900,8 +900,8 @@ end
 --- [View Online](https://pico-8.fandom.com/wiki/Rnd)
 --- @param limit? number
 --- @return number
-function pt.rnd(limit: number) : number
-	rnd(limit)
+function pt.rnd(limit)
+	return rnd(limit)
 end
 
 --- Generate a random number under the given limit
@@ -909,45 +909,45 @@ end
 --- [View Online](https://pico-8.fandom.com/wiki/Rnd)
 --- @param tbl table
 --- @return any
--- global rnd: function(tbl: number) : any
-
+-- global rnd: function(tbl: number)
+return 
 --- Initializes the random number generator with an explicit seed value
 --- [View Online](https://pico-8.fandom.com/wiki/Srand)
 --- @param val number
-function pt.srand(val: number) : number
-	srand(val)
+function pt.srand(val)
+	return srand(val)
 end
 
 --- Converts a value to a number
 --- @param val any
 --- @param format_flags? integer
 --- @return number
-function pt.tonum(val: any, format_flags: integer) : number
-	tonum(val, format_flags)
+function pt.tonum(val, format_flags)
+	return tonum(val, format_flags)
 end
 
 --- Returns the absolute value of a number
 --- [View Online](https://pico-8.fandom.com/wiki/Abs)
 --- @param n number
 --- @return number
--- global abs: function(n: number) : number
-function pt.abs(n: integer) : integer
-	abs(n)
+-- global abs: function(n: number)
+return function pt.abs(n)
+	return abs(n)
 end
 
 --- Returns the sign of a number. 1 for positive, -1 for negative
 --- [View Online](https://pico-8.fandom.com/wiki/Sgn)
 --- @param n number
 --- @return -1 | 1
-function pt.sgn(n: number) : integer
-	sgn(n)
+function pt.sgn(n)
+	return sgn(n)
 end
 
 --- Calculates the arctangent of dx/dy formed by the vector on the unit circle.
 --- The result is adjusted to represent the full circle.
 --- [View Online](https://pico-8.fandom.com/wiki/Atan2)
-function pt.atan2(dx: number, dy: number) : number
-	atan2(dx, dy)
+function pt.atan2(dx, dy)
+	return atan2(dx, dy)
 end
 
 --- Calculates the sin of an angle
@@ -956,8 +956,8 @@ end
 --- [View Online](https://pico-8.fandom.com/wiki/Sin)
 --- @param angle number
 --- @return number
-function pt.sin(angle: number) : number
-	sin(angle)
+function pt.sin(angle)
+	return sin(angle)
 end
 
 --- Calculates the sin of an angle
@@ -966,16 +966,16 @@ end
 --- [View Online](https://pico-8.fandom.com/wiki/Cos)
 --- @param angle number
 --- @return number
-function pt.cos(angle: number) : number
-	cos(angle)
+function pt.cos(angle)
+	return cos(angle)
 end
 
 --- Calculates the square root of a number
 --- [View Online](https://pico-8.fandom.com/wiki/Sqrt)
 --- @param n number
 --- @return number
-function pt.sqrt(n: number) : number
-	sqrt(n)
+function pt.sqrt(n)
+	return sqrt(n)
 end
 --- @meta
 
@@ -985,7 +985,7 @@ end
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-function pt.peek(addr: integer, n?: integer)
+function pt.peek(addr, n)
 	peek(addr, n)
 end
 
@@ -995,7 +995,7 @@ end
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-function pt.peek2(addr: integer, n?: integer)
+function pt.peek2(addr, n)
 	peek2(addr, n)
 end
 
@@ -1005,7 +1005,7 @@ end
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-function pt.peek4(addr: integer, n?: integer)
+function pt.peek4(addr, n)
 	peek4(addr, n)
 end
 
@@ -1015,7 +1015,7 @@ end
 --- @param addr integer
 --- @param n? integer
 --- @return integer ...
-function pt.peek8(addr: integer, n?: integer)
+function pt.peek8(addr, n)
 	peek8(addr, n)
 end
 
@@ -1024,7 +1024,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke)
 --- @param addr integer
 --- @param ... integer
-function pt.poke(addr: integer, ...: integer)
+function pt.poke(addr, ...)
 	poke(addr, ...)
 end
 
@@ -1033,7 +1033,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke2)
 --- @param addr integer
 --- @param ... integer
-function pt.poke2(addr: integer, ...: integer)
+function pt.poke2(addr, ...)
 	poke2(addr, ...)
 end
 
@@ -1042,7 +1042,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke4)
 --- @param addr integer
 --- @param ... integer
-function pt.poke4(addr: integer, ...: integer)
+function pt.poke4(addr, ...)
 	poke4(addr, ...)
 end
 
@@ -1051,7 +1051,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke4)
 --- @param addr integer
 --- @param ... integer
-function pt.poke8(addr: integer, ...: integer)
+function pt.poke8(addr, ...)
 	poke8(addr, ...)
 end
 
@@ -1060,7 +1060,7 @@ end
 --- @param dest_addr integer
 --- @param source_addr integer
 --- @param len integer
-function pt.memcpy(dest_addr: integer, source_addr: integer, len: integer) 
+function pt.memcpy(dest_addr, source_addr, len) 
 	memcpy(dest_addr, source_addr, len)
 end
 
@@ -1069,7 +1069,7 @@ end
 --- @param dest_addr integer
 --- @param val integer
 --- @param len integer
-function pt.memset(dest_addr: integer, val: integer, len: integer) 
+function pt.memset(dest_addr, val, len) 
 	memset(dest_addr, val, len)
 end
 --- @meta
@@ -1085,7 +1085,7 @@ end
 --- @param flags? integer
 --- @param metadata? table
 --- @return string | nil
-function pt.pod(val: any | string | Userdata | boolean | number, flags?: integer, metadata?: any)
+function pt.pod(val, flags, metadata)
 	pod(val    , flags, metadata)
 end
 
@@ -1094,7 +1094,7 @@ end
 --- @param val string
 --- @return table | string | userdata | boolean | number | nil content
 --- @return table metadata
-function pt.unpod(val: string)
+function pt.unpod(val)
 	unpod(val)
 end
 --- @meta
@@ -1213,7 +1213,7 @@ end
 --- @param pos0 integer
 --- @param pos1? integer | boolean
 --- @return string
-function pt.sub(str: string, pos0: integer, pos1: integer | boolean)
+function pt.sub(str, pos0, pos1)
 	sub(str, pos0, pos1 )
 end
 
@@ -1288,33 +1288,33 @@ end
 --- Gets the environment variables given to the process at its creation
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#env)
 --- @return __Environment
-function pt.env() : __Environment 
-	env()
+function pt.env()
+	return env()
 end
 
 --- Exits the program
 --- @param exit_code? integer
-function pt.exit(exit_code?: integer) 
+function pt.exit(exit_code) 
 	exit(exit_code)
 end
 
 --- Prints text to the host system's console
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#printh)
 --- @param value any
-function pt.printh(value: any) 
+function pt.printh(value) 
 	printh(value)
 end
 
 --- @param filename string
 --- @param env? __Environment
-function pt.create_process(filename: string, env?: __Environment) 
+function pt.create_process(filename, env) 
 	create_process(filename, env)
 end
 
 --- Stop the cart and optionally print a message
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#stop)
 --- @param message? string
-function pt.stop(message?: string) 
+function pt.stop(message) 
 	stop(message)
 end
 
@@ -1327,28 +1327,28 @@ end
 --- Get the number of seconds elapsed since the cartridge was run
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#time)
 --- @return number
-function pt.time() : number
-	time()
+function pt.time()
+	return time()
 end
 
 --- Get the number of seconds elapsed since the cartridge was run
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#t)
 --- @return number
-global t : function() : number
-
+global t : function()
+return 
 --- : anyGet the current date and time formatted using Lua's standard date 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#date)
 --- @param format? string
 --- @param t? integer | string
 --- @param delta? number
 --- @return string
-function pt.date(format?: string, t?: integer | string, delta?: number)
+function pt.date(format, t, delta)
 	date(format, t , delta)
 end
 
 --- Set the system clipboard
 --- @param text string
-function pt.set_clipboard(text: string) 
+function pt.set_clipboard(text) 
 	set_clipboard(text)
 end
 
@@ -1361,26 +1361,26 @@ end
 --- Adds an event listener
 --- @param event string
 --- @param callback function
-function pt.on_event(event: string, callback: any) 
+function pt.on_event(event, callback) 
 	on_event(event, callback)
 end
 
 --- Sends an event to a process
 --- @param pid integer
 --- @param event table
-function pt.send_message(pid: integer, event: any) 
+function pt.send_message(pid, event) 
 	send_message(pid, event)
 end
 
 --- Get the current process id
 --- @return integer
-function pt.pid() : integer 
-	pid()
+function pt.pid()
+	return pid()
 end
 
 --- Create a notification toast
 --- @param message string
-function pt.notify(message: string) 
+function pt.notify(message) 
 	notify(message)
 end
 
@@ -1392,20 +1392,20 @@ end
 --- @param id integer
 --- @param addr? integer
 --- @return any
-function pt.stat(id?: integer, addr?: integer) 
+function pt.stat(id, addr) 
 	stat(id, addr)
 end
 
 --- Get a property from the current theme (/ram/shared/theme.pod)
 --- @param which string
 --- @return any
-function pt.theme(which: string) 
+function pt.theme(which) 
 	theme(which)
 end
 
 --- Opens a file using the system file associations (/system/util/open.lua)
 --- @param file string
-function pt.open(file: string) 
+function pt.open(file) 
 	open(file)
 end
 --- @meta
@@ -1416,7 +1416,7 @@ end
 --- @param table table
 --- @param value any
 --- @param index? number
-function pt.add<V>(table: {V}, value: V, index?: number) 
+function pt.add(table, value, index) 
 	add(table, value, index)
 end
 
@@ -1425,8 +1425,8 @@ end
 --- @param table table
 --- @param value any
 --- @return any | nil
-function pt.del<V>(table: {V}, value: V) : V | nil
-	del(table, value)
+function pt.del(table, value)
+	return del(table, value)
 end
 
 --- Delete the item in the table at the specified index
@@ -1435,8 +1435,8 @@ end
 --- @param table table
 --- @param index? integer
 --- @return any | nil
-function pt.deli<V>(table: { V }, index?: integer) : V | nil
-	deli(table, index)
+function pt.deli(table, index)
+	return deli(table, index)
 end
 
 --- Get the length of a table
@@ -1444,7 +1444,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#count)
 --- @param table table
 --- @param value? any
-function pt.count(table: any, value?: any) 
+function pt.count(table, value) 
 	count(table, value)
 end
 
@@ -1452,15 +1452,15 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#all)
 --- @param table table
 --- @return function
-function pt.all(table: any) : any
-	all(table)
+function pt.all(table)
+	return all(table)
 end
 
 --- For each item in the table, call function with each item as a parameter
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#foreach)
 --- @param table table
 --- @param func function
-function pt.foreach(table: any, func: any) 
+function pt.foreach(table, func) 
 	foreach(table, func)
 end
 
@@ -1468,15 +1468,15 @@ end
 
 --- Alias for table.pack
 --- @param ... any
-function pt.pack(...: any)  
+function pt.pack(...)  
 	pack(...)
 end
 
 --- Alias for table.unpack
 --- @param tbl table
 --- @return any ...
-function pt.unpack(tbl: any) : any
-	unpack(tbl)
+function pt.unpack(tbl)
+	return unpack(tbl)
 end
 --- @meta
 
@@ -1502,18 +1502,18 @@ end
 --- @field x number
 --- @field y number
 --- @field z number
---- @operator add(userdata|number):userdata
---- @operator sub(userdata|number):userdata
---- @operator mul(userdata|number):userdata
---- @operator div(userdata|number):userdata
-global record Userdata
+--- @operator add(userdata|number)
+return --- @operator sub(userdata|number)
+return --- @operator mul(userdata|number)
+return --- @operator div(userdata|number)
+return global record Userdata
 	x: number
 	y: number
 	z: number
-	width: function(self): integer | nil
-	height: function(self): integer | nil
-	get: function(self, integer, integer): integer
-	set: function(self, integer, ...: integer)
+	width: function(self)
+	return height: function(self)
+	return get: function(self, integer, integer)
+	return set: function(self, integer, ...: integer)
 	sort: function(self)
 end
 
@@ -1533,9 +1533,9 @@ end
 --- @param height integer
 --- @param data? string string of hex values encoding the data or comma separated list of floats
 --- @return userdata
---- @overload fun(data_type: userdata_type, width: integer, data: string?): userdata
---- @overload fun(data: string): userdata
-function pt.userdata(data_type: userdata_type, width: integer, height: integer, data?: string)
+--- @overload fun(data_type: userdata_type, width: integer, data: string?)
+return --- @overload fun(data: string)
+return function pt.userdata(data_type, width, height, data)
 	userdata(data_type, width, height, data)
 end
 
@@ -1543,16 +1543,16 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#vec)
 --- @return userdata
 --- @param ... number
-function pt.vec(...: number) : Userdata 
-	vec(...)
+function pt.vec(...)
+	return vec(...)
 end
 
 --- @class userdata
 --- @return number
 --- Get the magnitude of the vector
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
--- global Userdata:magnitude = function(self): number 
-
+-- global Userdata:magnitude = function(self)
+return 
 --- @class userdata
 --- @param v userdata
 --- @return number
@@ -1609,11 +1609,11 @@ end
 --- @param y integer The y index to start from
 --- @param n integer The number of flat-indexed values to get
 --- @return number ... Each value from the starting index in flat-indexed order
---- @overload fun(u: userdata, x: integer, n: integer): number ...
---- @overload fun(u: userdata, x: integer, y: integer): number
---- @overload fun(u: userdata, x: integer): number
---- @overload fun(u: userdata): number ...
--- global get: function(u: any, x: any, y: any, n: any) 
+--- @overload fun(u: userdata, x: integer, n: integer)
+return --- @overload fun(u: userdata, x: integer, y: integer)
+return --- @overload fun(u: userdata, x: integer)
+return --- @overload fun(u: userdata)
+return -- global get: function(u: any, x: any, y: any, n: any) 
 
 -- userdata.get = get
 
@@ -2079,15 +2079,15 @@ end
 --- Get the current display as a u8, 2d userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_display)
 --- @return userdata
-function pt.get_display() : Userdata 
-	get_display()
+function pt.get_display()
+	return get_display()
 end
 
 --- Set the draw target to a u8, 2d userdata
 --- If ud is not provided, set the draw target to the current display
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_draw_target)
 --- @param ud? userdata
-function pt.set_draw_target(ud?: Userdata) 
+function pt.set_draw_target(ud) 
 	set_draw_target(ud)
 end
 
@@ -2103,7 +2103,7 @@ end
 --- @param width integer
 --- @param height integer
 --- @param attribs? __WindowAttribs
-function pt.window(width: integer, height: integer, attribs?: __WindowAttribs) 
+function pt.window(width, height, attribs) 
 	window(width, height, attribs)
 end
 
@@ -2125,13 +2125,13 @@ end
 --- @param untitled_filename? string
 --- @param get_hlocation? function
 --- @param set_hlocation? function
-function pt.wrangle_working_file(save_state?: any, load_state?: any, untitled_filename?: string, get_hlocation?: any, set_hlocation?: any) 
+function pt.wrangle_working_file(save_state, load_state, untitled_filename, get_hlocation, set_hlocation) 
 	wrangle_working_file(save_state, load_state, untitled_filename, get_hlocation, set_hlocation)
 end
 
 --- Gets the present working file. Used with wrangle_working_file
 --- View implementation in /system/lib/wrangle.lua
 --- @return string | nil
-function pt.pwf() : string | nil 
-	pwf()
+function pt.pwf()
+	return pwf()
 end
