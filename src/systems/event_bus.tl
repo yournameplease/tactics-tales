@@ -4,6 +4,7 @@ require("src/debug")
 
 global enum GameEvent
     "GAME_BEGIN_STORY"
+    "GAME_SET_OPTIONS"
     
     "TACTICS_BEGIN_PLAYER_TURN"
     "TACTICS_END_PLAYER_TURN"

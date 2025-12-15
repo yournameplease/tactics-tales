@@ -42,22 +42,29 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
                     return options
                 end
             }),
-            -- ["OPTIONS_MENU"] = MultipleOptionsMenuDefinition.new({
-            --     get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
-            --         local options: {MenuOption} = {}
-
-            --         pt.add(options, {
-            --             text = "Play",
-            --             send_command = "GAME_BEGIN_STORY",
-            --         })
-            --         pt.add(options, {
-            --             text = "Options",
-            --             next_state = "OPTIONS_MENU",
-            --         })
-
-            --         return options
-            --     end
-            -- }),
+            ["OPTIONS_MENU"] = MultipleOptionsMenuDefinition.new({
+                primary_direction = "vertical",
+                wrap = false,
+                send_command = "GAME_SET_OPTIONS",
+                options = {
+                    MenuMultipleOptionDefinition.new({
+                        text = "Log Level",
+                        definition = ListMenuDefinition.of_static_options(
+                            {"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"},
+                            "log_level",
+                            "horizontal"
+                        )
+                    }),
+                    MenuMultipleOptionDefinition.new({
+                        text = "Draw Flexbox Debug",
+                        definition = ListMenuDefinition.of_static_options(
+                            {"NO", "YES"},
+                            "draw_flexbox_debug",
+                            "horizontal"
+                        )
+                    }),
+                },
+            }),
         }
     }
 

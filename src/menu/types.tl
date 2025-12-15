@@ -48,6 +48,7 @@ global record MenuContext
     destination: TileSelection
     target_unit: UnitSelection
     selected_item: ItemSelection
+    metadata: {string: any}
 end
 
 global type MenuId = string

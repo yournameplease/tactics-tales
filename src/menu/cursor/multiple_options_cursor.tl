@@ -4,16 +4,28 @@ local List = require("src/util/list")
 
 global type MenuState
 
+global record MenuMultipleOptionSelection<GC is GameContext>
+    text: string -- label
+    cursor: MenuCursor<GC>
+    must_select: boolean -- true if must be picked before using.  Default to false
+end
+
 global record MenuMultipleOptionDefinition<GC>
     text: string -- label
     definition: MenuStepDefinition<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
 end
 
-global record MenuMultipleOptionSelection<GC is GameContext>
-    text: string -- label
-    cursor: MenuCursor<GC>
-    must_select: boolean -- true if must be picked before using.  Default to false
+function MenuMultipleOptionDefinition.new(props: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionDefinition<GC>
+    return props
+end
+
+function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
+    return {
+        text = self.text,
+        cursor = self.definition:to_cursor(game_context, menu_ctx, menu_state),
+        must_select = self.must_select,
+    }
 end
 
 global enum MultipleOptionsDirection
@@ -30,6 +42,23 @@ global record MultipleOptionsMenuCursor<GC is GameContext>
     wrap: boolean
     is_option_selected: boolean -- if the current selection has been selected.  Needed if the selection is must_select
     options: { MenuMultipleOptionSelection<GC> }
+    next_state: string
+    send_command: GameEvent
+end
+
+global record MultipleOptionsMenuDefinition<GC is GameContext>
+    is MenuStepDefinition<GC>
+    where self.type == "CURSOR_MULTIPLE_OPTIONS"
+    primary_direction: MultipleOptionsDirection
+    wrap: boolean
+    options: { MenuMultipleOptionDefinition<GC> }
+    next_state: string
+    send_command: GameEvent
+end
+
+function MultipleOptionsMenuDefinition.new(props: MultipleOptionsMenuDefinition<GC>): MultipleOptionsMenuDefinition<GC>
+    props.type = "CURSOR_MULTIPLE_OPTIONS"
+    return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
 end
 
 global record MultipleOptionsMenuDefinition<GC is GameContext>
@@ -95,4 +124,16 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
     else
         self.i = pt.mid(1, new_i, #self.options)
     end
+end
+
+function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+    for _, opt in ipairs(self.options) do
+        opt.cursor:handle_select(game_ctx, menu_ctx, menu_state)
+    end
+
+    return self.next_state, self.send_command
+end
+
+function MultipleOptionsMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    return MultipleOptionsMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end

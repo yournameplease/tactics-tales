@@ -46,6 +46,9 @@ function Game.new(services: GameServiceBundle): Game
     services.event_bus:on("GAME_BEGIN_STORY", function()
         self:begin_story()
     end)
+    services.event_bus:on("GAME_SET_OPTIONS", function()
+        self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
+    end)
 
     return self
 end

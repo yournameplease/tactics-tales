@@ -1,5 +1,6 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
+local List = require("src/util/list")
 
 global type MenuState
 global type MenuContext
@@ -20,9 +21,9 @@ global record ListMenuCursor<GC is GameContext>
     where self.type == "CURSOR_LIST"
     i: integer
     options: { MenuOption }
-    direction: ListDirection
 
     -- from definition
+    direction: ListDirection
     wrap: boolean
     set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
 end
@@ -33,11 +34,38 @@ global record ListMenuDefinition<GC is GameContext>
     set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
     get_options: function(GC, MenuContext): {MenuOption}
     wrap: boolean
+    direction: ListDirection
 end
 
 function ListMenuDefinition.new(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
     props.type = "CURSOR_LIST"
     return setmetatable(props, { __index = ListMenuDefinition })
+end
+
+function ListMenuDefinition.of_static_options<T>(
+    options: {T},
+    set_context_key: string,
+    direction: ListDirection
+): ListMenuDefinition<GC>
+    local get_options = function(game_ctx: GC, menu_context: MenuContext): {MenuOption}
+        return List.do_map(
+            options,
+            function (o: T): MenuOption
+                return {
+                    text = tostring(o)
+                }
+            end
+        )
+    end
+    local set_selected_context = function(s: ListMenuCursor<GC>, _msb: BattleContext, ctx: MenuContext)
+        ctx.metadata[set_context_key] = options[s.i]
+    end
+    return ListMenuDefinition.new({
+        set_selected_context = set_selected_context,
+        get_options = get_options,
+        wrap = false,
+        direction = direction,
+    })
 end
 
 function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
