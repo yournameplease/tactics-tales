@@ -264,7 +264,7 @@ function AnimationManager:tick()
         if not self.active_animations[i].playing then
             LOG.debug("Ending animation")
             self.active_animations[i].animated_object.playing = false
-            deli(self.active_animations, i)
+            pt.deli(self.active_animations, i)
         else
             i = i + 1
         end
@@ -289,7 +289,7 @@ function AnimationManager:create_idle_animation(): AnimatedSpriteData
         playing = true
     }
     
-    add(self.active_animations, instance)
+    pt.add(self.active_animations, instance)
     setmetatable(instance, { __index = GlobalAnimationInstance } )
 
     return instance.animated_object
@@ -307,7 +307,7 @@ function AnimationManager:create_animation(animation_id: OffsetAnimationId, dire
         animated_object = { playing = true }
     }
 
-    add(self.active_animations, animation_data)
+    pt.add(self.active_animations, animation_data)
     setmetatable(animation_data, { __index = DirectionalOffsetAnimationInstance } )
 
     return animation_data.animated_object
@@ -347,7 +347,7 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
         playing = true
     }
 LOG.debug("confirming...", #instance.path_points)
-    add(self.active_animations, instance)
+    pt.add(self.active_animations, instance)
     setmetatable(instance, { __index = PathAnimationInstance })
 
     return instance.animated_object

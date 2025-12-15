@@ -86,27 +86,7 @@ end
 function pt.note(pitch, inst, vol, effect, effect_p, channel, retrig, panning) 
 	note(pitch, inst, vol, effect, effect_p, channel, retrig, panning)
 end
----@meta
 
---- Called after main.lua is run, but before the first call to `_update`.
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Program_Stucture)
-function pt._init()
-	_init()
-end
-
---- Called 60 times per second, provided that the `_update` function does not exceed ~90% CPU
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Program_Stucture)
-function pt._update()
-	_update()
-end
-
---- Called each time the window manager asks for a frame.
---- If `_update` and `_draw` combined exceed ~90% CPU, draw will be called less frequently.
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Program_Stucture)
-function pt._draw()
-	_draw()
-end
---- @meta
 
 --- Create a coroutine for a function
 --- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COCREATE)
@@ -306,7 +286,7 @@ end
 --- @return integer new_x The x coordinate of the next character to be printed.
 --- @return integer new_y The y coordinate of the next character to be printed.
 -- global print: function(value: integer, x: integer, y: integer, col: integer)
-return 
+
 --- Sets the clipping rectangle for drawing operations.
 --- If clip_previous is set, the new region will be clipped by the old region
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#clip)
@@ -326,7 +306,7 @@ end
 --- @return integer w
 --- @return integer h
 -- global clip: function()
-return 
+
 --- Sets the pixel to at x, y to the color index 0 to 63
 --- If color is not specified, uses the current draw color instead
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pset)
@@ -359,7 +339,7 @@ end
 --- @param f integer
 --- @return boolean
 -- global fget: function(n: integer, f: integer)
-return function pt.fget_one(n, f)
+function pt.fget_one(n, f)
 	return fget(n, f)
 end
 
@@ -689,7 +669,7 @@ end
 --- @param player? integer
 --- @return number | false
 -- global btn: function(button: integer, player?: integer)
-return function pt.btn(button, player)
+function pt.btn(button, player)
 	return btn(button, player)
 end
 
@@ -853,7 +833,7 @@ end
 --- @param y number
 --- @return number
 -- global min: function(x: number, y: number)
-return function pt.min(x, y)
+function pt.min(x, y)
 	return min(x, y)
 end
 
@@ -863,7 +843,7 @@ end
 --- @param y number
 --- @return number
 -- global max: function(x: number, y: number)
-return function pt.max(x, y)
+function pt.max(x, y)
 	return max(x, y)
 end
 
@@ -874,7 +854,7 @@ end
 --- @param z number
 --- @return number
 -- global mid: function(x: number, y: number, z: number)
-return function pt.mid(x, y, z)
+function pt.mid(x, y, z)
 	return mid(x, y, z)
 end
 
@@ -910,7 +890,7 @@ end
 --- @param tbl table
 --- @return any
 -- global rnd: function(tbl: number)
-return 
+
 --- Initializes the random number generator with an explicit seed value
 --- [View Online](https://pico-8.fandom.com/wiki/Srand)
 --- @param val number
@@ -931,7 +911,7 @@ end
 --- @param n number
 --- @return number
 -- global abs: function(n: number)
-return function pt.abs(n)
+function pt.abs(n)
 	return abs(n)
 end
 
@@ -1335,7 +1315,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#t)
 --- @return number
 global t : function()
-return 
+
 --- : anyGet the current date and time formatted using Lua's standard date 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#date)
 --- @param format? string
@@ -1503,17 +1483,17 @@ end
 --- @field y number
 --- @field z number
 --- @operator add(userdata|number)
-return --- @operator sub(userdata|number)
-return --- @operator mul(userdata|number)
-return --- @operator div(userdata|number)
-return global record Userdata
+--- @operator sub(userdata|number)
+--- @operator mul(userdata|number)
+--- @operator div(userdata|number)
+global record Userdata
 	x: number
 	y: number
 	z: number
 	width: function(self)
-	return height: function(self)
-	return get: function(self, integer, integer)
-	return set: function(self, integer, ...: integer)
+	height: function(self)
+	get: function(self, integer, integer)
+	set: function(self, integer, ...: integer)
 	sort: function(self)
 end
 
@@ -1534,8 +1514,8 @@ end
 --- @param data? string string of hex values encoding the data or comma separated list of floats
 --- @return userdata
 --- @overload fun(data_type: userdata_type, width: integer, data: string?)
-return --- @overload fun(data: string)
-return function pt.userdata(data_type, width, height, data)
+--- @overload fun(data: string)
+function pt.userdata(data_type, width, height, data)
 	userdata(data_type, width, height, data)
 end
 
@@ -1552,7 +1532,7 @@ end
 --- Get the magnitude of the vector
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
 -- global Userdata:magnitude = function(self)
-return 
+
 --- @class userdata
 --- @param v userdata
 --- @return number
@@ -1610,10 +1590,10 @@ return
 --- @param n integer The number of flat-indexed values to get
 --- @return number ... Each value from the starting index in flat-indexed order
 --- @overload fun(u: userdata, x: integer, n: integer)
-return --- @overload fun(u: userdata, x: integer, y: integer)
-return --- @overload fun(u: userdata, x: integer)
-return --- @overload fun(u: userdata)
-return -- global get: function(u: any, x: any, y: any, n: any) 
+--- @overload fun(u: userdata, x: integer, y: integer)
+--- @overload fun(u: userdata, x: integer)
+--- @overload fun(u: userdata)
+-- global get: function(u: any, x: any, y: any, n: any) 
 
 -- userdata.get = get
 

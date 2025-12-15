@@ -30,11 +30,11 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
                 get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
-                    add(options, {
+                    pt.add(options, {
                         text = "Play",
                         send_command = "GAME_BEGIN_STORY",
                     })
-                    add(options, {
+                    pt.add(options, {
                         text = "Options",
                         next_state = "OPTIONS_MENU",
                     })
@@ -46,11 +46,11 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
             --     get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
             --         local options: {MenuOption} = {}
 
-            --         add(options, {
+            --         pt.add(options, {
             --             text = "Play",
             --             send_command = "GAME_BEGIN_STORY",
             --         })
-            --         add(options, {
+            --         pt.add(options, {
             --             text = "Options",
             --             next_state = "OPTIONS_MENU",
             --         })

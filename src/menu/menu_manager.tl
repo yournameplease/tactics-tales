@@ -94,7 +94,7 @@ function BaseMenuManager:handle_menu_select()
 
     local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
     
-    add(self.selection_history, {
+    pt.add(self.selection_history, {
         step = self.menu_state.step,
         selection = self.menu_cursor
     })

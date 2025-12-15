@@ -59,8 +59,8 @@ function GridMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuCo
 end
 
 function GridMenuCursor:update(joy: Joypad)
-        self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
-        self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
+        self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
+        self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
 end
 
 function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent

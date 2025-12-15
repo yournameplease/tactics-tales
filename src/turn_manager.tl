@@ -34,26 +34,26 @@ function TurnManager.new(ctx: BattleContext): TurnManager
 
     self.event_listener_ids = {}
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_BATTLE", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_BATTLE", function()
         self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.ctx.services.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_UNIT_END_ACTION", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_UNIT_END_ACTION", function()
         if self.phase == "PLAYER" then
             LOG.debug("Setting to player turn menu")
             self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         end        
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
         self.ctx.tactics_engine:refresh_all_units()
         self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
         if self.phase ~= "PLAYER" then
             LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -64,12 +64,12 @@ function TurnManager.new(ctx: BattleContext): TurnManager
         self.ctx.services.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.ctx.tactics_engine)
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
         self.phase = "ENEMY"
         LOG.info("Begin enemy turn!")
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_ENEMY_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_ENEMY_TURN", function()
         if self.phase ~= "ENEMY" then
             LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -87,31 +87,31 @@ function TurnManager.new(ctx: BattleContext): TurnManager
         end
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_VICTORY", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_VICTORY", function()
         LOG.info("You win!")
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_DEFEAT", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_DEFEAT", function()
         LOG.info("You lose!")
     end))
     
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self.ctx.tactics_engine:handle_move_unit(ctx)
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self.ctx.tactics_engine:handle_move_and_attack(ctx)
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
         self.ctx.tactics_engine.is_player_turn = true
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
         self.ctx.tactics_engine.is_player_turn = false
     end))
 
-    add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+    pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
         self.ctx.enemy_ai_engine:handle_enemy_turn()
     end))
     

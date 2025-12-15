@@ -86,26 +86,26 @@ function BattleMap:get_terrain(tile: TilePoint): TerrainData
     local tile_sprite = ground:get(tile.x,tile.y)
     if tile_sprite == 0 then return nil end
     
-    local flags = fget(tile_sprite)
+    local flags = pt.fget_all(tile_sprite)
     local terrain = (flags & 0xD) >> 1
     local terrain_data = TERRAIN_DATA[terrain]
 
     local solid = flags & 0x1 == 0x1
     if back_wall then
         local back_wall_sprite = back_wall:get(tile.x,tile.y)
-        if (fget(back_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget_all(back_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end
     if mid_wall then
         local mid_wall_sprite = mid_wall:get(tile.x,tile.y)
-        if (fget(mid_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget_all(mid_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end
     if front_wall then
         local front_wall_sprite = front_wall:get(tile.x,tile.y)
-        if (fget(front_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget_all(front_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end
@@ -177,7 +177,7 @@ function BattleMap:get_targets_in_range(unit_id: integer, tile: TilePoint): { Ba
                     target.tile,
                     min_range, max_range
             ) then
-                add(targets, target)
+                pt.add(targets, target)
             end
         end
     end
@@ -188,7 +188,7 @@ function BattleMap:get_units(filter: function(BattleUnit): boolean): { BattleUni
     local units: { BattleUnit } = {}
     for _,unit in pairs(self.units_by_id) do
         if filter(unit) then
-            add(units, unit)
+            pt.add(units, unit)
         end
     end
     return units

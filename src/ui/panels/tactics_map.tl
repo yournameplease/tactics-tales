@@ -69,10 +69,10 @@ local function compute_animated_unit_positions(battle_map: BattleMap): { Animate
 end
 
 local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer, y: integer, width: integer, height: integer)
-    rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
-    local bar_width = flr(hp_current*(width-2) / hp_max)
-    rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
-    rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
+    pt.rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
+    local bar_width = pt.flr(hp_current*(width-2) / hp_max)
+    pt.rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
+    pt.rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
 local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor<BattleContext>)
@@ -82,24 +82,24 @@ local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuC
 
     local max_text_width = 0
     for _,opt in ipairs(options) do
-        local text_width = print(opt.text, 0, -1000) as integer
-        max_text_width = max(max_text_width, text_width)
+        local text_width = pt.print(opt.text, 0, -1000) as integer
+        max_text_width = pt.max(max_text_width, text_width)
     end
 
     local menu_x = x + TILE_SIZE.x
     local menu_y = y + TILE_SIZE.y
     local menu_w = 2*PADDING + max_text_width
     local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
-    rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+    pt.rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
     for i,opt in ipairs(options) do
         if i == selected_i then
-            rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-            print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+            pt.rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
+            pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
         else
-            print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
+            pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
         end
     end
-    rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+    pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
 end
 
 local function draw_unit(unit: BattleUnit)
@@ -135,14 +135,14 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
     local camera_x = self.x + self.internal_margin.l
     local camera_y = self.y + self.internal_margin.t
-    camera(-camera_x, -camera_y)
+    pt.camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
 
     -- pre-compute actor animations for z-ordering
     local unit_positions = compute_animated_unit_positions(state.battle_context.ctx.battle_map)
 
-    -- local sorted_units = userdata("i16", 2, #unit_positions) as Userdata
+    -- local sorted_units = pt.userdata("i16", 2, #unit_positions) as Userdata
     -- for i,u in ipairs(unit_positions) do
     --     sorted_units:set(0,i-1, u.point.y)
     --     sorted_units:set(1,i-1, u.id)
@@ -166,13 +166,13 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     end
 
     for y = 0, self.map_height-1 do
-        map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-        map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
         if menu_cursor is GridMenuCursor<BattleContext> then
             if menu_cursor.legal_tiles ~= nil then
-                fillp(
+                pt.fillp(
                 -- 1:2 diagonal slashes
                 --0b00111111,
                 --0b11111100,
@@ -192,24 +192,24 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                         0x33,
                         0xCC
                 )
-                poke(0x550b,0x3f)
-                palt()
+                pt.poke(0x550b,0x3f)
+                pt.palt()
                 for x = 0, self.map_width-1 do
                     local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                     if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
                         if (highlighted_tile.reachable) then
-                            color(28)
+                            pt.color(28)
                         elseif highlighted_tile.can_attack then
-                            color(8)
+                            pt.color(8)
                         else
                             error("invalid state")
                         end
-                        rrectfill(x*TILE_SIZE.x+1, y*TILE_SIZE.y+1, TILE_SIZE.x-2, TILE_SIZE.y-2)
+                        pt.rrectfill(x*TILE_SIZE.x+1, y*TILE_SIZE.y+1, TILE_SIZE.x-2, TILE_SIZE.y-2)
                     end
                 end
-                poke(0x550b,0x00)
-                fillp()
-                color()
+                pt.poke(0x550b,0x00)
+                pt.fillp()
+                pt.color()
             end
         end
 
@@ -220,7 +220,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         --     drawn_unit_count = drawn_unit_count + 1
         -- end
 
-        map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
         --     local unit_id = sorted_units:get(1, drawn_unit_count)
@@ -233,23 +233,23 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         if cursor_tile ~= nil then
             local c_x = cursor_tile.x * TILE_SIZE.x
             local c_y = cursor_tile.y * TILE_SIZE.y
-            spr(CURSOR_SPRITE, c_x, c_y)
+            pt.spr(CURSOR_SPRITE, c_x, c_y)
         end
 
-        map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
 
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
-        spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+        pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         if menu_cursor is ListMenuCursor<BattleContext> then
             draw_floating_menu(x, y, menu_cursor)
         end
     end
 
-    camera()
+    pt.camera()
 end
 
 return TacticsMap

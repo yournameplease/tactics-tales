@@ -76,7 +76,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
             unit.animation_data = animation
             LOG.debug("Animating!", animation.playing)
             while animation.playing do
-                yield()
+                pt.yield()
             end
         end
 
@@ -102,7 +102,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
             unit.animation_data = animation
 
             while animation.playing do
-                yield()
+                pt.yield()
             end
         end
 
@@ -124,7 +124,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
     local attacker = step.attacker
     local defender = step.defender
 
-    local direction = atan2(
+    local direction = pt.atan2(
             defender.tile.x - attacker.tile.x,
             defender.tile.y - attacker.tile.y
     )
@@ -135,11 +135,11 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
         local dodge_animation = self.ctx.services.animation_manager:create_animation("DODGE", direction + 0.25)
         defender.animation_data = dodge_animation
         while dodge_animation.playing do
-            yield()
+            pt.yield()
         end
     end
     while attack_animation.playing do
-        yield()
+        pt.yield()
     end
 
     if step.is_hit then
@@ -148,7 +148,7 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
         defender.animation_data = hurt_animation
 
         while hurt_animation.playing do
-            yield()
+            pt.yield()
         end
     end
 
@@ -248,8 +248,8 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x: integer, tile_
     for x=-max_distance,max_distance do
         local map_x = x + tile_x
         if map_x >= 0 and map_x < MAP_WIDTH then
-            local abs_x = abs(x)
-            local min_y_abs = max(0, min_distance-abs_x)
+            local abs_x = pt.abs(x)
+            local min_y_abs = pt.max(0, min_distance-abs_x)
             local max_y_abs = max_distance-abs_x
 
             if max_y_abs >= min_y_abs then

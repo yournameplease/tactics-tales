@@ -59,7 +59,7 @@ function EventBus:on(event_name: GameEvent, callback: function(args: any)): inte
     if not self.listeners[event_name] then
         self.listeners[event_name] = {}
     end
-    add(self.listeners[event_name], {
+    pt.add(self.listeners[event_name], {
         id = self.id_counter:get_id(),
         callback = callback
     })
@@ -70,7 +70,7 @@ function EventBus:remove(id: integer)
     for _,slots in pairs(self.listeners) do
         for i,listener in ipairs(slots) do
             if listener.id == id then
-                deli(slots, i)
+                pt.deli(slots, i)
                 return
             end
         end
@@ -87,9 +87,9 @@ end
 function EventBus:emit(event_name: GameEvent, args?: any)
     LOG.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
-        deli(self.event_history, 1)
+        pt.deli(self.event_history, 1)
     end
-    add(self.event_history, event_name)
+    pt.add(self.event_history, event_name)
 
     local slots = self.listeners[event_name]
     if slots then

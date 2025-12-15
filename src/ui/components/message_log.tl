@@ -40,7 +40,7 @@ function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
     local text = self.func(state, 999)
 
     -- TODO: text wrapping?  and cutoff text if not wrap
-    -- local rows_to_render = min(row_count, #text)
+    -- local rows_to_render = pt.min(row_count, #text)
     -- for i=1,rows_to_render do
     --     draw_text_row(self, i, text[#text-i+1], ui_theme)
     -- end

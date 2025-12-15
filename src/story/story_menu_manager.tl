@@ -23,7 +23,7 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryContext> } = {
                 get_options = function(msb: StoryContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
-                    add(options, {
+                    pt.add(options, {
                         text = "Continue",
                         send_command = "STORY_ADVANCE_TEXT"
                     })

@@ -82,7 +82,7 @@ function UIManager:draw(battle_context: UIContextManager)
     root:layout(root.x, root.y)
 
     -- Render
-    cls(self.theme.COLOR_CLEAR)
+    pt.cls(self.theme.COLOR_CLEAR)
     root:draw(battle_context, self.theme)
 end
 

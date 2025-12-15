@@ -13,8 +13,6 @@ require("src/ui/panels/unit_info")
 require("src/ui/panels/combat_preview")
 require("src/ui/panels/event_message_log")
 
-local SplitPages = require("src/ui/panels/split_pages")
-local BattleSummary = require("src/ui/panels/battle_summary")
 
 require("src/ui/validator")
 

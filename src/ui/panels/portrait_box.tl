@@ -41,7 +41,7 @@ function PortraitBox:draw(state: UIContextManager, ui_theme: UITheme)
         Colors.apply_palette("paper")
         local self_pos: Point = DrawPoint.of(self.x, self.y)
         CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as DrawPoint, unit.side, false, false)
-        pal()
+        pt.pal()
     end
 end
 

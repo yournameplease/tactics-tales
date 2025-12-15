@@ -61,7 +61,7 @@ local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, star
     local start_cost = 0 -- Cost to be at the start is 0
 
     visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
-    add(priority_queue, {x = start_x, y = start_y, cost = start_cost})
+    pt.add(priority_queue, {x = start_x, y = start_y, cost = start_cost})
 
     -- Main Loop
     while #priority_queue > 0 do
@@ -76,7 +76,7 @@ local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, star
             end
         end
 
-        local u = deli(priority_queue, min_index)
+        local u = pt.deli(priority_queue, min_index)
         assert(u is ShortestPathQueueEntry)
         local ux, uy, ucost = u.x, u.y, u.cost
 
@@ -106,7 +106,7 @@ local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, star
                         if not neighbor_info or new_total < neighbor_info.cost then
                             -- Record the new cost and the tile we came from (ux, uy)
                             visited_info:set(vx, vy, { cost = new_total, prev = TilePoint.of(ux, uy) })
-                            add(priority_queue, {x = vx, y = vy, cost = new_total})
+                            pt.add(priority_queue, {x = vx, y = vy, cost = new_total})
                         end
                     end
                 end
@@ -135,11 +135,11 @@ end
 function Pathfinding.get_path_to_tile(all_tile_costs: Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path: {TilePoint} = {}
-    add(path, tile:copy())
+    pt.add(path, tile:copy())
     local next_tile = tile
     while all_tile_costs:get_point(next_tile).prev ~= nil do
         next_tile = all_tile_costs:get_point(next_tile).prev
-        add(path, next_tile:copy())
+        pt.add(path, next_tile:copy())
     end
     return reverse_list(path)
 end

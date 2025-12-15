@@ -95,15 +95,15 @@ function ItemInventoryImpl:get_equipped_weapons(): { Weapon }
 	local out: { Weapon } = {}
 	if self._items_by_equip_slot["TWO_HANDS"] ~= nil
 		and self._items_by_equip_slot["TWO_HANDS"].item:get_type() == "WEAPON" then
-		add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
+		pt.add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
 	end
 	if self._items_by_equip_slot["MAIN_HAND"] ~= nil
 		and self._items_by_equip_slot["MAIN_HAND"].item:get_type() == "WEAPON" then
-		add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
+		pt.add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
 	end
 	if self._items_by_equip_slot["OFF_HAND"] ~= nil
 		and self._items_by_equip_slot["OFF_HAND"].item:get_type() == "WEAPON" then
-		add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
+		pt.add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
 	end
 	return out
 end
@@ -136,7 +136,7 @@ end
 
 function ItemInventoryImpl:add_item(item: Item.Item)
 	assert(self:can_add_item(item))
-	add(self.items, { item = item })
+	pt.add(self.items, { item = item })
 	self:compute_current_slots()
 end
 
@@ -183,7 +183,7 @@ end
 
 function ItemInventoryImpl:remove_item(slot: integer)
 	local item = self._items_by_slot[slot]
-	del(self.items, item) 	
+	pt.del(self.items, item)
 	self:compute_current_slots()
 end
 

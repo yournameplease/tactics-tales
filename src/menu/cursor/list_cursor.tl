@@ -70,7 +70,7 @@ function ListMenuCursor:update(joy: Joypad)
     if self.wrap then
         self.i = new_i % #self.options + 1
     else
-        self.i = mid(1, new_i, #self.options)
+        self.i = pt.mid(1, new_i, #self.options)
     end
 end
 

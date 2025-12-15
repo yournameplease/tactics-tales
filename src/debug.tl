@@ -48,10 +48,10 @@ local function debug_print(level: LogLevel, ...: any)
             str = str .. "<nil> , "
         else
             str = str .. tostring(v)
-            -- printh("Warning: Logging undefined type "..type(v))
+            -- pt.printh("Warning: Logging undefined type "..type(v))
         end
 
-        printh(level .. ": " .. str)
+        pt.printh(level .. ": " .. str)
     end
 end
 

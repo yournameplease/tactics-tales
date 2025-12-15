@@ -53,18 +53,18 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                     local options: {MenuOption} = {}
                     -- if target in range
                     if msb.tactics_engine:any_target_in_range(ctx) then -- TODO: global state
-                        add(options, {
+                        pt.add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"
                         })
                     end
 
-                    add(options, {
+                    pt.add(options, {
                         text = "Wait",
                         send_command = "MOVE_AND_WAIT"
                     })
 
-                    add(options, {
+                    pt.add(options, {
                         text = "Items",
                         next_state = "SELECT_ITEM"
                     })
@@ -99,7 +99,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
 
                         local options = {}
                         for i,item in ipairs(items) do
-                            add(options, {
+                            pt.add(options, {
                                 text = item:get_name(),
                                 next_state = "SELECT_ITEM_ACTION"
                             })
@@ -125,13 +125,13 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                         -- TODO: consumables
                         if item:get_equip_slot() ~= "NONE" then
                             if inventory:is_equipped(index) then
-                                add(options, {
+                                pt.add(options, {
                                     text = "Unequip",
                                     send_command = "INVENTORY_UNEQUIP_ITEM",
                                     next_state = "SELECT_ITEM_ACTION",
                                 })
                             else
-                                add(options, {
+                                pt.add(options, {
                                     text = "Equip",
                                     send_command = "INVENTORY_EQUIP_ITEM",
                                     next_state = "SELECT_ITEM_ACTION",
@@ -140,11 +140,11 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                         end
 
                         if #items > 0 then
-                            add(options, {
+                            pt.add(options, {
                                 text = "Move",
                             })
                         end
-                        add(options, {
+                        pt.add(options, {
                             text = "Discard",
                             send_command = "INVENTORY_DISCARD_ITEM",
                             next_state = "SELECT_ITEM",

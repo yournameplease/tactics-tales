@@ -53,7 +53,7 @@ function BattleUnit:is_alive(): boolean
 end
 
 function BattleUnit:take_damage(amount: integer)
-    local new_hp = mid(0, self.hp_current - amount, self.character.stats.hp_max)
+    local new_hp = pt.mid(0, self.hp_current - amount, self.character.stats.hp_max)
     self.hp_current = new_hp
 end
 

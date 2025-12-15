@@ -28,9 +28,9 @@ function PageDivider:draw(state: UIContextManager, ui_theme: UITheme)
         local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
         local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
 
-        line(l + i, t + i, l + i, b, c_l)
+        pt.line(l + i, t + i, l + i, b, c_l)
         if i < w or w & 1 == 0 then
-            line(r - i, t + i, r - i, b, c_r)
+            pt.line(r - i, t + i, r - i, b, c_r)
         end
     end
 end

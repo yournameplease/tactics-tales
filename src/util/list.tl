@@ -49,7 +49,7 @@ function List.do_filter<A>(list: {A}, filter: function(A): boolean): { A }
     local out: {A} = {}
     for _,v in ipairs(list) do
 		if filter(v) then
-	        add(out, v) 
+	        pt.add(out, v)
 		end
     end
     return out

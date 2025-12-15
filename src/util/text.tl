@@ -32,7 +32,7 @@ local record Text
 end
 
 function Text.width(text: string): integer
-    return print(text, 0, -1000) as integer
+    return pt.print(text, 0, -1000) as integer
 end
 
 function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapMode): {string}
@@ -48,11 +48,11 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
         local out_width: integer
         repeat
             char_count = char_count + 1
-            out = sub(text,1, char_count)
+            out = pt.sub(text,1, char_count)
             out_width = Text.width(out)
         until out_width > width or char_count == #text
         if out_width > width then
-            return {sub(text, 1,char_count-3).."..."}
+            return {pt.sub(text, 1,char_count-3).."..."}
         else
             return {text}
         end
@@ -63,32 +63,32 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
         local previous_word_end: integer = -1
         local line_width: integer
         while true do
-            while line_start <= #text and sub(text, line_start, true) == ' ' do
+            while line_start <= #text and pt.sub(text, line_start, true) == ' ' do
                 line_start = line_start + 1
             end
             if line_start > #text then 
                 return out
             end
             local line_end = line_start
-            local line = sub(text, line_start, line_end)
+            local line = pt.sub(text, line_start, line_end)
             while line_end <= #text and Text.width(line) <= width do
                 line_end = line_end + 1
-                line = sub(text, line_start, line_end)
-                if (sub(text, line_end, true) == ' ' and sub(text, line_end-1, true) ~= ' ') then
+                line = pt.sub(text, line_start, line_end)
+                if (pt.sub(text, line_end, true) == ' ' and pt.sub(text, line_end-1, true) ~= ' ') then
                     previous_word_end = line_end - 1
                 end
             end
 
             if line_end > #text and Text.width(line) <= width then
                 -- end of text without overflow
-                add(out, line)
+                pt.add(out, line)
                 return out
             elseif previous_word_end >= line_start then
-                add(out, sub(text, line_start, previous_word_end))
+                pt.add(out, pt.sub(text, line_start, previous_word_end))
                 line_start = previous_word_end + 1
             else
                 -- need to hyphenate
-                add(out, sub(text, line_start, line_end-2)..'-')
+                pt.add(out, pt.sub(text, line_start, line_end-2)..'-')
 				line_start = line_end - 1
             end
         end
@@ -106,8 +106,8 @@ function Text.draw_text_row(text: string, x: integer, y: integer, color: Color)
     -- else
     --     error("Unexpected value!")
     -- end
-    -- print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
-    print(text, x, y, color)
+    -- pt.print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
+    pt.print(text, x, y, color)
 end
 
 function Text.get_text_alignment_offset(text: string, w: integer, justify: TextJustify): integer
@@ -125,12 +125,12 @@ end
 
 function Text.draw(text: {string}, x: integer, y: integer, w: integer, h: integer, color: Color, properties: Text.TextDrawProperties)
 
-    local row_count = flr(h / TEXT_ROW_HEIGHT)
+    local row_count = pt.flr(h / TEXT_ROW_HEIGHT)
 	
 
     local wrapped_text: {{string}} = {}
     for _, t in ipairs(text) do
-        add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
+        pt.add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
         
     end
 

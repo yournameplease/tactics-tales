@@ -79,14 +79,14 @@ end
 
 local function set_palette(battle_unit: BattleUnit, side: Side)
     if side == 1 then
-        pal(16, 8)
-        pal(19, 24)
+        pt.pal(16, 8)
+        pt.pal(19, 24)
     end
     local skin = battle_unit.character.appearance.skin
-    pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-    pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-    pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
-    pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+    pt.pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+    pt.pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+    pt.pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
+    pt.pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
 function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean)
@@ -101,24 +101,24 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
 		headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]	
 	end
 
-    spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
+    pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
 	if headwear == nil or headwear.draw_beard then
 	    if battle_unit.character.appearance.beard ~= nil then
-	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+	        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
 	    end
 	end
 	if headwear == nil or headwear.draw_eyewear then
-	    spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
+	    pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
 		if battle_unit.character.appearance.eyewear ~= nil then
-	        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+	        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
 		end
 	end
 	if headwear == nil or headwear.draw_hair then
-        spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
 	end
 	if headwear ~= nil then
-        spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
 	end
 
 end
@@ -150,7 +150,7 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
         set_palette(battle_unit, side)
     end
 
-    spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
+    pt.spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
     CharacterRenderer.draw_head(battle_unit, head_anchor, side, set_pal)
@@ -163,13 +163,13 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
 			if equip:get_sprite_data() ~= nil then
 				local anchor: AnchorPointName = slot == "OFF_HAND" and "off_hand" or "main_hand"
 			    local equip_anchor = get_anchor_offsets(base_point, animation_frame.anchors[anchor], equip:get_sprite_data().anchor, flip_h, false)
-			    spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
+			    pt.spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
 			end
 		end
 	end
 
     if set_pal then
-        pal()
+        pt.pal()
     end
 
 end

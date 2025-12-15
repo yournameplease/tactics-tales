@@ -143,7 +143,7 @@ function Box.spacer(): Box
 end
 
 function Box:add(child: UIElement): UIElement
-    add(self.children, child as Box) -- Note: casting
+    pt.add(self.children, child as Box) -- Note: casting
     return child -- Return child for chaining
 end
 
@@ -182,10 +182,10 @@ function Box:measure()
 
         if is_row then
             content_w = content_w + child_outer_w
-            content_h = max(content_h, child_outer_h)
+            content_h = pt.max(content_h, child_outer_h)
             if i > 1 then content_w = content_w + self.gap end
         else
-            content_w = max(content_w, child_outer_w)
+            content_w = pt.max(content_w, child_outer_w)
             content_h = content_h + child_outer_h
             if i > 1 then content_h = content_h + self.gap end
         end
@@ -244,7 +244,7 @@ function Box:layout(parent_x: integer, parent_y: integer)
     local cx = self.x + self.internal_margin.l
     local cy = self.y + self.internal_margin.t
     local total_size = is_row and my_w or my_h
-    local remaining = max(0, total_size - used_space)
+    local remaining = pt.max(0, total_size - used_space)
     local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
 
     for _, child in ipairs(self.children) do
@@ -254,7 +254,7 @@ function Box:layout(parent_x: integer, parent_y: integer)
 
         -- Handle Flex
         if child.flex_grow > 0 and total_flex > 0 then
-            local added = flr(child.flex_grow * px_per_flex)
+            local added = pt.flr(child.flex_grow * px_per_flex)
             if is_row then child_w = added
             else child_h = added end
         end
@@ -291,28 +291,28 @@ function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color
     local h = self.h - (self.internal_margin.t + self.internal_margin.b)
     local pad = self.decoration_padding
     if pad ~= 0 then
-        rectfill(
+        pt.rectfill(
                 x,
                 y+pad-1,
                 x+pad-1,
                 y+h-1,
                 color_sw
         )
-        rectfill(
+        pt.rectfill(
                 x,
                 y+h-1,
                 x+w-1,
                 y+h-1,
                 color_sw
         )
-        rectfill(
+        pt.rectfill(
                 x,
                 y,
                 x+w-1,
                 y+pad-1,
                 color_ne
         )
-        rectfill(
+        pt.rectfill(
                 x+w-pad,
                 y,
                 x+w-1,
@@ -320,7 +320,7 @@ function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color
                 color_ne
         )
     end
-    rectfill(
+    pt.rectfill(
             x+pad,
             y+pad,
             x+w-1-pad,
@@ -343,21 +343,21 @@ function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interi
             --    local child = self.children[i]
             --    local c_y = child.y + child.internal_margin.t
             --    local gap_h = self.gap
-            --    rectfill(
+            --    pt.rectfill(
             --            x,
             --            c_y - gap_h + pad,
             --            x + w -1,
             --            c_y - pad,
             --            color_interior
             --    )
-            --    rectfill(
+            --    pt.rectfill(
             --        x,
             --        c_y - pad + 1,
             --        x + w -1,
             --        c_y,
             --        color_ne
             --    )
-            --    rectfill(
+            --    pt.rectfill(
             --        x,
             --        c_y - gap_h,
             --        x + w -1,
@@ -370,21 +370,21 @@ function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interi
                 local child = self.children[i]
                 local c_y = child.y + child.internal_margin.t
                 local gap_h = self.gap
-                rectfill(
+                pt.rectfill(
                         x,
                         c_y - gap_h + pad,
                         x + w -1,
                         c_y - pad,
                         color_interior
                 )
-                rectfill(
+                pt.rectfill(
                     x,
                     c_y - gap_h,
                     x + w -1,
                     c_y - gap_h + pad - 1,
                     color_sw
                 )
-                rectfill(
+                pt.rectfill(
                     x,
                     c_y - pad + 1,
                     x + w -1,
@@ -400,21 +400,21 @@ function Box:draw_shaded_dividers(color_ne: Color, color_sw: Color, color_interi
                 local h_prev = prev_child.h
                 local y_next = next_child.y + next_child.internal_margin.t
                 local h_next = next_child.h
-                rectfill(
+                pt.rectfill(
                         c_x - gap_w + pad,
                         y,
                         c_x - pad,
                         y + h -1,
                         color_interior
                 )
-                rectfill(
+                pt.rectfill(
                     c_x - gap_w,
                     y_prev,
                     c_x - gap_w + pad - 1,
                     h_prev + h_prev -1,
                     color_sw
                 )
-                rectfill(
+                pt.rectfill(
                     c_x - pad + 1,
                     y_next,
                     c_x,
@@ -441,8 +441,8 @@ function Box:draw_border(ui_theme: UITheme)
     local y = self.y + self.internal_margin.t - d_pad
     local w = self.w - (self.internal_margin.l + self.internal_margin.r - 2*d_pad)
     local h = self.h - (self.internal_margin.t + self.internal_margin.b - 2*d_pad)
-    local r = max(0, d_pad-1)
-    rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
+    local r = pt.max(0, d_pad-1)
+    pt.rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
 function Box:draw_solid(ui_theme: UITheme)
@@ -450,7 +450,7 @@ function Box:draw_solid(ui_theme: UITheme)
     local y = self.y
     local w = self.w
     local h = self.h
-    rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
+    pt.rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
 function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
@@ -470,13 +470,13 @@ function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
 
     -- Debug rectangle
     -- LOG.trace(box.x, box.y, box.w, box.h)
-    --     rrect(
+    --     pt.rrect(
     --             box.x+box.internal_margin.l-box.decoration_padding,
     --             box.y+box.internal_margin.t-box.decoration_padding,
     --             box.w - (box.internal_margin.l+box.internal_margin.r)+2*box.decoration_padding,
     --             box.h - (box.internal_margin.t+box.internal_margin.b)+2*box.decoration_padding,
     --             0, 14)
-        -- rrect(
+        -- pt.rrect(
         --         box.x+box.padding+box.internal_margin.l,
         --         box.y+box.padding+box.internal_margin.t,
         --         box._calculated_w - 2*box.padding,

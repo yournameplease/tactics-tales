@@ -38,7 +38,7 @@ local function apply_checkerboard(map_layers: MapLayers)
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)
-            if x+y & 1 == 0 and fget(tile) & 0x40 == 0x40 then
+            if x+y & 1 == 0 and pt.fget_all(tile) & 0x40 == 0x40 then
                 ground:set(x, y, tile+1)
             end  
         end
@@ -53,7 +53,7 @@ local function apply_default_walls(map_layers: MapLayers)
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)
-            if fget(tile) & 0x80 == 0x80 then
+            if pt.fget_all(tile) & 0x80 == 0x80 then
                 if back_wall:get(x,y) == 0 then
                     back_wall:set(x,y,tile+2)
                 end
@@ -69,7 +69,7 @@ local function apply_default_walls(map_layers: MapLayers)
 end
 
 local function load_static(definition: StaticMapDefinition): BattleMap
-    local map_fetch = fetch(DATP..definition.file) as MapFetchResult
+    local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
     
@@ -97,7 +97,7 @@ local function load_static(definition: StaticMapDefinition): BattleMap
                 if battle_map.metadata.enemy_spawners[enemy_spawner_id] == nil then
                     battle_map.metadata.enemy_spawners[enemy_spawner_id] = {}
                 end
-                add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
+                pt.add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
             end
         end
     end

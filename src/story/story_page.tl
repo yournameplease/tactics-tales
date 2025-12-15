@@ -14,7 +14,7 @@ end
 -- data access
 
 function StoryPage:add_text_line(text: string)
-    add(self.text, text)
+    pt.add(self.text, text)
 end
 
 function StoryPage:clear_page()

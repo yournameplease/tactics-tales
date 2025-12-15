@@ -18,7 +18,7 @@ require("src/config")
 -- end
 
 global function rndi(i: number): integer
-    return flr(rnd(i)//1)
+    return pt.flr(pt.rnd(i)//1)
 end
 
 -- global function choose_random(...)
@@ -34,7 +34,7 @@ end
 global function choose_random_from_table<A>(tab: {string: A}): A
     local list: {A} = {}
     for _, v in pairs(tab) do
-        add(list, v)
+        pt.add(list, v)
     end
     return choose_random_from_list(list)
 end

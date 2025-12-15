@@ -95,7 +95,7 @@ local function get_hit_chance(attacker: CombatDouble, defender: CombatDouble, we
         unit_avoid = unit_avoid + amount or 0
     end
 
-    return mid(0, accuracy - unit_avoid - terrain_avoid, 100)
+    return pt.mid(0, accuracy - unit_avoid - terrain_avoid, 100)
 end
 
 local function get_damage(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
@@ -106,7 +106,7 @@ local function get_damage(attacker: CombatDouble, defender: CombatDouble, weapon
         def = def + amount or 0
     end
     
-    local damage = mid(0, atk - def, 999)
+    local damage = pt.mid(0, atk - def, 999)
     if atk > 0 and damage == 0 then
         damage = 1
     end
@@ -166,7 +166,7 @@ function CombatCalculator.compute_combat(attacker_unit: BattleUnit, defender_uni
     -- attack
     local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
-        add(result.steps, step1)
+        pt.add(result.steps, step1)
         if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
     end
 
@@ -175,7 +175,7 @@ function CombatCalculator.compute_combat(attacker_unit: BattleUnit, defender_uni
     if can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
-            add(result.steps, step2)
+            pt.add(result.steps, step2)
         end
     end
 
@@ -206,7 +206,7 @@ function CombatCalculator.preview_combat(attacker_unit: BattleUnit, defender_uni
     -- attack
     local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
-        add(result.steps, step1)
+        pt.add(result.steps, step1)
     end
 
     -- defender counterattack
@@ -214,7 +214,7 @@ function CombatCalculator.preview_combat(attacker_unit: BattleUnit, defender_uni
     if can_attack(defender, attacker, defender_attacks[1]) then
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
-            add(result.steps, step2)
+            pt.add(result.steps, step2)
         end
     end
     

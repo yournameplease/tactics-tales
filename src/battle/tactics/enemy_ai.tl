@@ -50,10 +50,10 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
                 if shortest_path_tile ~= nil then
                     if shortest_path_tile.cost <= unit.character.stats.movement then
                         if self.ctx.battle_map:tile_is_legal_destination(unit, tile ) then
-                            add(potential_attacks, { destination = tile, target = e})
+                            pt.add(potential_attacks, { destination = tile, target = e})
                         end
                     else
-                        add(deep_moves, { destination = tile })
+                        pt.add(deep_moves, { destination = tile })
                     end
                 end
             end
@@ -109,7 +109,7 @@ function EnemyAIEngine:handle_enemy_turn()
         for _,enemy in ipairs(enemies) do
             self:compute_enemy_ai(enemy)
             while self.ctx.tactics_engine:is_blocked() do
-                yield()
+                pt.yield()
             end
         end
 

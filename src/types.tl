@@ -39,11 +39,11 @@ local base_point_mt = {
     __mul = function(a: Point|number, b: Point|number): Point
         if a is number then
             assert(b is Point)
-            return BasePoint.of(flr(a * b.x), flr(a * b.y))
+            return BasePoint.of(pt.flr(a * b.x), pt.flr(a * b.y))
         end
         if b is number then
             assert(a is Point)
-            return BasePoint.of(flr(a.x * b), flr(a.y * b))
+            return BasePoint.of(pt.flr(a.x * b), pt.flr(a.y * b))
         end
         return BasePoint.of(a.x * b.x, a.y * b.y)
     end,
@@ -64,8 +64,8 @@ function BasePoint.of(x: integer, y: integer): BasePoint
 end
 
 function BasePoint.of_angle(angle: number, scale: number): BasePoint
-    local x = flr(scale * cos(angle) + 0.5) 
-    local y = flr(scale * sin(angle) + 0.5) 
+    local x = pt.flr(scale * pt.cos(angle) + 0.5)
+    local y = pt.flr(scale * pt.sin(angle) + 0.5)
     return BasePoint.of(x, y)
 end
 
@@ -109,7 +109,7 @@ end
 setmetatable(DrawPoint, { __index = BasePoint })
 
 global function taxicab_distance(p1: Point, p2: Point): integer
-    return abs(p1.x-p2.x)+abs(p1.y-p2.y)
+    return pt.abs(p1.x-p2.x)+pt.abs(p1.y-p2.y)
 end
 
 global type Side = integer
