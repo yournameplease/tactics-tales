@@ -1,9 +1,7 @@
 --- @meta
 
 --- container for all Picotron functions
-global record pt
-
-end
+local pt = {}
 
 
 --- @class __MenuItem
@@ -13,14 +11,14 @@ end
 --- @field greyed? boolean Greyed out item (use for ---)
 --- @field action? function Callback on select -- param b is the button pressed (left or right)
 --- @field divider? boolean Is item a divider
-global record __MenuItem
-	id: integer 
-	label: string 
-	shortcut: string 
-	greyed: boolean 
-	action: function 
-	divider: boolean 	
-end
+-- global record __MenuItem
+-- 	id: integer 
+-- 	label: string 
+-- 	shortcut: string 
+-- 	greyed: boolean 
+-- 	action: function 
+-- 	divider: boolean 	
+-- end
 
 --- Adds a menu item
 --- If m is nil, reset the menu
@@ -93,7 +91,7 @@ end
 --- @param func function
 --- @return thread
 function pt.cocreate(func)
-	cocreate(func)
+	return cocreate(func)
 end
 
 --- Run or continue the coroutine c. Parameters are passed to the function
@@ -103,7 +101,7 @@ end
 --- @return boolean error
 --- @return ... any
 function pt.coresume(c, ...)
-	coresume(c, ...)
+	return coresume(c, ...)
 end
 
 --- Checks the status of a coroutine
@@ -127,12 +125,12 @@ end
 --- @field modified string
 --- @field pod_format? string
 --- @field revision? integer
-global record __FileMetadata
-	created: string
-	modified: string
-	pod_format: string
-	revision: integer
-end
+-- global record __FileMetadata
+-- 	created: string
+-- 	modified: string
+-- 	pod_format: string
+-- 	revision: integer
+-- end
 
 --- Change the current working directory
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cd)
@@ -148,7 +146,7 @@ end
 --- @return number | nil size
 --- @return string | nil origin
 function pt.fstat(path)
-	fstat(path)
+	return fstat(path)
 end
 
 --- Converts a relative path to an absolute path
@@ -194,7 +192,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pwd)
 --- @return string
 function pt.pwd()
-	pwd()
+	return pwd()
 end
 
 --- Read a lua object from a file
@@ -203,7 +201,7 @@ end
 --- @return any
 --- @return __FileMetadata?
 function pt.fetch(filename)
-	fetch(filename)
+	return fetch(filename)
 end
 
 --- Store a lua object to a file
@@ -220,7 +218,7 @@ end
 --- @param filename string
 --- @return __FileMetadata | nil
 function pt.fetch_metadata(filename)
-	fetch_metadata(filename)
+	return fetch_metadata(filename)
 end
 
 --- Store just the metadata of a path
@@ -285,7 +283,9 @@ end
 --- @param col? integer The color index to print in.
 --- @return integer new_x The x coordinate of the next character to be printed.
 --- @return integer new_y The y coordinate of the next character to be printed.
--- global print: function(value: integer, x: integer, y: integer, col: integer)
+function pt.print(value, x, y, col)
+	return print(value, x, y, col)
+end
 
 --- Sets the clipping rectangle for drawing operations.
 --- If clip_previous is set, the new region will be clipped by the old region
@@ -687,8 +687,8 @@ end
 --- @param player? integer
 --- @return number | false
 -- global btnp: function(button: integer, player?: integer)
-return function pt.btnp(button, player)
-	btnp(button, player)
+function pt.btnp(button, player)
+	return btnp(button, player)
 end
 
 --- Get the state of a key
@@ -722,7 +722,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peektext)
 --- @return boolean
 function pt.peektext()
-	peektext()
+	return peektext()
 end
 
 --- Read the next peice of text waiting
@@ -748,7 +748,7 @@ end
 --- @return number wheel_x
 --- @return number wheel_y
 function pt.mouse(new_mx, new_my)
-	mouse(new_mx, new_my)
+	return mouse(new_mx, new_my)
 end
 
 --- Requests to capture the mouse to control speed and move_sensitivity
@@ -763,9 +763,8 @@ end
 --- @return number dx
 --- @return number dy
 function pt.mouselock(lock, event_sensitivity, move_sensitivity)
-	mouselock(lock, event_sensitivity, move_sensitivity)
+	return mouselock(lock, event_sensitivity, move_sensitivity)
 end
-global DATP: string--- @meta
 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#map)
 --- @param tile_x integer
@@ -966,7 +965,7 @@ end
 --- @param n? integer
 --- @return integer ...
 function pt.peek(addr, n)
-	peek(addr, n)
+	return peek(addr, n)
 end
 
 --- Read an i16 from an address in memory
@@ -976,7 +975,7 @@ end
 --- @param n? integer
 --- @return integer ...
 function pt.peek2(addr, n)
-	peek2(addr, n)
+	return peek2(addr, n)
 end
 
 --- Read an i32 from an address in memory
@@ -986,7 +985,7 @@ end
 --- @param n? integer
 --- @return integer ...
 function pt.peek4(addr, n)
-	peek4(addr, n)
+	return peek4(addr, n)
 end
 
 --- Read an i64 from an address in memory
@@ -996,7 +995,7 @@ end
 --- @param n? integer
 --- @return integer ...
 function pt.peek8(addr, n)
-	peek8(addr, n)
+	return peek8(addr, n)
 end
 
 --- Write a byte to an address in memory
@@ -1066,7 +1065,7 @@ end
 --- @param metadata? table
 --- @return string | nil
 function pt.pod(val, flags, metadata)
-	pod(val    , flags, metadata)
+	return pod(val    , flags, metadata)
 end
 
 --- Gets the decoded value and metadata from a POD string
@@ -1075,7 +1074,7 @@ end
 --- @return table | string | userdata | boolean | number | nil content
 --- @return table metadata
 function pt.unpod(val)
-	unpod(val)
+	return unpod(val)
 end
 --- @meta
 
@@ -1194,7 +1193,7 @@ end
 --- @param pos1? integer | boolean
 --- @return string
 function pt.sub(str, pos0, pos1)
-	sub(str, pos0, pos1 )
+	return sub(str, pos0, pos1 )
 end
 
 --- Converts a value to a string.
@@ -1247,16 +1246,16 @@ end
 --- @field prog_name? string
 --- @field title? string
 --- @field window_attribs? __WindowAttribs
-global record __Environment 
-	argv: {string}
-	immortal: boolean
-	parent_pid: integer
-	path: string
-	print_to_proc_id: integer
-	prog_name: string
-	title: string
-	window_attribs: __WindowAttribs
-end
+-- global record __Environment 
+-- 	argv: {string}
+-- 	immortal: boolean
+-- 	parent_pid: integer
+-- 	path: string
+-- 	print_to_proc_id: integer
+-- 	prog_name: string
+-- 	title: string
+-- 	window_attribs: __WindowAttribs
+-- end
 
 
 
@@ -1314,7 +1313,9 @@ end
 --- Get the number of seconds elapsed since the cartridge was run
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#t)
 --- @return number
-global t : function()
+function pt.t()
+	return t()
+end
 
 --- : anyGet the current date and time formatted using Lua's standard date 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#date)
@@ -1335,7 +1336,7 @@ end
 --- Get the system clipboard
 --- @return string
 function pt.get_clipboard()
-	get_clipboard()
+	return get_clipboard()
 end
 
 --- Adds an event listener
@@ -1373,14 +1374,14 @@ end
 --- @param addr? integer
 --- @return any
 function pt.stat(id, addr) 
-	stat(id, addr)
+	return stat(id, addr)
 end
 
 --- Get a property from the current theme (/ram/shared/theme.pod)
 --- @param which string
 --- @return any
 function pt.theme(which) 
-	theme(which)
+	return theme(which)
 end
 
 --- Opens a file using the system file associations (/system/util/open.lua)
@@ -1486,25 +1487,25 @@ end
 --- @operator sub(userdata|number)
 --- @operator mul(userdata|number)
 --- @operator div(userdata|number)
-global record Userdata
-	x: number
-	y: number
-	z: number
-	width: function(self)
-	height: function(self)
-	get: function(self, integer, integer)
-	set: function(self, integer, ...: integer)
-	sort: function(self)
-end
+-- global record Userdata
+-- 	x: number
+-- 	y: number
+-- 	z: number
+-- 	width: function(self)
+-- 	height: function(self)
+-- 	get: function(self, integer, integer)
+-- 	set: function(self, integer, ...: integer)
+-- 	sort: function(self)
+-- end
 
 
-global enum userdata_type
-	"u8"
-	"i16"
-	"i32"
-	"i64"
-	"f64"
-end
+-- global enum userdata_type
+-- 	"u8"
+-- 	"i16"
+-- 	"i32"
+-- 	"i64"
+-- 	"f64"
+-- end
 
 --- Creates a userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata)
@@ -1516,7 +1517,7 @@ end
 --- @overload fun(data_type: userdata_type, width: integer, data: string?)
 --- @overload fun(data: string)
 function pt.userdata(data_type, width, height, data)
-	userdata(data_type, width, height, data)
+	return userdata(data_type, width, height, data)
 end
 
 --- Creates a vector (f64, 1d userdata)
@@ -2034,27 +2035,27 @@ end
 --- @field x? integer
 --- @field y? integer
 --- @field z? integer
-global record __WindowAttribs
-	autoclose: boolean
-	cursor: integer | string | Userdata
-	fullscreen: boolean
-	has_frame: boolean
-	height: integer
-	immortal: boolean
-	moveable: boolean
-	pausable: boolean
-	pwc_output: boolean
-	resizable: boolean
-	show_in_workspace: boolean
-	tabbed: boolean
-	title: string
-	video_mode: integer
-	wallpaper: boolean
-	width: integer
-	x: integer
-	y: integer
-	z: integer
-end
+-- global record __WindowAttribs
+-- 	autoclose: boolean
+-- 	cursor: integer | string | Userdata
+-- 	fullscreen: boolean
+-- 	has_frame: boolean
+-- 	height: integer
+-- 	immortal: boolean
+-- 	moveable: boolean
+-- 	pausable: boolean
+-- 	pwc_output: boolean
+-- 	resizable: boolean
+-- 	show_in_workspace: boolean
+-- 	tabbed: boolean
+-- 	title: string
+-- 	video_mode: integer
+-- 	wallpaper: boolean
+-- 	width: integer
+-- 	x: integer
+-- 	y: integer
+-- 	z: integer
+-- end
 
 --- Get the current display as a u8, 2d userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_display)
@@ -2075,7 +2076,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_draw_target)
 --- @return userdata
 function pt.get_draw_target()
-	get_draw_target()
+	return get_draw_target()
 end
 
 --- Create a window or set its attributes
@@ -2115,3 +2116,5 @@ end
 function pt.pwf()
 	return pwf()
 end
+
+return pt

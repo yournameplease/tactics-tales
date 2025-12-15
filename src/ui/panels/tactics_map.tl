@@ -135,7 +135,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
     local camera_x = self.x + self.internal_margin.l
     local camera_y = self.y + self.internal_margin.t
-    pt.camera(-camera_x, -camera_y)
+    pt.set_camera(-camera_x, -camera_y)
 
     -- draw row-by row, top to bottom aka back to front
 
@@ -198,9 +198,9 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                     local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                     if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
                         if (highlighted_tile.reachable) then
-                            pt.color(28)
+                            pt.set_color(28)
                         elseif highlighted_tile.can_attack then
-                            pt.color(8)
+                            pt.set_color(8)
                         else
                             error("invalid state")
                         end
@@ -209,7 +209,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                 end
                 pt.poke(0x550b,0x00)
                 pt.fillp()
-                pt.color()
+                pt.reset_color()
             end
         end
 
@@ -249,7 +249,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         end
     end
 
-    pt.camera()
+    pt.reset_camera()
 end
 
 return TacticsMap

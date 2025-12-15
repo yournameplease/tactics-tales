@@ -86,26 +86,26 @@ function BattleMap:get_terrain(tile: TilePoint): TerrainData
     local tile_sprite = ground:get(tile.x,tile.y)
     if tile_sprite == 0 then return nil end
     
-    local flags = pt.fget_all(tile_sprite)
+    local flags = pt.fget(tile_sprite)
     local terrain = (flags & 0xD) >> 1
     local terrain_data = TERRAIN_DATA[terrain]
 
     local solid = flags & 0x1 == 0x1
     if back_wall then
         local back_wall_sprite = back_wall:get(tile.x,tile.y)
-        if (pt.fget_all(back_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget(back_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end
     if mid_wall then
         local mid_wall_sprite = mid_wall:get(tile.x,tile.y)
-        if (pt.fget_all(mid_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget(mid_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end
     if front_wall then
         local front_wall_sprite = front_wall:get(tile.x,tile.y)
-        if (pt.fget_all(front_wall_sprite) & 0x1) == 0x1 then
+        if (pt.fget(front_wall_sprite) & 0x1) == 0x1 then
             solid = true
         end
     end

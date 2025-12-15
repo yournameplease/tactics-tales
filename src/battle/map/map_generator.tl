@@ -38,7 +38,7 @@ local function apply_checkerboard(map_layers: MapLayers)
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)
-            if x+y & 1 == 0 and pt.fget_all(tile) & 0x40 == 0x40 then
+            if x+y & 1 == 0 and pt.fget(tile) & 0x40 == 0x40 then
                 ground:set(x, y, tile+1)
             end  
         end
@@ -53,7 +53,7 @@ local function apply_default_walls(map_layers: MapLayers)
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)
-            if pt.fget_all(tile) & 0x80 == 0x80 then
+            if pt.fget(tile) & 0x80 == 0x80 then
                 if back_wall:get(x,y) == 0 then
                     back_wall:set(x,y,tile+2)
                 end
