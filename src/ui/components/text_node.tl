@@ -36,8 +36,10 @@ function TextNode.new(props: TextNode): TextNode
     else
         error("Need either `text` or `func` for text node!")
     end
-    box.rows = props.rows or 1
-    box.h = (box.rows) * (TEXT_HEIGHT + 2)
+    if props.rows then
+        box.rows = props.rows
+        box.h = (box.rows) * (TEXT_HEIGHT + 2)
+    end
 
     props.draw_properties = props.draw_properties or {}
     box.draw_properties = {
@@ -57,10 +59,12 @@ function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
 
     local text = self.text or self.func(state)
 
-    assert(
-            #text ==
-            self.rows, "`func` should return expected number of rows"
-    )
+    if self.rows then
+        assert(
+                #text ==
+                self.rows, "`func` should return expected number of rows"
+        )
+    end
 
     Text.draw(text,
         self.x+self.internal_margin.l,
