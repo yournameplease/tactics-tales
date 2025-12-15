@@ -79,14 +79,14 @@ end
 
 local function set_palette(battle_unit: BattleUnit, side: Side)
     if side == 1 then
-        pt.pal(16, 8)
-        pt.pal(19, 24)
+        pt.set_pal(16, 8)
+        pt.set_pal(19, 24)
     end
     local skin = battle_unit.character.appearance.skin
-    pt.pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-    pt.pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-    pt.pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
-    pt.pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+    pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+    pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+    pt.set_pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
+    pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
 function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean)
@@ -169,7 +169,7 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
 	end
 
     if set_pal then
-        pt.pal()
+        pt.reset_pal()
     end
 
 end

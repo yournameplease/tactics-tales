@@ -20,7 +20,9 @@ version 2
 :: build/systems/service/
 :: build/types/
 :: build/ui/
+:: build/ui/components/
 :: build/ui/decoration/
+:: build/ui/layout/
 :: build/ui/panels/
 :: build/util/
 :: gfx/
@@ -295,7 +297,7 @@ function AnimationManager:tick()
       if not self.active_animations[i].playing then
          LOG.debug("Ending animation")
          self.active_animations[i].animated_object.playing = false
-         deli(self.active_animations, i)
+         pt.deli(self.active_animations, i)
       else
          i = i + 1
       end
@@ -320,7 +322,7 @@ function AnimationManager:create_idle_animation()
       playing = true,
    }
 
-   add(self.active_animations, instance)
+   pt.add(self.active_animations, instance)
    setmetatable(instance, { __index = GlobalAnimationInstance })
 
    return instance.animated_object
@@ -338,7 +340,7 @@ function AnimationManager:create_animation(animation_id, direction)
       animated_object = { playing = true },
    }
 
-   add(self.active_animations, animation_data)
+   pt.add(self.active_animations, animation_data)
    setmetatable(animation_data, { __index = DirectionalOffsetAnimationInstance })
 
    return animation_data.animated_object
@@ -378,7 +380,7 @@ function AnimationManager:create_walk_animation(path)
       playing = true,
    }
    LOG.debug("confirming...", #instance.path_points)
-   add(self.active_animations, instance)
+   pt.add(self.active_animations, instance)
    setmetatable(instance, { __index = PathAnimationInstance })
 
    return instance.animated_object
@@ -638,26 +640,26 @@ function BattleMap:get_terrain(tile)
    local tile_sprite = ground:get(tile.x, tile.y)
    if tile_sprite == 0 then return nil end
 
-   local flags = fget(tile_sprite)
+   local flags = pt.fget(tile_sprite)
    local terrain = (flags & 0xD) >> 1
    local terrain_data = TERRAIN_DATA[terrain]
 
    local solid = flags & 0x1 == 0x1
    if back_wall then
       local back_wall_sprite = back_wall:get(tile.x, tile.y)
-      if (fget(back_wall_sprite) & 0x1) == 0x1 then
+      if (pt.fget(back_wall_sprite) & 0x1) == 0x1 then
          solid = true
       end
    end
    if mid_wall then
       local mid_wall_sprite = mid_wall:get(tile.x, tile.y)
-      if (fget(mid_wall_sprite) & 0x1) == 0x1 then
+      if (pt.fget(mid_wall_sprite) & 0x1) == 0x1 then
          solid = true
       end
    end
    if front_wall then
       local front_wall_sprite = front_wall:get(tile.x, tile.y)
-      if (fget(front_wall_sprite) & 0x1) == 0x1 then
+      if (pt.fget(front_wall_sprite) & 0x1) == 0x1 then
          solid = true
       end
    end
@@ -729,7 +731,7 @@ function BattleMap:get_targets_in_range(unit_id, tile)
             target.tile,
             min_range, max_range) then
 
-            add(targets, target)
+            pt.add(targets, target)
          end
       end
    end
@@ -740,7 +742,7 @@ function BattleMap:get_units(filter)
    local units = {}
    for _, unit in pairs(self.units_by_id) do
       if filter(unit) then
-         add(units, unit)
+         pt.add(units, unit)
       end
    end
    return units
@@ -806,18 +808,18 @@ local MENU_DATA = {
                local options = {}
 
                if msb.tactics_engine:any_target_in_range(ctx) then
-                  add(options, {
+                  pt.add(options, {
                      text = "Attack",
                      next_state = "SELECT_TARGET",
                   })
                end
 
-               add(options, {
+               pt.add(options, {
                   text = "Wait",
                   send_command = "MOVE_AND_WAIT",
                })
 
-               add(options, {
+               pt.add(options, {
                   text = "Items",
                   next_state = "SELECT_ITEM",
                })
@@ -852,7 +854,7 @@ local MENU_DATA = {
 
                local options = {}
                for i, item in ipairs(items) do
-                  add(options, {
+                  pt.add(options, {
                      text = item:get_name(),
                      next_state = "SELECT_ITEM_ACTION",
                   })
@@ -878,13 +880,13 @@ local MENU_DATA = {
 
                if item:get_equip_slot() ~= "NONE" then
                   if inventory:is_equipped(index) then
-                     add(options, {
+                     pt.add(options, {
                         text = "Unequip",
                         send_command = "INVENTORY_UNEQUIP_ITEM",
                         next_state = "SELECT_ITEM_ACTION",
                      })
                   else
-                     add(options, {
+                     pt.add(options, {
                         text = "Equip",
                         send_command = "INVENTORY_EQUIP_ITEM",
                         next_state = "SELECT_ITEM_ACTION",
@@ -893,11 +895,11 @@ local MENU_DATA = {
                end
 
                if #items > 0 then
-                  add(options, {
+                  pt.add(options, {
                      text = "Move",
                   })
                end
-               add(options, {
+               pt.add(options, {
                   text = "Discard",
                   send_command = "INVENTORY_DISCARD_ITEM",
                   next_state = "SELECT_ITEM",
@@ -1139,7 +1141,7 @@ local function get_hit_chance(attacker, defender, weapon, battle_map)
       unit_avoid = unit_avoid + amount or 0
    end
 
-   return mid(0, accuracy - unit_avoid - terrain_avoid, 100)
+   return pt.mid(0, accuracy - unit_avoid - terrain_avoid, 100)
 end
 
 local function get_damage(attacker, defender, weapon)
@@ -1150,7 +1152,7 @@ local function get_damage(attacker, defender, weapon)
       def = def + amount or 0
    end
 
-   local damage = mid(0, atk - def, 999)
+   local damage = pt.mid(0, atk - def, 999)
    if atk > 0 and damage == 0 then
       damage = 1
    end
@@ -1210,7 +1212,7 @@ function CombatCalculator.compute_combat(attacker_unit, defender_unit, battle_ma
 
    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
    if step1 ~= nil then
-      add(result.steps, step1)
+      pt.add(result.steps, step1)
       if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
    end
 
@@ -1219,7 +1221,7 @@ function CombatCalculator.compute_combat(attacker_unit, defender_unit, battle_ma
    if can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then
       local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
       if step2 ~= nil then
-         add(result.steps, step2)
+         pt.add(result.steps, step2)
       end
    end
 
@@ -1250,7 +1252,7 @@ function CombatCalculator.preview_combat(attacker_unit, defender_unit, attacker_
 
    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
    if step1 ~= nil then
-      add(result.steps, step1)
+      pt.add(result.steps, step1)
    end
 
 
@@ -1258,7 +1260,7 @@ function CombatCalculator.preview_combat(attacker_unit, defender_unit, attacker_
    if can_attack(defender, attacker, defender_attacks[1]) then
       local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
       if step2 ~= nil then
-         add(result.steps, step2)
+         pt.add(result.steps, step2)
       end
    end
 
@@ -1308,7 +1310,7 @@ local function apply_checkerboard(map_layers)
    for x = 0, ground:height() - 1 do
       for y = 0, ground:width() - 1 do
          local tile = ground:get(x, y)
-         if x + y & 1 == 0 and fget(tile) & 0x40 == 0x40 then
+         if x + y & 1 == 0 and pt.fget(tile) & 0x40 == 0x40 then
             ground:set(x, y, tile + 1)
          end
       end
@@ -1323,7 +1325,7 @@ local function apply_default_walls(map_layers)
    for x = 0, ground:height() - 1 do
       for y = 0, ground:width() - 1 do
          local tile = ground:get(x, y)
-         if fget(tile) & 0x80 == 0x80 then
+         if pt.fget(tile) & 0x80 == 0x80 then
             if back_wall:get(x, y) == 0 then
                back_wall:set(x, y, tile + 2)
             end
@@ -1339,7 +1341,7 @@ local function apply_default_walls(map_layers)
 end
 
 local function load_static(definition)
-   local map_fetch = fetch(DATP .. definition.file)
+   local map_fetch = pt.fetch(DATP .. definition.file)
 
    local layers = as_map(map_fetch)
 
@@ -1367,7 +1369,7 @@ local function load_static(definition)
             if battle_map.metadata.enemy_spawners[enemy_spawner_id] == nil then
                battle_map.metadata.enemy_spawners[enemy_spawner_id] = {}
             end
-            add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
+            pt.add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
          end
       end
    end
@@ -1463,7 +1465,7 @@ local function _dijkstra_traversal(battle_map, start_x, start_y, side, max_cost)
    local start_cost = 0
 
    visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
-   add(priority_queue, { x = start_x, y = start_y, cost = start_cost })
+   pt.add(priority_queue, { x = start_x, y = start_y, cost = start_cost })
 
 
    while #priority_queue > 0 do
@@ -1478,7 +1480,7 @@ local function _dijkstra_traversal(battle_map, start_x, start_y, side, max_cost)
          end
       end
 
-      local u = deli(priority_queue, min_index)
+      local u = pt.deli(priority_queue, min_index)
       assert(type(u) == "table")
       local ux, uy, ucost = u.x, u.y, u.cost
 
@@ -1508,7 +1510,7 @@ local function _dijkstra_traversal(battle_map, start_x, start_y, side, max_cost)
                   if not neighbor_info or new_total < neighbor_info.cost then
 
                      visited_info:set(vx, vy, { cost = new_total, prev = TilePoint.of(ux, uy) })
-                     add(priority_queue, { x = vx, y = vy, cost = new_total })
+                     pt.add(priority_queue, { x = vx, y = vy, cost = new_total })
                   end
                end
             end
@@ -1537,11 +1539,11 @@ end
 function Pathfinding.get_path_to_tile(all_tile_costs, tile)
    assert(all_tile_costs:get_point(tile) ~= nil)
    local path = {}
-   add(path, tile:copy())
+   pt.add(path, tile:copy())
    local next_tile = tile
    while all_tile_costs:get_point(next_tile).prev ~= nil do
       next_tile = all_tile_costs:get_point(next_tile).prev
-      add(path, next_tile:copy())
+      pt.add(path, next_tile:copy())
    end
    return reverse_list(path)
 end
@@ -1627,7 +1629,7 @@ function BattleUnit:is_alive()
 end
 
 function BattleUnit:take_damage(amount)
-   local new_hp = mid(0, self.hp_current - amount, self.character.stats.hp_max)
+   local new_hp = pt.mid(0, self.hp_current - amount, self.character.stats.hp_max)
    self.hp_current = new_hp
 end
 
@@ -1690,10 +1692,10 @@ function EnemyAIEngine:compute_enemy_ai(unit)
             if shortest_path_tile ~= nil then
                if shortest_path_tile.cost <= unit.character.stats.movement then
                   if self.ctx.battle_map:tile_is_legal_destination(unit, tile) then
-                     add(potential_attacks, { destination = tile, target = e })
+                     pt.add(potential_attacks, { destination = tile, target = e })
                   end
                else
-                  add(deep_moves, { destination = tile })
+                  pt.add(deep_moves, { destination = tile })
                end
             end
          end
@@ -1749,7 +1751,7 @@ function EnemyAIEngine:handle_enemy_turn()
       for _, enemy in ipairs(enemies) do
          self:compute_enemy_ai(enemy)
          while self.ctx.tactics_engine:is_blocked() do
-            yield()
+            pt.yield()
          end
       end
 
@@ -1845,7 +1847,7 @@ function TacticsEngine:handle_move_unit(ctx)
          unit.animation_data = animation
          LOG.debug("Animating!", animation.playing)
          while animation.playing do
-            yield()
+            pt.yield()
          end
       end
 
@@ -1871,7 +1873,7 @@ function TacticsEngine:handle_move_and_attack(ctx)
          unit.animation_data = animation
 
          while animation.playing do
-            yield()
+            pt.yield()
          end
       end
 
@@ -1893,7 +1895,7 @@ function TacticsEngine:apply_combat_step(step)
    local attacker = step.attacker
    local defender = step.defender
 
-   local direction = atan2(
+   local direction = pt.atan2(
    defender.tile.x - attacker.tile.x,
    defender.tile.y - attacker.tile.y)
 
@@ -1904,11 +1906,11 @@ function TacticsEngine:apply_combat_step(step)
       local dodge_animation = self.ctx.services.animation_manager:create_animation("DODGE", direction + 0.25)
       defender.animation_data = dodge_animation
       while dodge_animation.playing do
-         yield()
+         pt.yield()
       end
    end
    while attack_animation.playing do
-      yield()
+      pt.yield()
    end
 
    if step.is_hit then
@@ -1917,7 +1919,7 @@ function TacticsEngine:apply_combat_step(step)
       defender.animation_data = hurt_animation
 
       while hurt_animation.playing do
-         yield()
+         pt.yield()
       end
    end
 
@@ -2017,8 +2019,8 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_di
    for x = -max_distance, max_distance do
       local map_x = x + tile_x
       if map_x >= 0 and map_x < MAP_WIDTH then
-         local abs_x = abs(x)
-         local min_y_abs = max(0, min_distance - abs_x)
+         local abs_x = pt.abs(x)
+         local min_y_abs = pt.max(0, min_distance - abs_x)
          local max_y_abs = max_distance - abs_x
 
          if max_y_abs >= min_y_abs then
@@ -2566,14 +2568,14 @@ end
 
 local function set_palette(battle_unit, side)
    if side == 1 then
-      pal(16, 8)
-      pal(19, 24)
+      pt.pal(16, 8)
+      pt.pal(19, 24)
    end
    local skin = battle_unit.character.appearance.skin
-   pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-   pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-   pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
-   pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+   pt.pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+   pt.pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+   pt.pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
+   pt.pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
 function CharacterRenderer.draw_head(battle_unit, point, side, set_pal)
@@ -2588,24 +2590,24 @@ function CharacterRenderer.draw_head(battle_unit, point, side, set_pal)
       headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]
    end
 
-   spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
+   pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
 
    if headwear == nil or headwear.draw_beard then
       if battle_unit.character.appearance.beard ~= nil then
-         spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+         pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
       end
    end
    if headwear == nil or headwear.draw_eyewear then
-      spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
+      pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
       if battle_unit.character.appearance.eyewear ~= nil then
-         spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+         pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
       end
    end
    if headwear == nil or headwear.draw_hair then
-      spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+      pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
    end
    if headwear ~= nil then
-      spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
+      pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
    end
 
 end
@@ -2637,7 +2639,7 @@ function CharacterRenderer.draw(battle_unit, point, side, set_pal, apply_animati
       set_palette(battle_unit, side)
    end
 
-   spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
+   pt.spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
    CharacterRenderer.draw_head(battle_unit, head_anchor, side, set_pal)
@@ -2650,13 +2652,13 @@ function CharacterRenderer.draw(battle_unit, point, side, set_pal, apply_animati
          if equip:get_sprite_data() ~= nil then
             local anchor = slot == "OFF_HAND" and "off_hand" or "main_hand"
             local equip_anchor = get_anchor_offsets(base_point, animation_frame.anchors[anchor], equip:get_sprite_data().anchor, flip_h, false)
-            spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
+            pt.spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
          end
       end
    end
 
    if set_pal then
-      pal()
+      pt.pal()
    end
 
 end
@@ -2791,8 +2793,6 @@ require("src/character/items/object/weapon")
 local List = require("src/util/list")
 require("src/util")
 
-local ItemInventoryModule = {}
-
 
 
 
@@ -2884,15 +2884,15 @@ function ItemInventoryImpl:get_equipped_weapons()
    local out = {}
    if self._items_by_equip_slot["TWO_HANDS"] ~= nil and
       self._items_by_equip_slot["TWO_HANDS"].item:get_type() == "WEAPON" then
-      add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
+      pt.add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
    end
    if self._items_by_equip_slot["MAIN_HAND"] ~= nil and
       self._items_by_equip_slot["MAIN_HAND"].item:get_type() == "WEAPON" then
-      add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
+      pt.add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
    end
    if self._items_by_equip_slot["OFF_HAND"] ~= nil and
       self._items_by_equip_slot["OFF_HAND"].item:get_type() == "WEAPON" then
-      add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
+      pt.add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
    end
    return out
 end
@@ -2925,7 +2925,7 @@ end
 
 function ItemInventoryImpl:add_item(item)
    assert(self:can_add_item(item))
-   add(self.items, { item = item })
+   pt.add(self.items, { item = item })
    self:compute_current_slots()
 end
 
@@ -2972,7 +2972,7 @@ end
 
 function ItemInventoryImpl:remove_item(slot)
    local item = self._items_by_slot[slot]
-   del(self.items, item)
+   pt.del(self.items, item)
    self:compute_current_slots()
 end
 
@@ -2982,7 +2982,7 @@ function ItemInventoryImpl:move_item(index, before_index)
    self:compute_current_slots()
 end
 
-function ItemInventoryModule.new(max_slots)
+local function new(max_slots)
    local inventory = {
       max_slots = max_slots,
       items = {},
@@ -2992,7 +2992,10 @@ function ItemInventoryModule.new(max_slots)
    return inventory
 end
 
-return ItemInventoryModule
+return {
+   ItemInventory = ItemInventory,
+   new = new,
+}
 
 :: build/character/items/object/weapon.lua
 require("src/types")
@@ -3284,13 +3287,13 @@ local color_table_sprite = 1
 
 function Colors.apply_colortable_row(row_id)
    local color_row = rows_by_id[row_id]
-   local sprite = get_spr(color_table_sprite)
+   local sprite = pt.get_spr(color_table_sprite)
    local address = 0x8000 + color_row * 64
    for x = 0, 63 do
       local c = sprite:get(x, color_row)
-      poke(address + x, c)
+      pt.poke(address + x, c)
    end
-   poke(0x550b, 0x3f)
+   pt.poke(0x550b, 0x3f)
 end
 
 PaletteId = {}
@@ -3306,10 +3309,10 @@ local cols_by_id = {
 
 function Colors.apply_palette(palette_id)
    local color_col = cols_by_id[palette_id]
-   local sprite = get_spr(palette_sprite)
+   local sprite = pt.get_spr(palette_sprite)
    for y = 1, 63 do
       local c = sprite:get(color_col, y)
-      pal(y, c)
+      pt.pal(y, c)
    end
 end
 
@@ -4090,7 +4093,7 @@ local function debug_print(level, ...)
 
       end
 
-      printh(level .. ": " .. str)
+      pt.printh(level .. ": " .. str)
    end
 end
 
@@ -4121,13 +4124,13 @@ local draw_util = {}
 
 function draw_shadow(c, draw, x, y)
    for i = 1, 31 do
-      pal(i, c)
+      pt.pal(i, c)
    end
    draw(x - 1, y)
    draw(x, y - 1)
    draw(x + 1, y)
    draw(x, y + 1)
-   pal()
+   pt.pal()
 end
 
 return draw_util
@@ -4142,8 +4145,10 @@ BaseGameContext = {}
 
 
 
+
 function BaseGameContext.new(services)
    return {
+      type = "game",
       services = services,
    }
 end
@@ -4160,7 +4165,6 @@ require("src/systems/tasks")
 require("src/data/battles")
 
 require("src/battle/battle_manager")
-require("src/menu/menu_manager")
 require("src/game/game_menu_manager")
 require("src/systems/service")
 require("src/character/character_manager")
@@ -4191,10 +4195,11 @@ function Game.new(services)
    self.game_ctx = BaseGameContext.new(services)
 
    self.game_ctx.menu_manager = GameMenuManager.new(self.game_ctx)
+   self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
 
    services.ui_context:register_context(self.game_ctx)
 
-   services.event_bus:on("BATTLE_END_DEFEAT", function()
+   services.event_bus:on("GAME_BEGIN_STORY", function()
       self:begin_story()
    end)
 
@@ -4202,7 +4207,11 @@ function Game.new(services)
 end
 
 function Game:update(joy)
-   self.game_ctx.menu_manager:update(joy)
+   if self.story ~= nil then
+      self.story:update(joy)
+   else
+      self.game_ctx.menu_manager:update(joy)
+   end
 end
 
 return Game
@@ -4220,6 +4229,7 @@ require("src/menu/menu_manager")
 require("src/story/story_context")
 require("src/game/base_game_context")
 require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/multiple_options_cursor")
 require("src/menu/cursor/button_advance_cursor")
 
 
@@ -4229,8 +4239,8 @@ GameMenuManager = {}
 
 local MENU_DATA = {
    ["MENU_MAIN_MENU"] = {
+      initial_step = "TITLE_SCREEN",
 
-      initial_step = "MAIN_MENU",
       steps = {
          ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
             next_state = "MAIN_MENU",
@@ -4239,11 +4249,11 @@ local MENU_DATA = {
             get_options = function(msb, ctx)
                local options = {}
 
-               add(options, {
+               pt.add(options, {
                   text = "Play",
                   send_command = "GAME_BEGIN_STORY",
                })
-               add(options, {
+               pt.add(options, {
                   text = "Options",
                   next_state = "OPTIONS_MENU",
                })
@@ -4281,6 +4291,40 @@ end
 
 return GameMenuManager
 
+:: build/game/game_ui_context.lua
+require("src/ui/types")
+require("src/battle/tactics/tactics_engine")
+require("src/turn_manager")
+require("src/game/base_game_context")
+require("src/game/game_menu_manager")
+
+
+
+GameUIContext = {}
+
+
+
+
+
+function GameUIContext.new(ctx)
+   local context = setmetatable({
+      ctx = ctx,
+   }, { __index = GameUIContext })
+   return context
+end
+
+function GameUIContext:enrich()
+   self.layout = "TITLE_SCREEN"
+
+   if self.ctx.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
+      if self.ctx.menu_manager.menu_state.step == "MAIN_MENU" then
+         self.layout = "MAIN_MENU_PAGE"
+      end
+   end
+end
+
+return GameUIContext
+
 :: build/game_context.lua
 
 
@@ -4290,6 +4334,7 @@ return GameMenuManager
 
 
 GameContextType = {}
+
 
 
 
@@ -4313,15 +4358,15 @@ Joypad = {}
 function get_joypad()
    local joy = {
 
-      dx = (btn(1) and 1 or 0) - (btn(0) and 1 or 0),
-      dxp = (btnp(1) and 1 or 0) - (btnp(0) and 1 or 0),
-      dy = (btn(3) and 1 or 0) - (btn(2) and 1 or 0),
-      dyp = (btnp(3) and 1 or 0) - (btnp(2) and 1 or 0),
-      a = btn(4),
-      ap = btnp(4),
-      b = btn(5),
-      bp = btnp(5),
-      lp = btnp(14),
+      dx = (pt.btn(1) and 1 or 0) - (pt.btn(0) and 1 or 0),
+      dxp = (pt.btnp(1) and 1 or 0) - (pt.btnp(0) and 1 or 0),
+      dy = (pt.btn(3) and 1 or 0) - (pt.btn(2) and 1 or 0),
+      dyp = (pt.btnp(3) and 1 or 0) - (pt.btnp(2) and 1 or 0),
+      a = pt.btn(4),
+      ap = pt.btnp(4),
+      b = pt.btn(5),
+      bp = pt.btnp(5),
+      lp = pt.btnp(14),
    }
 
    return joy
@@ -4545,8 +4590,8 @@ function GridMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
 end
 
 function GridMenuCursor:update(joy)
-   self.point.x = mid(0, self.point.x + joy.dxp, self.x_max - 1)
-   self.point.y = mid(0, self.point.y + joy.dyp, self.y_max - 1)
+   self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
+   self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
 end
 
 function GridMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
@@ -4640,7 +4685,7 @@ function ListMenuCursor:update(joy)
    if self.wrap then
       self.i = new_i % #self.options + 1
    else
-      self.i = mid(1, new_i, #self.options)
+      self.i = pt.mid(1, new_i, #self.options)
    end
 end
 
@@ -4751,7 +4796,7 @@ function MultipleOptionsMenuCursor:update(joy)
    if self.wrap then
       self.i = new_i % #self.options + 1
    else
-      self.i = mid(1, new_i, #self.options)
+      self.i = pt.mid(1, new_i, #self.options)
    end
 end
 
@@ -4874,7 +4919,7 @@ function BaseMenuManager:handle_menu_select()
 
    local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
 
-   add(self.selection_history, {
+   pt.add(self.selection_history, {
       step = self.menu_state.step,
       selection = self.menu_cursor,
    })
@@ -5193,7 +5238,7 @@ local MENU_DATA = {
             get_options = function(msb, ctx)
                local options = {}
 
-               add(options, {
+               pt.add(options, {
                   text = "Continue",
                   send_command = "STORY_ADVANCE_TEXT",
                })
@@ -5231,7 +5276,7 @@ end
 
 
 function StoryPage:add_text_line(text)
-   add(self.text, text)
+   pt.add(self.text, text)
 end
 
 function StoryPage:clear_page()
@@ -5246,7 +5291,6 @@ return StoryPage
 require("src/ui/types")
 require("src/battle/tactics/tactics_engine")
 require("src/turn_manager")
-require("src/story/story_page")
 require("src/story/story_context")
 
 
@@ -5426,7 +5470,7 @@ function EventBus:on(event_name, callback)
    if not self.listeners[event_name] then
       self.listeners[event_name] = {}
    end
-   add(self.listeners[event_name], {
+   pt.add(self.listeners[event_name], {
       id = self.id_counter:get_id(),
       callback = callback,
    })
@@ -5437,7 +5481,7 @@ function EventBus:remove(id)
    for _, slots in pairs(self.listeners) do
       for i, listener in ipairs(slots) do
          if listener.id == id then
-            deli(slots, i)
+            pt.deli(slots, i)
             return
          end
       end
@@ -5454,9 +5498,9 @@ end
 function EventBus:emit(event_name, args)
    LOG.debug("Recieved event", event_name)
    if #self.event_history > MAX_EVENT_HISTORY then
-      deli(self.event_history, 1)
+      pt.deli(self.event_history, 1)
    end
-   add(self.event_history, event_name)
+   pt.add(self.event_history, event_name)
 
    local slots = self.listeners[event_name]
    if slots then
@@ -5630,20 +5674,20 @@ function TaskManager.new()
 end
 
 function TaskManager:start_routine(func)
-   local co = cocreate(func)
-   add(self.tasks, co)
+   local co = pt.cocreate(func)
+   pt.add(self.tasks, co)
 end
 
 function TaskManager:update_tasks()
    for _, co in ipairs(self.tasks) do
-      if costatus(co) == "suspended" then
-         local ok, err = coresume(co)
+      if pt.costatus(co) == "suspended" then
+         local ok, err = pt.coresume(co)
          if not ok then
             LOG.error("Task Error: " .. err)
             assert(ok)
          end
-      elseif costatus(co) == "dead" then
-         del(self.tasks, co)
+      elseif pt.costatus(co) == "dead" then
+         pt.del(self.tasks, co)
       end
    end
 end
@@ -5685,26 +5729,26 @@ function TurnManager.new(ctx)
 
    self.event_listener_ids = {}
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_BATTLE", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_BATTLE", function()
       self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
       self.ctx.services.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_UNIT_END_ACTION", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_UNIT_END_ACTION", function()
       if self.phase == "PLAYER" then
          LOG.debug("Setting to player turn menu")
          self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
       end
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
       LOG.info("Begin player turn!")
       self.phase = "PLAYER"
       self.ctx.tactics_engine:refresh_all_units()
       self.ctx.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
       if self.phase ~= "PLAYER" then
          LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was " .. self.phase .. ".  Ignoring message.")
          return
@@ -5715,12 +5759,12 @@ function TurnManager.new(ctx)
       self.ctx.services.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.ctx.tactics_engine)
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
       self.phase = "ENEMY"
       LOG.info("Begin enemy turn!")
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_ENEMY_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_ENEMY_TURN", function()
       if self.phase ~= "ENEMY" then
          LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was " .. self.phase .. ".  Ignoring message.")
          return
@@ -5738,31 +5782,31 @@ function TurnManager.new(ctx)
       end
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_VICTORY", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_VICTORY", function()
       LOG.info("You win!")
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_DEFEAT", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("BATTLE_END_DEFEAT", function()
       LOG.info("You lose!")
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx)
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_WAIT", function(ctx)
       self.ctx.tactics_engine:handle_move_unit(ctx)
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx)
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("MOVE_AND_ATTACK", function(ctx)
       self.ctx.tactics_engine:handle_move_and_attack(ctx)
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function()
       self.ctx.tactics_engine.is_player_turn = true
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_END_PLAYER_TURN", function()
       self.ctx.tactics_engine.is_player_turn = false
    end))
 
-   add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
+   pt.add(self.event_listener_ids, self.ctx.services.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
       self.ctx.enemy_ai_engine:handle_enemy_turn()
    end))
 
@@ -5817,11 +5861,11 @@ local base_point_mt = {
    __mul = function(a, b)
       if type(a) == "number" then
          assert(type(b) == "table")
-         return BasePoint.of(flr(a * b.x), flr(a * b.y))
+         return BasePoint.of(pt.flr(a * b.x), pt.flr(a * b.y))
       end
       if type(b) == "number" then
          assert(type(a) == "table")
-         return BasePoint.of(flr(a.x * b), flr(a.y * b))
+         return BasePoint.of(pt.flr(a.x * b), pt.flr(a.y * b))
       end
       return BasePoint.of(a.x * b.x, a.y * b.y)
    end,
@@ -5842,8 +5886,8 @@ function BasePoint.of(x, y)
 end
 
 function BasePoint.of_angle(angle, scale)
-   local x = flr(scale * cos(angle) + 0.5)
-   local y = flr(scale * sin(angle) + 0.5)
+   local x = pt.flr(scale * pt.cos(angle) + 0.5)
+   local y = pt.flr(scale * pt.sin(angle) + 0.5)
    return BasePoint.of(x, y)
 end
 
@@ -5887,7 +5931,7 @@ DrawPoint = {}
 setmetatable(DrawPoint, { __index = BasePoint })
 
 function taxicab_distance(p1, p2)
-   return abs(p1.x - p2.x) + abs(p1.y - p2.y)
+   return pt.abs(p1.x - p2.x) + pt.abs(p1.y - p2.y)
 end
 
 Side = {}
@@ -6058,7 +6102,7 @@ function Box.spacer()
 end
 
 function Box:add(child)
-   add(self.children, child)
+   pt.add(self.children, child)
    return child
 end
 
@@ -6097,10 +6141,10 @@ function Box:measure()
 
       if is_row then
          content_w = content_w + child_outer_w
-         content_h = max(content_h, child_outer_h)
+         content_h = pt.max(content_h, child_outer_h)
          if i > 1 then content_w = content_w + self.gap end
       else
-         content_w = max(content_w, child_outer_w)
+         content_w = pt.max(content_w, child_outer_w)
          content_h = content_h + child_outer_h
          if i > 1 then content_h = content_h + self.gap end
       end
@@ -6159,7 +6203,7 @@ function Box:layout(parent_x, parent_y)
    local cx = self.x + self.internal_margin.l
    local cy = self.y + self.internal_margin.t
    local total_size = is_row and my_w or my_h
-   local remaining = max(0, total_size - used_space)
+   local remaining = pt.max(0, total_size - used_space)
    local px_per_flex = (total_flex > 0) and (remaining / total_flex) or 0
 
    for _, child in ipairs(self.children) do
@@ -6169,7 +6213,7 @@ function Box:layout(parent_x, parent_y)
 
 
       if child.flex_grow > 0 and total_flex > 0 then
-         local added = flr(child.flex_grow * px_per_flex)
+         local added = pt.flr(child.flex_grow * px_per_flex)
          if is_row then child_w = added
          else child_h = added end
       end
@@ -6206,28 +6250,28 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
    local h = self.h - (self.internal_margin.t + self.internal_margin.b)
    local pad = self.decoration_padding
    if pad ~= 0 then
-      rectfill(
+      pt.rectfill(
       x,
       y + pad - 1,
       x + pad - 1,
       y + h - 1,
       color_sw)
 
-      rectfill(
+      pt.rectfill(
       x,
       y + h - 1,
       x + w - 1,
       y + h - 1,
       color_sw)
 
-      rectfill(
+      pt.rectfill(
       x,
       y,
       x + w - 1,
       y + pad - 1,
       color_ne)
 
-      rectfill(
+      pt.rectfill(
       x + w - pad,
       y,
       x + w - 1,
@@ -6235,7 +6279,7 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
       color_ne)
 
    end
-   rectfill(
+   pt.rectfill(
    x + pad,
    y + pad,
    x + w - 1 - pad,
@@ -6285,21 +6329,21 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
             local child = self.children[i]
             local c_y = child.y + child.internal_margin.t
             local gap_h = self.gap
-            rectfill(
+            pt.rectfill(
             x,
             c_y - gap_h + pad,
             x + w - 1,
             c_y - pad,
             color_interior)
 
-            rectfill(
+            pt.rectfill(
             x,
             c_y - gap_h,
             x + w - 1,
             c_y - gap_h + pad - 1,
             color_sw)
 
-            rectfill(
+            pt.rectfill(
             x,
             c_y - pad + 1,
             x + w - 1,
@@ -6315,21 +6359,21 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
             local h_prev = prev_child.h
             local y_next = next_child.y + next_child.internal_margin.t
             local h_next = next_child.h
-            rectfill(
+            pt.rectfill(
             c_x - gap_w + pad,
             y,
             c_x - pad,
             y + h - 1,
             color_interior)
 
-            rectfill(
+            pt.rectfill(
             c_x - gap_w,
             y_prev,
             c_x - gap_w + pad - 1,
             h_prev + h_prev - 1,
             color_sw)
 
-            rectfill(
+            pt.rectfill(
             c_x - pad + 1,
             y_next,
             c_x,
@@ -6356,8 +6400,8 @@ function Box:draw_border(ui_theme)
    local y = self.y + self.internal_margin.t - d_pad
    local w = self.w - (self.internal_margin.l + self.internal_margin.r - 2 * d_pad)
    local h = self.h - (self.internal_margin.t + self.internal_margin.b - 2 * d_pad)
-   local r = max(0, d_pad - 1)
-   rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
+   local r = pt.max(0, d_pad - 1)
+   pt.rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
 function Box:draw_solid(ui_theme)
@@ -6365,7 +6409,7 @@ function Box:draw_solid(ui_theme)
    local y = self.y
    local w = self.w
    local h = self.h
-   rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
+   pt.rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
 function Box._draw(self, state, ui_theme)
@@ -6410,150 +6454,9 @@ end
 
 return Box
 
-:: build/ui/decoration/page_divider.lua
+:: build/ui/components/message_log.lua
 require("src/ui/box")
-require("src/ui/ui_context_manager")
-
-local PageDivider = {}
-
-
-
-setmetatable(PageDivider, { __index = Box })
-
-
-function PageDivider.new(width)
-   local box = Box.new({ w = width, cross_stretch = true })
-   setmetatable(box, { __index = PageDivider })
-   return box
-end
-
-function PageDivider:draw(state, ui_theme)
-
-
-   local l = self.x
-   local r = self.x + self.w - 1
-   local t = self.y
-   local b = self.y + self.h
-
-   local w = ((self.w + 1) >> 1) - 1
-   for i = 0, w do
-
-      local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
-      local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
-
-      line(l + i, t + i, l + i, b, c_l)
-      if i < w or w & 1 == 0 then
-         line(r - i, t + i, r - i, b, c_r)
-      end
-   end
-end
-
-return PageDivider
-
-:: build/ui/panels/combat_preview.lua
-require("src/ui/box")
-require("src/ui/panels/text_node")
-require("src/ui/panels/portrait_box")
-require("src/ui/ui_context_manager")
-require("src/battle/battle_context")
-local CombatCalculator = require("src/battle/combat/combat_calculator")
-
-CombatPreview = {}
-
-
-
-setmetatable(CombatPreview, { __index = Box })
-
-local function get_preview_text(state)
-   local attacker = state.battle_context.acting_unit
-   local defender = state.battle_context.hovered_unit
-   local attacker_tile = state.battle_context.destination
-   local battle_map = state.battle_context.ctx.battle_map
-   local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
-
-   local out = {}
-   if preview[1] ~= nil then
-      add(out, attacker.character.name .. " -> " .. defender.character.name)
-      add(out, "Hit: " .. preview[1].hit_chance .. "%")
-      add(out, "Dmg: " .. preview[1].dmg)
-   else
-      add(out, "No attack!")
-      add(out, "")
-      add(out, "")
-
-   end
-   if preview[2] ~= nil then
-      add(out, attacker.character.name .. " <- " .. defender.character.name)
-      add(out, "Hit: " .. preview[2].hit_chance .. "%")
-      add(out, "Dmg: " .. preview[2].dmg)
-   else
-      add(out, "No counterattack!")
-      add(out, "")
-      add(out, "")
-   end
-   return out
-end
-
-function CombatPreview.new(props)
-   props.dir = "row"
-   props.gap = props.gap or 4
-   props.padding = props.padding or 4
-   props.auto_height = props.auto_height or true
-
-   local self = Box.new(props)
-   setmetatable(self, { __index = CombatPreview })
-
-   local attacker_portrait = PortraitBox.new(function(state) return state.battle_context.acting_unit end)
-   local left = Box.flex_col()
-   left:add(attacker_portrait)
-   left:add(Box.spacer())
-   local defender_portrait = PortraitBox.new(function(state) return state.battle_context.hovered_unit end)
-   local right = Box.flex_col()
-   right:add(defender_portrait)
-   right:add(Box.spacer())
-
-   local preview_text = TextNode.new({
-      flex_grow = 1,
-      rows = 6,
-      func = get_preview_text,
-   })
-
-   self:add(left)
-   self:add(preview_text)
-   self:add(right)
-
-   return self
-end
-
-return CombatPreview
-
-:: build/ui/panels/event_message_log.lua
-require("src/ui/box")
-require("src/systems/event_bus")
-require("src/ui/panels/text_node")
-require("src/ui/panels/message_log")
-require("src/ui/ui_context_manager")
-require("src/story/story_context")
-
-EventMessageLog = {}
-
-
-
-function EventMessageLog.new(props)
-   props.func = function(state, _row_limit)
-      return tmap(state.story_context.ctx.services.event_bus:get_event_history(), function(e) return "> " .. e end)
-   end
-
-   props.draw_properties = props.draw_properties or {}
-   props.draw_properties.text_direction = props.draw_properties.text_direction or 'up'
-   return MessageLog.new(props)
-end
-
-return EventMessageLog
-
-:: build/ui/panels/message_log.lua
-require("src/ui/box")
-require("src/ui/panels/text_node")
+require("src/ui/components/text_node")
 require("src/ui/ui_context_manager")
 local Text = require("src/util/text")
 
@@ -6611,6 +6514,423 @@ setmetatable(MessageLog, { __index = Box })
 
 return MessageLog
 
+:: build/ui/components/text_node.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/ui/ui_context_manager")
+require("src/ui/box")
+local Text = require("src/util/text")
+
+TextUIElement = {}
+
+
+
+
+
+TextNode = {}
+
+
+
+
+
+
+setmetatable(TextNode, { __index = Box })
+
+local TEXT_HEIGHT = 8
+
+
+
+
+
+function TextNode.new(props)
+   local box = Box.new(props)
+   setmetatable(box, { __index = TextNode })
+
+   box.padding = props.padding or 0
+   box.decoration_padding = 0
+   if props.text then
+      box.text = props.text
+   elseif props.func then
+      box.func = props.func
+   else
+      error("Need either `text` or `func` for text node!")
+   end
+   box.rows = props.rows or 1
+   box.h = (box.rows) * (TEXT_HEIGHT + 2)
+
+   props.draw_properties = props.draw_properties or {}
+   box.draw_properties = {
+      justify = "left",
+      text_direction = "down",
+      wrap_mode = "ellipsis",
+   }
+   box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
+   box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
+   box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
+
+   return box
+end
+
+function TextNode:draw(state, ui_theme)
+   Box._draw(self, state, ui_theme)
+
+   local text = self.text or self.func(state)
+
+   assert(
+   #text ==
+   self.rows, "`func` should return expected number of rows")
+
+
+   Text.draw(text,
+   self.x + self.internal_margin.l,
+   self.y + self.internal_margin.t,
+   self.w - self.internal_margin.l - self.internal_margin.r,
+   self.h - self.internal_margin.t - self.internal_margin.b,
+   ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
+end
+
+return TextNode
+
+:: build/ui/decoration/page_divider.lua
+require("src/ui/box")
+require("src/ui/ui_context_manager")
+
+local PageDivider = {}
+
+
+
+setmetatable(PageDivider, { __index = Box })
+
+
+function PageDivider.new(width)
+   local box = Box.new({ w = width, cross_stretch = true })
+   setmetatable(box, { __index = PageDivider })
+   return box
+end
+
+function PageDivider:draw(state, ui_theme)
+
+
+   local l = self.x
+   local r = self.x + self.w - 1
+   local t = self.y
+   local b = self.y + self.h
+
+   local w = ((self.w + 1) >> 1) - 1
+   for i = 0, w do
+
+      local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
+      local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
+
+      pt.line(l + i, t + i, l + i, b, c_l)
+      if i < w or w & 1 == 0 then
+         pt.line(r - i, t + i, r - i, b, c_r)
+      end
+   end
+end
+
+return PageDivider
+
+:: build/ui/layout/combat_preview.lua
+require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+
+local SplitPages = require("src/ui/panels/split_pages")
+local BattleSummary = require("src/ui/panels/battle_summary")
+
+require("src/ui/validator")
+
+local battle_summary = BattleSummary.new()
+local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+{
+   decoration_padding = 2,
+   decoration = "border",
+   internal_margin = { t = 5, b = 5, l = 4, r = 4 },
+})
+local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+left:add(battle_summary)
+left:add(UnitInfo.new({ padding = 2, decoration = "border" }))
+left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
+
+local root = SplitPages.new(left, tactics_map)
+
+return { root = root }
+
+:: build/ui/layout/main_menu.lua
+require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+
+local SplitPages = require("src/ui/panels/split_pages")
+
+require("src/ui/validator")
+
+
+local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+local right = TextNode.new({ flex_grow = 1, text = { "Main Menu" } })
+local root = SplitPages.new(left, right)
+
+return { root = root }
+
+:: build/ui/layout/story_page.lua
+require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/story/story_page")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+
+local SplitPages = require("src/ui/panels/split_pages")
+
+require("src/ui/validator")
+
+local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+
+local story_page = MessageLog.new({
+   dir = "col",
+   flex_grow = 1,
+   padding = 2,
+   draw_properties = {
+      text_direction = "down",
+      wrap_mode = "ellipsis",
+   },
+   func = function(state, _row_limit)
+      return state.story_context.ctx.story_page.text
+   end,
+})
+
+local root = SplitPages.new(left, story_page)
+
+return { root = root }
+
+:: build/ui/layout/tactics_main.lua
+require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+
+local SplitPages = require("src/ui/panels/split_pages")
+local BattleSummary = require("src/ui/panels/battle_summary")
+
+require("src/ui/validator")
+
+local battle_summary = BattleSummary.new()
+local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+{
+   decoration_padding = 2,
+   decoration = "border",
+   internal_margin = { t = 5, b = 5, l = 4, r = 4 },
+})
+
+local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+left:add(battle_summary)
+left:add(UnitInfo.new({ padding = 2, decoration = "border" }))
+left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
+
+local root = SplitPages.new(left, tactics_map)
+
+return { root = root }
+
+:: build/ui/layout/title_screen.lua
+require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/components/text_node")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+
+
+require("src/ui/validator")
+
+
+local root = Box.new({
+   x = 0, y = 0,
+   w = 480, h = 270,
+   internal_margin = { t = 4 },
+   dir = "row",
+   transparent = true,
+})
+
+
+root:add(TextNode.new({ text = { "Title Screen" } }))
+
+return { root = root }
+
+:: build/ui/panels/battle_summary.lua
+
+require("src/ui/box")
+require("src/ui/components/text_node")
+require("src/ui/panels/portrait_box")
+require("src/character/items/object/item")
+require("src/ui/ui_context_manager")
+require("src/character/items/object/item_inventory")
+require("src/battle/battle_context")
+
+local BattleSummary = {}
+
+
+
+setmetatable(BattleSummary, { __index = Box })
+
+function BattleSummary.new()
+   local self = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border" })
+   self:add(TextNode.new({ func = function(_state) return { "BATTLE" } end, draw_properties = { justify = "center" } }))
+   self:add(TextNode.new({ func = function(state)
+      local turn = state.battle_context.ctx.turn_manager.turn
+      return { "Turn " .. turn }
+   end, draw_properties = { justify = "center" }, }))
+   self:add(TextNode.new({ func = function(_state) return { "Defeat all" } end, draw_properties = { justify = "center" } }))
+
+   return self
+end
+
+return BattleSummary
+
+:: build/ui/panels/combat_preview.lua
+require("src/ui/box")
+require("src/ui/components/text_node")
+require("src/ui/panels/portrait_box")
+require("src/ui/ui_context_manager")
+require("src/battle/battle_context")
+local CombatCalculator = require("src/battle/combat/combat_calculator")
+
+CombatPreview = {}
+
+
+
+setmetatable(CombatPreview, { __index = Box })
+
+local function get_preview_text(state)
+   local attacker = state.battle_context.acting_unit
+   local defender = state.battle_context.hovered_unit
+   local attacker_tile = state.battle_context.destination
+   local battle_map = state.battle_context.ctx.battle_map
+   local preview = CombatCalculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
+
+   local out = {}
+   if preview[1] ~= nil then
+      pt.add(out, attacker.character.name .. " -> " .. defender.character.name)
+      pt.add(out, "Hit: " .. preview[1].hit_chance .. "%")
+      pt.add(out, "Dmg: " .. preview[1].dmg)
+   else
+      pt.add(out, "No attack!")
+      pt.add(out, "")
+      pt.add(out, "")
+
+   end
+   if preview[2] ~= nil then
+      pt.add(out, attacker.character.name .. " <- " .. defender.character.name)
+      pt.add(out, "Hit: " .. preview[2].hit_chance .. "%")
+      pt.add(out, "Dmg: " .. preview[2].dmg)
+   else
+      pt.add(out, "No counterattack!")
+      pt.add(out, "")
+      pt.add(out, "")
+   end
+   return out
+end
+
+function CombatPreview.new(props)
+   props.dir = "row"
+   props.gap = props.gap or 4
+   props.padding = props.padding or 4
+   props.auto_height = props.auto_height or true
+
+   local self = Box.new(props)
+   setmetatable(self, { __index = CombatPreview })
+
+   local attacker_portrait = PortraitBox.new(function(state) return state.battle_context.acting_unit end)
+   local left = Box.flex_col()
+   left:add(attacker_portrait)
+   left:add(Box.spacer())
+   local defender_portrait = PortraitBox.new(function(state) return state.battle_context.hovered_unit end)
+   local right = Box.flex_col()
+   right:add(defender_portrait)
+   right:add(Box.spacer())
+
+   local preview_text = TextNode.new({
+      flex_grow = 1,
+      rows = 6,
+      func = get_preview_text,
+   })
+
+   self:add(left)
+   self:add(preview_text)
+   self:add(right)
+
+   return self
+end
+
+return CombatPreview
+
+:: build/ui/panels/event_message_log.lua
+require("src/ui/box")
+require("src/systems/event_bus")
+require("src/ui/components/text_node")
+require("src/ui/components/message_log")
+require("src/ui/ui_context_manager")
+require("src/story/story_context")
+
+EventMessageLog = {}
+
+
+
+function EventMessageLog.new(props)
+   props.func = function(state, _row_limit)
+      return tmap(state.story_context.ctx.services.event_bus:get_event_history(), function(e) return "> " .. e end)
+   end
+
+   props.draw_properties = props.draw_properties or {}
+   props.draw_properties.text_direction = props.draw_properties.text_direction or 'up'
+   return MessageLog.new(props)
+end
+
+return EventMessageLog
+
 :: build/ui/panels/portrait_box.lua
 require("src/types")
 require("src/ui/ui_context_manager")
@@ -6652,14 +6972,46 @@ function PortraitBox:draw(state, ui_theme)
       end,
       self.x, self.y)
 
-      Colors.apply_palette("paper")
+
       local self_pos = DrawPoint.of(self.x, self.y)
       CharacterRenderer.draw(unit, (FEET_ANCHOR + self_pos), unit.side, false, false)
-      pal()
+      pt.pal()
    end
 end
 
 return PortraitBox
+
+:: build/ui/panels/split_pages.lua
+require("src/ui/box")
+require("src/systems/event_bus")
+require("src/ui/components/text_node")
+require("src/ui/components/message_log")
+require("src/ui/ui_context_manager")
+require("src/game/base_game_context")
+local PageDivider = require("src/ui/decoration/page_divider")
+
+local SplitPages = {}
+
+
+
+function SplitPages.new(left, right)
+   local root = Box.new({
+      x = 0, y = 0,
+      w = 480, h = 270,
+      internal_margin = { t = 4 },
+      gap = 0,
+      padding = 0,
+      dir = "row",
+      transparent = true,
+   })
+   root:add(left)
+   root:add(PageDivider.new(7))
+   root:add(right)
+
+   return root
+end
+
+return SplitPages
 
 :: build/ui/panels/tactics_map.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
@@ -6733,10 +7085,10 @@ local function compute_animated_unit_positions(battle_map)
 end
 
 local function draw_health_bar(hp_current, hp_max, x, y, width, height)
-   rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
-   local bar_width = flr(hp_current * (width - 2) / hp_max)
-   rrectfill(x + 1, y + 1, bar_width, height - 2, 1, 27)
-   rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
+   pt.rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
+   local bar_width = pt.flr(hp_current * (width - 2) / hp_max)
+   pt.rrectfill(x + 1, y + 1, bar_width, height - 2, 1, 27)
+   pt.rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
 local function draw_floating_menu(x, y, menu_cursor)
@@ -6746,24 +7098,24 @@ local function draw_floating_menu(x, y, menu_cursor)
 
    local max_text_width = 0
    for _, opt in ipairs(options) do
-      local text_width = print(opt.text, 0, -1000)
-      max_text_width = max(max_text_width, text_width)
+      local text_width = pt.print(opt.text, 0, -1000)
+      max_text_width = pt.max(max_text_width, text_width)
    end
 
    local menu_x = x + TILE_SIZE.x
    local menu_y = y + TILE_SIZE.y
    local menu_w = 2 * PADDING + max_text_width
    local menu_h = 2 * PADDING + #options * (TEXT_HEIGHT + 1) - 1
-   rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+   pt.rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
    for i, opt in ipairs(options) do
       if i == selected_i then
-         rrectfill(menu_x, menu_y + PADDING - 1 + (TEXT_HEIGHT + 1) * (i - 1), menu_w, TEXT_HEIGHT + 2, 0, COLOR_MENU_HIGHLIGHT)
-         print(opt.text, menu_x + PADDING, menu_y + PADDING + (TEXT_HEIGHT + 1) * (i - 1), COLOR_MENU_HIGHLIGHT_TEXT)
+         pt.rrectfill(menu_x, menu_y + PADDING - 1 + (TEXT_HEIGHT + 1) * (i - 1), menu_w, TEXT_HEIGHT + 2, 0, COLOR_MENU_HIGHLIGHT)
+         pt.print(opt.text, menu_x + PADDING, menu_y + PADDING + (TEXT_HEIGHT + 1) * (i - 1), COLOR_MENU_HIGHLIGHT_TEXT)
       else
-         print(opt.text, menu_x + PADDING, menu_y + PADDING + (TEXT_HEIGHT + 1) * (i - 1), COLOR_MENU_TEXT)
+         pt.print(opt.text, menu_x + PADDING, menu_y + PADDING + (TEXT_HEIGHT + 1) * (i - 1), COLOR_MENU_TEXT)
       end
    end
-   rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+   pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
 end
 
 local function draw_unit(unit)
@@ -6799,19 +7151,19 @@ function TacticsMap:draw(state, ui_theme)
 
    local camera_x = self.x + self.internal_margin.l
    local camera_y = self.y + self.internal_margin.t
-   camera(-camera_x, -camera_y)
+   pt.set_camera(-camera_x, -camera_y)
 
 
 
 
    local unit_positions = compute_animated_unit_positions(state.battle_context.ctx.battle_map)
 
-
-
-
-
-
-
+   local sorted_units = pt.userdata("i16", 2, #unit_positions)
+   for i, u in ipairs(unit_positions) do
+      sorted_units:set(0, i - 1, u.point.y)
+      sorted_units:set(1, i - 1, u.id)
+   end
+   sorted_units:sort()
 
    local drawn_unit_count = 0
 
@@ -6830,13 +7182,13 @@ function TacticsMap:draw(state, ui_theme)
    end
 
    for y = 0, self.map_height - 1 do
-      map(layer_wall_back, 0, y, 0, (y - 1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-      map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+      pt.map(layer_wall_back, 0, y, 0, (y - 1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+      pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
 
       if menu_cursor.type == "CURSOR_GRID" then
          if menu_cursor.legal_tiles ~= nil then
-            fillp(
+            pt.fillp(
 
 
 
@@ -6856,139 +7208,71 @@ function TacticsMap:draw(state, ui_theme)
             0x33,
             0xCC)
 
-            poke(0x550b, 0x3f)
-            palt()
+            pt.poke(0x550b, 0x3f)
+            pt.palt()
             for x = 0, self.map_width - 1 do
                local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack) then
                   if (highlighted_tile.reachable) then
-                     color(28)
+                     pt.set_color(28)
                   elseif highlighted_tile.can_attack then
-                     color(8)
+                     pt.set_color(8)
                   else
                      error("invalid state")
                   end
-                  rrectfill(x * TILE_SIZE.x + 1, y * TILE_SIZE.y + 1, TILE_SIZE.x - 2, TILE_SIZE.y - 2)
+                  pt.rrectfill(x * TILE_SIZE.x + 1, y * TILE_SIZE.y + 1, TILE_SIZE.x - 2, TILE_SIZE.y - 2)
                end
             end
-            poke(0x550b, 0x00)
-            fillp()
-            color()
+            pt.poke(0x550b, 0x00)
+            pt.fillp()
+            pt.reset_color()
          end
       end
 
+      while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
+         local unit_id = sorted_units:get(1, drawn_unit_count)
+         local unit = battle_map:get_unit_by_id(unit_id)
+         draw_unit(unit)
+         drawn_unit_count = drawn_unit_count + 1
+      end
 
+      pt.map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-
-
-
-
-
-      map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-
-
-
-
-
-
-
+      while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y + 1) * TILE_SIZE.y do
+         local unit_id = sorted_units:get(1, drawn_unit_count)
+         local unit = battle_map:get_unit_by_id(unit_id)
+         draw_unit(unit)
+         drawn_unit_count = drawn_unit_count + 1
+      end
 
 
       if cursor_tile ~= nil then
          local c_x = cursor_tile.x * TILE_SIZE.x
          local c_y = cursor_tile.y * TILE_SIZE.y
-         spr(CURSOR_SPRITE, c_x, c_y)
+         pt.spr(CURSOR_SPRITE, c_x, c_y)
       end
 
-      map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+      pt.map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
    end
 
    if cursor_tile ~= nil then
       local x = cursor_tile.x * TILE_SIZE.x
       local y = cursor_tile.y * TILE_SIZE.y
-      spr(CURSOR_SPRITE, x, y)
+      pt.spr(CURSOR_SPRITE, x, y)
 
       if menu_cursor.type == "CURSOR_LIST" then
          draw_floating_menu(x, y, menu_cursor)
       end
    end
 
-   camera()
+   pt.reset_camera()
 end
 
 return TacticsMap
 
-:: build/ui/panels/text_node.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/ui/ui_context_manager")
-require("src/ui/box")
-local Text = require("src/util/text")
-
-TextUIElement = {}
-
-
-
-
-
-TextNode = {}
-
-
-
-
-
-setmetatable(TextNode, { __index = Box })
-
-local TEXT_HEIGHT = 8
-
-
-
-
-
-function TextNode.new(props)
-   local box = Box.new(props)
-   setmetatable(box, { __index = TextNode })
-
-   box.padding = props.padding or 0
-   box.decoration_padding = 0
-   box.func = props.func or error("Need text getter `func`")
-   box.rows = props.rows or 1
-   box.h = (box.rows) * (TEXT_HEIGHT + 2)
-
-   props.draw_properties = props.draw_properties or {}
-   box.draw_properties = {
-      justify = "left",
-      text_direction = "down",
-      wrap_mode = "ellipsis",
-   }
-   box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
-   box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
-   box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
-
-   return box
-end
-
-function TextNode:draw(state, ui_theme)
-   Box._draw(self, state, ui_theme)
-
-   local text = self.func(state)
-
-   assert(
-   #text ==
-   self.rows, "`func` should return expected number of rows")
-
-
-   Text.draw(text,
-   self.x + self.internal_margin.l,
-   self.y + self.internal_margin.t,
-   self.w - self.internal_margin.l - self.internal_margin.r,
-   self.h - self.internal_margin.t - self.internal_margin.b,
-   ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
-end
-
-return TextNode
-
 :: build/ui/panels/unit_info.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/ui/box")
-require("src/ui/panels/text_node")
+require("src/ui/components/text_node")
 require("src/ui/panels/portrait_box")
 require("src/character/items/object/item")
 require("src/ui/ui_context_manager")
@@ -7098,6 +7382,7 @@ require("src/battle/battle_context")
 require("src/battle/battle_ui_context")
 require("src/story/story_context")
 require("src/story/story_ui_context")
+require("src/game/game_ui_context")
 require("src/game_context")
 
 
@@ -7116,14 +7401,19 @@ UIContextManager = {}
 
 
 
+
 function UIContextManager:register_context(ctx)
    if ctx.type == 'battle' then
       assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
       self.battle_context = BattleUIContext.new(ctx)
-   end
-   if ctx.type == 'story' then
-      assert(self.story_context == nil, "Attempt to register battle context which was already registered!")
+   elseif ctx.type == 'story' then
+      assert(self.story_context == nil, "Attempt to register game context which was already registered!")
       self.story_context = StoryUIContext.new(ctx)
+   elseif ctx.type == "game" then
+      assert(self.game_context == nil, "Attempt to register game context which was already registered!")
+      self.game_context = GameUIContext.new(ctx)
+   else
+      error("Unexpexted UI Context: " .. ctx.type)
    end
 end
 
@@ -7145,16 +7435,21 @@ function UIContextManager.new()
 end
 
 function UIContextManager:enrich()
-   self.layout = "TACTICS"
+
+
+   self.layout = "TITLE_SCREEN"
 
 
    if self.battle_context ~= nil then
       self.battle_context:enrich()
    end
-
    if self.story_context ~= nil then
       self.story_context:enrich()
    end
+   if self.game_context ~= nil then
+      self.game_context:enrich()
+   end
+
 
 
 
@@ -7162,6 +7457,8 @@ function UIContextManager:enrich()
       self.layout = self.battle_context.layout
    elseif self.story_context ~= nil then
       self.layout = self.story_context.layout
+   elseif self.game_context ~= nil then
+      self.layout = self.game_context.layout
    end
 end
 
@@ -7172,21 +7469,17 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 require("src/types")
 require("src/ui/types")
 
-require("src/battle/battle_context")
-require("src/story/story_context")
 require("src/config")
 
-require("src/ui/panels/tactics_map")
 require("src/ui/box")
-require("src/ui/panels/unit_info")
-require("src/ui/panels/combat_preview")
-require("src/ui/panels/text_node")
-require("src/ui/panels/event_message_log")
-
-local PageDivider = require("src/ui/decoration/page_divider")
 
 require("src/ui/validator")
 
+local tactics_main = require("src/ui/layout/tactics_main")
+local combat_preview = require("src/ui/layout/combat_preview")
+local story_page = require("src/ui/layout/story_page")
+local title_screen = require("src/ui/layout/title_screen")
+local main_menu = require("src/ui/layout/main_menu")
 UILayout = {}
 
 
@@ -7213,123 +7506,11 @@ function UIManager.new()
 
    self.layouts = {}
 
-   local battle_summary = Box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0, decoration = "border" })
-   battle_summary:add(TextNode.new({ func = function(_state) return { "BATTLE" } end, draw_properties = { justify = "center" } }))
-   battle_summary:add(TextNode.new({ func = function(state)
-      local turn = state.battle_context.ctx.turn_manager.turn
-      return { "Turn " .. turn }
-   end, draw_properties = { justify = "center" }, }))
-   battle_summary:add(TextNode.new({ func = function(_state) return { "Defeat all" } end, draw_properties = { justify = "center" } }))
-
-   local page_divider = PageDivider.new(7)
-
-   local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
-   {
-      decoration_padding = 2,
-      decoration = "border",
-      internal_margin = { t = 5, b = 5, l = 4, r = 4 },
-   })
-
-   do
-      local battle_root = Box.new({
-         x = 0, y = 0,
-         w = 480, h = 270,
-         internal_margin = { t = 4 },
-         gap = 0,
-         padding = 0,
-         dir = "row",
-         transparent = true,
-      })
-
-
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
-      left:add(battle_summary)
-      left:add(UnitInfo.new({ padding = 2, decoration = "border" }))
-      left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
-
-      battle_root:add(page_divider)
-      battle_root:add(tactics_map)
-
-      self.layouts["TACTICS"] = { root = battle_root }
-   end
-   do
-      local battle_root = Box.new({
-         x = 0, y = 0,
-         w = 480, h = 270,
-         internal_margin = { t = 4 },
-         dir = "row",
-         transparent = true,
-      })
-
-
-      local left = battle_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
-      left:add(battle_summary)
-      left:add(CombatPreview.new({ padding = 0, decoration = "border" }))
-      left:add(EventMessageLog.new({ flex_grow = 1, decoration = "border" }))
-
-      battle_root:add(page_divider)
-      battle_root:add(tactics_map)
-
-      self.layouts["COMBAT_PREVIEW"] = { root = battle_root }
-   end
-   do
-      local story_root = Box.new({
-         x = 0, y = 0,
-         w = 480, h = 270,
-         internal_margin = { t = 4 },
-         dir = "row",
-         transparent = true,
-      })
-
-
-      local left = story_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
-
-      local story_page = MessageLog.new({
-         dir = "col",
-         flex_grow = 1,
-         padding = 2,
-         draw_properties = {
-            text_direction = "down",
-            wrap_mode = "ellipsis",
-         },
-         func = function(state, _row_limit)
-            return state.story_context.ctx.story_page.text
-         end,
-      })
-
-      story_root:add(page_divider)
-      story_root:add(story_page)
-
-      self.layouts["STORY_PAGE"] = { root = story_root }
-   end
-   do
-      local title_screen_root = Box.new({
-         x = 0, y = 0,
-         w = 480, h = 270,
-         internal_margin = { t = 4 },
-         dir = "row",
-         transparent = true,
-      })
-
-
-      local left = title_screen_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
-
-      self.layouts["TITLE_SCREEN"] = { root = title_screen_root }
-   end
-   do
-      local main_menu_root = Box.new({
-         x = 0, y = 0,
-         w = 480, h = 270,
-         internal_margin = { t = 4 },
-         dir = "row",
-         transparent = true,
-      })
-
-
-      local left = main_menu_root:add(Box.new({ dir = "col", flex_grow = 1, padding = 2 }))
-
-      self.layouts["MAIN_MENU_PAGE"] = { root = main_menu_root }
-   end
+   self.layouts["TACTICS"] = tactics_main
+   self.layouts["COMBAT_PREVIEW"] = combat_preview
+   self.layouts["STORY_PAGE"] = story_page
+   self.layouts["TITLE_SCREEN"] = title_screen
+   self.layouts["MAIN_MENU_PAGE"] = main_menu
 
 
    for id, v in pairs(self.layouts) do
@@ -7368,7 +7549,7 @@ function UIManager:draw(battle_context)
    root:layout(root.x, root.y)
 
 
-   cls(self.theme.COLOR_CLEAR)
+   pt.cls(self.theme.COLOR_CLEAR)
    root:draw(battle_context, self.theme)
 end
 
@@ -7469,7 +7650,7 @@ require("src/config")
 
 
 function rndi(i)
-   return flr(rnd(i) // 1)
+   return pt.flr(pt.rnd(i) // 1)
 end
 
 
@@ -7485,7 +7666,7 @@ end
 function choose_random_from_table(tab)
    local list = {}
    for _, v in pairs(tab) do
-      add(list, v)
+      pt.add(list, v)
    end
    return choose_random_from_list(list)
 end
@@ -7674,7 +7855,7 @@ function List.do_filter(list, filter)
    local out = {}
    for _, v in ipairs(list) do
       if filter(v) then
-         add(out, v)
+         pt.add(out, v)
       end
    end
    return out
@@ -7876,7 +8057,7 @@ local Text = { TextDrawProperties = {} }
 
 
 function Text.width(text)
-   return print(text, 0, -1000)
+   return pt.print(text, 0, -1000)
 end
 
 function Text.apply_text_wrapping(text, width, wrap_mode)
@@ -7892,11 +8073,11 @@ function Text.apply_text_wrapping(text, width, wrap_mode)
       local out_width
       repeat
          char_count = char_count + 1
-         out = sub(text, 1, char_count)
+         out = pt.sub(text, 1, char_count)
          out_width = Text.width(out)
       until out_width > width or char_count == #text
       if out_width > width then
-         return { sub(text, 1, char_count - 3) .. "..." }
+         return { pt.sub(text, 1, char_count - 3) .. "..." }
       else
          return { text }
       end
@@ -7907,32 +8088,32 @@ function Text.apply_text_wrapping(text, width, wrap_mode)
       local previous_word_end = -1
       local line_width
       while true do
-         while line_start <= #text and sub(text, line_start, true) == ' ' do
+         while line_start <= #text and pt.sub(text, line_start, true) == ' ' do
             line_start = line_start + 1
          end
          if line_start > #text then
             return out
          end
          local line_end = line_start
-         local line = sub(text, line_start, line_end)
+         local line = pt.sub(text, line_start, line_end)
          while line_end <= #text and Text.width(line) <= width do
             line_end = line_end + 1
-            line = sub(text, line_start, line_end)
-            if (sub(text, line_end, true) == ' ' and sub(text, line_end - 1, true) ~= ' ') then
+            line = pt.sub(text, line_start, line_end)
+            if (pt.sub(text, line_end, true) == ' ' and pt.sub(text, line_end - 1, true) ~= ' ') then
                previous_word_end = line_end - 1
             end
          end
 
          if line_end > #text and Text.width(line) <= width then
 
-            add(out, line)
+            pt.add(out, line)
             return out
          elseif previous_word_end >= line_start then
-            add(out, sub(text, line_start, previous_word_end))
+            pt.add(out, pt.sub(text, line_start, previous_word_end))
             line_start = previous_word_end + 1
          else
 
-            add(out, sub(text, line_start, line_end - 2) .. '-')
+            pt.add(out, pt.sub(text, line_start, line_end - 2) .. '-')
             line_start = line_end - 1
          end
       end
@@ -7951,7 +8132,7 @@ function Text.draw_text_row(text, x, y, color)
 
 
 
-   print(text, x, y, color)
+   pt.print(text, x, y, color)
 end
 
 function Text.get_text_alignment_offset(text, w, justify)
@@ -7969,12 +8150,12 @@ end
 
 function Text.draw(text, x, y, w, h, color, properties)
 
-   local row_count = flr(h / TEXT_ROW_HEIGHT)
+   local row_count = pt.flr(h / TEXT_ROW_HEIGHT)
 
 
    local wrapped_text = {}
    for _, t in ipairs(text) do
-      add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
+      pt.add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
 
    end
 
@@ -7994,7 +8175,7 @@ end
 return Text
 
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-06 23:17:04",revision=74,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-15 00:54:57",revision=75,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -8013,62 +8194,2191 @@ end
 DATP = ""
 	--DATP = "tactics.p64/"
 --if not fetch "build/main.lua" then
+	cp("/desktop/projects/tactics/picotron.lua", "picotron.lua")
 	cp("/desktop/projects/tactics/build", "build")
 	cp("/desktop/projects/tactics/lib", "lib")
 	--DATP = "tactics.p64/"
 --end
 
+pt = include "picotron.lua"
+
 include "build/main.lua"
 
 include "lib/error_explorer.lua"
+:: picotron.lua
+--- @meta
+
+--- container for all Picotron functions
+local pt = {}
+
+
+--- @class __MenuItem
+--- @field id? integer Unique identifier, used to sort items (otherwise order added is used)
+--- @field label? string | function User facing label
+--- @field shortcut? string Drawn right justified in the menu
+--- @field greyed? boolean Greyed out item (use for ---)
+--- @field action? function Callback on select -- param b is the button pressed (left or right)
+--- @field divider? boolean Is item a divider
+-- global record __MenuItem
+-- 	id: integer 
+-- 	label: string 
+-- 	shortcut: string 
+-- 	greyed: boolean 
+-- 	action: function 
+-- 	divider: boolean 	
+-- end
+
+--- Adds a menu item
+--- If m is nil, reset the menu
+--- View implementation in /system/lib/app_menu.lua
+--- @param m? __MenuItem
+-- global menuitem: function(m?: __MenuItem) 
+
+--- Adds a menu item
+--- id is the numerical id
+--- label is the label for the menu item
+--- action is a callback for when the item is pressed -- param b is the button pressed (left or right)
+--- View implementation in /system/lib/app_menu.lua
+--- @param id integer
+--- @param label string | function
+--- @param action function
+function pt.menuitem(id, label, action) 
+	menuitem(id , label, action)
+end
+--- @meta
+
+--- Plays a sound effect.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sfx)
+--- @param n integer The index of the sound effect to play (0-63). -1 stops the sound effect on the channel. -2 stops the sound effect and clears the channel state.
+--- @param channel? integer The channel to play the sound effect on (0-15).
+--- @param offset? integer The offset in the sound effect to start playing from (0-63 in notes).
+--- @param length? integer The length of the sound effect to play in notes (0-63).
+--- @param pan? integer The panning of the sound effect (-128 to 127).
+--- @param mix_volume? integer The volume of the sound effect (0-255). Takes priority over the value at `0x553a`.
+function pt.sfx(n, channel, offset, length, pan, mix_volume)
+	sfx(n, channel, offset, length, pan, mix_volume)
+end
+
+--- Plays music starting from pattern n.
+--- If n is -1, stop music
+--- fade_len is in ms (default 0)
+--- channel_mask is bitfield that specifies which channels to reserve for music only, low bits first
+--- @param n integer
+--- @param fade_len? integer
+--- @param channel_mask? integer
+function pt.music(n, fade_len, channel_mask) 
+	music(n, fade_len, channel_mask)
+end
+
+--- This provides low level control over a channel. It is useful in more niche situations, like audio authoring tools and size-coding.
+--- Internally this is what is used to play each row of a sfx when one is active. Use 0xff to indicate an attribute should not be altered.
+---     pitch     channel pitch (default 48 -- middle C)
+---     inst      instrument index (default 0)
+---     vol       channel volume (default 64)
+---     effect    channel effect (default 0)
+---     effect_p  effect parameter (default 0)
+---     channel   channel index (0..15 -- default 0)
+---     retrig    (boolean) force retrigger -- default to false
+---     panning   set channel panning (-128..127)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#note)
+--- @param pitch integer
+--- @param inst integer
+--- @param vol integer
+--- @param effect integer
+--- @param effect_p integer
+--- @param channel integer
+--- @param retrig boolean
+--- @param panning integer
+function pt.note(pitch, inst, vol, effect, effect_p, channel, retrig, panning) 
+	note(pitch, inst, vol, effect, effect_p, channel, retrig, panning)
+end
+
+
+--- Create a coroutine for a function
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COCREATE)
+--- @param func function
+--- @return thread
+function pt.cocreate(func)
+	return cocreate(func)
+end
+
+--- Run or continue the coroutine c. Parameters are passed to the function
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#CORESUME)
+--- @param c thread
+--- @param ... any
+--- @return boolean error
+--- @return ... any
+function pt.coresume(c, ...)
+	return coresume(c, ...)
+end
+
+--- Checks the status of a coroutine
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#COSTATUS)
+--- @param c thread
+--- @return string
+function pt.costatus(c)
+	return costatus(c)
+end
+
+--- Yield the coroutine back to the caller
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#YIELD)
+--- @param ... any
+function pt.yield(...) 
+	yield(...)
+end
+--- @meta
+
+--- @class __FileMetadata
+--- @field created string
+--- @field modified string
+--- @field pod_format? string
+--- @field revision? integer
+-- global record __FileMetadata
+-- 	created: string
+-- 	modified: string
+-- 	pod_format: string
+-- 	revision: integer
+-- end
+
+--- Change the current working directory
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cd)
+--- @param path string
+function pt.cd(path) 
+	cd(path)
+end
+
+--- Gets the file type, size, and origin
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fstat)
+--- @param path string
+--- @return string | nil type
+--- @return number | nil size
+--- @return string | nil origin
+function pt.fstat(path)
+	return fstat(path)
+end
+
+--- Converts a relative path to an absolute path
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fullpath)
+--- @param filename string
+--- @return string
+function pt.fullpath(filename)
+	return fullpath(filename)
+end
+
+--- Lists the contents of a folder
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ls)
+--- @param path? string
+--- @return string[]
+function pt.ls(path)
+	return ls(path)
+end
+
+--- Copy a file from src to dest. Folders are copied recursively and the dest is overwritten.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cp)
+--- @param src string
+--- @param dest string
+function pt.cp(src, dest) 
+	cp(src, dest)
+end
+
+--- Move a file from src to dest. Folders are copied recursively and the dest is overwritten.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mv)
+--- @param src string
+--- @param dest string
+function pt.mv(src, dest) 
+	mv(src, dest)
+end
+
+--- Delete a file or folder (recursive)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#rm)
+--- @param filename string
+function pt.rm(filename) 
+	rm(filename)
+end
+
+--- Return the present working directory
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pwd)
+--- @return string
+function pt.pwd()
+	return pwd()
+end
+
+--- Read a lua object from a file
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fetch)
+--- @param filename string
+--- @return any
+--- @return __FileMetadata?
+function pt.fetch(filename)
+	return fetch(filename)
+end
+
+--- Store a lua object to a file
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#store)
+--- @param filename string
+--- @param object table | string | userdata | boolean | number
+--- @param metadata? __FileMetadata
+function pt.store(filename, object, metadata) 
+	store(filename, object, metadata)
+end
+
+--- Fetch just the metadata of a path
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fetch_metadata)
+--- @param filename string
+--- @return __FileMetadata | nil
+function pt.fetch_metadata(filename)
+	return fetch_metadata(filename)
+end
+
+--- Store just the metadata of a path
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#store_metadata)
+--- @param filename string
+--- @param metadata __FileMetadata
+function pt.store_metadata(filename, metadata) 
+	store_metadata(filename, metadata)
+end
+
+--- Create a directory
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mkdir)
+--- @param name string
+function pt.mkdir(name) 
+	mkdir(name)
+end
+
+-- --- @param filename string
+-- function include(filename)
+--     require(filename)
+-- end
+
+--- Mounts a folder. Creates a link from origin to target
+--- View implementation in /system/lib/fs.lua
+--- @param target string
+--- @param origin string
+function pt.mount(target, origin) 
+	mount(target, origin)
+end
+
+--- Loads and runs a lua file like a function.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#include)
+--- @param filename string The path to the file relative to the working directory. Must include the file extension.
+--- @return any? #The return value of the file, if any.
+function pt.include(filename)
+	return include(filename)
+end
+--- @meta
+
+--- Changes the video mode
+--- 0 is 480x720
+--- 3 is 240x135
+--- 4 is 160x90
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#vid)
+--- @param mode 0 | 3 | 4
+function pt.vid(mode) 
+	vid(mode)
+end
+
+--- Clears the screen and resets the clipping rectangle
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cls)
+--- @param col? integer
+function pt.cls(col) 
+	cls(col)
+end
+
+--- Prints text on screen
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#print)
+--- @param value any The object to print.
+--- @param x? integer The x coordinate to print at.
+--- @param y? integer The y coordinate to print at.
+--- @param col? integer The color index to print in.
+--- @return integer new_x The x coordinate of the next character to be printed.
+--- @return integer new_y The y coordinate of the next character to be printed.
+function pt.print(value, x, y, col)
+	return print(value, x, y, col)
+end
+
+--- Sets the clipping rectangle for drawing operations.
+--- If clip_previous is set, the new region will be clipped by the old region
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#clip)
+--- @param x integer
+--- @param y integer
+--- @param w integer
+--- @param h integer
+--- @param clip_previous? boolean
+function pt.clip(x, y, w, h, clip_previous) 
+	clip(x, y, w, h, clip_previous)
+end
+
+--- Reset clipping region
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#clip)
+--- @return integer x
+--- @return integer y
+--- @return integer w
+--- @return integer h
+-- global clip: function()
+
+--- Sets the pixel to at x, y to the color index 0 to 63
+--- If color is not specified, uses the current draw color instead
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pset)
+--- @param x integer
+--- @param y integer
+--- @param col? integer
+function pt.pset(x, y, col) 
+	pset(x, y, col)
+end
+
+--- Returns the color of the pixel at x, y
+--- Returns 0 if out of bounds
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pget)
+--- @param x integer
+--- @param y integer
+--- @return integer
+function pt.pget(x, y)
+	return pget(x, y)
+end
+
+-- These are in the docs, but they don't appear to be implemented
+-- In any case, sprites are just userdata, so you can do userdata:get()
+-- and userdata:set() if I'm understanding this correctly
+-- function sset(x, y, col) end
+-- function sget(x, y) end
+
+--- Get the value of a sprite n's flag f (0-7)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fget)
+--- @param n integer
+--- @param f integer
+--- @return boolean
+-- global fget: function(n: integer, f: integer)
+function pt.fget_one(n, f)
+	return fget(n, f)
+end
+
+function pt.fget(n)
+	return fget(n)
+end
+
+--- Set the value of a sprite n's flag f (0-7)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fset)
+--- @param n integer
+--- @param f integer
+--- @param val boolean
+function pt.fset(n, f, val) 
+	fset(n, f, val)
+end
+
+--- Set the cursor position
+--- If color is specified, also set the current color
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#cursor)
+--- @param x integer
+--- @param y integer
+--- @param col? integer
+function pt.cursor(x, y, col) 
+	cursor(x, y, col)
+end
+
+--- Set the current color
+--- If color is not specified, set the current color to 6
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#color)
+--- @param col integer
+function pt.set_color(col) 
+	color(col)
+end
+
+function pt.reset_color()
+	color()
+end
+
+--- Set a screen offset of -x, -y for all drawing operations
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#camera)
+--- @param x integer
+--- @param y integer
+--- @return integer x
+--- @return integer y
+function pt.set_camera(x, y)
+	return camera(x, y)
+end
+
+--- Reset the camera offset
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#camera)
+--- @return integer x
+--- @return integer y
+function pt.reset_camera()
+	camera()
+end
+
+--- Draw a circle at x, y with radius r
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#circ)
+--- @param x integer
+--- @param y integer
+--- @param r integer
+--- @param col? integer
+function pt.circ(x, y, r, col) 
+	circ(x, y, r, col)
+end
+
+--- Draw a filled circle at x, y with radius r
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#circfill)
+--- @param x integer
+--- @param y integer
+--- @param r integer
+--- @param col? integer
+function pt.circfill(x, y, r, col) 
+	circfill(x, y, r, col)
+end
+
+--- Draw an ellipse within the given rectangle
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#oval)
+--- @param x0 integer
+--- @param y0 integer
+--- @param x1 integer
+--- @param y1 integer
+--- @param col? integer
+function pt.oval(x0, y0, x1, y1, col) 
+	oval(x0, y0, x1, y1, col)
+end
+
+--- Draw a filled ellipse within the given rectangle
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ovalfill)
+--- @param x0 integer
+--- @param y0 integer
+--- @param x1 integer
+--- @param y1 integer
+--- @param col? integer
+function pt.ovalfill(x0, y0, x1, y1, col) 
+	ovalfill(x0, y0, x1, y1, col)
+end
+
+--- Draw a line from (x0, y0) to (x1, y1)
+--- If (x1, y1) are not given the end of the last line will be used
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#line)
+--- @param x0 integer
+--- @param y0 integer
+--- @param x1? integer
+--- @param y1? integer
+--- @param col? integer
+function pt.line(x0, y0, x1, y1, col) 
+	line(x0, y0, x1, y1, col)
+end
+
+--- The next call to line(x1, y1) will set the endpoints without drawing
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#line)
+-- global line: function()  
+
+--- Draw a rectangle within the given points
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#rect)
+--- @param x0 integer
+--- @param y0 integer
+--- @param x1 integer
+--- @param y1 integer
+--- @param col? integer
+function pt.rect(x0, y0, x1, y1, col) 
+	rect(x0, y0, x1, y1, col)
+end
+function pt.rrect(x, y, w, h, radius, col) 
+	rrect(x, y, w, h, radius, col)
+end
+
+--- Draw a filled rectangle within the given points
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#rectfill)
+--- @param x0 integer
+--- @param y0 integer
+--- @param x1 integer
+--- @param y1 integer
+--- @param col? integer
+function pt.rectfill(x0, y0, x1, y1, col) 
+	rectfill(x0, y0, x1, y1, col)
+end
+function pt.rrectfill(x, y, w, h, radius, col) 
+	rrectfill(x, y, w, h, radius, col)
+end
+
+--- Remaps one color index to produce another.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pal)
+--- @param c0 integer The index to remap.
+--- @param c1 integer The index to map c0 to.
+--- @param p? 0 | 1 0 to swap during drawing, 1 to swap the entire screen. Defaults to 0.
+function pt.pal(c0, c1, p) 
+	pal(c0, c1, p)
+end
+
+--- Sets the ARGB color value for the given color index.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_gfx_pipeline.html#Display_Palettes)
+--- @param c0 integer The index to change the color of.
+--- @param argb integer The ARGB color value to set as a 32-bit integer, with the alpha channel in the highest byte.
+--- @param p 2
+-- global pal: function(c0: integer, argb: integer, p: integer) 
+
+--- Resets the color tables back to their defaults.
+--- @param p 0
+-- global pal: function(p: integer) 
+
+--- Resets the indexed display palettes back to their defaults.
+--- @param p 1
+-- global pal: function(p: integer) 
+
+--- Resets all palettes and color tables back to their defaults.
+-- global pal: function()  
+
+--- Set the transparency of a color
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
+--- @param c integer
+--- @param is_transparent boolean
+function pt.palt(c, is_transparent) 
+	palt(c, is_transparent)
+end
+
+--- Set the transparency of all colors
+--- c is a bitfield representing the transparency of all 64 colors
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
+--- @param c? integer
+-- global palt: function(c: integer) 
+
+--- Draws a sprite on the screen
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#spr)
+--- @param s integer | userdata
+--- @param x? integer
+--- @param y? integer
+--- @param flip_x? boolean
+--- @param flip_y? boolean
+function pt.spr(s, x, y, flip_x, flip_y) 
+	spr(s, x, y, flip_x, flip_y)
+end
+
+--- Crops a sprite to a source rectangle and draws it stretched to fit a destination rectangle on the current draw target.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sspr)
+--- @param s integer | userdata The sprite to draw. This can be a sprite index or a u8 userdata object.
+--- @param sx? integer The x coordinate of the top left corner of the source rectangle. Defaults to 0.
+--- @param sy? integer The y coordinate of the top left corner of the source rectangle. Defaults to 0.
+--- @param sw? integer The width of the source rectangle. Defaults to the width of the sprite.
+--- @param sh? integer The height of the source rectangle. Defaults to the height of the sprite.
+--- @param dx? integer The x coordinate of the top left corner of the destination rectangle. Defaults to 0.
+--- @param dy? integer The y coordinate of the top left corner of the destination rectangle. Defaults to 0.
+--- @param dw? integer The width of the destination rectangle. Defaults to sw.
+--- @param dh? integer The height of the destination rectangle. Defaults to sh.
+--- @param flip_x? boolean Whether to flip the sprite horizontally. Defaults to false.
+--- @param flip_y? boolean Whether to flip the sprite vertically. Defaults to false.
+function pt.sspr(s, sx, sy, sw, sh, dx, dy, dw, dh, flip_x, flip_y) 
+	sspr(s, sx, sy, sw, sh, dx, dy, dw, dh, flip_x, flip_y)
+end
+
+--- Set a 4x4 fill pattern using Pico-8 style fill patterns
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#fillp)
+--- @param p integer
+--- @param ... integer
+-- global fillp: function(p?: integer, ...: integer) 
+function pt.fillp(...) 
+	fillp(...)
+end
+
+--- Get the sprite for a given index
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_spr)
+--- @param index integer
+--- @return userdata
+function pt.get_spr(index)
+	return get_spr(index)
+end
+
+--- Set the sprite for a given index
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_spr)
+--- @param index integer
+--- @param ud userdata
+function pt.set_spr(index, ud) 
+	set_spr(index, ud)
+end
+
+--- Copies the graphics buffer to the screen, then syncronizes to the next frame
+--- [View Online](https://pico-8.fandom.com/wiki/Flip)
+--- @param flags? integer
+function pt.flip(flags) 
+	flip(flags)
+end
+-- --- @meta
+
+-- --- @class __GUI_PROPS
+-- --- @field height? integer
+-- --- @field height_rel? integer
+-- --- @field width? integer
+-- --- @field width_rel? integer
+-- --- @field x? integer
+-- --- @field y? integer
+-- --- @field z? integer
+-- --- @field click? function
+-- --- @field release? function
+-- --- @field tap? function
+-- --- @field update? function
+-- --- @field draw? function
+-- __GUI_PROPS = {}
+
+-- --- @class __GUI: __GUI_PROPS
+-- __GUI = {}
+
+-- --- @class __GUI_ED_PROPS: __GUI_PROPS
+-- --- @field bgcol? integer
+-- --- @field fgcol? integer
+-- __GUI_ED_PROPS = {}
+
+-- --- @class __GUI_ED: __GUI_ED_PROPS
+-- __GUI_ED = {}
+
+-- --- @param head_el? __GUI_PROPS
+-- --- @return __GUI
+-- --- Create a GUI
+-- global create_gui: function(head_el: any) 
+
+-- --- @class __GUI
+-- --- Draws all GUI elements
+-- global __GUI: function:draw_all: any() 
+
+-- --- @class __GUI
+-- --- Updates all GUI elements
+-- global __GUI: function:update_all: any() 
+
+-- --- @class __GUI
+-- --- @param focus boolean
+-- --- Sets keyboard focus
+-- global __GUI: function:set_keyboard_focus: any(focus) 
+
+-- --- @class __GUI
+-- --- @param head_el __GUI_PROPS
+-- --- @return __GUI
+-- global __GUI: function:attach: any(head_el) 
+
+-- --- @class __GUI
+-- --- @param head_el? __GUI_ED_PROPS
+-- --- @return __GUI_ED
+-- --- Attaches a text editor to the GUI
+-- global __GUI: function:attach_text_editor: any(head_el) 
+
+-- --- @class __GUI_ED
+-- --- @param text string
+-- --- Set the text editor's current text
+-- global __GUI_ED: function:set_text: any(text) 
+
+-- --- @class __GUI_ED
+-- --- @param column integer
+-- --- @param line integer
+-- --- Set the text editor's cursor position
+-- global __GUI_ED: function:set_cursor: any(column, line) 
+
+-- --- @class __GUI_ED
+-- --- @return string[]
+-- --- Set the text editor's current text
+-- global __GUI_ED: function:get_text: any() 
+--- @meta
+
+--- Get the state of the button for the specified player
+--- 0 1 2 3     LEFT RIGHT UP DOWN
+--- 5 6         Buttons: O X
+--- 7           MENU
+--- 8           reserved
+--- 9 10 11 12  Secondary Stick L,R,U,D
+--- 12 13       Buttons (not named yet!)
+--- 14 15       SL SR
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#btn)
+--- @param button integer
+--- @param player? integer
+--- @return number | false
+-- global btn: function(button: integer, player?: integer)
+function pt.btn(button, player)
+	return btn(button, player)
+end
+
+--- Get the state of a button held down.
+--- By default, a button press repeats after 30 frames, and once again every 8 frames
+--- 0 1 2 3     LEFT RIGHT UP DOWN
+--- 5 6         Buttons: O X
+--- 7           MENU
+--- 8           reserved
+--- 9 10 11 12  Secondary Stick L,R,U,D
+--- 12 13       Buttons (not named yet!)
+--- 14 15       SL SR
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#btnp)
+--- @param button integer
+--- @param player? integer
+--- @return number | false
+-- global btnp: function(button: integer, player?: integer)
+function pt.btnp(button, player)
+	return btnp(button, player)
+end
+
+--- Get the state of a key
+--- If raw is set, ignore the keyboard layout
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#key)
+--- @param k string
+--- @param raw? boolean
+--- @return boolean
+function pt.key(k, raw)
+	return key(k, raw)
+end
+
+--- Get the state of a key held down
+--- If raw is set, ignore the keyboard layout
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#keyp)
+--- @param k string
+--- @param raw? boolean
+--- @return boolean
+function pt.keyp(k, raw)
+	keyp(k, raw)
+end
+
+--- Reset the state of a key until the end of frame
+--- View implementation in /system/lib/events.lua
+--- @param k string
+function pt.clear_key(k) 
+	clear_key(k)
+end
+
+--- Check if text is waiting to be read with `readtext()`
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peektext)
+--- @return boolean
+function pt.peektext()
+	return peektext()
+end
+
+--- Read the next peice of text waiting
+--- If clear is set, discard remaining text
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#readtext)
+--- @param clear? boolean
+function pt.readtext(clear) 
+	readtext(clear)
+end
+
+--- Gets the current location and state of the mouse
+--- If new_mx and new_my are set, move the mouse to that position
+--- mouse_b is a bitfield.
+---     0x1 means left mouse button
+---     0x2 means right mouse button
+---     0x4 means middle mouse button
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mouse)
+--- @param new_mx? number
+--- @param new_my? number
+--- @return number mouse_x
+--- @return number mouse_y
+--- @return integer mouse_b
+--- @return number wheel_x
+--- @return number wheel_y
+function pt.mouse(new_mx, new_my)
+	return mouse(new_mx, new_my)
+end
+
+--- Requests to capture the mouse to control speed and move_sensitivity
+--- event_sensitivity determines how fast dx and dy change
+---     1 - 4; 1.0 means once per Picotron pixel
+--- move_sensitivity determines how fast the cursor moves
+---     1 - 4; 1.0 means the cursor continues to move at the same speed
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mouselock)
+--- @param lock boolean
+--- @param event_sensitivity number
+--- @param move_sensitivity number
+--- @return number dx
+--- @return number dy
+function pt.mouselock(lock, event_sensitivity, move_sensitivity)
+	return mouselock(lock, event_sensitivity, move_sensitivity)
+end
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#map)
+--- @param tile_x integer
+--- @param tile_y integer
+--- @param sx? integer
+--- @param sy? integer
+--- @param tiles_x? integer
+--- @param tiles_y? integer
+--- @param p8layers? integer
+--- @param tile_w? integer
+--- @param tile_h? integer
+-- global map: function(tile_x: any, tile_y: any, sx: any, sy: any, tiles_x: any, tiles_y: any, p8layers: any, tile_w: any, tile_h: any) 
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#map)
+--- @param src userdata
+--- @param tile_x any
+--- @param tile_y any
+--- @param sx? any
+--- @param sy? any
+--- @param tiles_x? any
+--- @param tiles_y? any
+--- @param p8layers? any
+--- @param tile_w? any
+--- @param tile_h? any
+function pt.map(src, tile_x, tile_y, sx, sy, tiles_x, tiles_y, p8layers, tile_w, tile_h) 
+	map(src, tile_x, tile_y, sx, sy, tiles_x, tiles_y, p8layers, tile_w, tile_h)
+end
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mget)
+--- @param x any
+--- @param y any
+function pt.mget(x, y) 
+	mget(x, y)
+end
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#mset)
+--- @param x any
+--- @param y any
+--- @param val any
+function pt.mset(x, y, val) 
+	mset(x, y, val)
+end
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#tline3d)
+--- @param src_ud any
+--- @param x0 any
+--- @param y0 any
+--- @param x1 any
+--- @param y1 any
+--- @param u0 any
+--- @param v0 any
+--- @param u1 any
+--- @param v1 any
+--- @param w0 any
+--- @param w1 any
+--- @param flags any
+function pt.tline3d(src_ud, x0, y0, x1, y1, u0, v0, u1, v1, w0, w1, flags) 
+	tline3d(src_ud, x0, y0, x1, y1, u0, v0, u1, v1, w0, w1, flags)
+end
+--- @meta
+
+--- Returns the minimum of two numbers
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#MIN)
+--- @param x number
+--- @param y number
+--- @return number
+-- global min: function(x: number, y: number)
+function pt.min(x, y)
+	return min(x, y)
+end
+
+--- Returns the maximum of two numbers
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#MAX)
+--- @param x number
+--- @param y number
+--- @return number
+-- global max: function(x: number, y: number)
+function pt.max(x, y)
+	return max(x, y)
+end
+
+--- Returns the middle value of two numbers
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#MID)
+--- @param x number
+--- @param y number
+--- @param z number
+--- @return number
+-- global mid: function(x: number, y: number, z: number)
+function pt.mid(x, y, z)
+	return mid(x, y, z)
+end
+
+--- Returns the nearest integer at or below a number
+--- [View Online](https://www.lexaloffle.com/dl/docs/pico-8_manual.html#FLR)
+--- @param x number
+--- @return integer
+function pt.flr(x)
+	return flr(x)
+end
+
+--- Returns the nearest integer at or above a number
+--- [View Online](https://pico-8.fandom.com/wiki/Ceil)
+--- @param val number
+--- @return integer
+function pt.ceil(val)
+	return ceil(val)
+end
+
+--- Generate a random number under the given limit
+--- or a random element from the table
+--- Limit is 1 if not set
+--- [View Online](https://pico-8.fandom.com/wiki/Rnd)
+--- @param limit? number
+--- @return number
+function pt.rnd(limit)
+	return rnd(limit)
+end
+
+--- Generate a random number under the given limit
+--- or a random element from the table
+--- [View Online](https://pico-8.fandom.com/wiki/Rnd)
+--- @param tbl table
+--- @return any
+-- global rnd: function(tbl: number)
+
+--- Initializes the random number generator with an explicit seed value
+--- [View Online](https://pico-8.fandom.com/wiki/Srand)
+--- @param val number
+function pt.srand(val)
+	return srand(val)
+end
+
+--- Converts a value to a number
+--- @param val any
+--- @param format_flags? integer
+--- @return number
+function pt.tonum(val, format_flags)
+	return tonum(val, format_flags)
+end
+
+--- Returns the absolute value of a number
+--- [View Online](https://pico-8.fandom.com/wiki/Abs)
+--- @param n number
+--- @return number
+-- global abs: function(n: number)
+function pt.abs(n)
+	return abs(n)
+end
+
+--- Returns the sign of a number. 1 for positive, -1 for negative
+--- [View Online](https://pico-8.fandom.com/wiki/Sgn)
+--- @param n number
+--- @return -1 | 1
+function pt.sgn(n)
+	return sgn(n)
+end
+
+--- Calculates the arctangent of dx/dy formed by the vector on the unit circle.
+--- The result is adjusted to represent the full circle.
+--- [View Online](https://pico-8.fandom.com/wiki/Atan2)
+function pt.atan2(dx, dy)
+	return atan2(dx, dy)
+end
+
+--- Calculates the sin of an angle
+--- Uses a range of 0.0 to 1.0 to represent the angle. Sometimes called turns.
+--- Example: 180 degrees or pi radians is 0.5 turns.
+--- [View Online](https://pico-8.fandom.com/wiki/Sin)
+--- @param angle number
+--- @return number
+function pt.sin(angle)
+	return sin(angle)
+end
+
+--- Calculates the sin of an angle
+--- Uses a range of 0.0 to 1.0 to represent the angle. Sometimes called turns.
+--- Example: 180 degrees or pi radians is .5 turns.
+--- [View Online](https://pico-8.fandom.com/wiki/Cos)
+--- @param angle number
+--- @return number
+function pt.cos(angle)
+	return cos(angle)
+end
+
+--- Calculates the square root of a number
+--- [View Online](https://pico-8.fandom.com/wiki/Sqrt)
+--- @param n number
+--- @return number
+function pt.sqrt(n)
+	return sqrt(n)
+end
+--- @meta
+
+--- Read a byte from an address in memory
+--- If n is provided, return that number of results
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peek)
+--- @param addr integer
+--- @param n? integer
+--- @return integer ...
+function pt.peek(addr, n)
+	return peek(addr, n)
+end
+
+--- Read an i16 from an address in memory
+--- If n is provided, return that number of results
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peek2)
+--- @param addr integer
+--- @param n? integer
+--- @return integer ...
+function pt.peek2(addr, n)
+	return peek2(addr, n)
+end
+
+--- Read an i32 from an address in memory
+--- If n is provided, return that number of results
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peek4)
+--- @param addr integer
+--- @param n? integer
+--- @return integer ...
+function pt.peek4(addr, n)
+	return peek4(addr, n)
+end
+
+--- Read an i64 from an address in memory
+--- If n is provided, return that number of results
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#peek4)
+--- @param addr integer
+--- @param n? integer
+--- @return integer ...
+function pt.peek8(addr, n)
+	return peek8(addr, n)
+end
+
+--- Write a byte to an address in memory
+--- If multiple values are given, they will be written sequentially
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke)
+--- @param addr integer
+--- @param ... integer
+function pt.poke(addr, ...)
+	poke(addr, ...)
+end
+
+--- Write an i16 to an address in memory
+--- If multiple values are given, they will be written sequentially
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke2)
+--- @param addr integer
+--- @param ... integer
+function pt.poke2(addr, ...)
+	poke2(addr, ...)
+end
+
+--- Write an i32 to an address in memory
+--- If multiple values are given, they will be written sequentially
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke4)
+--- @param addr integer
+--- @param ... integer
+function pt.poke4(addr, ...)
+	poke4(addr, ...)
+end
+
+--- Write an i64 to an address in memory
+--- If multiple values are given, they will be written sequentially
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#poke4)
+--- @param addr integer
+--- @param ... integer
+function pt.poke8(addr, ...)
+	poke8(addr, ...)
+end
+
+--- Copy len bytes from source address to destination address
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#memcpy)
+--- @param dest_addr integer
+--- @param source_addr integer
+--- @param len integer
+function pt.memcpy(dest_addr, source_addr, len) 
+	memcpy(dest_addr, source_addr, len)
+end
+
+--- Write the byte val to destination address for len bytes
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#memset)
+--- @param dest_addr integer
+--- @param val integer
+--- @param len integer
+function pt.memset(dest_addr, val, len) 
+	memset(dest_addr, val, len)
+end
+--- @meta
+
+--- Gets a binary string encoding the value
+--- Flags determine the encoding
+---     0x0 - default
+---     0x1 - pxu - RLE style compression
+---     0x2 - lz4 compression
+---     0x3 - base64
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#pod)
+--- @param val table | string | userdata | boolean | number
+--- @param flags? integer
+--- @param metadata? table
+--- @return string | nil
+function pt.pod(val, flags, metadata)
+	return pod(val    , flags, metadata)
+end
+
+--- Gets the decoded value and metadata from a POD string
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#unpod)
+--- @param val string
+--- @return table | string | userdata | boolean | number | nil content
+--- @return table metadata
+function pt.unpod(val)
+	return unpod(val)
+end
+--- @meta
+
+--- @class Socket
+-- sock = {}
+
+--- Create a socket.
+--- `addr` is a string consisting of the protocol (`tcp://` or `udp://`), the ip address, followed by a port number ":1234". ipv6 addresses should be enclosed in square brackets.
+--- 
+--- To create a socket that listens to any incoming traffic on a given port, use * for the address.
+--- 
+--- A socket with remote hosts writing (or connecting to) that port can then be accepted using sock:accept(). Listener sockets can not be created while a process is sandboxed. i.e. BBS carts can proactively connect to a particular address, but can not receive connections from arbitrary sources.
+--- 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#socket)
+--- @param addr string The address of the socket, starting with `tcp://` or `udp://`, followed by ipv4 address, ipv6 address, a domain name, or a wildcard `*`, ending with a port separated by a colon.
+--- @return Socket socket A newly opened socket.
+-- global socket: function(addr: any) 
+
+--- Read a string from a socket. This function is not blocking; it will return nothing when there is no data available on the socket.
+--- 
+--- Returns the number of bytes written, or nil followed by an error message string.
+--- 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sock_read)
+--- @class Socket
+--- @return string msg
+-- global sock: function:read: any() 
+
+--- Write string str to socket.
+
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sock_write)
+--- @class Socket
+--- @param str string The string to write to the socket.
+--- @return number bytes_written The number of bytes written to the socket.
+-- global sock: function:write: any(str) 
+
+--- Close the connection if there is one.
+--- 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sock_close)
+--- @class Socket
+-- global sock: function:close: any() 
+
+--- Returns a string describing the sockets status
+--- 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sock_status)
+--- @class Socket
+--- @return "ready" | "listening" | "closed" | "closed by peer" | "disconnected" | "invalid"
+-- global sock: function:status: any() 
+
+--- This can be used with sockets that are listening to all traffic on a given port. When a new connection is made with tcp, or a UDP message is receieved from a new address+port, :accept() will return a new socket that can be used to communicate with that particular client, or nil if none found.
+--- 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sock_accept)
+--- @class Socket
+--- @return Socket client_socket
+-- global sock: function:accept: any() 
+--- @meta
+
+--- @class string
+-- string = {}
+
+--- Get the extension of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:ext: any() 
+
+--- Get the basename (filename and extension) of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:basename: any() 
+
+--- Get the path of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:path: any() 
+
+--- Get the hloc(?) of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:hloc: any() 
+
+--- Get the directory of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:dirname: any() 
+
+--- Get the protocol (e.g. http) of a file
+--- Assumes string is a path
+--- View implementation in /system/lib/head.lua
+--- @return string
+-- global string: function:prot: any() 
+
+--- Converts 1 or more ordinal character codes to a string
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#chr)
+--- @param val integer
+--- @param ... integer
+-- global chr: function(val: any, ...: any) 
+
+--- Convert 1 or more characters from a string to ordinal character codes
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ord)
+--- @param str string
+--- @param index? integer
+--- @param num_results? integer
+--- @return (integer | nil) ...
+-- global ord: function(str: any, index: any, num_results: any) 
+
+--- Get the substring from pos0 to pos1 (inclusive)
+--- If pos1 is not specified, return substring from pos0 to end of string
+--- If pos1 is not a number, return a single character at pos0
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sub)
+--- @param str string
+--- @param pos0 integer
+--- @param pos1? integer | boolean
+--- @return string
+function pt.sub(str, pos0, pos1)
+	return sub(str, pos0, pos1 )
+end
+
+--- Converts a value to a string.
+--- @param value any The value to convert.
+--- @param as_hex? boolean If true, numbers will be converted to a hexidecimal string. Non-numbers will convert to 0x0. Decimal numbers will error.
+--- @return string The string representation of the value.
+-- global tostr: function(value: any, as_hex: any) 
+
+--- Splits a string on a separator
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#split)
+--- @param str string
+--- @param separator? string
+--- @param convert_numbers? true
+--- @return number[]
+-- global split: function(str: any, separator: any, convert_numbers: any) 
+
+--- Splits a string on a separator
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#split)
+--- @param str string
+--- @param separator? string
+--- @param convert_numbers? false
+--- @return string[]
+-- global split: function(str: any, separator: any, convert_numbers: any) 
+-- string.split = split
+
+--- Create a string encoding all the information needed to get from str0 to str1.
+--- The delta can be used with apply_delta to produce str1 given only str0.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#create_delta)
+--- @param str0 string
+--- @param str1 string
+--- @return string
+-- global create_delta: function(str0: any, str1: any) 
+
+--- Apply a delta created with create_delta to str0. This will produce str1.
+--- str0 must be the exactly the same as the string used to create the delta; otherwise apply_delta returns nil.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#apply_delta)
+--- @param str0 string
+--- @param delta string
+--- @return string | nil
+-- global apply_delta: function(str0: any, delta: any) 
+--- @meta
+
+--- Environment Properties
+--- @class __Environment
+--- @field argv? string[]
+--- @field immortal? boolean
+--- @field parent_pid? integer
+--- @field path? string
+--- @field print_to_proc_id? integer
+--- @field prog_name? string
+--- @field title? string
+--- @field window_attribs? __WindowAttribs
+-- global record __Environment 
+-- 	argv: {string}
+-- 	immortal: boolean
+-- 	parent_pid: integer
+-- 	path: string
+-- 	print_to_proc_id: integer
+-- 	prog_name: string
+-- 	title: string
+-- 	window_attribs: __WindowAttribs
+-- end
+
+
+
+
+-- Defining _ENV causes these definitions in system.lua to be ignored
+-- @type any
+-- _ENV = {}
+
+--- Gets the environment variables given to the process at its creation
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#env)
+--- @return __Environment
+function pt.env()
+	return env()
+end
+
+--- Exits the program
+--- @param exit_code? integer
+function pt.exit(exit_code) 
+	exit(exit_code)
+end
+
+--- Prints text to the host system's console
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#printh)
+--- @param value any
+function pt.printh(value) 
+	printh(value)
+end
+
+--- @param filename string
+--- @param env? __Environment
+function pt.create_process(filename, env) 
+	create_process(filename, env)
+end
+
+--- Stop the cart and optionally print a message
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#stop)
+--- @param message? string
+function pt.stop(message) 
+	stop(message)
+end
+
+--- If condition is false, stop the cart and print a message
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#assert)
+--- @param condition boolean
+--- @param message? string
+-- global assert: function(condition: boolean, message: string) 
+
+--- Get the number of seconds elapsed since the cartridge was run
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#time)
+--- @return number
+function pt.time()
+	return time()
+end
+
+--- Get the number of seconds elapsed since the cartridge was run
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#t)
+--- @return number
+function pt.t()
+	return t()
+end
+
+--- : anyGet the current date and time formatted using Lua's standard date 
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#date)
+--- @param format? string
+--- @param t? integer | string
+--- @param delta? number
+--- @return string
+function pt.date(format, t, delta)
+	date(format, t , delta)
+end
+
+--- Set the system clipboard
+--- @param text string
+function pt.set_clipboard(text) 
+	set_clipboard(text)
+end
+
+--- Get the system clipboard
+--- @return string
+function pt.get_clipboard()
+	return get_clipboard()
+end
+
+--- Adds an event listener
+--- @param event string
+--- @param callback function
+function pt.on_event(event, callback) 
+	on_event(event, callback)
+end
+
+--- Sends an event to a process
+--- @param pid integer
+--- @param event table
+function pt.send_message(pid, event) 
+	send_message(pid, event)
+end
+
+--- Get the current process id
+--- @return integer
+function pt.pid()
+	return pid()
+end
+
+--- Create a notification toast
+--- @param message string
+function pt.notify(message) 
+	notify(message)
+end
+
+-- should stat(n) return any? i think it always returns a number, but that might not always be true
+
+--- Returns information about the current runtime environment
+--- If addr is specified, copy the result to addr. This isn't fully documented, see [Querying Mixer State](https://pico-8.fandom.com/wiki/Stat?fandom=allow)
+--- [View Online](https://pico-8.fandom.com/wiki/Stat)
+--- @param id integer
+--- @param addr? integer
+--- @return any
+function pt.stat(id, addr) 
+	return stat(id, addr)
+end
+
+--- Get a property from the current theme (/ram/shared/theme.pod)
+--- @param which string
+--- @return any
+function pt.theme(which) 
+	return theme(which)
+end
+
+--- Opens a file using the system file associations (/system/util/open.lua)
+--- @param file string
+function pt.open(file) 
+	open(file)
+end
+--- @meta
+
+--- Add an element to a table
+--- If index is not specified, the item will be added to the end of the table
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#add)
+--- @param table table
+--- @param value any
+--- @param index? number
+function pt.add(table, value, index) 
+	add(table, value, index)
+end
+
+--- Delete the first instance of value in table
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#del)
+--- @param table table
+--- @param value any
+--- @return any | nil
+function pt.del(table, value)
+	return del(table, value)
+end
+
+--- Delete the item in the table at the specified index
+--- If index is not specified, the last item will be removed and returned
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#deli)
+--- @param table table
+--- @param index? integer
+--- @return any | nil
+function pt.deli(table, index)
+	return deli(table, index)
+end
+
+--- Get the length of a table
+--- When value is specified, get the number of times value is in the table
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#count)
+--- @param table table
+--- @param value? any
+function pt.count(table, value) 
+	count(table, value)
+end
+
+--- Returns an iterator for array like tables
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#all)
+--- @param table table
+--- @return function
+function pt.all(table)
+	return all(table)
+end
+
+--- For each item in the table, call function with each item as a parameter
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#foreach)
+--- @param table table
+--- @param func function
+function pt.foreach(table, func) 
+	foreach(table, func)
+end
+
+-- pairs and ipairs are builtin to lua, so there's no need to specify them here
+
+--- Alias for table.pack
+--- @param ... any
+function pt.pack(...)  
+	pack(...)
+end
+
+--- Alias for table.unpack
+--- @param tbl table
+--- @return any ...
+function pt.unpack(tbl)
+	return unpack(tbl)
+end
+--- @meta
+
+--- /system/lib/undo.lua
+--- @return __Undo
+-- function create_undo_stack(save_state, load_state, pod_flags, item) end
+
+--- @class __Undo
+-- UNDO = {}
+
+-- function UNDO:reset() end
+
+-- function UNDO:undo() end
+
+-- function UNDO:redo() end
+
+-- function UNDO:checkpoint() end
+
+-- function UNDO:new(save_state, load_state, pod_flags, item) end
+--- @meta
+
+--- @class userdata
+--- @field x number
+--- @field y number
+--- @field z number
+--- @operator add(userdata|number)
+--- @operator sub(userdata|number)
+--- @operator mul(userdata|number)
+--- @operator div(userdata|number)
+-- global record Userdata
+-- 	x: number
+-- 	y: number
+-- 	z: number
+-- 	width: function(self)
+-- 	height: function(self)
+-- 	get: function(self, integer, integer)
+-- 	set: function(self, integer, ...: integer)
+-- 	sort: function(self)
+-- end
+
+
+-- global enum userdata_type
+-- 	"u8"
+-- 	"i16"
+-- 	"i32"
+-- 	"i64"
+-- 	"f64"
+-- end
+
+--- Creates a userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata)
+--- @param data_type userdata_type The primitive type of the userdata's numbers
+--- @param width integer
+--- @param height integer
+--- @param data? string string of hex values encoding the data or comma separated list of floats
+--- @return userdata
+--- @overload fun(data_type: userdata_type, width: integer, data: string?)
+--- @overload fun(data: string)
+function pt.userdata(data_type, width, height, data)
+	return userdata(data_type, width, height, data)
+end
+
+--- Creates a vector (f64, 1d userdata)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#vec)
+--- @return userdata
+--- @param ... number
+function pt.vec(...)
+	return vec(...)
+end
+
+--- @class userdata
+--- @return number
+--- Get the magnitude of the vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+-- global Userdata:magnitude = function(self)
+
+--- @class userdata
+--- @param v userdata
+--- @return number
+--- Get the distance to another vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+-- global userdata: function:distance: any(v) 
+
+--- @class userdata
+--- @param v userdata
+--- @return number
+--- Get the dot product of another vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+-- global userdata: function:dot: any(v) 
+
+--- @class userdata
+--- @param v userdata
+--- @param v_out userdata | boolean
+--- @return userdata
+--- Get the cross product of another vector
+--- If v_out is provided, the output will be stored in v_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+-- global userdata: function:cross: any(v, v_out) 
+
+--- @class userdata
+--- @return integer
+--- Gets the width of the userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_width)
+-- global userdata: function:width: any() 
+
+--- @class userdata
+--- @return integer | nil
+--- Gets the height of the userdata
+--- Returns nil for a 1d userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_height)
+-- global userdata: function:height: any() 
+
+--- @class userdata
+--- @return integer width
+--- @return integer height
+--- @return string type
+--- @return integer dimensionality
+--- Returns the attributes of the userdata
+--- If the userdata is 1d, height will be 1
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_attribs)
+-- global userdata: function:attribs: any() 
+
+--- Gets values from a userdata as a multiple value return. If no index and no count are specified,
+--- it will return all values in flat-indexed order.
+--- If only an index is specified, it will return the value at that index. If the starting index
+--- is out of range, it will return a single 0. If not, any additional values that are not in range will each be returned as 0.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer The x index to start from
+--- @param y integer The y index to start from
+--- @param n integer The number of flat-indexed values to get
+--- @return number ... Each value from the starting index in flat-indexed order
+--- @overload fun(u: userdata, x: integer, n: integer)
+--- @overload fun(u: userdata, x: integer, y: integer)
+--- @overload fun(u: userdata, x: integer)
+--- @overload fun(u: userdata)
+-- global get: function(u: any, x: any, y: any, n: any) 
+
+-- userdata.get = get
+
+--- @class userdata
+--- @param x integer
+--- @param ... number
+--- Set one or more values starting at x
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+-- global userdata: function:set: any(x, ...) 
+
+--- @class userdata
+--- @param x integer
+--- @param y integer
+--- @param ... number
+--- Set one or more values starting at x, y
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+-- global userdata: function:set: any(x, y, ...) 
+
+--- Set one or more values starting at x
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer
+--- @param ... number
+-- global set: function(u: any, x: any, ...: any) 
+
+--- Set one or more values starting at x, y
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer
+--- @param y integer
+--- @param ... number
+-- global set: function(u: any, x: any, y: any, ...: any) 
+
+--- Copy a region of one userdata to another
+--- Both src and dest must be the same type.
+--- src and dest default to the current draw target.
+--- width and height default to the src width and height.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#blit)
+--- @param src? userdata
+--- @param dest? userdata
+--- @param src_x? integer
+--- @param src_y? integer
+--- @param dest_x? integer
+--- @param dest_y? integer
+--- @param width? integer
+--- @param height? integer
+-- global blit: function(src: any, dest: any, src_x: any, src_y: any, dest_x: any, dest_y: any, width: any, height: any) 
+
+--- Get a row of a 2d userdata
+--- Rows are 0-indexed
+--- Returns nil if out of range
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
+--- @class userdata
+--- @param i integer
+--- @return userdata | nil
+-- global userdata: function:row: any(i) 
+
+--- Get a column of a 2d userdata
+--- Columns are 0-indexed
+--- Returns nil if out of range
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
+--- @class userdata
+--- @param i integer
+--- @return userdata | nil
+-- global userdata: function:column: any(i) 
+
+-- TODO userdata op functions
+-- function userdata_op(u0, u1, u2, offset1, offset2, len, stride1, stride2, spans) end
+
+--- @class userdata
+--- @param m userdata
+--- @param m_out? userdata | boolean
+--- @return userdata | nil
+--- Multiply two matrices together
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul)
+-- global userdata: function:matmul: any(m, m_out) 
+
+-- This function is included in the manual, but is not real
+-- --- Multiply two matrices together
+-- --- If m_out is provided, the output will be stored in m_out, or in self if true
+-- --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul)
+-- --- @param m0 userdata
+-- --- @param m1 userdata
+-- --- @param m_out? userdata | boolean
+-- --- @return userdata | nil
+-- function matmul(m0, m1, m_out) end
+
+--- @class userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
+-- global userdata: function:matmul2d: any(m, m_out) 
+
+--- Multiply 3d 4x4 transformation matrices
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul3d)
+--- @param m userdata
+--- @param m_out? userdata | boolean
+-- global userdata: function:matmul3d: any(m, m_out) 
+
+-- This function is included in the manual, but is not real
+-- --- Multiply 3d 4x4 transformation matrices
+-- --- If m_out is provided, the output will be stored in m_out, or in self if true
+-- --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul3d)
+-- --- @param m0 userdata
+-- --- @param m1 userdata
+-- --- @param m_out? userdata | boolean
+-- --- @class userdata
+-- function matmul3d(m0, m1, m_out) end
+
+--- @class userdata
+--- @param m_out? userdata | boolean
+--- @return userdata
+--- Transpose the matrix
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
+-- global userdata: function:transpose: any(m_out) 
+
+--- Map the contents of an integer-type userdata to RAM
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#memmap)
+--- @param ud userdata
+--- @param addr integer
+-- global memmap: function(ud: any, addr: any) 
+
+--- Unmap userdata from RAM
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#unmap)
+--- @param ud userdata
+--- @param addr? integer
+-- global unmap: function(ud: any, addr: any) 
+
+--- @class userdata
+--- @param addr integer Address to read from
+--- @param offset? integer Offset into userdata
+--- @param elements? integer Number of elements to peek
+--- @return integer ...
+--- Read from RAM into an integer typed userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_peek)
+-- global userdata: function:peek: any(addr, offset, elements) 
+
+--- @class userdata
+--- @param addr integer Address to write to
+--- @param offset? integer Offset into userdata
+--- @param elements? integer Number of elements to poke
+--- Write to RAM from an integer typed userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_poke)
+-- global userdata: function:poke: any(addr, offset, elements) 
+
+--- Copy a region of one userdata to another
+--- Both src and dest must be the same type.
+--- dest defaults to the current draw target.
+--- width and height default to the src width and height.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_blit)
+--- @param dest? userdata
+--- @param src_x? integer
+--- @param src_y? integer
+--- @param dest_x? integer
+--- @param dest_y? integer
+--- @param width? integer
+--- @param height? integer
+-- global userdata: function:blit: any(dest, src_x, src_y, dest_x, dest_y, width, height) 
+
+--- Change the type or size of a userdata. Only integer types can be used.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_mutate)
+--- @param data_type string u8, i16, i32, i64
+--- @param width? integer
+--- @param height? integer
+-- global userdata: function:mutate: any(data_type, width, height) 
+
+--- Linearly interpolate between two elements of a userdata
+--- offset is the flat index to start from
+--- len is the length (x1 - x0) of the lerp including the end (but not the start) element
+--- el_stride is the distance between the elements
+--- Multiple lerps can be performed at once using num_lerps and lerp_stride
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_lerp)
+--- @param offset? integer
+--- @param len? integer
+--- @param el_stride? integer
+--- @param num_lerps? integer
+--- @param lerp_stride? integer
+-- global userdata: function:lerp: any(offset, len, el_stride, num_lerps, lerp_stride) 
+
+--- Return a copy of userdata cast as a different type.
+--- When converting to ints, f64 values are floored and out of range values overflow
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_convert)
+--- @param data_type string u8, i16, i32, i64, f64
+--- @param dest? userdata
+--- @return userdata
+-- global userdata: function:convert: any(data_type, dest) 
+
+-- global userdata: function:pow: any() 
+
+-- global userdata: function:sgn: any() 
+
+-- global userdata: function:sgn0: any() 
+
+-- global userdata: function:abs: any() 
+
+--- Sort a 2d userdata of any type by the value found at the index column (0 by default)
+--- When descending is true, sort from largest to smallest
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_sort)
+--- @param index? integer
+--- @param descending? boolean
+-- global userdata: function:sort: any(index, descending) 
+
+-- === Userdata Operations ===
+
+--- Applies add to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:add: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies sub to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:sub: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies mul to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:mul: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies div to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:div: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies integer division to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:idiv: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies mod to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:mod: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies band to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:band: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies bor to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:bor: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Applies bxor to each element and written to a new userdata
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:bxor: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Shifts the bits of each element to the left by n bits
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:shl: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Shifts the bits of each element to the right by n bits
+--- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:shr: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Copy the userdata
+--- When :copy is given a table as the first argument (after self), it is taken to be a
+--- lookup table into that userdata for the start of each span.
+--- ** this form will be deprecated in 0.1.2 -- use :take instead with the same parameters.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_copy)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:copy: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Take values from the userdata at locations specified by idx.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_take)
+--- @param idx userdata
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param idx_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:take: any(idx, dest, src_offset, dest_offset, len, idx_stride, dest_stride, spans) 
+
+--- Returns the largest of each element or scalar
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#UserData_Operations)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:max: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+
+--- Returns the smallest of each element or scalar
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#UserData_Operations)
+--- @param src? userdata | number
+--- @param dest? userdata | boolean
+--- @param src_offset? integer
+--- @param dest_offset? integer
+--- @param len? integer
+--- @param src_stride? integer
+--- @param dest_stride? integer
+--- @param spans? integer
+--- @return userdata
+-- global userdata: function:min: any(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) 
+--- @meta
+
+--- Window Attributes
+--- @class __WindowAttribs
+--- @field autoclose? boolean
+--- @field cursor? 0 | 1 | string | userdata
+--- @field fullscreen? boolean
+--- @field has_frame? boolean
+--- @field height? integer
+--- @field immortal? boolean
+--- @field moveable? boolean
+--- @field pausable? boolean
+--- @field pwc_output? boolean
+--- @field resizable? boolean
+--- @field show_in_workspace? boolean
+--- @field tabbed? boolean
+--- @field title? string
+--- @field video_mode? 0 | 3 | 4
+--- @field wallpaper? boolean
+--- @field width? integer
+--- @field x? integer
+--- @field y? integer
+--- @field z? integer
+-- global record __WindowAttribs
+-- 	autoclose: boolean
+-- 	cursor: integer | string | Userdata
+-- 	fullscreen: boolean
+-- 	has_frame: boolean
+-- 	height: integer
+-- 	immortal: boolean
+-- 	moveable: boolean
+-- 	pausable: boolean
+-- 	pwc_output: boolean
+-- 	resizable: boolean
+-- 	show_in_workspace: boolean
+-- 	tabbed: boolean
+-- 	title: string
+-- 	video_mode: integer
+-- 	wallpaper: boolean
+-- 	width: integer
+-- 	x: integer
+-- 	y: integer
+-- 	z: integer
+-- end
+
+--- Get the current display as a u8, 2d userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_display)
+--- @return userdata
+function pt.get_display()
+	return get_display()
+end
+
+--- Set the draw target to a u8, 2d userdata
+--- If ud is not provided, set the draw target to the current display
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_draw_target)
+--- @param ud? userdata
+function pt.set_draw_target(ud) 
+	set_draw_target(ud)
+end
+
+--- Gets the current draw target as a u8, 2d userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_draw_target)
+--- @return userdata
+function pt.get_draw_target()
+	return get_draw_target()
+end
+
+--- Create a window or set its attributes
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#window)
+--- @param width integer
+--- @param height integer
+--- @param attribs? __WindowAttribs
+function pt.window(width, height, attribs) 
+	window(width, height, attribs)
+end
+
+--- Create a window or set its attributes
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#window)
+--- @param attribs? __WindowAttribs
+-- global window: function(attribs: __WindowAttribs) 
+--- @meta
+
+--- Manage working with a file
+--- save_state is a function that returns the content and metadata of the file to save. Called when the "save_file" event is fired
+--- load_state is a function that takes the content and metadata of the file as parameters. Called when the "open_file" event is fired
+--- untitled filename is the file name to use by default
+--- get_hlocation is a function that gets the location in the file
+--- set_hlocation is a function that sets the location in the file
+--- View implementation in /system/lib/wrangle.lua
+--- @param save_state? function
+--- @param load_state? function
+--- @param untitled_filename? string
+--- @param get_hlocation? function
+--- @param set_hlocation? function
+function pt.wrangle_working_file(save_state, load_state, untitled_filename, get_hlocation, set_hlocation) 
+	wrangle_working_file(save_state, load_state, untitled_filename, get_hlocation, set_hlocation)
+end
+
+--- Gets the present working file. Used with wrangle_working_file
+--- View implementation in /system/lib/wrangle.lua
+--- @return string | nil
+function pt.pwf()
+	return pwf()
+end
+
+return pt
+
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50",runtime=24,workspaces={{location="main.lua#22",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09",runtime=24,workspaces={{location="main.lua#28",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/game/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/menu/cursor/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/systems/service/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+:: build/ui/components/.info.pod
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+:: build/ui/layout/.info.pod
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -8248,7 +10558,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-13 21:33:21",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -8531,7 +10841,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -8560,7 +10870,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -8568,5 +10878,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-13 23:05:50"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-15 01:44:09"]]
 :: [eoc]

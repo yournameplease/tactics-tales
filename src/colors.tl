@@ -39,7 +39,7 @@ function Colors.apply_palette(palette_id: PaletteId)
 		local sprite=pt.get_spr(palette_sprite)
 		for y=1,63 do
 				local c=sprite:get(color_col,y)
-				pt.pal(y,c)
+				pt.set_pal(y,c)
 		end
 end
 

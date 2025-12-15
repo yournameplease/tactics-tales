@@ -487,8 +487,11 @@ end
 --- @param c0 integer The index to remap.
 --- @param c1 integer The index to map c0 to.
 --- @param p? 0 | 1 0 to swap during drawing, 1 to swap the entire screen. Defaults to 0.
-function pt.pal(c0, c1, p) 
+function pt.set_pal(c0, c1, p) 
 	pal(c0, c1, p)
+end
+function pt.reset_pal() 
+	pal()
 end
 
 --- Sets the ARGB color value for the given color index.
@@ -513,8 +516,11 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
 --- @param c integer
 --- @param is_transparent boolean
-function pt.palt(c, is_transparent) 
+function pt.set_palt(c, is_transparent) 
 	palt(c, is_transparent)
+end
+function pt.reset_palt(c) 
+	palt(c)
 end
 
 --- Set the transparency of all colors
