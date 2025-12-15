@@ -1181,6 +1181,9 @@ end
 --- @param val integer
 --- @param ... integer
 -- global chr: function(val: any, ...: any) 
+function pt.chr(val)
+	return chr(val)
+end 
 
 --- Convert 1 or more characters from a string to ordinal character codes
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ord)

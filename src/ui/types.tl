@@ -3,6 +3,7 @@
 global enum UILayoutId
     "TITLE_SCREEN"
     "MAIN_MENU_PAGE"
+    "OPTIONS_MENU_PAGE"
 
     "TACTICS"
     "COMBAT_PREVIEW"

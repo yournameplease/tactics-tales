@@ -13,6 +13,7 @@ local combat_preview = require("src/ui/layout/combat_preview")
 local story_page = require("src/ui/layout/story_page")
 local title_screen = require("src/ui/layout/title_screen")
 local main_menu = require("src/ui/layout/main_menu")
+local options_menu = require("src/ui/layout/options_menu")
 global record UILayout
     root: UIElement
 end
@@ -44,6 +45,7 @@ function UIManager.new(): UIManager
     self.layouts["STORY_PAGE"] = story_page
     self.layouts["TITLE_SCREEN"] = title_screen
     self.layouts["MAIN_MENU_PAGE"] = main_menu
+    self.layouts["OPTIONS_MENU_PAGE"] = options_menu
 
     -- Validate all layouts
     for id, v in pairs(self.layouts) do

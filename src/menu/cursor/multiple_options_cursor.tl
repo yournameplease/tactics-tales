@@ -4,7 +4,7 @@ local List = require("src/util/list")
 
 global type MenuState
 
-global record MenuMultipleOptionSelection<GC is GameContext>
+global record MenuMultipleOptionCursor<GC is GameContext>
     text: string -- label
     cursor: MenuCursor<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
@@ -20,14 +20,6 @@ function MenuMultipleOptionDefinition.new(props: MenuMultipleOptionDefinition<GC
     return props
 end
 
-function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
-    return {
-        text = self.text,
-        cursor = self.definition:to_cursor(game_context, menu_ctx, menu_state),
-        must_select = self.must_select,
-    }
-end
-
 global enum MultipleOptionsDirection
     "vertical"
     "horizontal"
@@ -41,9 +33,17 @@ global record MultipleOptionsMenuCursor<GC is GameContext>
     primary_direction: MultipleOptionsDirection
     wrap: boolean
     is_option_selected: boolean -- if the current selection has been selected.  Needed if the selection is must_select
-    options: { MenuMultipleOptionSelection<GC> }
+    options: { MenuMultipleOptionCursor<GC> }
     next_state: string
     send_command: GameEvent
+end
+
+function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
+    return {
+        text = self.text,
+        cursor = self.definition:to_cursor(game_context, menu_ctx, menu_state),
+        must_select = self.must_select,
+    }
 end
 
 global record MultipleOptionsMenuDefinition<GC is GameContext>
@@ -61,22 +61,14 @@ function MultipleOptionsMenuDefinition.new(props: MultipleOptionsMenuDefinition<
     return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
 end
 
-global record MultipleOptionsMenuDefinition<GC is GameContext>
-    is MenuStepDefinition<GC>
-    where self.type == "CURSOR_LIST"
-    set_selected_context: function(MultipleOptionsMenuCursor<GC>, GC, MenuContext)
-    get_options_definitions: function(GC, MenuContext): {MenuMultipleOptionDefinition<GC>}
-    wrap: boolean
-end
-
 function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuCursor<GC>
     assert(step_definition is MultipleOptionsMenuDefinition<GC>)
     local self: MultipleOptionsMenuCursor<GC> = {
         type = "CURSOR_MULTIPLE_OPTIONS",
-        i = 0,
+        i = 1,
         options = List.do_map(
-            step_definition.get_options_definitions(game_ctx, menu_ctx),
-            function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionSelection<GC>
+            step_definition.options,
+            function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
                 return {
                     text = o.text,
                     cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
@@ -137,3 +129,4 @@ end
 function MultipleOptionsMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
     return MultipleOptionsMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end
+

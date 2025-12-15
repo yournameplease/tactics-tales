@@ -2568,14 +2568,14 @@ end
 
 local function set_palette(battle_unit, side)
    if side == 1 then
-      pt.pal(16, 8)
-      pt.pal(19, 24)
+      pt.set_pal(16, 8)
+      pt.set_pal(19, 24)
    end
    local skin = battle_unit.character.appearance.skin
-   pt.pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-   pt.pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-   pt.pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
-   pt.pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+   pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
+   pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
+   pt.set_pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
+   pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
 function CharacterRenderer.draw_head(battle_unit, point, side, set_pal)
@@ -2658,7 +2658,7 @@ function CharacterRenderer.draw(battle_unit, point, side, set_pal, apply_animati
    end
 
    if set_pal then
-      pt.pal()
+      pt.reset_pal()
    end
 
 end
@@ -3312,7 +3312,7 @@ function Colors.apply_palette(palette_id)
    local sprite = pt.get_spr(palette_sprite)
    for y = 1, 63 do
       local c = sprite:get(color_col, y)
-      pt.pal(y, c)
+      pt.set_pal(y, c)
    end
 end
 
@@ -3348,7 +3348,7 @@ Config = {}
 
 CONFIG = {
 
-   LOG_LEVEL = "TRACE",
+   LOG_LEVEL = "DEBUG",
 
    SCREEN_WIDTH = 480,
    SCREEN_HEIGHT = 270,
@@ -4124,13 +4124,13 @@ local draw_util = {}
 
 function draw_shadow(c, draw, x, y)
    for i = 1, 31 do
-      pt.pal(i, c)
+      pt.set_pal(i, c)
    end
    draw(x - 1, y)
    draw(x, y - 1)
    draw(x + 1, y)
    draw(x, y + 1)
-   pt.pal()
+   pt.reset_pal()
 end
 
 return draw_util
@@ -4202,6 +4202,14 @@ function Game.new(services)
    services.event_bus:on("GAME_BEGIN_STORY", function()
       self:begin_story()
    end)
+   services.event_bus:on("GAME_SET_OPTIONS", function(ctx)
+      LOG.debug(
+      "TODO: set options: ",
+      ctx.metadata["log_level"],
+      ctx.metadata["draw_flexbox_debug"])
+
+      self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
+   end)
 
    return self
 end
@@ -4261,22 +4269,29 @@ local MENU_DATA = {
                return options
             end,
          }),
+         ["OPTIONS_MENU"] = MultipleOptionsMenuDefinition.new({
+            primary_direction = "vertical",
+            wrap = false,
+            send_command = "GAME_SET_OPTIONS",
+            options = {
+               MenuMultipleOptionDefinition.new({
+                  text = "Log Level",
+                  definition = ListMenuDefinition.of_static_options(
+                  { "ERROR", "WARNING", "INFO", "DEBUG", "TRACE" },
+                  "log_level",
+                  "horizontal"),
 
+               }),
+               MenuMultipleOptionDefinition.new({
+                  text = "Draw Flexbox Debug",
+                  definition = ListMenuDefinition.of_static_options(
+                  { "NO", "YES" },
+                  "draw_flexbox_debug",
+                  "horizontal"),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+               }),
+            },
+         }),
       },
    },
 
@@ -4317,8 +4332,14 @@ function GameUIContext:enrich()
    self.layout = "TITLE_SCREEN"
 
    if self.ctx.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
-      if self.ctx.menu_manager.menu_state.step == "MAIN_MENU" then
+      if self.ctx.menu_manager.menu_state.step == "TITLE_SCREEN" then
+         self.layout = "TITLE_SCREEN"
+      elseif self.ctx.menu_manager.menu_state.step == "MAIN_MENU" then
          self.layout = "MAIN_MENU_PAGE"
+      elseif self.ctx.menu_manager.menu_state.step == "OPTIONS_MENU" then
+         self.layout = "OPTIONS_MENU_PAGE"
+      else
+         error("unexpected menu state")
       end
    end
 end
@@ -4615,6 +4636,7 @@ end
 :: build/menu/cursor/list_cursor.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
 require("src/game_context")
+local List = require("src/util/list")
 
 
 
@@ -4650,9 +4672,36 @@ ListMenuDefinition = {}
 
 
 
+
 function ListMenuDefinition.new(props)
    props.type = "CURSOR_LIST"
    return setmetatable(props, { __index = ListMenuDefinition })
+end
+
+function ListMenuDefinition.of_static_options(
+   options,
+   set_context_key,
+   direction)
+
+   local get_options = function(game_ctx, menu_context)
+      return List.do_map(
+      options,
+      function(o)
+         return {
+            text = tostring(o),
+         }
+      end)
+
+   end
+   local set_selected_context = function(s, _msb, ctx)
+      ctx.metadata[set_context_key] = options[s.i]
+   end
+   return ListMenuDefinition.new({
+      set_selected_context = set_selected_context,
+      get_options = get_options,
+      wrap = false,
+      direction = direction,
+   })
 end
 
 function ListMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
@@ -4701,9 +4750,15 @@ function ListMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
 end
 
 :: build/menu/cursor/multiple_options_cursor.lua
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/menu/menu_cursor")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/menu/menu_cursor")
 require("src/game_context")
 local List = require("src/util/list")
+
+
+
+MenuMultipleOptionCursor = {}
+
+
 
 
 
@@ -4713,11 +4768,9 @@ MenuMultipleOptionDefinition = {}
 
 
 
-MenuMultipleOptionSelection = {}
-
-
-
-
+function MenuMultipleOptionDefinition.new(props)
+   return props
+end
 
 MultipleOptionsDirection = {}
 
@@ -4735,6 +4788,16 @@ MultipleOptionsMenuCursor = {}
 
 
 
+
+
+function MenuMultipleOptionDefinition:to_cursor(game_context, menu_ctx, menu_state)
+   return {
+      text = self.text,
+      cursor = self.definition:to_cursor(game_context, menu_ctx, menu_state),
+      must_select = self.must_select,
+   }
+end
+
 MultipleOptionsMenuDefinition = {}
 
 
@@ -4743,13 +4806,20 @@ MultipleOptionsMenuDefinition = {}
 
 
 
+
+
+function MultipleOptionsMenuDefinition.new(props)
+   props.type = "CURSOR_MULTIPLE_OPTIONS"
+   return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
+end
+
 function MultipleOptionsMenuCursor.new(step_definition, game_ctx, menu_ctx, menu_state)
-   assert(step_definition.type == "CURSOR_LIST")
+   assert(step_definition.type == "CURSOR_MULTIPLE_OPTIONS")
    local self = {
       type = "CURSOR_MULTIPLE_OPTIONS",
       i = 0,
       options = List.do_map(
-      step_definition.get_options_definitions(game_ctx, menu_ctx),
+      step_definition.options,
       function(o)
          return {
             text = o.text,
@@ -4798,6 +4868,18 @@ function MultipleOptionsMenuCursor:update(joy)
    else
       self.i = pt.mid(1, new_i, #self.options)
    end
+end
+
+function MultipleOptionsMenuCursor:handle_select(game_ctx, menu_ctx, menu_state)
+   for _, opt in ipairs(self.options) do
+      opt.cursor:handle_select(game_ctx, menu_ctx, menu_state)
+   end
+
+   return self.next_state, self.send_command
+end
+
+function MultipleOptionsMenuDefinition:to_cursor(game_context, menu_ctx, menu_state)
+   return MultipleOptionsMenuCursor.new(self, game_context, menu_ctx, menu_state)
 end
 
 :: build/menu/menu_cursor.lua
@@ -5021,6 +5103,7 @@ MenuContextId = {}
 
 
 MenuContext = {}
+
 
 
 
@@ -5414,6 +5497,7 @@ require("src/util")
 require("src/debug")
 
 GameEvent = {}
+
 
 
 
@@ -6553,8 +6637,10 @@ function TextNode.new(props)
    else
       error("Need either `text` or `func` for text node!")
    end
-   box.rows = props.rows or 1
-   box.h = (box.rows) * (TEXT_HEIGHT + 2)
+   if props.rows then
+      box.rows = props.rows
+      box.h = (box.rows) * (TEXT_HEIGHT + 2)
+   end
 
    props.draw_properties = props.draw_properties or {}
    box.draw_properties = {
@@ -6574,10 +6660,12 @@ function TextNode:draw(state, ui_theme)
 
    local text = self.text or self.func(state)
 
-   assert(
-   #text ==
-   self.rows, "`func` should return expected number of rows")
+   if self.rows then
+      assert(
+      #text ==
+      self.rows, "`func` should return expected number of rows")
 
+   end
 
    Text.draw(text,
    self.x + self.internal_margin.l,
@@ -6666,7 +6754,7 @@ local root = SplitPages.new(left, tactics_map)
 return { root = root }
 
 :: build/ui/layout/main_menu.lua
-require("src/systems/service")
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/systems/service")
 require("src/types")
 require("src/ui/types")
 
@@ -6679,6 +6767,7 @@ require("src/ui/box")
 require("src/ui/panels/unit_info")
 require("src/ui/panels/combat_preview")
 require("src/ui/panels/event_message_log")
+local VerticalListMenu = require("src/ui/panels/vertical_list_menu")
 
 local SplitPages = require("src/ui/panels/split_pages")
 
@@ -6686,7 +6775,60 @@ require("src/ui/validator")
 
 
 local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
-local right = TextNode.new({ flex_grow = 1, text = { "Main Menu" } })
+local right = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+right:add(TextNode.new({ flex_grow = 1, text = { "Main Menu" } }))
+right:add(VerticalListMenu.new(
+"{text}",
+">{text}<",
+function(state)
+   local cursor = state.game_context.ctx.menu_manager.menu_cursor
+   assert(cursor.type == "CURSOR_LIST")
+   return cursor
+end,
+{ flex_grow = 1 }))
+
+
+
+local root = SplitPages.new(left, right)
+
+return { root = root }
+
+:: build/ui/layout/options_menu.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; require("src/systems/service")
+require("src/types")
+require("src/ui/types")
+
+require("src/battle/battle_context")
+require("src/story/story_context")
+require("src/config")
+
+require("src/ui/panels/tactics_map")
+require("src/ui/box")
+require("src/ui/panels/unit_info")
+require("src/ui/panels/combat_preview")
+require("src/ui/panels/event_message_log")
+local VerticalMultiSelectMenu = require("src/ui/panels/vertical_list_multi_select")
+
+local SplitPages = require("src/ui/panels/split_pages")
+
+require("src/ui/validator")
+
+
+local left = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+local right = Box.new({ dir = "col", flex_grow = 1, padding = 2 })
+right:add(TextNode.new({ flex_grow = 1, text = { "Main Menu" } }))
+right:add(VerticalMultiSelectMenu.new(
+"{label}: {value}",
+"{label}: " .. pt.chr(139) .. "{value}" .. pt.chr(145),
+function(state)
+   local cursor = state.game_context.ctx.menu_manager.menu_cursor
+   assert(cursor.type == "CURSOR_MULTIPLE_OPTIONS")
+   return cursor
+end,
+{ flex_grow = 1 }))
+
+
+
 local root = SplitPages.new(left, right)
 
 return { root = root }
@@ -6972,10 +7114,10 @@ function PortraitBox:draw(state, ui_theme)
       end,
       self.x, self.y)
 
-
+      Colors.apply_palette("paper")
       local self_pos = DrawPoint.of(self.x, self.y)
       CharacterRenderer.draw(unit, (FEET_ANCHOR + self_pos), unit.side, false, false)
-      pt.pal()
+      pt.reset_pal()
    end
 end
 
@@ -7209,7 +7351,7 @@ function TacticsMap:draw(state, ui_theme)
             0xCC)
 
             pt.poke(0x550b, 0x3f)
-            pt.palt()
+            pt.set_palt(0, true)
             for x = 0, self.map_width - 1 do
                local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
                if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack) then
@@ -7365,6 +7507,105 @@ end
 
 return UnitInfo
 
+:: build/ui/panels/vertical_list_menu.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+require("src/ui/box")
+require("src/systems/event_bus")
+require("src/ui/components/text_node")
+require("src/ui/ui_context_manager")
+require("src/story/story_context")
+require("src/menu/cursor/list_cursor")
+local String = require("src/util/string")
+
+local VerticalListMenu = {}
+
+
+
+
+
+
+function VerticalListMenu.new(
+   unselected_template,
+   selected_template,
+   menu_cursor_func,
+   props)
+
+
+   props.func = function(state)
+      local out = {}
+      local cursor = menu_cursor_func(state)
+      local selected = cursor.i
+      LOG.trace("rendering options: ", #cursor.options, selected)
+      for i, opt in ipairs(cursor.options) do
+         local template = i == selected and selected_template or unselected_template
+         local out_line = String.format(template, { ["text"] = opt.text })
+         LOG.trace("out line", template, out_line)
+         pt.add(out, out_line)
+      end
+      return out
+   end
+
+   props.draw_properties = props.draw_properties or {}
+   props.draw_properties.text_direction = props.draw_properties.text_direction or 'down'
+   return TextNode.new(props)
+end
+
+return VerticalListMenu
+
+:: build/ui/panels/vertical_list_multi_select.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
+require("src/ui/box")
+require("src/systems/event_bus")
+require("src/ui/components/text_node")
+require("src/ui/ui_context_manager")
+require("src/story/story_context")
+require("src/menu/cursor/list_cursor")
+require("src/menu/cursor/multiple_options_cursor")
+local String = require("src/util/string")
+
+local VerticalMultiSelectMenu = {}
+
+
+
+
+
+
+function VerticalMultiSelectMenu.new(
+   unselected_template,
+   selected_template,
+   menu_cursor_func,
+   props)
+
+
+   props.func = function(state)
+      local out = {}
+      local cursor = menu_cursor_func(state)
+      local selected = cursor.i
+      LOG.trace("rendering options: ", #cursor.options, selected)
+      for i, opt in ipairs(cursor.options) do
+         local template = i == selected and selected_template or unselected_template
+         local subcursor = opt.cursor
+         assert(subcursor.type == "CURSOR_LIST", "Only list cursor is implemented!")
+         local out_line = String.format(
+         template,
+         {
+            ["label"] = opt.text,
+            ["value"] = subcursor.options[subcursor.i],
+         })
+
+         LOG.trace("out line", template, out_line)
+         pt.add(out, out_line)
+      end
+      return out
+   end
+
+   props.draw_properties = props.draw_properties or {}
+   props.draw_properties.text_direction = props.draw_properties.text_direction or 'down'
+   return TextNode.new(props)
+end
+
+return VerticalMultiSelectMenu
+
 :: build/ui/theme.lua
 require("src/types")
 
@@ -7480,6 +7721,7 @@ local combat_preview = require("src/ui/layout/combat_preview")
 local story_page = require("src/ui/layout/story_page")
 local title_screen = require("src/ui/layout/title_screen")
 local main_menu = require("src/ui/layout/main_menu")
+local options_menu = require("src/ui/layout/options_menu")
 UILayout = {}
 
 
@@ -7511,6 +7753,7 @@ function UIManager.new()
    self.layouts["STORY_PAGE"] = story_page
    self.layouts["TITLE_SCREEN"] = title_screen
    self.layouts["MAIN_MENU_PAGE"] = main_menu
+   self.layouts["OPTIONS_MENU_PAGE"] = options_menu
 
 
    for id, v in pairs(self.layouts) do
@@ -8022,6 +8265,22 @@ function RandomRange:pick_random()
    return self.min_value + rndi(self.max_value - self.min_value)
 end
 
+:: build/util/string.lua
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local pairs = _tl_compat and _tl_compat.pairs or pairs; local string = _tl_compat and _tl_compat.string or string
+local str = {}
+
+
+
+function str.format(template, values)
+   local out = template
+   for k, v in pairs(values) do
+      out = out:gsub("{" .. k .. "}", tostring(v))
+   end
+   return out
+end
+
+return str
+
 :: build/util/text.lua
 local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; require("src/debug")
 require("src/util")
@@ -8175,7 +8434,7 @@ end
 return Text
 
 :: main.lua
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-15 00:54:57",revision=75,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-15 14:11:26",revision=78,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -8205,6 +8464,7 @@ pt = include "picotron.lua"
 include "build/main.lua"
 
 include "lib/error_explorer.lua"
+
 :: picotron.lua
 --- @meta
 
@@ -8695,8 +8955,11 @@ end
 --- @param c0 integer The index to remap.
 --- @param c1 integer The index to map c0 to.
 --- @param p? 0 | 1 0 to swap during drawing, 1 to swap the entire screen. Defaults to 0.
-function pt.pal(c0, c1, p) 
+function pt.set_pal(c0, c1, p) 
 	pal(c0, c1, p)
+end
+function pt.reset_pal() 
+	pal()
 end
 
 --- Sets the ARGB color value for the given color index.
@@ -8721,8 +8984,11 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#palt)
 --- @param c integer
 --- @param is_transparent boolean
-function pt.palt(c, is_transparent) 
+function pt.set_palt(c, is_transparent) 
 	palt(c, is_transparent)
+end
+function pt.reset_palt(c) 
+	palt(c)
 end
 
 --- Set the transparency of all colors
@@ -9383,6 +9649,9 @@ end
 --- @param val integer
 --- @param ... integer
 -- global chr: function(val: any, ...: any) 
+function pt.chr(val)
+	return chr(val)
+end 
 
 --- Convert 1 or more characters from a string to ordinal character codes
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#ord)
@@ -10328,57 +10597,57 @@ end
 return pt
 
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09",runtime=24,workspaces={{location="main.lua#28",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 14:11:28",runtime=24,workspaces={{location="main.lua#30",workspace_index=1},{location="build/game/game_menu_manager.lua#45",workspace_index=1},{location="build/menu/menu_cursor.lua",workspace_index=1},{location="build/menu/cursor/multiple_options_cursor.lua",workspace_index=1},{location="gfx/0.gfx",workspace_index=2},{location="gfx/1_units.gfx",workspace_index=2},{location="gfx/2_tiles.gfx",workspace_index=2},{location="gfx/4_map_util.gfx",workspace_index=2},{location="gfx/portrait.gfx",workspace_index=2},{location="gfx/scratch.gfx",workspace_index=2},{location="map/0.map",workspace_index=3},{location="map/castle.map",workspace_index=3},{location="map/bandit_village.map",workspace_index=3},{location="map/cultist_cave.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: build/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/battle/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/battle/combat/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/battle/map/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/battle/tactics/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/character/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/character/items/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/character/items/object/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/character/object/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/corpora/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/data/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/game/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/menu/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/menu/cursor/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/story/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/systems/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/systems/service/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/types/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/ui/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/ui/components/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/ui/decoration/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/ui/layout/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/ui/panels/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: build/util/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 14:11:28"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0wOCAwMToyMjoyMiIscmV2aXNpb249MjZdXWx6NACLAQAAUTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -10558,7 +10827,7 @@ IAEBExIJGiZwUAUQCR4ZHgIT8iEpHhkOEB4FAC5JHg8fAN4cAAxOLA4cDhwABSx_LAAFIAwePA4s
 AAUwbAAcBUBhAAzxEn8gBSAuMB4g2QEfDzIA----------------------------------------
 oFA9MTF9fQ==
 :: lib/.info.pod
---[[pod,created="2025-12-15 01:41:00",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-15 14:11:26",modified="2025-12-15 14:11:28"]]
 :: lib/error_explorer.lua
 b64$LS0tQGRpYWdub3N0aWMgZGlzYWJsZQotLSAjIHBpY290cm9uIGVycm9yIGV4cGxvcmVyCi0t
 Ci0tIGJ5IGtpcmEKLS0KLS0gdmVyc2lvbiAwLjAuNgotLQotLSBhbiBpbnRlcmFjdGl2ZSBlcnJv
@@ -10841,7 +11110,7 @@ ICh1c2VyX3VwZGF0ZSkKICBlbmQKZW5kCgpmdW5jdGlvbiBfZHJhdyAoKQogIGlmIGVycm9yX3Ro
 cmVhZCB0aGVuCiAgICBjYWxsX2Vycm9yX2V2ZW50IChlcnJvcl9kcmF3KQogIGVsc2UKICAgIGNh
 bGxfcHJvdGVjdGVkICh1c2VyX2RyYXcpCiAgZW5kCmVuZAo=
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 14:11:28"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yNiAwNToxNjo0OCIscmV2aXNpb249MzVdXWx6NABaAQAAGgUAAP4Ge3tibXA9cHh1AEyAEBAA
@@ -10870,7 +11139,7 @@ AAACCAM5AAAsaGlkZGVuPWZhbHNlLG5hbWU9IndhbGxzIixwYW5feD0tNgkA4nk9NzEsdGlsZV9o
 PTE2CgAQdwoAinpvb209MX0sYABvAAgCAAkCBgAUFwEMAA8GAA4XAQwAD1oA--9ZPwAIAioDAV9m
 bG9vcioDGFBtPTF9fQ==
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2025-12-15 14:11:28"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0x
 MS0yMCAxNDo1NTowMiIscmV2aXNpb249MV1dbHo0AK4AAAAWCgAA-zBweHUAAygAAAQABA9AEAIO
@@ -10878,5 +11147,5 @@ AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOvzEqoBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD2igAhAGDhsA9geoDygP--DGD-gKD-8PgA-3Dw0B8AkBIAAK
 OwA-QPDDMAD------6Uf-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: src/.info.pod
---[[pod,created="2025-12-06 23:16:07",modified="2025-12-15 01:44:09"]]
+--[[pod,created="2025-12-06 23:16:07",modified="2025-12-15 14:11:28"]]
 :: [eoc]

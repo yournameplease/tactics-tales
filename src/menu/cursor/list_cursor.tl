@@ -57,7 +57,7 @@ function ListMenuDefinition.of_static_options<T>(
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<GC>, _msb: BattleContext, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuCursor<GC>, _msb: GC, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return ListMenuDefinition.new({
