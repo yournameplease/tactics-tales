@@ -67,7 +67,9 @@ function BaseMenuManager.new(
     self.menu_state = {
         point = TilePoint.of(0, 0)
     }
-    self.menu_ctx = {}
+    self.menu_ctx = {
+        metadata = {}
+    }
     self.menu_cursor = {}
     self.selection_history = {}
 

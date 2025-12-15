@@ -39,6 +39,7 @@ end
 
 function ListMenuDefinition.new(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
     props.type = "CURSOR_LIST"
+    props.direction = props.direction or "vertical"
     return setmetatable(props, { __index = ListMenuDefinition })
 end
 
@@ -74,7 +75,6 @@ function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuCo
         type = "CURSOR_LIST",
         i = 1,
         options = step_definition.get_options(game_ctx, menu_ctx),
-        direction = "vertical",
     }
     return setmetatable(self, { __index = function(t: any, k: string): any 
             if (ListMenuCursor as {string: any})[k] then

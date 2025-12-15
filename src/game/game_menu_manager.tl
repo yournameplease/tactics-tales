@@ -53,7 +53,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
                             {"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"},
                             "log_level",
                             "horizontal"
-                        )
+                        ),
                     }),
                     MenuMultipleOptionDefinition.new({
                         text = "Draw Flexbox Debug",

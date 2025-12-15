@@ -72,7 +72,7 @@ function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GC, menu_
                 return {
                     text = o.text,
                     cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
-                    must_select = o.must_select
+                    must_select = o.must_select == true
                 }
             end
         ),

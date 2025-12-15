@@ -35,7 +35,7 @@ function VerticalMultiSelectMenu.new(
 				template,
 				{
 					["label"] = opt.text,
-					["value"] = subcursor.options[subcursor.i],
+					["value"] = subcursor.options[subcursor.i].text,
 				}
 			)
 			LOG.trace("out line", template, out_line)
