@@ -1,6 +1,4 @@
-local draw_util = {}
-
-global function draw_shadow(c: integer, draw: function(x: number, y: number), x: number, y: number)
+local function draw_shadow(c: integer, draw: function(x: number, y: number), x: number, y: number)
     for i=1,31 do
         pt.set_pal(i, c)
     end
@@ -11,4 +9,6 @@ global function draw_shadow(c: integer, draw: function(x: number, y: number), x:
     pt.reset_pal()
 end
 
-return draw_util
+return {
+    draw_shadow = draw_shadow
+}

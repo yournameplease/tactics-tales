@@ -1,30 +1,10 @@
 require("src/types")
 
 require("src/config")
--- http://lua-users.org/wiki/CopyTable
--- global function deepcopy(orig)
---     local orig_type = type(orig)
---     local copy
---     if orig_type == 'table' then
---         copy = {}
---         for orig_key, orig_value in next, orig, nil do
---             copy[deepcopy(orig_key)] = deepcopy(orig_value)
---         end
---         setmetatable(copy, deepcopy(getmetatable(orig)))
---     else -- number, string, boolean, etc
---         copy = orig
---     end
---     return copy
--- end
 
 global function rndi(i: number): integer
     return pt.flr(pt.rnd(i)//1)
 end
-
--- global function choose_random(...)
---     local i = rndi(args.n)+1
---     return args[i]
--- end
 
 global function choose_random_from_list<A>(list: {A}): A
     local i = rndi(#list)+1

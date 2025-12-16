@@ -3,6 +3,7 @@ require("src/ui/ui_context_manager")
 require("src/ui/box")
 local CharacterRenderer = require("src/character/character_renderer")
 local Colors = require("src/colors")
+local Draw = require("src/draw")
 
 global record PortraitBox
     is UIElement
@@ -31,7 +32,7 @@ function PortraitBox:draw(state: UIContextManager, ui_theme: UITheme)
     local unit = self.get_selected_unit(state)
     if unit then
         local shadow_color = ui_theme.COLOR_DECORATION_SHADOW
-        draw_shadow(shadow_color,
+        Draw.draw_shadow(shadow_color,
                 function(draw_x: integer,draw_y: integer)
                     local draw_pos: Point = DrawPoint.of(draw_x, draw_y)
                     CharacterRenderer.draw(unit, (FEET_ANCHOR+draw_pos) as DrawPoint, unit.side, false, false)
