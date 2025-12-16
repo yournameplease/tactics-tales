@@ -58,16 +58,23 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
 end
 
 function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
+    local char_man = self.story_context.character_manager
+    local player_roster = char_man:get_player_roster()
+    local roster_count = 1
     for i, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
         local character: Character
         if new_players[i] ~= nil then
             local spawn_data = new_players[i]
-            character = self.story_context.character_manager:generate_character(spawn_data.template)
-            self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
+            character = char_man:generate_character(spawn_data.template)
+            char_man:persist_player(character)
         else
-            
+            if player_roster[roster_count] ~= nil then
+                character = player_roster[roster_count]
+                roster_count = roster_count + 1
+            end
         end
+        self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
     end
 end
 

@@ -10,21 +10,33 @@ require("src/systems/service")
 require("src/story/story_context")
 require("src/systems/service/game_service_bundle")
 local CharacterGenerator = require("src/character/character_generator")
+local lists = require("src/util/lists")
+local maps = require("src/util/maps")
 
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
-global record CharacterManager
-    id_generator: id_generator.IdGenerator
-    characters: { Character }
-
-    ctx: StoryContext
+global interface CharacterManager
+    generate_character: function(self, template_id: string): Character
+    persist_player: function(self, character: Character)
+    get_player_roster: function(self): { Character }
 end
 
 local character_manager = {
     CharacterManager = CharacterManager
 }
 
-function CharacterManager:generate_character(template_id: string): Character
+local record CharacterManagerImpl
+    is CharacterManager
+    
+    id_generator: id_generator.IdGenerator
+    characters: { integer: Character }
+
+    player_ids: { integer }
+
+    ctx: StoryContext
+end
+
+function CharacterManagerImpl:generate_character(template_id: string): Character
     local character: Character = CharacterGenerator.generate_from_template(
         self.id_generator:get_id(),
         template_id
@@ -33,37 +45,45 @@ function CharacterManager:generate_character(template_id: string): Character
     return character
 end
 
-function CharacterManager:persist_character(character: Character)
+function CharacterManagerImpl:persist_player(character: Character)
     self.characters[character.id] = character
+    pt.add(self.player_ids, character.id)
+end
+
+function CharacterManagerImpl:get_player_roster(): { Character }
+    return lists.map(
+        maps.get_at(self.characters)
+    )(self.player_ids)
 end
 
 -- event handlers
 
-function CharacterManager:handle_equip_item(ctx: MenuContext)
+function CharacterManagerImpl:handle_equip_item(ctx: MenuContext)
     local character = ctx.acting_unit.unit.character
     local item_index = ctx.selected_item.index
     character.inventory:equip_item(item_index)
 end
 
-function CharacterManager:handle_unequip_item(ctx: MenuContext)
+function CharacterManagerImpl:handle_unequip_item(ctx: MenuContext)
     local character = ctx.acting_unit.unit.character
     local item_index = ctx.selected_item.index
     character.inventory:unequip_item(item_index)
 end
 
-function CharacterManager:handle_discard_item(ctx: MenuContext)
+function CharacterManagerImpl:handle_discard_item(ctx: MenuContext)
     local character = ctx.acting_unit.unit.character
     local item_index = ctx.selected_item.index
     character.inventory:remove_item(item_index)
 end
 
 function character_manager.new(ctx: StoryContext): CharacterManager
-    local self: CharacterManager = setmetatable({
+    local self: CharacterManagerImpl = setmetatable({
         ctx = ctx
-    }, { __index = CharacterManager})
+    }, { __index = CharacterManagerImpl})
     
     self.id_generator = id_generator.new()
     self.characters = {}
+    self.player_ids = {}
 
     self.ctx.services.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
         self:handle_equip_item(ctx)

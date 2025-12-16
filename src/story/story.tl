@@ -111,6 +111,9 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
     self.story_ctx.services.event_bus = services.event_bus as EventBus
 
     self.story_ctx.character_manager = character_manager.new(self.story_ctx)
+    -- todo node for this
+    local hero = self.story_ctx.character_manager:generate_character("village_hero")
+    self.story_ctx.character_manager:persist_player(hero)
     
     self.story_ctx.story_page = StoryPage.new()
     self.story_ctx.menu_manager = StoryMenuManager.new(self.story_ctx)
