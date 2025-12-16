@@ -1,16 +1,20 @@
 require("src/types")
 require("src/data/maps")
 require("src/battle/battle_map")
+local MAP_DEFINITIONS = require("src/data/maps")
+local map_types = require("src/battle/map/types")
 
-global record MapGenerator
 
-end
+local map_generator = {
+    
+}
 
-global record __MapFetchResultEntry
+local record __MapFetchResultEntry
     bmp: Userdata
 end
 
-global type MapFetchResult = { __MapFetchResultEntry }
+local type MapFetchResult = { __MapFetchResultEntry }
+
 
 
 local BASE_PLAYER_SPAWNER_SPRITE = 0x408
@@ -68,7 +72,7 @@ local function apply_default_walls(map_layers: MapLayers)
     end
 end
 
-local function load_static(definition: StaticMapDefinition): BattleMap
+local function load_static(definition: map_types.StaticMapDefinition): BattleMap
     local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
@@ -111,12 +115,12 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function MapGenerator:load_map(map_id: string): BattleMap
+function map_generator.load_map(map_id: string): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
     local battle_map: BattleMap
-    if definition is StaticMapDefinition then
+    if definition is map_types.StaticMapDefinition then
         battle_map = load_static(definition)
     -- elseif definition is ProceduralMapDefinition then
 
@@ -127,4 +131,4 @@ function MapGenerator:load_map(map_id: string): BattleMap
     return battle_map
 end
 
-return MapGenerator
+return map_generator

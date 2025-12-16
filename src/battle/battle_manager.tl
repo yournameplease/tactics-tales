@@ -12,7 +12,7 @@ require("src/battle/battle_map")
 require("src/battle/tactics/battle_unit")
 require("src/battle/pathfinding")
 require("src/battle/tactics/tactics_engine")
-require("src/battle/map/map_generator")
+local map_generator = require("src/battle/map/map_generator")
 require("src/menu/menu_manager")
 require("src/systems/service")
 require("src/ui/ui_context_manager")
@@ -89,7 +89,7 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
 
     local battle_definition = BATTLE_DATA[self.battle_context.battle_id]
 
-    self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
+    self.battle_context.battle_map = map_generator.load_map(battle_definition.map_id)
 
     self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
     self:_spawn_players(battle_definition.players, self.battle_context.battle_map.metadata.player_spawners)

@@ -1,24 +1,16 @@
-global enum MapGenerationType
-    "static"
-    "procgen"
-end
+local map_types = require("src/battle/map/types")
 
-global interface MapDefinition
-    type: MapGenerationType
-    -- file: string
-end
-
-global record StaticMapDefinition
-    is MapDefinition
-    where self.type == "static"
-    file: string
-end
-
-global MAP_DEFINITIONS: {string: MapDefinition} = {
-    bandit_village = {
+local function static_map(file: string): map_types.MapDefinition
+    local static_definition: map_types.StaticMapDefinition = {
         type = "static",
-        file = "map/bandit_village.map"
-    } as StaticMapDefinition -- is this idiomatic?
+        file = file,
+    }
+    return static_definition
+end
+
+local MAP_DEFINITIONS: {string: map_types.MapDefinition} = {
+    bandit_village = static_map("map/bandit_village.map"),
+    cultist_cave = static_map("map/cultist_cave.map"),
 }
 
 return MAP_DEFINITIONS
