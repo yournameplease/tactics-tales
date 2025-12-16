@@ -127,6 +127,12 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 		body_options = randomizer.weighted_option_selector.of("ROBED"),
 		headwear_options = randomizer.weighted_option_selector.of("cultist_hood")
 	},
+	village_hero = {
+		parent_template = "human_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of("sword")
+		)
+	},
 }
 
 return UNIT_TEMPLATES

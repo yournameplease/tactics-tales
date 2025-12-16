@@ -20,18 +20,24 @@ global record CharacterManager
     ctx: StoryContext
 end
 
+local character_manager = {
+    CharacterManager = CharacterManager
+}
+
 function CharacterManager:generate_character(template_id: string): Character
     local character: Character = CharacterGenerator.generate_from_template(
         self.id_generator:get_id(),
         template_id
     )
 
-    self.characters[character.id] = character
-
     return character
 end
 
--- handlers
+function CharacterManager:persist_character(character: Character)
+    self.characters[character.id] = character
+end
+
+-- event handlers
 
 function CharacterManager:handle_equip_item(ctx: MenuContext)
     local character = ctx.acting_unit.unit.character
@@ -51,7 +57,7 @@ function CharacterManager:handle_discard_item(ctx: MenuContext)
     character.inventory:remove_item(item_index)
 end
 
-function CharacterManager.new(ctx: StoryContext): CharacterManager
+function character_manager.new(ctx: StoryContext): CharacterManager
     local self: CharacterManager = setmetatable({
         ctx = ctx
     }, { __index = CharacterManager})
@@ -72,4 +78,4 @@ function CharacterManager.new(ctx: StoryContext): CharacterManager
     return self
 end
 
-return CharacterManager
+return character_manager

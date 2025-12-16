@@ -11,7 +11,7 @@ require("src/battle/battle_manager")
 require("src/menu/menu_manager")
 require("src/story/story_menu_manager")
 require("src/systems/service")
-require("src/character/character_manager")
+local character_manager = require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/story/story_context")
@@ -110,7 +110,7 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
 
     self.story_ctx.services.event_bus = services.event_bus as EventBus
 
-    self.story_ctx.character_manager = CharacterManager.new(self.story_ctx)
+    self.story_ctx.character_manager = character_manager.new(self.story_ctx)
     
     self.story_ctx.story_page = StoryPage.new()
     self.story_ctx.menu_manager = StoryMenuManager.new(self.story_ctx)

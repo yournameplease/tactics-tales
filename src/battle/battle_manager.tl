@@ -15,7 +15,8 @@ require("src/battle/tactics/tactics_engine")
 require("src/battle/map/map_generator")
 require("src/menu/menu_manager")
 require("src/systems/service")
-require("src/character/character_manager")
+require("src/ui/ui_context_manager")
+local character_manager = require("src/character/character_manager")
 require("src/turn_manager")
 require("src/battle/tactics/enemy_ai")
 require("src/battle/battle_objective_service")
@@ -56,11 +57,17 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
     end
 end
 
-function BattleManager:_spawn_players(player_spawners: { TilePoint })
-    for _id, spawn_point in ipairs(player_spawners) do
+function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
+    for i, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
-        local character = self.story_context.character_manager:generate_character("default")
-        self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
+        local character: Character
+        if new_players[i] ~= nil then
+            local spawn_data = new_players[i]
+            character = self.story_context.character_manager:generate_character(spawn_data.template)
+            self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
+        else
+            
+        end
     end
 end
 
@@ -78,7 +85,7 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
     self.battle_context.battle_map = MapGenerator:load_map(battle_definition.map_id)
 
     self:_spawn_enemies(battle_definition.enemies, self.battle_context.battle_map.metadata.enemy_spawners)
-    self:_spawn_players(self.battle_context.battle_map.metadata.player_spawners)
+    self:_spawn_players(battle_definition.players, self.battle_context.battle_map.metadata.player_spawners)
 
     self.battle_context.tactics_engine = TacticsEngine.new(self.battle_context)
 

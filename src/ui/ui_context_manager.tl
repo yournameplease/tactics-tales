@@ -9,11 +9,6 @@ require("src/game_context")
 
 global type UILayoutId
 
-global enum context_type
-    "battle"
-    "story"
-end
-
 global record UIContextManager
 
     battle_context: BattleUIContext

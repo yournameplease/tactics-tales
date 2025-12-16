@@ -30,11 +30,16 @@ global record EnemySpawnData
     template: string
 end
 
+global record PlayerSpawnData
+    template: string
+end
+
 global record BattleDefinition
     map_id: string
     victory_conditions: { VictoryCondition }
     failure_conditions: { FailureCondition }
     enemies: { integer: EnemySpawnData }
+    players: { integer: PlayerSpawnData }
 end
 
 global BATTLE_DATA: { string: BattleDefinition } = {
@@ -49,6 +54,11 @@ global BATTLE_DATA: { string: BattleDefinition } = {
         enemies = {
             { template = "bandit_boss" },
             { template = "bandit_goon" }
+        },
+        players = {
+            [2] = { template = "militia_spearman" },
+            [3] = { template = "militia_archer" },
+            [4] = { template = "militia_armor" },
         }
     }
 }
