@@ -4,53 +4,64 @@
 
 require("src/types")
 
-local record Array2D<V>
+local interface Array2D<V>
     w: integer
     h: integer
-    data: {integer: { integer: V }}
+    
+    get: function(self, x: integer, y: integer): V
+    get_point: function(self, p: Point): V
+    set: function(self, x: integer, y: integer, v: V)
+    set_point: function(self, p: Point, v: V)
+    foreach: function(self, fn: function(x: integer, y: integer, v: V))
+    foreachpoint: function(self, fn: function(point: Point, v: V))
 end
 
 local array_2d = {
     Array2D = Array2D
 }
 
+local record Array2DImpl<V>
+    is Array2D<V>
+    data: {integer: { integer: V }}
+end
+
 function array_2d.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
-    local out = {
+    local out: Array2DImpl<V> = {
         w = w,
         h = h,
-        _data = {}
+        data = {}
     }
     for x=1, w do
-        out._data[x] = {}
+        out.data[x] = {}
         if initial ~= nil then
             for y=1,h do
-                out._data[x][y] = initial
+                out.data[x][y] = initial
             end 
         end
     end
-    setmetatable(out, { __index = Array2D })
+    setmetatable(out, { __index = Array2DImpl })
     return out
 end
 
-function Array2D:get<V>(x: integer, y: integer): V
+function Array2DImpl:get(x: integer, y: integer): V
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     return self.data[x+1][y+1]
 end
 
-function Array2D:get_point<V>(p: Point): V
+function Array2DImpl:get_point(p: Point): V
     return self:get(p.x, p.y)
 end
 
-function Array2D:set<V>(x: integer, y: integer, v: V)
+function Array2DImpl:set(x: integer, y: integer, v: V)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x+1][y+1] = v
 end
 
-function Array2D:set_point<V>(p: Point, v: V)
+function Array2DImpl:set_point(p: Point, v: V)
     self:set(p.x, p.y, v)
 end
 
-function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
+function Array2DImpl:foreach(fn: function(x: integer, y: integer, v: V))
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
             fn(x-1, y-1, v)
@@ -58,7 +69,7 @@ function Array2D:foreach<V>(fn: function(x: integer, y: integer, v: V))
     end
 end
 
-function Array2D:foreachpoint<V>(fn: function(point: Point, v: V))
+function Array2DImpl:foreachpoint(fn: function(point: Point, v: V))
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
             fn(TilePoint.of(x-1, y-1), v)
