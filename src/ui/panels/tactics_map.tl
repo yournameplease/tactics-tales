@@ -7,6 +7,7 @@ require("src/ui/ui_context_manager")
 require("src/battle/battle_map")
 require("src/battle/battle_context")
 require("src/util/array_2d")
+local maps = require("src/util/maps")
 
 local CharacterRenderer = require("src/character/character_renderer")
 
@@ -57,7 +58,7 @@ local record AnimatedUnitPosition
 end
 
 local function compute_animated_unit_positions(battle_map: BattleMap): { AnimatedUnitPosition }
-    return tmap(
+    return maps.map(
             battle_map:get_all_units(),
             function(unit: BattleUnit): AnimatedUnitPosition
                 local animation_offset = CharacterRenderer.get_animation_offset(unit)

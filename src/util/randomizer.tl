@@ -1,6 +1,7 @@
 require("src/util")
 local random = require("src/util/random")
 local lists = require("src/util/lists")
+local maps = require("src/util/maps")
 
 
 local interface Randomizer<V>
@@ -38,7 +39,7 @@ local randomizer = {
 
 function randomizer.weighted_option_selector.of<V>(...: V): WeightedOptionSelector<V>
 	local array = {...}
-	local options: {WeightedOption<V>} = tmap(array, function(v: V): WeightedOption<V> return { v, 1 } end)
+	local options: {WeightedOption<V>} = maps.map(array, function(v: V): WeightedOption<V> return { v, 1 } end)
 	return setmetatable({
 		options = options,
 		total_weight = #array

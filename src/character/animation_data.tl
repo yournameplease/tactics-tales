@@ -1,4 +1,5 @@
 require("src/util")
+local maps = require("src/util/maps")
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc
 
@@ -178,7 +179,7 @@ local function frame_from_base_frame(s: integer, base_frame: BaseAnimationFrame 
 end
 
 local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
-    return tmap(BASE_FRAMES[base_frame], function (f: BaseAnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
+    return maps.map(BASE_FRAMES[base_frame], function (f: BaseAnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
 end
 
 local ANIMATION_DATA: { AnimationName: Animation } = {

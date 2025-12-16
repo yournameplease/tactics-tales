@@ -2,6 +2,7 @@ require("src/systems/service")
 require("src/debug")
 require("src/types")
 local lists = require("src/util/lists")
+local maps = require("src/util/maps")
 require("src/character/animation_data")
 
 global record AnimatedSpriteData
@@ -319,7 +320,7 @@ function AnimationManager:create_walk_animation(path: { AnimationOffset }): Anim
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
-    local path_points: { PathAnimationPoint } = tmap(path, function(p: AnimationOffset): PathAnimationPoint
+    local path_points: { PathAnimationPoint } = maps.map(path, function(p: AnimationOffset): PathAnimationPoint
         return {
             point = p,
             duration = DURATION_PER_TILE

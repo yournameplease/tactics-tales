@@ -1,16 +1,9 @@
 require("src/types")
 require("src/config")
+local maps = require("src/util/maps")
 
 global function fn_true(): boolean
     return true
-end
-
-global function tmap<K, A, B>(tab: {K: A}, fn: function(A): B): { K: B }
-    local out = {}
-    for k,v in pairs(tab) do
-        out[k] = fn(v)
-    end
-    return out
 end
 
 -- normalize to offsets from first tile
@@ -20,7 +13,7 @@ global function to_tile_path(path: { TilePoint }): { AnimationOffset }
     --if #path == 0 then return path end
 
     local base_point = path[1]
-    return tmap(path, function(p: TilePoint): AnimationOffset
+    return maps.map(path, function(p: TilePoint): AnimationOffset
         return (p - base_point) * CONFIG.TILE_SIZE
     end)
 end

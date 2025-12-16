@@ -2,6 +2,7 @@ local Item = require("src/character/items/object/item")
 require("src/character/items/types")
 require("src/character/items/object/weapon")
 local lists = require("src/util/lists")
+local maps = require("src/util/maps")
 require("src/util")
 
 local interface ItemInventory
@@ -70,7 +71,7 @@ function ItemInventoryImpl:get_items(): { Item.Item }
 end
 
 function ItemInventoryImpl:get_items_by_slot(): { integer: Item.Item }
-	return tmap(
+	return maps.map(
 		self._items_by_slot,
 		function(i: InventoryItem): Item.Item
 			return i.item
@@ -83,7 +84,7 @@ function ItemInventoryImpl:get_max_slots(): integer
 end
 
 function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
-	return tmap(
+	return maps.map(
 		self._items_by_equip_slot,
 		function(i: InventoryItem): Item.Item
 			return i.item
