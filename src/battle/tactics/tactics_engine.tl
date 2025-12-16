@@ -5,6 +5,7 @@ require ("src/menu/types")
 require ("src/menu/menu_manager")
 
 require("src/util")
+local array_2d = require("src/util/array_2d")
 local Pathfinding = require("src/battle/pathfinding")
 require("src/draw")
 local CombatCalculator = require("src/battle/combat/combat_calculator")
@@ -45,9 +46,9 @@ global record TacticsEngine
     is_blocked: function(self): boolean
     validate_tile_is_in_unit_attack_range: function(self, GridMenuCursor<BattleContext>, MenuContext): boolean
     any_target_in_range: function(self, MenuContext): boolean
-    tiles_with_distance_from_unit_attacks: function(self, MenuContext): Array2D<MenuTileHighlight>
-    find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): Array2D<boolean>
-    tiles_in_movement_and_attack_range: function(self, MenuContext): Array2D<MenuTileHighlight>
+    tiles_with_distance_from_unit_attacks: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
+    tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
     grid_selection_is_empty_or_acting_unit: function(self, GridMenuCursor<BattleContext>, MenuContext): boolean
     grid_selection_is_available_player: function(self, GridMenuCursor<BattleContext>): boolean
     update: function(self)
@@ -222,14 +223,14 @@ end
 -- legal tile getters
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
-function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): Array2D<MenuTileHighlight>
+function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
     local destination = ctx.destination.point
     local tiles_in_distance = self:find_tiles_with_distance_from_tile(destination.x, destination.y, min_range, max_range)
 
-    local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
+    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
 
     tiles_in_distance:foreach(function(x: integer, y: integer, in_range: boolean)
             if in_range then
@@ -241,10 +242,10 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): 
 end
 
 -- @return  { [x][y] = bool }
-function TacticsEngine:find_tiles_with_distance_from_tile(tile_x: integer, tile_y: integer, min_distance: integer, max_distance: integer): Array2D<boolean>
+function TacticsEngine:find_tiles_with_distance_from_tile(tile_x: integer, tile_y: integer, min_distance: integer, max_distance: integer): array_2d.Array2D<boolean>
     max_distance = max_distance or min_distance
 
-    local reachable = Array2D.new(MAP_WIDTH, MAP_HEIGHT, false)
+    local reachable = array_2d.new(MAP_WIDTH, MAP_HEIGHT, false)
     for x=-max_distance,max_distance do
         local map_x = x + tile_x
         if map_x >= 0 and map_x < MAP_WIDTH then
@@ -274,13 +275,13 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x: integer, tile_
 end
 
 -- @return  { [x][y] = { valid_selection, reachable, can_attack } }
-function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): Array2D<MenuTileHighlight>
+function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
     local reachable_tiles = Pathfinding.find_reachable_tiles(self.ctx.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
-    local tiles: Array2D<MenuTileHighlight> = Array2D.new(MAP_WIDTH, MAP_HEIGHT)
+    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
 
     reachable_tiles:foreach(function(x: integer, y: integer, reachable: boolean)
         if reachable then

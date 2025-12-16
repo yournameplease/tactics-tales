@@ -1,6 +1,6 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
-local List = require("src/util/list")
+local lists = require("src/util/lists")
 
 global type MenuState
 global type MenuContext
@@ -49,7 +49,7 @@ function ListMenuDefinition.of_static_options<T>(
     direction: ListDirection
 ): ListMenuDefinition<GC>
     local get_options = function(game_ctx: GC, menu_context: MenuContext): {MenuOption}
-        return List.do_map(
+        return lists.do_map(
             options,
             function (o: T): MenuOption
                 return {

@@ -1,7 +1,8 @@
 require("src/battle/tactics/battle_unit")
 require("src/battle/pathfinding")
 require("src/debug")
-local List = require("src/util/list")
+local lists = require("src/util/lists")
+local random = require("src/util/random")
 
 
 
@@ -42,7 +43,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
         hp_max = unit.character.stats.hp_max,
         defense = { },
         avoid = { },
-        attacks = List.do_map(
+        attacks = lists.do_map(
             unit.character.inventory:get_equipped_weapons(),
             function(weapon: Weapon): AttackDouble
                 return build_attack_double(weapon, unit)
@@ -146,7 +147,7 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
             defender = defender.unit,
             hit_chance = get_hit_chance(attacker, defender, weapon, battle_map),
             dmg = get_damage(attacker, defender, weapon),
-            hit_roll = rndi(100)
+            hit_roll = random.rndi(100)
         }
         step.is_hit = step.hit_roll < step.hit_chance
         return step

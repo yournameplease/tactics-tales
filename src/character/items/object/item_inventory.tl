@@ -1,7 +1,7 @@
 local Item = require("src/character/items/object/item")
 require("src/character/items/types")
 require("src/character/items/object/weapon")
-local List = require("src/util/list")
+local lists = require("src/util/lists")
 require("src/util")
 
 local interface ItemInventory
@@ -61,7 +61,7 @@ function ItemInventoryImpl:compute_current_slots()
 end
 
 function ItemInventoryImpl:get_items(): { Item.Item }
-	return List.do_map(
+	return lists.do_map(
 		self.items,
 		function(i: InventoryItem): Item.Item
 			return i.item

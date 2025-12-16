@@ -1,5 +1,5 @@
 require("src/systems/service")
-require("src/util")
+local id_generator = require("src/util/id_generator")
 require("src/debug")
 
 global enum GameEvent
@@ -33,7 +33,7 @@ end
 global record EventBus
     is GameService
     where self.id == "event_bus"
-    id_counter: IdCounter
+    id_generator: id_generator.IdGenerator
     event_history: { GameEvent }
     listeners: { GameEvent: {EventListener}}
 end
@@ -50,7 +50,7 @@ function EventBus.new(): EventBus
         dependencies = {},
     }, { __index = EventBus })
 
-    self.id_counter = IdCounter.new()
+    self.id_generator = id_generator.new()
     self.event_history = {}
     self.listeners = {}
     return self
@@ -61,7 +61,7 @@ function EventBus:on(event_name: GameEvent, callback: function(args: any)): inte
         self.listeners[event_name] = {}
     end
     pt.add(self.listeners[event_name], {
-        id = self.id_counter:get_id(),
+        id = self.id_generator:get_id(),
         callback = callback
     })
 end

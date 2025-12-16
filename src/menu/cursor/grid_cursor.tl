@@ -1,5 +1,6 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
+local array_2d = require("src/util/array_2d")
 
 global type MenuState
 global type MenuContext
@@ -11,7 +12,7 @@ global record GridMenuCursor<GC is GameContext>
     x_max: integer
     y_max: integer
     path: { TilePoint }
-    legal_tiles: Array2D<MenuTileHighlight>
+    legal_tiles: array_2d.Array2D<MenuTileHighlight>
 
     -- from definition
     set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
@@ -28,7 +29,7 @@ global record GridMenuDefinition<GC is GameContext>
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
     next_state: MenuStep
     send_command: GameEvent
-    get_legal_tiles: function(GC, MenuContext): Array2D<MenuTileHighlight>
+    get_legal_tiles: function(GC, MenuContext): array_2d.Array2D<MenuTileHighlight>
 end
 
 function GridMenuDefinition.new(props: GridMenuDefinition<GC>): GridMenuDefinition<GC>

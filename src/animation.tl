@@ -1,7 +1,7 @@
 require("src/systems/service")
 require("src/debug")
 require("src/types")
-require("src/util")
+local lists = require("src/util/lists")
 require("src/character/animation_data")
 
 global record AnimatedSpriteData
@@ -51,9 +51,7 @@ function SpriteFrameData.new(sprite_frames: { SpriteFrame }): SpriteFrameData
 end
 
 function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
-    local total_frames = reduce(self.sprite_frames, 0, function(s:integer,f:SpriteFrame):integer
-        return s + f.duration
-    end)
+    local total_frames = lists.do_sum(self.sprite_frames, function(f:SpriteFrame):integer return f.duration end)
     local frame_number = frame % total_frames
     local sprite_id = 1
     while frame_number >= 0 do

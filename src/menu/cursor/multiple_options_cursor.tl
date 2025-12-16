@@ -1,6 +1,6 @@
 require("src/menu/menu_cursor")
 require("src/game_context")
-local List = require("src/util/list")
+local lists = require("src/util/lists")
 
 global type MenuState
 
@@ -66,7 +66,7 @@ function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GC, menu_
     local self: MultipleOptionsMenuCursor<GC> = {
         type = "CURSOR_MULTIPLE_OPTIONS",
         i = 1,
-        options = List.do_map(
+        options = lists.do_map(
             step_definition.options,
             function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
                 return {

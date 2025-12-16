@@ -1,5 +1,6 @@
 require("src/types")
 require("src/util")
+local array_2d = require("src/util/array_2d")
 require("src/battle/tactics/battle_unit")
 
 global record TerrainData
@@ -61,7 +62,7 @@ global record BattleMap
     height: integer
     
     units_by_id: { integer: BattleUnit }
-    units_by_x_y: Array2D<BattleUnit>
+    units_by_x_y: array_2d.Array2D<BattleUnit>
     
     layers: MapLayers 
     metadata: MapMetadata
@@ -70,7 +71,7 @@ end
 function BattleMap.new(width: integer, height: integer): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
-        units_by_x_y = Array2D.new(width, height),
+        units_by_x_y = array_2d.new(width, height),
     }, { __index = BattleMap })
     return self
 end

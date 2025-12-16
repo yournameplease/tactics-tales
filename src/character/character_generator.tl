@@ -3,6 +3,8 @@ require("src/character/object/character")
 require("src/data/items")
 require("src/character/items/object/weapon")
 require("src/util")
+local random = require("src/util/random")
+require("src/util/randomizer")
 local ItemInventory  = require("src/character/items/object/item_inventory")
 local ItemGenerator = require("src/character/items/item_generator")
 local NAMES = require("src/corpora/names")
@@ -67,9 +69,10 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	end
 	character.appearance.eyes = template.eye_options:pick_random()
 
+	-- TODO: move these to a randomizer
     character.name = character.appearance.sex == "male"
-		and choose_random_from_list(NAMES.MALE)
-		or choose_random_from_list(NAMES.FEMALE)
+		and random.choose_random_from_list(NAMES.MALE)
+		or random.choose_random_from_list(NAMES.FEMALE)
 
 	character.inventory = ItemInventory.new(4)
 	local item_ids = template.item_loadout_options:pick_random()

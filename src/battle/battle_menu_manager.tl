@@ -8,6 +8,7 @@ require("src/battle/pathfinding")
 require("src/systems/service")
 require("src/menu/menu_manager")
 require("src/battle/battle_context")
+local array_2d = require("src/util/array_2d")
 
 require("src/menu/cursor/grid_cursor")
 require("src/menu/cursor/list_cursor")
@@ -43,7 +44,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                 end,
                 next_state = "SELECT_ACTION",
                 previous_state = "SELECT_UNIT",
-                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end
             }),
@@ -81,7 +82,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                     return msb.tactics_engine:validate_tile_is_in_unit_attack_range(s, ctx) 
                 end,
                 send_command = "MOVE_AND_ATTACK",
-                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
                 end
             }),

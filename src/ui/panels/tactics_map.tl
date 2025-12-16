@@ -6,6 +6,7 @@ require("src/battle/battle_menu_manager")
 require("src/ui/ui_context_manager")
 require("src/battle/battle_map")
 require("src/battle/battle_context")
+require("src/util/array_2d")
 
 local CharacterRenderer = require("src/character/character_renderer")
 

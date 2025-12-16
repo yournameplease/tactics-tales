@@ -1,0 +1,107 @@
+-- Utility functions for functional programming on lists
+
+local type MapEntry<Key,Value> = { Key, Value }
+
+local lists = {
+	MapEntry = MapEntry
+}
+
+function lists.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
+	local fns = {...}
+	local result: any = list 
+	for _,fn in ipairs(fns) do
+		result = fn(result)
+	end
+	return result as B
+end
+
+-- This doesn't seem to work with typing rules
+-- function lists.pipeline<A,B>(...: function(any): any): function({A}): B
+-- 	local args = {...}
+-- 	return function(list: {A}): B
+-- 		return lists.do_pipeline(list, table.unpack(args))
+-- 	end
+-- end
+
+function lists.do_reverse<A>(list: {A}): {A} 
+    local out = {}
+    for i = 1,#list do
+        out[#list-i+1] = list[i]
+    end
+    return out
+end
+
+function lists.reverse<A>(): function({A}): {A}
+	return function(list: {A}): {A} 
+		return lists.do_reverse(list) 
+	end
+end
+
+function lists.do_filter<A>(list: {A}, filter: function(A): boolean): { A }
+    local out: {A} = {}
+    for _,v in ipairs(list) do
+		if filter(v) then
+	        pt.add(out, v)
+		end
+    end
+    return out
+end
+
+function lists.filter<A>(filter: function(A): boolean): function({A}): {A}
+	return function(list: {A}): {A}
+		return lists.do_filter(list, filter)
+	end
+end
+
+function lists.do_map<A, B>(list: {A}, fn: function(A): B): { B }
+    local out: {B} = {}
+    for k,v in ipairs(list) do
+        out[k] = fn(v)
+    end
+    return out
+end
+
+function lists.map<A, B>(fn: function(A): B): function({A}): {B}
+	return function(list: {A}): {B}
+		return lists.do_map(list, fn)
+	end
+end
+
+function lists.do_reduce<A, V>(list: {A}, initial: V, fn: function(acc: V, elem: A): V): V
+    local val = initial
+    for _,e in ipairs(list) do
+        val = fn(val, e)
+    end
+    return val
+end
+
+function lists.reduce<A, V>(initial: V, fn: function(acc: V, elem: A): V): function({A}): V
+	return function(list: {A}): V 
+		return lists.do_reduce(list, initial, fn)
+	end
+end
+
+function lists.do_sum<A>(list: {A}, fn: function(A): number): number
+    return lists.do_reduce(list, 0, function(s: number, a: A): number return s + fn(a) end)
+end
+
+function lists.sum<A>(fn: function(A): number): function({A}): number
+	return function(list: {A}): number 
+		return lists.do_sum(list, fn)
+	end
+end
+
+function lists.do_collect_map<K,V>(list: {lists.MapEntry<K,V>}): { K: V }
+	return lists.do_reduce(list, {}, function(acc: { K: V}, entry: lists.MapEntry<K, V>): { K: V }
+		acc[entry[1]] = entry[2]
+		return acc
+	end)
+end
+
+function lists.collect_map<K,V>(): function({lists.MapEntry<K,V>}): { K: V }
+	return function(list: {lists.MapEntry<K,V>}): {K: V}
+		return lists.do_collect_map(list)
+	end
+end
+
+return lists

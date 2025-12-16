@@ -1,5 +1,5 @@
 require("src/debug")
-require("src/util")
+local id_generator = require("src/util/id_generator")
 require("src/systems/event_bus")
 require("src/menu/types")
 require("src/character/animation_data")
@@ -14,7 +14,7 @@ local CharacterGenerator = require("src/character/character_generator")
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
 global record CharacterManager
-    id_counter: IdCounter
+    id_generator: id_generator.IdGenerator
     characters: { Character }
 
     ctx: StoryContext
@@ -22,7 +22,7 @@ end
 
 function CharacterManager:generate_character(template_id: string): Character
     local character: Character = CharacterGenerator.generate_from_template(
-        self.id_counter:get_id(),
+        self.id_generator:get_id(),
         template_id
     )
 
@@ -56,7 +56,7 @@ function CharacterManager.new(ctx: StoryContext): CharacterManager
         ctx = ctx
     }, { __index = CharacterManager})
     
-    self.id_counter = IdCounter.new()
+    self.id_generator = id_generator.new()
     self.characters = {}
 
     self.ctx.services.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
