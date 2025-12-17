@@ -1,9 +1,9 @@
-require("src/systems/service")
-require("src/debug")
-require("src/types")
-local lists = require("src/util/lists")
-local maps = require("src/util/maps")
-require("src/character/animation_data")
+require("src/tactics/systems/service")
+require("src/tactics/debug")
+require("src/tactics/types")
+local lists = require("src/tactics/util/lists")
+local maps = require("src/tactics/util/maps")
+require("src/tactics/character/animation_data")
 
 global record AnimatedSpriteData
     current_frame: AnimationFrameData

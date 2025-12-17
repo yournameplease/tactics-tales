@@ -1,7 +1,7 @@
-local randomizer = require("src/util/randomizer")
-require("src/character/object/character")
-require("src/character/items/object/weapon")
-require("src/animation")
+local randomizer = require("src/tactics/util/randomizer")
+require("src/tactics/character/object/character")
+require("src/tactics/character/items/object/weapon")
+require("src/tactics/animation")
 
 -- all fields are optional in the templates
 global record CharacterTemplate

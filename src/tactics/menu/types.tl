@@ -1,8 +1,8 @@
-require("src/types")
-require("src/joypad")
-require("src/systems/event_bus")
-require("src/battle/tactics/battle_unit")
-local Item = require("src/character/items/object/item")
+require("src/tactics/types")
+require("src/tactics/joypad")
+require("src/tactics/systems/event_bus")
+require("src/tactics/battle/tactics/battle_unit")
+local Item = require("src/tactics/character/items/object/item")
 
 -- Note: some of these extracted types could be kept in menu_manager if tactics_engine and menu_manager didn't require each other
 -- Probably, there would be a menu_action_listener or similar to delegate menu commands to the tactics_engine

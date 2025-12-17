@@ -1,13 +1,13 @@
-require("src/debug")
-require("src/types")
-require("src/menu/types")
-require("src/menu/menu_manager")
-require("src/joypad")
-require("src/story/story_page")
-require("src/systems/service")
-require("src/menu/menu_manager")
-require("src/story/story_context")
-require("src/menu/cursor/list_cursor")
+require("src/tactics/debug")
+require("src/tactics/types")
+require("src/tactics/menu/types")
+require("src/tactics/menu/menu_manager")
+require("src/tactics/joypad")
+require("src/tactics/story/story_page")
+require("src/tactics/systems/service")
+require("src/tactics/menu/menu_manager")
+require("src/tactics/story/story_context")
+require("src/tactics/menu/cursor/list_cursor")
 
 
 

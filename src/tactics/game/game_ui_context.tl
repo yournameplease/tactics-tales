@@ -1,8 +1,8 @@
-require("src/ui/types")
-require("src/battle/tactics/tactics_engine")
-require("src/turn_manager")
-require("src/game/base_game_context")
-require("src/game/game_menu_manager")
+require("src/tactics/ui/types")
+require("src/tactics/battle/tactics/tactics_engine")
+require("src/tactics/turn_manager")
+require("src/tactics/game/base_game_context")
+require("src/tactics/game/game_menu_manager")
 
 global type UILayoutId
 

@@ -1,8 +1,8 @@
-require("src/types")
-require("src/data/maps")
-require("src/battle/battle_map")
-local MAP_DEFINITIONS = require("src/data/maps")
-local map_types = require("src/battle/map/types")
+require("src/tactics/types")
+require("src/tactics/data/maps")
+require("src/tactics/battle/battle_map")
+local MAP_DEFINITIONS = require("src/tactics/data/maps")
+local map_types = require("src/tactics/battle/map/types")
 
 
 local map_generator = {

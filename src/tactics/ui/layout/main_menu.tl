@@ -1,21 +1,21 @@
-require("src/systems/service")
-require("src/types")
-require("src/ui/types")
+require("src/tactics/systems/service")
+require("src/tactics/types")
+require("src/tactics/ui/types")
 
-require("src/battle/battle_context")
-require("src/story/story_context")
-require("src/config")
+require("src/tactics/battle/battle_context")
+require("src/tactics/story/story_context")
+require("src/tactics/config")
 
-require("src/ui/panels/tactics_map")
-require("src/ui/box")
-require("src/ui/panels/unit_info")
-require("src/ui/panels/combat_preview")
-require("src/ui/panels/event_message_log")
-local VerticalListMenu = require("src/ui/panels/vertical_list_menu")
+require("src/tactics/ui/panels/tactics_map")
+require("src/tactics/ui/box")
+require("src/tactics/ui/panels/unit_info")
+require("src/tactics/ui/panels/combat_preview")
+require("src/tactics/ui/panels/event_message_log")
+local VerticalListMenu = require("src/tactics/ui/panels/vertical_list_menu")
 
-local SplitPages = require("src/ui/panels/split_pages")
+local SplitPages = require("src/tactics/ui/panels/split_pages")
 
-require("src/ui/validator")
+require("src/tactics/ui/validator")
 
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})

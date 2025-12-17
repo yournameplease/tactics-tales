@@ -1,6 +1,6 @@
-require('src/game_context')
--- local character_manager = require('src/character/character_manager')
-local StoryTypes = require('src/story/types')
+require('src/tactics/game_context')
+-- local character_manager = require('src/tactics/character/character_manager')
+local StoryTypes = require('src/tactics/story/types')
 
 global type CharacterManager
 global type StoryPage

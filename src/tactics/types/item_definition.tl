@@ -1,5 +1,5 @@
-require("src/character/items/types")
-require("src/character/items/object/weapon")
+require("src/tactics/character/items/types")
+require("src/tactics/character/items/object/weapon")
 
 
 global record WeaponDefinition

@@ -1,10 +1,10 @@
-require("src/ui/types")
-require("src/battle/tactics/tactics_engine")
-require("src/turn_manager")
-require("src/battle/pathfinding")
-require("src/battle/battle_menu_manager")
-require("src/character/character_manager")
-require("src/systems/event_bus")
+require("src/tactics/ui/types")
+require("src/tactics/battle/tactics/tactics_engine")
+require("src/tactics/turn_manager")
+require("src/tactics/battle/pathfinding")
+require("src/tactics/battle/battle_menu_manager")
+require("src/tactics/character/character_manager")
+require("src/tactics/systems/event_bus")
 
 global type UILayoutId
 

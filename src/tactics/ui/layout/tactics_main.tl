@@ -1,21 +1,21 @@
-require("src/systems/service")
-require("src/types")
-require("src/ui/types")
+require("src/tactics/systems/service")
+require("src/tactics/types")
+require("src/tactics/ui/types")
 
-require("src/battle/battle_context")
-require("src/story/story_context")
-require("src/config")
+require("src/tactics/battle/battle_context")
+require("src/tactics/story/story_context")
+require("src/tactics/config")
 
-require("src/ui/panels/tactics_map")
-require("src/ui/box")
-require("src/ui/panels/unit_info")
-require("src/ui/panels/combat_preview")
-require("src/ui/panels/event_message_log")
+require("src/tactics/ui/panels/tactics_map")
+require("src/tactics/ui/box")
+require("src/tactics/ui/panels/unit_info")
+require("src/tactics/ui/panels/combat_preview")
+require("src/tactics/ui/panels/event_message_log")
 
-local SplitPages = require("src/ui/panels/split_pages")
-local BattleSummary = require("src/ui/panels/battle_summary")
+local SplitPages = require("src/tactics/ui/panels/split_pages")
+local BattleSummary = require("src/tactics/ui/panels/battle_summary")
 
-require("src/ui/validator")
+require("src/tactics/ui/validator")
 
 local battle_summary = BattleSummary.new()
 local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,

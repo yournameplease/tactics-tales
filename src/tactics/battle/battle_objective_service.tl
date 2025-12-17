@@ -1,9 +1,9 @@
 
-require("src/systems/service")
-require("src/systems/event_bus")
-require("src/battle/battle_map")
-require("src/battle/battle_context")
-require("src/battle/tactics/tactics_engine")
+require("src/tactics/systems/service")
+require("src/tactics/systems/event_bus")
+require("src/tactics/battle/battle_map")
+require("src/tactics/battle/battle_context")
+require("src/tactics/battle/tactics/tactics_engine")
 
 global record BattleObjectiveService
     ctx: BattleContext

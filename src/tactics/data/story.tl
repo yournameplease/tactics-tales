@@ -1,4 +1,4 @@
-local StoryTypes = require('src/story/types')
+local StoryTypes = require('src/tactics/story/types')
 
 local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 	test_story = {

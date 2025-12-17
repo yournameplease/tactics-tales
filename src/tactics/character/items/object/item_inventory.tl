@@ -1,9 +1,9 @@
-local Item = require("src/character/items/object/item")
-require("src/character/items/types")
-require("src/character/items/object/weapon")
-local lists = require("src/util/lists")
-local maps = require("src/util/maps")
-require("src/util")
+local Item = require("src/tactics/character/items/object/item")
+require("src/tactics/character/items/types")
+require("src/tactics/character/items/object/weapon")
+local lists = require("src/tactics/util/lists")
+local maps = require("src/tactics/util/maps")
+require("src/tactics/util")
 
 local interface ItemInventory
 

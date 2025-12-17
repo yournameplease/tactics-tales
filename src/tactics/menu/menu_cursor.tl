@@ -1,7 +1,7 @@
-require("src/menu/types")
-require("src/game_context")
-require("src/joypad")
-require("src/systems/event_bus")
+require("src/tactics/menu/types")
+require("src/tactics/game_context")
+require("src/tactics/joypad")
+require("src/tactics/systems/event_bus")
 
 global type MenuState
 global type MenuContext

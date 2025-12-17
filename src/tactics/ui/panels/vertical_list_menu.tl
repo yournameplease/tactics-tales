@@ -1,11 +1,11 @@
-require("src/debug")
-require("src/ui/box")
-require("src/systems/event_bus")
-require("src/ui/components/text_node")
-require("src/ui/ui_context_manager")
-require("src/story/story_context")
-require("src/menu/cursor/list_cursor")
-local String = require("src/util/string")
+require("src/tactics/debug")
+require("src/tactics/ui/box")
+require("src/tactics/systems/event_bus")
+require("src/tactics/ui/components/text_node")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/story/story_context")
+require("src/tactics/menu/cursor/list_cursor")
+local String = require("src/tactics/util/string")
 
 local record VerticalListMenu<T>
     is UIElement, TextUIElement

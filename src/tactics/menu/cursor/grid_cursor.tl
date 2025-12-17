@@ -1,6 +1,6 @@
-require("src/menu/menu_cursor")
-require("src/game_context")
-local array_2d = require("src/util/array_2d")
+require("src/tactics/menu/menu_cursor")
+require("src/tactics/game_context")
+local array_2d = require("src/tactics/util/array_2d")
 
 global type MenuState
 global type MenuContext

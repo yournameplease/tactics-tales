@@ -1,7 +1,7 @@
-require("src/ui/box")
-require("src/ui/components/text_node")
-require("src/ui/ui_context_manager")
-local Text = require("src/util/text")
+require("src/tactics/ui/box")
+require("src/tactics/ui/components/text_node")
+require("src/tactics/ui/ui_context_manager")
+local Text = require("src/tactics/util/text")
 
 global record MessageLog
     is UIElement, TextUIElement

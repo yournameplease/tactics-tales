@@ -1,6 +1,6 @@
-local Item = require("src/character/items/object/item")
-require("src/character/items/types")
-local ITEM_DATA = require("src/data/items")
+local Item = require("src/tactics/character/items/object/item")
+require("src/tactics/character/items/types")
+local ITEM_DATA = require("src/tactics/data/items")
 
 local record ItemGenerator
 end

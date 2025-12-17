@@ -1,10 +1,10 @@
-require("src/ui/box")
-require("src/systems/event_bus")
-require("src/ui/components/text_node")
-require("src/ui/components/message_log")
-require("src/ui/ui_context_manager")
-require("src/story/story_context")
-local maps = require("src/util/maps")
+require("src/tactics/ui/box")
+require("src/tactics/systems/event_bus")
+require("src/tactics/ui/components/text_node")
+require("src/tactics/ui/components/message_log")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/story/story_context")
+local maps = require("src/tactics/util/maps")
 
 global record EventMessageLog
     is UIElement, TextUIElement

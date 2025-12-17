@@ -1,4 +1,4 @@
-require("src/types")
+require("src/tactics/types")
 -- constant configs.  eventually, may move back into relevant files.
 
 global enum LogLevel

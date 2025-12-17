@@ -1,19 +1,19 @@
-require("src/systems/service")
-require("src/types")
-require("src/ui/types")
+require("src/tactics/systems/service")
+require("src/tactics/types")
+require("src/tactics/ui/types")
 
-require("src/config")
+require("src/tactics/config")
 
-require("src/ui/box")
+require("src/tactics/ui/box")
 
-require("src/ui/validator")
+require("src/tactics/ui/validator")
 
-local tactics_main = require("src/ui/layout/tactics_main")
-local combat_preview = require("src/ui/layout/combat_preview")
-local story_page = require("src/ui/layout/story_page")
-local title_screen = require("src/ui/layout/title_screen")
-local main_menu = require("src/ui/layout/main_menu")
-local options_menu = require("src/ui/layout/options_menu")
+local tactics_main = require("src/tactics/ui/layout/tactics_main")
+local combat_preview = require("src/tactics/ui/layout/combat_preview")
+local story_page = require("src/tactics/ui/layout/story_page")
+local title_screen = require("src/tactics/ui/layout/title_screen")
+local main_menu = require("src/tactics/ui/layout/main_menu")
+local options_menu = require("src/tactics/ui/layout/options_menu")
 global record UILayout
     root: UIElement
 end

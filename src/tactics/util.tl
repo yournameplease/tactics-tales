@@ -1,6 +1,6 @@
-require("src/types")
-require("src/config")
-local maps = require("src/util/maps")
+require("src/tactics/types")
+require("src/tactics/config")
+local maps = require("src/tactics/util/maps")
 
 global function fn_true(): boolean
     return true

@@ -1,5 +1,5 @@
-require("src/systems/service")
-require("src/debug")
+require("src/tactics/systems/service")
+require("src/tactics/debug")
 
 global record TaskManager
     is GameService

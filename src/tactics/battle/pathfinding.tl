@@ -1,11 +1,11 @@
-require("src/types")
+require("src/tactics/types")
 
-require("src/util")
-local array_2d = require("src/util/array_2d")
-local lists = require("src/util/lists")
-require("src/battle/battle_map")
-require("src/battle/map/map_generator")
-require("src/systems/service")
+require("src/tactics/util")
+local array_2d = require("src/tactics/util/array_2d")
+local lists = require("src/tactics/util/lists")
+require("src/tactics/battle/battle_map")
+require("src/tactics/battle/map/map_generator")
+require("src/tactics/systems/service")
 
 -- tile flags:
 -- 0: empty/solid

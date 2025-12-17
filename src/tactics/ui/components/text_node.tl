@@ -1,6 +1,6 @@
-require("src/ui/ui_context_manager")
-require("src/ui/box")
-local Text = require("src/util/text")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/ui/box")
+local Text = require("src/tactics/util/text")
 
 global interface TextUIElement
     is UIElement

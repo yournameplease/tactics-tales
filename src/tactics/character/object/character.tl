@@ -1,6 +1,6 @@
-require("src/types")
-require("src/character/items/object/weapon")
-local ItemInventory = require("src/character/items/object/item_inventory")
+require("src/tactics/types")
+require("src/tactics/character/items/object/weapon")
+local ItemInventory = require("src/tactics/character/items/object/item_inventory")
 
 global SKIN_COLORS: { { Color, Color } } = {
     {15, 31},

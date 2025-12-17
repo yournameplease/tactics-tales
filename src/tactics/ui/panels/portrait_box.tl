@@ -1,9 +1,9 @@
-require("src/types")
-require("src/ui/ui_context_manager")
-require("src/ui/box")
-local CharacterRenderer = require("src/character/character_renderer")
-local Colors = require("src/colors")
-local Draw = require("src/draw")
+require("src/tactics/types")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/ui/box")
+local CharacterRenderer = require("src/tactics/character/character_renderer")
+local Colors = require("src/tactics/colors")
+local Draw = require("src/tactics/draw")
 
 global record PortraitBox
     is UIElement

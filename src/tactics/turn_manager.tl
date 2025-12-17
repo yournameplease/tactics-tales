@@ -1,14 +1,14 @@
-require("src/debug")
+require("src/tactics/debug")
 
-require("src/battle/tactics/enemy_ai")
-require("src/battle/battle_menu_manager")
-require("src/util/data_utils")
-require("src/systems/event_bus")
-require("src/battle/tactics/tactics_engine")
-require("src/systems/service")
-require("src/battle/battle_objective_service")
-require("src/battle/battle_context")
-require("src/systems/service/game_service_bundle")
+require("src/tactics/battle/tactics/enemy_ai")
+require("src/tactics/battle/battle_menu_manager")
+require("src/tactics/util/data_utils")
+require("src/tactics/systems/event_bus")
+require("src/tactics/battle/tactics/tactics_engine")
+require("src/tactics/systems/service")
+require("src/tactics/battle/battle_objective_service")
+require("src/tactics/battle/battle_context")
+require("src/tactics/systems/service/game_service_bundle")
 
 local enum Phase
     "PLAYER"

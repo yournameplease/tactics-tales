@@ -1,15 +1,15 @@
-require("src/debug")
+require("src/tactics/debug")
 
-require("src/menu/menu_manager")
-require("src/battle/tactics/battle_unit")
-local Pathfinding = require("src/battle/pathfinding")
-require("src/battle/tactics/tactics_engine")
-require("src/systems/event_bus")
-require("src/systems/tasks")
-require("src/battle/battle_map")
-require("src/systems/service")
-require("src/battle/battle_context")
-require("src/systems/service/game_service_bundle")
+require("src/tactics/menu/menu_manager")
+require("src/tactics/battle/tactics/battle_unit")
+local Pathfinding = require("src/tactics/battle/pathfinding")
+require("src/tactics/battle/tactics/tactics_engine")
+require("src/tactics/systems/event_bus")
+require("src/tactics/systems/tasks")
+require("src/tactics/battle/battle_map")
+require("src/tactics/systems/service")
+require("src/tactics/battle/battle_context")
+require("src/tactics/systems/service/game_service_bundle")
 
 --[[
 AI Mk 1:

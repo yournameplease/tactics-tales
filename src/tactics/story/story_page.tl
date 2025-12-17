@@ -1,5 +1,5 @@
-require("src/types")
-require("src/util")
+require("src/tactics/types")
+require("src/tactics/util")
 
 global record StoryPage
     text: {string}

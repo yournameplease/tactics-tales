@@ -1,5 +1,5 @@
-require("src/ui/box")
-require("src/ui/ui_context_manager")
+require("src/tactics/ui/box")
+require("src/tactics/ui/ui_context_manager")
 
 local record PageDivider
     is UIElement

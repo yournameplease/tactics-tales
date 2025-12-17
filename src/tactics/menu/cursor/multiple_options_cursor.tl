@@ -1,6 +1,6 @@
-require("src/menu/menu_cursor")
-require("src/game_context")
-local lists = require("src/util/lists")
+require("src/tactics/menu/menu_cursor")
+require("src/tactics/game_context")
+local lists = require("src/tactics/util/lists")
 
 global type MenuState
 

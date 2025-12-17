@@ -1,8 +1,8 @@
-require("src/battle/tactics/battle_unit")
-require("src/battle/pathfinding")
-require("src/debug")
-local lists = require("src/util/lists")
-local random = require("src/util/random")
+require("src/tactics/battle/tactics/battle_unit")
+require("src/tactics/battle/pathfinding")
+require("src/tactics/debug")
+local lists = require("src/tactics/util/lists")
+local random = require("src/tactics/util/random")
 
 
 

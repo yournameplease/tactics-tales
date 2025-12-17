@@ -1,7 +1,7 @@
-require("src/util")
-local random = require("src/util/random")
-local lists = require("src/util/lists")
-local maps = require("src/util/maps")
+require("src/tactics/util")
+local random = require("src/tactics/util/random")
+local lists = require("src/tactics/util/lists")
+local maps = require("src/tactics/util/maps")
 
 
 local interface Randomizer<V>

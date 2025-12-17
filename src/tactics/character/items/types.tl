@@ -1,4 +1,4 @@
-require("src/types")
+require("src/tactics/types")
 
 local record ItemTypes
 end

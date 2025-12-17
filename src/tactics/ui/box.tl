@@ -1,7 +1,7 @@
-require("src/types")
-require("src/battle/battle_context")
-require("src/ui/ui_context_manager")
-require("src/ui/theme")
+require("src/tactics/types")
+require("src/tactics/battle/battle_context")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/ui/theme")
 
 global record Margin
     t: integer

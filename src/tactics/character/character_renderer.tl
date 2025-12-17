@@ -1,12 +1,12 @@
-require("src/debug")
-require("src/types")
+require("src/tactics/debug")
+require("src/tactics/types")
 
-require("src/battle/tactics/battle_unit")
-require("src/character/character_manager")
-require("src/character/object/character")
-require("src/character/sprite_data")
+require("src/tactics/battle/tactics/battle_unit")
+require("src/tactics/character/character_manager")
+require("src/tactics/character/object/character")
+require("src/tactics/character/sprite_data")
 
-local ANIMATION_DATA = require("src/character/animation_data")
+local ANIMATION_DATA = require("src/tactics/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
 

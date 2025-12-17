@@ -1,6 +1,6 @@
-require("src/systems/service")
-local id_generator = require("src/util/id_generator")
-require("src/debug")
+require("src/tactics/systems/service")
+local id_generator = require("src/tactics/util/id_generator")
+require("src/tactics/debug")
 
 global enum GameEvent
     "GAME_BEGIN_STORY"

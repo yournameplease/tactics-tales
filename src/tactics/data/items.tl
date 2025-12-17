@@ -1,6 +1,6 @@
-require("src/types")
-require("src/character/items/object/weapon")
-require("src/types/item_definition")
+require("src/tactics/types")
+require("src/tactics/character/items/object/weapon")
+require("src/tactics/types/item_definition")
 
 -- potential additions
 -- shields

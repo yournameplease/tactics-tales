@@ -2,7 +2,7 @@
 --- Data structure with a 0-indexed 2d array
 --- with utilities for point access
 
-require("src/types")
+require("src/tactics/types")
 
 local interface Array2D<V>
     w: integer

@@ -1,7 +1,7 @@
-require("src/types")
-require("src/util")
-local array_2d = require("src/util/array_2d")
-require("src/battle/tactics/battle_unit")
+require("src/tactics/types")
+require("src/tactics/util")
+local array_2d = require("src/tactics/util/array_2d")
+require("src/tactics/battle/tactics/battle_unit")
 
 global record TerrainData
     solid: boolean

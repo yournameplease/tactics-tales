@@ -1,11 +1,11 @@
 
-require("src/ui/box")
-require("src/ui/components/text_node")
-require("src/ui/panels/portrait_box")
-require("src/character/items/object/item")
-require("src/ui/ui_context_manager")
-require("src/character/items/object/item_inventory")
-require("src/battle/battle_context")
+require("src/tactics/ui/box")
+require("src/tactics/ui/components/text_node")
+require("src/tactics/ui/panels/portrait_box")
+require("src/tactics/character/items/object/item")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/character/items/object/item_inventory")
+require("src/tactics/battle/battle_context")
 
 local record BattleSummary
     is UIElement

@@ -1,5 +1,5 @@
-require("src/util")
-local maps = require("src/util/maps")
+require("src/tactics/util")
+local maps = require("src/tactics/util/maps")
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc
 

@@ -1,4 +1,4 @@
-require("src/config")
+require("src/tactics/config")
 
 global LOG = {}
 

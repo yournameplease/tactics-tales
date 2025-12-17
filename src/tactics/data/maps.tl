@@ -1,4 +1,4 @@
-local map_types = require("src/battle/map/types")
+local map_types = require("src/tactics/battle/map/types")
 
 local function static_map(file: string): map_types.MapDefinition
     local static_definition: map_types.StaticMapDefinition = {

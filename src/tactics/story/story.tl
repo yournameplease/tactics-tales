@@ -1,26 +1,26 @@
 
-require("src/debug")
+require("src/tactics/debug")
 
-require("src/types")
-require("src/systems/event_bus")
-require("src/systems/tasks")
+require("src/tactics/types")
+require("src/tactics/systems/event_bus")
+require("src/tactics/systems/tasks")
 
-require("src/data/battles")
+require("src/tactics/data/battles")
 
-require("src/battle/battle_manager")
-require("src/menu/menu_manager")
-require("src/story/story_menu_manager")
-require("src/systems/service")
-local character_manager = require("src/character/character_manager")
-require("src/turn_manager")
-require("src/battle/tactics/enemy_ai")
-require("src/story/story_context")
-require("src/story/story_page")
-require("src/ui/ui_context_manager")
+require("src/tactics/battle/battle_manager")
+require("src/tactics/menu/menu_manager")
+require("src/tactics/story/story_menu_manager")
+require("src/tactics/systems/service")
+local character_manager = require("src/tactics/character/character_manager")
+require("src/tactics/turn_manager")
+require("src/tactics/battle/tactics/enemy_ai")
+require("src/tactics/story/story_context")
+require("src/tactics/story/story_page")
+require("src/tactics/ui/ui_context_manager")
 
-local StoryTypes = require("src/story/types")
+local StoryTypes = require("src/tactics/story/types")
 
-local STORY_DATA = require("src/data/story")
+local STORY_DATA = require("src/tactics/data/story")
 
 
 global record Story

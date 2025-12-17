@@ -32,24 +32,24 @@
 -- inheritence? (the human kind)
 ]]
 
-require("src/systems/tasks")
+require("src/tactics/systems/tasks")
 
-require("src/debug")
+require("src/tactics/debug")
 
-require("src/systems/event_bus")
-require("src/systems/service")
+require("src/tactics/systems/event_bus")
+require("src/tactics/systems/service")
 
-require("src/battle/battle_context")
-require("src/character/character_manager")
-require("src/animation")
-require("src/ui/ui_manager")
-require("src/battle/battle_context")
-require("src/story/story")
-require("src/game/game")
-require("src/ui/ui_context_manager")
+require("src/tactics/battle/battle_context")
+require("src/tactics/character/character_manager")
+require("src/tactics/animation")
+require("src/tactics/ui/ui_manager")
+require("src/tactics/battle/battle_context")
+require("src/tactics/story/story")
+require("src/tactics/game/game")
+require("src/tactics/ui/ui_context_manager")
 
-require("src/battle/tactics/enemy_ai")
-require("src/joypad")
+require("src/tactics/battle/tactics/enemy_ai")
+require("src/tactics/joypad")
 
 -- TODO: local battle_manager
 

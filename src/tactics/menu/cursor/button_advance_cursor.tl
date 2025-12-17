@@ -1,5 +1,5 @@
-require("src/menu/menu_cursor")
-require("src/game_context")
+require("src/tactics/menu/menu_cursor")
+require("src/tactics/game_context")
 
 global type MenuState
 global type MenuContext

@@ -1,10 +1,10 @@
-require("src/ui/box")
-require("src/systems/event_bus")
-require("src/ui/components/text_node")
-require("src/ui/components/message_log")
-require("src/ui/ui_context_manager")
-require("src/game/base_game_context")
-local PageDivider = require("src/ui/decoration/page_divider")
+require("src/tactics/ui/box")
+require("src/tactics/systems/event_bus")
+require("src/tactics/ui/components/text_node")
+require("src/tactics/ui/components/message_log")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/game/base_game_context")
+local PageDivider = require("src/tactics/ui/decoration/page_divider")
 
 local record SplitPages
     is UIElement, TextUIElement

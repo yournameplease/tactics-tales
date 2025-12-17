@@ -1,11 +1,11 @@
-require("src/ui/types")
-require("src/systems/service")
-require("src/battle/battle_context")
-require("src/battle/battle_ui_context")
-require("src/story/story_context")
-require("src/story/story_ui_context")
-require("src/game/game_ui_context")
-require("src/game_context")
+require("src/tactics/ui/types")
+require("src/tactics/systems/service")
+require("src/tactics/battle/battle_context")
+require("src/tactics/battle/battle_ui_context")
+require("src/tactics/story/story_context")
+require("src/tactics/story/story_ui_context")
+require("src/tactics/game/game_ui_context")
+require("src/tactics/game_context")
 
 global type UILayoutId
 

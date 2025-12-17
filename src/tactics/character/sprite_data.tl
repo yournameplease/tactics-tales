@@ -1,4 +1,4 @@
-require("src/character/object/character")
+require("src/tactics/character/object/character")
 
 global record HeadwearSpriteData
 	draw_hair: boolean

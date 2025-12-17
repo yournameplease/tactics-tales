@@ -1,15 +1,15 @@
-require("src/debug")
-require("src/config")
+require("src/tactics/debug")
+require("src/tactics/config")
 
-require("src/ui/box")
-require("src/battle/battle_menu_manager")
-require("src/ui/ui_context_manager")
-require("src/battle/battle_map")
-require("src/battle/battle_context")
-require("src/util/array_2d")
-local maps = require("src/util/maps")
+require("src/tactics/ui/box")
+require("src/tactics/battle/battle_menu_manager")
+require("src/tactics/ui/ui_context_manager")
+require("src/tactics/battle/battle_map")
+require("src/tactics/battle/battle_context")
+require("src/tactics/util/array_2d")
+local maps = require("src/tactics/util/maps")
 
-local CharacterRenderer = require("src/character/character_renderer")
+local CharacterRenderer = require("src/tactics/character/character_renderer")
 
 global record TacticsMap
     is UIElement

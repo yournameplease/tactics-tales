@@ -1,4 +1,4 @@
-require('src/game_context')
+require('src/tactics/tactics/game_context')
 
 global type BattleMap 
 global type TacticsEngine 

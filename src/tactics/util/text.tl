@@ -1,5 +1,5 @@
-require("src/debug")
-require("src/util")
+require("src/tactics/debug")
+require("src/tactics/util")
 
 -- TODO: allow different metric fonts
 

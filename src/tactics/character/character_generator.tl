@@ -1,13 +1,13 @@
-require("src/data/character_templates")
-require("src/character/object/character")
-require("src/data/items")
-require("src/character/items/object/weapon")
-require("src/util")
-local random = require("src/util/random")
-require("src/util/randomizer")
-local ItemInventory  = require("src/character/items/object/item_inventory")
-local ItemGenerator = require("src/character/items/item_generator")
-local NAMES = require("src/corpora/names")
+require("src/tactics/data/character_templates")
+require("src/tactics/character/object/character")
+require("src/tactics/data/items")
+require("src/tactics/character/items/object/weapon")
+require("src/tactics/util")
+local random = require("src/tactics/util/random")
+require("src/tactics/util/randomizer")
+local ItemInventory  = require("src/tactics/character/items/object/item_inventory")
+local ItemGenerator = require("src/tactics/character/items/item_generator")
+local NAMES = require("src/tactics/corpora/names")
 
 local record CharacterGenerator
 end

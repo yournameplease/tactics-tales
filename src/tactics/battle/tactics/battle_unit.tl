@@ -1,9 +1,9 @@
-require("src/debug")
+require("src/tactics/debug")
 
-require("src/animation")
-require("src/types")
-require("src/character/object/character")
-require("src/character/items/object/weapon")
+require("src/tactics/animation")
+require("src/tactics/types")
+require("src/tactics/character/object/character")
+require("src/tactics/character/items/object/weapon")
 
 -- TODO: some of this moves to character/weapon files
 

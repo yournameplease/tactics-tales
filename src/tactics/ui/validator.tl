@@ -1,4 +1,4 @@
-require("src/ui/box")
+require("src/tactics/ui/box")
 
 global record MenuValidator
 
