@@ -1,43 +1,38 @@
-# This comes from Gemini, beware.
-# ==========================================
-# Configuration & Path Definitions
-# ==========================================
-SHELL := /bin/bash
-SRC_DIR := src
-LIB_DIR := lib
-TYPES_DIR := picotron_types
-BUILD_DIR := build
-PREBUILD_SCRIPT := ./prebuild.sh
+SRC = \
+	$(wildcard src/tactics/*.tl) \
+	$(wildcard src/tactics/*/*.tl) \
+	
+LUA = $(SRC:src/%.tl=build/%.lua)
 
-# Recursively find files to ensure path safety
-# This detects new files added to subdirectories automatically
-SRC_FILES := $(wildcard $(SRC_DIR)/*.tl)
+TL = tl
+TLFLAGS = --quiet -I src
+CYAN = cyan
+CYANFLAGS = 
 
 .PHONY: all check build clean
 
-# Default target
-all: build
 
-# ==========================================
-# Targets
-# ==========================================
+# build/%.lua: src/%.tl
+# 	$(TL) $(TLFLAGS) gen --check $< -o $@
 
-# 1. Clean
-# Removes the build directory and the prebuild marker
+default: tactics
+# tactics: $(LUA)
+tactics:
+	$(CYAN) $(CYANFLAGS) build
+
+all: clean test
+
+# build_directories:
+# 	mkdir -p \
+# 		build/tactics/ui/{panels,components,decoration,layout} \
+# 		build/tactics/{story,character,data,corpora,systems,types,util,game} \
+# 		build/tactics/battle/{combat,map,tactics}
+		# build/spec/{}
+
 clean:
-	@echo "Cleaning build artifacts..."
-	rm -rf $(BUILD_DIR)
+	rm -rf build
+	
+test: default
+	busted build/
 
-# 3. Check
-# Logic: Ensure prebuild runs first, then run cyan check.
-# We use $(SRC_FILES) instead of raw globs to ensure shell compatibility.
-check: $(SRC_FILES)
-	@echo "Running cyan check..."
-	cyan check $(SRC_FILES)
-
-# 4. Build
-# Logic: Depends on the prebuild marker (handles lib changes) 
-# AND src files (handles src changes).
-build: $(SRC_FILES)
-	@echo "Building project..."
-	cyan build
+.PHONY: clean
