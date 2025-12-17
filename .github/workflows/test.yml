@@ -24,11 +24,15 @@ jobs:
       - name: Install LuaRocks
         uses: hishamhm/gh-actions-luarocks@master
 
+      - name: Install dependencies
+        run: |
+          luarocks install tl cyan busted luassert
+
       - name: Build
         run: |
-          luarocks make --dev
-          luarocks install busted
+          make tactics
 
       - name: Test
-        run: busted -o utfTerminal build/
+        run: |
+          make test
 
