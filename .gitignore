@@ -1,6 +1,5 @@
 .ignore
 .luarc.json
-picotron.d.tl
 tactics.iml
 .idea/.gitignore
 .idea/misc.xml
