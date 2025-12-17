@@ -1,0 +1,34 @@
+name: test
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install Lua
+        uses: hishamhm/gh-actions-lua@master
+
+      - name: Install LuaRocks
+        uses: hishamhm/gh-actions-luarocks@master
+
+      - name: Build
+        run: |
+          luarocks make --dev
+          luarocks install busted
+
+      - name: Test
+        run: busted -o utfTerminal build/
+

@@ -1,24 +1,32 @@
 SRC = \
 	$(wildcard src/tactics/*.tl) \
 	$(wildcard src/tactics/*/*.tl) \
+	$(wildcard src/spec/*.tl) \
+	$(wildcard src/spec/*/*.tl) \
 	
 LUA = $(SRC:src/%.tl=build/%.lua)
 
 TL = tl
 TLFLAGS = --quiet -I src
 CYAN = cyan
-CYANFLAGS = 
+CYANFLAGS =
+
+BUILD_MARKER = build/.cyan_built
 
 .PHONY: all check build clean
 
 
-# build/%.lua: src/%.tl
-# 	$(TL) $(TLFLAGS) gen --check $< -o $@
-
-default: tactics
-# tactics: $(LUA)
-tactics:
+build/%.lua: src/%.tl
 	$(CYAN) $(CYANFLAGS) build
+	# $(TL) $(TLFLAGS) gen --check $< -o $@
+
+
+# tactics: $(LUA)
+tactics: $(BUILD_MARKER)
+
+$(BUILD_MARKER): $(LUA)
+	# $(CYAN) $(CYANFLAGS) build
+	@touch $@
 
 all: clean test
 
@@ -32,7 +40,7 @@ all: clean test
 clean:
 	rm -rf build
 	
-test: default
+test: tactics
 	busted build/
 
 .PHONY: clean
