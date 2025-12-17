@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          luarocks install tl cyan busted luassert
+          luarocks install tl && luarocks install cyan && luarocks install busted && luarocks install luassert
 
       - name: Build
         run: |
