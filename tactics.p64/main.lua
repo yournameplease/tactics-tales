@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-18 01:26:36",revision=81,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-19 05:32:28",revision=86,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -6,7 +6,9 @@
 local _modules = {}
 
 function require(name)
-	if _modules[name] == nil then
+	if split(name,'/')[1] ~= 'src' then
+		return
+	elseif _modules[name] == nil then
 		local build_name = name:gsub('%.', '/') .. '.lua'
 		build_name = build_name:gsub('src/', 'build/')
 		_modules[name] = include(build_name)
@@ -23,6 +25,9 @@ DATP = ""
 --end
 
 pt = include "lib/picotron.lua"
+
+include "lib/profiler.lua"
+profile.enabled(true, true)
 
 include "build/tactics/main.lua"
 

@@ -51,6 +51,7 @@ require("src/tactics/ui/ui_context_manager")
 require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/joypad")
 
+require("profiler")
 -- TODO: local battle_manager
 
 local ui_context: UIContextManager = {}
@@ -86,15 +87,28 @@ function _init()
 end
 
 function _update()
+    profile("animation_tick")
     animation_manager:tick()
+    profile("animation_tick")
     LOG.trace("Getting Joypad.")
     local joy = get_joypad()
+    profile("game_update")
     game:update(joy)
+    profile("game_update")
+    profile("update_tasks")
     task_manager:update_tasks()
+    profile("update_tasks")
 end
 
 function _draw()
+    profile("generate_frame_data")
     animation_manager:generate_frame_data()
+    profile("generate_frame_data")
+    profile("enrich_ui_context")
     ui_context:enrich()
+    profile("enrich_ui_context")
+    profile("draw")
     ui_manager:draw(ui_context)
+    profile("draw")
+    profile.draw()
 end
