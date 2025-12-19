@@ -188,6 +188,10 @@ function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, 
     if not legal_tiles:get_point(target) then
         return { path[1] }
     end
+    if path[#path] == target then
+        return path
+    end
+    
     LOG.debug("Extend path")
     LOG.debug("Extend path", #path, target, max_length)
 
@@ -198,13 +202,43 @@ function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, 
         local new_points = { t }
         LOG.debug("Extending path!", t)
         while (full_map:get_point(new_points[#new_points]).prev ~= p[#p]) do
-            pt.add(new_points, full_map:get_point(new_points[#new_points]).prev)
+            local prev = full_map:get_point(new_points[#new_points]).prev
+            LOG.debug("prev", prev)
+            pt.add(new_points, prev)
+        end
+        -- TODO: config
+        local visited = array_2d.new(16, 16, false)
+        for _,point in ipairs(p) do
+            visited:set_point(point, true)
         end
         while #new_points > 0 do
-            pt.add(p, pt.pop(new_points))
+            local next_point = pt.pop(new_points)
+            assert(next_point is TilePoint)
+            if visited:get_point(next_point) then
+                while p[#p] ~= next_point do
+                    pt.pop(p)
+                end
+            else
+                visited:set_point(next_point, true)
+                pt.add(p, next_point:copy())
+                if p[#p] == t then
+                    return p
+                end
+            end
         end
         return p
     end
+
+    for i,p in ipairs(path) do
+        if p == target then
+            local out = {}
+            for j=1,i do
+                pt.add(out, path[j]:copy())
+            end
+            return out
+        end
+    end
+    
     -- TODO: config
     local max_tile = TilePoint.of(16, 16)
 
@@ -216,7 +250,7 @@ function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, 
         local start = path[#path]
         local remaining_length = max_length + 1 - #path
         local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, max_tile)
-        if full_map:get_point(target).cost <= remaining_length then
+        if full_map:get_point(target) ~= nil and full_map:get_point(target).cost <= remaining_length then
             return extend_path(path, target, full_map)
         end
     end
