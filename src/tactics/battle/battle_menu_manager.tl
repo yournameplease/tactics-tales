@@ -27,7 +27,10 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
         steps = {
             ["SELECT_UNIT"] = GridMenuDefinition.new({
                 set_selected_context = function(s: GridMenuCursor<BattleContext>, msb: BattleContext, ctx: MenuContext)
-                    ctx.acting_unit = { unit = msb.battle_map:get_at_tile(s.point)}
+                    ctx.acting_unit = {
+                        unit = msb.battle_map:get_at_tile(s.point),
+                        point = s.point:copy()
+                    }
                 end,
                 validator = function (s: GridMenuCursor<BattleContext>, msb: BattleContext, _ctx: MenuContext): boolean
                     return msb.tactics_engine:grid_selection_is_available_player(s) end,
@@ -46,6 +49,12 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleContext> } = {
                 previous_state = "SELECT_UNIT",
                 get_legal_tiles = function (msb: BattleContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
+                end,
+                get_max_path_length = function(msb: BattleContext, ctx: MenuContext): integer
+                    return ctx.acting_unit.unit.character.stats.movement
+                end,
+                get_path_anchor = function(msb: BattleContext, ctx: MenuContext): TilePoint
+                    return ctx.acting_unit.point:copy()
                 end
             }),
             ["SELECT_ACTION"] = ListMenuDefinition.new({

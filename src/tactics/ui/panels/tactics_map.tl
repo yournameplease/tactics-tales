@@ -30,6 +30,7 @@ local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
 local HALF_HEIGHT = TILE_SIZE.y >> 1
+local BASE_TILE_SPRITE = 2 * 256
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
 local UNIT_OFFSET_Y = -3
@@ -129,6 +130,86 @@ local function draw_unit(unit: BattleUnit)
     draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_SIZE.x-2, 4)
 end
 
+local function set_ud_tile(ud: Userdata, t: TilePoint, s: integer)
+    ud:set(t.x, t.y, BASE_TILE_SPRITE + s)
+end
+
+local function get_path_layer(state: UIContextManager): Userdata
+    local cursor_tile: TilePoint = nil
+    local menu = state.battle_context.ctx.battle_menu_manager
+    local menu_cursor = menu.menu_cursor
+
+    local path_layer = pt.userdata("i32", state.battle_context.ctx.battle_map.width, state.battle_context.ctx.battle_map.height)
+    if menu_cursor is GridMenuCursor<BattleContext> then
+        local path = menu_cursor.path
+        if path ~= nil then
+            local len = #path
+            if len > 1 then
+                do
+                    local step_offset = path[2] - path[1]
+                    local s = 0
+                    if step_offset.x == 0 then
+                        if step_offset.y == 1 then
+                            s = 205
+                        elseif step_offset.y == -1 then
+                            s = 203
+                        end
+                    elseif step_offset.y == 0 then
+                        if step_offset.x == 1 then
+                            s = 204
+                        elseif step_offset.x == -1 then
+                            s = 202
+                        end
+                    end
+                    assert(s ~= 0)
+                    set_ud_tile(path_layer, path[1], s)
+                end
+                for i = 2, #path-1 do
+                    local step_offset = path[i+1] - path[i-1]
+                    local s = 0
+                    if step_offset.x == 0 then
+                        s = 193
+                    elseif step_offset.y == 0 then
+                        s = 192
+                    else
+                        if step_offset.x == 1 and step_offset.y == 1 then
+                            s = 196
+                        elseif step_offset.x == 1 and step_offset.y == -1 then
+                            s = 194
+                        elseif step_offset.x == -1 and step_offset.y == 1 then
+                            s = 197
+                        elseif step_offset.x == -1 and step_offset.y == -1 then
+                            s = 195
+                        end
+                    end
+                    assert(s ~= 0)
+                    set_ud_tile(path_layer, path[1], s)
+                end
+                do
+                    local step_offset = path[#path] - path[#path-1]
+                    local s = 0
+                    if step_offset.x == 0 then
+                        if step_offset.y == -1 then
+                            s = 201
+                        elseif step_offset.y == 1 then
+                            s = 199
+                        end
+                    elseif step_offset.y == 0 then
+                        if step_offset.x == -1 then
+                            s = 200
+                        elseif step_offset.x == 1 then
+                            s = 198
+                        end
+                    end
+                    assert(s ~= 0)
+                    set_ud_tile(path_layer, path[1], s)
+                end
+            end
+        end
+        return path_layer
+    end
+end
+
 function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
@@ -158,6 +239,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     local layer_wall_back = layers.back_wall
     local layer_wall_mid = layers.mid_wall
     local layer_wall_front = layers.front_wall
+    local layer_path = get_path_layer(state)
 
     local cursor_tile: TilePoint = nil
     local menu_cursor = menu.menu_cursor
@@ -170,6 +252,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     for y = 0, self.map_height-1 do
         pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
         pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_path, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
         if menu_cursor is GridMenuCursor<BattleContext> then

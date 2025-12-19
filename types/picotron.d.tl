@@ -279,6 +279,7 @@ global record Picotron
 	add: function<V>(table: {V}, value: V, index?: integer) 
 	del: function<V>(table: {V}, value: V): V | nil
 	deli: function<V>(table: {V}, index: integer): V | nil
+	pop: function<V>(table: {V}): V | nil
 
 	count: function(table: any, value?: any) 
 	all: function(table: any) : any
