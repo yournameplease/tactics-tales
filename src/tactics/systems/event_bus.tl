@@ -42,7 +42,7 @@ function EventBus:init(_service_manager: ServiceManager, _services: { ServiceId:
 
 end
 
-local MAX_EVENT_HISTORY = 99
+local MAX_EVENT_HISTORY = 20
 
 function EventBus.new(): EventBus
     local self: EventBus = setmetatable({
@@ -100,8 +100,12 @@ function EventBus:emit(event_name: GameEvent, args?: any)
     end
 end
 
-function EventBus:get_event_history(): { GameEvent }
-    return self.event_history
+function EventBus:get_event_history(row_limit: integer): { GameEvent }
+    local out = {}
+    for i=1,row_limit do
+        pt.add(out, self.event_history[i])
+    end
+    return out
 end
 
 return EventBus
