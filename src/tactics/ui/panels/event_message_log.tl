@@ -11,8 +11,8 @@ global record EventMessageLog
 end
  
 function EventMessageLog.new(props: MessageLog): EventMessageLog
-    props.func = function(state: UIContextManager, _row_limit: integer): { string }
-        return maps.map(state.story_context.ctx.services.event_bus:get_event_history(), function(e: GameEvent): string return "> "..e  end)
+    props.func = function(state: UIContextManager, row_limit: integer): { string }
+        return maps.map(state.story_context.ctx.services.event_bus:get_event_history(row_limit), function(e: GameEvent): string return "> "..e  end)
     end
 
     props.draw_properties = props.draw_properties or {}

@@ -8,6 +8,8 @@ require("src/tactics/ui/box")
 
 require("src/tactics/ui/validator")
 
+require("profiler")
+
 local tactics_main = require("src/tactics/ui/layout/tactics_main")
 local combat_preview = require("src/tactics/ui/layout/combat_preview")
 local story_page = require("src/tactics/ui/layout/story_page")
@@ -80,12 +82,19 @@ function UIManager:draw(battle_context: UIContextManager)
 
     local root = self.current_layout.root
     -- Recalculate size and positions
+
+    profile("ui_manager_measure")
     root:measure()
+    profile("ui_manager_measure")
+    profile("ui_manager_layout")
     root:layout(root.x, root.y)
+    profile("ui_manager_layout")
 
     -- Render
     pt.cls(self.theme.COLOR_CLEAR)
+    profile("ui_manager_draw")
     root:draw(battle_context, self.theme)
+    profile("ui_manager_draw")
 end
 
 return UIManager

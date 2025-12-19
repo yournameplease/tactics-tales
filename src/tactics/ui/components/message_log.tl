@@ -37,7 +37,9 @@ end
 function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local text = self.func(state, 999)
+    local row_limit = (self.h-self.internal_margin.t-self.internal_margin.b) // 10
+
+    local text = self.func(state, row_limit)
 
     -- TODO: text wrapping?  and cutoff text if not wrap
     -- local rows_to_render = pt.min(row_count, #text)
