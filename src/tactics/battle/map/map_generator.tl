@@ -52,7 +52,8 @@ end
 local function apply_default_walls(map_layers: MapLayers)
     local ground = map_layers.ground
     local back_wall = map_layers.back_wall
-    local mid_wall = map_layers.mid_wall
+    -- mid wall makes ui look ugly
+    -- local mid_wall = map_layers.mid_wall
     local front_wall = map_layers.front_wall
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
@@ -61,9 +62,9 @@ local function apply_default_walls(map_layers: MapLayers)
                 if back_wall:get(x,y) == 0 then
                     back_wall:set(x,y,tile+2)
                 end
-                if mid_wall:get(x,y) == 0 then
-                    mid_wall:set(x,y,tile+2)
-                end
+                -- if mid_wall:get(x,y) == 0 then
+                --     mid_wall:set(x,y,tile+2)
+                -- end
                 if front_wall:get(x,y) == 0 then
                     front_wall:set(x,y,tile+2)
                 end

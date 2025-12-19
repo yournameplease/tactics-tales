@@ -131,6 +131,7 @@ local function draw_unit(unit: BattleUnit)
 end
 
 local function set_ud_tile(ud: Userdata, t: TilePoint, s: integer)
+    -- LOG.trace(t, s)
     ud:set(t.x, t.y, BASE_TILE_SPRITE + s)
 end
 
@@ -139,7 +140,7 @@ local function get_path_layer(state: UIContextManager): Userdata
     local menu = state.battle_context.ctx.battle_menu_manager
     local menu_cursor = menu.menu_cursor
 
-    local path_layer = pt.userdata("i32", state.battle_context.ctx.battle_map.width, state.battle_context.ctx.battle_map.height)
+    local path_layer = pt.userdata("i16", state.battle_context.ctx.battle_map.width, state.battle_context.ctx.battle_map.height)
     if menu_cursor is GridMenuCursor<BattleContext> then
         local path = menu_cursor.path
         if path ~= nil then
@@ -166,24 +167,30 @@ local function get_path_layer(state: UIContextManager): Userdata
                 end
                 for i = 2, #path-1 do
                     local step_offset = path[i+1] - path[i-1]
+                    local one_step_offset = path[i] - path[i-1]
                     local s = 0
                     if step_offset.x == 0 then
                         s = 193
                     elseif step_offset.y == 0 then
                         s = 192
                     else
-                        if step_offset.x == 1 and step_offset.y == 1 then
-                            s = 196
-                        elseif step_offset.x == 1 and step_offset.y == -1 then
-                            s = 194
-                        elseif step_offset.x == -1 and step_offset.y == 1 then
-                            s = 197
-                        elseif step_offset.x == -1 and step_offset.y == -1 then
-                            s = 195
+                        local dir = step_offset.x * step_offset.y -- +/- 1
+                        if dir == 1 then -- 45 deg down
+                            if one_step_offset.x == 1 or one_step_offset.y == -1 then
+                                s = 196
+                            else
+                                s = 195
+                            end
+                        else -- 45 deg up
+                            if one_step_offset.x == 1 or one_step_offset.y == 1 then
+                                s = 194
+                            else
+                                s = 197
+                            end
                         end
                     end
                     assert(s ~= 0)
-                    set_ud_tile(path_layer, path[1], s)
+                    set_ud_tile(path_layer, path[i], s)
                 end
                 do
                     local step_offset = path[#path] - path[#path-1]
@@ -202,7 +209,7 @@ local function get_path_layer(state: UIContextManager): Userdata
                         end
                     end
                     assert(s ~= 0)
-                    set_ud_tile(path_layer, path[1], s)
+                    set_ud_tile(path_layer, path[#path], s)
                 end
             end
         end
@@ -252,7 +259,6 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     for y = 0, self.map_height-1 do
         pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
         pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-        pt.map(layer_path, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
         if menu_cursor is GridMenuCursor<BattleContext> then
@@ -297,6 +303,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                 pt.reset_color()
             end
         end
+        pt.map(layer_path, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
