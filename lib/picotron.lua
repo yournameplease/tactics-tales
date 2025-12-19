@@ -1428,6 +1428,9 @@ end
 function pt.deli(table, index)
 	return deli(table, index)
 end
+function pt.pop(table)
+	return deli(table)
+end
 
 --- Get the length of a table
 --- When value is specified, get the number of times value is in the table

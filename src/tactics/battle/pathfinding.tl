@@ -42,13 +42,20 @@ global record ShortestPathEntry
     prev: TilePoint
 end
 
+local type DistanceFunction = function(tile: TilePoint): integer
+local function distance_for_unit(battle_map: BattleMap, side: Side): DistanceFunction
+    return function(tile: TilePoint): integer
+        return movement_cost(battle_map, tile, side)
+    end
+end
+
 -- --------------------------------------------------------------------------
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_cost: integer): array_2d.Array2D<ShortestPathEntry>
+local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_function: DistanceFunction, max_cost: integer, max_point: TilePoint): array_2d.Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
-    local visited_info: array_2d.Array2D<ShortestPathEntry> = array_2d.new(battle_map.width, battle_map.height)
+    local visited_info: array_2d.Array2D<ShortestPathEntry> = array_2d.new(max_point.x, max_point.y)
 
     local record ShortestPathQueueEntry
         cost: integer
@@ -93,7 +100,12 @@ local function _dijkstra_traversal(battle_map: BattleMap, start_x: integer, star
                 local vx, vy = ux + offset.x, uy + offset.y
 
                 -- Calculate cost to move FROM u INTO v
-                local move_cost = movement_cost(battle_map, { x=vx, y=vy }, side)
+                local move_cost = 0
+                if vx >= 0 and vx < max_point.x and vy >= 0 and vy < max_point.y then 
+                    move_cost = distance_function({ x=vx, y=vy })
+                else
+                    move_cost = 999
+                end
                 assert(move_cost > 0, "0 cost moves not yet implemented.")
 
                 -- Only proceed if the tile is traversable (movement_cost returns 999 for blocked)
@@ -130,7 +142,7 @@ end
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
 function Pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
-    return _dijkstra_traversal(battle_map, start_x, start_y, side, limit)
+    return _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), limit, TilePoint.of(battle_map.width, battle_map.height))
 end 
 
 -- @return list of { { x, y } } tile coordinates from start position
@@ -150,7 +162,7 @@ end
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
 function Pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(battle_map, start_x, start_y, side, total_cost)
+    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), total_cost, TilePoint.of(battle_map.width, battle_map.height))
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: array_2d.Array2D<boolean> = array_2d.new(full_map.w, full_map.h, false)
@@ -167,6 +179,56 @@ function Pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: intege
     )
 
     return reachable
+end
+
+---@desc
+--- extend a path to a point, shortening the path until the point is reachable within max_length.
+--- return starting point only if not possible
+function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {TilePoint}
+    if not legal_tiles:get_point(target) then
+        return { path[1] }
+    end
+    LOG.debug("Extend path")
+    LOG.debug("Extend path", #path, target, max_length)
+
+    local distance = function(tile: TilePoint): integer
+        return legal_tiles:get_point(tile) and 1 or 999
+    end
+    local extend_path = function(p: {TilePoint}, t: TilePoint, full_map: array_2d.Array2D<ShortestPathEntry>): {TilePoint}
+        local new_points = { t }
+        LOG.debug("Extending path!", t)
+        while (full_map:get_point(new_points[#new_points]).prev ~= p[#p]) do
+            pt.add(new_points, full_map:get_point(new_points[#new_points]).prev)
+        end
+        while #new_points > 0 do
+            pt.add(p, pt.pop(new_points))
+        end
+        return p
+    end
+    -- TODO: config
+    local max_tile = TilePoint.of(16, 16)
+
+    while #path > max_length + 1 do
+        pt.pop(path)
+    end
+    while #path > 1 do
+        pt.pop(path)
+        local start = path[#path]
+        local remaining_length = max_length + 1 - #path
+        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, max_tile)
+        if full_map:get_point(target).cost <= remaining_length then
+            return extend_path(path, target, full_map)
+        end
+    end
+    do
+        local start = path[1]
+        local remaining_length = max_length
+        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, max_tile)
+        if full_map:get_point(target).cost <= remaining_length then
+            return extend_path(path, target, full_map)
+        end
+    end
+    return path
 end
 
 return Pathfinding

@@ -24,7 +24,7 @@ build/%.lua: src/%.tl
 # tactics: $(LUA)
 tactics: $(BUILD_MARKER)
 
-$(BUILD_MARKER): $(LUA)
+$(BUILD_MARKER): $(SRC) $(LUA)
 	# $(CYAN) $(CYANFLAGS) build
 	@touch $@
 
