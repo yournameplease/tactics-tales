@@ -183,10 +183,10 @@ end
 
 ---@desc
 --- extend a path to a point, shortening the path until the point is reachable within max_length.
---- return starting point only if not possible
+--- return current path if not possible
 function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {TilePoint}
     if not legal_tiles:get_point(target) then
-        return { path[1] }
+        return path
     end
     if path[#path] == target then
         return path
