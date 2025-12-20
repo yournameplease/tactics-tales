@@ -14,7 +14,8 @@ require("src/tactics/systems/service")
 local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
-require("src/tactics/story/story_context")
+local story_menu_context = require("src/tactics/story/story_context")
+local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
@@ -30,7 +31,12 @@ global record Story
         definition: StoryTypes.StoryNode
     end
     
-    story_ctx: StoryContext
+    story_id: StoryTypes.StoryId
+
+    story_page: StoryPage
+
+    character_manager: CharacterManager	
+    menu_manager: StoryMenuManager
     current_node: ActiveNode
 
     battle_manager: BattleManager
@@ -38,10 +44,12 @@ global record Story
     jump_to_node: function(self, node_id: string)
     handle_new_node: function(self)
     advance_node: function(self)
+
+    services: GameServiceBundle
 end
 
 function Story:jump_to_node(node_id: string)
-    local story_definition = STORY_DATA[self.story_ctx.story_id]
+    local story_definition = STORY_DATA[self.story_id]
     local node_definition = story_definition.nodes[node_id][1]
     self.current_node = {
         node_id = node_id,
@@ -59,21 +67,21 @@ function Story:handle_new_node()
         self:jump_to_node(node_definition.next_node)
     end
     if node_definition is StoryTypes.TextNode then
-        self.story_ctx.story_page:add_text_line(node_definition.text)
-        self.story_ctx.menu_manager:set_menu("MENU_STORY_TEXT")
+        self.story_page:add_text_line(node_definition.text)
+        self.menu_manager:set_menu("MENU_STORY_TEXT")
     end
     if node_definition is StoryTypes.BattleNode then
         local battle_id = node_definition.battle_id
-        self.battle_manager = BattleManager.new(battle_id, self.story_ctx)
+        self.battle_manager = BattleManager.new(battle_id, self.character_manager, self.services)
     end
     if node_definition is StoryTypes.NewPageNode then
-        self.story_ctx.story_page:clear_page()
+        self.story_page:clear_page()
         self:advance_node()
     end
 end
 
 function Story:advance_node()
-    local story_definition = STORY_DATA[self.story_ctx.story_id]
+    local story_definition = STORY_DATA[self.story_id]
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
     self:handle_new_node()
@@ -103,28 +111,31 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
     assert(STORY_DATA[story_id] ~= nil)
 
     local self: Story = setmetatable({}, { __index = Story })
-    self.story_ctx = StoryContext.new(services)
-    self.story_ctx.story_id = story_id
+    self.story_id = story_id
 
-    local story_definition = STORY_DATA[self.story_ctx.story_id]
+    local story_definition = STORY_DATA[self.story_id]
 
-    self.story_ctx.services.event_bus = services.event_bus as EventBus
+    self.services.event_bus = services.event_bus as EventBus
 
-    self.story_ctx.character_manager = character_manager.new(self.story_ctx)
+    self.character_manager = character_manager.new(self.services.event_bus)
     -- todo node for this
-    local hero = self.story_ctx.character_manager:generate_character("village_hero")
-    self.story_ctx.character_manager:persist_player(hero)
+    local hero = self.character_manager:generate_character("village_hero")
+    self.character_manager:persist_player(hero)
     
-    self.story_ctx.story_page = StoryPage.new()
-    self.story_ctx.menu_manager = StoryMenuManager.new(self.story_ctx)
+    self.story_page = StoryPage.new()
+    self.menu_manager = StoryMenuManager.new(
+        story_menu_context.new(),
+        self.services.event_bus
+    )
 
     self:jump_to_node(story_definition.starting_node)
 
-    self.story_ctx.services.event_bus:on("STORY_ADVANCE_TEXT", function()
+    self.services.event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
     end)
 
-    services.ui_context:register_context(self.story_ctx)
+    local story_ui_context = story_ui_context.new(self.story_page)
+    services.ui_context:register_ui_context(story_ui_context)
 
     services.event_bus:on("BATTLE_END_VICTORY", function()
         self:handle_battle_victory( )
@@ -139,7 +150,7 @@ end
 function Story:update(joy: Joypad)
     local current_node = self.current_node.definition
     if current_node is StoryTypes.TextNode then
-        self.story_ctx.menu_manager:update(joy)
+        self.menu_manager:update(joy)
     elseif current_node is StoryTypes.BattleNode then
         self.battle_manager:update(joy)
     elseif current_node is StoryTypes.JumpNode then

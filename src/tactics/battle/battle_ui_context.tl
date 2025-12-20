@@ -12,8 +12,6 @@ global type UILayoutId
 global record BattleUIContext
     is ui_context.UIContext
     where self.type == "battle"
-    
-    layout: UILayoutId
 
     battle_map: BattleMap
     battle_menu_manager: BattleMenuManager

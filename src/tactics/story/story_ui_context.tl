@@ -1,27 +1,30 @@
+local ui_context = require("src/tactics/ui/ui_context")
+require("src/tactics/story/story_page")
 require("src/tactics/ui/types")
-require("src/tactics/battle/tactics/tactics_engine")
-require("src/tactics/turn_manager")
-require("src/tactics/story/story_context")
 
 global type UILayoutId
 
-global record StoryUIContext
-    ctx: StoryContext
+local record StoryUIContext
+    is ui_context.UIContext
+    where self.type == "story"
 
-    layout: UILayoutId
+    story_page: StoryPage
 end
 
-function StoryUIContext.new(ctx: StoryContext): StoryUIContext
+local story_ui_context = {
+    StoryUIContext = StoryUIContext
+}
+
+function story_ui_context.new(story_page: StoryPage): StoryUIContext
     local context: StoryUIContext = setmetatable({
-        ctx = ctx
+
     }, { __index = StoryUIContext })
     return context
 end
 
 function StoryUIContext:enrich()
     self.layout = "STORY_PAGE"
-
 end
 
-return StoryUIContext
+return story_ui_context
 
