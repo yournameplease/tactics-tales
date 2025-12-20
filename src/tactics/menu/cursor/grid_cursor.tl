@@ -1,10 +1,8 @@
 require("src/tactics/menu/menu_cursor")
+require("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
-
-global type MenuState
-global type MenuContext
 
 global record GridMenuCursor<GC>
     is MenuCursor<GC>

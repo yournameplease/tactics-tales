@@ -21,6 +21,7 @@ require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_context")
+local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1

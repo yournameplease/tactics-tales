@@ -45,6 +45,7 @@ require("src/tactics/ui/ui_manager")
 require("src/tactics/story/story")
 require("src/tactics/game/game")
 require("src/tactics/ui/ui_context_manager")
+local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 require("src/tactics/battle/tactics/enemy_ai")
 local joypad = require("src/tactics/joypad")

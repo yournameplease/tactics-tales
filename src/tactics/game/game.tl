@@ -19,6 +19,7 @@ require("src/tactics/ui/ui_context_manager")
 local game_menu_context = require("src/tactics/game/base_game_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local Joypad = require("src/tactics/joypad").Joypad
+local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 
 global record Game

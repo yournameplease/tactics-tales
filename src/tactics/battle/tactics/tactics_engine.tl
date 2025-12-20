@@ -12,7 +12,6 @@ require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
 require("src/tactics/systems/service")
-require("src/tactics/systems/service/game_service_bundle")
 
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/menu/types")

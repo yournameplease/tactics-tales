@@ -20,6 +20,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
 local StoryTypes = require("src/tactics/story/types")
+local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 local STORY_DATA = require("src/tactics/data/story")
 
