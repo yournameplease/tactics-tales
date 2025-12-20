@@ -31,8 +31,14 @@ local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint,
 end
 
 local function get_body_type(battle_unit: BattleUnit): AnimationName
-    -- local base_body_type = battle_unit.character.weapon.body_type
-    local base_body_type = "BACK_HAND"
+    local weapons = battle_unit.character.inventory:get_equipped_weapons()
+	
+    local base_body_type: WeaponBodyType = "BACK_HAND"
+	if #weapons > 0 then
+		base_body_type = weapons[1].body_type
+	end
+
+
 	local body_class = battle_unit.character.appearance.body_class
 	if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
 		body_class = "SLEEVELESS"
