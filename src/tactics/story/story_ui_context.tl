@@ -17,7 +17,7 @@ local story_ui_context = {
 
 function story_ui_context.new(story_page: StoryPage): StoryUIContext
     local context: StoryUIContext = setmetatable({
-
+        type = "story"
     }, { __index = StoryUIContext })
     return context
 end

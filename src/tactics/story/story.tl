@@ -115,7 +115,7 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
 
     local story_definition = STORY_DATA[self.story_id]
 
-    self.services.event_bus = services.event_bus as EventBus
+    self.services = services
 
     self.character_manager = character_manager.new(self.services.event_bus)
     -- todo node for this
@@ -134,8 +134,8 @@ function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): S
         self:advance_text()
     end)
 
-    local story_ui_context = story_ui_context.new(self.story_page)
-    services.ui_context:register_ui_context(story_ui_context)
+    local story_ui_ctx = story_ui_context.new(self.story_page)
+    services.ui_context:register_ui_context(story_ui_ctx)
 
     services.event_bus:on("BATTLE_END_VICTORY", function()
         self:handle_battle_victory( )
