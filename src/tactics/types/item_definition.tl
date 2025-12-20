@@ -1,5 +1,5 @@
 require("src/tactics/character/items/types")
-require("src/tactics/character/items/object/weapon")
+local wpn = require("src/tactics/character/items/object/weapon")
 
 
 global record WeaponDefinition
@@ -8,8 +8,8 @@ global record WeaponDefinition
     hand_anchor: AnimationAnchorPoint
     damage: integer
     accuracy: integer
-    type: WeaponType
-    body_type: WeaponBodyType
+    type: wpn.WeaponType
+    body_type: wpn.WeaponBodyType
     min_range: integer
     max_range: integer
 end
@@ -24,7 +24,7 @@ global record ItemDefinition
 	equip_slot: EquipSlot
 	sprite_data: ItemSpriteData
 	weapon_definition: WeaponDefinition
-	equipment_effects: { EquipmentEffect }
+	equipment_effects: { wpn.EquipmentEffect }
 
 	-- Consumables
 	

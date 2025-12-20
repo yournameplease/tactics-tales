@@ -5,6 +5,7 @@ require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/character_manager")
 require("src/tactics/character/object/character")
 require("src/tactics/character/sprite_data")
+local wpn = require("src/tactics/character/items/object/weapon")
 
 local ANIMATION_DATA = require("src/tactics/character/animation_data")
 
@@ -33,7 +34,7 @@ end
 local function get_body_type(battle_unit: BattleUnit): AnimationName
     local weapons = battle_unit.character.inventory:get_equipped_weapons()
 	
-    local base_body_type: WeaponBodyType = "BACK_HAND"
+    local base_body_type: wpn.WeaponBodyType = "BACK_HAND"
 	if #weapons > 0 then
 		base_body_type = weapons[1].body_type
 	end

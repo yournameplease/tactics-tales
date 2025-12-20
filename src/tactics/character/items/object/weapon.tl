@@ -1,29 +1,19 @@
 require("src/tactics/types")
 
 
-global enum WeaponType
+local enum WeaponType
     "MELEE"
     "RANGED"
 end
 
 -- picks the relevant body sprite
-global enum WeaponBodyType
+local enum WeaponBodyType
     "BACK_HAND" -- standard 1h weapons
     "FRONT_HAND" -- bows, rapiers,
     "HORIZONTAL" -- heavy weapons
 end
 
-global enum WeaponProperty
-    "armorkiller"
-    "shieldsplitter"
-    "long"
-end
-
-global type WeaponProperties = {
-    WeaponProperty: boolean
-}
-
-global record Weapon
+local record Weapon
     name: string
     sprite: integer
     hand_anchor: AnimationAnchorPoint
@@ -37,7 +27,7 @@ end
 
 -- Equipment effects
 
-global enum EquipmentEffectType
+local enum EquipmentEffectType
     "increase_defense"
     "increase_avoid"
     "long_reach"
@@ -45,18 +35,18 @@ global enum EquipmentEffectType
     "armorkiller"
 end
 
-global interface EquipmentEffect
+local interface EquipmentEffect
     type: EquipmentEffectType
 end
 
-global enum DefenseType
+local enum DefenseType
     "ARMOR"
     "SHIELD"
     "OTHER"
     "TRUE"
 end
 
-global record IncreaseDefenseEffect
+local record IncreaseDefenseEffect
     is EquipmentEffect
     where self.type == "increase_defense"
     
@@ -72,14 +62,14 @@ function IncreaseDefenseEffect.of(amount: integer, type: DefenseType): IncreaseD
     }
 end
 
-global enum AvoidType
+local enum AvoidType
     "ARMOR"
     "SHIELD"
     "OTHER"
     "TRUE"
 end
 
-global record IncreaseAvoidEffect
+local record IncreaseAvoidEffect
     is EquipmentEffect
     where self.type == "increase_avoid"
     
@@ -95,7 +85,7 @@ function IncreaseAvoidEffect.of(amount: integer, type: AvoidType): IncreaseAvoid
     }
 end
 
-global record LongReachEffect
+local record LongReachEffect
     is EquipmentEffect
     where self.type == "long_reach"
 end
@@ -106,7 +96,7 @@ function LongReachEffect.of(): LongReachEffect
     }
 end
 
-global record ShieldsplitterEffect
+local record ShieldsplitterEffect
     is EquipmentEffect
     where self.type == "shieldsplitter"
 end
@@ -117,7 +107,7 @@ function ShieldsplitterEffect.of(): ShieldsplitterEffect
     }
 end
 
-global record ArmorkillerEffect
+local record ArmorkillerEffect
     is EquipmentEffect
     where self.type == "armorkiller"
 end
@@ -127,3 +117,21 @@ function ArmorkillerEffect.of(): ArmorkillerEffect
         type = "armorkiller"
     }
 end
+
+local weapon = {
+    WeaponType = WeaponType,
+    WeaponBodyType = WeaponBodyType,
+    Weapon = Weapon,
+    EquipmentEffect = EquipmentEffect,
+    effect = {
+        DefenseType = DefenseType,
+        AvoidType = AvoidType,
+        IncreaseDefenseEffect = IncreaseDefenseEffect,
+        IncreaseAvoidEffect = IncreaseAvoidEffect,
+        LongReachEffect = LongReachEffect,
+        ShieldsplitterEffect = ShieldsplitterEffect,
+        ArmorkillerEffect = ArmorkillerEffect        
+    }
+}
+
+return weapon

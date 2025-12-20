@@ -1,6 +1,8 @@
 require("src/tactics/types")
 require("src/tactics/character/items/object/weapon")
 require("src/tactics/types/item_definition")
+local wpn = require("src/tactics/character/items/object/weapon")
+local effect = wpn.effect
 
 -- potential additions
 -- shields
@@ -19,8 +21,8 @@ local function shield(name: string, sprite_id: integer, slots: integer, defense:
         },
 
         equipment_effects = {
-            IncreaseDefenseEffect.of(defense, "SHIELD"),
-            IncreaseAvoidEffect.of(avoid, "SHIELD")
+            effect.IncreaseDefenseEffect.of(defense, "SHIELD"),
+            effect.IncreaseAvoidEffect.of(avoid, "SHIELD")
         }        
     }
 end
@@ -33,8 +35,8 @@ local function armor(name: string, slots: integer, defense: integer, avoid: inte
         equip_slot = "BODY",
 
         equipment_effects = {
-            IncreaseDefenseEffect.of(defense, "ARMOR"),
-            IncreaseAvoidEffect.of(avoid, "ARMOR")
+            effect.IncreaseDefenseEffect.of(defense, "ARMOR"),
+            effect.IncreaseAvoidEffect.of(avoid, "ARMOR")
         }        
     }
 end
@@ -57,7 +59,7 @@ local function weapon(
     equip_slot: EquipSlot,
     sprite_data: ItemSpriteData,
     data: WeaponDefinition,
-    effects?: {EquipmentEffect}
+    effects?: {wpn.EquipmentEffect}
 ) : ItemDefinition
     setmetatable(data, { __index = default_weapon })
     return {
@@ -78,7 +80,7 @@ local function melee_weapon(
     damage: integer,
     accuracy: integer,
     slots: integer,
-    effects?: { EquipmentEffect }
+    effects?: { wpn.EquipmentEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -103,7 +105,7 @@ local function two_handed_weapon(
     damage: integer,
     accuracy: integer,
     slots: integer,
-    effects?: { EquipmentEffect }
+    effects?: { wpn.EquipmentEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -132,7 +134,7 @@ local function ranged_weapon(
     min_range: integer,
     max_range: integer,
     slots: integer,
-    effects?: { EquipmentEffect }
+    effects?: { wpn.EquipmentEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -161,21 +163,21 @@ global ITEM_DATA: {string: ItemDefinition} = {
     dagger = melee_weapon( "Dagger", 104, 1, 90, 1 ),
     sword = melee_weapon( "Sword", 105, 2, 80, 1 ),
     axe = melee_weapon( "Axe", 106, 2, 70, 1, {
-            ShieldsplitterEffect.of()
+            effect.ShieldsplitterEffect.of()
         }
     ),
     spear = melee_weapon( "Spear", 107, 1, 90, 1, {
-            LongReachEffect.of()
+            effect.LongReachEffect.of()
         }
     ),
     poleaxe = melee_weapon( "Poleaxe", 108, 2, 60, 1, {
-            LongReachEffect.of(),
-            ShieldsplitterEffect.of()
+            effect.LongReachEffect.of(),
+            effect.ShieldsplitterEffect.of()
         }
     ),
     club = melee_weapon( "Club", 109, 1, 80, 1),
     mace = melee_weapon( "Mace", 110, 2, 70, 1, {
-            ArmorkillerEffect.of()
+            effect.ArmorkillerEffect.of()
         }
     ),
     greatsword = two_handed_weapon( "Greatsword", 111, 3, 70, 2),
