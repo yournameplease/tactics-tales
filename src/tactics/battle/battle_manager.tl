@@ -41,7 +41,7 @@ global record BattleManager
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
 
-    story_context: StoryContext
+    character_manager: CharacterManager
 
     services: GameServiceBundle
 end
@@ -61,14 +61,14 @@ function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners:
         assert(spawners)
         for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
-            local character = self.story_context.character_manager:generate_character(enemy.template)
+            local character = self.character_manager:generate_character(enemy.template)
             self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
         end
     end
 end
 
 function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
-    local char_man = self.story_context.character_manager
+    local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
     local roster_count = 1
     for i, spawn_point in ipairs(player_spawners) do
@@ -89,14 +89,14 @@ function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spa
 end
 
 
-function BattleManager.new(battle_id: string, story_context: StoryContext): BattleManager 
+function BattleManager.new(battle_id: string, character_manager: CharacterManager, services: GameServiceBundle): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
-    self.services = story_context.services
+    self.services = services
 
     self.battle_id = battle_id
-    self.story_context = story_context
+    self.character_manager = character_manager
 
     local battle_definition = BATTLE_DATA[self.battle_id]
 
@@ -147,7 +147,7 @@ function BattleManager.new(battle_id: string, story_context: StoryContext): Batt
         self.battle_menu_manager,
         self.turn_manager
     )
-    story_context.services.ui_context:register_ui_context(battle_ui_context)
+    self.services.ui_context:register_ui_context(battle_ui_context)
 
     self.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
     return self

@@ -2,6 +2,8 @@ require("src/tactics/ui/types")
 
 local enum UIContextType
 	"battle"
+	"story"
+	"game"
 end
 
 local interface UIContext

@@ -12,15 +12,15 @@ require("src/tactics/menu/cursor/list_cursor")
 
 
 global record StoryMenuManager
-    is MenuManager<StoryContext>
+    is MenuManager<StoryMenuContext>
 end
 
-local MENU_DATA: { MenuId: MenuDefinition<StoryContext> } = {
+local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
     ["MENU_STORY_TEXT"] = {
         initial_step = "ADVANCE_TEXT",
         steps = {
             ["ADVANCE_TEXT"] = ListMenuDefinition.new({
-                get_options = function(msb: StoryContext, ctx: MenuContext): {MenuOption}
+                get_options = function(msb: StoryMenuContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     pt.add(options, {
@@ -35,11 +35,11 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryContext> } = {
     }
 }
 
-function StoryMenuManager.new(ctx: StoryContext): StoryMenuManager
+function StoryMenuManager.new(ctx: StoryMenuContext, event_bus: EventBus): StoryMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
-        ctx.services.event_bus
+        event_bus
     ) as StoryMenuManager
 end
 

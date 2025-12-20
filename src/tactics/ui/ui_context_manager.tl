@@ -4,7 +4,7 @@ require("src/tactics/systems/service")
 require("src/tactics/battle/battle_context")
 require("src/tactics/battle/battle_ui_context")
 require("src/tactics/story/story_context")
-require("src/tactics/story/story_ui_context")
+local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/game/game_ui_context")
 require("src/tactics/game_context")
 
@@ -13,7 +13,7 @@ global type UILayoutId
 global record UIContextManager
 
     battle_context: BattleUIContext
-    story_context: StoryUIContext
+    story_context: story_ui_context.StoryUIContext
     game_context: GameUIContext
 
     layout: UILayoutId
@@ -24,12 +24,12 @@ function UIContextManager:register_ui_context(ctx: ui_context.UIContext)
     if ctx is BattleUIContext then
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
         self.battle_context = ctx
-    -- elseif ctx is StoryContext then
-    --     assert(self.story_context == nil, "Attempt to register game context which was already registered!")
-    --     self.story_context = StoryUIContext.new(ctx)
-    -- elseif ctx is BaseGameContext then
+    elseif ctx is story_ui_context.StoryUIContext then
+        assert(self.story_context == nil, "Attempt to register game context which was already registered!")
+        self.story_context = ctx
+    -- elseif ctx is GameUIContext then
     --     assert(self.game_context == nil, "Attempt to register game context which was already registered!")
-    --     self.game_context = GameUIContext.new(ctx)
+    --     self.game_context = ctx
     else
         error("Unexpexted UI Context: "..ctx.type)
     end
@@ -37,10 +37,7 @@ end
 
 -- deprecated
 function UIContextManager:register_context(ctx: GameContext)
-    if ctx is StoryContext then
-        assert(self.story_context == nil, "Attempt to register game context which was already registered!")
-        self.story_context = StoryUIContext.new(ctx)
-    elseif ctx is BaseGameContext then
+    if ctx is BaseGameContext then
         assert(self.game_context == nil, "Attempt to register game context which was already registered!")
         self.game_context = GameUIContext.new(ctx)
     else

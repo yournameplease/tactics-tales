@@ -3,7 +3,7 @@ require("src/tactics/types")
 require("src/tactics/ui/types")
 
 require("src/tactics/battle/battle_context")
-require("src/tactics/story/story_context")
+local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/story/story_page")
 require("src/tactics/config")
 
@@ -28,7 +28,7 @@ local story_page = MessageLog.new({
         wrap_mode = "ellipsis",
     },
     func = function(state: UIContextManager, _row_limit: integer): { string }
-        return state.story_context.ctx.story_page.text
+        return state.story_context.story_page.text
     end
 })
 

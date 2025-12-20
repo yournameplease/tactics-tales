@@ -1,6 +1,5 @@
 require("src/tactics/menu/types")
 require("src/tactics/game_context")
-require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 local Joypad = require("src/tactics/joypad").Joypad
 

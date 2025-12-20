@@ -27,13 +27,13 @@ local character_manager = {
 
 local record CharacterManagerImpl
     is CharacterManager
+
+    event_bus: EventBus
     
     id_generator: id_generator.IdGenerator
     characters: { integer: Character }
 
     player_ids: { integer }
-
-    ctx: StoryContext
 end
 
 function CharacterManagerImpl:generate_character(template_id: string): Character
@@ -76,22 +76,22 @@ function CharacterManagerImpl:handle_discard_item(ctx: MenuContext)
     character.inventory:remove_item(item_index)
 end
 
-function character_manager.new(ctx: StoryContext): CharacterManager
+function character_manager.new(event_bus: EventBus): CharacterManager
     local self: CharacterManagerImpl = setmetatable({
-        ctx = ctx
+        event_bus = event_bus
     }, { __index = CharacterManagerImpl})
     
     self.id_generator = id_generator.new()
     self.characters = {}
     self.player_ids = {}
 
-    self.ctx.services.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
+    self.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
         self:handle_equip_item(ctx)
     end)
-    self.ctx.services.event_bus:on("INVENTORY_UNEQUIP_ITEM", function(ctx: MenuContext)
+    self.event_bus:on("INVENTORY_UNEQUIP_ITEM", function(ctx: MenuContext)
         self:handle_unequip_item(ctx)
     end)
-    self.ctx.services.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
+    self.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
         self:handle_discard_item(ctx)
     end)
 
