@@ -13,7 +13,6 @@ require("src/tactics/battle/pathfinding")
 require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")
-require("src/tactics/systems/service")
 require("src/tactics/ui/ui_context_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local character_manager = require("src/tactics/character/character_manager")
@@ -27,8 +26,6 @@ local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
 
 global record BattleManager
-    is TransientGameService
-    where self.id == 'battle_manager'
 
     battle_id: string
 	

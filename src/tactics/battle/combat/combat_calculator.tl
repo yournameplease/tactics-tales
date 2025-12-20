@@ -4,10 +4,34 @@ require("src/tactics/debug")
 local lists = require("src/tactics/util/lists")
 local random = require("src/tactics/util/random")
 
+local record CombatResult
+    record CombatStep
+        attacker: BattleUnit
+        defender: BattleUnit
+        hit_chance: integer
+        hit_roll: integer
+        is_hit: boolean
+        dmg: integer
+    end
 
-
-local record CombatCalculator
+    steps: { CombatStep }
 end
+
+
+local record CombatPreviewResult
+    record CombatPreviewStep
+        attacker: BattleUnit
+        defender: BattleUnit
+        hit_chance: integer
+        dmg: integer
+    end
+    steps: { CombatPreviewStep }
+end
+
+local combat_calculator = {
+    CombatResult = CombatResult,
+    CombatPreviewResult = CombatPreviewResult,
+}
 
 local record AttackDouble
     damage: integer
@@ -127,22 +151,9 @@ local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack
             and defender.hp_current > 0
 end
 
-global record CombatStep
-    attacker: BattleUnit
-    defender: BattleUnit
-    hit_chance: integer
-    hit_roll: integer
-    is_hit: boolean
-    dmg: integer
-end
-
-global record CombatResult
-    steps: { CombatStep }
-end
-
-local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): CombatStep
+local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): CombatResult.CombatStep
     if weapon ~= nil then
-        local step: CombatStep = {
+        local step: CombatResult.CombatStep = {
             attacker = attacker.unit,
             defender = defender.unit,
             hit_chance = get_hit_chance(attacker, defender, weapon, battle_map),
@@ -155,8 +166,8 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
     return nil
 end
 
-function CombatCalculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): CombatResult
-    local result: CombatResult = { steps = {} }
+function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): combat_calculator.CombatResult
+    local result: combat_calculator.CombatResult = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
     local defender = build_combat_double(defender_unit)
@@ -183,18 +194,7 @@ function CombatCalculator.compute_combat(attacker_unit: BattleUnit, defender_uni
     return result
 end
 
-global record CombatPreviewStep
-    attacker: BattleUnit
-    defender: BattleUnit
-    hit_chance: integer
-    dmg: integer
-end
-
-global record CombatPreviewResult
-    steps: { CombatPreviewStep }
-end
-
-function CombatCalculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: TilePoint, battle_map: BattleMap): CombatPreviewResult
+function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: TilePoint, battle_map: BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -222,4 +222,4 @@ function CombatCalculator.preview_combat(attacker_unit: BattleUnit, defender_uni
     return result
 end
 
-return CombatCalculator
+return combat_calculator

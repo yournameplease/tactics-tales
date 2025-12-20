@@ -7,7 +7,7 @@ require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
 local Pathfinding = require("src/tactics/battle/pathfinding")
 require("src/tactics/draw")
-local CombatCalculator = require("src/tactics/battle/combat/combat_calculator")
+local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
@@ -36,7 +36,6 @@ global record TacticsEngine
 
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
-    apply_combat_step: function(self, CombatStep)
     do_combat: function(self, BattleUnit, BattleUnit)
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
@@ -123,7 +122,7 @@ end
 
 -- Combat
 
-function TacticsEngine:apply_combat_step(step: CombatStep)
+function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.CombatStep)
     local attacker = step.attacker
     local defender = step.defender
 
@@ -161,11 +160,11 @@ function TacticsEngine:apply_combat_step(step: CombatStep)
 end
 
 function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
-    local combat_result = CombatCalculator.compute_combat(attacker, defender, self.battle_map)
+    local combat_result: combat_calculator.CombatResult = combat_calculator.compute_combat(attacker, defender, self.battle_map)
 
     for i,combat_step in ipairs(combat_result.steps) do
         LOG.debug("Combat step: ",i)
-        self:apply_combat_step(combat_step)
+        self:apply_combat_step(combat_step as combat_calculator.CombatResult.CombatStep)
     end
 end
 
