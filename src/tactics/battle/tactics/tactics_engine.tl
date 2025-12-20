@@ -6,7 +6,6 @@ require ("src/tactics/menu/types")
 require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
-require("src/tactics/draw")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
@@ -14,8 +13,6 @@ require("src/tactics/animation")
 require("src/tactics/systems/service")
 
 require("src/tactics/battle/tactics/battle_unit")
-require("src/tactics/menu/types")
-require("src/tactics/menu/cursor/grid_cursor")
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT

@@ -1,13 +1,20 @@
-
-require("src/tactics/systems/service")
-require("src/tactics/systems/event_bus")
 require("src/tactics/battle/battle_map")
 
-global record BattleObjectiveService
+local record BattleObjectiveService
     battle_map: BattleMap
 end
 
-function BattleObjectiveService.new(
+local record BattleFinishState
+    finished: boolean
+    command: GameEvent
+end
+
+local battle_objective_service = {
+    BattleObjectiveService = BattleObjectiveService,
+    BattleFinishState = BattleFinishState
+}
+
+function battle_objective_service.new(
     battle_map: BattleMap
 ): BattleObjectiveService 
     local self: BattleObjectiveService = setmetatable({
@@ -17,12 +24,7 @@ function BattleObjectiveService.new(
     
     return self
 end
-
-global record BattleFinishState
-    finished: boolean
-    command: GameEvent
-end
-
+-- 
 -- legacy function, doesn't support different end conditions
 function BattleObjectiveService:check_for_end(): BattleFinishState
     local players = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
@@ -44,4 +46,4 @@ function BattleObjectiveService:check_objectives(): BattleFinishState
     return self:check_for_end()
 end
 
-return BattleObjectiveService
+return battle_objective_service
