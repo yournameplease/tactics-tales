@@ -109,8 +109,7 @@ function BattleManager.new(battle_id: string, character_manager: CharacterManage
     )
 
     self.battle_objective_service = BattleObjectiveService.new(
-        self.battle_map,
-        self.tactics_engine
+        self.battle_map
     )
 
     self.enemy_ai_engine = EnemyAIEngine.new(
