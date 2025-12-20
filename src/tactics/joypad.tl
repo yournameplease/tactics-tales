@@ -1,5 +1,4 @@
-
-global record Joypad
+local record Joypad
     dx: integer
     dxp: integer
     dy: integer
@@ -11,7 +10,7 @@ global record Joypad
     lp: boolean
 end
 
-global function get_joypad(): Joypad
+local function get_joypad(): Joypad
     local joy: Joypad = {
         -- currently locked to -1,0,1 on joysticks
         dx = (pt.btn(1) and 1 or 0) - (pt.btn(0) and 1 or 0),
@@ -27,3 +26,10 @@ global function get_joypad(): Joypad
 
     return joy
 end
+
+local joy = {
+    Joypad = Joypad,
+    get_joypad = get_joypad
+}
+
+return joy
