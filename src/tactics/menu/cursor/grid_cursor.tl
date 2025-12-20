@@ -6,7 +6,7 @@ local pathfinding = require("src/tactics/battle/pathfinding")
 global type MenuState
 global type MenuContext
 
-global record GridMenuCursor<GC is GameContext>
+global record GridMenuCursor<GC>
     is MenuCursor<GC>
     where self.type == "CURSOR_GRID"
     point: TilePoint
@@ -23,7 +23,7 @@ global record GridMenuCursor<GC is GameContext>
     send_command: GameEvent
 end
 
-global record GridMenuDefinition<GC is GameContext>
+global record GridMenuDefinition<GC>
     is MenuStepDefinition<GC>
     where self.type == "CURSOR_GRID"
 

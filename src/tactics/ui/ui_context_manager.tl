@@ -1,4 +1,5 @@
 require("src/tactics/ui/types")
+local ui_context = require("src/tactics/ui/ui_context")
 require("src/tactics/systems/service")
 require("src/tactics/battle/battle_context")
 require("src/tactics/battle/battle_ui_context")
@@ -19,11 +20,24 @@ global record UIContextManager
     
 end
 
-function UIContextManager:register_context(ctx: GameContext)
-    if ctx is BattleContext then
+function UIContextManager:register_ui_context(ctx: ui_context.UIContext)
+    if ctx is BattleUIContext then
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
-        self.battle_context = BattleUIContext.new(ctx)
-    elseif ctx is StoryContext then
+        self.battle_context = ctx
+    -- elseif ctx is StoryContext then
+    --     assert(self.story_context == nil, "Attempt to register game context which was already registered!")
+    --     self.story_context = StoryUIContext.new(ctx)
+    -- elseif ctx is BaseGameContext then
+    --     assert(self.game_context == nil, "Attempt to register game context which was already registered!")
+    --     self.game_context = GameUIContext.new(ctx)
+    else
+        error("Unexpexted UI Context: "..ctx.type)
+    end
+end
+
+-- deprecated
+function UIContextManager:register_context(ctx: GameContext)
+    if ctx is StoryContext then
         assert(self.story_context == nil, "Attempt to register game context which was already registered!")
         self.story_context = StoryUIContext.new(ctx)
     elseif ctx is BaseGameContext then
@@ -34,11 +48,19 @@ function UIContextManager:register_context(ctx: GameContext)
     end
 end
 
-function UIContextManager:unregister_context(ctx_type: GameContextType)
+function UIContextManager:unregister_ui_context(ctx_type: ui_context.UIContextType)
     if ctx_type == 'battle' then
         assert(self.battle_context ~= nil, "Attempt to unregister battle context which was not registered!")
         self.battle_context = nil
     end
+    -- if ctx_type == 'story' then
+    --     assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
+    --     self.story_context = nil
+    -- end
+end
+
+-- deprecated
+function UIContextManager:unregister_context(ctx_type: GameContextType)
     if ctx_type == 'story' then
         assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
         self.story_context = nil

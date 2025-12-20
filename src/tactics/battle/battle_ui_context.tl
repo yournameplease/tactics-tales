@@ -1,3 +1,4 @@
+local ui_context = require("src/tactics/ui/ui_context")
 require("src/tactics/ui/types")
 require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/turn_manager")
@@ -9,21 +10,34 @@ require("src/tactics/systems/event_bus")
 global type UILayoutId
 
 global record BattleUIContext
-    ctx: BattleContext
-
+    is ui_context.UIContext
+    where self.type == "battle"
+    
     layout: UILayoutId
 
+    battle_map: BattleMap
+    battle_menu_manager: BattleMenuManager
+    turn_manager: TurnManager
+    
     hovered_unit: BattleUnit
     acting_unit: BattleUnit
     destination: TilePoint
 end
 
-function BattleUIContext.new(ctx: BattleContext): BattleUIContext
-    local self: BattleUIContext = setmetatable({}, { __index = BattleUIContext })
-
-    self.ctx = ctx
+function BattleUIContext.new(
+    battle_map: BattleMap,
+    battle_menu_manager: BattleMenuManager,
+    turn_manager: TurnManager
+): BattleUIContext
+    local self: BattleUIContext = setmetatable({
+        type = "battle"
+    }, { __index = BattleUIContext })
 
     self.layout = "TACTICS"
+    
+    self.battle_map = battle_map
+    self.battle_menu_manager = battle_menu_manager
+    self.turn_manager = turn_manager
 
     self.hovered_unit = nil
     self.acting_unit = nil
@@ -34,20 +48,20 @@ function BattleUIContext:enrich()
     self.layout = "TACTICS"
 
 
-    local selection = self.ctx.battle_menu_manager.menu_cursor
+    local selection = self.battle_menu_manager.menu_cursor
 
-    if selection is GridMenuCursor<BattleContext> then
-        if self.ctx.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+    if selection is GridMenuCursor<BattleMenuContext> then
+        if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
-            local unit = self.ctx.battle_map:get_at_tile(point)
+            local unit = self.battle_map:get_at_tile(point)
             if unit then
                 self.hovered_unit = unit
             end
         end
 
-        if self.ctx.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
+        if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
             local point = selection.point
-            local unit = self.ctx.battle_map:get_at_tile(point)
+            local unit = self.battle_map:get_at_tile(point)
             if unit then
                 self.layout = "COMBAT_PREVIEW"
                 self.hovered_unit = unit
@@ -55,12 +69,12 @@ function BattleUIContext:enrich()
         end
     end
 
-    if self.ctx.battle_menu_manager.menu_ctx.acting_unit ~= nil then
-        self.acting_unit = self.ctx.battle_menu_manager.menu_ctx.acting_unit.unit
+    if self.battle_menu_manager.menu_ctx.acting_unit ~= nil then
+        self.acting_unit = self.battle_menu_manager.menu_ctx.acting_unit.unit
     end
 
-    if self.ctx.battle_menu_manager.menu_ctx.destination ~= nil then
-        self.destination = self.ctx.battle_menu_manager.menu_ctx.destination.point
+    if self.battle_menu_manager.menu_ctx.destination ~= nil then
+        self.destination = self.battle_menu_manager.menu_ctx.destination.point
     end
 
 end

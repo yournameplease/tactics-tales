@@ -21,7 +21,10 @@ AI Mk 1:
 ]]
 
 global record EnemyAIEngine
-    ctx: BattleContext
+    battle_map: BattleMap
+    tactics_engine: TacticsEngine
+    event_bus: EventBus
+    task_manager: TaskManager
 end
 
 local record AttackOption
@@ -34,22 +37,22 @@ local record MovementOption
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
-    local all_tile_costs = Pathfinding.calculate_all_tile_costs(self.ctx.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
+    local all_tile_costs = Pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
 
-    local enemies = self.ctx.battle_map:get_units(unit_is_player)
+    local enemies = self.battle_map:get_units(unit_is_player)
 
     local potential_attacks: {AttackOption} = {}
     local deep_moves: {MovementOption} = {}
 
     for _,e in ipairs(enemies) do
         local min_range, max_range = unit.character:get_weapon_range()
-        local tiles_in_range = self.ctx.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
+        local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
         tiles_in_range:foreachpoint(function(tile: TilePoint, in_range: boolean)
             if in_range then
                 local shortest_path_tile = all_tile_costs:get_point(tile) -- if could calculate
                 if shortest_path_tile ~= nil then
                     if shortest_path_tile.cost <= unit.character.stats.movement then
-                        if self.ctx.battle_map:tile_is_legal_destination(unit, tile ) then
+                        if self.battle_map:tile_is_legal_destination(unit, tile ) then
                             pt.add(potential_attacks, { destination = tile, target = e})
                         end
                     else
@@ -72,7 +75,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             target_unit = { unit = choice.target }
         }
         LOG.info(unit.id .. " will attack "..choice.target.id)
-        self.ctx.services.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
+        self.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
         local min_cost_deep_move = deep_moves[1]
         local min_cost = 999
@@ -85,7 +88,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         -- follow until first tile in range
         local point = min_cost_deep_move.destination
         while all_tile_costs:get_point(point).cost > unit.character.stats.movement
-            or not self.ctx.battle_map:tile_is_legal_destination(unit, point) do
+            or not self.battle_map:tile_is_legal_destination(unit, point) do
             point = all_tile_costs:get_point(point).prev
         end
 
@@ -96,31 +99,40 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             destination = { point = point, path = path }
         }
         LOG.info(unit.id .. " will move to "..point.x..","..point.y)
-        self.ctx.services.event_bus:emit("MOVE_AND_WAIT", action_ctx)
+        self.event_bus:emit("MOVE_AND_WAIT", action_ctx)
     else
         LOG.warn("WARN: No valid moves for "..unit.id.. "!")
     end
 end
 
 function EnemyAIEngine:handle_enemy_turn()
-    self.ctx.services.task_manager:start_routine(function()
-        local enemies = self.ctx.battle_map:get_units(unit_is_enemy)
+    self.task_manager:start_routine(function()
+        local enemies = self.battle_map:get_units(unit_is_enemy)
 
         for _,enemy in ipairs(enemies) do
             self:compute_enemy_ai(enemy)
-            while self.ctx.tactics_engine:is_blocked() do
+            while self.tactics_engine:is_blocked() do
                 pt.yield()
             end
         end
 
-        self.ctx.services.event_bus:emit("TACTICS_END_ENEMY_TURN")
+        self.event_bus:emit("TACTICS_END_ENEMY_TURN")
     end)
 end
 
-function EnemyAIEngine.new(ctx: BattleContext): EnemyAIEngine
+function EnemyAIEngine.new(
+    battle_map: BattleMap,
+    tactics_engine: TacticsEngine,
+    event_bus: EventBus,
+    task_manager: TaskManager
+): EnemyAIEngine
     local self: EnemyAIEngine = setmetatable({
-        ctx = ctx
     }, { __index = EnemyAIEngine })
+
+    self.battle_map = battle_map
+    self.tactics_engine = tactics_engine
+    self.event_bus = event_bus
+    self.task_manager = task_manager
     return self
 end
 

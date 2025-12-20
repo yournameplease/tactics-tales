@@ -7,7 +7,7 @@ global type MenuState
 global type MenuContext
 global type MenuCursor
 
-global interface MenuCursor<GC is GameContext>
+global interface MenuCursor<GC>
     type: MenuType
     update: function(self, Joypad) 
 --- @return next state
@@ -17,7 +17,7 @@ global interface MenuCursor<GC is GameContext>
     new: function(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): self
 end
 
-global interface MenuStepDefinition<GC is GameContext>
+global interface MenuStepDefinition<GC>
     type: MenuType
     previous_state: MenuStep
     to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>

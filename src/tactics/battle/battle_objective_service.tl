@@ -6,14 +6,20 @@ require("src/tactics/battle/battle_context")
 require("src/tactics/battle/tactics/tactics_engine")
 
 global record BattleObjectiveService
-    ctx: BattleContext
+    battle_map: BattleMap
+    tactics_engine: TacticsEngine
 end
 
-function BattleObjectiveService.new(ctx: BattleContext): BattleObjectiveService 
+function BattleObjectiveService.new(
+    battle_map: BattleMap,
+    tactics_engine: TacticsEngine
+): BattleObjectiveService 
     local self: BattleObjectiveService = setmetatable({
-        ctx = ctx
     }, { __index = BattleObjectiveService })
 
+    self.battle_map = battle_map
+    self.tactics_engine = tactics_engine
+    
     return self
 end
 
@@ -24,12 +30,12 @@ end
 
 -- legacy function, doesn't support different end conditions
 function BattleObjectiveService:check_for_end(): BattleFinishState
-    if self.ctx.tactics_engine:is_blocked() then
+    if self.tactics_engine:is_blocked() then
         return { finished = false }
     end
 
-    local players = self.ctx.battle_map:get_units(unit_is_player)
-    local enemies = self.ctx.battle_map:get_units(unit_is_enemy)
+    local players = self.battle_map:get_units(unit_is_player)
+    local enemies = self.battle_map:get_units(unit_is_enemy)
 
     if (#players == 0) then
         return { finished = true, command = "BATTLE_END_VICTORY" }

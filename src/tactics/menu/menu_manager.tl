@@ -16,17 +16,17 @@ require("src/tactics/menu/cursor/multiple_options_cursor")
 
 
 
-global record SelectionHistory<GC is GameContext>
+global record SelectionHistory<GC>
     step: MenuStep
     selection: MenuCursor<GC>
 end
 
-global record MenuDefinition<GC is GameContext>
+global record MenuDefinition<GC>
     initial_step: MenuStep
     steps: { MenuStep: MenuStepDefinition<GC> }
 end
 
-global interface MenuManager<GC is GameContext>
+global interface MenuManager<GC>
     
     menu_definitions: { MenuId: MenuDefinition }
 
@@ -39,10 +39,6 @@ global interface MenuManager<GC is GameContext>
     event_bus: EventBus
 
     init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
-    -- new: function(
-    --     menu_definitions: { MenuId: MenuDefinition },
-    --     get_menu_service_bundle: function(services: { ServiceId: GameService }): GC
-    -- ): MenuManager<GC>
     populate_menu_state: function(self, new_step: MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)
@@ -50,7 +46,7 @@ global interface MenuManager<GC is GameContext>
     update: function(self, joy: Joypad)
 end
 
-global record BaseMenuManager<GC is GameContext>
+global record BaseMenuManager<GC>
     is MenuManager<GC>
 
     menu_definitions: { MenuId: MenuDefinition<GC> }
@@ -58,7 +54,8 @@ end
 
 function BaseMenuManager.new(
     menu_definitions: { MenuId: MenuDefinition },
-    ctx: GameContext
+    ctx: GC,
+    event_bus: EventBus
 ): MenuManager<GC>
     local self: BaseMenuManager<GC> = setmetatable({}, { __index = BaseMenuManager })
 
@@ -74,7 +71,7 @@ function BaseMenuManager.new(
     self.selection_history = {}
 
     self.game_ctx = ctx
-    self.event_bus = ctx.services.event_bus as EventBus
+    self.event_bus = event_bus
 
     return self
 end

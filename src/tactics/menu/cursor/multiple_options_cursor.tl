@@ -4,7 +4,7 @@ local lists = require("src/tactics/util/lists")
 
 global type MenuState
 
-global record MenuMultipleOptionCursor<GC is GameContext>
+global record MenuMultipleOptionCursor<GC>
     text: string -- label
     cursor: MenuCursor<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
@@ -26,7 +26,7 @@ global enum MultipleOptionsDirection
     "select"
 end
 
-global record MultipleOptionsMenuCursor<GC is GameContext>
+global record MultipleOptionsMenuCursor<GC>
     is MenuCursor<GC>
     where self.type == "CURSOR_MULTIPLE_OPTIONS"
     i: integer
@@ -46,7 +46,7 @@ function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: Menu
     }
 end
 
-global record MultipleOptionsMenuDefinition<GC is GameContext>
+global record MultipleOptionsMenuDefinition<GC>
     is MenuStepDefinition<GC>
     where self.type == "CURSOR_MULTIPLE_OPTIONS"
     primary_direction: MultipleOptionsDirection
