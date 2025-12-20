@@ -1,5 +1,4 @@
 require("src/tactics/menu/menu_cursor")
-require("src/tactics/game_context")
 local Joypad = require("src/tactics/joypad").Joypad
 
 global type MenuState

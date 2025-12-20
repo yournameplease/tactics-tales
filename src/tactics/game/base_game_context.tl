@@ -1,5 +1,3 @@
-require("src/tactics/game_context")
-
 local record GameMenuContext
 end
 
