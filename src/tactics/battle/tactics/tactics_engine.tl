@@ -18,9 +18,6 @@ require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/menu/types")
 require("src/tactics/menu/cursor/grid_cursor")
 
-global type MenuContext
-global type MenuCursor
-
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 

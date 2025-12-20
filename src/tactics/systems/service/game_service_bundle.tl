@@ -1,4 +1,3 @@
-
 global type EventBus
 global type TaskManager
 global type AnimationManager

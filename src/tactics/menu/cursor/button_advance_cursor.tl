@@ -1,8 +1,6 @@
 require("src/tactics/menu/menu_cursor")
+require("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
-
-global type MenuState
-global type MenuContext
 
 global record ButtonAdvanceCursor<GC>
     is MenuCursor<GC>
@@ -26,7 +24,7 @@ function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<GC>)
 end
 
 
-function ButtonAdvanceCursor.new(step_definition: any, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): ButtonAdvanceCursor<GC>
+function ButtonAdvanceCursor.new(step_definition: any, _: GC, _: MenuContext, _: MenuState): ButtonAdvanceCursor<GC>
     assert(step_definition is ButtonAdvanceMenuDefinition<GC>)
     local self: ButtonAdvanceCursor<GC> = {
         type = "CURSOR_BUTTON_ADVANCE",

@@ -1,8 +1,7 @@
 require("src/tactics/menu/menu_cursor")
+require("src/tactics/menu/types")
 local lists = require("src/tactics/util/lists")
 local Joypad = require("src/tactics/joypad").Joypad
-
-global type MenuState
 
 global record MenuMultipleOptionCursor<GC>
     text: string -- label
