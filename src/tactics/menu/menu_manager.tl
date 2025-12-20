@@ -4,9 +4,8 @@ require ("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
-require("src/tactics/systems/service/game_service_bundle")
 
-require("src/tactics/menu/menu_cursor")
+ require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
 require("src/tactics/menu/cursor/grid_cursor")
 require("src/tactics/menu/cursor/list_cursor")
