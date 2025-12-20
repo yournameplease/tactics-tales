@@ -16,10 +16,13 @@ local story_ui_context = {
 }
 
 function story_ui_context.new(story_page: StoryPage): StoryUIContext
-    local context: StoryUIContext = setmetatable({
+    local self: StoryUIContext = setmetatable({
         type = "story"
     }, { __index = StoryUIContext })
-    return context
+
+    self.story_page = story_page
+
+    return self
 end
 
 function StoryUIContext:enrich()

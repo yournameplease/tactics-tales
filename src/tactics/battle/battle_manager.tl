@@ -16,6 +16,7 @@ local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")
 require("src/tactics/ui/ui_context_manager")
+local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
@@ -142,7 +143,7 @@ function BattleManager.new(battle_id: string, character_manager: CharacterManage
         self.battle_menu_manager
     )
 
-    local battle_ui_context = BattleUIContext.new(
+    local battle_ui_context = battle_ui_context.new(
         self.battle_map,
         self.battle_menu_manager,
         self.turn_manager
