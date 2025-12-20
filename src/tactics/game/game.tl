@@ -16,33 +16,36 @@ require("src/tactics/story/story_context")
 require("src/tactics/story/story")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/game/base_game_context")
+local game_menu_context = require("src/tactics/game/base_game_context")
+local game_ui_context = require("src/tactics/game/game_ui_context")
 local Joypad = require("src/tactics/joypad").Joypad
 
 
 global record Game
-
-	game_ctx: BaseGameContext
-   	
+	menu_manager: GameMenuManager
+       	
     story: Story
 
+    services: GameServiceBundle
 end
 
 function Game:begin_story()
-    self.story = Story.new("test_story", self.game_ctx.services)
+    self.story = Story.new("test_story", self.services)
 end
 
 function Game.new(services: GameServiceBundle): Game 
 
     local self: Game = setmetatable({}, { __index = Game })
-    self.game_ctx = BaseGameContext.new(services)
+    self.services = services
 
-	self.game_ctx.menu_manager = GameMenuManager.new(self.game_ctx)
-    self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
+    local game_menu_ctx = game_menu_context.new()
+	self.menu_manager = GameMenuManager.new(game_menu_ctx, self.services.event_bus)
+    self.menu_manager:set_menu("MENU_MAIN_MENU")
 
-    services.ui_context:register_context(self.game_ctx)
+    local game_ui_context = game_ui_context.new(self.services.event_bus, self.menu_manager)
+    self.services.ui_context:register_ui_context(game_ui_context)
 
-    services.event_bus:on("GAME_BEGIN_STORY", function()
+    self.services.event_bus:on("GAME_BEGIN_STORY", function()
         self:begin_story()
     end)
     services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
@@ -51,7 +54,7 @@ function Game.new(services: GameServiceBundle): Game
             ctx.metadata["log_level"],
             ctx.metadata["draw_flexbox_debug"]
             )
-        self.game_ctx.menu_manager:set_menu("MENU_MAIN_MENU")
+        self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)
 
     return self
@@ -61,7 +64,7 @@ function Game:update(joy: Joypad)
     if self.story ~= nil then
         self.story:update(joy)
     else
-        self.game_ctx.menu_manager:update(joy)
+        self.menu_manager:update(joy)
     end
 end
 

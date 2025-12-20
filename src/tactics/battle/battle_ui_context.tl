@@ -1,14 +1,9 @@
 local ui_context = require("src/tactics/ui/ui_context")
-require("src/tactics/ui/types")
+local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/turn_manager")
-require("src/tactics/battle/pathfinding")
 require("src/tactics/battle/battle_menu_manager")
-require("src/tactics/character/character_manager")
-require("src/tactics/systems/event_bus")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
-
-global type UILayoutId
 
 local record BattleUIContext
     is ui_context.UIContext

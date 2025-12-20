@@ -1,4 +1,5 @@
 require("src/tactics/ui/types")
+local UILayoutId = require("src/tactics/ui/types").UILayoutId
 
 local enum UIContextType
 	"battle"

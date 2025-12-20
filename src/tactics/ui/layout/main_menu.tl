@@ -10,6 +10,7 @@ require("src/tactics/ui/panels/unit_info")
 require("src/tactics/ui/panels/combat_preview")
 require("src/tactics/ui/panels/event_message_log")
 local VerticalListMenu = require("src/tactics/ui/panels/vertical_list_menu")
+local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 
@@ -22,9 +23,9 @@ right:add(TextNode.new( { flex_grow = 1, text = {"Main Menu"} } ))
 right:add(VerticalListMenu.new(
 	"{text}",
 	">{text}<",
-	function (state: UIContextManager): ListMenuCursor<BaseGameContext>
-		local cursor = state.game_context.ctx.menu_manager.menu_cursor
-		assert(cursor is ListMenuCursor<BaseGameContext>) 
+	function (state: UIContextManager): ListMenuCursor<GameMenuContext>
+		local cursor = state.game_context.menu_manager.menu_cursor
+		assert(cursor is ListMenuCursor<GameMenuContext>) 
 		return cursor
 	end,
 	{flex_grow = 1} ))

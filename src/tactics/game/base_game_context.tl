@@ -1,16 +1,14 @@
 require("src/tactics/game_context")
 
-global type GameMenuManager
-
-global record BaseGameContext
-	is GameContext
-	where self.type == "game"
-	menu_manager: GameMenuManager 
+local record GameMenuContext
 end
 
-function BaseGameContext.new(services: GameServiceBundle): BaseGameContext
-	return {
-		type = "game",
-		services = services,
-	}
+local game_menu_context = {
+	GameMenuContext = GameMenuContext
+}
+
+function game_menu_context.new(): GameMenuContext
+	return {}
 end
+
+return game_menu_context

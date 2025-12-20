@@ -1,8 +1,6 @@
 local ui_context = require("src/tactics/ui/ui_context")
 require("src/tactics/story/story_page")
-require("src/tactics/ui/types")
-
-global type UILayoutId
+local UILayoutId = require("src/tactics/ui/types").UILayoutId
 
 local record StoryUIContext
     is ui_context.UIContext
