@@ -3,7 +3,7 @@ require("src/tactics/debug")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/battle/tactics/battle_unit")
 local pathfinding = require("src/tactics/battle/pathfinding")
-require("src/tactics/battle/tactics/tactics_engine")
+local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/battle/battle_map")
@@ -20,7 +20,7 @@ AI Mk 1:
 
 global record EnemyAIEngine
     battle_map: BattleMap
-    tactics_engine: TacticsEngine
+    tactics_engine: tactics_engine.TacticsEngine
     event_bus: EventBus
     task_manager: TaskManager
 end
@@ -37,7 +37,7 @@ end
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
 
-    local enemies = self.battle_map:get_units(unit_is_player)
+    local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
 
     local potential_attacks: {AttackOption} = {}
     local deep_moves: {MovementOption} = {}
@@ -105,7 +105,7 @@ end
 
 function EnemyAIEngine:handle_enemy_turn()
     self.task_manager:start_routine(function()
-        local enemies = self.battle_map:get_units(unit_is_enemy)
+        local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_enemy() end)
 
         for _,enemy in ipairs(enemies) do
             self:compute_enemy_ai(enemy)
@@ -120,7 +120,7 @@ end
 
 function EnemyAIEngine.new(
     battle_map: BattleMap,
-    tactics_engine: TacticsEngine,
+    tactics_engine: tactics_engine.TacticsEngine,
     event_bus: EventBus,
     task_manager: TaskManager
 ): EnemyAIEngine

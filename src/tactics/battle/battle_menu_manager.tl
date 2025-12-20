@@ -2,7 +2,7 @@ require("src/tactics/debug")
 require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
-require("src/tactics/battle/tactics/tactics_engine")
+local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/battle/pathfinding")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
@@ -32,7 +32,7 @@ local function grid_selection_is_available_player(battle_map: BattleMap, grid_se
     local unit = battle_map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end
-    if not unit_is_player(unit) then return false end
+    if not unit:is_player() then return false end
     if unit.has_acted then return false end
 
     return true

@@ -5,7 +5,9 @@ require("src/tactics/types")
 require("src/tactics/character/object/character")
 require("src/tactics/character/items/object/weapon")
 
--- TODO: some of this moves to character/weapon files
+
+local SIDE_PLAYER = 0
+local SIDE_ENEMY = 1
 
 global record BattleUnit
     id: integer
@@ -16,6 +18,17 @@ global record BattleUnit
 
     animation_data: AnimatedSpriteData
     character: Character
+
+    is_player: function(self): boolean
+    is_enemy: function(self): boolean
+end
+
+function BattleUnit:is_player(): boolean
+    return self.side == SIDE_PLAYER
+end
+
+function BattleUnit:is_enemy(): boolean
+    return self.side == SIDE_ENEMY
 end
 
 -- local function access_fallback(tab, k)
