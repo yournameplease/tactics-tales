@@ -152,7 +152,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
                         local items = character.character.inventory:get_items()
 
                         local options = {}
-                        for i,item in ipairs(items) do
+                        for _,item in ipairs(items) do
                             pt.add(options, {
                                 text = item:get_name(),
                                 next_state = "SELECT_ITEM_ACTION"

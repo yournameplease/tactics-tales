@@ -27,7 +27,7 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                 next_state = "MAIN_MENU",
             }),
             ["MAIN_MENU"] = ListMenuDefinition.new({
-                get_options = function(msb: GameMenuContext, ctx: MenuContext): {MenuOption}
+                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     pt.add(options, {

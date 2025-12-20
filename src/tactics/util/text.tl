@@ -61,8 +61,6 @@ function Text.apply_text_wrapping(text: string, width: integer, wrap_mode: WrapM
         local out: {string} = {}
         local line_start = 1
         local previous_word_end: integer = -1
-        local line_width: integer
-        while true do
             while line_start <= #text and pt.sub(text, line_start, true) == ' ' do
                 line_start = line_start + 1
             end
@@ -125,9 +123,6 @@ end
 
 function Text.draw(text: {string}, x: integer, y: integer, w: integer, h: integer, color: Color, properties: Text.TextDrawProperties)
 
-    local row_count = pt.flr(h / TEXT_ROW_HEIGHT)
-	
-
     local wrapped_text: {{string}} = {}
     for _, t in ipairs(text) do
         pt.add(wrapped_text, Text.apply_text_wrapping(t, w, properties.wrap_mode))
@@ -135,13 +130,13 @@ function Text.draw(text: {string}, x: integer, y: integer, w: integer, h: intege
     end
 
     local row_count = 0
-    for i, paragraph in ipairs(wrapped_text) do
+    for _, paragraph in ipairs(wrapped_text) do
         for _, text_row in ipairs(paragraph) do
             row_count = row_count + 1
 			local x_offset = Text.get_text_alignment_offset(text_row, w, properties.justify)
 
 			local t_x = x + x_offset
-			local t_y = y + ((row_count-1) * (TEXT_HEIGHT + 2))
+			local t_y = y + ((row_count-1) * (TEXT_ROW_HEIGHT))
             Text.draw_text_row(text_row, t_x, t_y, color)
         end
     end
