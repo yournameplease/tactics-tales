@@ -5,8 +5,6 @@ local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 require("src/tactics/story/story_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
-require("src/tactics/game_context")
-
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 
 global record UIContextManager
