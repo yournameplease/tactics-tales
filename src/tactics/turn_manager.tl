@@ -4,7 +4,7 @@ require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/util/data_utils")
 require("src/tactics/systems/event_bus")
-require("src/tactics/battle/tactics/tactics_engine")
+local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/service")
 require("src/tactics/battle/battle_objective_service")
 
@@ -20,7 +20,7 @@ global record TurnManager
     event_listener_ids: {integer}
     
     battle_map: BattleMap
-    tactics_engine: TacticsEngine
+    tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: BattleObjectiveService
     enemy_ai_engine: EnemyAIEngine
     battle_menu_manager : BattleMenuManager
@@ -29,7 +29,7 @@ end
 
 function TurnManager.new(
     battle_map: BattleMap,
-    tactics_engine: TacticsEngine,
+    tactics_engine: tactics_engine.TacticsEngine,
     battle_objective_service: BattleObjectiveService,
     enemy_ai_engine: EnemyAIEngine,
     event_bus: EventBus,

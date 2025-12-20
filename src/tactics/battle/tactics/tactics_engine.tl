@@ -20,10 +20,8 @@ require("src/tactics/menu/cursor/grid_cursor")
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 
-local SIDE_PLAYER = 0
-local SIDE_ENEMY = 1
 
-global record TacticsEngine
+local record TacticsEngine
 
     battle_is_blocked: boolean
     is_player_turn: boolean
@@ -46,13 +44,17 @@ global record TacticsEngine
     update: function(self)
 end
 
-function TacticsEngine.new(
+local tactics_engine = {
+    TacticsEngine = TacticsEngine
+}
+
+function tactics_engine.new(
     battle_map: BattleMap,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus
-): TacticsEngine
-    local self: TacticsEngine = setmetatable({
+): tactics_engine.TacticsEngine
+    local self: tactics_engine.TacticsEngine = setmetatable({
     }, { __index = TacticsEngine })
     self.battle_is_blocked = false
 
@@ -186,16 +188,6 @@ function TacticsEngine:is_blocked(): boolean
     return self.battle_is_blocked
 end
 
--- unit filters
-
-global function unit_is_player(unit: BattleUnit): boolean
-    return unit.side == SIDE_PLAYER
-end
-
-global function unit_is_enemy(unit: BattleUnit): boolean
-    return unit.side == SIDE_ENEMY
-end
-
 -- legal tile getters
 
 function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
@@ -287,7 +279,7 @@ function TacticsEngine:update()
         -- if unit.animation_blocking then
         --     blocking_animation = true
         -- end
-        if unit.side == SIDE_PLAYER and not unit.has_acted then
+        if unit.is_player and not unit.has_acted then
             all_players_acted = false
         end
     end
@@ -298,4 +290,4 @@ function TacticsEngine:update()
     end
 end
 
-return TacticsEngine
+return tactics_engine

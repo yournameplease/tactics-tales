@@ -10,7 +10,7 @@ require("src/tactics/data/battles")
 require("src/tactics/battle/battle_map")
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/battle/pathfinding")
-require("src/tactics/battle/tactics/tactics_engine")
+local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/ui/ui_context_manager")
@@ -31,7 +31,7 @@ global record BattleManager
 	
     battle_map: BattleMap
 
-    tactics_engine: TacticsEngine
+    tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: BattleObjectiveService
     enemy_ai_engine: EnemyAIEngine
     battle_menu_manager: BattleMenuManager
@@ -101,7 +101,7 @@ function BattleManager.new(battle_id: string, character_manager: CharacterManage
     self:_spawn_enemies(battle_definition.enemies, self.battle_map.metadata.enemy_spawners)
     self:_spawn_players(battle_definition.players, self.battle_map.metadata.player_spawners)
 
-    self.tactics_engine = TacticsEngine.new(
+    self.tactics_engine = tactics_engine.new(
         self.battle_map,
         self.services.task_manager,
         self.services.animation_manager,
