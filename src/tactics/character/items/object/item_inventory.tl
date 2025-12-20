@@ -1,6 +1,6 @@
 local Item = require("src/tactics/character/items/object/item")
 require("src/tactics/character/items/types")
-require("src/tactics/character/items/object/weapon")
+local wpn = require("src/tactics/character/items/object/weapon")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
 require("src/tactics/util")
@@ -12,7 +12,7 @@ local interface ItemInventory
 	get_items_by_slot: function(self): { integer: Item.Item }
 	get_max_slots: function(self): integer
 	get_equipped_items: function(self): { EquipSlot: Item.Item }
-	get_equipped_weapons: function(self): { Weapon }
+	get_equipped_weapons: function(self): { wpn.Weapon }
 
 	can_equip: function(self, index: integer): boolean
 	is_equipped: function(self, index: integer): boolean
@@ -92,8 +92,8 @@ function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 	)
 end
 
-function ItemInventoryImpl:get_equipped_weapons(): { Weapon }
-	local out: { Weapon } = {}
+function ItemInventoryImpl:get_equipped_weapons(): { wpn.Weapon }
+	local out: { wpn.Weapon } = {}
 	if self._items_by_equip_slot["TWO_HANDS"] ~= nil
 		and self._items_by_equip_slot["TWO_HANDS"].item:get_type() == "WEAPON" then
 		pt.add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())

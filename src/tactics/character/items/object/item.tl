@@ -1,5 +1,5 @@
 require("src/tactics/character/items/types")
-require("src/tactics/character/items/object/weapon")
+local wpn = require("src/tactics/character/items/object/weapon")
 
 local record ItemModule
 	interface Item
@@ -10,9 +10,9 @@ local record ItemModule
 		get_equip_slot: function(self): EquipSlot
 		get_sprite_data: function(self): ItemSpriteData
 
-		get_weapon_data: function(self): Weapon
+		get_weapon_data: function(self): wpn.Weapon
 
-		get_equipment_effects: function(self): { EquipmentEffect } 
+		get_equipment_effects: function(self): { wpn.EquipmentEffect } 
 	end
 end
 
@@ -26,8 +26,8 @@ local record ItemImpl
 
 	equip_slot: EquipSlot
 	sprite_data: ItemSpriteData
-	weapon: Weapon
-	equipment_effects: { EquipmentEffect }
+	weapon: wpn.Weapon
+	equipment_effects: { wpn.EquipmentEffect }
 end
 
 
@@ -51,11 +51,11 @@ function ItemImpl:get_sprite_data(): ItemSpriteData
 	return self.sprite_data
 end
 
-function ItemImpl:get_weapon_data(): Weapon
+function ItemImpl:get_weapon_data(): wpn.Weapon
 	return self.weapon
 end
 
-function ItemImpl:get_equipment_effects(): { EquipmentEffect }
+function ItemImpl:get_equipment_effects(): { wpn.EquipmentEffect }
 	return self.equipment_effects
 end
 
@@ -66,8 +66,8 @@ function ItemModule.new(
 	slots: integer,
 	equip_slot: EquipSlot,
 	sprite_data: ItemSpriteData,
-	equipment_effects: {EquipmentEffect},
-	weapon: Weapon
+	equipment_effects: {wpn.EquipmentEffect},
+	weapon: wpn.Weapon
 ): ItemModule.Item
 	local item: ItemImpl = {
 		id = id,

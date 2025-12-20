@@ -3,6 +3,8 @@ require("src/tactics/battle/pathfinding")
 require("src/tactics/debug")
 local lists = require("src/tactics/util/lists")
 local random = require("src/tactics/util/random")
+local wpn = require("src/tactics/character/items/object/weapon")
+local effect = wpn.effect
 
 local record CombatResult
     record CombatStep
@@ -44,13 +46,13 @@ local record CombatDouble
     tile: TilePoint
     hp_current: integer
     hp_max: integer
-    defense: { DefenseType: integer }
-    avoid: { AvoidType: integer }
+    defense: { effect.DefenseType: integer }
+    avoid: { effect.AvoidType: integer }
     attacks: { AttackDouble }
     unit: BattleUnit
 end
 
-local function build_attack_double(weapon: Weapon, unit: BattleUnit): AttackDouble
+local function build_attack_double(weapon: wpn.Weapon, unit: BattleUnit): AttackDouble
     local double = {
         damage = weapon.damage,
         accuracy = weapon.accuracy,
@@ -69,7 +71,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
         avoid = { },
         attacks = lists.do_map(
             unit.character.inventory:get_equipped_weapons(),
-            function(weapon: Weapon): AttackDouble
+            function(weapon: wpn.Weapon): AttackDouble
                 return build_attack_double(weapon, unit)
             end
         ),
@@ -79,26 +81,26 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
     local equipped_items = unit.character.inventory:get_equipped_items()
 
     for _slot, item in pairs(equipped_items) do
-        for _, effect in ipairs(item:get_equipment_effects()) do
+        for _, eff in ipairs(item:get_equipment_effects()) do
 
         
-            if effect is IncreaseDefenseEffect then
-                double.defense[effect.defense_type] = (double.defense[effect.defense_type] or 0) + effect.amount
+            if eff is effect.IncreaseDefenseEffect then
+                double.defense[eff.defense_type] = (double.defense[eff.defense_type] or 0) + eff.amount
             end
     
-            if effect is IncreaseAvoidEffect then
-                double.avoid[effect.avoid_type] = (double.avoid[effect.avoid_type] or 0) + effect.amount  
+            if eff is effect.IncreaseAvoidEffect then
+                double.avoid[eff.avoid_type] = (double.avoid[eff.avoid_type] or 0) + eff.amount  
             end
     
-            if effect is LongReachEffect then
+            if eff is effect.LongReachEffect then
 
             end
     
-            if effect is ShieldsplitterEffect then
+            if eff is effect.ShieldsplitterEffect then
 
             end
     
-            if effect is ArmorkillerEffect then
+            if eff is effect.ArmorkillerEffect then
 
             end
                    

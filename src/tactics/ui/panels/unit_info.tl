@@ -4,6 +4,7 @@ require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
+local wpn = require("src/tactics/character/items/object/weapon")
 
 global record UnitInfo
     is UIElement
@@ -49,7 +50,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
             local weapons = u.character.inventory:get_equipped_weapons()
 
-            local w: Weapon
+            local w: wpn.Weapon
             if #weapons > 0 then
                 w = weapons[1]
             end
