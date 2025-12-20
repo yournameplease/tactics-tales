@@ -7,7 +7,6 @@ local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/battle/battle_map")
-require("src/tactics/systems/service")
 
 --[[
 AI Mk 1:
