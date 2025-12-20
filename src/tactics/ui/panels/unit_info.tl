@@ -4,7 +4,6 @@ require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
-require("src/tactics/battle/battle_context")
 
 global record UnitInfo
     is UIElement

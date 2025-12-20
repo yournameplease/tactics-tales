@@ -7,7 +7,6 @@ require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/service")
 require("src/tactics/battle/battle_objective_service")
-require("src/tactics/battle/battle_context")
 require("src/tactics/systems/service/game_service_bundle")
 
 local enum Phase

@@ -7,7 +7,6 @@ require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")
 
-require("src/tactics/battle/battle_context")
 require("src/tactics/battle/battle_map")
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/battle/pathfinding")
@@ -21,9 +20,7 @@ local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/battle/battle_objective_service")
-require("src/tactics/battle/battle_context")
-require("src/tactics/story/story_context")
-
+local battle_menu_context = require("src/tactics/battle/battle_context")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -125,7 +122,7 @@ function BattleManager.new(battle_id: string, character_manager: CharacterManage
         self.services.task_manager
     )
     
-    local battle_menu_context = BattleMenuContext.new(
+    local battle_menu_context = battle_menu_context.new(
         self.battle_map,
         self.tactics_engine
     )

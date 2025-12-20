@@ -1,12 +1,16 @@
 require('src/tactics/battle/battle_map')
 require('src/tactics/battle/tactics/tactics_engine')
 
-global record BattleMenuContext
+local record BattleMenuContext
     battle_map: BattleMap
     tactics_engine: TacticsEngine
 end
 
-function BattleMenuContext.new(
+local battle_menu_context = {
+    BattleMenuContext = BattleMenuContext
+}
+
+function battle_menu_context.new(
     battle_map: BattleMap,
     tactics_engine: TacticsEngine
 ): BattleMenuContext
@@ -15,3 +19,5 @@ function BattleMenuContext.new(
         tactics_engine = tactics_engine,
     }
 end
+
+return battle_menu_context

@@ -6,7 +6,7 @@ require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/battle/pathfinding")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
-require("src/tactics/battle/battle_context")
+local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local array_2d = require("src/tactics/util/array_2d")
 
 require("src/tactics/menu/cursor/grid_cursor")

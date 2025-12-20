@@ -1,5 +1,4 @@
 require("src/tactics/types")
-require("src/tactics/battle/battle_context")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/theme")
 
