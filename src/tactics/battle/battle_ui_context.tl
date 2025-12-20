@@ -9,7 +9,7 @@ require("src/tactics/systems/event_bus")
 
 global type UILayoutId
 
-global record BattleUIContext
+local record BattleUIContext
     is ui_context.UIContext
     where self.type == "battle"
 
@@ -22,7 +22,11 @@ global record BattleUIContext
     destination: TilePoint
 end
 
-function BattleUIContext.new(
+local battle_ui_context = {
+    BattleUIContext = BattleUIContext
+}
+
+function battle_ui_context.new(
     battle_map: BattleMap,
     battle_menu_manager: BattleMenuManager,
     turn_manager: TurnManager
@@ -77,4 +81,4 @@ function BattleUIContext:enrich()
 
 end
 
-return BattleUIContext
+return battle_ui_context

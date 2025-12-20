@@ -2,7 +2,7 @@ require("src/tactics/ui/types")
 local ui_context = require("src/tactics/ui/ui_context")
 require("src/tactics/systems/service")
 require("src/tactics/battle/battle_context")
-require("src/tactics/battle/battle_ui_context")
+local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 require("src/tactics/story/story_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/game/game_ui_context")
@@ -12,7 +12,7 @@ global type UILayoutId
 
 global record UIContextManager
 
-    battle_context: BattleUIContext
+    battle_context: battle_ui_context.BattleUIContext
     story_context: story_ui_context.StoryUIContext
     game_context: GameUIContext
 
@@ -21,7 +21,7 @@ global record UIContextManager
 end
 
 function UIContextManager:register_ui_context(ctx: ui_context.UIContext)
-    if ctx is BattleUIContext then
+    if ctx is battle_ui_context.BattleUIContext then
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
         self.battle_context = ctx
     elseif ctx is story_ui_context.StoryUIContext then
@@ -50,10 +50,10 @@ function UIContextManager:unregister_ui_context(ctx_type: ui_context.UIContextTy
         assert(self.battle_context ~= nil, "Attempt to unregister battle context which was not registered!")
         self.battle_context = nil
     end
-    -- if ctx_type == 'story' then
-    --     assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
-    --     self.story_context = nil
-    -- end
+    if ctx_type == 'story' then
+        assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
+        self.story_context = nil
+    end
 end
 
 -- deprecated
