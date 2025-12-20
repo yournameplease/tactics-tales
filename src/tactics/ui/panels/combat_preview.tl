@@ -2,7 +2,6 @@ require("src/tactics/ui/box")
 require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/battle/battle_context")
 local CombatCalculator = require("src/tactics/battle/combat/combat_calculator")
 
 global record CombatPreview

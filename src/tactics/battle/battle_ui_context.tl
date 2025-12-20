@@ -6,6 +6,7 @@ require("src/tactics/battle/pathfinding")
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/character/character_manager")
 require("src/tactics/systems/event_bus")
+local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 
 global type UILayoutId
 

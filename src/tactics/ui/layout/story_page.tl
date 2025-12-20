@@ -2,7 +2,6 @@ require("src/tactics/systems/service")
 require("src/tactics/types")
 require("src/tactics/ui/types")
 
-require("src/tactics/battle/battle_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/story/story_page")
 require("src/tactics/config")

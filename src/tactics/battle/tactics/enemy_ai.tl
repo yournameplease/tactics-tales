@@ -8,7 +8,6 @@ require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/battle/battle_map")
 require("src/tactics/systems/service")
-require("src/tactics/battle/battle_context")
 require("src/tactics/systems/service/game_service_bundle")
 
 --[[

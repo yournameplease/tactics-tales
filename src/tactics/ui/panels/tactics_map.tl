@@ -5,9 +5,9 @@ require("src/tactics/ui/box")
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/battle/battle_map")
-require("src/tactics/battle/battle_context")
 require("src/tactics/util/array_2d")
 require("src/tactics/menu/cursor/grid_cursor")
+local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local maps = require("src/tactics/util/maps")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")

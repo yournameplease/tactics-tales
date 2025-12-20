@@ -2,8 +2,6 @@ require("src/tactics/systems/service")
 require("src/tactics/types")
 require("src/tactics/ui/types")
 
-require("src/tactics/battle/battle_context")
-require("src/tactics/story/story_context")
 require("src/tactics/config")
 
 require("src/tactics/ui/panels/tactics_map")
