@@ -73,7 +73,8 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
 function GameMenuManager.new(ctx: BaseGameContext): GameMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
-        ctx
+        ctx,
+        ctx.services.event_bus
     ) as GameMenuManager
 end
 

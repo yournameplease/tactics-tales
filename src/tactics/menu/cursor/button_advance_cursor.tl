@@ -4,7 +4,7 @@ require("src/tactics/game_context")
 global type MenuState
 global type MenuContext
 
-global record ButtonAdvanceCursor<GC is GameContext>
+global record ButtonAdvanceCursor<GC>
     is MenuCursor<GC>
     where self.type == "CURSOR_BUTTON_ADVANCE"
 
@@ -13,7 +13,7 @@ global record ButtonAdvanceCursor<GC is GameContext>
     send_command: GameEvent
 end
 
-global record ButtonAdvanceMenuDefinition<GC is GameContext>
+global record ButtonAdvanceMenuDefinition<GC>
     is MenuStepDefinition<GC>
     where self.type == "CURSOR_BUTTON_ADVANCE" 
     next_state: MenuStep

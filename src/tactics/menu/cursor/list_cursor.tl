@@ -16,7 +16,7 @@ global record MenuOption
     send_command: GameEvent
 end
 
-global record ListMenuCursor<GC is GameContext>
+global record ListMenuCursor<GC>
     is MenuCursor<GC>
     where self.type == "CURSOR_LIST"
     i: integer
@@ -28,7 +28,7 @@ global record ListMenuCursor<GC is GameContext>
     set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
 end
 
-global record ListMenuDefinition<GC is GameContext>
+global record ListMenuDefinition<GC>
     is MenuStepDefinition<GC>
     where self.type == "CURSOR_LIST"
     set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
