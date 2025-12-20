@@ -7,6 +7,7 @@ require("src/tactics/ui/ui_context_manager")
 require("src/tactics/battle/battle_map")
 require("src/tactics/battle/battle_context")
 require("src/tactics/util/array_2d")
+require("src/tactics/menu/cursor/grid_cursor")
 local maps = require("src/tactics/util/maps")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
@@ -78,7 +79,7 @@ local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer,
     pt.rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor<BattleUIContext>)
+local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor<BattleMenuContext>)
     local selected_i = menu_cursor.i
     local options = menu_cursor.options
     local PADDING = 2
@@ -138,10 +139,10 @@ end
 local function get_path_layer(state: UIContextManager): Userdata
     local cursor_tile: TilePoint = nil
     local menu = state.battle_context.battle_menu_manager
-    local menu_cursor = menu.menu_cursor
+    local menu_cursor: MenuCursor<BattleMenuContext> = menu.menu_cursor
 
     local path_layer = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
-    if menu_cursor is GridMenuCursor<BattleUIContext> then
+    if menu_cursor is GridMenuCursor<BattleMenuContext> then
         local path = menu_cursor.path
         if path ~= nil then
             local len = #path
@@ -250,7 +251,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
 
     local cursor_tile: TilePoint = nil
     local menu_cursor = menu.menu_cursor
-    if menu_cursor is GridMenuCursor<BattleUIContext> then
+    if menu_cursor is GridMenuCursor<BattleMenuContext> then
         cursor_tile = menu_cursor.point
     elseif menu.menu_state.point ~= nil then
         cursor_tile = menu.menu_state.point
@@ -261,7 +262,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
-        if menu_cursor is GridMenuCursor<BattleUIContext> then
+        if menu_cursor is GridMenuCursor<BattleMenuContext> then
             if menu_cursor.legal_tiles ~= nil then
                 pt.fillp(
                 -- 1:2 diagonal slashes
@@ -336,7 +337,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         local y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if menu_cursor is ListMenuCursor<BattleUIContext> then
+        if menu_cursor is ListMenuCursor<BattleMenuContext> then
             draw_floating_menu(x, y, menu_cursor)
         end
     end

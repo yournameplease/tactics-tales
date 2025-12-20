@@ -107,7 +107,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
                 get_options = function(msb: BattleMenuContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
                     -- if target in range
-                    if msb.tactics_engine:any_target_in_range(ctx) then -- TODO: global state
+                    if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
                         pt.add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"

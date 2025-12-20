@@ -45,7 +45,6 @@ global record TacticsEngine
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
     is_blocked: function(self): boolean
-    any_target_in_range: function(self, MenuContext): boolean
     tiles_with_distance_from_unit_attacks: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
     tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
