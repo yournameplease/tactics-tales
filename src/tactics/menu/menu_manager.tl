@@ -1,7 +1,7 @@
 require("src/tactics/debug")
 require ("src/tactics/types")
 require ("src/tactics/menu/types")
-require("src/tactics/joypad")
+local Joypad = require("src/tactics/joypad").Joypad
 require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/battle/battle_context")

@@ -49,7 +49,7 @@ require("src/tactics/game/game")
 require("src/tactics/ui/ui_context_manager")
 
 require("src/tactics/battle/tactics/enemy_ai")
-require("src/tactics/joypad")
+local joypad = require("src/tactics/joypad")
 
 require("profiler")
 -- TODO: local battle_manager
@@ -91,7 +91,7 @@ function _update()
     animation_manager:tick()
     profile("animation_tick")
     LOG.trace("Getting Joypad.")
-    local joy = get_joypad()
+    local joy = joypad.get_joypad()
     profile("game_update")
     game:update(joy)
     profile("game_update")

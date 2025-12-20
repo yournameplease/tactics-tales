@@ -1,5 +1,3 @@
-
-
 require("src/tactics/debug")
 
 require("src/tactics/types")
@@ -19,6 +17,7 @@ require("src/tactics/story/story")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/game/base_game_context")
+local Joypad = require("src/tactics/joypad").Joypad
 
 
 global record Game
