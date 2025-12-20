@@ -10,6 +10,7 @@ require("src/tactics/ui/panels/unit_info")
 require("src/tactics/ui/panels/combat_preview")
 require("src/tactics/ui/panels/event_message_log")
 local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
+local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 
@@ -22,9 +23,9 @@ right:add(TextNode.new( { flex_grow = 1, text = {"Main Menu"} } ))
 right:add(VerticalMultiSelectMenu.new(
 	"{label}: {value}",
 	"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-	function (state: UIContextManager): MultipleOptionsMenuCursor<BaseGameContext>
-		local cursor = state.game_context.ctx.menu_manager.menu_cursor
-		assert(cursor is MultipleOptionsMenuCursor<BaseGameContext>) 
+	function (state: UIContextManager): MultipleOptionsMenuCursor<GameMenuContext>
+		local cursor = state.game_context.menu_manager.menu_cursor
+		assert(cursor is MultipleOptionsMenuCursor<GameMenuContext>) 
 		return cursor
 	end,
 	{flex_grow = 1} ))

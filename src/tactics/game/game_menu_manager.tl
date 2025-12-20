@@ -8,17 +8,17 @@ require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
-require("src/tactics/game/base_game_context")
+local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
 require("src/tactics/menu/cursor/list_cursor")
 require("src/tactics/menu/cursor/multiple_options_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
 
 
 global record GameMenuManager
-    is MenuManager<BaseGameContext>
+    is MenuManager<GameMenuContext>
 end
 
-local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
+local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
         -- initial_step = "MAIN_MENU",
@@ -27,7 +27,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
                 next_state = "MAIN_MENU",
             }),
             ["MAIN_MENU"] = ListMenuDefinition.new({
-                get_options = function(msb: BaseGameContext, ctx: MenuContext): {MenuOption}
+                get_options = function(msb: GameMenuContext, ctx: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     pt.add(options, {
@@ -70,11 +70,11 @@ local MENU_DATA: { MenuId: MenuDefinition<BaseGameContext> } = {
 
 }
 
-function GameMenuManager.new(ctx: BaseGameContext): GameMenuManager
+function GameMenuManager.new(ctx: GameMenuContext, event_bus: EventBus ): GameMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
-        ctx.services.event_bus
+        event_bus
     ) as GameMenuManager
 end
 

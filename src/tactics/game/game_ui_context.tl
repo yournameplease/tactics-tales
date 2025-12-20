@@ -1,33 +1,41 @@
-require("src/tactics/ui/types")
-require("src/tactics/battle/tactics/tactics_engine")
-require("src/tactics/turn_manager")
-require("src/tactics/game/base_game_context")
+local ui_context = require("src/tactics/ui/ui_context")
+local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/game/game_menu_manager")
 
-global type UILayoutId
-
 global record GameUIContext
-    ctx: BaseGameContext
+    is ui_context.UIContext
+    where self.type == "game"
 
+    menu_manager: GameMenuManager
+    event_bus: EventBus
+    
     layout: UILayoutId
 end
 
-function GameUIContext.new(ctx: BaseGameContext): GameUIContext
-    local context: GameUIContext = setmetatable({
-        ctx = ctx
+local game_ui_context = {
+    GameUIContext = GameUIContext
+}
+
+function game_ui_context.new(event_bus: EventBus, menu_manager: GameMenuManager): GameUIContext
+    local self: GameUIContext = setmetatable({
+        type = "game"
     }, { __index = GameUIContext })
-    return context
+
+    self.event_bus = event_bus
+    self.menu_manager = menu_manager
+    
+    return self
 end
 
 function GameUIContext:enrich()
     self.layout = "TITLE_SCREEN"
 
-    if self.ctx.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
-        if self.ctx.menu_manager.menu_state.step == "TITLE_SCREEN" then
+    if self.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
+        if self.menu_manager.menu_state.step == "TITLE_SCREEN" then
             self.layout = "TITLE_SCREEN"
-        elseif self.ctx.menu_manager.menu_state.step == "MAIN_MENU" then
+        elseif self.menu_manager.menu_state.step == "MAIN_MENU" then
             self.layout = "MAIN_MENU_PAGE"
-        elseif self.ctx.menu_manager.menu_state.step == "OPTIONS_MENU" then
+        elseif self.menu_manager.menu_state.step == "OPTIONS_MENU" then
             self.layout = "OPTIONS_MENU_PAGE"
         else
             error("unexpected menu state")
@@ -35,5 +43,5 @@ function GameUIContext:enrich()
     end
 end
 
-return GameUIContext
+return game_ui_context
 
