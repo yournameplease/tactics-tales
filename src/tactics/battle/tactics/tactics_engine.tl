@@ -10,7 +10,6 @@ local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
-require("src/tactics/systems/service")
 
 require("src/tactics/battle/tactics/battle_unit")
 

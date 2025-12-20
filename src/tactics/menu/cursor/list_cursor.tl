@@ -46,7 +46,7 @@ function ListMenuDefinition.of_static_options<T>(
     set_context_key: string,
     direction: ListDirection
 ): ListMenuDefinition<GC>
-    local get_options = function(game_ctx: GC, menu_context: MenuContext): {MenuOption}
+    local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {MenuOption}
         return lists.do_map(
             options,
             function (o: T): MenuOption
@@ -74,7 +74,7 @@ function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuCo
         i = 1,
         options = step_definition.get_options(game_ctx, menu_ctx),
     }
-    return setmetatable(self, { __index = function(t: any, k: string): any 
+    return setmetatable(self, { __index = function(_: any, k: string): any 
             if (ListMenuCursor as {string: any})[k] then
                 return (ListMenuCursor as {string: any})[k]
             end

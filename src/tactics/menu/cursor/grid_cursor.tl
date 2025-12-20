@@ -64,7 +64,7 @@ function GridMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuCo
     else
         self.legal_tiles = nil
     end
-    return setmetatable(self, { __index = function(t: any, k: string): any 
+    return setmetatable(self, { __index = function(_: any, k: string): any 
             if (GridMenuCursor as {string: any})[k] then
                 return (GridMenuCursor as {string: any})[k]
             end
