@@ -2,7 +2,7 @@ require("src/tactics/debug")
 
 require("src/tactics/menu/menu_manager")
 require("src/tactics/battle/tactics/battle_unit")
-local Pathfinding = require("src/tactics/battle/pathfinding")
+local pathfinding = require("src/tactics/battle/pathfinding")
 require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
@@ -35,7 +35,7 @@ local record MovementOption
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
-    local all_tile_costs = Pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
+    local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
 
     local enemies = self.battle_map:get_units(unit_is_player)
 
@@ -65,7 +65,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         local choice = potential_attacks[1]
 
         local destination = choice.destination
-        local path = Pathfinding.get_path_to_tile(all_tile_costs, destination)
+        local path = pathfinding.get_path_to_tile(all_tile_costs, destination)
 
         local action_ctx: MenuContext = {
             acting_unit = { unit = unit},
@@ -90,7 +90,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             point = all_tile_costs:get_point(point).prev
         end
 
-        local path = Pathfinding.get_path_to_tile(all_tile_costs, point)
+        local path = pathfinding.get_path_to_tile(all_tile_costs, point)
 
         local action_ctx = {
             acting_unit = { unit = unit },

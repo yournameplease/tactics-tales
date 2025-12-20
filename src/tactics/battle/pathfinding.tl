@@ -37,7 +37,7 @@ end
 -- Shared neighbor offsets (up, down, left, right)
 local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
-global record ShortestPathEntry
+local record ShortestPathEntry
     cost: integer
     prev: TilePoint
 end
@@ -135,18 +135,19 @@ end
 -- Public API
 -- --------------------------------------------------------------------------
 
-local record Pathfinding
-end
+local pathfinding = {
+    ShortestPathEntry = ShortestPathEntry
+}
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function Pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
+function pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
     return _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), limit, TilePoint.of(battle_map.width, battle_map.height))
 end 
 
 -- @return list of { { x, y } } tile coordinates from start position
-function Pathfinding.get_path_to_tile(all_tile_costs: array_2d.Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
+function pathfinding.get_path_to_tile(all_tile_costs: array_2d.Array2D<ShortestPathEntry>, tile: TilePoint): { TilePoint } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
     local path: {TilePoint} = {}
     pt.add(path, tile:copy())
@@ -160,7 +161,7 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function Pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
+function pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
     -- 1. Get the detailed map from the core engine
     local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), total_cost, TilePoint.of(battle_map.width, battle_map.height))
 
@@ -184,7 +185,7 @@ end
 ---@desc
 --- extend a path to a point, shortening the path until the point is reachable within max_length.
 --- return current path if not possible
-function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {TilePoint}
+function pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {TilePoint}
     if not legal_tiles:get_point(target) then
         return path
     end
@@ -265,4 +266,4 @@ function Pathfinding.extend_path_to_point(path: {TilePoint}, target: TilePoint, 
     return path
 end
 
-return Pathfinding
+return pathfinding

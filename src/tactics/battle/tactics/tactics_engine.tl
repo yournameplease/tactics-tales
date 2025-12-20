@@ -5,7 +5,7 @@ require ("src/tactics/menu/types")
 
 require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
-local Pathfinding = require("src/tactics/battle/pathfinding")
+local pathfinding = require("src/tactics/battle/pathfinding")
 require("src/tactics/draw")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
@@ -252,7 +252,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): arr
     local unit = ctx.acting_unit.unit
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local reachable_tiles = Pathfinding.find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+    local reachable_tiles = pathfinding.find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
 
     local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
 
