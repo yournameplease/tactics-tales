@@ -37,7 +37,7 @@ global record BattleManager
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
 
-    character_manager: CharacterManager
+    character_manager: character_manager.CharacterManager
 
     services: GameServiceBundle
 end
@@ -85,14 +85,14 @@ function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spa
 end
 
 
-function BattleManager.new(battle_id: string, character_manager: CharacterManager, services: GameServiceBundle): BattleManager 
+function BattleManager.new(battle_id: string, char_man: character_manager.CharacterManager, services: GameServiceBundle): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
     self.services = services
 
     self.battle_id = battle_id
-    self.character_manager = character_manager
+    self.character_manager = char_man
 
     local battle_definition = BATTLE_DATA[self.battle_id]
 
