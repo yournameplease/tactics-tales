@@ -2,7 +2,6 @@ require("src/tactics/debug")
 require("src/tactics/types")
 
 require("src/tactics/battle/tactics/battle_unit")
-require("src/tactics/character/character_manager")
 require("src/tactics/character/object/character")
 require("src/tactics/character/sprite_data")
 local wpn = require("src/tactics/character/items/object/weapon")

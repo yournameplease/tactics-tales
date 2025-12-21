@@ -36,7 +36,7 @@ global record Story
 
     story_page: StoryPage
 
-    character_manager: CharacterManager	
+    character_manager: character_manager.CharacterManager	
     menu_manager: StoryMenuManager
     current_node: ActiveNode
 
