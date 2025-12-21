@@ -36,7 +36,7 @@ function VerticalListMenu.new(
     end
 
     props.draw_properties = props.draw_properties or {}
-    props.draw_properties.text_direction = props.draw_properties.text_direction or 'down'
+    props.draw_properties.direction = props.draw_properties.direction or 'down'
     return TextNode.new(props) as VerticalListMenu
 end
 

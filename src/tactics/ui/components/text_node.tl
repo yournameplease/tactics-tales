@@ -1,10 +1,10 @@
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
-local Text = require("src/tactics/util/text")
+local text = require("src/tactics/util/text")
 
 global interface TextUIElement
     is UIElement
-    draw_properties: Text.TextDrawProperties
+    draw_properties: text.DrawProperties
 end
 
 
@@ -44,12 +44,12 @@ function TextNode.new(props: TextNode): TextNode
     props.draw_properties = props.draw_properties or {}
     box.draw_properties = {
         justify = "left",
-        text_direction = "down",
-        wrap_mode = "ellipsis",
+        direction = "down",
+        wrap = "ellipsis",
     }
     box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
-    box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
-    box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
+    box.draw_properties.direction = props.draw_properties.direction or box.draw_properties.direction
+    box.draw_properties.wrap = box.draw_properties.wrap
 
     return box
 end
@@ -57,21 +57,23 @@ end
 function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
     Box._draw(self, state, ui_theme)
 
-    local text = self.text or self.func(state)
+    local lines = self.text or self.func(state)
 
     if self.rows then
         assert(
-                #text ==
+                #lines ==
                 self.rows, "`func` should return expected number of rows"
         )
     end
 
-    Text.draw(text,
+    local text_obj = text.new(lines, self.draw_properties)
+    text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
         self.w-self.internal_margin.l-self.internal_margin.r,
         self.h-self.internal_margin.t-self.internal_margin.b,
-        ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
+        ui_theme.COLOR_INTERIOR_TEXT
+    )
 end
 
 return TextNode

@@ -1,7 +1,7 @@
 require("src/tactics/ui/box")
 require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
-local Text = require("src/tactics/util/text")
+local text = require("src/tactics/util/text")
 
 global record MessageLog
     is UIElement, TextUIElement
@@ -24,12 +24,12 @@ function MessageLog.new(props: MessageLog): MessageLog
     props.draw_properties = props.draw_properties or {}
     box.draw_properties = box.draw_properties or {
         justify = "left",
-        text_direction = "up",
-        wrap_mode = "wrap"
+        direction = "up",
+        wrap = "wrap"
     }
     box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
-    box.draw_properties.text_direction = props.draw_properties.text_direction or box.draw_properties.text_direction
-    box.draw_properties.wrap_mode = box.draw_properties.wrap_mode
+    box.draw_properties.direction = props.draw_properties.direction or box.draw_properties.direction
+    box.draw_properties.wrap = box.draw_properties.wrap
 
     return box
 end
@@ -39,7 +39,7 @@ function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
 
     local row_limit = (self.h-self.internal_margin.t-self.internal_margin.b) // 10
 
-    local text = self.func(state, row_limit)
+    local lines = self.func(state, row_limit)
 
     -- TODO: text wrapping?  and cutoff text if not wrap
     -- local rows_to_render = pt.min(row_count, #text)
@@ -47,12 +47,15 @@ function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
     --     draw_text_row(self, i, text[#text-i+1], ui_theme)
     -- end
 
-    Text.draw(text,
+    local text_obj = text.new(lines, self.draw_properties)
+    
+    text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
         self.w-self.internal_margin.l-self.internal_margin.r,
         self.h-self.internal_margin.t-self.internal_margin.b,
-        ui_theme.COLOR_INTERIOR_TEXT, self.draw_properties)
+        ui_theme.COLOR_INTERIOR_TEXT
+    )
 end
 
 setmetatable(MessageLog, { __index = Box})
