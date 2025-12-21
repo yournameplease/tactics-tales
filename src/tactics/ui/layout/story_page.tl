@@ -23,8 +23,8 @@ local story_page = MessageLog.new({
     flex_grow = 1,
     padding = 2,
     draw_properties = {
-        text_direction = "down",
-        wrap_mode = "ellipsis",
+        direction = "down",
+        wrap = "ellipsis",
     },
     func = function(state: UIContextManager, _row_limit: integer): { string }
         return state.story_context.story_page.text

@@ -16,7 +16,7 @@ function EventMessageLog.new(props: MessageLog): EventMessageLog
     end
 
     props.draw_properties = props.draw_properties or {}
-    props.draw_properties.text_direction = props.draw_properties.text_direction or 'up'
+    props.draw_properties.direction = props.draw_properties.direction or 'up'
     return MessageLog.new(props) as EventMessageLog
 end
 
