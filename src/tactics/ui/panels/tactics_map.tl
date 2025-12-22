@@ -9,6 +9,7 @@ require("src/tactics/util/array_2d")
 require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local maps = require("src/tactics/util/maps")
+local point = require("src/tactics/types")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
@@ -39,7 +40,7 @@ local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7
 
-local FOOT_GROUND_ANCHOR = point.of(8,12)
+local FOOT_GROUND_ANCHOR = Point.of(8,12)
 
 function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
     local box = Box.new(props) as TacticsMap
@@ -56,7 +57,7 @@ end
 
 local record AnimatedUnitPosition
     id: integer
-    point: point.Point
+    point: Point
 end
 
 local function compute_animated_unit_positions(battle_map: BattleMap): { AnimatedUnitPosition }
@@ -131,13 +132,13 @@ local function draw_unit(unit: BattleUnit)
     draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_SIZE.x-2, 4)
 end
 
-local function set_ud_tile(ud: Userdata, t: point.Point, s: integer)
+local function set_ud_tile(ud: Userdata, t: Point, s: integer)
     -- LOG.trace(t, s)
     ud:set(t.x, t.y, BASE_TILE_SPRITE + s)
 end
 
 local function get_path_layer(state: UIContextManager): Userdata
-    local cursor_tile: point.Point = nil
+    local cursor_tile: Point = nil
     local menu = state.battle_context.battle_menu_manager
     local menu_cursor: MenuCursor<BattleMenuContext> = menu.menu_cursor
 
@@ -249,7 +250,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     local layer_wall_front = layers.front_wall
     local layer_path = get_path_layer(state)
 
-    local cursor_tile: point.Point = nil
+    local cursor_tile: Point = nil
     local menu_cursor = menu.menu_cursor
     if menu_cursor is GridMenuCursor<BattleMenuContext> then
         cursor_tile = menu_cursor.point

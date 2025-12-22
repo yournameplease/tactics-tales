@@ -11,7 +11,7 @@ local SIDE_ENEMY = 1
 
 global record BattleUnit
     id: integer
-    tile: point.Point
+    tile: Point
     hp_current: integer
     side: Side
     has_acted: boolean
@@ -45,7 +45,7 @@ end
 --     return tab.source[k]
 -- end
 
-local function spawn_unit(permanent_unit: Character, tile: point.Point): BattleUnit
+local function spawn_unit(permanent_unit: Character, tile: Point): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,
@@ -59,7 +59,7 @@ local function spawn_unit(permanent_unit: Character, tile: point.Point): BattleU
     return instance
 end
 
-function battle_unit.player(permanent_unit: Character, tile: point.Point): BattleUnit
+function battle_unit.player(permanent_unit: Character, tile: Point): BattleUnit
     local instance = spawn_unit(permanent_unit, tile)
 
     instance.side = SIDE_PLAYER
@@ -67,7 +67,7 @@ function battle_unit.player(permanent_unit: Character, tile: point.Point): Battl
     return instance
 end
 
-function battle_unit.enemy(permanent_unit: Character, tile: point.Point, ai: unit_ai.UnitAI): BattleUnit
+function battle_unit.enemy(permanent_unit: Character, tile: Point, ai: unit_ai.UnitAI): BattleUnit
     local instance = spawn_unit(permanent_unit, tile)
 
     instance.side = SIDE_ENEMY

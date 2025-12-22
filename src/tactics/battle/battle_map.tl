@@ -54,8 +54,8 @@ global record MapLayers
 end
 
 global record MapMetadata
-    player_spawners: { integer: point.Point }
-    enemy_spawners: { integer: { point.Point } }
+    player_spawners: { integer: Point }
+    enemy_spawners: { integer: { Point } }
 end
 
 global record BattleMap    
@@ -65,13 +65,13 @@ global record BattleMap
     units_by_id: { integer: battle_unit.BattleUnit }
     units_by_x_y: array_2d.Array2D<battle_unit.BattleUnit>
 
-    tile_labels: {battle_definition.TileLabel: {point.Point}}
+    tile_labels: {battle_definition.TileLabel: {Point}}
     
     layers: MapLayers 
     metadata: MapMetadata
 end
 
-function BattleMap.new(width: integer, height: integer, labels: { string: {point.Point} }): BattleMap
+function BattleMap.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
         units_by_x_y = array_2d.new(width, height),
@@ -81,7 +81,7 @@ function BattleMap.new(width: integer, height: integer, labels: { string: {point
 end
 
 -- data access
-function BattleMap:get_tiles_by_label(label: battle_definition.TileLabel): {point.Point}
+function BattleMap:get_tiles_by_label(label: battle_definition.TileLabel): {Point}
     if self.tile_labels[label] then
         return self.tile_labels[label]
     else
@@ -89,7 +89,7 @@ function BattleMap:get_tiles_by_label(label: battle_definition.TileLabel): {poin
     end
 end
 
-function BattleMap:get_terrain(tile: point.Point): TerrainData
+function BattleMap:get_terrain(tile: Point): TerrainData
     local ground = self.layers.ground
     local back_wall = self.layers.back_wall
     local mid_wall = self.layers.mid_wall
@@ -133,11 +133,11 @@ function BattleMap:get_unit_by_id(id: integer): battle_unit.BattleUnit
     return self.units_by_id[id]
 end
 
-function BattleMap:get_at_tile(tile: point.Point): battle_unit.BattleUnit
+function BattleMap:get_at_tile(tile: Point): battle_unit.BattleUnit
     return self.units_by_x_y:get_point(tile)
 end
 
-function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: point.Point)
+function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: Point)
     if self:get_at_tile(tile) ~= nil then
         error("Tried to spawn unit in an occupied tile! (".. tile.x .. "," .. tile.y .. ")")
     end
@@ -147,13 +147,13 @@ function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: point.Point)
     self.units_by_x_y:set_point(tile, unit)
 end
 
-function BattleMap:tile_is_legal_destination(unit: battle_unit.BattleUnit, tile: point.Point): boolean
+function BattleMap:tile_is_legal_destination(unit: battle_unit.BattleUnit, tile: Point): boolean
     local unit_id_at_destination = self.units_by_x_y:get_point(tile)
     return (unit_id_at_destination == nil
             or unit_id_at_destination.id == unit.id)
 end
 
-function BattleMap:move_unit(unit: battle_unit.BattleUnit, tile: point.Point)
+function BattleMap:move_unit(unit: battle_unit.BattleUnit, tile: Point)
     assert(self:tile_is_legal_destination(unit, tile))
 
     self.units_by_x_y:set_point(unit.tile, nil)
@@ -171,13 +171,13 @@ end
 -- queries
 
 
-function BattleMap:tile_has_distance_from_tile(t1: point.Point, t2: point.Point, min_distance: integer, max_distance: integer): boolean
+function BattleMap:tile_has_distance_from_tile(t1: Point, t2: Point, min_distance: integer, max_distance: integer): boolean
     max_distance = max_distance or min_distance
     local distance = taxicab_distance(t1, t2)
     return distance >= min_distance and distance <= max_distance
 end
 
-function BattleMap:get_targets_in_range(unit_id: integer, tile: point.Point): { battle_unit.BattleUnit }
+function BattleMap:get_targets_in_range(unit_id: integer, tile: Point): { battle_unit.BattleUnit }
     local targets: { BattleUnit } = {}
     local attacker = self.units_by_id[unit_id]
     local min_range, max_range = attacker.character:get_weapon_range()

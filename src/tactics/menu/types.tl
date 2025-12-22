@@ -21,12 +21,12 @@ global enum MenuType
 end
 
 global record TileSelection
-    point: point.Point
-    path: { point.Point }
+    point: Point
+    path: { Point }
 end
 
 global record UnitSelection
-    point: point.Point
+    point: Point
     unit: BattleUnit
 end
 
@@ -58,5 +58,5 @@ global type MenuStep = string
 global record MenuState
     step: MenuStep
     menu_id: MenuId
-    point: point.Point
+    point: Point
 end

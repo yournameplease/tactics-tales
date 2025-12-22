@@ -40,12 +40,12 @@ end
 
 global record BaseAnimationFrame
     sprite_offset: integer
-    anchors: { AnchorPointName: point.Point }
+    anchors: { AnchorPointName: Point }
 end
 
 global record AnimationFrame
     sprite: integer
-    anchors: { AnchorPointName: point.Point }
+    anchors: { AnchorPointName: Point }
 end
 
 local type BaseAnimation = { AnimationFrameName: BaseAnimationFrame }
@@ -58,37 +58,37 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = point.of(9, 7),
-                main_hand = point.of(1, 8),
-                off_hand = point.of(14, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(9, 7),
+                main_hand = Point.of(1, 8),
+                off_hand = Point.of(14, 12),
+                feet_center = Point.of(7, 15)
             }
         },
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                neck = point.of(10, 7),
-                main_hand = point.of(1, 7),
-                off_hand = point.of(14, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(10, 7),
+                main_hand = Point.of(1, 7),
+                off_hand = Point.of(14, 12),
+                feet_center = Point.of(7, 15)
             }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                neck = point.of(9, 7),
-                main_hand = point.of(1, 8),
-                off_hand = point.of(14, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(9, 7),
+                main_hand = Point.of(1, 8),
+                off_hand = Point.of(14, 12),
+                feet_center = Point.of(7, 15)
             }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                neck = point.of(9, 7),
-                main_hand = point.of(1, 8),
-                off_hand = point.of(14, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(9, 7),
+                main_hand = Point.of(1, 8),
+                off_hand = Point.of(14, 12),
+                feet_center = Point.of(7, 15)
             }
         },
     },
@@ -96,37 +96,37 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = point.of(7, 7),
-                main_hand = point.of(3, 12),
-                off_hand = point.of(12, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(7, 7),
+                main_hand = Point.of(3, 12),
+                off_hand = Point.of(12, 12),
+                feet_center = Point.of(7, 15)
             }
         },
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               neck = point.of(6, 7),
-               main_hand = point.of(4, 11),
-               off_hand = point.of(11, 12),
-               feet_center = point.of(7, 15)
+               neck = Point.of(6, 7),
+               main_hand = Point.of(4, 11),
+               off_hand = Point.of(11, 12),
+               feet_center = Point.of(7, 15)
            }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                neck = point.of(7, 7),
-                main_hand = point.of(3, 12),
-                off_hand = point.of(12, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(7, 7),
+                main_hand = Point.of(3, 12),
+                off_hand = Point.of(12, 12),
+                feet_center = Point.of(7, 15)
             }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                neck = point.of(7, 7),
-                main_hand = point.of(3, 12),
-                off_hand = point.of(12, 12),
-                feet_center = point.of(7, 15)
+                neck = Point.of(7, 7),
+                main_hand = Point.of(3, 12),
+                off_hand = Point.of(12, 12),
+                feet_center = Point.of(7, 15)
             }
         },
     },
@@ -134,37 +134,37 @@ local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                neck = point.of(6, 7),
-                main_hand = point.of(13, 9),
-                off_hand = point.of(3, 11),
-                feet_center = point.of(7, 15)
+                neck = Point.of(6, 7),
+                main_hand = Point.of(13, 9),
+                off_hand = Point.of(3, 11),
+                feet_center = Point.of(7, 15)
             }
         },
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               neck = point.of(7, 7),
-               main_hand = point.of(14, 8),
-               off_hand = point.of(4, 11),
-               feet_center = point.of(7, 15)
+               neck = Point.of(7, 7),
+               main_hand = Point.of(14, 8),
+               off_hand = Point.of(4, 11),
+               feet_center = Point.of(7, 15)
            }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                neck = point.of(6, 7),
-                main_hand = point.of(13, 9),
-                off_hand = point.of(3, 11),
-                feet_center = point.of(7, 15)
+                neck = Point.of(6, 7),
+                main_hand = Point.of(13, 9),
+                off_hand = Point.of(3, 11),
+                feet_center = Point.of(7, 15)
             }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                neck = point.of(6, 7),
-                main_hand = point.of(13, 9),
-                off_hand = point.of(3, 11),
-                feet_center = point.of(7, 15)
+                neck = Point.of(6, 7),
+                main_hand = Point.of(13, 9),
+                off_hand = Point.of(3, 11),
+                feet_center = Point.of(7, 15)
             }
         },
     }

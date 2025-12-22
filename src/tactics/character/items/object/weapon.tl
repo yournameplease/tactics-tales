@@ -16,7 +16,7 @@ end
 local record Weapon
     name: string
     sprite: integer
-    hand_anchor: point.Point
+    hand_anchor: Point
     damage: integer
     accuracy: integer
     type: WeaponType

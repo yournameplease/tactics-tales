@@ -72,7 +72,7 @@ end
 
 -- unit spawning
 
-function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: point.Point, side: Side)
+function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Point, side: Side)
     local idle_animation = self.animation_manager:create_idle_animation()
     unit.animation_data = idle_animation
     self.battle_map:spawn_unit(unit, spawn_point)

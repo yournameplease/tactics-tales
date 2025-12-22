@@ -49,8 +49,8 @@ end
 local function validate_tile_is_in_unit_attack_range(
     battle_map: BattleMap,
     unit: BattleUnit,
-    unit_position: point.Point,
-    target_point: point.Point 
+    unit_position: Point,
+    target_point: Point 
 ): boolean
     local min_range, max_range = unit.character:get_weapon_range()
 
@@ -97,7 +97,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
                 get_max_path_length = function(msb: BattleMenuContext, ctx: MenuContext): integer
                     return ctx.acting_unit.unit.character.stats.movement
                 end,
-                get_path_anchor = function(msb: BattleMenuContext, ctx: MenuContext): point.Point
+                get_path_anchor = function(msb: BattleMenuContext, ctx: MenuContext): Point
                     return ctx.acting_unit.point:copy()
                 end
             }),

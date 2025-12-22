@@ -12,7 +12,7 @@ end
 
 setmetatable(PortraitBox, { __index = Box })
 
-local FEET_ANCHOR = point.of(11, 22)
+local FEET_ANCHOR = Point.of(11, 22)
 
 function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUnit): PortraitBox
     local box = Box.new({

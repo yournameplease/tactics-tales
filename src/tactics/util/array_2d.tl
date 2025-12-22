@@ -73,14 +73,14 @@ end
 function Array2DImpl:foreachpoint(fn: function(point: Point, v: V))
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
-            fn(point.of(x-1, y-1), v)
+            fn(Point.of(x-1, y-1), v)
         end
     end
 end
 
 function Array2DImpl:map<NewType>(fn: function(v: V): NewType): Array2D<NewType>
     local out: Array2D<NewType> = array_2d.new(self.w, self.h)
-    self:foreachpoint(function(p: point.Point, v: V)
+    self:foreachpoint(function(p: Point, v: V)
         out:set_point(p, fn(v))
     end)
     return out

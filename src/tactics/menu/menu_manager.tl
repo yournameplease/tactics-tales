@@ -59,7 +59,7 @@ function BaseMenuManager.new(
     self.menu_definitions = menu_definitions
 
     self.menu_state = {
-        point = point.of(0, 0)
+        point = Point.of(0, 0)
     }
     self.menu_ctx = {
         metadata = {}

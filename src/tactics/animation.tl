@@ -22,7 +22,7 @@ global interface AnimationInstance
     tick: function(self)
     -- takes a the global frame as input
     get_sprite_frame_name: function(self, integer): AnimationFrameName
-    get_animation_offset: function(self, integer): point.Point
+    get_animation_offset: function(self, integer): Point
 
     animated_object: AnimatedSpriteData
 end
@@ -66,12 +66,12 @@ function SpriteFrameData:get_at_frame(frame: integer): AnimationFrameName
     return self.sprite_frames[#self.sprite_frames].sprite_name
 end
 
-local function lerp_offsets(o0: point.Point, o1: point.Point, frame: number, duration: number): point.Point
+local function lerp_offsets(o0: Point, o1: Point, frame: number, duration: number): Point
     return o0 + (frame/duration) * (o1 - o0)
 end
 
-local record point.Point
-    point: point.Point
+local record Point
+    point: Point
     duration: integer
 end
 
@@ -80,7 +80,7 @@ local record PathAnimationInstance
     where self.type == "path" 
     current_point: integer
     frame: integer
-    path_points: { point.Point }
+    path_points: { Point }
     sprites: SpriteFrameData
 end
 
@@ -100,7 +100,7 @@ function PathAnimationInstance:get_sprite_frame_name(global_frame: integer): Ani
     return self.sprites:get_at_frame(global_frame)
 end
 
-function PathAnimationInstance:get_animation_offset(_global_frame: integer): point.Point
+function PathAnimationInstance:get_animation_offset(_global_frame: integer): Point
     if #self.path_points == 1 then
         return self.path_points[1].point
     end
@@ -131,13 +131,13 @@ function DirectionalOffsetAnimationInstance:get_sprite_frame_name(_global_frame:
     return self.sprites:get_at_frame(self.frame)
 end
 
-function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: integer): point.Point
+function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: integer): Point
     local track = self.track
     assert(self.frame <= #track)
 
     local direction = self.direction
     local offset = track[self.frame]
-    return point.of_angle(direction, offset)
+    return Point.of_angle(direction, offset)
 end
 
 global record GlobalAnimationInstance
@@ -155,13 +155,13 @@ function GlobalAnimationInstance:get_sprite_frame_name(global_frame: integer): A
     return self.sprites:get_at_frame(global_frame)
 end
 
-function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): point.Point
-    return point.of(0, 0)
+function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): Point
+    return Point.of(0, 0)
 end
 
 global record AnimationFrameData
     frame: AnimationFrameName
-    offset: point.Point
+    offset: Point
 end
 
 global enum OffsetAnimationId
@@ -312,7 +312,7 @@ function AnimationManager:create_animation(animation_id: OffsetAnimationId, dire
     return animation_data.animated_object
 end
 
-function AnimationManager:create_walk_animation(path: { point.Point }): AnimatedSpriteData
+function AnimationManager:create_walk_animation(path: { Point }): AnimatedSpriteData
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation
@@ -320,7 +320,7 @@ function AnimationManager:create_walk_animation(path: { point.Point }): Animated
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
-    local path_points: { point.Point } = maps.map(path, function(p: point.Point): point.Point
+    local path_points: { Point } = maps.map(path, function(p: Point): Point
         return {
             point = p,
             duration = DURATION_PER_TILE
