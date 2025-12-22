@@ -91,7 +91,6 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             return {row}
         end
     elseif self.wrap == "wrap" then
-    LOG.debug("wrapping...",row)
         -- this needs unit tests x.x
         local out: {string} = {}
         local line_start = 1
@@ -119,12 +118,10 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
                 return out
             elseif previous_word_end >= line_start then
                 pt.add(out, pt.sub(row, line_start, previous_word_end))
-        LOG.debug("wrap adding...",out[#out])
                 line_start = previous_word_end + 1
             else
                 -- need to hyphenate
                 pt.add(out, pt.sub(row, line_start, line_end-2)..'-')
-        LOG.debug("wrap adding...",out[#out])
     			line_start = line_end - 1
             end
         end

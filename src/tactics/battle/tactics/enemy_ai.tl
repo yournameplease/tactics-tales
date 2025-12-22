@@ -17,12 +17,16 @@ AI Mk 1:
 - - pick nearest  enemy, move as close as possible
 ]]
 
-global record EnemyAIEngine
+local record EnemyAIEngine
     battle_map: BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     event_bus: EventBus
     task_manager: TaskManager
 end
+
+local enemy_ai_engine = {
+    EnemyAIEngine = EnemyAIEngine,
+}
 
 local record AttackOption
     destination: TilePoint
@@ -34,7 +38,22 @@ local record MovementOption
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
-    local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, 999) 
+    local ai = unit.unit_ai
+
+    local max_move: integer
+    if ai.move == "zero" then
+        max_move = 0
+    elseif ai.move == "one" then
+        max_move = unit.character.stats.movement
+    elseif ai.move == "two" then
+        max_move = unit.character.stats.movement * 2
+    elseif ai.move == "infinity" then
+        max_move = 999
+    else
+        error()
+    end
+        
+    local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
 
     local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
 
@@ -117,7 +136,7 @@ function EnemyAIEngine:handle_enemy_turn()
     end)
 end
 
-function EnemyAIEngine.new(
+function enemy_ai_engine.new(
     battle_map: BattleMap,
     tactics_engine: tactics_engine.TacticsEngine,
     event_bus: EventBus,
@@ -133,4 +152,4 @@ function EnemyAIEngine.new(
     return self
 end
 
-return EnemyAIEngine
+return enemy_ai_engine
