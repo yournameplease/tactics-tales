@@ -1,6 +1,6 @@
 require("src/tactics/systems/service")
 require("src/tactics/debug")
-local point = require("src/tactics/types")
+require("src/tactics/types")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
 require("src/tactics/character/animation_data")

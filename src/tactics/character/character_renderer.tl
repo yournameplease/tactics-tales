@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-local point = require("src/tactics/types")
+require("src/tactics/types")
 
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")

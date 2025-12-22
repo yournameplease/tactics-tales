@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 
 global record UITheme
     COLOR_DECORATION_PRIMARY: Color

@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/data/maps")
 require("src/tactics/battle/battle_map")
 local MAP_DEFINITIONS = require("src/tactics/data/maps")

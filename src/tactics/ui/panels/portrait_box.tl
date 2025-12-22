@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
 local CharacterRenderer = require("src/tactics/character/character_renderer")

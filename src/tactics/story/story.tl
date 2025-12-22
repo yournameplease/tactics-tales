@@ -1,7 +1,7 @@
 
 require("src/tactics/debug")
 
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 

@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/ui/types")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/config")

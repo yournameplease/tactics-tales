@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/battle_unit")
