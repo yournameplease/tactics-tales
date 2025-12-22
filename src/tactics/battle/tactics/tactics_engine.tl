@@ -10,12 +10,16 @@ local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
+local battle_definition = require("src/tactics/battle/definition")
 
-require("src/tactics/battle/tactics/battle_unit")
+local character_manager = require("src/tactics/character/character_manager")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 
+local SIDE_PLAYER = 0
+local SIDE_ENEMY = 1
 
 local record TacticsEngine
 
@@ -23,6 +27,7 @@ local record TacticsEngine
     is_player_turn: boolean
 
     battle_map: BattleMap
+    character_manager: character_manager.CharacterManager
 
     task_manager: TaskManager
     animation_manager: AnimationManager
@@ -46,6 +51,7 @@ local tactics_engine = {
 
 function tactics_engine.new(
     battle_map: BattleMap,
+    character_manager: character_manager.CharacterManager,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus
@@ -61,6 +67,51 @@ function tactics_engine.new(
 
     return self
 end
+
+-- unit spawning
+
+function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: TilePoint, side: Side)
+    local idle_animation = self.animation_manager:create_idle_animation()
+    unit.animation_data = idle_animation
+    self.battle_map:spawn_unit(unit, spawn_point)
+end
+
+--- Iterates over enemy definitions and calls CharacterManager
+function TacticsEngine:spawn_enemies(enemies: {battle_definition.EnemySpawnData})
+    for i, enemy in ipairs(enemies) do
+        local spawn_points = self.battle_map:get_tiles_by_label(enemy.tile)
+        for _,spawn_point in ipairs(spawn_points) do
+            local character = self.character_manager:generate_character(enemy.template)
+            local unit = battle_unit.enemy(character, spawn_point, enemy.ai)
+            self:spawn_unit(unit, spawn_point, SIDE_ENEMY)
+        end
+    end
+end
+
+function TacticsEngine:spawn_players(players: {battle_definition.PlayerSpawnData})
+    local char_man = self.character_manager
+    local player_roster = char_man:get_player_roster()
+    local roster_count = 1
+    for i, player in ipairs(players) do
+        local spawn_points = self.battle_map:get_tiles_by_label(player.tile)
+        for _,spawn_point in ipairs(spawn_points) do
+            local unit: BattleUnit
+            if player.template ~= nil then
+                local character = char_man:generate_character(player.template)
+                unit = battle_unit.player(character, spawn_point)
+                char_man:persist_player(character)
+            else
+                if player_roster[roster_count] ~= nil then
+                    local character = player_roster[roster_count]
+                    unit = battle_unit.player(character, spawn_point)
+                    roster_count = roster_count + 1
+                end
+            end
+            self:spawn_unit(unit, spawn_point, SIDE_PLAYER)
+        end
+    end
+end
+
 
 -- handlers
 

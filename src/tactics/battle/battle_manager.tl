@@ -21,6 +21,7 @@ local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local battle_definition = require("src/tactics/battle/definition")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -42,51 +43,6 @@ global record BattleManager
     services: GameServiceBundle
 end
 
-
-function BattleManager:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: TilePoint, side: Side)
-    local idle_animation = self.services.animation_manager:create_idle_animation()
-    unit.animation_data = idle_animation
-    self.battle_map:spawn_unit(unit, spawn_point)
-end
-
---- Iterates over enemy definitions and calls CharacterManager
-function BattleManager:spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners: {integer: {TilePoint}})
-    for i, enemy in ipairs(enemies) do
-        local spawners = enemy_spawners[i]
-        assert(spawners ~= nil)
-        for _,spawn_point in ipairs(enemy_spawners[i]) do
-            -- TODO: generate from template
-            local character = self.character_manager:generate_character(enemy.template)
-            local unit = battle_unit.enemy(character, spawn_point, enemy.ai)
-            self:spawn_unit(unit, spawn_point, SIDE_ENEMY)
-        end
-    end
-end
-
-function BattleManager:spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
-    local char_man = self.character_manager
-    local player_roster = char_man:get_player_roster()
-    local roster_count = 1
-    for i, spawn_point in ipairs(player_spawners) do
-        -- TODO: use existing players
-        local unit: BattleUnit
-        if new_players[i] ~= nil then
-            local spawn_data = new_players[i]
-            local character = char_man:generate_character(spawn_data.template)
-            unit = battle_unit.player(character, spawn_point)
-            char_man:persist_player(character)
-        else
-            if player_roster[roster_count] ~= nil then
-                local character = player_roster[roster_count]
-                unit = battle_unit.player(character, spawn_point)
-                roster_count = roster_count + 1
-            end
-        end
-        self:spawn_unit(unit, spawn_point, SIDE_PLAYER)
-    end
-end
-
-
 function BattleManager.new(battle_id: string, char_man: character_manager.CharacterManager, services: GameServiceBundle): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
@@ -96,19 +52,20 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
     self.battle_id = battle_id
     self.character_manager = char_man
 
-    local battle_definition = BATTLE_DATA[self.battle_id]
+    local battle_def = BATTLE_DATA[self.battle_id]
 
-    self.battle_map = map_generator.load_map(battle_definition.map_id)
-
-    self:spawn_enemies(battle_definition.enemies, self.battle_map.metadata.enemy_spawners)
-    self:spawn_players(battle_definition.players, self.battle_map.metadata.player_spawners)
+    self.battle_map = map_generator.load_map(battle_def.map_id, battle_def.tile_labels)
 
     self.tactics_engine = tactics_engine.new(
         self.battle_map,
+        self.character_manager,
         self.services.task_manager,
         self.services.animation_manager,
         self.services.event_bus
     )
+    
+    self.tactics_engine:spawn_enemies(battle_def.enemies)
+    self.tactics_engine:spawn_players(battle_def.players)
 
     self.battle_objective_service = battle_objective_service.new(
         self.battle_map

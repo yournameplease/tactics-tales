@@ -3,6 +3,8 @@ require("src/tactics/data/maps")
 require("src/tactics/battle/battle_map")
 local MAP_DEFINITIONS = require("src/tactics/data/maps")
 local map_types = require("src/tactics/battle/map/types")
+-- only for tile labels.  may want to move those...
+local battle_definition = require("src/tactics/battle/definition")
 
 
 local map_generator = {
@@ -17,9 +19,7 @@ local type MapFetchResult = { __MapFetchResultEntry }
 
 
 
-local BASE_PLAYER_SPAWNER_SPRITE = 0x408
-local BASE_ENEMY_SPAWNER_SPRITE = 0x410
-local BASE_REINFORCEMENT_SPAWNER_SPRITE = 0x418
+local BASE_METATILE= 0x400
 
 local METATILES_LAYER = 1
 local FRONT_WALL_LAYER = 2
@@ -73,7 +73,7 @@ local function apply_default_walls(map_layers: MapLayers)
     end
 end
 
-local function load_static(definition: map_types.StaticMapDefinition): BattleMap
+local function load_static(definition: map_types.StaticMapDefinition, tile_labels: {battle_definition.TileLabel: {integer}}): BattleMap
     local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
@@ -82,30 +82,39 @@ local function load_static(definition: map_types.StaticMapDefinition): BattleMap
     apply_default_walls(layers)
 
     local metatiles_layer = layers.metatiles
-    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height())
+    local labels_by_metatile: {integer: {battle_definition.TileLabel}} = {}
+    for label,metatiles in pairs(tile_labels) do
+        for _,metatile in ipairs(metatiles) do
+            if labels_by_metatile[metatile] == nil then
+                labels_by_metatile[metatile] = {}
+            end
+            pt.add(labels_by_metatile[metatile], label)
+        end        
+    end
+    
+    local labels: {battle_definition.TileLabel: {TilePoint}} = {}
+    for x = 0, metatiles_layer:height()-1 do
+        for y = 0,metatiles_layer:width()-1 do
+            local metatile = metatiles_layer:get(x, y) - BASE_METATILE
+            if labels_by_metatile[metatile] ~= nil then
+                local point = TilePoint.of(x, y)
+                for _,label in ipairs(labels_by_metatile[metatile]) do
+                    if labels[label] == nil then
+                        labels[label] = {}
+                    end
+                    pt.add(labels[label], point)
+                end
+            end
+        end
+    end
+    
+    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height(), tile_labels)
     battle_map.layers = layers
-    battle_map.width = metatiles_layer:width()
-    battle_map.height = metatiles_layer:height()
     battle_map.metadata = {
         player_spawners = {},
         enemy_spawners = {},
     }
 
-    for x = 0, metatiles_layer:height()-1 do
-        for y = 0,metatiles_layer:width()-1 do
-            local tile = metatiles_layer:get(x, y)
-            if tile >= BASE_PLAYER_SPAWNER_SPRITE and tile < BASE_ENEMY_SPAWNER_SPRITE then
-                local player_spawner_id = tile - BASE_PLAYER_SPAWNER_SPRITE + 1
-                battle_map.metadata.player_spawners[player_spawner_id] = TilePoint.of(x, y)
-            elseif tile >= BASE_ENEMY_SPAWNER_SPRITE and tile < BASE_REINFORCEMENT_SPAWNER_SPRITE then
-                local enemy_spawner_id = tile - BASE_ENEMY_SPAWNER_SPRITE + 1
-                if battle_map.metadata.enemy_spawners[enemy_spawner_id] == nil then
-                    battle_map.metadata.enemy_spawners[enemy_spawner_id] = {}
-                end
-                pt.add(battle_map.metadata.enemy_spawners[enemy_spawner_id], TilePoint.of(x, y))
-            end
-        end
-    end
 
     return battle_map
 end
@@ -116,13 +125,13 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function map_generator.load_map(map_id: string): BattleMap
+function map_generator.load_map(map_id: string, tile_labels: {battle_definition.TileLabel: {integer}}): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
     local battle_map: BattleMap
     if definition is map_types.StaticMapDefinition then
-        battle_map = load_static(definition)
+        battle_map = load_static(definition, tile_labels)
     -- elseif definition is ProceduralMapDefinition then
 
     else

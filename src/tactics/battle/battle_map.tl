@@ -1,7 +1,8 @@
 require("src/tactics/types")
 require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
-require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_definition = require("src/tactics/battle/definition")
 
 global record TerrainData
     solid: boolean
@@ -61,22 +62,32 @@ global record BattleMap
     width: integer
     height: integer
     
-    units_by_id: { integer: BattleUnit }
-    units_by_x_y: array_2d.Array2D<BattleUnit>
+    units_by_id: { integer: battle_unit.BattleUnit }
+    units_by_x_y: array_2d.Array2D<battle_unit.BattleUnit>
+
+    tile_labels: {battle_definition.TileLabel: {TilePoint}}
     
     layers: MapLayers 
     metadata: MapMetadata
 end
 
-function BattleMap.new(width: integer, height: integer): BattleMap
+function BattleMap.new(width: integer, height: integer, labels: { string: {TilePoint} }): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
         units_by_x_y = array_2d.new(width, height),
     }, { __index = BattleMap })
+    self.tile_labels = labels
     return self
 end
 
 -- data access
+function BattleMap:get_tiles_by_label(label: battle_definition.TileLabel): {TilePoint}
+    if self.tile_labels[label] then
+        return self.tile_labels[label]
+    else
+        return {}
+    end
+end
 
 function BattleMap:get_terrain(tile: TilePoint): TerrainData
     local ground = self.layers.ground
@@ -118,15 +129,15 @@ function BattleMap:get_terrain(tile: TilePoint): TerrainData
     }
 end
 
-function BattleMap:get_unit_by_id(id: integer): BattleUnit
+function BattleMap:get_unit_by_id(id: integer): battle_unit.BattleUnit
     return self.units_by_id[id]
 end
 
-function BattleMap:get_at_tile(tile: TilePoint): BattleUnit
+function BattleMap:get_at_tile(tile: TilePoint): battle_unit.BattleUnit
     return self.units_by_x_y:get_point(tile)
 end
 
-function BattleMap:spawn_unit(unit: BattleUnit, tile: TilePoint)
+function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: TilePoint)
     if self:get_at_tile(tile) ~= nil then
         error("Tried to spawn unit in an occupied tile! (".. tile.x .. "," .. tile.y .. ")")
     end
@@ -136,13 +147,13 @@ function BattleMap:spawn_unit(unit: BattleUnit, tile: TilePoint)
     self.units_by_x_y:set_point(tile, unit)
 end
 
-function BattleMap:tile_is_legal_destination(unit: BattleUnit, tile: TilePoint): boolean
+function BattleMap:tile_is_legal_destination(unit: battle_unit.BattleUnit, tile: TilePoint): boolean
     local unit_id_at_destination = self.units_by_x_y:get_point(tile)
     return (unit_id_at_destination == nil
             or unit_id_at_destination.id == unit.id)
 end
 
-function BattleMap:move_unit(unit: BattleUnit, tile: TilePoint)
+function BattleMap:move_unit(unit: battle_unit.BattleUnit, tile: TilePoint)
     assert(self:tile_is_legal_destination(unit, tile))
 
     self.units_by_x_y:set_point(unit.tile, nil)
@@ -150,7 +161,7 @@ function BattleMap:move_unit(unit: BattleUnit, tile: TilePoint)
     unit.tile = tile
 end
 
-function BattleMap:kill_unit(unit: BattleUnit)
+function BattleMap:kill_unit(unit: battle_unit.BattleUnit)
     self.units_by_x_y:set_point(unit.tile, nil)
     self.units_by_id[unit.id] = nil
     unit:die()
@@ -166,7 +177,7 @@ function BattleMap:tile_has_distance_from_tile(t1: TilePoint, t2: TilePoint, min
     return distance >= min_distance and distance <= max_distance
 end
 
-function BattleMap:get_targets_in_range(unit_id: integer, tile: TilePoint): { BattleUnit }
+function BattleMap:get_targets_in_range(unit_id: integer, tile: TilePoint): { battle_unit.BattleUnit }
     local targets: { BattleUnit } = {}
     local attacker = self.units_by_id[unit_id]
     local min_range, max_range = attacker.character:get_weapon_range()
@@ -185,7 +196,7 @@ function BattleMap:get_targets_in_range(unit_id: integer, tile: TilePoint): { Ba
     return targets
 end
 
-function BattleMap:get_units(filter: function(BattleUnit): boolean): { BattleUnit }
+function BattleMap:get_units(filter: function(battle_unit.BattleUnit): boolean): { BattleUnit }
     local units: { BattleUnit } = {}
     for _,unit in pairs(self.units_by_id) do
         if filter(unit) then
@@ -195,6 +206,6 @@ function BattleMap:get_units(filter: function(BattleUnit): boolean): { BattleUni
     return units
 end
 
-function BattleMap:get_all_units(): { BattleUnit }
+function BattleMap:get_all_units(): { battle_unit.BattleUnit }
     return self:get_units(fn_true)
 end
