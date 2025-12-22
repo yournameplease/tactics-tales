@@ -4,7 +4,7 @@ require("src/tactics/animation")
 require("src/tactics/types")
 require("src/tactics/character/object/character")
 require("src/tactics/character/items/object/weapon")
-
+local unit_ai = require("src/tactics/battle/unit/unit_ai")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -19,9 +19,15 @@ global record BattleUnit
     animation_data: AnimatedSpriteData
     character: Character
 
+    unit_ai: unit_ai.UnitAI
+
     is_player: function(self): boolean
     is_enemy: function(self): boolean
 end
+
+local battle_unit = {
+    BattleUnit = BattleUnit
+}
 
 function BattleUnit:is_player(): boolean
     return self.side == SIDE_PLAYER
@@ -39,24 +45,33 @@ end
 --     return tab.source[k]
 -- end
 
-function BattleUnit.spawn(permanent_unit: Character, tile: TilePoint, side: Side): BattleUnit
+local function spawn_unit(permanent_unit: Character, tile: TilePoint): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,
-        side = side,
         hp_current = permanent_unit.stats.hp_max,
         has_acted = false,
         character = permanent_unit
     }
 
-    -- setmetatable(instance, {
-    --     __index = function(t, k)
-    --         if BattleUnit[k] then return BattleUnit[k] end
-
-    --         return access_fallback(t, k)
-    --     end
-    -- })
     setmetatable(instance, { __index = BattleUnit })
+
+    return instance
+end
+
+function battle_unit.player(permanent_unit: Character, tile: TilePoint): BattleUnit
+    local instance = spawn_unit(permanent_unit, tile)
+
+    instance.side = SIDE_PLAYER
+
+    return instance
+end
+
+function battle_unit.enemy(permanent_unit: Character, tile: TilePoint, ai: unit_ai.UnitAI): BattleUnit
+    local instance = spawn_unit(permanent_unit, tile)
+
+    instance.side = SIDE_ENEMY
+    instance.unit_ai = ai
 
     return instance
 end
@@ -74,4 +89,4 @@ function BattleUnit:die()
     LOG.info("Unit "..self.id.." is now dead")
 end
 
-return BattleUnit
+return battle_unit

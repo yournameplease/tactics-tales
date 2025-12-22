@@ -8,8 +8,8 @@ require("src/tactics/systems/tasks")
 require("src/tactics/data/battles")
 
 require("src/tactics/battle/battle_map")
-require("src/tactics/battle/tactics/battle_unit")
-require("src/tactics/battle/pathfinding")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")
@@ -17,7 +17,7 @@ require("src/tactics/ui/ui_context_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
-require("src/tactics/battle/tactics/enemy_ai")
+local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
@@ -33,7 +33,7 @@ global record BattleManager
 
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
-    enemy_ai_engine: EnemyAIEngine
+    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
 
@@ -43,44 +43,46 @@ global record BattleManager
 end
 
 
-function BattleManager:_spawn_unit(unit: Character, spawn_point: TilePoint, side: Side)
-    local battle_unit = BattleUnit.spawn(unit, spawn_point, side)
+function BattleManager:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: TilePoint, side: Side)
     local idle_animation = self.services.animation_manager:create_idle_animation()
-    battle_unit.animation_data = idle_animation
-    self.battle_map:spawn_unit(battle_unit, spawn_point)
+    unit.animation_data = idle_animation
+    self.battle_map:spawn_unit(unit, spawn_point)
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
-function BattleManager:_spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners: {integer: {TilePoint}})
+function BattleManager:spawn_enemies(enemies: {EnemySpawnData}, enemy_spawners: {integer: {TilePoint}})
     for i, enemy in ipairs(enemies) do
         local spawners = enemy_spawners[i]
-        assert(spawners)
+        assert(spawners ~= nil)
         for _,spawn_point in ipairs(enemy_spawners[i]) do
             -- TODO: generate from template
             local character = self.character_manager:generate_character(enemy.template)
-            self:_spawn_unit(character, spawn_point, SIDE_ENEMY)
+            local unit = battle_unit.enemy(character, spawn_point, enemy.ai)
+            self:spawn_unit(unit, spawn_point, SIDE_ENEMY)
         end
     end
 end
 
-function BattleManager:_spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
+function BattleManager:spawn_players(new_players: {PlayerSpawnData}, player_spawners: { TilePoint })
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
     local roster_count = 1
     for i, spawn_point in ipairs(player_spawners) do
         -- TODO: use existing players
-        local character: Character
+        local unit: BattleUnit
         if new_players[i] ~= nil then
             local spawn_data = new_players[i]
-            character = char_man:generate_character(spawn_data.template)
+            local character = char_man:generate_character(spawn_data.template)
+            unit = battle_unit.player(character, spawn_point)
             char_man:persist_player(character)
         else
             if player_roster[roster_count] ~= nil then
-                character = player_roster[roster_count]
+                local character = player_roster[roster_count]
+                unit = battle_unit.player(character, spawn_point)
                 roster_count = roster_count + 1
             end
         end
-        self:_spawn_unit(character, spawn_point, SIDE_PLAYER)
+        self:spawn_unit(unit, spawn_point, SIDE_PLAYER)
     end
 end
 
@@ -98,8 +100,8 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
 
     self.battle_map = map_generator.load_map(battle_definition.map_id)
 
-    self:_spawn_enemies(battle_definition.enemies, self.battle_map.metadata.enemy_spawners)
-    self:_spawn_players(battle_definition.players, self.battle_map.metadata.player_spawners)
+    self:spawn_enemies(battle_definition.enemies, self.battle_map.metadata.enemy_spawners)
+    self:spawn_players(battle_definition.players, self.battle_map.metadata.player_spawners)
 
     self.tactics_engine = tactics_engine.new(
         self.battle_map,
@@ -112,7 +114,7 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.battle_map
     )
 
-    self.enemy_ai_engine = EnemyAIEngine.new(
+    self.enemy_ai_engine = enemy_ai_engine.new(
         self.battle_map,
         self.tactics_engine,
         self.services.event_bus,

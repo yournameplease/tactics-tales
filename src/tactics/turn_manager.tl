@@ -1,6 +1,6 @@
 require("src/tactics/debug")
 
-require("src/tactics/battle/tactics/enemy_ai")
+local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/util/data_utils")
 require("src/tactics/systems/event_bus")
@@ -22,7 +22,7 @@ global record TurnManager
     battle_map: BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
-    enemy_ai_engine: EnemyAIEngine
+    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
     battle_menu_manager : BattleMenuManager
     event_bus: EventBus
 end
@@ -31,7 +31,7 @@ function TurnManager.new(
     battle_map: BattleMap,
     tactics_engine: tactics_engine.TacticsEngine,
     battle_objective_service: battle_objective_service.BattleObjectiveService,
-    enemy_ai_engine: EnemyAIEngine,
+    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine,
     event_bus: EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
