@@ -1,6 +1,6 @@
 require("src/tactics/types")
-local CONFIG = require("src/tactics/config")
-local maps = require("src/tactics/util/maps")
+require("src/tactics/config")
+local lists = require("src/tactics/util/lists")
 
 global function fn_true(): boolean
     return true
@@ -12,12 +12,12 @@ global function to_tile_path(path: { Point }): { Point }
     assert(#path > 0)
     --if #path == 0 then return path end
 
-    --TODO:
-    return {Point.of(0,0)}
-    -- local base_point = path[1]
-    -- return maps.map(path, function(p: Point): Point
-    --     return (p - base_point) * CONFIG.TILE_SIZE
-    -- end)
+    local base_point = path[1]
+    local normalize_point: function(Point): Point =
+        function(p: Point): Point
+            return (p - base_point) * CONFIG.TILE_SIZE
+        end
+    return lists.map(normalize_point)(path)
 end
 
 global function contains<V>(tab: {V}, val: V): boolean

@@ -3,7 +3,7 @@ local maps = {
 	
 }
 
-function maps.map<K, A, B>(m: {K: A}, fn: function(A): B): { K: B }
+function maps.map<Key, From, To>(m: {Key: From}, fn: function(From): To): { Key: To }
     local out = {}
     for k,v in pairs(m) do
         out[k] = fn(v)
