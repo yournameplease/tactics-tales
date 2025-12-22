@@ -1,49 +1,5 @@
---[[ Data contains:
-- map_file or generator
-- victory condition
-- config
-  - specify input for utility map tiles
-]]
-
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
-
-local enum VictoryConditionType
-        "ROUT"
-        "DEFEAT_BOSS"
-        "SURVIVE"
-        "ESCAPE"
-end
-
-local interface VictoryCondition
-    type: VictoryConditionType
-end
-
-
-local enum FailureConditionType
-    "LEADER_DIES"
-    "TURN_LIMIT"
-end
-
-local interface FailureCondition
-    type: FailureConditionType
-end
-
-global record EnemySpawnData
-    template: string
-    ai: unit_ai.UnitAI
-end
-
-global record PlayerSpawnData
-    template: string
-end
-
-global record BattleDefinition
-    map_id: string
-    victory_conditions: { VictoryCondition }
-    failure_conditions: { FailureCondition }
-    enemies: { integer: EnemySpawnData }
-    players: { integer: PlayerSpawnData }
-end
+local battle_definition = require("src/tactics/battle/definition")
 
 local ai: {string: unit_ai.UnitAI} = {
     default = { move = "two", target = "player"},
@@ -54,9 +10,17 @@ local ai: {string: unit_ai.UnitAI} = {
 }
 
 
-global BATTLE_DATA: { string: BattleDefinition } = {
+global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
     ["bandit_village"] = {
         map_id = "bandit_village",
+        tile_labels = {
+            ["player_deployment"] = { 0x01 },
+            ["bandit_boss_tile"] = { 0x01 },
+            ["bandit_goon_tile"] = { 0x01 },
+            ["player_spearman_tile"] = { 0x01 },
+            ["player_archer_tile"] = { 0x01 },
+            ["player_armor_tile"] = { 0x01 },
+        },
         victory_conditions = { {
             type = "ROUT"
         } },
@@ -64,13 +28,14 @@ global BATTLE_DATA: { string: BattleDefinition } = {
             type = "TURN_LIMIT"
         } },
         enemies = {
-            { template = "bandit_boss", ai = ai.stationary },
-            { template = "bandit_goon", ai = ai.move_two },
+            { template = "bandit_boss", ai = ai.stationary, tile = "bandit_boss_tile" },
+            { template = "bandit_goon", ai = ai.move_two, tile = "bandit_goon_tile" },
         },
         players = {
-            [2] = { template = "militia_spearman" },
-            [3] = { template = "militia_archer" },
-            [4] = { template = "militia_armor" },
+            { tile = "player_deployment" },
+            { template = "militia_spearman", tile = "player_spearman_tile" },
+            { template = "militia_archer", tile = "player_archer_tile" },
+            { template = "militia_armor", tile = "player_armor_tile" },
         }
     }
 }
