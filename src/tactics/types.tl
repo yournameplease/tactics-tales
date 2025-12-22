@@ -11,11 +11,11 @@ global type Color = integer
 global record Point
     x: integer
     y: integer
-    copy: function(self): self
+    copy: function(self): Point
 
     -- I think I need these for the metatable implementation
-    of: function(x: integer, y: integer): self
-    of_angle: function(ang: number, r: number): self
+    of: function(x: integer, y: integer): Point
+    of_angle: function(ang: number, r: number): Point
     
     metamethod __eq: function(Point|any, Point|any): boolean
     metamethod __add: function(Point|any, Point|any): Point
