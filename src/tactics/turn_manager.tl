@@ -29,9 +29,9 @@ end
 
 function TurnManager.new(
     battle_map: BattleMap,
-    tactics_engine: tactics_engine.TacticsEngine,
-    battle_objective_service: battle_objective_service.BattleObjectiveService,
-    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine,
+    tactics_eng: tactics_engine.TacticsEngine,
+    battle_objective_srv: battle_objective_service.BattleObjectiveService,
+    enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,
     event_bus: EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
@@ -44,9 +44,9 @@ function TurnManager.new(
     self.event_listener_ids = {}
 
     self.battle_map = battle_map 
-    self.tactics_engine = tactics_engine 
-    self.battle_objective_service = battle_objective_service
-    self.enemy_ai_engine = enemy_ai_engine
+    self.tactics_engine = tactics_eng
+    self.battle_objective_service = battle_objective_srv
+    self.enemy_ai_engine = enemy_ai_eng
     self.event_bus = event_bus 
     self.battle_menu_manager = battle_menu_manager
 

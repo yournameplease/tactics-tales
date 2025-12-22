@@ -2,8 +2,6 @@ require("src/tactics/debug")
 require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-require("src/tactics/battle/pathfinding")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
@@ -11,8 +9,6 @@ local array_2d = require("src/tactics/util/array_2d")
 
 require("src/tactics/menu/cursor/grid_cursor")
 require("src/tactics/menu/cursor/list_cursor")
-
-local SIDE_PLAYER = 0
 
 global record BattleMenuManager
     is MenuManager<BattleMenuContext>
@@ -94,10 +90,10 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
                 get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end,
-                get_max_path_length = function(msb: BattleMenuContext, ctx: MenuContext): integer
+                get_max_path_length = function(_: BattleMenuContext, ctx: MenuContext): integer
                     return ctx.acting_unit.unit.character.stats.movement
                 end,
-                get_path_anchor = function(msb: BattleMenuContext, ctx: MenuContext): Point
+                get_path_anchor = function(_: BattleMenuContext, ctx: MenuContext): Point
                     return ctx.acting_unit.point:copy()
                 end
             }),

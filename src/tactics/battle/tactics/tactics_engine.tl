@@ -331,13 +331,11 @@ function TacticsEngine:update()
     end
 
     for _,unit in ipairs(self.battle_map:get_units(is_player)) do
-        LOG.debug(unit.id, unit:is_player(), unit.has_acted)
         if not unit.has_acted then
             all_players_acted = false
         end
     end
 
-    LOG.debug(self.is_player_turn, all_players_acted)
     if self.is_player_turn and all_players_acted then
         self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
     end
