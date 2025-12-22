@@ -80,7 +80,7 @@ local record PathAnimationInstance
     where self.type == "path" 
     current_point: integer
     frame: integer
-    path_points: { Pathpoint.Point }
+    path_points: { point.Point }
     sprites: SpriteFrameData
 end
 
@@ -320,7 +320,7 @@ function AnimationManager:create_walk_animation(path: { point.Point }): Animated
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
-    local path_points: { Pathpoint.Point } = maps.map(path, function(p: point.Point): Pathpoint.Point
+    local path_points: { point.Point } = maps.map(path, function(p: point.Point): point.Point
         return {
             point = p,
             duration = DURATION_PER_TILE
