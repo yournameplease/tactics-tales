@@ -3,8 +3,7 @@ require("src/tactics/data/maps")
 require("src/tactics/battle/battle_map")
 local MAP_DEFINITIONS = require("src/tactics/data/maps")
 local map_types = require("src/tactics/battle/map/types")
--- only for tile labels.  may want to move those...
-local battle_definition = require("src/tactics/battle/definition")
+local battle_definition_types = require("src/tactics/battle/definition/types")
 
 
 local map_generator = {
@@ -73,7 +72,7 @@ local function apply_default_walls(map_layers: MapLayers)
     end
 end
 
-local function load_static(definition: map_types.StaticMapDefinition, tile_labels: {battle_definition.TileLabel: {integer}}): BattleMap
+local function load_static(definition: map_types.StaticMapDefinition, tile_labels: {battle_definition_types.TileLabel: {integer}}): BattleMap
     local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
@@ -82,7 +81,7 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
     apply_default_walls(layers)
 
     local metatiles_layer = layers.metatiles
-    local labels_by_metatile: {integer: {battle_definition.TileLabel}} = {}
+    local labels_by_metatile: {integer: {battle_definition_types.TileLabel}} = {}
     for label,metatiles in pairs(tile_labels) do
         for _,metatile in ipairs(metatiles) do
             if labels_by_metatile[metatile] == nil then
@@ -92,7 +91,7 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         end        
     end
     
-    local labels: {battle_definition.TileLabel: {Point}} = {}
+    local labels: {battle_definition_types.TileLabel: {Point}} = {}
     for x = 0, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local metatile = metatiles_layer:get(x, y) - BASE_METATILE
@@ -125,7 +124,7 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function map_generator.load_map(map_id: string, labels: {battle_definition.TileLabel: {integer}}): BattleMap
+function map_generator.load_map(map_id: string, labels: {battle_definition_types.TileLabel: {integer}}): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 

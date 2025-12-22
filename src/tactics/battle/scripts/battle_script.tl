@@ -1,3 +1,4 @@
+local battle_definition_types = require("src/tactics/battle/definition/types")
 
 local enum ScriptTriggerType
 	"turn"
@@ -17,7 +18,7 @@ end
 
 local record Turn
 	is ScriptTrigger
-	where self.type == "unit_death"
+	where self.type == "turn"
 	turn: integer
 	repeating: integer
 	phase: TurnTriggerPhase
@@ -42,6 +43,8 @@ end
 local record SpawnUnits
 	is BattleScript
 	where self.type == "spawn_units"
+	players: { battle_definition_types.PlayerSpawnData }
+	enemies: { battle_definition_types.EnemySpawnData }
 end
 
 local record ModifyTerrain
@@ -53,6 +56,7 @@ local battle_script = {
 	BattleScript = BattleScript,
 	trigger = {
 		Turn = Turn,
+		TurnTriggerPhase = TurnTriggerPhase,
 		UnitDeath = UnitDeath
 	},
 	script = {
@@ -60,5 +64,41 @@ local battle_script = {
 		ModifyTerrain = ModifyTerrain
 	}
 }
+
+function battle_script.trigger.turn(
+	turn: integer,
+	repeating: integer,
+	phase: TurnTriggerPhase
+): Turn
+	return {
+		type = "turn",
+		turn = turn,
+		repeating = repeating,
+		phase = phase,
+	}
+end
+
+function battle_script.trigger.unit_death(
+	unit_label: string
+): UnitDeath
+	return {
+		type = "unit_death",
+		unit_label = unit_label,
+	}
+end
+
+function battle_script.script.spawn_units(
+	trigger: ScriptTrigger,
+	players: { battle_definition_types.PlayerSpawnData },
+	enemies: { battle_definition_types.EnemySpawnData }
+): SpawnUnits
+	return {
+		type = "spawn_units",
+		trigger = trigger,
+		players = players,
+		enemies = enemies,
+	}
+end
+
 
 return battle_script

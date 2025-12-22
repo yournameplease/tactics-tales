@@ -10,6 +10,8 @@ global enum GameEvent
     "TACTICS_END_PLAYER_TURN"
     "TACTICS_BEGIN_ENEMY_TURN"
     "TACTICS_END_ENEMY_TURN"
+    "TACTICS_FINISH_ENEMY_ACTIONS"
+    "TACTICS_FINISH_PLAYER_ACTIONS"
     "TACTICS_BEGIN_BATTLE"
     "TACTICS_UNIT_END_ACTION"
 
@@ -27,7 +29,7 @@ end
 
 global record EventListener
     id: integer
-    callback: function(args: any)
+    callback: function(args?: { string: any })
 end
 
 global record EventBus
@@ -56,7 +58,7 @@ function EventBus.new(): EventBus
     return self
 end
 
-function EventBus:on(event_name: GameEvent, callback: function(args: any)): integer
+function EventBus:on(event_name: GameEvent, callback: function(args: { string: any })): integer
     if not self.listeners[event_name] then
         self.listeners[event_name] = {}
     end
@@ -85,7 +87,7 @@ function EventBus:remove_all(ids: {integer})
     end
 end
 
-function EventBus:emit(event_name: GameEvent, args?: any)
+function EventBus:emit(event_name: GameEvent, args?: {string: any})
     LOG.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
         pt.deli(self.event_history, 1)

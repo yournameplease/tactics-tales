@@ -132,7 +132,7 @@ end
 function BaseMenuManager:update(joy: Joypad)
     if joy.lp then
         -- DEBUG Only for now.  consider where to put
-        self.event_bus:emit("TACTICS_END_PLAYER_TURN")
+        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS")
     elseif joy.bp then
         self:handle_menu_back()
     elseif joy.ap then
