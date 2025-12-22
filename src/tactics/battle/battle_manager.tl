@@ -80,12 +80,12 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.services.task_manager
     )
     
-    local battle_menu_context = battle_menu_context.new(
+    local battle_menu_ctx = battle_menu_context.new(
         self.battle_map,
         self.tactics_engine
     )
     self.battle_menu_manager = BattleMenuManager.new(
-        battle_menu_context,
+        battle_menu_ctx,
         self.services.event_bus
     )
     
