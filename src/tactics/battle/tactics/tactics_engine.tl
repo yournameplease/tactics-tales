@@ -97,7 +97,7 @@ function TacticsEngine:spawn_players(players: {battle_definition_types.PlayerSpa
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
     local roster_count = 1
-    for i, player in ipairs(players) do
+    for _, player in ipairs(players) do
         local spawn_points = self.battle_map:get_tiles_by_label(player.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local unit: BattleUnit
@@ -141,7 +141,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
 
         self.battle_is_blocked = false
         unit.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION", {})
     end)
 end
 
@@ -170,7 +170,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
         LOG.debug("unblocking battle")
         unit.animation_data = self.animation_manager:create_idle_animation()
         target.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION")
+        self.event_bus:emit("TACTICS_UNIT_END_ACTION", {})
     end)
 end
 
@@ -326,14 +326,20 @@ end
 function TacticsEngine:update()
     local all_players_acted = true
 
-    for _,unit in ipairs(self.battle_map:get_all_units()) do
-        if unit.is_player and not unit.has_acted then
+    local is_player = function(u: BattleUnit): boolean
+        return u:is_player()
+    end
+
+    for _,unit in ipairs(self.battle_map:get_units(is_player)) do
+        LOG.debug(unit.id, unit:is_player(), unit.has_acted)
+        if not unit.has_acted then
             all_players_acted = false
         end
     end
 
+    LOG.debug(self.is_player_turn, all_players_acted)
     if self.is_player_turn and all_players_acted then
-        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS")
+        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
     end
 end
 

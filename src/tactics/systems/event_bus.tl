@@ -2,6 +2,8 @@ require("src/tactics/systems/service")
 local id_generator = require("src/tactics/util/id_generator")
 require("src/tactics/debug")
 
+global type EventArgs = { string: any }
+
 global enum GameEvent
     "GAME_BEGIN_STORY"
     "GAME_SET_OPTIONS"
@@ -29,7 +31,7 @@ end
 
 global record EventListener
     id: integer
-    callback: function(args?: { string: any })
+    callback: function(args: { string: any })
 end
 
 global record EventBus
@@ -87,7 +89,7 @@ function EventBus:remove_all(ids: {integer})
     end
 end
 
-function EventBus:emit(event_name: GameEvent, args?: {string: any})
+function EventBus:emit(event_name: GameEvent, args: {string: any})
     LOG.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
         pt.deli(self.event_history, 1)

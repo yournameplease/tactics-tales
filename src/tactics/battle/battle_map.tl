@@ -140,6 +140,7 @@ function BattleMap:get_at_tile(tile: Point): battle_unit.BattleUnit
 end
 
 function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: Point)
+    assert(unit.id ~= nil)
     if self:get_at_tile(tile) ~= nil then
         error("Tried to spawn unit in an occupied tile! (".. tile.x .. "," .. tile.y .. ")")
     end

@@ -132,7 +132,7 @@ function EnemyAIEngine:handle_enemy_turn()
             end
         end
 
-        self.event_bus:emit("TACTICS_FINISH_ENEMY_ACTIONS")
+        self.event_bus:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
     end)
 end
 
