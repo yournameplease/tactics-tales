@@ -21,9 +21,6 @@ local battle_menu_context = require("src/tactics/battle/battle_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local script_manager = require("src/tactics/battle/scripts/script_manager")
 
-local SIDE_PLAYER = 0
-local SIDE_ENEMY = 1
-
 global record BattleManager
 
     battle_id: string
@@ -108,7 +105,7 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
     )
     self.services.ui_context:register_ui_context(battle_ui_ctx)
 
-    self.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
+    self.services.event_bus:emit("TACTICS_BEGIN_BATTLE", {})
     return self
 end
 

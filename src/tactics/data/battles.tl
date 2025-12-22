@@ -3,7 +3,7 @@ local battle_definition = require("src/tactics/battle/definition")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
-local ai: {string: unit_ai.UnitAI} = {
+local ai = {
     default = { move = "two", target = "player"},
     move_one = { move = "one", target = "player"},
     move_two = { move = "two", target = "player"},
@@ -75,14 +75,14 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 "before_player"
             ),
             spawn_enemies({
-                { template = "bandit_goon", ai = ai.move_infinity, tile = "bandit_reinforce_b" },
+                { template = "bandit_goon", ai = ai.move_inf, tile = "bandit_reinforce_b" },
             },
                 3,
                 3,
                 "after_enemy"
             ),
             spawn_enemies({
-                { template = "bandit_goon", ai = ai.move_infinity, tile = "bandit_reinforce_a" },
+                { template = "bandit_goon", ai = ai.move_inf, tile = "bandit_reinforce_a" },
             },
                 6,
                 3,
