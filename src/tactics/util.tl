@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/config")
 local maps = require("src/tactics/util/maps")
 
@@ -8,12 +8,12 @@ end
 
 -- normalize to offsets from first tile
 -- multiply by tile scale
-global function to_tile_path(path: { TilePoint }): { AnimationOffset }
+global function to_tile_path(path: { point.Point }): { point.Point }
     assert(#path > 0)
     --if #path == 0 then return path end
 
     local base_point = path[1]
-    return maps.map(path, function(p: TilePoint): AnimationOffset
+    return maps.map(path, function(p: point.Point): point.Point
         return (p - base_point) * CONFIG.TILE_SIZE
     end)
 end

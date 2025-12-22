@@ -43,7 +43,7 @@ local record AttackDouble
 end
 
 local record CombatDouble
-    tile: TilePoint
+    tile: point.Point
     hp_current: integer
     hp_max: integer
     defense: { effect.DefenseType: integer }
@@ -196,7 +196,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     return result
 end
 
-function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: TilePoint, battle_map: BattleMap): CombatPreviewResult
+function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: point.Point, battle_map: BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)

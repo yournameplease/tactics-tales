@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 
 local record ItemTypes
 end
@@ -24,7 +24,7 @@ end
 
 global record ItemSpriteData
 	sprite: integer
-	anchor: AnimationAnchorPoint
+	anchor: point.Point
 end
 
 return ItemTypes

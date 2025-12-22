@@ -14,12 +14,15 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
     ["bandit_village"] = {
         map_id = "bandit_village",
         tile_labels = {
-            ["player_deployment"] = { 0x01 },
-            ["bandit_boss_tile"] = { 0x01 },
-            ["bandit_goon_tile"] = { 0x01 },
-            ["player_spearman_tile"] = { 0x01 },
-            ["player_archer_tile"] = { 0x01 },
-            ["player_armor_tile"] = { 0x01 },
+            ["player_deployment"] = { 0x00 },
+            ["bandit_boss_tile"] = { 0x10 },
+            ["bandit_goon_tile"] = { 0x11 },
+            ["bandit_guard_tile"] = { 0x12 },
+            ["bandit_reinforce_a_tile"] = { 0x18 },
+            ["bandit_reinforce_b_tile"] = { 0x19 },
+            ["player_spearman_tile"] = { 0x08 },
+            ["player_archer_tile"] = { 0x09 },
+            ["player_armor_tile"] = { 0x0A },
         },
         victory_conditions = { {
             type = "ROUT"
@@ -29,6 +32,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         } },
         enemies = {
             { template = "bandit_boss", ai = ai.stationary, tile = "bandit_boss_tile" },
+            { template = "bandit_guard", ai = ai.stationary, tile = "bandit_guard_tile" },
             { template = "bandit_goon", ai = ai.move_two, tile = "bandit_goon_tile" },
         },
         players = {

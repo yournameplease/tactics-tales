@@ -51,7 +51,7 @@ local tactics_engine = {
 
 function tactics_engine.new(
     battle_map: BattleMap,
-    character_manager: character_manager.CharacterManager,
+    character_mgr: character_manager.CharacterManager,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus
@@ -61,6 +61,8 @@ function tactics_engine.new(
     self.battle_is_blocked = false
 
     self.battle_map = battle_map
+    self.character_manager = character_mgr
+
     self.task_manager = task_manager
     self.animation_manager = animation_manager
     self.event_bus = event_bus
@@ -70,7 +72,7 @@ end
 
 -- unit spawning
 
-function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: TilePoint, side: Side)
+function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: point.Point, side: Side)
     local idle_animation = self.animation_manager:create_idle_animation()
     unit.animation_data = idle_animation
     self.battle_map:spawn_unit(unit, spawn_point)
