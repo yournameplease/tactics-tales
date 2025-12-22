@@ -56,6 +56,8 @@ local point_mt: metatable<Point> = {
 }
 
 function Point.of(x: integer, y: integer): Point
+    assert(x ~= nil)
+    assert(y ~= nil)
     return setmetatable({
         x = x,
         y = y
