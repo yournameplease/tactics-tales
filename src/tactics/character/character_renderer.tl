@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-require("src/tactics/types")
+local point = require("src/tactics/types")
 
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
@@ -21,7 +21,7 @@ local record CharacterRenderer
 
 end
 
-local function get_anchor_offsets(base: DrawPoint, anchor: AnimationAnchorPoint, child: AnimationAnchorPoint, flip_h: boolean, flip_v: boolean): DrawPoint
+local function get_anchor_offsets(base: DrawPoint, anchor: point.Point, child: point.Point, flip_h: boolean, flip_v: boolean): DrawPoint
     local diff_x = anchor.x - child.x
     local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
@@ -49,14 +49,14 @@ local function get_body_type(battle_unit: BattleUnit): AnimationName
 end
 
 local record RenderedAnimationFrame
-	offset: AnimationOffset
+	offset: point.Point
 	sprite: integer
-	anchors: { AnchorPointName: AnimationAnchorPoint }
+	anchors: { AnchorPointName: point.Point }
 end
 
 local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFrame
 	local frame_name: AnimationFrameName 
-	local offset: AnimationOffset
+	local offset: point.Point
 	if battle_unit.animation_data ~= nil and battle_unit.animation_data.current_frame ~= nil then
 		frame_name = battle_unit.animation_data.current_frame.frame
 		offset = battle_unit.animation_data.current_frame.offset
@@ -76,7 +76,7 @@ local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFr
 end
 
 -- @return the position of the "feet_center" anchor
-function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): AnimationOffset
+function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): point.Point
     local frame_data = get_animation_frame(battle_unit)
 
     return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
@@ -137,12 +137,12 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
 
 	local offset = animation_frame.offset
 	if not apply_animation then
-		offset = AnimationOffset.of(0,0)
+		offset = point.of(0,0)
 	end
 	
     local base_point = get_anchor_offsets(
 		point + offset,
-		AnimationAnchorPoint.of(0, 0),
+		point.of(0, 0),
 		animation_frame.anchors.feet_center,
 		-- flip_h,
 		false,

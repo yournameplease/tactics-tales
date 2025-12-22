@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
 local CharacterRenderer = require("src/tactics/character/character_renderer")
@@ -12,7 +12,7 @@ end
 
 setmetatable(PortraitBox, { __index = Box })
 
-local FEET_ANCHOR = AnimationAnchorPoint.of(11, 22)
+local FEET_ANCHOR = point.of(11, 22)
 
 function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUnit): PortraitBox
     local box = Box.new({

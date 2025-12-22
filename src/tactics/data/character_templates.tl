@@ -79,8 +79,14 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
     bandit_goon = {
         parent_template = "bandit_base",
         item_loadout_options = randomizer.list_selector.of_randomizers(
-			randomizer.weighted_option_selector.of( "club", "axe" ),
-			randomizer.weighted_option_selector.of("shield", "axe")
+			randomizer.weighted_option_selector.of( "club" )
+		)
+    },
+    bandit_guard = {
+        parent_template = "bandit_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "axe" ),
+			randomizer.weighted_option_selector.of("shield")
 		)
     },
     bandit_boss = {

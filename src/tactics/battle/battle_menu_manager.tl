@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
@@ -49,8 +49,8 @@ end
 local function validate_tile_is_in_unit_attack_range(
     battle_map: BattleMap,
     unit: BattleUnit,
-    unit_position: TilePoint,
-    target_point: TilePoint 
+    unit_position: point.Point,
+    target_point: point.Point 
 ): boolean
     local min_range, max_range = unit.character:get_weapon_range()
 
@@ -97,7 +97,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
                 get_max_path_length = function(msb: BattleMenuContext, ctx: MenuContext): integer
                     return ctx.acting_unit.unit.character.stats.movement
                 end,
-                get_path_anchor = function(msb: BattleMenuContext, ctx: MenuContext): TilePoint
+                get_path_anchor = function(msb: BattleMenuContext, ctx: MenuContext): point.Point
                     return ctx.acting_unit.point:copy()
                 end
             }),

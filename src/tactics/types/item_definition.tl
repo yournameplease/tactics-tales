@@ -5,7 +5,7 @@ local wpn = require("src/tactics/character/items/object/weapon")
 global record WeaponDefinition
     name: string
     sprite: integer
-    hand_anchor: AnimationAnchorPoint
+    hand_anchor: point.Point
     damage: integer
     accuracy: integer
     type: wpn.WeaponType

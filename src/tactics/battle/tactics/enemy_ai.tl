@@ -29,12 +29,12 @@ local enemy_ai_engine = {
 }
 
 local record AttackOption
-    destination: TilePoint
+    destination: point.Point
     target: BattleUnit
 end
 
 local record MovementOption
-    destination: TilePoint
+    destination: point.Point
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
@@ -63,7 +63,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     for _,e in ipairs(enemies) do
         local min_range, max_range = unit.character:get_weapon_range()
         local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
-        tiles_in_range:foreachpoint(function(tile: TilePoint, in_range: boolean)
+        tiles_in_range:foreachpoint(function(tile: point.Point, in_range: boolean)
             if in_range then
                 local shortest_path_tile = all_tile_costs:get_point(tile) -- if could calculate
                 if shortest_path_tile ~= nil then

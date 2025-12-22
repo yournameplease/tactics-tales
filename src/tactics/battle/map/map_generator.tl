@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/data/maps")
 require("src/tactics/battle/battle_map")
 local MAP_DEFINITIONS = require("src/tactics/data/maps")
@@ -92,12 +92,12 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         end        
     end
     
-    local labels: {battle_definition.TileLabel: {TilePoint}} = {}
+    local labels: {battle_definition.TileLabel: {point.Point}} = {}
     for x = 0, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local metatile = metatiles_layer:get(x, y) - BASE_METATILE
             if labels_by_metatile[metatile] ~= nil then
-                local point = TilePoint.of(x, y)
+                local point = point.of(x, y)
                 for _,label in ipairs(labels_by_metatile[metatile]) do
                     if labels[label] == nil then
                         labels[label] = {}
@@ -108,7 +108,7 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         end
     end
     
-    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height(), tile_labels)
+    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height(), labels)
     battle_map.layers = layers
     battle_map.metadata = {
         player_spawners = {},
@@ -125,13 +125,13 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function map_generator.load_map(map_id: string, tile_labels: {battle_definition.TileLabel: {integer}}): BattleMap
+function map_generator.load_map(map_id: string, labels: {battle_definition.TileLabel: {integer}}): BattleMap
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
     local battle_map: BattleMap
     if definition is map_types.StaticMapDefinition then
-        battle_map = load_static(definition, tile_labels)
+        battle_map = load_static(definition, labels)
     -- elseif definition is ProceduralMapDefinition then
 
     else

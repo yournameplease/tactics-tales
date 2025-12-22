@@ -15,7 +15,7 @@ local record BattleUIContext
     
     hovered_unit: BattleUnit
     acting_unit: BattleUnit
-    destination: TilePoint
+    destination: point.Point
 end
 
 local battle_ui_context = {

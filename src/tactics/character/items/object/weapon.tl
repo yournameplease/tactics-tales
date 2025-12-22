@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 
 
 local enum WeaponType
@@ -16,7 +16,7 @@ end
 local record Weapon
     name: string
     sprite: integer
-    hand_anchor: AnimationAnchorPoint
+    hand_anchor: point.Point
     damage: integer
     accuracy: integer
     type: WeaponType

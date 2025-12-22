@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/battle_unit")
@@ -21,12 +21,12 @@ global enum MenuType
 end
 
 global record TileSelection
-    point: TilePoint
-    path: { TilePoint }
+    point: point.Point
+    path: { point.Point }
 end
 
 global record UnitSelection
-    point: TilePoint
+    point: point.Point
     unit: BattleUnit
 end
 
@@ -58,5 +58,5 @@ global type MenuStep = string
 global record MenuState
     step: MenuStep
     menu_id: MenuId
-    point: TilePoint
+    point: point.Point
 end

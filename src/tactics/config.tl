@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 -- constant configs.  eventually, may move back into relevant files.
 
 global enum LogLevel
@@ -15,7 +15,7 @@ global record Config
 	SCREEN_HEIGHT: integer 
 	MAP_WIDTH: integer 
 	MAP_HEIGHT: integer 
-	TILE_SIZE: ScalePoint
+	TILE_SIZE: point.Point
 	WALL_HEIGHT: integer 
 	COLOR_MENU_PRIMARY: integer 
 	COLOR_MENU_SECONDARY: integer 
@@ -32,7 +32,7 @@ global CONFIG: Config = {
 	SCREEN_HEIGHT = 270,
 	MAP_WIDTH = 16,
 	MAP_HEIGHT = 16,
-	TILE_SIZE = ScalePoint.of(20,16),
+	TILE_SIZE = point.of(20,16),
 	WALL_HEIGHT = 16,
 
 	COLOR_MENU_PRIMARY = 32,

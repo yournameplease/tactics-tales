@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/types")
 require("src/tactics/ui/types")
 
 require("src/tactics/config")
