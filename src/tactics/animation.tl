@@ -70,7 +70,7 @@ local function lerp_offsets(o0: Point, o1: Point, frame: number, duration: numbe
     return o0 + (frame/duration) * (o1 - o0)
 end
 
-local record Point
+local record PathAnimationPoint
     point: Point
     duration: integer
 end
@@ -80,7 +80,7 @@ local record PathAnimationInstance
     where self.type == "path" 
     current_point: integer
     frame: integer
-    path_points: { Point }
+    path_points: { PathAnimationPoint }
     sprites: SpriteFrameData
 end
 
@@ -320,7 +320,7 @@ function AnimationManager:create_walk_animation(path: { Point }): AnimatedSprite
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8
 
-    local path_points: { Point } = maps.map(path, function(p: Point): Point
+    local path_points: { PathAnimationPoint } = maps.map(path, function(p: Point): PathAnimationPoint
         return {
             point = p,
             duration = DURATION_PER_TILE

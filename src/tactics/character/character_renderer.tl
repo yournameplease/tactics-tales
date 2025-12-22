@@ -21,7 +21,7 @@ local record CharacterRenderer
 
 end
 
-local function get_anchor_offsets(base: DrawPoint, anchor: Point, child: Point, flip_h: boolean, flip_v: boolean): DrawPoint
+local function get_anchor_offsets(base: Point, anchor: Point, child: Point, flip_h: boolean, flip_v: boolean): Point
     local diff_x = anchor.x - child.x
     local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
@@ -95,7 +95,7 @@ local function set_palette(battle_unit: BattleUnit, side: Side)
     pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
-function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean)
+function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: Point, side: Side, set_pal: boolean)
     local flip_h = side ~= 0
 
     if set_pal then
@@ -129,7 +129,7 @@ function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: DrawPoint, 
 
 end
 
-function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side: Side, set_pal: boolean, apply_animation: boolean)
+function CharacterRenderer.draw(battle_unit: BattleUnit, point: Point, side: Side, set_pal: boolean, apply_animation: boolean)
     -- TODO: consider pre-rendering some of this
     local flip_h = side ~= 0
 
