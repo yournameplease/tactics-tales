@@ -17,17 +17,13 @@ global record Point
     of: function(x: integer, y: integer): self
     of_angle: function(ang: number, r: number): self
     
-    metamethod __eq: function<A is Point, B is Point>(A|any, B|any): boolean
-    metamethod __add: function<A is Point, B is Point>(A|any, B|any): A--|B
-    metamethod __sub: function<A is Point, B is Point>(A|any, B|any): A--|B
-    metamethod __mul: function<A is Point, B is Point>(A|number|any, B|number|any): A--|B -- gets rounded!
-    metamethod __unm: function<A is Point>(A): A
-    metamethod __tostring: function<A is Point>(A): string
+    metamethod __eq: function(Point|any, Point|any): boolean
+    metamethod __add: function(Point|any, Point|any): Point
+    metamethod __sub: function(Point|any, Point|any): Point
+    metamethod __mul: function(Point|number, Point|number): Point -- gets rounded!
+    metamethod __unm: function(Point): Point
+    metamethod __tostring: function(Point): string
 end
-
-local point = {
-    Point = Point,
-}
 
 local point_mt: metatable<Point> = {
     __eq = function(a: Point, b: Point): boolean
@@ -78,10 +74,8 @@ function Point:copy(): Point
     }, point_mt as metatable<Point>)
 end
 
-function point.taxicab_distance(p1: Point, p2: Point): integer
+global function taxicab_distance(p1: Point, p2: Point): integer
     return pt.abs(p1.x-p2.x)+pt.abs(p1.y-p2.y)
 end
 
 global type Side = integer
-
-return point
