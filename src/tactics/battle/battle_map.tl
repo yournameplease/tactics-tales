@@ -77,6 +77,8 @@ function BattleMap.new(width: integer, height: integer, labels: { string: {Point
         units_by_x_y = array_2d.new(width, height),
     }, { __index = BattleMap })
     self.tile_labels = labels
+    self.width = width
+    self.height = height
     return self
 end
 
