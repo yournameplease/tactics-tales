@@ -52,7 +52,9 @@ function TurnManager.new(
 
     pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_BATTLE", function()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-        self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
+        self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN", {
+            turn = self.turn
+        })
     end))
 
     pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_UNIT_END_ACTION", function()
@@ -77,7 +79,9 @@ function TurnManager.new(
 
         LOG.info("End player turn!")
 
-        self.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", self.tactics_engine)
+        self.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", {
+            turn = self.turn
+        })
     end))
 
     pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
@@ -97,7 +101,9 @@ function TurnManager.new(
         local battle_result = self.battle_objective_service:check_for_end()
 
         if not battle_result.finished then
-            self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN")
+            self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN", {
+            turn = self.turn
+        })
         else
             self.event_bus:emit(battle_result.command)
         end
@@ -129,6 +135,18 @@ function TurnManager.new(
 
     pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function()
         self.enemy_ai_engine:handle_enemy_turn()
+    end))
+
+    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_FINISH_ENEMY_ACTIONS", function()
+        self.event_bus:emit("TACTICS_END_ENEMY_TURN", {
+            turn = self.turn
+        })
+    end))
+
+    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_FINISH_PLAYER_ACTIONS", function()
+        self.event_bus:emit("TACTICS_END_PLAYER_TURN", {
+            turn = self.turn
+        })
     end))
     
     return self

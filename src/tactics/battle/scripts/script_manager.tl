@@ -3,10 +3,9 @@
 
 local event_bus = require("src/tactics/systems/event_bus")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
+local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 
 local interface ScriptManager
-	
-
 	teardown: function(self)
 end
 
@@ -15,6 +14,7 @@ local script_manager = {
 }
 
 local record ScriptManagerImpl
+	tactics_engine: tactics_engine.TacticsEngine
 	event_bus: EventBus
 	event_listener_ids: {integer}	
 end
@@ -35,25 +35,27 @@ function ScriptManagerImpl:register_script(
 			event = "TACTICS_END_PLAYER_TURN"
 		elseif trigger.phase == "before_enemy" then
 			event = "TACTICS_BEGIN_ENEMY_TURN"
-		elseif trigger.phase == "before_enemy" then
+		elseif trigger.phase == "after_enemy" then
 			event = "TACTICS_END_ENEMY_TURN"
 		else
 			error()	
 		end
 
-		if trigger.repeating ~= nil then
+		if trigger.repeating == nil then
 			filter = function(ctx: {string: any}): boolean
-				return ctx.turn_number == trigger.turn
+				return ctx.turn == trigger.turn
 			end
 		else
+			-- this assert is unnessary, but the LSP complains without it
+			assert(trigger is battle_script.trigger.Turn)
 			filter = function(ctx: {string: any}): boolean
-				local turn = ctx.turn_number as integer
+				local turn = ctx.turn as integer
 				return turn >= trigger.turn
 					and (turn - trigger.turn) % trigger.repeating == 0 
 			end
 		end
 	elseif trigger is battle_script.trigger.UnitDeath then
-		
+		error("unimplemented")
 	else
 		error()
 	end
@@ -61,9 +63,16 @@ function ScriptManagerImpl:register_script(
 	local effect: function
 
 	if script is battle_script.script.SpawnUnits then
-		
+		effect = function()
+			if script.enemies ~= nil then
+				self.tactics_engine:spawn_enemies(script.enemies)
+			end
+			if script.players ~= nil then
+				self.tactics_engine:spawn_players(script.players)
+			end
+		end
 	elseif script is battle_script.script.ModifyTerrain then
-
+		error("unimplementned")
 	else
 		error()
 	end
@@ -80,11 +89,28 @@ end
 
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
-	event_bus: EventBus
-)
+	event_bus: EventBus,
+	tactics_engine: tactics_engine.TacticsEngine
+): ScriptManager
+	scripts = scripts or {}
 
+	local self: ScriptManagerImpl = setmetatable({},{
+		__index = ScriptManagerImpl	
+	})
+
+	self.event_bus = event_bus
+	self.event_listener_ids = {}
+	self.tactics_engine = tactics_engine
+
+	for _,script in ipairs(scripts) do
+		self:register_script(script)
+	end
+
+	return self as ScriptManager
 end
 
 function ScriptManagerImpl:teardown()
     self.event_bus:remove_all(self.event_listener_ids)
 end
+
+return script_manager

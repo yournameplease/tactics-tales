@@ -8,8 +8,6 @@ require("src/tactics/systems/tasks")
 require("src/tactics/data/battles")
 
 require("src/tactics/battle/battle_map")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
-local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")
@@ -21,7 +19,7 @@ local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
-local battle_definition = require("src/tactics/battle/definition")
+local script_manager = require("src/tactics/battle/scripts/script_manager")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -37,6 +35,7 @@ global record BattleManager
     enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
     battle_menu_manager: BattleMenuManager
     turn_manager: TurnManager
+    script_manager: script_manager.ScriptManager
 
     character_manager: character_manager.CharacterManager
 
@@ -62,6 +61,12 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.services.task_manager,
         self.services.animation_manager,
         self.services.event_bus
+    )
+
+    self.script_manager = script_manager.new(
+        battle_def.scripts,
+        self.services.event_bus,
+        self.tactics_engine
     )
     
     self.tactics_engine:spawn_enemies(battle_def.enemies)
@@ -96,12 +101,12 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.battle_menu_manager
     )
 
-    local battle_ui_context = battle_ui_context.new(
+    local battle_ui_ctx = battle_ui_context.new(
         self.battle_map,
         self.battle_menu_manager,
         self.turn_manager
     )
-    self.services.ui_context:register_ui_context(battle_ui_context)
+    self.services.ui_context:register_ui_context(battle_ui_ctx)
 
     self.services.event_bus:emit("TACTICS_BEGIN_BATTLE")
     return self
@@ -110,6 +115,7 @@ end
 function BattleManager:teardown()
     self.services.ui_context:unregister_ui_context('battle')
     self.turn_manager:teardown()
+    self.script_manager:teardown()
 end
 
 function BattleManager:update(joy: Joypad)

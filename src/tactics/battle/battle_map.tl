@@ -2,7 +2,7 @@ require("src/tactics/types")
 require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
-local battle_definition = require("src/tactics/battle/definition")
+local battle_definition_types = require("src/tactics/battle/definition/types")
 
 global record TerrainData
     solid: boolean
@@ -65,7 +65,7 @@ global record BattleMap
     units_by_id: { integer: battle_unit.BattleUnit }
     units_by_x_y: array_2d.Array2D<battle_unit.BattleUnit>
 
-    tile_labels: {battle_definition.TileLabel: {Point}}
+    tile_labels: {battle_definition_types.TileLabel: {Point}}
     
     layers: MapLayers 
     metadata: MapMetadata
@@ -83,7 +83,7 @@ function BattleMap.new(width: integer, height: integer, labels: { string: {Point
 end
 
 -- data access
-function BattleMap:get_tiles_by_label(label: battle_definition.TileLabel): {Point}
+function BattleMap:get_tiles_by_label(label: battle_definition_types.TileLabel): {Point}
     if self.tile_labels[label] then
         return self.tile_labels[label]
     else

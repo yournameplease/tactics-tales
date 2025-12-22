@@ -10,7 +10,7 @@ local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
-local battle_definition = require("src/tactics/battle/definition")
+local battle_definition_types = require("src/tactics/battle/definition/types")
 
 local character_manager = require("src/tactics/character/character_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
@@ -33,6 +33,9 @@ local record TacticsEngine
     animation_manager: AnimationManager
     event_bus: EventBus
 
+
+    spawn_enemies: function(self, enemies: {battle_definition_types.EnemySpawnData})
+    spawn_players: function(self, players: {battle_definition_types.PlayerSpawnData})
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
@@ -79,7 +82,7 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
 end
 
 --- Iterates over enemy definitions and calls CharacterManager
-function TacticsEngine:spawn_enemies(enemies: {battle_definition.EnemySpawnData})
+function TacticsEngine:spawn_enemies(enemies: {battle_definition_types.EnemySpawnData})
     for i, enemy in ipairs(enemies) do
         local spawn_points = self.battle_map:get_tiles_by_label(enemy.tile)
         for _,spawn_point in ipairs(spawn_points) do
@@ -90,7 +93,7 @@ function TacticsEngine:spawn_enemies(enemies: {battle_definition.EnemySpawnData}
     end
 end
 
-function TacticsEngine:spawn_players(players: {battle_definition.PlayerSpawnData})
+function TacticsEngine:spawn_players(players: {battle_definition_types.PlayerSpawnData})
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
     local roster_count = 1
@@ -321,21 +324,16 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): arr
 end
 
 function TacticsEngine:update()
-    local blocking_animation = false
     local all_players_acted = true
 
     for _,unit in ipairs(self.battle_map:get_all_units()) do
-        -- if unit.animation_blocking then
-        --     blocking_animation = true
-        -- end
         if unit.is_player and not unit.has_acted then
             all_players_acted = false
         end
     end
 
-    if blocking_animation then return end
     if self.is_player_turn and all_players_acted then
-        self.event_bus:emit("TACTICS_END_PLAYER_TURN")
+        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS")
     end
 end
 
