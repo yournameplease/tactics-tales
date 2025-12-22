@@ -1,5 +1,5 @@
 require("src/tactics/systems/service")
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/ui/types")
 
 require("src/tactics/story/story_context")

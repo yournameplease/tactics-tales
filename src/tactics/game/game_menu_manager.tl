@@ -1,6 +1,6 @@
 
 require("src/tactics/debug")
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/joypad")

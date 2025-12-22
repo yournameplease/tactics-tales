@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 local CONFIG = require("src/tactics/config")
 local maps = require("src/tactics/util/maps")
 

@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 
 require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")

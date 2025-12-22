@@ -1,4 +1,4 @@
-local point = require("src/tactics/types")
+require("src/tactics/types")
 require("src/tactics/character/items/object/weapon")
 require("src/tactics/types/item_definition")
 local wpn = require("src/tactics/character/items/object/weapon")

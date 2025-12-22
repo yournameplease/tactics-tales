@@ -9,7 +9,7 @@ require("src/tactics/util/array_2d")
 require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local maps = require("src/tactics/util/maps")
-local point = require("src/tactics/types")
+require("src/tactics/types")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
