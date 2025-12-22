@@ -20,7 +20,7 @@ require("src/tactics/systems/service")
 -- 7
 
 -- cost to move onto x,y from any neighbor
-local function movement_cost(battle_map: BattleMap, tile: point.Point, side: Side): integer
+local function movement_cost(battle_map: BattleMap, tile: Point, side: Side): integer
     local terrain = battle_map:get_terrain(tile)
     if terrain == nil then return 999 end
 
@@ -39,12 +39,12 @@ local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
 
 local record ShortestPathEntry
     cost: integer
-    prev: point.Point
+    prev: Point
 end
 
-local type DistanceFunction = function(tile: point.Point): integer
+local type DistanceFunction = function(tile: Point): integer
 local function distance_for_unit(battle_map: BattleMap, side: Side): DistanceFunction
-    return function(tile: point.Point): integer
+    return function(tile: Point): integer
         return movement_cost(battle_map, tile, side)
     end
 end
@@ -53,7 +53,7 @@ end
 -- Core Logic: Shared Dijkstra Engine
 -- --------------------------------------------------------------------------
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
-local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_function: DistanceFunction, max_cost: integer, max_point: point.Point): array_2d.Array2D<ShortestPathEntry>
+local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_function: DistanceFunction, max_cost: integer, max_point: Point): array_2d.Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
     LOG.debug("doing Dijkstra: ", start_x, start_y, max_point)
     local visited_info: array_2d.Array2D<ShortestPathEntry> = array_2d.new(max_point.x, max_point.y)
@@ -120,7 +120,7 @@ local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_
                         -- 5. Relaxation: Is this new path better than the old one?
                         if not neighbor_info or new_total < neighbor_info.cost then
                             -- Record the new cost and the tile we came from (ux, uy)
-                            visited_info:set(vx, vy, { cost = new_total, prev = point.of(ux, uy) })
+                            visited_info:set(vx, vy, { cost = new_total, prev = Point.of(ux, uy) })
                             pt.add(priority_queue, {x = vx, y = vy, cost = new_total})
                         end
                     end
@@ -144,13 +144,13 @@ local pathfinding = {
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
 function pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), limit, point.of(battle_map.width, battle_map.height))
+    return _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), limit, Point.of(battle_map.width, battle_map.height))
 end 
 
 -- @return list of { { x, y } } tile coordinates from start position
-function pathfinding.get_path_to_tile(all_tile_costs: array_2d.Array2D<ShortestPathEntry>, tile: point.Point): { point.Point } -- could be static with current signature
+function pathfinding.get_path_to_tile(all_tile_costs: array_2d.Array2D<ShortestPathEntry>, tile: Point): { Point } -- could be static with current signature
     assert(all_tile_costs:get_point(tile) ~= nil)
-    local path: {point.Point} = {}
+    local path: {Point} = {}
     pt.add(path, tile:copy())
     local next_tile = tile
     while all_tile_costs:get_point(next_tile).prev ~= nil do
@@ -164,13 +164,13 @@ end
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
 function pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), total_cost, point.of(battle_map.width, battle_map.height))
+    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), total_cost, Point.of(battle_map.width, battle_map.height))
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: array_2d.Array2D<boolean> = array_2d.new(full_map.w, full_map.h, false)
 
     full_map:foreachpoint(
-        function (tile: point.Point, value: ShortestPathEntry)
+        function (tile: Point, value: ShortestPathEntry)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
             -- TODO: not positive after refactor to array_2d.Array2D.  investigate.
@@ -186,7 +186,7 @@ end
 ---@desc
 --- extend a path to a point, shortening the path until the point is reachable within max_length.
 --- return current path if not possible
-function pathfinding.extend_path_to_point(path: {point.Point}, target: point.Point, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {point.Point}
+function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {Point}
     if not legal_tiles:get_point(target) then
         return path
     end
@@ -197,10 +197,10 @@ function pathfinding.extend_path_to_point(path: {point.Point}, target: point.Poi
     LOG.debug("Extend path")
     LOG.debug("Extend path", #path, target, max_length)
 
-    local distance = function(tile: point.Point): integer
+    local distance = function(tile: Point): integer
         return legal_tiles:get_point(tile) and 1 or 999
     end
-    local extend_path = function(p: {point.Point}, t: point.Point, full_map: array_2d.Array2D<ShortestPathEntry>): {point.Point}
+    local extend_path = function(p: {Point}, t: Point, full_map: array_2d.Array2D<ShortestPathEntry>): {Point}
         local new_points = { t }
         LOG.debug("Extending path!", t)
         while (full_map:get_point(new_points[#new_points]).prev ~= p[#p]) do
@@ -215,7 +215,7 @@ function pathfinding.extend_path_to_point(path: {point.Point}, target: point.Poi
         end
         while #new_points > 0 do
             local next_point = pt.pop(new_points)
-            assert(next_point is point.Point)
+            assert(next_point is Point)
             if visited:get_point(next_point) then
                 while p[#p] ~= next_point do
                     pt.pop(p)
@@ -242,7 +242,7 @@ function pathfinding.extend_path_to_point(path: {point.Point}, target: point.Poi
     end
     
     -- TODO: config
-    local max_tile = point.of(16, 16)
+    local max_tile = Point.of(16, 16)
 
     while #path > max_length + 1 do
         pt.pop(path)

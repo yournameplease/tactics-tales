@@ -21,7 +21,7 @@ local record CharacterRenderer
 
 end
 
-local function get_anchor_offsets(base: DrawPoint, anchor: point.Point, child: point.Point, flip_h: boolean, flip_v: boolean): DrawPoint
+local function get_anchor_offsets(base: DrawPoint, anchor: Point, child: Point, flip_h: boolean, flip_v: boolean): DrawPoint
     local diff_x = anchor.x - child.x
     local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
@@ -49,14 +49,14 @@ local function get_body_type(battle_unit: BattleUnit): AnimationName
 end
 
 local record RenderedAnimationFrame
-	offset: point.Point
+	offset: Point
 	sprite: integer
-	anchors: { AnchorPointName: point.Point }
+	anchors: { AnchorPointName: Point }
 end
 
 local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFrame
 	local frame_name: AnimationFrameName 
-	local offset: point.Point
+	local offset: Point
 	if battle_unit.animation_data ~= nil and battle_unit.animation_data.current_frame ~= nil then
 		frame_name = battle_unit.animation_data.current_frame.frame
 		offset = battle_unit.animation_data.current_frame.offset
@@ -76,7 +76,7 @@ local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFr
 end
 
 -- @return the position of the "feet_center" anchor
-function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): point.Point
+function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): Point
     local frame_data = get_animation_frame(battle_unit)
 
     return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
@@ -137,12 +137,12 @@ function CharacterRenderer.draw(battle_unit: BattleUnit, point: DrawPoint, side:
 
 	local offset = animation_frame.offset
 	if not apply_animation then
-		offset = point.of(0,0)
+		offset = Point.of(0,0)
 	end
 	
     local base_point = get_anchor_offsets(
 		point + offset,
-		point.of(0, 0),
+		Point.of(0, 0),
 		animation_frame.anchors.feet_center,
 		-- flip_h,
 		false,

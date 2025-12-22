@@ -24,7 +24,7 @@ end
 
 global record ItemSpriteData
 	sprite: integer
-	anchor: point.Point
+	anchor: Point
 end
 
 return ItemTypes

@@ -15,7 +15,7 @@ global record Config
 	SCREEN_HEIGHT: integer 
 	MAP_WIDTH: integer 
 	MAP_HEIGHT: integer 
-	TILE_SIZE: point.Point
+	TILE_SIZE: Point
 	WALL_HEIGHT: integer 
 	COLOR_MENU_PRIMARY: integer 
 	COLOR_MENU_SECONDARY: integer 
@@ -32,7 +32,7 @@ global CONFIG: Config = {
 	SCREEN_HEIGHT = 270,
 	MAP_WIDTH = 16,
 	MAP_HEIGHT = 16,
-	TILE_SIZE = point.of(20,16),
+	TILE_SIZE = Point.of(20,16),
 	WALL_HEIGHT = 16,
 
 	COLOR_MENU_PRIMARY = 32,

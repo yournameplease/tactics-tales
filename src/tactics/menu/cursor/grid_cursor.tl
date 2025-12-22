@@ -7,10 +7,10 @@ local pathfinding = require("src/tactics/battle/pathfinding")
 global record GridMenuCursor<GC>
     is MenuCursor<GC>
     where self.type == "CURSOR_GRID"
-    point: point.Point
+    point: Point
     x_max: integer
     y_max: integer
-    path: { point.Point }
+    path: { Point }
     legal_tiles: array_2d.Array2D<MenuTileHighlight>
     max_path_length: integer
 
@@ -30,7 +30,7 @@ global record GridMenuDefinition<GC>
     next_state: MenuStep
     send_command: GameEvent
     get_legal_tiles: function(GC, MenuContext): array_2d.Array2D<MenuTileHighlight>
-    get_path_anchor: function(GC, MenuContext): point.Point
+    get_path_anchor: function(GC, MenuContext): Point
     get_max_path_length: function(GC, MenuContext): integer
 end
 

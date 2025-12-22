@@ -92,12 +92,12 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         end        
     end
     
-    local labels: {battle_definition.TileLabel: {point.Point}} = {}
+    local labels: {battle_definition.TileLabel: {Point}} = {}
     for x = 0, metatiles_layer:height()-1 do
         for y = 0,metatiles_layer:width()-1 do
             local metatile = metatiles_layer:get(x, y) - BASE_METATILE
             if labels_by_metatile[metatile] ~= nil then
-                local point = point.of(x, y)
+                local point = Point.of(x, y)
                 for _,label in ipairs(labels_by_metatile[metatile]) do
                     if labels[label] == nil then
                         labels[label] = {}
