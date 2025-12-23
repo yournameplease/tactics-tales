@@ -242,7 +242,7 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
 
     -- defender counterattack
 
-    if can_attack(defender, attacker, defender_attacks[1]) then
+    if can_counter_attack(attacker, defender, defender_attacks[1]) then
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
