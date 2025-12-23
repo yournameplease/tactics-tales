@@ -48,9 +48,17 @@ local record SpawnUnits
 	neutral: { battle_definition_types.NeutralSpawnData }
 end
 
+local enum TerrainLocation
+	"floor"
+	"back"
+	"mid"
+	"front"
+end
+
 local record ModifyTerrain
 	is BattleScript
 	where self.type == "modify_terrain"
+	new_terrain: { TerrainLocation: integer }
 end
 
 local battle_script = {
@@ -62,6 +70,7 @@ local battle_script = {
 	},
 	script = {
 		SpawnUnits = SpawnUnits,
+		TerrainLocation = TerrainLocation,
 		ModifyTerrain = ModifyTerrain
 	}
 }
@@ -98,6 +107,17 @@ function battle_script.script.spawn_units(
 		trigger = trigger,
 		players = players,
 		enemies = enemies,
+	}
+end
+
+function battle_script.script.modify_terrain(
+	trigger: ScriptTrigger,
+	new_terrain: { TerrainLocation: integer }
+): ModifyTerrain
+	return {
+		type = "modify_terrain",
+		trigger = trigger,
+		new_terrain = new_terrain
 	}
 end
 

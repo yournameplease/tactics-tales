@@ -1,7 +1,17 @@
 
+local type Set<Value> = {Value: boolean}
+
 local maps = {
-	
+    Set = Set
 }
+
+function maps.set<Value>(values: {Value}): Set<Value>
+    local out: Set<Value> = {}
+    for _,v in ipairs(values) do
+        out[v] = true
+    end
+    return out
+end
 
 function maps.map<Key, From, To>(m: {Key: From}, fn: function(From): To): { Key: To }
     local out = {}
