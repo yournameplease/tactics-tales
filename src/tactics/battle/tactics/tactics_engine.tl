@@ -235,6 +235,10 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
 
     if not defender:is_alive() then
         self.battle_map:kill_unit(defender)
+        self.event_bus:emit("TACTICS_UNIT_DEATH", {
+            attacker = attacker,
+            defender = defender,
+        })
     end
 end
 

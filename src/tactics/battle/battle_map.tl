@@ -4,6 +4,13 @@ local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
+local enum TerrainLocation
+	"front_wall"
+	"mid_wall"
+	"back_wall"
+	"ground"
+end
+
 global record TerrainData
     solid: boolean
     movement_cost: integer
@@ -47,10 +54,8 @@ local TERRAIN_DATA: { integer: TerrainData } = {
 
 global record MapLayers
     metatiles: Userdata
-    front_wall: Userdata
-    mid_wall: Userdata
-    back_wall: Userdata
-    ground: Userdata
+    -- should be total
+    terrain: {TerrainLocation: Userdata}
 end
 
 global record MapMetadata
@@ -71,6 +76,12 @@ global record BattleMap
     metadata: MapMetadata
 end
 
+local battle_map = {
+    BattleMap = BattleMap,
+    TerrainLocation = TerrainLocation
+    
+}
+
 function BattleMap.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
@@ -82,7 +93,7 @@ function BattleMap.new(width: integer, height: integer, labels: { string: {Point
     return self
 end
 
--- data access
+-- terrain
 function BattleMap:get_tiles_by_label(label: battle_definition_types.TileLabel): {Point}
     if self.tile_labels[label] then
         return self.tile_labels[label]
@@ -92,10 +103,10 @@ function BattleMap:get_tiles_by_label(label: battle_definition_types.TileLabel):
 end
 
 function BattleMap:get_terrain(tile: Point): TerrainData
-    local ground = self.layers.ground
-    local back_wall = self.layers.back_wall
-    local mid_wall = self.layers.mid_wall
-    local front_wall = self.layers.front_wall
+    local ground = self.layers.terrain.ground
+    local back_wall = self.layers.terrain.back_wall
+    local mid_wall = self.layers.terrain.mid_wall
+    local front_wall = self.layers.terrain.front_wall
     
     local tile_sprite = ground:get(tile.x,tile.y)
     if tile_sprite == 0 then return nil end
@@ -130,6 +141,17 @@ function BattleMap:get_terrain(tile: Point): TerrainData
         dodge = terrain_data.dodge,
     }
 end
+
+function BattleMap:update_terrain(label: string, new_terrain: { TerrainLocation: integer })
+    local tiles = self:get_tiles_by_label(label)
+    for _,t in ipairs(tiles) do
+        for terrain,new_terrain in pairs(new_terrain) do
+            self.layers.terrain[terrain]:set(t.x, t.y, new_terrain)
+        end
+    end
+end
+
+--- units
 
 function BattleMap:get_unit_by_id(id: integer): battle_unit.BattleUnit
     return self.units_by_id[id]
@@ -212,3 +234,5 @@ end
 function BattleMap:get_all_units(): { battle_unit.BattleUnit }
     return self:get_units(fn_true)
 end
+
+return battle_map
