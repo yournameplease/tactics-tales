@@ -42,8 +42,9 @@ local function open_door(
 ): battle_script.BattleScript
     return battle_script.script.modify_terrain(
         battle_script.trigger.unit_death(enemy_label),
+        tile_label,
         {
-            "mid" = 0
+            ["mid_wall"] = 0
         }
     )
 end

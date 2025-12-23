@@ -4,12 +4,14 @@ local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
-local enum TerrainLocation
+global enum TerrainLocation
 	"front_wall"
 	"mid_wall"
 	"back_wall"
 	"ground"
 end
+
+global type NewTilesMap = {TerrainLocation: integer}
 
 global record TerrainData
     solid: boolean
@@ -78,8 +80,8 @@ end
 
 local battle_map = {
     BattleMap = BattleMap,
-    TerrainLocation = TerrainLocation
-    
+    TerrainLocation = TerrainLocation,
+    NewTilesMap = NewTilesMap,
 }
 
 function BattleMap.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
@@ -142,11 +144,11 @@ function BattleMap:get_terrain(tile: Point): TerrainData
     }
 end
 
-function BattleMap:update_terrain(label: string, new_terrain: { TerrainLocation: integer })
+function BattleMap:update_terrain(label: string, new_terrain: NewTilesMap)
     local tiles = self:get_tiles_by_label(label)
     for _,t in ipairs(tiles) do
-        for terrain,new_terrain in pairs(new_terrain) do
-            self.layers.terrain[terrain]:set(t.x, t.y, new_terrain)
+        for terrain,new_tile in pairs(new_terrain) do
+            self.layers.terrain[terrain]:set(t.x, t.y, new_tile)
         end
     end
 end

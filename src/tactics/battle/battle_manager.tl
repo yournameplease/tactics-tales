@@ -63,6 +63,7 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
     self.script_manager = script_manager.new(
         battle_def.scripts,
         self.services.event_bus,
+        self.battle_map,
         self.tactics_engine
     )
     
