@@ -40,6 +40,11 @@ local record AttackDouble
     accuracy: integer
     min_range: integer
     max_range: integer
+
+    long_reach: boolean
+
+    ignored_defenses: {effect.DefenseType: boolean}
+    ignored_avoids: {effect.AvoidType: boolean}
 end
 
 local record CombatDouble
@@ -52,13 +57,29 @@ local record CombatDouble
     unit: BattleUnit
 end
 
-local function build_attack_double(weapon: wpn.Weapon, unit: BattleUnit): AttackDouble
+local function build_attack_double(weapon: wpn.Weapon): AttackDouble
     local double = {
         damage = weapon.damage,
         accuracy = weapon.accuracy,
         min_range = weapon.min_range,
         max_range = weapon.max_range,
+        long_reach = false,
+        ignored_defenses = {},
+        ignored_avoids = {},
     }
+    for _, eff in ipairs(weapon.effects) do
+        if eff is effect.LongReachEffect then
+            double.long_reach = true
+        elseif eff is effect.ShieldsplitterEffect then
+            
+        elseif eff is effect.ArmorkillerEffect then
+            double.ignored_defenses["ARMOR"] = true 
+            double.ignored_avoids["ARMOR"] = true 
+        else
+            error()
+        end
+    end
+    
     return double
 end
 
@@ -72,7 +93,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
         attacks = lists.do_map(
             unit.character.inventory:get_equipped_weapons(),
             function(weapon: wpn.Weapon): AttackDouble
-                return build_attack_double(weapon, unit)
+                return build_attack_double(weapon)
             end
         ),
         unit = unit
@@ -82,35 +103,20 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
 
     for _slot, item in pairs(equipped_items) do
         for _, eff in ipairs(item:get_equipment_effects()) do
-
-        
             if eff is effect.IncreaseDefenseEffect then
                 double.defense[eff.defense_type] = (double.defense[eff.defense_type] or 0) + eff.amount
-            end
-    
-            if eff is effect.IncreaseAvoidEffect then
+            elseif eff is effect.IncreaseAvoidEffect then
                 double.avoid[eff.avoid_type] = (double.avoid[eff.avoid_type] or 0) + eff.amount  
+            else
+                error()
             end
-    
-            if eff is effect.LongReachEffect then
-
-            end
-    
-            if eff is effect.ShieldsplitterEffect then
-
-            end
-    
-            if eff is effect.ArmorkillerEffect then
-
-            end
-                   
         end
     end
     
     return double
 end
 
-local function get_hit_chance(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): integer
+local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): integer
     local accuracy = weapon.accuracy
 
     local terrain = battle_map:get_terrain(defender.tile)
@@ -119,18 +125,22 @@ local function get_hit_chance(attacker: CombatDouble, defender: CombatDouble, we
     local unit_avoid = 0
 
     for type, amount in pairs(defender.avoid) do
-        unit_avoid = unit_avoid + amount or 0
+        if not weapon.ignored_avoids[type] then
+            unit_avoid = unit_avoid + amount or 0
+        end
     end
 
     return pt.mid(0, accuracy - unit_avoid - terrain_avoid, 100)
 end
 
-local function get_damage(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
+local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble): integer
     local atk = weapon.damage
     local def = 0
 
     for type, amount in pairs(defender.defense) do
-        def = def + amount or 0
+        if not weapon.ignored_defenses[type] then
+            def = def + amount or 0
+        end
     end
     
     local damage = pt.mid(0, atk - def, 999)
@@ -151,6 +161,25 @@ local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack
     return is_in_combat_range(attacker, defender, attack)
             and attacker.hp_current > 0
             and defender.hp_current > 0
+end
+
+---@desc True if all attacks are long range
+local function is_long_reach(unit: CombatDouble): boolean
+    for _,a in ipairs(unit.attacks) do
+        if not a.long_reach then
+            return false
+        end
+    end
+    return true
+end
+
+local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
+    local is_long_reach = is_long_reach(attacker)
+    if is_long_reach and not attack.long_reach then
+        return false
+    end
+
+    return can_attack(defender, attacker, attack)
 end
 
 local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): CombatResult.CombatStep
@@ -184,9 +213,8 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
         if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
     end
 
-
     -- defender counterattack
-    if can_attack(defender, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
+    if can_counter_attack(attacker, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             pt.add(result.steps, step2)

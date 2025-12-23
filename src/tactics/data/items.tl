@@ -58,8 +58,7 @@ local function weapon(
     slots: integer,
     equip_slot: EquipSlot,
     sprite_data: ItemSpriteData,
-    data: WeaponDefinition,
-    effects?: {wpn.EquipmentEffect}
+    data: WeaponDefinition
 ) : ItemDefinition
     setmetatable(data, { __index = default_weapon })
     return {
@@ -70,7 +69,7 @@ local function weapon(
         sprite_data = sprite_data,
 
         weapon_definition = data,
-        equipment_effects = effects or {}
+        equipment_effects = {}
     }
 end
 
@@ -80,7 +79,7 @@ local function melee_weapon(
     damage: integer,
     accuracy: integer,
     slots: integer,
-    effects?: { wpn.EquipmentEffect }
+    effects?: { wpn.WeaponEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -94,8 +93,8 @@ local function melee_weapon(
             name = name,
             damage = damage,
             accuracy = accuracy,
-        },
-        effects
+            effects = effects or {}
+        }
     )
 end
 
@@ -105,7 +104,7 @@ local function two_handed_weapon(
     damage: integer,
     accuracy: integer,
     slots: integer,
-    effects?: { wpn.EquipmentEffect }
+    effects?: { wpn.WeaponEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -120,9 +119,9 @@ local function two_handed_weapon(
             sprite = sprite,
             damage = damage,
             accuracy = accuracy,
-            body_type = "HORIZONTAL"
-        },
-        effects
+            body_type = "HORIZONTAL",
+            effects = effects or {}
+        }
     )
 end
 
@@ -134,7 +133,7 @@ local function ranged_weapon(
     min_range: integer,
     max_range: integer,
     slots: integer,
-    effects?: { wpn.EquipmentEffect }
+    effects?: { wpn.WeaponEffect }
 ): ItemDefinition
     return weapon(
         name,
@@ -152,9 +151,9 @@ local function ranged_weapon(
             min_range = min_range,
             max_range = max_range,
             type = "RANGED",
-            body_type = "FRONT_HAND"
-        },
-        effects
+            body_type = "FRONT_HAND",
+            effects = effects or {}
+        }
     )
 end
 

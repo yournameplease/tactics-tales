@@ -12,6 +12,7 @@ global record WeaponDefinition
     body_type: wpn.WeaponBodyType
     min_range: integer
     max_range: integer
+	effects: {wpn.WeaponEffect}
 end
 
 
