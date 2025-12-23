@@ -29,15 +29,17 @@ local GROUND_LAYER = 5
 local function as_map(battle_map: MapFetchResult): MapLayers
     return {
         metatiles = battle_map[METATILES_LAYER].bmp,
-        front_wall = battle_map[FRONT_WALL_LAYER].bmp,
-        mid_wall = battle_map[MID_WALL_LAYER].bmp,
-        back_wall = battle_map[BACK_WALL_LAYER].bmp,
-        ground = battle_map[GROUND_LAYER].bmp
+        terrain = {
+            front_wall = battle_map[FRONT_WALL_LAYER].bmp,
+            mid_wall = battle_map[MID_WALL_LAYER].bmp,
+            back_wall = battle_map[BACK_WALL_LAYER].bmp,
+            ground = battle_map[GROUND_LAYER].bmp,
+        }
     }
 end
 
 local function apply_checkerboard(map_layers: MapLayers)
-    local ground = map_layers.ground
+    local ground = map_layers.terrain.ground
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)
@@ -49,11 +51,11 @@ local function apply_checkerboard(map_layers: MapLayers)
 end
 
 local function apply_default_walls(map_layers: MapLayers)
-    local ground = map_layers.ground
-    local back_wall = map_layers.back_wall
+    local ground = map_layers.terrain.ground
+    local back_wall = map_layers.terrain.back_wall
     -- mid wall makes ui look ugly
-    -- local mid_wall = map_layers.mid_wall
-    local front_wall = map_layers.front_wall
+    -- local mid_wall = map_layers.terrain.mid_wall
+    local front_wall = map_layers.terrain.front_wall
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
             local tile = ground:get(x, y)

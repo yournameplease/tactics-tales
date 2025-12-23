@@ -78,9 +78,10 @@ function ScriptManagerImpl:register_script(
 		end
 	elseif script is battle_script.script.ModifyTerrain then
 		effect = function()
-			self.battle_map:
-			error("unimplementned")
-
+			self.battle_map:update_terrain(
+				script.tile_label,
+				script.new_terrain
+			)
 		end
 	else
 		error()

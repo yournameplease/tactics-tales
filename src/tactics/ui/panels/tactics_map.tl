@@ -244,10 +244,10 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     local drawn_unit_count = 0
     -- TODO: preload layers
     local layers = state.battle_context.battle_map.layers
-    local layer_ground = layers.ground
-    local layer_wall_back = layers.back_wall
-    local layer_wall_mid = layers.mid_wall
-    local layer_wall_front = layers.front_wall
+    local layer_ground = layers.terrain.ground
+    local layer_wall_back = layers.terrain.back_wall
+    local layer_wall_mid = layers.terrain.mid_wall
+    local layer_wall_front = layers.terrain.front_wall
     local layer_path = get_path_layer(state)
 
     local cursor_tile: Point = nil

@@ -52,8 +52,8 @@ end
 local record ModifyTerrain
 	is BattleScript
 	where self.type == "modify_terrain"
-	label: string
-	new_terrain: { battle_map.TerrainLocation: integer }
+	tile_label: string
+	new_terrain: battle_map.NewTilesMap
 end
 
 local battle_script = {
@@ -65,7 +65,7 @@ local battle_script = {
 	},
 	script = {
 		SpawnUnits = SpawnUnits,
-		TerrainLocation = TerrainLocation,
+		TerrainLocation = battle_map.TerrainLocation,
 		ModifyTerrain = ModifyTerrain
 	}
 }
@@ -107,11 +107,13 @@ end
 
 function battle_script.script.modify_terrain(
 	trigger: ScriptTrigger,
-	new_terrain: { TerrainLocation: integer }
+	tile_label: string,
+	new_terrain: battle_map.NewTilesMap
 ): ModifyTerrain
 	return {
 		type = "modify_terrain",
 		trigger = trigger,
+		tile_label = tile_label,
 		new_terrain = new_terrain
 	}
 end
