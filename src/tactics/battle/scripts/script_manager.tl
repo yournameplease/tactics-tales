@@ -3,6 +3,7 @@
 
 local event_bus = require("src/tactics/systems/event_bus")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
+local battle_map = require("src/tactics/battle/battle_map")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 
 local interface ScriptManager
@@ -14,9 +15,10 @@ local script_manager = {
 }
 
 local record ScriptManagerImpl
+	battle_map: BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
 	event_bus: EventBus
-	event_listener_ids: {integer}	
+	event_listener_ids: {integer}
 end
 
 function ScriptManagerImpl:register_script(
@@ -55,7 +57,11 @@ function ScriptManagerImpl:register_script(
 			end
 		end
 	elseif trigger is battle_script.trigger.UnitDeath then
-		error("unimplemented")
+		event = "TACTICS_UNIT_DEATH"
+		filter = function(ctx: {string: any}): boolean
+			local defender = ctx.defender as BattleUnit
+			return defender.labels[trigger.unit_label]
+		end
 	else
 		error()
 	end
@@ -71,7 +77,11 @@ function ScriptManagerImpl:register_script(
 		    )
 		end
 	elseif script is battle_script.script.ModifyTerrain then
-		error("unimplementned")
+		effect = function()
+			self.battle_map:
+			error("unimplementned")
+
+		end
 	else
 		error()
 	end
@@ -89,6 +99,7 @@ end
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
 	event_bus: EventBus,
+	battle_map: BattleMap,
 	tactics_engine: tactics_engine.TacticsEngine
 ): ScriptManager
 	scripts = scripts or {}
@@ -100,6 +111,7 @@ function script_manager.new(
 	self.event_bus = event_bus
 	self.event_listener_ids = {}
 	self.tactics_engine = tactics_engine
+	self.battle_map = battle_map
 
 	for _,script in ipairs(scripts) do
 		self:register_script(script)

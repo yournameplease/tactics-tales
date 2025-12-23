@@ -1,4 +1,5 @@
 local battle_definition_types = require("src/tactics/battle/definition/types")
+local battle_map = require("src/tactics/battle/battle_map")
 
 local enum ScriptTriggerType
 	"turn"
@@ -48,17 +49,11 @@ local record SpawnUnits
 	neutral: { battle_definition_types.NeutralSpawnData }
 end
 
-local enum TerrainLocation
-	"floor"
-	"back"
-	"mid"
-	"front"
-end
-
 local record ModifyTerrain
 	is BattleScript
 	where self.type == "modify_terrain"
-	new_terrain: { TerrainLocation: integer }
+	label: string
+	new_terrain: { battle_map.TerrainLocation: integer }
 end
 
 local battle_script = {
