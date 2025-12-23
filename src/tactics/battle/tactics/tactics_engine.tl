@@ -20,6 +20,7 @@ local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
+local SIDE_NEUTRAL = 2
 
 local record TacticsEngine
 
@@ -34,8 +35,7 @@ local record TacticsEngine
     event_bus: EventBus
 
 
-    spawn_enemies: function(self, enemies: {battle_definition_types.EnemySpawnData})
-    spawn_players: function(self, players: {battle_definition_types.PlayerSpawnData})
+    spawn_all: function(self, players: {battle_definition_types.PlayerSpawnData}, enemies: {battle_definition_types.EnemySpawnData}, neutrals: {battle_definition_types.NeutralSpawnData})
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
@@ -75,20 +75,31 @@ end
 
 -- unit spawning
 
-function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Point, side: Side)
+function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Point)
     local idle_animation = self.animation_manager:create_idle_animation()
     unit.animation_data = idle_animation
     self.battle_map:spawn_unit(unit, spawn_point)
 end
 
---- Iterates over enemy definitions and calls CharacterManager
-function TacticsEngine:spawn_enemies(enemies: {battle_definition_types.EnemySpawnData})
-    for i, enemy in ipairs(enemies) do
-        local spawn_points = self.battle_map:get_tiles_by_label(enemy.tile)
+--- Iterates over npc definitions and calls CharacterManager
+function TacticsEngine:spawn_enemies(npcs: {battle_definition_types.EnemySpawnData})
+    for _, npc in ipairs(npcs) do
+        local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
         for _,spawn_point in ipairs(spawn_points) do
-            local character = self.character_manager:generate_character(enemy.template)
-            local unit = battle_unit.enemy(character, spawn_point, enemy.ai)
-            self:spawn_unit(unit, spawn_point, SIDE_ENEMY)
+            local character = self.character_manager:generate_character(npc.template)
+            local unit = battle_unit.npc(character, spawn_point, SIDE_ENEMY, npc.ai)
+            self:spawn_unit(unit, spawn_point)
+        end
+    end
+end
+
+function TacticsEngine:spawn_neutrals(npcs: {battle_definition_types.NeutralSpawnData})
+    for _, npc in ipairs(npcs) do
+        local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
+        for _,spawn_point in ipairs(spawn_points) do
+            local character = self.character_manager:generate_character(npc.template)
+            local unit = battle_unit.npc(character, spawn_point, SIDE_NEUTRAL, npc.ai)
+            self:spawn_unit(unit, spawn_point)
         end
     end
 end
@@ -112,11 +123,22 @@ function TacticsEngine:spawn_players(players: {battle_definition_types.PlayerSpa
                     roster_count = roster_count + 1
                 end
             end
-            self:spawn_unit(unit, spawn_point, SIDE_PLAYER)
+            if unit ~= nil then
+                self:spawn_unit(unit, spawn_point)
+            end
         end
     end
 end
 
+function TacticsEngine:spawn_all(
+    players: {battle_definition_types.PlayerSpawnData},
+    enemies: {battle_definition_types.EnemySpawnData},
+    neutral: {battle_definition_types.NeutralSpawnData}
+)
+    self:spawn_players(players or {})
+    self:spawn_enemies(enemies or {})
+    self:spawn_neutrals(neutral or {})
+end
 
 -- handlers
 

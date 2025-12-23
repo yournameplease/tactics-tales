@@ -66,8 +66,11 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.tactics_engine
     )
     
-    self.tactics_engine:spawn_enemies(battle_def.enemies)
-    self.tactics_engine:spawn_players(battle_def.players)
+    self.tactics_engine:spawn_all(
+        battle_def.players,
+        battle_def.enemies,
+        battle_def.neutral
+    )
 
     self.battle_objective_service = battle_objective_service.new(
         self.battle_map

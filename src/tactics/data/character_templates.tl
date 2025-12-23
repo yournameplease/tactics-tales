@@ -89,6 +89,13 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			randomizer.weighted_option_selector.of("shield")
 		)
     },
+    bandit_berzerker = {
+        parent_template = "bandit_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of("axe"),
+			randomizer.weighted_option_selector.of("axe")
+		)
+    },
     bandit_boss = {
         parent_template = "bandit_base",
         hp_max = 8,
@@ -133,11 +140,43 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 		body_options = randomizer.weighted_option_selector.of("ROBED"),
 		headwear_options = randomizer.weighted_option_selector.of("cultist_hood")
 	},
+	cultist_goon = {
+		parent_template = "cultist_base",
+		headwear_options = randomizer.weighted_option_selector.of("cultist_hood"),
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "dagger" )
+		),
+	},
+	cultist_spear = {
+		parent_template = "cultist_base",
+		headwear_options = randomizer.weighted_option_selector.of("cultist_hood"),
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "spear" )
+		),
+	},
+	cultist_guard = {
+		parent_template = "cultist_base",
+		headwear_options = randomizer.weighted_option_selector.of("hooded_wizard_hat"),
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "spear" ),
+			randomizer.weighted_option_selector.of( "shield" )
+		),
+	},
+	cultist_boss = {
+		parent_template = "cultist_base",
+		headwear_options = randomizer.weighted_option_selector.of("hooded_wizard_hat"),
+        item_loadout_options = randomizer.list_selector.of_randomizers(),
+	},
 	village_hero = {
 		parent_template = "human_base",
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of("sword")
 		)
+	},
+	old_fart = {
+		parent_template = "human_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+		),
 	},
 }
 

@@ -64,12 +64,11 @@ function ScriptManagerImpl:register_script(
 
 	if script is battle_script.script.SpawnUnits then
 		effect = function()
-			if script.enemies ~= nil then
-				self.tactics_engine:spawn_enemies(script.enemies)
-			end
-			if script.players ~= nil then
-				self.tactics_engine:spawn_players(script.players)
-			end
+		    self.tactics_engine:spawn_all(
+		        script.players,
+		        script.enemies,
+		        script.neutral
+		    )
 		end
 	elseif script is battle_script.script.ModifyTerrain then
 		error("unimplementned")

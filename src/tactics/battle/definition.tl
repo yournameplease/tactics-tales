@@ -7,6 +7,7 @@ local record BattleDefinition
     victory_conditions: { types.VictoryCondition }
     failure_conditions: { types.FailureCondition }
     enemies: { types.EnemySpawnData }
+    neutral: { types.NeutralSpawnData }
     players: { types.PlayerSpawnData }
     scripts: { battle_script.BattleScript }
 end
