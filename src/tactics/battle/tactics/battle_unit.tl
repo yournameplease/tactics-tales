@@ -8,6 +8,7 @@ local unit_ai = require("src/tactics/battle/unit/unit_ai")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
+local SIDE_NEUTRAL = 2
 
 global record BattleUnit
     id: integer
@@ -22,6 +23,7 @@ global record BattleUnit
     unit_ai: unit_ai.UnitAI
 
     is_player: function(self): boolean
+    is_neutral: function(self): boolean
     is_enemy: function(self): boolean
 end
 
@@ -31,6 +33,10 @@ local battle_unit = {
 
 function BattleUnit:is_player(): boolean
     return self.side == SIDE_PLAYER
+end
+
+function BattleUnit:is_neutral(): boolean
+    return self.side == SIDE_NEUTRAL
 end
 
 function BattleUnit:is_enemy(): boolean
@@ -67,10 +73,10 @@ function battle_unit.player(permanent_unit: Character, tile: Point): BattleUnit
     return instance
 end
 
-function battle_unit.enemy(permanent_unit: Character, tile: Point, ai: unit_ai.UnitAI): BattleUnit
+function battle_unit.npc(permanent_unit: Character, tile: Point, side: Side, ai: unit_ai.UnitAI): BattleUnit
     local instance = spawn_unit(permanent_unit, tile)
 
-    instance.side = SIDE_ENEMY
+    instance.side = side
     instance.unit_ai = ai
 
     return instance

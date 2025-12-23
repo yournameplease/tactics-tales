@@ -54,7 +54,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     end
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
-
+    
     local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
 
     local potential_attacks: {AttackOption} = {}

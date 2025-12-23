@@ -45,6 +45,7 @@ local record SpawnUnits
 	where self.type == "spawn_units"
 	players: { battle_definition_types.PlayerSpawnData }
 	enemies: { battle_definition_types.EnemySpawnData }
+	neutral: { battle_definition_types.NeutralSpawnData }
 end
 
 local record ModifyTerrain

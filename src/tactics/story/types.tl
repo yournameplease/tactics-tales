@@ -4,6 +4,7 @@ local type NodeId = string
 
 local enum StoryNodeType
 	'text'
+	'roster_add'
 	'battle'
 	'jump'
 	'new_page'
@@ -36,6 +37,20 @@ function TextNode.of(text: string): TextNode
 		text = text
 	}
 	return setmetatable(self, { __index = TextNode})
+end
+
+local record RosterAddNode
+	is StoryNode
+	where self.type == 'roster_add'
+	template: string
+end
+
+function RosterAddNode.of(template: string): RosterAddNode
+	local self = {
+		type = 'roster_add',
+		template = template
+	}
+	return setmetatable(self, { __index = RosterAddNode})
 end
 
 local record BattleNode
