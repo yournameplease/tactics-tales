@@ -117,7 +117,6 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         enemies = {
             { template = "cultist_boss", ai = ai.stationary, tile = "cultist_boss" },
             { template = "cultist_guard", ai = ai.stationary, tile = "cultist_guard" },
-            { template = "cultist_spear", ai = ai.stationary, tile = "cultist_guard" },
             { template = "cultist_goon", ai = ai.move_two, tile = "cultist_goon" },
         },
         neutral = {
@@ -138,7 +137,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 "after_enemy"
             ),
             spawn_enemies({
-                { template = "cultist_goon", ai = ai.move_inf, tile = "cultist_reinforce_a" },
+                { template = "cultist_spear", ai = ai.move_inf, tile = "cultist_reinforce_a" },
             },
                 6,
                 3,

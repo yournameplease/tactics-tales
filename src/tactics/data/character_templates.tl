@@ -114,11 +114,17 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			{"hood", 1}
 		)
 	},
+	militia_leader = {
+		parent_template = "militia_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of("spear" ),
+			randomizer.weighted_option_selector.of("shield" )
+		)
+	}, 
 	militia_spearman = {
 		parent_template = "militia_base",
         item_loadout_options = randomizer.list_selector.of_randomizers(
-			randomizer.weighted_option_selector.of( "spear" ),
-			randomizer.weighted_option_selector.of("shield" )
+			randomizer.weighted_option_selector.of( "spear" )
 		)
 	}, 
 	militia_armor = {

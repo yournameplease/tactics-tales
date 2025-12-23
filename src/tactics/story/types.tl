@@ -32,11 +32,21 @@ local record TextNode
 end
 
 function TextNode.of(text: string): TextNode
-	local self = {
+	return {
 		type = 'text',
 		text = text
 	}
-	return setmetatable(self, { __index = TextNode})
+end
+
+local record ExitStoryNode
+	is StoryNode
+	where self.type == 'text'
+end
+
+function ExitStoryNode.of(): ExitStoryNode
+	return {
+		type = 'text',
+	}
 end
 
 local record RosterAddNode
@@ -46,11 +56,10 @@ local record RosterAddNode
 end
 
 function RosterAddNode.of(template: string): RosterAddNode
-	local self = {
+	return {
 		type = 'roster_add',
 		template = template
 	}
-	return setmetatable(self, { __index = RosterAddNode})
 end
 
 local record BattleNode
@@ -62,13 +71,12 @@ local record BattleNode
 end
 
 function BattleNode.of(battle_id: string, next_node_victory: NodeId, next_node_failure: NodeId): BattleNode
-	local self = {
+	return {
 		type = 'battle',
 		battle_id = battle_id,
 		next_node_victory = next_node_victory,
 		next_node_failure = next_node_failure,
 	}
-	return setmetatable(self, { __index = BattleNode})
 end
 
 -- TODO: conditional jumps
@@ -79,11 +87,10 @@ local record JumpNode
 end
 
 function JumpNode.of(next_node: NodeId): JumpNode
-	local self = {
+	return {
 		type = 'jump',
 		next_node = next_node
 	}
-	return setmetatable(self, { __index = JumpNode})
 end
 
 
@@ -100,7 +107,9 @@ return {
 	StoryNode = StoryNode,
 	StoryNodeType = StoryNodeType,
 	TextNode = TextNode,
+	ExitStoryNode = ExitStoryNode,
 	BattleNode = BattleNode,
 	JumpNode = JumpNode,
 	NewPageNode = NewPageNode,
+	RosterAddNode = RosterAddNode,
 }
