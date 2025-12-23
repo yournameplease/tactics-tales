@@ -84,10 +84,11 @@ end
 --- Iterates over npc definitions and calls CharacterManager
 function TacticsEngine:spawn_enemies(npcs: {battle_definition_types.EnemySpawnData})
     for _, npc in ipairs(npcs) do
+        local labels = {npc.tile}
         local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, SIDE_ENEMY, npc.ai)
+            local unit = battle_unit.npc(character, spawn_point, SIDE_ENEMY, npc.ai, labels)
             self:spawn_unit(unit, spawn_point)
         end
     end
@@ -95,10 +96,11 @@ end
 
 function TacticsEngine:spawn_neutrals(npcs: {battle_definition_types.NeutralSpawnData})
     for _, npc in ipairs(npcs) do
+        local labels = {npc.tile}
         local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, SIDE_NEUTRAL, npc.ai)
+            local unit = battle_unit.npc(character, spawn_point, SIDE_NEUTRAL, npc.ai, labels)
             self:spawn_unit(unit, spawn_point)
         end
     end
@@ -109,17 +111,18 @@ function TacticsEngine:spawn_players(players: {battle_definition_types.PlayerSpa
     local player_roster = char_man:get_player_roster()
     local roster_count = 1
     for _, player in ipairs(players) do
+        local labels = {player.tile}
         local spawn_points = self.battle_map:get_tiles_by_label(player.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local unit: BattleUnit
             if player.template ~= nil then
                 local character = char_man:generate_character(player.template)
-                unit = battle_unit.player(character, spawn_point)
+                unit = battle_unit.player(character, spawn_point, labels)
                 char_man:persist_player(character)
             else
                 if player_roster[roster_count] ~= nil then
                     local character = player_roster[roster_count]
-                    unit = battle_unit.player(character, spawn_point)
+                    unit = battle_unit.player(character, spawn_point, labels)
                     roster_count = roster_count + 1
                 end
             end

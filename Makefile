@@ -1,8 +1,8 @@
 SRC = \
 	$(wildcard src/tactics/*.tl) \
-	$(wildcard src/tactics/*/*.tl) \
+	$(wildcard src/tactics/**/*.tl) \
 	$(wildcard src/spec/*.tl) \
-	$(wildcard src/spec/*/*.tl) \
+	$(wildcard src/spec/**/*.tl) \
 	
 LUA = $(SRC:src/%.tl=build/%.lua)
 

@@ -36,6 +36,18 @@ local function spawn_enemies(
     )
 end
 
+local function open_door(
+    enemy_label: string,
+    tile_label: string
+): battle_script.BattleScript
+    return battle_script.script.modify_terrain(
+        battle_script.trigger.unit_death(enemy_label),
+        {
+            "mid" = 0
+        }
+    )
+end
+
 
 global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
     ["bandit_village"] = {
@@ -101,6 +113,11 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             ["cultist_door_guard_c"] = { 0x14 },
             ["cultist_door_guard_d"] = { 0x15 },
             ["cultist_door_guard_e"] = { 0x16 },
+            ["door_a"] = { 0x32 },
+            ["door_b"] = { 0x33 },
+            ["door_c"] = { 0x34 },
+            ["door_d"] = { 0x35 },
+            ["door_e"] = { 0x36 },
             ["cultist_reinforce_a"] = { 0x18 },
             ["cultist_reinforce_b"] = { 0x19 },
             ["jailed_royal"] = { 0x20 },
@@ -143,6 +160,10 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 3,
                 "after_enemy"
             ),
+            open_door(
+                "",
+                ""
+            )
         }
     }
 }

@@ -5,6 +5,7 @@ require("src/tactics/types")
 require("src/tactics/character/object/character")
 require("src/tactics/character/items/object/weapon")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
+local maps = require("src/tactics/util/maps")
 
 local SIDE_PLAYER = 0
 local SIDE_ENEMY = 1
@@ -21,6 +22,7 @@ global record BattleUnit
     character: Character
 
     unit_ai: unit_ai.UnitAI
+    labels: maps.Set<string>
 
     is_player: function(self): boolean
     is_neutral: function(self): boolean
@@ -51,13 +53,14 @@ end
 --     return tab.source[k]
 -- end
 
-local function spawn_unit(permanent_unit: Character, tile: Point): BattleUnit
+local function spawn_unit(permanent_unit: Character, tile: Point, labels: {string}): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,
         hp_current = permanent_unit.stats.hp_max,
         has_acted = false,
-        character = permanent_unit
+        character = permanent_unit,
+        labels = maps.set(labels)
     }
 
     setmetatable(instance, { __index = BattleUnit })
@@ -65,16 +68,16 @@ local function spawn_unit(permanent_unit: Character, tile: Point): BattleUnit
     return instance
 end
 
-function battle_unit.player(permanent_unit: Character, tile: Point): BattleUnit
-    local instance = spawn_unit(permanent_unit, tile)
+function battle_unit.player(permanent_unit: Character, tile: Point, labels: {string}): BattleUnit
+    local instance = spawn_unit(permanent_unit, tile, labels)
 
     instance.side = SIDE_PLAYER
 
     return instance
 end
 
-function battle_unit.npc(permanent_unit: Character, tile: Point, side: Side, ai: unit_ai.UnitAI): BattleUnit
-    local instance = spawn_unit(permanent_unit, tile)
+function battle_unit.npc(permanent_unit: Character, tile: Point, side: Side, ai: unit_ai.UnitAI, labels: {string}): BattleUnit
+    local instance = spawn_unit(permanent_unit, tile, labels)
 
     instance.side = side
     instance.unit_ai = ai
