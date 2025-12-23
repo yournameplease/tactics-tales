@@ -14,6 +14,7 @@ local combat_preview = require("src/tactics/ui/layout/combat_preview")
 local story_page = require("src/tactics/ui/layout/story_page")
 local title_screen = require("src/tactics/ui/layout/title_screen")
 local main_menu = require("src/tactics/ui/layout/main_menu")
+local chapter_select = require("src/tactics/ui/layout/chapter_select")
 local options_menu = require("src/tactics/ui/layout/options_menu")
 global record UILayout
     root: UIElement
@@ -46,6 +47,7 @@ function UIManager.new(): UIManager
     self.layouts["STORY_PAGE"] = story_page
     self.layouts["TITLE_SCREEN"] = title_screen
     self.layouts["MAIN_MENU_PAGE"] = main_menu
+    self.layouts["CHAPTER_SELECT_PAGE"] = chapter_select
     self.layouts["OPTIONS_MENU_PAGE"] = options_menu
 
     -- Validate all layouts
