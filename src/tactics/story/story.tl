@@ -19,7 +19,7 @@ local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
-local StoryTypes = require("src/tactics/story/types")
+local story_types = require("src/tactics/story/types")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 local STORY_DATA = require("src/tactics/data/story")
@@ -29,10 +29,10 @@ global record Story
     record ActiveNode
         node_id: string
         node_step: integer
-        definition: StoryTypes.StoryNode
+        definition: story_types.StoryNode
     end
     
-    story_id: StoryTypes.StoryId
+    story_id: story_types.StoryId
 
     story_page: StoryPage
 
@@ -64,18 +64,18 @@ end
 function Story:handle_new_node()
     local node_definition = self.current_node.definition
     LOG.debug("Handling new node: ", node_definition.type)
-    if node_definition is StoryTypes.JumpNode then
+    if node_definition is story_types.JumpNode then
         self:jump_to_node(node_definition.next_node)
     end
-    if node_definition is StoryTypes.TextNode then
+    if node_definition is story_types.TextNode then
         self.story_page:add_text_line(node_definition.text)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
     end
-    if node_definition is StoryTypes.BattleNode then
+    if node_definition is story_types.BattleNode then
         local battle_id = node_definition.battle_id
         self.battle_manager = BattleManager.new(battle_id, self.character_manager, self.services)
     end
-    if node_definition is StoryTypes.NewPageNode then
+    if node_definition is story_types.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
     end
@@ -94,7 +94,7 @@ end
 
 function Story:handle_battle_victory()
     local node_definition = self.current_node.definition
-    assert(node_definition is StoryTypes.BattleNode)
+    assert(node_definition is story_types.BattleNode)
 
     self.battle_manager:teardown()    
     self:jump_to_node(node_definition.next_node_victory)
@@ -102,13 +102,13 @@ end
 
 function Story:handle_battle_defeat()
     local node_definition = self.current_node.definition
-    assert(node_definition is StoryTypes.BattleNode)
+    assert(node_definition is story_types.BattleNode)
     
     self.battle_manager:teardown()
     self:jump_to_node(node_definition.next_node_victory)
 end
 
-function Story.new(story_id: StoryTypes.StoryId, services: GameServiceBundle): Story 
+function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): Story 
     assert(STORY_DATA[story_id] ~= nil)
 
     local self: Story = setmetatable({}, { __index = Story })
@@ -150,11 +150,11 @@ end
 
 function Story:update(joy: Joypad)
     local current_node = self.current_node.definition
-    if current_node is StoryTypes.TextNode then
+    if current_node is story_types.TextNode then
         self.menu_manager:update(joy)
-    elseif current_node is StoryTypes.BattleNode then
+    elseif current_node is story_types.BattleNode then
         self.battle_manager:update(joy)
-    elseif current_node is StoryTypes.JumpNode then
+    elseif current_node is story_types.JumpNode then
         error('in a jump node during update')
     end
 end

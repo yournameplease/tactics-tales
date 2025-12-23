@@ -3,6 +3,7 @@ require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/battle_unit")
 local Item = require("src/tactics/character/items/object/item")
+local story_types = require("src/tactics/story/types")
 
 -- Note: some of these extracted types could be kept in menu_manager if tactics_engine and menu_manager didn't require each other
 -- Probably, there would be a menu_action_listener or similar to delegate menu commands to the tactics_engine
@@ -42,12 +43,17 @@ global enum MenuContextId
     "selected_item"
 end
 
+global record StorySelection
+    id: story_types.StoryId
+end
+
 -- todo: this should be an interface
 global record MenuContext
     acting_unit: UnitSelection
     destination: TileSelection
     target_unit: UnitSelection
     selected_item: ItemSelection
+    story: StorySelection
     metadata: {string: any}
 end
 

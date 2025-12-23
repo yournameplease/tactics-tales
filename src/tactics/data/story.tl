@@ -1,6 +1,36 @@
 local StoryTypes = require('src/tactics/story/types')
 
 local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
+	bandit_village = {
+		starting_node = 'intro',
+		nodes = {
+			intro = {
+				StoryTypes.TextNode.of("A young hero finds their village under attack by bandits!"),
+				StoryTypes.BattleNode.of('bandit_village', 'victory', 'defeat'),
+			},
+			victory = {
+				StoryTypes.TextNode.of("You Win!"),
+			},
+			defeat = {
+				StoryTypes.TextNode.of("You Lose..."),
+			},
+		}	
+	},
+	cultist_cave = {
+		starting_node = 'intro',
+		nodes = {
+			intro = {
+				StoryTypes.TextNode.of("The heros find a cave where cultists keep prisoners for sacrifice."),
+				StoryTypes.BattleNode.of('cultist_cave', 'victory', 'defeat'),
+			},
+			victory = {
+				StoryTypes.TextNode.of("You Win!"),
+			},
+			defeat = {
+				StoryTypes.TextNode.of("You Lose..."),
+			},
+		}	
+	},
 	test_story = {
 		starting_node = 'part_1',
 		nodes = {
