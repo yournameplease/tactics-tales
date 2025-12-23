@@ -12,7 +12,7 @@ local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuCo
 require("src/tactics/menu/cursor/list_cursor")
 require("src/tactics/menu/cursor/multiple_options_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
-
+local story_types = require("src/tactics/story/types")
 
 global record GameMenuManager
     is MenuManager<GameMenuContext>
@@ -35,9 +35,32 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                         send_command = "GAME_BEGIN_STORY",
                     })
                     pt.add(options, {
+                        text = "Chapter Select",
+                        next_state = "CHAPTER_SELECT",
+                    })
+                    pt.add(options, {
                         text = "Options",
                         next_state = "OPTIONS_MENU",
                     })
+
+                    return options
+                end
+            }),
+            ["CHAPTER_SELECT"] = ListMenuDefinition.new({
+                set_selected_context = function(s: ListMenuCursor<GameMenuContext>, _msb: GameMenuContext, ctx: MenuContext)
+                    ctx.story = {
+                        id = s.options[s.i].text,
+                    }
+                end,
+                get_options = function(msb: GameMenuContext, _ctx: MenuContext): {MenuOption}
+                    local options: {MenuOption} = {}
+
+                    for _, id in ipairs(msb.story_ids) do
+                        pt.add(options, {
+                            text = id,
+                            send_command = "GAME_BEGIN_STORY",
+                        })
+                    end
 
                     return options
                 end
@@ -70,7 +93,7 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
 
 }
 
-function GameMenuManager.new(ctx: GameMenuContext, event_bus: EventBus ): GameMenuManager
+function GameMenuManager.new(ctx: GameMenuContext, event_bus: EventBus): GameMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
