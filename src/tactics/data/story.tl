@@ -5,14 +5,17 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 		starting_node = 'intro',
 		nodes = {
 			intro = {
+				StoryTypes.RosterAddNode.of("village_hero"),
 				StoryTypes.TextNode.of("A young hero finds their village under attack by bandits!"),
 				StoryTypes.BattleNode.of('bandit_village', 'victory', 'defeat'),
 			},
 			victory = {
 				StoryTypes.TextNode.of("You Win!"),
+				StoryTypes.ExitStoryNode.of(),
 			},
 			defeat = {
 				StoryTypes.TextNode.of("You Lose..."),
+				StoryTypes.ExitStoryNode.of(),
 			},
 		}	
 	},
@@ -20,14 +23,22 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 		starting_node = 'intro',
 		nodes = {
 			intro = {
+				StoryTypes.RosterAddNode.of("village_hero"),
+				StoryTypes.RosterAddNode.of("militia_leader"),
+				StoryTypes.RosterAddNode.of("militia_spearman"),
+				StoryTypes.RosterAddNode.of("militia_armor"),
+				StoryTypes.RosterAddNode.of("militia_archer"),
 				StoryTypes.TextNode.of("The heros find a cave where cultists keep prisoners for sacrifice."),
 				StoryTypes.BattleNode.of('cultist_cave', 'victory', 'defeat'),
 			},
 			victory = {
 				StoryTypes.TextNode.of("You Win!"),
+				StoryTypes.ExitStoryNode.of(),
+
 			},
 			defeat = {
 				StoryTypes.TextNode.of("You Lose..."),
+				StoryTypes.ExitStoryNode.of(),
 			},
 		}	
 	},
@@ -35,6 +46,7 @@ local STORIES: {StoryTypes.StoryId: StoryTypes.StoryDefinition} = {
 		starting_node = 'part_1',
 		nodes = {
 			part_1 = {
+				StoryTypes.RosterAddNode.of("village_hero"),
 				StoryTypes.TextNode.of("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
 				StoryTypes.TextNode.of('Thisisalotoftext.Awhooooooooooooooooooooooooooooooooooooooolelot.Totriggerhyphenation.'),
 				StoryTypes.TextNode.of('text 1.3'),

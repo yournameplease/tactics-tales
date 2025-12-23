@@ -39,6 +39,10 @@ function Game:begin_story(ctx: MenuContext)
     self.story = Story.new(story_id, self.services)
 end
 
+function Game:exit_story()
+    self.story:teardown()
+end
+
 function Game.new(services: GameServiceBundle): Game 
 
     local story_ids: {story_types.StoryId} = {}
@@ -60,6 +64,9 @@ function Game.new(services: GameServiceBundle): Game
 
     self.services.event_bus:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
         self:begin_story(ctx)
+    end)
+    self.services.event_bus:on("GAME_EXIT_STORY", function(ctx: MenuContext)
+        self:exit_story()
     end)
     services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
         LOG.debug(

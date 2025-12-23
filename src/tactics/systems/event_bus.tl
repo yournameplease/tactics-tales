@@ -6,6 +6,7 @@ global type EventArgs = { string: any }
 
 global enum GameEvent
     "GAME_BEGIN_STORY"
+    "GAME_EXIT_STORY"
     "GAME_SET_OPTIONS"
     
     "TACTICS_BEGIN_PLAYER_TURN"

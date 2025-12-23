@@ -66,18 +66,23 @@ function Story:handle_new_node()
     LOG.debug("Handling new node: ", node_definition.type)
     if node_definition is story_types.JumpNode then
         self:jump_to_node(node_definition.next_node)
-    end
-    if node_definition is story_types.TextNode then
+    elseif node_definition is story_types.TextNode then
         self.story_page:add_text_line(node_definition.text)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
-    end
-    if node_definition is story_types.BattleNode then
+    elseif node_definition is story_types.BattleNode then
         local battle_id = node_definition.battle_id
         self.battle_manager = BattleManager.new(battle_id, self.character_manager, self.services)
-    end
-    if node_definition is story_types.NewPageNode then
+    elseif node_definition is story_types.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
+    elseif node_definition is story_types.RosterAddNode then
+        local character = self.character_manager:generate_character(node_definition.template)
+        self.character_manager:persist_player(character)
+        self:advance_node()
+    elseif node_definition is story_types.ExitStoryNode then
+        self.services.event_bus:emit("GAME_EXIT_STORY", {})
+    else
+        error()
     end
 end
 
@@ -119,9 +124,6 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
     self.services = services
 
     self.character_manager = character_manager.new(self.services.event_bus)
-    -- todo node for this
-    local hero = self.character_manager:generate_character("village_hero")
-    self.character_manager:persist_player(hero)
     
     self.story_page = StoryPage.new()
     self.menu_manager = StoryMenuManager.new(
@@ -157,6 +159,10 @@ function Story:update(joy: Joypad)
     elseif current_node is story_types.JumpNode then
         error('in a jump node during update')
     end
+end
+
+function Story:teardown()
+    
 end
 
 return Story
