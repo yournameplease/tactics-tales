@@ -13,6 +13,50 @@ local enum WeaponBodyType
     "HORIZONTAL" -- heavy weapons
 end
 
+
+local enum WeaponEffectType
+    "long_reach"
+    "shieldsplitter"
+    "armorkiller"
+end
+
+local interface WeaponEffect
+    type: WeaponEffectType
+end
+
+local record LongReachEffect
+    is WeaponEffect
+    where self.type == "long_reach"
+end
+
+function LongReachEffect.of(): LongReachEffect
+    return {
+        type = "long_reach"
+    }
+end
+
+local record ShieldsplitterEffect
+    is WeaponEffect
+    where self.type == "shieldsplitter"
+end
+
+function ShieldsplitterEffect.of(): ShieldsplitterEffect
+    return {
+        type = "shieldsplitter"
+    }
+end
+
+local record ArmorkillerEffect
+    is WeaponEffect
+    where self.type == "armorkiller"
+end
+
+function ArmorkillerEffect.of(): ArmorkillerEffect
+    return {
+        type = "armorkiller"
+    }
+end
+
 local record Weapon
     name: string
     sprite: integer
@@ -23,6 +67,8 @@ local record Weapon
     body_type: WeaponBodyType
     min_range: integer
     max_range: integer
+
+    effects: {WeaponEffect}
 end
 
 -- Equipment effects
@@ -30,9 +76,6 @@ end
 local enum EquipmentEffectType
     "increase_defense"
     "increase_avoid"
-    "long_reach"
-    "shieldsplitter"
-    "armorkiller"
 end
 
 local interface EquipmentEffect
@@ -85,43 +128,11 @@ function IncreaseAvoidEffect.of(amount: integer, type: AvoidType): IncreaseAvoid
     }
 end
 
-local record LongReachEffect
-    is EquipmentEffect
-    where self.type == "long_reach"
-end
-
-function LongReachEffect.of(): LongReachEffect
-    return {
-        type = "long_reach"
-    }
-end
-
-local record ShieldsplitterEffect
-    is EquipmentEffect
-    where self.type == "shieldsplitter"
-end
-
-function ShieldsplitterEffect.of(): ShieldsplitterEffect
-    return {
-        type = "shieldsplitter"
-    }
-end
-
-local record ArmorkillerEffect
-    is EquipmentEffect
-    where self.type == "armorkiller"
-end
-
-function ArmorkillerEffect.of(): ArmorkillerEffect
-    return {
-        type = "armorkiller"
-    }
-end
-
 local weapon = {
     WeaponType = WeaponType,
     WeaponBodyType = WeaponBodyType,
     Weapon = Weapon,
+    WeaponEffect = WeaponEffect,
     EquipmentEffect = EquipmentEffect,
     effect = {
         DefenseType = DefenseType,
