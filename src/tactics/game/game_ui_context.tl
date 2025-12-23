@@ -35,6 +35,8 @@ function GameUIContext:enrich()
             self.layout = "TITLE_SCREEN"
         elseif self.menu_manager.menu_state.step == "MAIN_MENU" then
             self.layout = "MAIN_MENU_PAGE"
+        elseif self.menu_manager.menu_state.step == "CHAPTER_SELECT" then
+            self.layout = "CHAPTER_SELECT_PAGE"
         elseif self.menu_manager.menu_state.step == "OPTIONS_MENU" then
             self.layout = "OPTIONS_MENU_PAGE"
         else
