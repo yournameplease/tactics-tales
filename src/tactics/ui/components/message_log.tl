@@ -21,15 +21,10 @@ function MessageLog.new(props: MessageLog): MessageLog
     box.decoration_padding = 0
     box.func = props.func or error("Need text getter `func`")
 
-    props.draw_properties = props.draw_properties or {}
-    box.draw_properties = box.draw_properties or {
-        justify = "left",
-        direction = "up",
-        wrap = "wrap"
-    }
-    box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
-    box.draw_properties.direction = props.draw_properties.direction or box.draw_properties.direction
-    box.draw_properties.wrap = box.draw_properties.wrap
+    box.draw_properties = props.draw_properties or {}
+    box.draw_properties.justify = box.draw_properties.justify or "left"
+    box.draw_properties.direction = box.draw_properties.direction or "up"
+    box.draw_properties.wrap = box.draw_properties.wrap or "wrap"
 
     return box
 end

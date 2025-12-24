@@ -6,6 +6,7 @@ global record UITheme
     COLOR_DECORATION_SHADOW: Color
     COLOR_INTERIOR: Color
     COLOR_INTERIOR_TEXT: Color
+    COLOR_TRIM: Color
     COLOR_CLEAR: Color
 end
 
