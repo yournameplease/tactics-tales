@@ -41,3 +41,4 @@ function EventListenerImpl:teardown()
 	self.bus:remove_all(self.listener_ids)
 end
 
+return event_listener

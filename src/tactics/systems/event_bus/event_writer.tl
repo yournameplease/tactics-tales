@@ -34,3 +34,4 @@ function EventWriterImpl:emit(event_name: GameEvent, args: {string: any})
 	self.bus:emit(event_name, args)
 end
 
+return event_writer
