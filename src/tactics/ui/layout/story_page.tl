@@ -5,12 +5,7 @@ require("src/tactics/ui/types")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 require("src/tactics/story/story_page")
 require("src/tactics/config")
-
-require("src/tactics/ui/panels/tactics_map")
 require("src/tactics/ui/box")
-require("src/tactics/ui/panels/unit_info")
-require("src/tactics/ui/panels/combat_preview")
-require("src/tactics/ui/panels/event_message_log")
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 

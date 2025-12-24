@@ -1,7 +1,6 @@
 local ui_context = require("src/tactics/ui/ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
-require("src/tactics/battle/tactics/tactics_engine")
-require("src/tactics/turn_manager")
+local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 
@@ -11,7 +10,7 @@ local record BattleUIContext
 
     battle_map: BattleMap
     battle_menu_manager: BattleMenuManager
-    turn_manager: TurnManager
+    turn_manager: turn_manager.TurnManager
     
     hovered_unit: BattleUnit
     acting_unit: BattleUnit
@@ -24,8 +23,8 @@ local battle_ui_context = {
 
 function battle_ui_context.new(
     battle_map: BattleMap,
-    battle_menu_manager: BattleMenuManager,
-    turn_manager: TurnManager
+    battle_menu_mgr: BattleMenuManager,
+    turn_mgr: turn_manager.TurnManager
 ): BattleUIContext
     local self: BattleUIContext = setmetatable({
         type = "battle"
@@ -34,8 +33,8 @@ function battle_ui_context.new(
     self.layout = "TACTICS"
     
     self.battle_map = battle_map
-    self.battle_menu_manager = battle_menu_manager
-    self.turn_manager = turn_manager
+    self.battle_menu_manager = battle_menu_mgr
+    self.turn_manager = turn_mgr
 
     self.hovered_unit = nil
     self.acting_unit = nil
