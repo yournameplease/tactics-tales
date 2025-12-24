@@ -6,7 +6,7 @@ require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
-require("src/tactics/menu/menu_cursor")
+local menu_cursor = require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
 require("src/tactics/menu/cursor/grid_cursor")
 require("src/tactics/menu/cursor/list_cursor")
@@ -14,12 +14,12 @@ require("src/tactics/menu/cursor/multiple_options_cursor")
 
 global record SelectionHistory<GC>
     step: MenuStep
-    selection: MenuCursor<GC>
+    selection: menu_cursor.MenuCursor<GC>
 end
 
 global record MenuDefinition<GC>
     initial_step: MenuStep
-    steps: { MenuStep: MenuStepDefinition<GC> }
+    steps: { MenuStep: menu_cursor.MenuStepDefinition<GC> }
 end
 
 global interface MenuManager<GC>
@@ -28,7 +28,7 @@ global interface MenuManager<GC>
 
     menu_state: MenuState
     menu_ctx: MenuContext
-    menu_cursor: MenuCursor<GC>
+    menu_cursor: menu_cursor.MenuCursor<GC>
     selection_history: { SelectionHistory<GC> }
 
     game_ctx: GC

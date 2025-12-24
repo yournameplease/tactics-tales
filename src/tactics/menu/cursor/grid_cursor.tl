@@ -1,11 +1,11 @@
-require("src/tactics/menu/menu_cursor")
+local menu_cursor = require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 
-global record GridMenuCursor<GC>
-    is MenuCursor<GC>
+local record GridMenuCursor<GC>
+    is menu_cursor.MenuCursor<GC>
     where self.type == "CURSOR_GRID"
     point: Point
     x_max: integer
@@ -21,8 +21,8 @@ global record GridMenuCursor<GC>
     send_command: GameEvent
 end
 
-global record GridMenuDefinition<GC>
-    is MenuStepDefinition<GC>
+local record GridMenuDefinition<GC>
+    is menu_cursor.MenuStepDefinition<GC>
     where self.type == "CURSOR_GRID"
 
     set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
@@ -34,12 +34,21 @@ global record GridMenuDefinition<GC>
     get_max_path_length: function(GC, MenuContext): integer
 end
 
-function GridMenuDefinition.new(props: GridMenuDefinition<GC>): GridMenuDefinition<GC>
+local grid_cursor = {
+    GridMenuCursor = GridMenuCursor,
+    GridMenuDefinition = GridMenuDefinition,
+}
+
+function grid_cursor.definition<GC>(
+    props: GridMenuDefinition<GC>
+): GridMenuDefinition<GC>
     props.type = "CURSOR_GRID"
     return setmetatable(props, { __index = GridMenuDefinition })
 end
 
-function GridMenuCursor:update(joy: Joypad)
+function GridMenuCursor:update(
+    joy: Joypad
+)
     local prev_point = self.point:copy()
     self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
     self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
@@ -57,7 +66,11 @@ function GridMenuCursor:update(joy: Joypad)
     end 
 end
 
-function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function GridMenuCursor:handle_select(
+    game_ctx: GC,
+    menu_ctx: MenuContext,
+    menu_state: MenuState
+): string, GameEvent
     local validation = self.validator(self, game_ctx, menu_ctx)
     if not validation then return end
 
@@ -66,7 +79,11 @@ function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_
     return self.next_state, self.send_command
 end
 
-function GridMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+function GridMenuDefinition:to_cursor(
+    game_ctx: GC,
+    menu_ctx: MenuContext,
+    menu_state: MenuState
+): menu_cursor.MenuCursor<GC>
     local cursor: GridMenuCursor<GC> = {
         type = "CURSOR_GRID",
         point = menu_state.point, 
@@ -98,3 +115,5 @@ function GridMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_
         end
         })
 end
+
+return grid_cursor

@@ -9,9 +9,9 @@ require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
 local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
-require("src/tactics/menu/cursor/list_cursor")
-require("src/tactics/menu/cursor/multiple_options_cursor")
-require("src/tactics/menu/cursor/button_advance_cursor")
+local list_cursor = require("src/tactics/menu/cursor/list_cursor")
+local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
+local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 local story_types = require("src/tactics/story/types")
 
 global record GameMenuManager
@@ -23,12 +23,12 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
         initial_step = "TITLE_SCREEN",
         -- initial_step = "MAIN_MENU",
         steps = {
-            ["TITLE_SCREEN"] = ButtonAdvanceMenuDefinition.new({
+            ["TITLE_SCREEN"] = button_advance_cursor.definition({
                 next_state = "MAIN_MENU",
             }),
-            ["MAIN_MENU"] = ListMenuDefinition.new({
-                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {MenuOption}
-                    local options: {MenuOption} = {}
+            ["MAIN_MENU"] = list_cursor.definition({
+                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption}
+                    local options: {list_cursor.ListMenuOption} = {}
 
                     pt.add(options, {
                         text = "Play",
@@ -46,14 +46,14 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                     return options
                 end
             }),
-            ["CHAPTER_SELECT"] = ListMenuDefinition.new({
-                set_selected_context = function(s: ListMenuCursor<GameMenuContext>, _msb: GameMenuContext, ctx: MenuContext)
+            ["CHAPTER_SELECT"] = list_cursor.definition({
+                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext>, _msb: GameMenuContext, ctx: MenuContext)
                     ctx.story = {
                         id = s.options[s.i].text,
                     }
                 end,
-                get_options = function(msb: GameMenuContext, _ctx: MenuContext): {MenuOption}
-                    local options: {MenuOption} = {}
+                get_options = function(msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption}
+                    local options: {list_cursor.ListMenuOption} = {}
 
                     for _, id in ipairs(msb.story_ids) do
                         pt.add(options, {
@@ -65,22 +65,22 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                     return options
                 end
             }),
-            ["OPTIONS_MENU"] = MultipleOptionsMenuDefinition.new({
+            ["OPTIONS_MENU"] = multiple_options_cursor.definition({
                 primary_direction = "vertical",
                 wrap = false,
                 send_command = "GAME_SET_OPTIONS",
                 options = {
-                    MenuMultipleOptionDefinition.new({
+                    multiple_options_cursor.option_definition({
                         text = "Log Level",
-                        definition = ListMenuDefinition.of_static_options(
+                        definition = list_cursor.static_definition(
                             {"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"},
                             "log_level",
                             "horizontal"
                         ),
                     }),
-                    MenuMultipleOptionDefinition.new({
+                    multiple_options_cursor.option_definition({
                         text = "Draw Flexbox Debug",
-                        definition = ListMenuDefinition.of_static_options(
+                        definition = list_cursor.static_definition(
                             {"NO", "YES"},
                             "draw_flexbox_debug",
                             "horizontal"

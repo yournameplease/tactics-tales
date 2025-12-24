@@ -7,7 +7,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
-require("src/tactics/menu/cursor/list_cursor")
+local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 
 
 
@@ -19,17 +19,8 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
     ["MENU_STORY_TEXT"] = {
         initial_step = "ADVANCE_TEXT",
         steps = {
-            ["ADVANCE_TEXT"] = ListMenuDefinition.new({
-                get_options = function(_: StoryMenuContext, _: MenuContext): {MenuOption}
-                    local options: {MenuOption} = {}
-
-                    pt.add(options, {
-                        text = "Continue",
-                        send_command = "STORY_ADVANCE_TEXT"
-                    })
-
-                    return options
-                end
+            ["ADVANCE_TEXT"] = button_advance_cursor.definition({
+                send_command = "STORY_ADVANCE_TEXT"
             }),
         }
     }

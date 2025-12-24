@@ -3,6 +3,7 @@ local UILayoutId = require("src/tactics/ui/types").UILayoutId
 local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
+local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 
 local record BattleUIContext
     is ui_context.UIContext
@@ -47,7 +48,7 @@ function BattleUIContext:enrich()
 
     local selection = self.battle_menu_manager.menu_cursor
 
-    if selection is GridMenuCursor<BattleMenuContext> then
+    if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
             local unit = self.battle_map:get_at_tile(point)
