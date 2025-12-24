@@ -13,9 +13,19 @@ local enum Phase
     "ENEMY"
 end
 
-global record TurnManager
+local interface TurnManager
     turn: integer
     phase: Phase
+
+    teardown: function(self)
+end
+
+local turn_manager = {
+    TurnManager = TurnManager
+}
+
+local record TurnManagerImpl
+    is TurnManager
 
     event_listener_ids: {integer}
     
@@ -27,7 +37,7 @@ global record TurnManager
     event_bus: EventBus
 end
 
-function TurnManager.new(
+function turn_manager.new(
     battle_map: BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
@@ -35,7 +45,7 @@ function TurnManager.new(
     event_bus: EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
-    local self: TurnManager = setmetatable({
+    local self: TurnManagerImpl = setmetatable({
     }, { __index = TurnManager })
 
     self.turn = 1
@@ -152,8 +162,8 @@ function TurnManager.new(
     return self
 end
 
-function TurnManager:teardown()
+function TurnManagerImpl:teardown()
     self.event_bus:remove_all(self.event_listener_ids)
 end
 
-return TurnManager
+return turn_manager

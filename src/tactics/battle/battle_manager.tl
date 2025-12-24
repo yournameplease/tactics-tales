@@ -14,7 +14,7 @@ require("src/tactics/menu/menu_manager")
 require("src/tactics/ui/ui_context_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local character_manager = require("src/tactics/character/character_manager")
-require("src/tactics/turn_manager")
+local turn_manager = require("src/tactics/turn_manager")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_context")
@@ -31,7 +31,7 @@ global record BattleManager
     battle_objective_service: battle_objective_service.BattleObjectiveService
     enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
     battle_menu_manager: BattleMenuManager
-    turn_manager: TurnManager
+    turn_manager: turn_manager.TurnManager
     script_manager: script_manager.ScriptManager
 
     character_manager: character_manager.CharacterManager
@@ -93,7 +93,7 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
         self.services.event_bus
     )
     
-    self.turn_manager = TurnManager.new(
+    self.turn_manager = turn_manager.new(
         self.battle_map,
         self.tactics_engine,
         self.battle_objective_service,
