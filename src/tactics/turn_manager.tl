@@ -3,7 +3,9 @@ require("src/tactics/debug")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/util/data_utils")
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
+local event_listener = require("src/tactics/systems/event_bus/event_listener")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/battle/tactics/tactics_engine")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
@@ -27,14 +29,14 @@ local turn_manager = {
 local record TurnManagerImpl
     is TurnManager
 
-    event_listener_ids: {integer}
-    
     battle_map: BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
     enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
     battle_menu_manager : BattleMenuManager
-    event_bus: EventBus
+
+    event_listener: event_listener.EventListener
+    event_writer: event_writer.EventWriter
 end
 
 function turn_manager.new(
@@ -42,7 +44,7 @@ function turn_manager.new(
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
     enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,
-    event_bus: EventBus,
+    bus: EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
     local self: TurnManagerImpl = setmetatable({
@@ -51,37 +53,37 @@ function turn_manager.new(
     self.turn = 1
     self.phase = "PLAYER"
 
-    self.event_listener_ids = {}
-
     self.battle_map = battle_map 
     self.tactics_engine = tactics_eng
     self.battle_objective_service = battle_objective_srv
     self.enemy_ai_engine = enemy_ai_eng
-    self.event_bus = event_bus 
     self.battle_menu_manager = battle_menu_manager
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_BATTLE", function(_: EventArgs)
+    self.event_listener = event_listener.new(bus)
+    self.event_writer = event_writer.new(bus)
+
+    self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: EventArgs)
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-        self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN", {
+        self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
             turn = self.turn
         })
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_UNIT_END_ACTION", function(_: EventArgs)
+    self.event_listener:on("TACTICS_UNIT_END_ACTION", function(_: EventArgs)
         if self.phase == "PLAYER" then
             LOG.debug("Setting to player turn menu")
             self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         end        
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
         self.tactics_engine:refresh_all_units()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
         if self.phase ~= "PLAYER" then
             LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -89,17 +91,17 @@ function turn_manager.new(
 
         LOG.info("End player turn!")
 
-        self.event_bus:emit("TACTICS_BEGIN_ENEMY_TURN", {
+        self.event_writer:emit("TACTICS_BEGIN_ENEMY_TURN", {
             turn = self.turn
         })
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
         self.phase = "ENEMY"
         LOG.info("Begin enemy turn!")
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_END_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_ENEMY_TURN", function(_: EventArgs)
         if self.phase ~= "ENEMY" then
             LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -111,59 +113,59 @@ function turn_manager.new(
         local battle_result = self.battle_objective_service:check_for_end()
 
         if not battle_result.finished then
-            self.event_bus:emit("TACTICS_BEGIN_PLAYER_TURN", {
+            self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
             turn = self.turn
         })
         else
-            self.event_bus:emit(battle_result.command, {})
+            self.event_writer:emit(battle_result.command, {})
         end
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("BATTLE_END_VICTORY", function()
+    self.event_listener:on("BATTLE_END_VICTORY", function()
         LOG.info("You win!")
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("BATTLE_END_DEFEAT", function()
+    self.event_listener:on("BATTLE_END_DEFEAT", function()
         LOG.info("You lose!")
-    end))
+    end)
     
-    pt.add(self.event_listener_ids, self.event_bus:on("MOVE_AND_WAIT", function(ctx: MenuContext)
+    self.event_listener:on("MOVE_AND_WAIT", function(ctx: MenuContext)
         self.tactics_engine:handle_move_unit(ctx)
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
+    self.event_listener:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self.tactics_engine:handle_move_and_attack(ctx)
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
         self.tactics_engine.is_player_turn = true
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
         self.tactics_engine.is_player_turn = false
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
         self.enemy_ai_engine:handle_enemy_turn()
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_FINISH_ENEMY_ACTIONS", function()
-        self.event_bus:emit("TACTICS_END_ENEMY_TURN", {
+    self.event_listener:on("TACTICS_FINISH_ENEMY_ACTIONS", function()
+        self.event_writer:emit("TACTICS_END_ENEMY_TURN", {
             turn = self.turn
         })
-    end))
+    end)
 
-    pt.add(self.event_listener_ids, self.event_bus:on("TACTICS_FINISH_PLAYER_ACTIONS", function()
-        self.event_bus:emit("TACTICS_END_PLAYER_TURN", {
+    self.event_listener:on("TACTICS_FINISH_PLAYER_ACTIONS", function()
+        self.event_writer:emit("TACTICS_END_PLAYER_TURN", {
             turn = self.turn
         })
-    end))
+    end)
     
     return self
 end
 
 function TurnManagerImpl:teardown()
-    self.event_bus:remove_all(self.event_listener_ids)
+    self.event_listener:teardown()
 end
 
 return turn_manager
