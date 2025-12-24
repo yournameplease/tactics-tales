@@ -31,7 +31,7 @@ global enum GameEvent
     "STORY_ADVANCE_TEXT"
 end
 
-global record EventListener
+global record EventCallback
     id: integer
     callback: function(args: { string: any })
 end
@@ -41,7 +41,7 @@ global record EventBus
     where self.id == "event_bus"
     id_generator: id_generator.IdGenerator
     event_history: { GameEvent }
-    listeners: { GameEvent: {EventListener}}
+    listeners: { GameEvent: {EventCallback}}
 end
 
 function EventBus:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
