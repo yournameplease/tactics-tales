@@ -2,7 +2,7 @@ require("src/tactics/menu/types")
 require("src/tactics/systems/event_bus")
 local Joypad = require("src/tactics/joypad").Joypad
 
-global interface MenuCursor<GC>
+local interface MenuCursor<GC>
     type: MenuType
     update: function(self, Joypad) 
 --- @return next state
@@ -10,8 +10,15 @@ global interface MenuCursor<GC>
     handle_select: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
 end
 
-global interface MenuStepDefinition<GC>
+local interface MenuStepDefinition<GC>
     type: MenuType
     previous_state: MenuStep
     to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
 end
+
+local menu_cursor = {
+    MenuCursor = MenuCursor,
+    MenuStepDefinition = MenuStepDefinition,
+}
+
+return menu_cursor

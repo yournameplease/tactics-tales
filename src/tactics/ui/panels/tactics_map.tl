@@ -6,7 +6,9 @@ require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/battle/battle_map")
 require("src/tactics/util/array_2d")
-require("src/tactics/menu/cursor/grid_cursor")
+local menu_cursor = require("src/tactics/menu/menu_cursor")
+local list_cursor = require("src/tactics/menu/cursor/list_cursor")
+local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local maps = require("src/tactics/util/maps")
 require("src/tactics/types")
@@ -80,9 +82,9 @@ local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer,
     pt.rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_floating_menu(x: integer, y: integer, menu_cursor: ListMenuCursor<BattleMenuContext>)
-    local selected_i = menu_cursor.i
-    local options = menu_cursor.options
+local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext>)
+    local selected_i = cursor.i
+    local options = cursor.options
     local PADDING = 2
 
     local max_text_width = 0
@@ -139,11 +141,11 @@ end
 
 local function get_path_layer(state: UIContextManager): Userdata
     local menu = state.battle_context.battle_menu_manager
-    local menu_cursor: MenuCursor<BattleMenuContext> = menu.menu_cursor
+    local cursor: menu_cursor.MenuCursor<BattleMenuContext> = menu.menu_cursor
 
     local path_layer = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
-    if menu_cursor is GridMenuCursor<BattleMenuContext> then
-        local path = menu_cursor.path
+    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        local path = cursor.path
         if path ~= nil then
             local len = #path
             if len > 1 then
@@ -250,9 +252,9 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     local layer_path = get_path_layer(state)
 
     local cursor_tile: Point = nil
-    local menu_cursor = menu.menu_cursor
-    if menu_cursor is GridMenuCursor<BattleMenuContext> then
-        cursor_tile = menu_cursor.point
+    local cursor = menu.menu_cursor
+    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        cursor_tile = cursor.point
     elseif menu.menu_state.point ~= nil then
         cursor_tile = menu.menu_state.point
     end
@@ -262,8 +264,8 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         -- highlight legal tiles
-        if menu_cursor is GridMenuCursor<BattleMenuContext> then
-            if menu_cursor.legal_tiles ~= nil then
+        if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+            if cursor.legal_tiles ~= nil then
                 pt.fillp(
                 -- 1:2 diagonal slashes
                 --0b00111111,
@@ -287,7 +289,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
                 pt.poke(0x550b,0x3f)
                 pt.set_palt(0, true)
                 for x = 0, self.map_width-1 do
-                    local highlighted_tile = menu_cursor.legal_tiles:get(x, y)
+                    local highlighted_tile = cursor.legal_tiles:get(x, y)
                     if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
                         if (highlighted_tile.reachable) then
                             pt.set_color(28)
@@ -337,8 +339,8 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
         local y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if menu_cursor is ListMenuCursor<BattleMenuContext> then
-            draw_floating_menu(x, y, menu_cursor)
+        if cursor is list_cursor.ListMenuCursor<BattleMenuContext> then
+            draw_floating_menu(x, y, cursor)
         end
     end
 

@@ -12,11 +12,11 @@ local battle_menu_context = {
 
 function battle_menu_context.new(
     battle_map: BattleMap,
-    tactics_engine: tactics_engine.TacticsEngine
+    tactics: tactics_engine.TacticsEngine
 ): BattleMenuContext
     return {
         battle_map = battle_map,
-        tactics_engine = tactics_engine,
+        tactics_engine = tactics,
     }
 end
 

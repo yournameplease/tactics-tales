@@ -97,11 +97,14 @@ local record IncreaseDefenseEffect
     defense_type: DefenseType
 end
 
-function IncreaseDefenseEffect.of(amount: integer, type: DefenseType): IncreaseDefenseEffect
+function IncreaseDefenseEffect.of(
+    amount: integer,
+    defense_type: DefenseType
+): IncreaseDefenseEffect
     return {
         type = "increase_defense",
         amount = amount,
-        defense_type = type
+        defense_type = defense_type
     }
 end
 
@@ -120,11 +123,14 @@ local record IncreaseAvoidEffect
     avoid_type: AvoidType
 end
 
-function IncreaseAvoidEffect.of(amount: integer, type: AvoidType): IncreaseAvoidEffect
+function IncreaseAvoidEffect.of(
+    amount: integer,
+    avoid_type: AvoidType
+): IncreaseAvoidEffect
     return {
         type = "increase_avoid",
         amount = amount,
-        avoid_type = type
+        avoid_type = avoid_type
     }
 end
 

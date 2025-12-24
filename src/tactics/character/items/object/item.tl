@@ -62,7 +62,7 @@ end
 function ItemModule.new(
 	id: ItemId,
 	name: string,
-	type: ItemType,
+	item_type: ItemType,
 	slots: integer,
 	equip_slot: EquipSlot,
 	sprite_data: ItemSpriteData,
@@ -72,7 +72,7 @@ function ItemModule.new(
 	local item: ItemImpl = {
 		id = id,
 		name = name,
-		type = type,
+		type = item_type,
 		slots = slots,
 		equip_slot = equip_slot,
 		sprite_data = sprite_data,
