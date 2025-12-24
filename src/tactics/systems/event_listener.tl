@@ -38,6 +38,6 @@ function EventListenerImpl:on(event_name: GameEvent, callback: function(args: { 
 end
 
 function EventListenerImpl:teardown()
-
+	self.bus:remove_all(self.listener_ids)
 end
 
