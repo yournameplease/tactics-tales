@@ -19,7 +19,7 @@ local story_page = MessageLog.new({
     padding = 2,
     draw_properties = {
         direction = "down",
-        wrap = "ellipsis",
+        wrap = "wrap",
     },
     func = function(state: UIContextManager, _row_limit: integer): { string }
         return state.story_context.story_page.text
