@@ -5,13 +5,11 @@ local Joypad = require("src/tactics/joypad").Joypad
 require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
 
- require("src/tactics/menu/menu_cursor")
+require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
 require("src/tactics/menu/cursor/grid_cursor")
 require("src/tactics/menu/cursor/list_cursor")
 require("src/tactics/menu/cursor/multiple_options_cursor")
-
-
 
 global record SelectionHistory<GC>
     step: MenuStep
@@ -84,9 +82,6 @@ end
 
 function BaseMenuManager:handle_menu_select()
     LOG.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
-    local menu_data = self.menu_definitions[self.menu_state.menu_id]
-    local step_data = menu_data.steps[self.menu_state.step]
-
 
     local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
     
