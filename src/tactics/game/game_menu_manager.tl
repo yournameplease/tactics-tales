@@ -93,11 +93,11 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
 
 }
 
-function GameMenuManager.new(ctx: GameMenuContext, event_bus: EventBus): GameMenuManager
+function GameMenuManager.new(ctx: GameMenuContext, bus: EventBus): GameMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
-        event_bus
+        bus
     ) as GameMenuManager
 end
 

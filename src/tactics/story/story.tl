@@ -162,7 +162,7 @@ function Story:update(joy: Joypad)
 end
 
 function Story:teardown()
-    
+    self.character_manager:teardown()    
 end
 
 return Story

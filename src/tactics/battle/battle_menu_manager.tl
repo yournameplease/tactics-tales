@@ -209,12 +209,12 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
 
 function BattleMenuManager.new(
     ctx: BattleMenuContext,
-    event_bus: EventBus
+    bus: EventBus
 ): BattleMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
-        event_bus
+        bus
     ) as BattleMenuManager
 end
 

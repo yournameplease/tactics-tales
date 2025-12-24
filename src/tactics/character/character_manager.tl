@@ -1,6 +1,7 @@
 require("src/tactics/debug")
 local id_generator = require("src/tactics/util/id_generator")
 require("src/tactics/systems/event_bus")
+local event_listener = require("src/tactics/systems/event_bus/event_listener")
 require("src/tactics/menu/types")
 require("src/tactics/character/animation_data")
 require("src/tactics/character/items/object/weapon")
@@ -16,6 +17,7 @@ local interface CharacterManager
     generate_character: function(self, template_id: string): Character
     persist_player: function(self, character: Character)
     get_player_roster: function(self): { Character }
+    teardown: function(self) 
 end
 
 local character_manager = {
@@ -25,7 +27,7 @@ local character_manager = {
 local record CharacterManagerImpl
     is CharacterManager
 
-    event_bus: EventBus
+    event_listener: event_listener.EventListener
     
     id_generator: id_generator.IdGenerator
     characters: { integer: Character }
@@ -73,26 +75,30 @@ function CharacterManagerImpl:handle_discard_item(ctx: MenuContext)
     character.inventory:remove_item(item_index)
 end
 
-function character_manager.new(event_bus: EventBus): CharacterManager
+function character_manager.new(bus: EventBus): CharacterManager
     local self: CharacterManagerImpl = setmetatable({
-        event_bus = event_bus
+        event_listener = event_listener.new(bus)
     }, { __index = CharacterManagerImpl})
     
     self.id_generator = id_generator.new()
     self.characters = {}
     self.player_ids = {}
 
-    self.event_bus:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
+    self.event_listener:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
         self:handle_equip_item(ctx)
     end)
-    self.event_bus:on("INVENTORY_UNEQUIP_ITEM", function(ctx: MenuContext)
+    self.event_listener:on("INVENTORY_UNEQUIP_ITEM", function(ctx: MenuContext)
         self:handle_unequip_item(ctx)
     end)
-    self.event_bus:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
+    self.event_listener:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
         self:handle_discard_item(ctx)
     end)
 
     return self
+end
+
+function CharacterManagerImpl:teardown()
+    self.event_listener:teardown()
 end
 
 return character_manager
