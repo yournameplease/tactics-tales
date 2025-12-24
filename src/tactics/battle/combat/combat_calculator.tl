@@ -124,8 +124,8 @@ local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, w
 
     local unit_avoid = 0
 
-    for type, amount in pairs(defender.avoid) do
-        if not weapon.ignored_avoids[type] then
+    for defense_type, amount in pairs(defender.avoid) do
+        if not weapon.ignored_avoids[defense_type] then
             unit_avoid = unit_avoid + amount or 0
         end
     end
@@ -137,8 +137,8 @@ local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapo
     local atk = weapon.damage
     local def = 0
 
-    for type, amount in pairs(defender.defense) do
-        if not weapon.ignored_defenses[type] then
+    for avoid_type, amount in pairs(defender.defense) do
+        if not weapon.ignored_defenses[avoid_type] then
             def = def + amount or 0
         end
     end
@@ -164,7 +164,7 @@ local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack
 end
 
 ---@desc True if all attacks are long range
-local function is_long_reach(unit: CombatDouble): boolean
+local function unit_is_long_reach(unit: CombatDouble): boolean
     for _,a in ipairs(unit.attacks) do
         if not a.long_reach then
             return false
@@ -174,7 +174,7 @@ local function is_long_reach(unit: CombatDouble): boolean
 end
 
 local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
-    local is_long_reach = is_long_reach(attacker)
+    local is_long_reach = unit_is_long_reach(attacker)
     if is_long_reach and not attack.long_reach then
         return false
     end

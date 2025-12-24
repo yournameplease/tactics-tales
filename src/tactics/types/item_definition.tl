@@ -1,8 +1,7 @@
 require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 
-
-global record WeaponDefinition
+local record WeaponDefinition
     name: string
     sprite: integer
     hand_anchor: Point
@@ -15,8 +14,7 @@ global record WeaponDefinition
 	effects: {wpn.WeaponEffect}
 end
 
-
-global record ItemDefinition
+local record ItemDefinition
 	name: string
 	type: ItemType
 	slots: integer
@@ -30,3 +28,10 @@ global record ItemDefinition
 	-- Consumables
 	
 end
+
+local item_definition = {
+	ItemDefinition = ItemDefinition,
+	WeaponDefinition = WeaponDefinition,
+}
+
+return item_definition

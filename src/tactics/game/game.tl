@@ -59,8 +59,8 @@ function Game.new(services: GameServiceBundle): Game
 	self.menu_manager = GameMenuManager.new(game_menu_ctx, self.services.event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 
-    local game_ui_context = game_ui_context.new(self.services.event_bus, self.menu_manager)
-    self.services.ui_context:register_ui_context(game_ui_context)
+    local game_ui_ctx = game_ui_context.new(self.services.event_bus, self.menu_manager)
+    self.services.ui_context:register_ui_context(game_ui_ctx)
 
     self.services.event_bus:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
         self:begin_story(ctx)
