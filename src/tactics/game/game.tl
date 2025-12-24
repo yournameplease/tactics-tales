@@ -65,7 +65,7 @@ function Game.new(services: GameServiceBundle): Game
     self.services.event_bus:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
         self:begin_story(ctx)
     end)
-    self.services.event_bus:on("GAME_EXIT_STORY", function(ctx: MenuContext)
+    self.services.event_bus:on("GAME_EXIT_STORY", function(_: MenuContext)
         self:exit_story()
     end)
     services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)

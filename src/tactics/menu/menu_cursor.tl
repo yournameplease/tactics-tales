@@ -8,7 +8,6 @@ global interface MenuCursor<GC>
 --- @return next state
 --- @return send command
     handle_select: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
-    new: function(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): self
 end
 
 global interface MenuStepDefinition<GC>

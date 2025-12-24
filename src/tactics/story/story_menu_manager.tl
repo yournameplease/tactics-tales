@@ -20,7 +20,7 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
         initial_step = "ADVANCE_TEXT",
         steps = {
             ["ADVANCE_TEXT"] = ListMenuDefinition.new({
-                get_options = function(msb: StoryMenuContext, ctx: MenuContext): {MenuOption}
+                get_options = function(_: StoryMenuContext, _: MenuContext): {MenuOption}
                     local options: {MenuOption} = {}
 
                     pt.add(options, {
