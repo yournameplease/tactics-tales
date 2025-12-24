@@ -138,7 +138,6 @@ local function set_ud_tile(ud: Userdata, t: Point, s: integer)
 end
 
 local function get_path_layer(state: UIContextManager): Userdata
-    local cursor_tile: Point = nil
     local menu = state.battle_context.battle_menu_manager
     local menu_cursor: MenuCursor<BattleMenuContext> = menu.menu_cursor
 

@@ -7,9 +7,11 @@ require("src/tactics/character/items/object/weapon")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local maps = require("src/tactics/util/maps")
 
-local SIDE_PLAYER = 0
-local SIDE_ENEMY = 1
-local SIDE_NEUTRAL = 2
+global enum Side
+    "player"
+    "enemy"
+    "neutral"
+end
 
 global record BattleUnit
     id: integer
@@ -30,19 +32,20 @@ global record BattleUnit
 end
 
 local battle_unit = {
-    BattleUnit = BattleUnit
+    BattleUnit = BattleUnit,
+    Side = Side,
 }
 
 function BattleUnit:is_player(): boolean
-    return self.side == SIDE_PLAYER
+    return self.side == "player"
 end
 
 function BattleUnit:is_neutral(): boolean
-    return self.side == SIDE_NEUTRAL
+    return self.side == "neutral"
 end
 
 function BattleUnit:is_enemy(): boolean
-    return self.side == SIDE_ENEMY
+    return self.side == "enemy"
 end
 
 -- local function access_fallback(tab, k)
@@ -71,7 +74,7 @@ end
 function battle_unit.player(permanent_unit: Character, tile: Point, labels: {string}): BattleUnit
     local instance = spawn_unit(permanent_unit, tile, labels)
 
-    instance.side = SIDE_PLAYER
+    instance.side = "player"
 
     return instance
 end

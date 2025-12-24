@@ -18,10 +18,6 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 
-local SIDE_PLAYER = 0
-local SIDE_ENEMY = 1
-local SIDE_NEUTRAL = 2
-
 local record TacticsEngine
 
     battle_is_blocked: boolean
@@ -88,7 +84,7 @@ function TacticsEngine:spawn_enemies(npcs: {battle_definition_types.EnemySpawnDa
         local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, SIDE_ENEMY, npc.ai, labels)
+            local unit = battle_unit.npc(character, spawn_point, "enemy", npc.ai, labels)
             self:spawn_unit(unit, spawn_point)
         end
     end
@@ -100,7 +96,7 @@ function TacticsEngine:spawn_neutrals(npcs: {battle_definition_types.NeutralSpaw
         local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
         for _,spawn_point in ipairs(spawn_points) do
             local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, SIDE_NEUTRAL, npc.ai, labels)
+            local unit = battle_unit.npc(character, spawn_point, "neutral", npc.ai, labels)
             self:spawn_unit(unit, spawn_point)
         end
     end
