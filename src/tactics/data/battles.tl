@@ -137,9 +137,9 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             { template = "cultist_guard", ai = ai.stationary, tile = "cultist_guard" },
             { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_a" },
             { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_b" },
-            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_c" },
+            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_e" },
             { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_d" },
-            { template = "cultist_guard", ai = ai.stationary, tile = "cultist_door_guard_e" },
+            { template = "cultist_guard", ai = ai.stationary, tile = "cultist_door_guard_c" },
         },
         neutral = {
             { template = "old_fart", ai = ai.stationary, tile = "jailed_priest" },
