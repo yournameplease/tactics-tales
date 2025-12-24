@@ -153,7 +153,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			randomizer.weighted_option_selector.of( "dagger" )
 		),
 	},
-	cultist_spear = {
+	cultist_spearman = {
 		parent_template = "cultist_base",
 		headwear_options = randomizer.weighted_option_selector.of("cultist_hood"),
         item_loadout_options = randomizer.list_selector.of_randomizers(

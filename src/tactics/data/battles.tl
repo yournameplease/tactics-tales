@@ -135,7 +135,11 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         enemies = {
             { template = "cultist_boss", ai = ai.stationary, tile = "cultist_boss" },
             { template = "cultist_guard", ai = ai.stationary, tile = "cultist_guard" },
-            { template = "cultist_goon", ai = ai.move_two, tile = "cultist_goon" },
+            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_a" },
+            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_b" },
+            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_c" },
+            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_d" },
+            { template = "cultist_guard", ai = ai.stationary, tile = "cultist_door_guard_e" },
         },
         neutral = {
             { template = "old_fart", ai = ai.stationary, tile = "jailed_priest" },
@@ -161,10 +165,11 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 3,
                 "after_enemy"
             ),
-            open_door(
-                "",
-                ""
-            )
+            open_door("cultist_door_guard_a","door_a"),
+            open_door("cultist_door_guard_b","door_b"),
+            open_door("cultist_door_guard_c","door_c"),
+            open_door("cultist_door_guard_d","door_d"),
+            open_door("cultist_door_guard_e","door_e"),
         }
     }
 }
