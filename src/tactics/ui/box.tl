@@ -133,12 +133,12 @@ function Box.flex_col(): Box
 end
 
 function Box.flex_row(): Box
-    return Box.new({ dir = "row", auto_width = true})
+    return Box.new({ dir = "row", auto_height = true})
 end
 
 -- good for lazy justification
-function Box.spacer(): Box
-    return Box.new({ flex_grow = 1})
+function Box.spacer(grow: integer): Box
+    return Box.new({ flex_grow = grow, transparent = true})
 end
 
 function Box:add(child: UIElement): UIElement
@@ -169,8 +169,6 @@ function Box:measure()
 
     for i, child in ipairs(self.children) do
         -- Recursively measure child
-        -- Note: We pass 0 or math.huge because we are in 'auto' mode,
-        -- so we don't enforce a strict limit yet.
         if child.measure then
             child:measure()
         end

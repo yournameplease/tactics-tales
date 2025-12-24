@@ -2,9 +2,16 @@ require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
 local text = require("src/tactics/util/text")
 
+global enum UITextColor
+    "dark"
+    "trim"
+    "light"
+end
+
 global interface TextUIElement
     is UIElement
     draw_properties: text.DrawProperties
+    text_color: UITextColor
 end
 
 
@@ -41,15 +48,13 @@ function TextNode.new(props: TextNode): TextNode
         box.h = (box.rows) * (TEXT_HEIGHT + 2)
     end
 
-    props.draw_properties = props.draw_properties or {}
-    box.draw_properties = {
-        justify = "left",
-        direction = "down",
-        wrap = "ellipsis",
-    }
-    box.draw_properties.justify = props.draw_properties.justify or box.draw_properties.justify
-    box.draw_properties.direction = props.draw_properties.direction or box.draw_properties.direction
-    box.draw_properties.wrap = box.draw_properties.wrap
+    box.draw_properties = props.draw_properties or {}
+    box.draw_properties.justify = box.draw_properties.justify or "left"
+    box.draw_properties.direction = box.draw_properties.direction or "down"
+    box.draw_properties.wrap = box.draw_properties.wrap or "ellipsis"
+
+    box.transparent = props.transparent ~= false
+    box.text_color = props.text_color or "dark"
 
     return box
 end
@@ -66,13 +71,19 @@ function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
         )
     end
 
+    local colors <total>: {UITextColor: Color} = {
+        dark = ui_theme.COLOR_INTERIOR_TEXT,
+        trim = ui_theme.COLOR_TRIM,
+        light = ui_theme.COLOR_DECORATION_SHADOW,
+    }
+
     local text_obj = text.new(lines, self.draw_properties)
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
         self.w-self.internal_margin.l-self.internal_margin.r,
         self.h-self.internal_margin.t-self.internal_margin.b,
-        ui_theme.COLOR_INTERIOR_TEXT
+        colors[self.text_color]
     )
 end
 

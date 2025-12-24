@@ -52,11 +52,11 @@ function CombatPreview.new(props: UIElement): CombatPreview
     local attacker_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end)
     local left = Box.flex_col()
     left:add(attacker_portrait)
-    left:add(Box.spacer())
+    left:add(Box.spacer(1))
     local defender_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end)
     local right = Box.flex_col()
     right:add(defender_portrait)
-    right:add(Box.spacer())
+    right:add(Box.spacer(1))
 
     local preview_text = TextNode.new({
         flex_grow = 1,

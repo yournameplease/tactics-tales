@@ -23,7 +23,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
     local left = self:add(Box.flex_col())
     left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end))
-    left:add(Box.spacer())
+    left:add(Box.spacer(1))
 
     local info_col = self:add(Box.new({
         auto_height = true,
@@ -34,6 +34,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
 
     -- ROW 1: Name and Level
     info_col:add(TextNode.new({
+        rows = 1,
         func = function(state: UIContextManager): {string}
             local u = state.battle_context.hovered_unit
             if not u then return { "No Unit Selected" } end
