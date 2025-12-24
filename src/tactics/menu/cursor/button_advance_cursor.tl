@@ -23,28 +23,22 @@ function ButtonAdvanceMenuDefinition.new(props: ButtonAdvanceMenuDefinition<GC>)
     return setmetatable(props, { __index = ButtonAdvanceMenuDefinition })
 end
 
-
-function ButtonAdvanceCursor.new(step_definition: any, _: GC, _: MenuContext, _: MenuState): ButtonAdvanceCursor<GC>
-    assert(step_definition is ButtonAdvanceMenuDefinition<GC>)
-    local self: ButtonAdvanceCursor<GC> = {
-        type = "CURSOR_BUTTON_ADVANCE",
-    }
-    return setmetatable(self, { __index = function(t: any, k: string): any 
-            if (ButtonAdvanceCursor as {string: any})[k] then
-                return (ButtonAdvanceCursor as {string: any})[k]
-            end
-            return (step_definition as {string: any})[k]
-        end
-        })
-end
-
 function ButtonAdvanceCursor:update(_joy: Joypad)
 end
 
-function ButtonAdvanceCursor:handle_select(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: MenuState): string, GameEvent
     return self.next_state, self.send_command
 end
 
-function ButtonAdvanceMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
-    return ButtonAdvanceCursor.new(self, game_context, menu_ctx, menu_state)
+function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: MenuState): MenuCursor<GC>
+    local cursor: ButtonAdvanceCursor<GC> = {
+        type = "CURSOR_BUTTON_ADVANCE",
+    }
+    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+            if (ButtonAdvanceCursor as {string: any})[k] then
+                return (ButtonAdvanceCursor as {string: any})[k]
+            end
+            return (self as {string: any})[k]
+        end
+        })
 end

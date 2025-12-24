@@ -67,22 +67,6 @@ function ListMenuDefinition.of_static_options<T>(
     })
 end
 
-function ListMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): ListMenuCursor<GC>
-    assert(step_definition is ListMenuDefinition<GC>)
-    local self: ListMenuCursor<GC> = {
-        type = "CURSOR_LIST",
-        i = 1,
-        options = step_definition.get_options(game_ctx, menu_ctx),
-    }
-    return setmetatable(self, { __index = function(_: any, k: string): any 
-            if (ListMenuCursor as {string: any})[k] then
-                return (ListMenuCursor as {string: any})[k]
-            end
-            return (step_definition as {string: any})[k]
-        end
-        })
-end
-
 function ListMenuCursor:update(joy: Joypad)
     local new_i = self.i
     if self.direction == "vertical" then
@@ -100,13 +84,24 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
-function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): string, GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state, self.options[self.i].send_command
 end
 
-function ListMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
-    return ListMenuCursor.new(self, game_context, menu_ctx, menu_state)
+function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    local cursor: ListMenuCursor<GC> = {
+        type = "CURSOR_LIST",
+        i = 1,
+        options = self.get_options(game_ctx, menu_ctx),
+    }
+    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+            if (ListMenuCursor as {string: any})[k] then
+                return (ListMenuCursor as {string: any})[k]
+            end
+            return (self as {string: any})[k]
+        end
+        })
 end

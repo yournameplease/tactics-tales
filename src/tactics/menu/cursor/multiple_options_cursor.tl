@@ -125,7 +125,27 @@ function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuCon
     return self.next_state, self.send_command
 end
 
-function MultipleOptionsMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
-    return MultipleOptionsMenuCursor.new(self, game_context, menu_ctx, menu_state)
+function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    local cursor: MultipleOptionsMenuCursor<GC> = {
+        type = "CURSOR_MULTIPLE_OPTIONS",
+        i = 1,
+        options = lists.do_map(
+            self.options,
+            function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
+                return {
+                    text = o.text,
+                    cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
+                    must_select = o.must_select == true
+                }
+            end
+        ),
+    }
+    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+            if (MultipleOptionsMenuCursor as {string: any})[k] then
+                return (MultipleOptionsMenuCursor as {string: any})[k]
+            end
+            return (self as {string: any})[k]
+        end
+        })
 end
 

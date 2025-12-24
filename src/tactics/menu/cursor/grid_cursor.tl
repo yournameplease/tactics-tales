@@ -39,40 +39,6 @@ function GridMenuDefinition.new(props: GridMenuDefinition<GC>): GridMenuDefiniti
     return setmetatable(props, { __index = GridMenuDefinition })
 end
 
-function GridMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): GridMenuCursor<GC>
-    assert(step_definition is GridMenuDefinition<GC>)
-    local self: GridMenuCursor<GC> = {
-        type = "CURSOR_GRID",
-        point = menu_state.point, 
-        x_max = 16,
-        y_max = 16
-    }
-    if step_definition.get_legal_tiles ~= nil then
-        self.legal_tiles = step_definition.get_legal_tiles(game_ctx, menu_ctx)
-        if step_definition.get_max_path_length ~= nil then
-            self.max_path_length = step_definition.get_max_path_length(game_ctx, menu_ctx)
-            LOG.debug("path_length", self.max_path_length)
-            if step_definition.get_path_anchor then
-                self.path = {step_definition.get_path_anchor(game_ctx, menu_ctx)}
-            else
-                self.path = {menu_state.point:copy()}
-            end
-        else
-            self.path = nil
-            self.max_path_length = nil
-        end
-    else
-        self.legal_tiles = nil
-    end
-    return setmetatable(self, { __index = function(_: any, k: string): any 
-            if (GridMenuCursor as {string: any})[k] then
-                return (GridMenuCursor as {string: any})[k]
-            end
-            return (step_definition as {string: any})[k]
-        end
-        })
-end
-
 function GridMenuCursor:update(joy: Joypad)
     local prev_point = self.point:copy()
     self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
@@ -100,6 +66,35 @@ function GridMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_
     return self.next_state, self.send_command
 end
 
-function GridMenuDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
-    return GridMenuCursor.new(self, game_context, menu_ctx, menu_state)
+function GridMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+    local cursor: GridMenuCursor<GC> = {
+        type = "CURSOR_GRID",
+        point = menu_state.point, 
+        x_max = 16,
+        y_max = 16
+    }
+    if self.get_legal_tiles ~= nil then
+        cursor.legal_tiles = self.get_legal_tiles(game_ctx, menu_ctx)
+        if self.get_max_path_length ~= nil then
+            cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
+            LOG.debug("path_length", cursor.max_path_length)
+            if self.get_path_anchor then
+                cursor.path = {self.get_path_anchor(game_ctx, menu_ctx)}
+            else
+                cursor.path = {menu_state.point:copy()}
+            end
+        else
+            cursor.path = nil
+            cursor.max_path_length = nil
+        end
+    else
+        cursor.legal_tiles = nil
+    end
+    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+            if (GridMenuCursor as {string: any})[k] then
+                return (GridMenuCursor as {string: any})[k]
+            end
+            return (self as {string: any})[k]
+        end
+        })
 end
