@@ -5,6 +5,7 @@ require("src/tactics/battle/tactics/battle_unit")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 require("src/tactics/systems/event_bus")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/battle/battle_map")
 
@@ -20,7 +21,7 @@ AI Mk 1:
 local record EnemyAIEngine
     battle_map: BattleMap
     tactics_engine: tactics_engine.TacticsEngine
-    event_bus: EventBus
+    event_writer: event_writer.EventWriter
     task_manager: TaskManager
 end
 
@@ -91,7 +92,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             target_unit = { unit = choice.target }
         }
         LOG.info(unit.id .. " will attack "..choice.target.id)
-        self.event_bus:emit("MOVE_AND_ATTACK", action_ctx)
+        self.event_writer:emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
         local min_cost_deep_move = deep_moves[1]
         local min_cost = 999
@@ -115,7 +116,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             destination = { point = point, path = path }
         }
         LOG.info(unit.id .. " will move to "..point.x..","..point.y)
-        self.event_bus:emit("MOVE_AND_WAIT", action_ctx)
+        self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
     else
         LOG.warn("WARN: No valid moves for "..unit.id.. "!")
     end
@@ -132,22 +133,22 @@ function EnemyAIEngine:handle_enemy_turn()
             end
         end
 
-        self.event_bus:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
+        self.event_writer:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
     end)
 end
 
 function enemy_ai_engine.new(
     battle_map: BattleMap,
-    tactics_engine: tactics_engine.TacticsEngine,
-    event_bus: EventBus,
+    tactics: tactics_engine.TacticsEngine,
+    bus: EventBus,
     task_manager: TaskManager
 ): EnemyAIEngine
     local self: EnemyAIEngine = setmetatable({
     }, { __index = EnemyAIEngine })
 
     self.battle_map = battle_map
-    self.tactics_engine = tactics_engine
-    self.event_bus = event_bus
+    self.tactics_engine = tactics
+    self.event_writer = event_writer.new(bus)
     self.task_manager = task_manager
     return self
 end

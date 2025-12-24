@@ -2,6 +2,7 @@
 --- and apply the battle events
 
 local event_bus = require("src/tactics/systems/event_bus")
+local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
 local battle_map = require("src/tactics/battle/battle_map")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
@@ -17,8 +18,7 @@ local script_manager = {
 local record ScriptManagerImpl
 	battle_map: BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
-	event_bus: EventBus
-	event_listener_ids: {integer}
+	event_listener: event_listener.EventListener
 end
 
 function ScriptManagerImpl:register_script(
@@ -87,21 +87,21 @@ function ScriptManagerImpl:register_script(
 		error()
 	end
 
-	pt.add(self.event_listener_ids, self.event_bus:on(
+	self.event_listener:on(
 		event,
 		function(args: {string: any})
 			if filter(args) then
 				effect()
 			end
 		end
-	))
+	)
 end
 
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
-	event_bus: EventBus,
+	bus: EventBus,
 	battle_map: BattleMap,
-	tactics_engine: tactics_engine.TacticsEngine
+	tactics: tactics_engine.TacticsEngine
 ): ScriptManager
 	scripts = scripts or {}
 
@@ -109,9 +109,8 @@ function script_manager.new(
 		__index = ScriptManagerImpl	
 	})
 
-	self.event_bus = event_bus
-	self.event_listener_ids = {}
-	self.tactics_engine = tactics_engine
+	self.event_listener = event_listener.new(bus)
+	self.tactics_engine = tactics
 	self.battle_map = battle_map
 
 	for _,script in ipairs(scripts) do
@@ -122,7 +121,7 @@ function script_manager.new(
 end
 
 function ScriptManagerImpl:teardown()
-    self.event_bus:remove_all(self.event_listener_ids)
+    self.event_listener:teardown()
 end
 
 return script_manager

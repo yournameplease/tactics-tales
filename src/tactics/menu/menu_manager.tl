@@ -4,7 +4,8 @@ require ("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
-
+require("src/tactics/systems/event_bus")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/cursor/button_advance_cursor")
 require("src/tactics/menu/cursor/grid_cursor")
@@ -31,7 +32,7 @@ global interface MenuManager<GC>
     selection_history: { SelectionHistory<GC> }
 
     game_ctx: GC
-    event_bus: EventBus
+    event_writer: event_writer.EventWriter
 
     init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
     populate_menu_state: function(self, new_step: MenuStep)
@@ -50,7 +51,7 @@ end
 function BaseMenuManager.new(
     menu_definitions: { MenuId: MenuDefinition },
     ctx: GC,
-    event_bus: EventBus
+    bus: EventBus
 ): MenuManager<GC>
     local self: BaseMenuManager<GC> = setmetatable({}, { __index = BaseMenuManager })
 
@@ -66,7 +67,7 @@ function BaseMenuManager.new(
     self.selection_history = {}
 
     self.game_ctx = ctx
-    self.event_bus = event_bus
+    self.event_writer = event_writer.new(bus)
 
     return self
 end
@@ -92,7 +93,7 @@ function BaseMenuManager:handle_menu_select()
 
     if send_command ~= nil then
         LOG.info("Emitting menu command ", send_command)
-        self.event_bus:emit(send_command, self.menu_ctx)
+        self.event_writer:emit(send_command, self.menu_ctx)
     end
 
     if next_state ~= nil then
@@ -127,13 +128,12 @@ end
 function BaseMenuManager:update(joy: Joypad)
     if joy.lp then
         -- DEBUG Only for now.  consider where to put
-        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
+        self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
     elseif joy.bp then
         self:handle_menu_back()
     elseif joy.ap then
         self:handle_menu_select()
     else
-        LOG.trace("Update cursor", self.menu_cursor.type)
         self.menu_cursor:update(joy)
     end
 end

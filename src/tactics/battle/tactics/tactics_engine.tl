@@ -8,6 +8,7 @@ local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 require("src/tactics/systems/event_bus")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
 local battle_definition_types = require("src/tactics/battle/definition/types")
@@ -28,7 +29,7 @@ local record TacticsEngine
 
     task_manager: TaskManager
     animation_manager: AnimationManager
-    event_bus: EventBus
+    event_writer: event_writer.EventWriter
 
 
     spawn_all: function(self, players: {battle_definition_types.PlayerSpawnData}, enemies: {battle_definition_types.EnemySpawnData}, neutrals: {battle_definition_types.NeutralSpawnData})
@@ -53,7 +54,7 @@ function tactics_engine.new(
     character_mgr: character_manager.CharacterManager,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
-    event_bus: EventBus
+    bus: EventBus
 ): tactics_engine.TacticsEngine
     local self: tactics_engine.TacticsEngine = setmetatable({
     }, { __index = TacticsEngine })
@@ -64,8 +65,8 @@ function tactics_engine.new(
 
     self.task_manager = task_manager
     self.animation_manager = animation_manager
-    self.event_bus = event_bus
-
+    self.event_writer = event_writer.new(bus)
+    
     return self
 end
 
@@ -162,7 +163,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
 
         self.battle_is_blocked = false
         unit.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION", {})
+        self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
     end)
 end
 
@@ -191,7 +192,7 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
         LOG.debug("unblocking battle")
         unit.animation_data = self.animation_manager:create_idle_animation()
         target.animation_data = self.animation_manager:create_idle_animation()
-        self.event_bus:emit("TACTICS_UNIT_END_ACTION", {})
+        self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
     end)
 end
 
@@ -231,7 +232,7 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
 
     if not defender:is_alive() then
         self.battle_map:kill_unit(defender)
-        self.event_bus:emit("TACTICS_UNIT_DEATH", {
+        self.event_writer:emit("TACTICS_UNIT_DEATH", {
             attacker = attacker,
             defender = defender,
         })
@@ -362,7 +363,7 @@ function TacticsEngine:update()
     end
 
     if self.is_player_turn and all_players_acted then
-        self.event_bus:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
+        self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
     end
 end
 

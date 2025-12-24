@@ -35,11 +35,11 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
     }
 }
 
-function StoryMenuManager.new(ctx: StoryMenuContext, event_bus: EventBus): StoryMenuManager
+function StoryMenuManager.new(ctx: StoryMenuContext, bus: EventBus): StoryMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,
-        event_bus
+        bus
     ) as StoryMenuManager
 end
 
