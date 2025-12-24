@@ -25,13 +25,13 @@ function NewPageNode.of(): NewPageNode
 	}
 end
 
-local record TextNode
+local record StoryTextNode
 	is StoryNode
 	where self.type == 'text'
 	text: string
 end
 
-function TextNode.of(text: string): TextNode
+function StoryTextNode.of(text: string): StoryTextNode
 	return {
 		type = 'text',
 		text = text
@@ -94,8 +94,6 @@ function JumpNode.of(next_node: NodeId): JumpNode
 end
 
 
-
-
 local record StoryDefinition
 	nodes: { string: {StoryNode}}
 	starting_node: string
@@ -106,7 +104,7 @@ return {
 	StoryDefinition = StoryDefinition,
 	StoryNode = StoryNode,
 	StoryNodeType = StoryNodeType,
-	TextNode = TextNode,
+	StoryTextNode = StoryTextNode,
 	ExitStoryNode = ExitStoryNode,
 	BattleNode = BattleNode,
 	JumpNode = JumpNode,

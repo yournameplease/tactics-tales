@@ -66,7 +66,7 @@ function Story:handle_new_node()
     LOG.debug("Handling new node: ", node_definition.type)
     if node_definition is story_types.JumpNode then
         self:jump_to_node(node_definition.next_node)
-    elseif node_definition is story_types.TextNode then
+    elseif node_definition is story_types.StoryTextNode then
         self.story_page:add_text_line(node_definition.text)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_types.BattleNode then
@@ -152,7 +152,7 @@ end
 
 function Story:update(joy: Joypad)
     local current_node = self.current_node.definition
-    if current_node is story_types.TextNode then
+    if current_node is story_types.StoryTextNode then
         self.menu_manager:update(joy)
     elseif current_node is story_types.BattleNode then
         self.battle_manager:update(joy)
