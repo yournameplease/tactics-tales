@@ -4,7 +4,7 @@
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
-local battle_map = require("src/tactics/battle/battle_map")
+require("src/tactics/battle/battle_map")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 
 local interface ScriptManager
@@ -100,7 +100,7 @@ end
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
 	bus: EventBus,
-	battle_map: BattleMap,
+	map: BattleMap,
 	tactics: tactics_engine.TacticsEngine
 ): ScriptManager
 	scripts = scripts or {}
@@ -111,7 +111,7 @@ function script_manager.new(
 
 	self.event_listener = event_listener.new(bus)
 	self.tactics_engine = tactics
-	self.battle_map = battle_map
+	self.battle_map = map
 
 	for _,script in ipairs(scripts) do
 		self:register_script(script)

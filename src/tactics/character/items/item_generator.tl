@@ -2,11 +2,12 @@ local Item = require("src/tactics/character/items/object/item")
 require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 local ITEM_DATA = require("src/tactics/data/items")
+local item_definition = require("src/tactics/types/item_definition")
 
 local record ItemGenerator
 end
 
-local function generate_weapon(def: WeaponDefinition): wpn.Weapon
+local function generate_weapon(def: item_definition.WeaponDefinition): wpn.Weapon
 	if def == nil then
 		return nil
 	end

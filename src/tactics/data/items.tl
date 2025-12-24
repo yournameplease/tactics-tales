@@ -1,6 +1,6 @@
 require("src/tactics/types")
 require("src/tactics/character/items/object/weapon")
-require("src/tactics/types/item_definition")
+local item_definition = require("src/tactics/types/item_definition")
 local wpn = require("src/tactics/character/items/object/weapon")
 local effect = wpn.effect
 
@@ -9,7 +9,7 @@ local effect = wpn.effect
 -- dual wielding (use front hand sprite)
 
 
-local function shield(name: string, sprite_id: integer, slots: integer, defense: integer, avoid: integer): ItemDefinition
+local function shield(name: string, sprite_id: integer, slots: integer, defense: integer, avoid: integer): item_definition.ItemDefinition
     return {
         name = name,
         type = "SHIELD",
@@ -27,7 +27,7 @@ local function shield(name: string, sprite_id: integer, slots: integer, defense:
     }
 end
 
-local function armor(name: string, slots: integer, defense: integer, avoid: integer): ItemDefinition
+local function armor(name: string, slots: integer, defense: integer, avoid: integer): item_definition.ItemDefinition
     return {
         name = name,
         type = "ARMOR",
@@ -41,7 +41,7 @@ local function armor(name: string, slots: integer, defense: integer, avoid: inte
     }
 end
 
-local default_weapon: WeaponDefinition = {
+local default_weapon: item_definition.WeaponDefinition = {
     name = "Default Weapon",
     sprite = 104,
     hand_anchor = Point.of(1,8), -- the top left position of the handle
@@ -58,8 +58,8 @@ local function weapon(
     slots: integer,
     equip_slot: EquipSlot,
     sprite_data: ItemSpriteData,
-    data: WeaponDefinition
-) : ItemDefinition
+    data: item_definition.WeaponDefinition
+) : item_definition.ItemDefinition
     setmetatable(data, { __index = default_weapon })
     return {
         name = name,
@@ -80,7 +80,7 @@ local function melee_weapon(
     accuracy: integer,
     slots: integer,
     effects?: { wpn.WeaponEffect }
-): ItemDefinition
+): item_definition.ItemDefinition
     return weapon(
         name,
         slots,
@@ -105,7 +105,7 @@ local function two_handed_weapon(
     accuracy: integer,
     slots: integer,
     effects?: { wpn.WeaponEffect }
-): ItemDefinition
+): item_definition.ItemDefinition
     return weapon(
         name,
         slots,
@@ -134,7 +134,7 @@ local function ranged_weapon(
     max_range: integer,
     slots: integer,
     effects?: { wpn.WeaponEffect }
-): ItemDefinition
+): item_definition.ItemDefinition
     return weapon(
         name,
         slots,
@@ -158,7 +158,7 @@ local function ranged_weapon(
 end
 
 
-global ITEM_DATA: {string: ItemDefinition} = {
+local ITEM_DATA: {string: item_definition.ItemDefinition} = {
     dagger = melee_weapon( "Dagger", 104, 1, 90, 1 ),
     sword = melee_weapon( "Sword", 105, 2, 80, 1 ),
     axe = melee_weapon( "Axe", 106, 2, 70, 1, {
