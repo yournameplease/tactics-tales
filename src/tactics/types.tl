@@ -79,5 +79,3 @@ end
 global function taxicab_distance(p1: Point, p2: Point): integer
     return pt.abs(p1.x-p2.x)+pt.abs(p1.y-p2.y)
 end
-
-global type Side = integer

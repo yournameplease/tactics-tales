@@ -83,11 +83,16 @@ function CharacterRenderer.get_animation_offset(battle_unit: BattleUnit): Point
              y = frame_data.offset.y + frame_data.anchors.feet_center.y}
 end
 
+local palette_by_side <total>: {Side: {Color, Color}} = {
+	player = {16, 19},
+	enemy = {8, 24},
+	neutral = {27, 3},
+} 
+
 local function set_palette(battle_unit: BattleUnit, side: Side)
-    if side == 1 then
-        pt.set_pal(16, 8)
-        pt.set_pal(19, 24)
-    end
+	local side_palette = palette_by_side[side]
+    pt.set_pal(16, side_palette[1])
+    pt.set_pal(19, side_palette[2])
     local skin = battle_unit.character.appearance.skin
     pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
     pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
@@ -96,7 +101,7 @@ local function set_palette(battle_unit: BattleUnit, side: Side)
 end
 
 function CharacterRenderer.draw_head(battle_unit: BattleUnit, point: Point, side: Side, set_pal: boolean)
-    local flip_h = side ~= 0
+    local flip_h = side == "enemy"
 
     if set_pal then
         set_palette(battle_unit, side)
@@ -131,7 +136,7 @@ end
 
 function CharacterRenderer.draw(battle_unit: BattleUnit, point: Point, side: Side, set_pal: boolean, apply_animation: boolean)
     -- TODO: consider pre-rendering some of this
-    local flip_h = side ~= 0
+    local flip_h = side == "enemy"
 
 	local animation_frame = get_animation_frame(battle_unit)
 

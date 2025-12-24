@@ -91,7 +91,7 @@ function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: Me
     return self.options[self.i].next_state, self.options[self.i].send_command
 end
 
-function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuCursor<GC>
+function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): MenuCursor<GC>
     local cursor: ListMenuCursor<GC> = {
         type = "CURSOR_LIST",
         i = 1,
