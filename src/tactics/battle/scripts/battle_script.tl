@@ -45,6 +45,7 @@ end
 local record SpawnUnits
 	is BattleScript
 	where self.type == "spawn_units"
+	animation: unit_spawn_data.UnitSpawnAnimation
     enemies: { unit_spawn_data.UnitSpawnData}
     neutral: { unit_spawn_data.UnitSpawnData}
     players: { unit_spawn_data.UnitSpawnData}
@@ -96,13 +97,15 @@ end
 function battle_script.script.spawn_units(
 	trigger: ScriptTrigger,
 	players: { unit_spawn_data.UnitSpawnData },
-	enemies: { unit_spawn_data.UnitSpawnData }
+	enemies: { unit_spawn_data.UnitSpawnData },
+	animation: unit_spawn_data.UnitSpawnAnimation
 ): SpawnUnits
 	return {
 		type = "spawn_units",
 		trigger = trigger,
 		players = players,
 		enemies = enemies,
+		animation = animation,
 	}
 end
 
