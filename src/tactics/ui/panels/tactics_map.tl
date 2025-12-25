@@ -75,13 +75,6 @@ local function compute_animated_unit_positions(battle_map: BattleMap): { Animate
     )
 end
 
-local function draw_health_bar(hp_current: integer, hp_max: integer, x: integer, y: integer, width: integer, height: integer)
-    pt.rrectfill(x, y, width, height, 1, COLOR_MENU_PRIMARY)
-    local bar_width = pt.flr(hp_current*(width-2) / hp_max)
-    pt.rrectfill(x+1, y+1, bar_width, height-2, 1, 27)
-    pt.rrect(x, y, width, height, 1, COLOR_MENU_SECONDARY)
-end
-
 local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext>)
     local selected_i = cursor.i
     local options = cursor.options
@@ -110,7 +103,6 @@ local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.Li
 end
 
 local function draw_unit(unit: BattleUnit)
-    local side = unit.side
     local unit_tile = unit.tile
     -- local has_acted = unit.has_acted
 
@@ -126,12 +118,8 @@ local function draw_unit(unit: BattleUnit)
     --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, side, true, true)
-
-    local hp_current = unit.hp_current
-    local hp_max = unit.character.stats.hp_max
-    -- TODO: make this a skeleton point
-    draw_health_bar(hp_current, hp_max, world_point.x+1, world_point.y+UNIT_OFFSET_Y-5, TILE_SIZE.x-2, 4)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
+    CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
@@ -337,7 +325,7 @@ function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
-        pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+        -- pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         if cursor is list_cursor.ListMenuCursor<BattleMenuContext> then
             draw_floating_menu(x, y, cursor)

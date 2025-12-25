@@ -25,7 +25,7 @@ end
 
 global BASE_UNIT: CharacterTemplate = {
 	movement = 5,
-	hp_max = 5,
+	hp_max = 4,
 	item_loadout_options = randomizer.list_selector.of_randomizers(
 		randomizer.weighted_option_selector.of("dagger"),
 		randomizer.weighted_option_selector.of("shield", "sword")
@@ -60,7 +60,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	default = BASE_UNIT,
     human_base = {
         movement = 5,
-        hp_max = 5
+        hp_max = 4
     },
 	bandit_base = {
 		parent_template = "human_base",
@@ -91,6 +91,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
     },
     bandit_berzerker = {
         parent_template = "bandit_base",
+        hp_max = 5,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of("axe"),
 			randomizer.weighted_option_selector.of("axe")
@@ -98,7 +99,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
     },
     bandit_boss = {
         parent_template = "bandit_base",
-        hp_max = 8,
+        hp_max = 5,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "poleaxe" )
 		)
@@ -116,6 +117,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	},
 	militia_leader = {
 		parent_template = "militia_base",
+        hp_max = 5,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of("spear" ),
 			randomizer.weighted_option_selector.of("shield" )
@@ -129,6 +131,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	}, 
 	militia_armor = {
 		parent_template = "militia_base",
+        hp_max = 5,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "mace" ),
 			randomizer.weighted_option_selector.of("shield" ),
@@ -143,6 +146,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	}, 
 	cultist_base = {
 		parent_template = "human_base",
+        hp_max = 3,
 		body_options = randomizer.weighted_option_selector.of("ROBED"),
 		headwear_options = randomizer.weighted_option_selector.of("cultist_hood")
 	},
@@ -170,6 +174,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	},
 	cultist_boss = {
 		parent_template = "cultist_base",
+        hp_max = 5,
 		headwear_options = randomizer.weighted_option_selector.of("hooded_wizard_hat"),
         item_loadout_options = randomizer.list_selector.of_randomizers(),
 	},
@@ -181,6 +186,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	},
 	old_fart = {
 		parent_template = "human_base",
+        hp_max = 2,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 		),
 	},
