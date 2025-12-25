@@ -172,6 +172,11 @@ function TacticsEngine:spawn_all(
             while spawn_animation.playing do
                 pt.yield()
             end
+
+            local idle_animation = self.animation_manager:create_idle_animation()
+            for _,unit in ipairs(spawned) do
+                unit.animation_data = idle_animation
+            end
         end)
     end
 end
