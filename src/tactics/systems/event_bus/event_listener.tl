@@ -1,7 +1,7 @@
 ---@brief
 --- manages ids of event bus `on` events
 --- to allow easy teardown 
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 
 
 local interface EventListener
@@ -17,11 +17,11 @@ local record EventListenerImpl
 	is EventListener
 
     listener_ids: {integer}
-	bus: EventBus
+	bus: event_bus.EventBus
 end
 
 function event_listener.new(
-	bus: EventBus
+	bus: event_bus.EventBus
 ): EventListener
 	local self: EventListenerImpl = setmetatable({}, {
 		__index = EventListenerImpl

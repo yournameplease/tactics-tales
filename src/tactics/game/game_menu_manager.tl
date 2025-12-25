@@ -8,6 +8,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
+local event_bus = require("src/tactics/systems/event_bus")
 local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
@@ -93,7 +94,7 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
 
 }
 
-function GameMenuManager.new(ctx: GameMenuContext, bus: EventBus): GameMenuManager
+function GameMenuManager.new(ctx: GameMenuContext, bus: event_bus.EventBus): GameMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,

@@ -36,7 +36,7 @@ global record EventCallback
     callback: function(args: { string: any })
 end
 
-global record EventBus
+local record EventBus
     is GameService
     where self.id == "event_bus"
     id_generator: id_generator.IdGenerator
@@ -44,13 +44,17 @@ global record EventBus
     listeners: { GameEvent: {EventCallback}}
 end
 
+local event_bus = {
+    EventBus = EventBus
+}
+
 function EventBus:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
 
 end
 
 local MAX_EVENT_HISTORY = 20
 
-function EventBus.new(): EventBus
+function event_bus.new(): EventBus
     local self: EventBus = setmetatable({
         id = "event_bus",
         dependencies = {},
@@ -114,4 +118,4 @@ function EventBus:get_event_history(row_limit: integer): { GameEvent }
     return out
 end
 
-return EventBus
+return event_bus

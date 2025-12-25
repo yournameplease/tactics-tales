@@ -7,7 +7,7 @@ require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
@@ -54,7 +54,7 @@ function tactics_engine.new(
     character_mgr: character_manager.CharacterManager,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
-    bus: EventBus
+    bus: event_bus.EventBus
 ): tactics_engine.TacticsEngine
     local self: tactics_engine.TacticsEngine = setmetatable({
     }, { __index = TacticsEngine })

@@ -4,13 +4,13 @@ require ("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 require("src/tactics/systems/service")
 require("src/tactics/battle/tactics/battle_unit")
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
-require("src/tactics/menu/cursor/button_advance_cursor")
-require("src/tactics/menu/cursor/grid_cursor")
-require("src/tactics/menu/cursor/list_cursor")
-require("src/tactics/menu/cursor/multiple_options_cursor")
+-- require("src/tactics/menu/cursor/button_advance_cursor")
+-- require("src/tactics/menu/cursor/grid_cursor")
+-- require("src/tactics/menu/cursor/list_cursor")
+-- require("src/tactics/menu/cursor/multiple_options_cursor")
 
 global record SelectionHistory<GC>
     step: MenuStep
@@ -51,7 +51,7 @@ end
 function BaseMenuManager.new(
     menu_definitions: { MenuId: MenuDefinition },
     ctx: GC,
-    bus: EventBus
+    bus: event_bus.EventBus
 ): MenuManager<GC>
     local self: BaseMenuManager<GC> = setmetatable({}, { __index = BaseMenuManager })
 

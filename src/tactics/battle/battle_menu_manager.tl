@@ -4,9 +4,9 @@ require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
+local event_bus = require("src/tactics/systems/event_bus")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local array_2d = require("src/tactics/util/array_2d")
-
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 
@@ -219,7 +219,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
 
 function BattleMenuManager.new(
     ctx: BattleMenuContext,
-    bus: EventBus
+    bus: event_bus.EventBus
 ): BattleMenuManager
     return BaseMenuManager.new(
         MENU_DATA,

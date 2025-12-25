@@ -1,7 +1,7 @@
 
 ---@brief
 --- abstracts event bus to make clear whether a service writes
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 
 
 local interface EventWriter
@@ -15,11 +15,11 @@ local event_writer = {
 local record EventWriterImpl
 	is EventWriter
 
-	bus: EventBus
+	bus: event_bus.EventBus
 end
 
 function event_writer.new(
-	bus: EventBus
+	bus: event_bus.EventBus
 ): EventWriter
 	local self: EventWriterImpl = setmetatable({}, {
 		__index = EventWriterImpl
@@ -30,7 +30,10 @@ function event_writer.new(
 	return self
 end
 
-function EventWriterImpl:emit(event_name: GameEvent, args: {string: any})
+function EventWriterImpl:emit(
+	event_name: GameEvent,
+	args: {string: any}
+)
 	self.bus:emit(event_name, args)
 end
 
