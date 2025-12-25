@@ -103,7 +103,7 @@ local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.Li
     pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
 end
 
-local function draw_unit(unit: BattleUnit)
+local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager)
     local unit_tile = unit.tile
     -- local has_acted = unit.has_acted
 
@@ -120,7 +120,7 @@ local function draw_unit(unit: BattleUnit)
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
     CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, false)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
@@ -220,7 +220,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local ud_height = self.h + self.x + self.internal_margin.t
     local draw_x = self.x + self.internal_margin.l
     local draw_y = self.y + self.internal_margin.t
-    draw_target_manager:push_target(ud_width, ud_height, 0, -draw_y)
+    draw_target_manager:push_target(ud_width, ud_height, 0, draw_y)
 
     -- draw row-by row, top to bottom aka back to front
 
@@ -303,7 +303,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit)
+            draw_unit(unit, draw_target_manager)
             drawn_unit_count = drawn_unit_count + 1
         end
 
@@ -312,7 +312,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit)
+            draw_unit(unit, draw_target_manager)
             drawn_unit_count = drawn_unit_count + 1
         end
 

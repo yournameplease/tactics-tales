@@ -1,6 +1,7 @@
 require("src/tactics/debug")
 require("src/tactics/types")
 
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
 require("src/tactics/character/sprite_data")
@@ -27,7 +28,13 @@ local MAX_HEALTH_BAR_WIDTH = 18
 
 local character_renderer = {}
 
-local function get_anchor_offsets(base: Point, anchor: Point, child: Point, flip_h: boolean, flip_v: boolean): Point
+local function get_anchor_offsets(
+	base: Point,
+	anchor: Point,
+	child: Point,
+	flip_h: boolean,
+	flip_v: boolean
+): Point
     local diff_x = anchor.x - child.x
     local diff_y = anchor.y - child.y
     if flip_h then diff_x = -diff_x end
@@ -36,7 +43,9 @@ local function get_anchor_offsets(base: Point, anchor: Point, child: Point, flip
     return { x = base.x + diff_x, y = base.y + diff_y }
 end
 
-local function get_body_type(battle_unit: BattleUnit): AnimationName
+local function get_body_type(
+	battle_unit: BattleUnit
+): AnimationName
     local weapons = battle_unit.character.inventory:get_equipped_weapons()
 	
     local base_body_type: wpn.WeaponBodyType = "BACK_HAND"
@@ -60,7 +69,9 @@ local record RenderedAnimationFrame
 	anchors: { AnchorPointName: Point }
 end
 
-local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFrame
+local function get_animation_frame(
+	battle_unit: BattleUnit
+): RenderedAnimationFrame
 	local frame_name: AnimationFrameName 
 	local offset: Point
 	if battle_unit.animation_data ~= nil and battle_unit.animation_data.current_frame ~= nil then
@@ -82,14 +93,18 @@ local function get_animation_frame(battle_unit: BattleUnit): RenderedAnimationFr
 end
 
 -- @return the position of the "feet_center" anchor
-function character_renderer.get_animation_offset(battle_unit: BattleUnit): Point
+function character_renderer.get_animation_offset(
+	battle_unit: BattleUnit
+): Point
     local frame_data = get_animation_frame(battle_unit)
 
     return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
              y = frame_data.offset.y + frame_data.anchors.feet_center.y}
 end
 
-local function set_palette(battle_unit: BattleUnit)
+local function set_palette(
+	battle_unit: BattleUnit
+)
 	local side_palette = PALETTE_BY_SIDE[battle_unit.side]
     pt.set_pal(16, side_palette[1])
     pt.set_pal(19, side_palette[2])
@@ -100,7 +115,11 @@ local function set_palette(battle_unit: BattleUnit)
     pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
-function character_renderer.draw_head(battle_unit: BattleUnit, point: Point, set_pal: boolean)
+function character_renderer.draw_head(
+	battle_unit: BattleUnit,
+	point: Point,
+	set_pal: boolean
+)
     local flip_h = battle_unit.side == "enemy"
 
     if set_pal then
@@ -134,16 +153,17 @@ function character_renderer.draw_head(battle_unit: BattleUnit, point: Point, set
 
 end
 
-function character_renderer.draw(battle_unit: BattleUnit, point: Point, set_pal: boolean, apply_animation: boolean)
+local function draw_character(
+	battle_unit: BattleUnit,
+	point: Point,
+	set_pal: boolean
+)
     -- TODO: consider pre-rendering some of this
     local flip_h = battle_unit.side == "enemy"
 
 	local animation_frame = get_animation_frame(battle_unit)
 
-	local offset = animation_frame.offset
-	if not apply_animation then
-		offset = Point.of(0,0)
-	end
+	local offset = Point.of(0,0)
 	
     local base_point = get_anchor_offsets(
 		point + offset,
@@ -184,7 +204,43 @@ function character_renderer.draw(battle_unit: BattleUnit, point: Point, set_pal:
     end
 end
 
-local function draw_health_bar(battle_unit: BattleUnit, point: Point)
+function character_renderer.draw(
+	battle_unit: BattleUnit,
+	point: Point,
+	draw_target_manager: DrawTargetManager,
+	set_pal: boolean,
+	apply_animation: boolean,
+	draw_shadow: boolean
+)
+	local DRAW_TARGET_W = 32
+	local DRAW_TARGET_H = 32
+	-- local DRAW_TARGET_TILE_TOP_LEFT = Point.of(5,11)
+	-- local FOOT_GROUND_ANCHOR = Point.of(8,12)
+	-- local draw_target_camera = DRAW_TARGET_TILE_TOP_LEFT + FOOT_GROUND_ANCHOR
+	local DRAW_TARGET_D = Point.of(15, 31)
+
+	draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
+	pt.circfill(0,0,50,7)
+
+	if draw_shadow then
+
+	end
+	draw_character(battle_unit, Point.of(0,0), set_pal)
+
+	local animation_frame = get_animation_frame(battle_unit)
+	local offset = animation_frame.offset
+	if not apply_animation then
+		offset = Point.of(0,0)
+	end
+	pt.circ(0,0,3,1)
+	local draw_point = point + offset - DRAW_TARGET_D
+	draw_target_manager:draw(draw_point.x,draw_point.y)
+end
+
+local function draw_health_bar(
+	battle_unit: BattleUnit,
+	point: Point
+)
 	local flip_h = battle_unit.side == "enemy"
 
 	local hp_current = battle_unit.hp_current
@@ -219,7 +275,12 @@ local function draw_health_bar(battle_unit: BattleUnit, point: Point)
 end
 
 
-function character_renderer.draw_health_bar(battle_unit: BattleUnit, point: Point, set_pal: boolean, apply_animation: boolean)
+function character_renderer.draw_health_bar(
+	battle_unit: BattleUnit,
+	point: Point,
+	set_pal: boolean,
+	apply_animation: boolean
+)
     -- TODO: consider pre-rendering some of this
     local flip_h = battle_unit.side == "enemy"
 

@@ -1,5 +1,5 @@
 local interface DrawTargetManager
-	push_target: function(self, w: integer, h: integer, c_x: integer, c_y: integer)
+	push_target: function(self, w: integer, h: integer, d_x: integer, d_y: integer)
 	draw: function(self, x: integer, y: integer)
 end
 
@@ -31,14 +31,14 @@ function DrawTargetManagerImpl:apply_current_target()
 	end
 end
 
-function DrawTargetManagerImpl:push_target(w: integer, h: integer, c_x: integer, c_y: integer)
+function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer, d_y: integer)
 	local ud = pt.userdata("u8",w,h)
 	local new_target =  {
 		ud = ud,
 		w = w,
 		h = h,
-		camera_x = c_x or 0,
-		camera_y = c_y or 0,
+		camera_x = -d_x or 0,
+		camera_y = -d_y or 0,
 	}
 
 	if self.current_target ~= nil then
