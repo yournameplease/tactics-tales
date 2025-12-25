@@ -11,6 +11,7 @@ local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
+local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 
 local character_manager = require("src/tactics/character/character_manager")
@@ -18,6 +19,8 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
+
+local TILE_SIZE = CONFIG.TILE_SIZE
 
 local record TacticsEngine
 
@@ -32,7 +35,7 @@ local record TacticsEngine
     event_writer: event_writer.EventWriter
 
 
-    spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData})
+    spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
@@ -79,7 +82,8 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
 end
 
 --- Iterates over unit definitions and calls CharacterManager
-function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side: battle_unit.Side)
+function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side: battle_unit.Side): {battle_unit.BattleUnit}
+    local spawned_units: {battle_unit.BattleUnit} = {}
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
     -- this will duplicate players if multiple roster spawns are made
@@ -104,20 +108,72 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
                 error()
             end
             local unit = battle_unit.spawn_unit(character, spawn_point, labels, side, spawn_data.ai)
-
+            
             self:spawn_unit(unit, spawn_point)
+            pt.add(spawned_units, unit)
         end
     end
+    return spawned_units
 end
 
 function TacticsEngine:spawn_all(
     players: {unit_spawn_data.UnitSpawnData},
     enemies: {unit_spawn_data.UnitSpawnData},
-    neutral: {unit_spawn_data.UnitSpawnData}
+    neutral: {unit_spawn_data.UnitSpawnData},
+    animation: unit_spawn_data.UnitSpawnAnimation
 )
-    self:spawn_units(players or {}, "player")
-    self:spawn_units(enemies or {}, "enemy")
-    self:spawn_units(neutral or {}, "neutral")
+    local spawned: {battle_unit.BattleUnit} = {}
+    lists.add_all(spawned, self:spawn_units(players or {}, "player"))
+    lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy"))
+    lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral"))
+
+    if animation ~= nil and #spawned > 0 then
+        local max_offset = 0
+        for _,unit in ipairs(spawned) do
+            local offset: integer
+            if animation == "from_north" then
+                offset = unit.tile.y + 1
+            elseif animation == "from_south" then
+                offset = MAP_HEIGHT - unit.tile.y
+            elseif animation == "from_east" then
+                offset = MAP_WIDTH - unit.tile.x
+            elseif animation == "from_west" then
+                offset = unit.tile.x + 1
+            else
+                error()
+            end
+            if offset > max_offset then
+                max_offset = offset 
+            end
+        end
+
+        local offset_point: Point
+        if animation == "from_north" then
+            offset_point = Point.of(0,-max_offset)
+        elseif animation == "from_south" then
+            offset_point = Point.of(0,max_offset)
+        elseif animation == "from_east" then
+            offset_point = Point.of(max_offset,0)
+        elseif animation == "from_west" then
+            offset_point = Point.of(-max_offset,0)
+        else
+            error()
+        end
+
+        local path = { offset_point * TILE_SIZE, Point.of(0,0) }
+
+        self.task_manager:start_routine(function()
+            local spawn_animation = self.animation_manager:create_walk_animation(path, max_offset)
+
+            for _,unit in ipairs(spawned) do
+                unit.animation_data = spawn_animation
+            end
+
+            while spawn_animation.playing do
+                pt.yield()
+            end
+        end)
+    end
 end
 
 -- handlers

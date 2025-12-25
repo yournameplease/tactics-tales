@@ -2,6 +2,13 @@ require("src/tactics/types")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 
+local enum UnitSpawnAnimation
+    "from_north"
+    "from_south"
+    "from_east"
+    "from_west"
+end
+
 local enum CharacterSourceType
     "template"
     "player_roster"
@@ -30,6 +37,7 @@ local record UnitSpawnData
 end
 
 local unit_spawn_data = {
+	UnitSpawnAnimation = UnitSpawnAnimation,
 	UnitSpawnData = UnitSpawnData,
 	character_source = {
 		CharacterSourceType = CharacterSourceType,

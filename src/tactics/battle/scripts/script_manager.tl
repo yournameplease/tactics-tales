@@ -73,7 +73,8 @@ function ScriptManagerImpl:register_script(
 		    self.tactics_engine:spawn_all(
 		        script.players,
 		        script.enemies,
-		        script.neutral
+		        script.neutral,
+				script.animation
 		    )
 		end
 	elseif script is battle_script.script.ModifyTerrain then
