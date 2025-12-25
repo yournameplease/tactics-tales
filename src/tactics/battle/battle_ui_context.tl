@@ -13,6 +13,7 @@ local record BattleUIContext
     battle_menu_manager: BattleMenuManager
     turn_manager: turn_manager.TurnManager
     
+    hovered_unit: BattleUnit
     last_hovered_unit: BattleUnit
     acting_unit: BattleUnit
     destination: Point
@@ -38,6 +39,7 @@ function battle_ui_context.new(
     self.turn_manager = turn_mgr
 
     self.last_hovered_unit = nil
+    self.hovered_unit = nil
     self.acting_unit = nil
     return self
 end
@@ -45,13 +47,14 @@ end
 function BattleUIContext:enrich()
     self.layout = "TACTICS"
 
-
+    self.hovered_unit = nil
     local selection = self.battle_menu_manager.menu_cursor
 
     if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local point = selection.point
             local unit = self.battle_map:get_at_tile(point)
+            self.hovered_unit = unit
             if unit then
                 self.last_hovered_unit = unit
             end
@@ -60,6 +63,7 @@ function BattleUIContext:enrich()
         if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
             local point = selection.point
             local unit = self.battle_map:get_at_tile(point)
+            self.hovered_unit = unit
             if unit then
                 self.layout = "COMBAT_PREVIEW"
                 self.last_hovered_unit = unit
@@ -75,6 +79,11 @@ function BattleUIContext:enrich()
         self.destination = self.battle_menu_manager.menu_ctx.destination.point
     end
 
+    if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+            self.acting_unit = nil
+        end
+    end
 end
 
 return battle_ui_context
