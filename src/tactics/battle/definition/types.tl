@@ -1,6 +1,3 @@
-require("src/tactics/types")
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
-
 -- identifier to associate metatiles with semantic meaning
 -- multiple ids can go to the same tiles
 local type TileLabel = string
@@ -25,28 +22,10 @@ local interface FailureCondition
     type: FailureConditionType
 end
 
-local record NpcSpawnData
-    template: string
-    ai: unit_ai.UnitAI
-    tile: TileLabel
-end
-
-local type NeutralSpawnData = NpcSpawnData
-local type EnemySpawnData = NpcSpawnData
-
-local record PlayerSpawnData
-    -- nullable if from roster.  probably want a "source" interface
-    template: string
-    tile: TileLabel
-end
-
 local battle_definition_types = {
     TileLabel = TileLabel,
 	VictoryCondition = VictoryCondition,
 	FailureCondition = FailureCondition,
-    NeutralSpawnData = NeutralSpawnData,
-    EnemySpawnData = EnemySpawnData,
-    PlayerSpawnData = PlayerSpawnData,
 }
 
 return battle_definition_types

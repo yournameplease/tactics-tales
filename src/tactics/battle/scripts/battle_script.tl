@@ -1,4 +1,5 @@
 local battle_definition_types = require("src/tactics/battle/definition/types")
+local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local battle_map = require("src/tactics/battle/battle_map")
 
 local enum ScriptTriggerType
@@ -44,9 +45,9 @@ end
 local record SpawnUnits
 	is BattleScript
 	where self.type == "spawn_units"
-	players: { battle_definition_types.PlayerSpawnData }
-	enemies: { battle_definition_types.EnemySpawnData }
-	neutral: { battle_definition_types.NeutralSpawnData }
+    enemies: { unit_spawn_data.UnitSpawnData}
+    neutral: { unit_spawn_data.UnitSpawnData}
+    players: { unit_spawn_data.UnitSpawnData}
 end
 
 local record ModifyTerrain
@@ -94,8 +95,8 @@ end
 
 function battle_script.script.spawn_units(
 	trigger: ScriptTrigger,
-	players: { battle_definition_types.PlayerSpawnData },
-	enemies: { battle_definition_types.EnemySpawnData }
+	players: { unit_spawn_data.UnitSpawnData },
+	enemies: { unit_spawn_data.UnitSpawnData }
 ): SpawnUnits
 	return {
 		type = "spawn_units",

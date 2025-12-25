@@ -11,7 +11,7 @@ local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
-local battle_definition_types = require("src/tactics/battle/definition/types")
+local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 
 local character_manager = require("src/tactics/character/character_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
@@ -32,7 +32,7 @@ local record TacticsEngine
     event_writer: event_writer.EventWriter
 
 
-    spawn_all: function(self, players: {battle_definition_types.PlayerSpawnData}, enemies: {battle_definition_types.EnemySpawnData}, neutrals: {battle_definition_types.NeutralSpawnData})
+    spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData})
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
@@ -78,66 +78,46 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
     self.battle_map:spawn_unit(unit, spawn_point)
 end
 
---- Iterates over npc definitions and calls CharacterManager
-function TacticsEngine:spawn_enemies(npcs: {battle_definition_types.EnemySpawnData})
-    for _, npc in ipairs(npcs) do
-        local labels = {npc.tile}
-        local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
-        for _,spawn_point in ipairs(spawn_points) do
-            local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, "enemy", npc.ai, labels)
-            self:spawn_unit(unit, spawn_point)
-        end
-    end
-end
-
-function TacticsEngine:spawn_neutrals(npcs: {battle_definition_types.NeutralSpawnData})
-    for _, npc in ipairs(npcs) do
-        local labels = {npc.tile}
-        local spawn_points = self.battle_map:get_tiles_by_label(npc.tile)
-        for _,spawn_point in ipairs(spawn_points) do
-            local character = self.character_manager:generate_character(npc.template)
-            local unit = battle_unit.npc(character, spawn_point, "neutral", npc.ai, labels)
-            self:spawn_unit(unit, spawn_point)
-        end
-    end
-end
-
-function TacticsEngine:spawn_players(players: {battle_definition_types.PlayerSpawnData})
+--- Iterates over unit definitions and calls CharacterManager
+function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side: battle_unit.Side)
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
+    -- this will duplicate players if multiple roster spawns are made
     local roster_count = 1
-    for _, player in ipairs(players) do
-        local labels = {player.tile}
-        local spawn_points = self.battle_map:get_tiles_by_label(player.tile)
+
+    for _, spawn_data in ipairs(units) do
+        local labels = {spawn_data.tile}
+        local spawn_points = self.battle_map:get_tiles_by_label(spawn_data.tile)
         for _,spawn_point in ipairs(spawn_points) do
-            local unit: BattleUnit
-            if player.template ~= nil then
-                local character = char_man:generate_character(player.template)
-                unit = battle_unit.player(character, spawn_point, labels)
+            local character: Character
+
+            local character_source = spawn_data.character_source
+            if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
+                character = char_man:generate_character(character_source.template)
                 char_man:persist_player(character)
-            else
+            elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
                 if player_roster[roster_count] ~= nil then
-                    local character = player_roster[roster_count]
-                    unit = battle_unit.player(character, spawn_point, labels)
+                    character = player_roster[roster_count]
                     roster_count = roster_count + 1
                 end
+            else
+                error()
             end
-            if unit ~= nil then
-                self:spawn_unit(unit, spawn_point)
-            end
+            local unit = battle_unit.spawn_unit(character, spawn_point, labels, side, spawn_data.ai)
+
+            self:spawn_unit(unit, spawn_point)
         end
     end
 end
 
 function TacticsEngine:spawn_all(
-    players: {battle_definition_types.PlayerSpawnData},
-    enemies: {battle_definition_types.EnemySpawnData},
-    neutral: {battle_definition_types.NeutralSpawnData}
+    players: {unit_spawn_data.UnitSpawnData},
+    enemies: {unit_spawn_data.UnitSpawnData},
+    neutral: {unit_spawn_data.UnitSpawnData}
 )
-    self:spawn_players(players or {})
-    self:spawn_enemies(enemies or {})
-    self:spawn_neutrals(neutral or {})
+    self:spawn_units(players or {}, "player")
+    self:spawn_units(enemies or {}, "enemy")
+    self:spawn_units(neutral or {}, "neutral")
 end
 
 -- handlers
