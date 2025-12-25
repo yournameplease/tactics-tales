@@ -36,13 +36,13 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
         Draw.draw_shadow(shadow_color,
                 function(draw_x: integer,draw_y: integer)
                     local draw_pos: Point = Point.of(draw_x, draw_y)
-                    CharacterRenderer.draw(unit, (FEET_ANCHOR+draw_pos) as Point, false, false)
+                    CharacterRenderer.draw(unit, (FEET_ANCHOR+draw_pos) as Point, draw_target_manager, false, false, false)
                 end,
                 self.x, self.y)
 
         Colors.apply_palette("paper")
         local self_pos: Point = Point.of(self.x, self.y)
-        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, false, false)
+        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, false, false, false)
         pt.reset_pal()
     end
 end
