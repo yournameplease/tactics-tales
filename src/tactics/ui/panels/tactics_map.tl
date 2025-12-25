@@ -11,6 +11,7 @@ local menu_cursor = require("src/tactics/menu/menu_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
+local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
 local maps = require("src/tactics/util/maps")
 require("src/tactics/types")
 
@@ -101,6 +102,14 @@ local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.Li
         end
     end
     pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+end
+
+local function should_draw_shadow(unit: BattleUnit, ctx: BattleUIContext): boolean
+    if ctx.acting_unit ~= nil and unit.id == ctx.acting_unit.id then
+        return true
+    end
+
+    return false
 end
 
 local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager)

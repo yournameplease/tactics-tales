@@ -4,7 +4,6 @@ require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local Colors = require("src/tactics/colors")
-local Draw = require("src/tactics/draw")
 
 global record PortraitBox
     is UIElement
@@ -32,17 +31,9 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
 
     local unit = self.get_selected_unit(state)
     if unit then
-        local shadow_color = ui_theme.COLOR_DECORATION_SHADOW
-        Draw.draw_shadow(shadow_color,
-                function(draw_x: integer,draw_y: integer)
-                    local draw_pos: Point = Point.of(draw_x, draw_y)
-                    CharacterRenderer.draw(unit, (FEET_ANCHOR+draw_pos) as Point, draw_target_manager, false, false, false)
-                end,
-                self.x, self.y)
-
         Colors.apply_palette("paper")
         local self_pos: Point = Point.of(self.x, self.y)
-        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, false, false, false)
+        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, false, false, true)
         pt.reset_pal()
     end
 end
