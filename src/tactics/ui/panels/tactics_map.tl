@@ -215,9 +215,12 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local battle_map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager
 
-    local camera_x = self.x + self.internal_margin.l
-    local camera_y = self.y + self.internal_margin.t
-    pt.set_camera(-camera_x, -camera_y)
+    local ud_width = self.w
+    -- to top of screen
+    local ud_height = self.h + self.x + self.internal_margin.t
+    local draw_x = self.x + self.internal_margin.l
+    local draw_y = self.y + self.internal_margin.t
+    draw_target_manager:push_target(ud_width, ud_height, 0, -draw_y)
 
     -- draw row-by row, top to bottom aka back to front
 
@@ -333,7 +336,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         end
     end
 
-    pt.reset_camera()
+    draw_target_manager:draw(draw_x, 0)
 end
 
 return TacticsMap
