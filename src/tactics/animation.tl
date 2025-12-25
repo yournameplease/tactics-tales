@@ -312,13 +312,17 @@ function AnimationManager:create_animation(animation_id: OffsetAnimationId, dire
     return animation_data.animated_object
 end
 
-function AnimationManager:create_walk_animation(path: { Point }): AnimatedSpriteData
+function AnimationManager:create_walk_animation(
+    path: { Point },
+    time_scale?: integer -- default 1
+): AnimatedSpriteData
+    time_scale = time_scale or 1
     -- TODO: future
     -- - different terrain/unit speeds
     -- - faux elevation
     assert(#path > 0)
     LOG.debug("creating path animation", #path)
-    local DURATION_PER_TILE = 8
+    local DURATION_PER_TILE = 8 * time_scale
 
     local path_points: { PathAnimationPoint } = maps.map(path, function(p: Point): PathAnimationPoint
         return {
