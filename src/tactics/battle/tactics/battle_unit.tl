@@ -56,34 +56,19 @@ end
 --     return tab.source[k]
 -- end
 
-local function spawn_unit(permanent_unit: Character, tile: Point, labels: {string}): BattleUnit
+function battle_unit.spawn_unit(permanent_unit: Character, tile: Point, labels: {string}, side: Side, ai: unit_ai.UnitAI): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,
         hp_current = permanent_unit.stats.hp_max,
         has_acted = false,
         character = permanent_unit,
-        labels = maps.set(labels)
+        labels = maps.set(labels),
+        side = side,
+        unit_ai = ai,
     }
 
     setmetatable(instance, { __index = BattleUnit })
-
-    return instance
-end
-
-function battle_unit.player(permanent_unit: Character, tile: Point, labels: {string}): BattleUnit
-    local instance = spawn_unit(permanent_unit, tile, labels)
-
-    instance.side = "player"
-
-    return instance
-end
-
-function battle_unit.npc(permanent_unit: Character, tile: Point, side: Side, ai: unit_ai.UnitAI, labels: {string}): BattleUnit
-    local instance = spawn_unit(permanent_unit, tile, labels)
-
-    instance.side = side
-    instance.unit_ai = ai
 
     return instance
 end

@@ -1,7 +1,11 @@
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
-local battle_definition = require("src/tactics/battle/definition")
-local battle_script = require("src/tactics/battle/scripts/battle_script")
-local battle_definition_types = require("src/tactics/battle/definition/types")
+local unit_ai <const> = require("src/tactics/battle/unit/unit_ai")
+local battle_definition <const> = require("src/tactics/battle/definition")
+local battle_script <const> = require("src/tactics/battle/scripts/battle_script")
+local battle_definition_types <const> = require("src/tactics/battle/definition/types")
+local unit_spawn_data <const> = require("src/tactics/battle/unit/spawn_data")
+
+local character_template <const> = unit_spawn_data.character_source.template
+local player_roster <const> = unit_spawn_data.character_source.player_roster
 
 local ai = {
     default = { move = "two", target = "player"},
@@ -12,7 +16,7 @@ local ai = {
 }
 
 local function spawn_players(
-    players: { battle_definition_types.PlayerSpawnData },
+    players: { unit_spawn_data.UnitSpawnData },
     turn: integer,
     phase: battle_script.trigger.TurnTriggerPhase
 ): battle_script.BattleScript
@@ -24,7 +28,7 @@ local function spawn_players(
 end
 
 local function spawn_enemies(
-    enemies: { battle_definition_types.EnemySpawnData },
+    enemies: { unit_spawn_data.UnitSpawnData },
     turn: integer,
     repeating: integer, --nillable
     phase: battle_script.trigger.TurnTriggerPhase
@@ -71,31 +75,31 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             type = "TURN_LIMIT"
         } },
         enemies = {
-            { template = "bandit_boss", ai = ai.stationary, tile = "bandit_boss" },
-            { template = "bandit_guard", ai = ai.stationary, tile = "bandit_guard" },
-            { template = "bandit_goon", ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss" },
+            { character_source = character_template("bandit_guard"), ai = ai.stationary, tile = "bandit_guard" },
+            { character_source = character_template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
         },
         players = {
-            { tile = "player_deployment" },
+            { character_source = player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_players({
-                { template = "militia_spearman", tile = "player_spearman" },
-                { template = "militia_archer", tile = "player_archer" },
-                { template = "militia_armor", tile = "player_armor" },
+                { character_source = character_template("militia_spearman"), tile = "player_spearman" },
+                { character_source = character_template("militia_archer"), tile = "player_archer" },
+                { character_source = character_template("militia_armor"), tile = "player_armor" },
             },
                 2,
                 "before_player"
             ),
             spawn_enemies({
-                { template = "bandit_goon", ai = ai.move_inf, tile = "bandit_reinforce_b" },
+                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_b" },
             },
                 3,
                 3,
                 "after_enemy"
             ),
             spawn_enemies({
-                { template = "bandit_goon", ai = ai.move_inf, tile = "bandit_reinforce_a" },
+                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_a" },
             },
                 6,
                 3,
@@ -133,33 +137,33 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             type = "TURN_LIMIT"
         } },
         enemies = {
-            { template = "cultist_boss", ai = ai.stationary, tile = "cultist_boss" },
-            { template = "cultist_guard", ai = ai.stationary, tile = "cultist_guard" },
-            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_a" },
-            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_b" },
-            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_e" },
-            { template = "cultist_spearman", ai = ai.stationary, tile = "cultist_door_guard_d" },
-            { template = "cultist_guard", ai = ai.stationary, tile = "cultist_door_guard_c" },
+            { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss" },
+            { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_a" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_b" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_d" },
+            { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_door_guard_c" },
         },
         neutral = {
-            { template = "old_fart", ai = ai.stationary, tile = "jailed_priest" },
-            { template = "village_hero", ai = ai.stationary, tile = "jailed_royal" },
-            { template = "bandit_guard", ai = ai.move_inf, tile = "jailed_bandit" },
-            { template = "bandit_berzerker", ai = ai.move_inf, tile = "jailed_bandit_bro" },
+            { character_source = character_template("old_fart"), ai = ai.stationary, tile = "jailed_priest" },
+            { character_source = character_template("village_hero"), ai = ai.stationary, tile = "jailed_royal" },
+            { character_source = character_template("bandit_guard"), ai = ai.move_inf, tile = "jailed_bandit" },
+            { character_source = character_template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro" },
         },
         players = {
-            { tile = "player_deployment" },
+            { character_source = player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_enemies({
-                { template = "cultist_goon", ai = ai.move_inf, tile = "cultist_reinforce_b" },
+                { character_source = character_template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
             },
                 3,
                 3,
                 "after_enemy"
             ),
             spawn_enemies({
-                { template = "cultist_spear", ai = ai.move_inf, tile = "cultist_reinforce_a" },
+                { character_source = character_template("cultist_spear"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
             },
                 6,
                 3,
