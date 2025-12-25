@@ -1,5 +1,6 @@
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")
 
 global enum UITextColor
@@ -59,8 +60,8 @@ function TextNode.new(props: TextNode): TextNode
     return box
 end
 
-function TextNode:draw(state: UIContextManager, ui_theme: UITheme)
-    Box._draw(self, state, ui_theme)
+function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw(self, state, draw_target_manager, ui_theme)
 
     local lines = self.text or self.func(state)
 

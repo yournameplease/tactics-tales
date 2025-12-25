@@ -191,8 +191,8 @@ global record Picotron
 	set_palt: function(c: integer, is_transparent: boolean) 
 	reset_palt: function(c?: integer) 
 	-- palt: function(c: integer) 
-	spr: function(s: integer, x?: number, y?: number, flip_x?: boolean, flip_y?: boolean) 
-	sspr: function(s: integer, sx?: integer, sy?: integer, sw?: integer, sh?: integer, dx?: integer, dy?: integer, dw?: integer, dh?: integer, flip_x?: boolean, flip_y?: boolean) 
+	spr: function(s: integer | Userdata, x?: number, y?: number, flip_x?: boolean, flip_y?: boolean) 
+	sspr: function(s: integer | Userdata, sx?: integer, sy?: integer, sw?: integer, sh?: integer, dx?: integer, dy?: integer, dw?: integer, dh?: integer, flip_x?: boolean, flip_y?: boolean) 
 	-- fillp: function(p?: integer, ...: integer) 
 	fillp: function(...: any) 
 	get_spr: function(index: integer) : Userdata

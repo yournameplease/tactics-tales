@@ -1,6 +1,7 @@
 require("src/tactics/types")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/theme")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 
 global record Margin
     t: integer
@@ -43,7 +44,7 @@ global interface UIElement
     add: function(self, UIElement): UIElement
     measure: function(self)
     layout: function(self, integer, integer)
-    draw: function(self, UIContextManager, UITheme)
+    draw: function(self, UIContextManager, DrawTargetManager, UITheme)
 end
 
 global record Box
@@ -450,7 +451,7 @@ function Box:draw_solid(ui_theme: UITheme)
     pt.rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
-function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
+function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     local box = self as Box -- Cast!  All classes inherit from box though
 
     if not box.transparent then
@@ -482,12 +483,12 @@ function Box._draw(self: UIElement, state: UIContextManager, ui_theme: UITheme)
 
     -- 2. Draw Children
     for _, child in ipairs(box.children) do
-        child:draw(state, ui_theme)
+        child:draw(state, draw_target_manager, ui_theme)
     end
 end
 
-function Box:draw(state: UIContextManager, ui_theme: UITheme)
-    Box._draw(self, state, ui_theme)
+function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw(self, state, draw_target_manager, ui_theme)
 end
 
 return Box

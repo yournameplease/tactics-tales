@@ -1,5 +1,5 @@
-
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/ui_context_manager")
 
 local record BookBox
@@ -32,7 +32,7 @@ function BookBox.new(
     return box
 end
 
-function BookBox:draw(state: UIContextManager, ui_theme: UITheme)
+function BookBox:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     -- Box._draw(self, state, ui_theme)
 
     local l = self.x
@@ -60,7 +60,7 @@ function BookBox:draw(state: UIContextManager, ui_theme: UITheme)
 	pt.rect(l+1+2,t+2,r-2,b-p-1-2,ui_theme.COLOR_TRIM)
 
     for _, child in ipairs(self.children) do
-        child:draw(state, ui_theme)
+        child:draw(state, draw_target_manager, ui_theme)
     end
 end
 
