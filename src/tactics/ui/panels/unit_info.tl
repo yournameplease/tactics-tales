@@ -22,7 +22,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
     local left = self:add(Box.flex_col())
-    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end))
+    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end))
     left:add(Box.spacer(1))
 
     local info_col = self:add(Box.new({
@@ -36,7 +36,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     info_col:add(TextNode.new({
         rows = 1,
         func = function(state: UIContextManager): {string}
-            local u = state.battle_context.hovered_unit
+            local u = state.battle_context.last_hovered_unit
             if not u then return { "No Unit Selected" } end
             return { u.character.name .. " Lv." .. 1 }
         end
@@ -46,7 +46,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     info_col:add(TextNode.new({
         rows = 3,
         func = function(state: UIContextManager): {string}
-            local u = state.battle_context.hovered_unit
+            local u = state.battle_context.last_hovered_unit
             if not u then return { "", "", "" } end
 
             local weapons = u.character.inventory:get_equipped_weapons()
@@ -67,7 +67,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     info_col:add(TextNode.new({
         rows = 5,
         func = function(state: UIContextManager): {string}
-            local u = state.battle_context.hovered_unit
+            local u = state.battle_context.last_hovered_unit
             if not u then return { "", "", "", "", "" } end
 
             local items = u.character.inventory:get_items()

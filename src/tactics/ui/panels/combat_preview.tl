@@ -12,7 +12,7 @@ setmetatable(CombatPreview, { __index = Box })
 
 local function get_preview_text(state: UIContextManager): {string}
     local attacker = state.battle_context.acting_unit
-    local defender = state.battle_context.hovered_unit
+    local defender = state.battle_context.last_hovered_unit
     local attacker_tile = state.battle_context.destination
     local battle_map = state.battle_context.battle_map
     local preview = combat_calculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
@@ -53,7 +53,7 @@ function CombatPreview.new(props: UIElement): CombatPreview
     local left = Box.flex_col()
     left:add(attacker_portrait)
     left:add(Box.spacer(1))
-    local defender_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end)
+    local defender_portrait = PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end)
     local right = Box.flex_col()
     right:add(defender_portrait)
     right:add(Box.spacer(1))

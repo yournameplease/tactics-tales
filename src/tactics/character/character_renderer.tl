@@ -1,6 +1,7 @@
 require("src/tactics/debug")
 require("src/tactics/types")
 
+local draw = require("src/tactics/draw")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
@@ -11,6 +12,10 @@ local ANIMATION_DATA = require("src/tactics/character/animation_data")
 
 local BASE_UNIT_SPRITE = 256
 
+local COLOR_SIDE_1 = 16
+local COLOR_SIDE_2 = 19
+local COLOR_SIDE_3 = 1
+
 local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23
@@ -18,10 +23,10 @@ local COLOR_BEARD = 22
 local _COLOR_EYE = 21
 local _COLOR_EYE_WHITE = 7
 
-local PALETTE_BY_SIDE <total>: {Side: {Color, Color}} = {
-	player = {16, 19},
-	enemy = {8, 24},
-	neutral = {27, 3},
+local PALETTE_BY_SIDE <total>: {Side: {Color, Color, Color}} = {
+	player = {16, 19, 1},
+	enemy = {8, 24, 2},
+	neutral = {27, 3, 19},
 }
 
 local MAX_HEALTH_BAR_WIDTH = 18
@@ -106,8 +111,9 @@ local function set_palette(
 	battle_unit: BattleUnit
 )
 	local side_palette = PALETTE_BY_SIDE[battle_unit.side]
-    pt.set_pal(16, side_palette[1])
-    pt.set_pal(19, side_palette[2])
+    pt.set_pal(COLOR_SIDE_1, side_palette[1])
+    pt.set_pal(COLOR_SIDE_2, side_palette[2])
+    pt.set_pal(COLOR_SIDE_3, side_palette[3])
     local skin = battle_unit.character.appearance.skin
     pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
     pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
@@ -115,16 +121,11 @@ local function set_palette(
     pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
 end
 
-function character_renderer.draw_head(
+local function draw_head(
 	battle_unit: BattleUnit,
-	point: Point,
-	set_pal: boolean
+	point: Point
 )
     local flip_h = battle_unit.side == "enemy"
-
-    if set_pal then
-        set_palette(battle_unit)
-    end
 
 	local headwear: HeadwearSpriteData = nil
 	if battle_unit.character.appearance.headwear then
@@ -155,8 +156,7 @@ end
 
 local function draw_character(
 	battle_unit: BattleUnit,
-	point: Point,
-	set_pal: boolean
+	point: Point
 )
     -- TODO: consider pre-rendering some of this
     local flip_h = battle_unit.side == "enemy"
@@ -177,14 +177,10 @@ local function draw_character(
     local HEAD_NECK_X = 9
     local HEAD_NECK_Y = 7
 
-    if set_pal then
-        set_palette(battle_unit)
-    end
-
     pt.spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
-    character_renderer.draw_head(battle_unit, head_anchor, set_pal)
+    draw_head(battle_unit, head_anchor)
 
 	local equipment = battle_unit.character.inventory:get_equipped_items()
 	for slot,equip in pairs(equipment) do
@@ -198,10 +194,6 @@ local function draw_character(
 			end
 		end
 	end
-
-    if set_pal then
-        pt.reset_pal()
-    end
 end
 
 function character_renderer.draw(
@@ -220,21 +212,35 @@ function character_renderer.draw(
 	local DRAW_TARGET_D = Point.of(15, 31)
 
 	draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
-	pt.circfill(0,0,50,7)
 
 	if draw_shadow then
-
+		local shadow_color = 1
+        draw.draw_shadow(shadow_color,
+            function(draw_x: integer,draw_y: integer)
+                local draw_pos: Point = Point.of(draw_x, draw_y)
+                draw_character(battle_unit, draw_pos)
+            end,
+            0, 0)
 	end
-	draw_character(battle_unit, Point.of(0,0), set_pal)
+	draw_character(battle_unit, Point.of(0,0))
 
 	local animation_frame = get_animation_frame(battle_unit)
 	local offset = animation_frame.offset
 	if not apply_animation then
 		offset = Point.of(0,0)
 	end
-	pt.circ(0,0,3,1)
+
 	local draw_point = point + offset - DRAW_TARGET_D
+
+    if set_pal then
+        set_palette(battle_unit)
+    end
+	
 	draw_target_manager:draw(draw_point.x,draw_point.y)
+
+    if set_pal then
+        pt.reset_pal()
+    end
 end
 
 local function draw_health_bar(

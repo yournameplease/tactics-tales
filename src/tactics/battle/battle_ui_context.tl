@@ -13,7 +13,7 @@ local record BattleUIContext
     battle_menu_manager: BattleMenuManager
     turn_manager: turn_manager.TurnManager
     
-    hovered_unit: BattleUnit
+    last_hovered_unit: BattleUnit
     acting_unit: BattleUnit
     destination: Point
 end
@@ -37,7 +37,7 @@ function battle_ui_context.new(
     self.battle_menu_manager = battle_menu_mgr
     self.turn_manager = turn_mgr
 
-    self.hovered_unit = nil
+    self.last_hovered_unit = nil
     self.acting_unit = nil
     return self
 end
@@ -53,7 +53,7 @@ function BattleUIContext:enrich()
             local point = selection.point
             local unit = self.battle_map:get_at_tile(point)
             if unit then
-                self.hovered_unit = unit
+                self.last_hovered_unit = unit
             end
         end
 
@@ -62,7 +62,7 @@ function BattleUIContext:enrich()
             local unit = self.battle_map:get_at_tile(point)
             if unit then
                 self.layout = "COMBAT_PREVIEW"
-                self.hovered_unit = unit
+                self.last_hovered_unit = unit
             end
         end
     end
