@@ -118,8 +118,8 @@ local function draw_unit(unit: BattleUnit)
     --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
     --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
 
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
     CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
