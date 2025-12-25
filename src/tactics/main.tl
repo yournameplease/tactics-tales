@@ -36,7 +36,7 @@ require("src/tactics/systems/tasks")
 
 require("src/tactics/debug")
 
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 require("src/tactics/systems/service")
 
 require("src/tactics/character/character_manager")
@@ -70,13 +70,13 @@ function _init()
     ui_manager = service_manager:register(UIManager.new())
     animation_manager = service_manager:register(AnimationManager.new())
 
-    service_manager:register(EventBus.new())
+    service_manager:register(event_bus.new())
 
     ui_context = UIContextManager.new()
     
-    -- once there is a full game manager, this would go there
+    -- this is stupid.  delete the bundle class
     local game_services: GameServiceBundle = {
-    	event_bus = service_manager.persistent_services.event_bus as EventBus,
+    	event_bus = service_manager.persistent_services.event_bus as event_bus.EventBus,
     	task_manager = service_manager.persistent_services.task_manager as TaskManager,
     	animation_manager = service_manager.persistent_services.animation_manager as AnimationManager,
         ui_context = ui_context

@@ -2,7 +2,7 @@ require("src/tactics/debug")
 
 require("src/tactics/types")
 local Joypad = require("src/tactics/joypad").Joypad
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")

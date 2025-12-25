@@ -7,6 +7,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
+local event_bus = require("src/tactics/systems/event_bus")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 
 
@@ -26,7 +27,7 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
     }
 }
 
-function StoryMenuManager.new(ctx: StoryMenuContext, bus: EventBus): StoryMenuManager
+function StoryMenuManager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): StoryMenuManager
     return BaseMenuManager.new(
         MENU_DATA,
         ctx,

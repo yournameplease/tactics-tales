@@ -4,7 +4,7 @@ require("src/tactics/menu/menu_manager")
 require("src/tactics/battle/tactics/battle_unit")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
 require("src/tactics/battle/battle_map")
@@ -140,7 +140,7 @@ end
 function enemy_ai_engine.new(
     battle_map: BattleMap,
     tactics: tactics_engine.TacticsEngine,
-    bus: EventBus,
+    bus: event_bus.EventBus,
     task_manager: TaskManager
 ): EnemyAIEngine
     local self: EnemyAIEngine = setmetatable({

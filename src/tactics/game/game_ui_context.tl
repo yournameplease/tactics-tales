@@ -1,3 +1,4 @@
+local event_bus = require("src/tactics/systems/event_bus")
 local ui_context = require("src/tactics/ui/ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/game/game_menu_manager")
@@ -7,7 +8,7 @@ global record GameUIContext
     where self.type == "game"
 
     menu_manager: GameMenuManager
-    event_bus: EventBus
+    event_bus: event_bus.EventBus
     
     layout: UILayoutId
 end
@@ -16,12 +17,12 @@ local game_ui_context = {
     GameUIContext = GameUIContext
 }
 
-function game_ui_context.new(event_bus: EventBus, menu_manager: GameMenuManager): GameUIContext
+function game_ui_context.new(bus: event_bus.EventBus, menu_manager: GameMenuManager): GameUIContext
     local self: GameUIContext = setmetatable({
         type = "game"
     }, { __index = GameUIContext })
 
-    self.event_bus = event_bus
+    self.event_bus = bus
     self.menu_manager = menu_manager
     
     return self

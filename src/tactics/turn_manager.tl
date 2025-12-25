@@ -44,7 +44,7 @@ function turn_manager.new(
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
     enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,
-    bus: EventBus,
+    bus: event_bus.EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
     local self: TurnManagerImpl = setmetatable({

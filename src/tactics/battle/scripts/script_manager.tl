@@ -99,7 +99,7 @@ end
 
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
-	bus: EventBus,
+	bus: event_bus.EventBus,
 	map: BattleMap,
 	tactics: tactics_engine.TacticsEngine
 ): ScriptManager

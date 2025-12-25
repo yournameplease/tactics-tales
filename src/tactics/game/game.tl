@@ -1,7 +1,6 @@
 require("src/tactics/debug")
 
 require("src/tactics/types")
-require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")
@@ -15,6 +14,7 @@ require("src/tactics/story/story_context")
 require("src/tactics/story/story")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
+local event_bus = require("src/tactics/systems/event_bus")
 local game_menu_context = require("src/tactics/game/base_game_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local Joypad = require("src/tactics/joypad").Joypad
