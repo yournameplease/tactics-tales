@@ -1,6 +1,7 @@
 require("src/tactics/types")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local Colors = require("src/tactics/colors")
 local Draw = require("src/tactics/draw")
@@ -26,8 +27,8 @@ function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUn
     return box
 end
 
-function PortraitBox:draw(state: UIContextManager, ui_theme: UITheme)
-    Box._draw(self, state, ui_theme)
+function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw(self, state, draw_target_manager, ui_theme)
 
     local unit = self.get_selected_unit(state)
     if unit then

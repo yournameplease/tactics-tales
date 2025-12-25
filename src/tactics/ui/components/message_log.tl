@@ -1,4 +1,5 @@
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
 local text = require("src/tactics/util/text")
@@ -29,8 +30,8 @@ function MessageLog.new(props: MessageLog): MessageLog
     return box
 end
 
-function MessageLog:draw(state: UIContextManager, ui_theme: UITheme)
-    Box._draw(self, state, ui_theme)
+function MessageLog:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw(self, state, draw_target_manager, ui_theme)
 
     local row_limit = (self.h-self.internal_margin.t-self.internal_margin.b) // 10
 

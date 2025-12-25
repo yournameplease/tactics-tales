@@ -2,6 +2,7 @@ require("src/tactics/debug")
 require("src/tactics/config")
 
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/battle/battle_map")
@@ -208,8 +209,8 @@ local function get_path_layer(state: UIContextManager): Userdata
     end
 end
 
-function TacticsMap:draw(state: UIContextManager, ui_theme: UITheme)
-    Box._draw(self, state, ui_theme)
+function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw(self, state, draw_target_manager, ui_theme)
 
     local battle_map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager

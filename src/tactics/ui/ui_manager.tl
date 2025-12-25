@@ -2,6 +2,7 @@ require("src/tactics/types")
 require("src/tactics/ui/types")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/config")
+local draw_target_manager = require("src/tactics/draw/draw_target_manager")
 
 require("src/tactics/ui/box")
 
@@ -26,6 +27,7 @@ global record UIManager
     layouts: { UILayoutId: UILayout }
     current_layout: UILayout
     theme: UITheme
+    draw_target_manager: draw_target_manager.DrawTargetManager
 end
 
 function UIManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
@@ -76,6 +78,8 @@ function UIManager.new(): UIManager
         COLOR_CLEAR = 20
     }
 
+    self.draw_target_manager = draw_target_manager.new()
+    
     return self
 end
 
@@ -95,7 +99,7 @@ function UIManager:draw(battle_context: UIContextManager)
     -- Render
     pt.cls(self.theme.COLOR_CLEAR)
     profile("ui_manager_draw")
-    root:draw(battle_context, self.theme)
+    root:draw(battle_context, draw_target_manager, self.theme)
     profile("ui_manager_draw")
 end
 

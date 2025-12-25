@@ -1,4 +1,5 @@
 require("src/tactics/ui/box")
+local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/ui_context_manager")
 
 local record PageDivider
@@ -14,7 +15,7 @@ function PageDivider.new(width: integer): PageDivider
     return box
 end
 
-function PageDivider:draw(_: UIContextManager, ui_theme: UITheme)
+function PageDivider:draw(_: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     -- Box._draw(self, state, ui_theme)
 
     local l = self.x
