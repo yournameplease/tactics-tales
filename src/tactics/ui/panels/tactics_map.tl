@@ -108,28 +108,21 @@ local function should_draw_shadow(unit: BattleUnit, ctx: BattleUIContext): boole
     if ctx.acting_unit ~= nil and unit.id == ctx.acting_unit.id then
         return true
     end
+    if ctx.hovered_unit ~= nil and unit.id == ctx.hovered_unit.id then
+        return true
+    end
 
     return false
 end
 
-local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager)
+local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager, ctx: BattleUIContext)
     local unit_tile = unit.tile
-    -- local has_acted = unit.has_acted
+    local draw_shadow = should_draw_shadow(unit, ctx)
 
     local world_point = unit_tile * TILE_SIZE
 
-    -- local shadow_color
-    -- if has_acted then
-    --     shadow_color = 0
-    -- else
-    --     shadow_color = 7
-    -- end
-    --draw_shadow(shadow_color,
-    --        function(draw_x,draw_y) unit:draw(draw_x, draw_y, side, false) end,
-    --        tile_x + UNIT_OFFSET_X, tile_y + UNIT_OFFSET_Y)
-
     CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, false)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, draw_shadow)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
@@ -312,7 +305,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit, draw_target_manager)
+            draw_unit(unit, draw_target_manager, state.battle_context)
             drawn_unit_count = drawn_unit_count + 1
         end
 
@@ -321,7 +314,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
             local unit_id = sorted_units:get(1, drawn_unit_count)
             local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit, draw_target_manager)
+            draw_unit(unit, draw_target_manager, state.battle_context)
             drawn_unit_count = drawn_unit_count + 1
         end
 

@@ -2,6 +2,7 @@ require("src/tactics/debug")
 require("src/tactics/types")
 
 local draw = require("src/tactics/draw")
+local colors = require("src/tactics/colors")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
@@ -200,7 +201,7 @@ function character_renderer.draw(
 	battle_unit: BattleUnit,
 	point: Point,
 	draw_target_manager: DrawTargetManager,
-	set_pal: boolean,
+	set_pal: boolean | colors.PaletteId,
 	apply_animation: boolean,
 	draw_shadow: boolean
 )
@@ -214,7 +215,7 @@ function character_renderer.draw(
 	draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
 	if draw_shadow then
-		local shadow_color = 1
+		local shadow_color = battle_unit.has_acted and 21 or 1
         draw.draw_shadow(shadow_color,
             function(draw_x: integer,draw_y: integer)
                 local draw_pos: Point = Point.of(draw_x, draw_y)
@@ -232,9 +233,13 @@ function character_renderer.draw(
 
 	local draw_point = point + offset - DRAW_TARGET_D
 
-    if set_pal then
-        set_palette(battle_unit)
-    end
+    if set_pal is boolean then
+		if set_pal then
+        	set_palette(battle_unit)
+		end
+    elseif set_pal is colors.PaletteId then
+		colors.apply_palette(set_pal)
+	end
 	
 	draw_target_manager:draw(draw_point.x,draw_point.y)
 

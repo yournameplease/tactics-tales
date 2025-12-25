@@ -31,9 +31,8 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
 
     local unit = self.get_selected_unit(state)
     if unit then
-        Colors.apply_palette("paper")
         local self_pos: Point = Point.of(self.x, self.y)
-        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, false, false, true)
+        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, "paper", false, true)
         pt.reset_pal()
     end
 end
