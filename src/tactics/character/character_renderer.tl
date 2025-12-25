@@ -239,15 +239,12 @@ function character_renderer.draw_health_bar(battle_unit: BattleUnit, point: Poin
 		false
 	)
     
-    local HEAD_NECK_X = 9
-    local HEAD_NECK_Y = 7
-
     if set_pal then
         set_palette(battle_unit)
     end
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, Point.of(0,0), flip_h, false)
-	local health_bar_anchor = head_anchor - Point.of(0,8)
+	local health_bar_anchor = head_anchor - Point.of(0,9)
     draw_health_bar(battle_unit, health_bar_anchor)
 
     if set_pal then
