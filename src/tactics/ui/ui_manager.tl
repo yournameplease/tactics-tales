@@ -99,7 +99,7 @@ function UIManager:draw(battle_context: UIContextManager)
     -- Render
     pt.cls(self.theme.COLOR_CLEAR)
     profile("ui_manager_draw")
-    root:draw(battle_context, draw_target_manager, self.theme)
+    root:draw(battle_context, self.draw_target_manager, self.theme)
     profile("ui_manager_draw")
 end
 

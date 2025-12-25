@@ -9,6 +9,8 @@ local draw_target_manager = {
 
 local record DrawTargetEntry
 	ud: Userdata
+	w: integer
+	h: integer
 	camera_x: integer
 	camera_y: integer
 end
@@ -19,36 +21,50 @@ local record DrawTargetManagerImpl
 	current_target: DrawTargetEntry
 end
 
-function draw_target_manager.new(): DrawTargetManager
-	local self: DrawTargetManagerImpl = setmetatable({},{
-		__index = DrawTargetManagerImpl
-	})
-	return self
-end
-
 function DrawTargetManagerImpl:apply_current_target()
 	if self.current_target ~= nil then
 		pt.set_draw_target(self.current_target.ud)
+		pt.set_camera(self.current_target.camera_x, self.current_target.camera_y)
 	else
 		pt.set_draw_target()
+		pt.reset_camera()
 	end
 end
 
 function DrawTargetManagerImpl:push_target(w: integer, h: integer, c_x: integer, c_y: integer)
 	local ud = pt.userdata("u8",w,h)
-	self.current_target =  {
+	local new_target =  {
 		ud = ud,
+		w = w,
+		h = h,
 		camera_x = c_x or 0,
 		camera_y = c_y or 0,
 	}
+
+	if self.current_target ~= nil then
+		pt.add(self.targets, self.current_target)
+	end
+	self.current_target = new_target
 	self:apply_current_target()
 end
 
 function DrawTargetManagerImpl:draw(x: integer, y: integer)
 	assert(self.current_target ~= nil)
-	pt.spr(self.current_target.ud, x, y)
-	
+	local prev_target = self.current_target
+	self.current_target = pt.pop(self.targets)
 	self:apply_current_target()
+	
+	-- pt.sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)	
+	pt.spr(prev_target.ud, x, y)	
+
+end
+
+function draw_target_manager.new(): DrawTargetManager
+	local self: DrawTargetManagerImpl = setmetatable({},{
+		__index = DrawTargetManagerImpl
+	})
+	self.targets = {}
+	return self
 end
 
 return draw_target_manager
