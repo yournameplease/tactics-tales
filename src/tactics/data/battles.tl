@@ -18,12 +18,14 @@ local ai = {
 local function spawn_players(
     players: { unit_spawn_data.UnitSpawnData },
     turn: integer,
-    phase: battle_script.trigger.TurnTriggerPhase
+    phase: battle_script.trigger.TurnTriggerPhase,
+	animation: unit_spawn_data.UnitSpawnAnimation
 ): battle_script.BattleScript
     return battle_script.script.spawn_units(
         battle_script.trigger.turn(turn, nil, phase),
         players,
-        {}
+        {},
+        animation
     )
 end
 
@@ -31,12 +33,14 @@ local function spawn_enemies(
     enemies: { unit_spawn_data.UnitSpawnData },
     turn: integer,
     repeating: integer, --nillable
-    phase: battle_script.trigger.TurnTriggerPhase
+    phase: battle_script.trigger.TurnTriggerPhase,
+	animation: unit_spawn_data.UnitSpawnAnimation
 ): battle_script.BattleScript
     return battle_script.script.spawn_units(
         battle_script.trigger.turn(turn, repeating, phase),
         {},
-        enemies
+        enemies,
+        animation
     )
 end
 
@@ -89,21 +93,24 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 { character_source = character_template("militia_armor"), tile = "player_armor" },
             },
                 2,
-                "before_player"
+                "before_player",
+                "from_west"
             ),
             spawn_enemies({
                 { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_b" },
             },
                 3,
                 3,
-                "after_enemy"
+                "after_enemy",
+                "from_east"
             ),
             spawn_enemies({
                 { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_a" },
             },
                 6,
                 3,
-                "after_enemy"
+                "after_enemy",
+                "from_west"
             ),
         }
     },
@@ -160,14 +167,16 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             },
                 3,
                 3,
-                "after_enemy"
+                "after_enemy",
+                "from_south"
             ),
             spawn_enemies({
                 { character_source = character_template("cultist_spear"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
             },
                 6,
                 3,
-                "after_enemy"
+                "after_enemy",
+                "from_south"
             ),
             open_door("cultist_door_guard_a","door_a"),
             open_door("cultist_door_guard_b","door_b"),

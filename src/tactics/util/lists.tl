@@ -6,6 +6,12 @@ local lists = {
 	MapEntry = MapEntry
 }
 
+function lists.add_all<Value>(list: {Value}, elements: {Value})
+	for _,elem in ipairs(elements) do
+		pt.add(list, elem)
+	end
+end
+
 function lists.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
 	local fns = {...}
 	local result: any = list 
