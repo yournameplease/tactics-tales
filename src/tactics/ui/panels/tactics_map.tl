@@ -214,6 +214,7 @@ end
 
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     profile("tactics_map_draw")
+    profile("draw_map_pre_rows")
     Box._draw(self, state, draw_target_manager, ui_theme)
 
     local battle_map = state.battle_context.battle_map
@@ -255,37 +256,36 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         cursor_tile = menu.menu_state.point
     end
 
-    for y = 0, self.map_height-1 do
-        profile("draw_map_row_"..y)
-        pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-        pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-        -- highlight legal tiles
-        if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
-            if cursor.legal_tiles ~= nil then
-                pt.fillp(
-                -- 1:2 diagonal slashes
-                --0b00111111,
-                --0b11111100,
-                --0b11110011,
-                --0b11001111,
-                --0b00111111,
-                --0b11111100,
-                --0b11110011,
-                --0b11001111
-                -- 1:2 checkerboard
-                        0x33,
-                        0xCC,
-                        0x33,
-                        0xCC,
-                        0x33,
-                        0xCC,
-                        0x33,
-                        0xCC
-                )
-                pt.poke(0x550b,0x3f)
-                pt.set_palt(0, true)
-                for x = 0, self.map_width-1 do
+    -- draw ground
+    pt.map(layer_ground, 0, 0, 0, 0, self.map_height, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    -- highlight legal tiles
+    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        if cursor.legal_tiles ~= nil then
+            pt.fillp(
+            -- 1:2 diagonal slashes
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111,
+            --0b00111111,
+            --0b11111100,
+            --0b11110011,
+            --0b11001111
+            -- 1:2 checkerboard
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC,
+                    0x33,
+                    0xCC
+            )
+            pt.poke(0x550b,0x3f)
+            pt.set_palt(0, true)
+            for x = 0, self.map_width-1 do
+                for y = 0, self.map_height-1 do
                     local highlighted_tile = cursor.legal_tiles:get(x, y)
                     if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
                         if (highlighted_tile.reachable) then
@@ -298,11 +298,18 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
                         pt.rrectfill(x*TILE_SIZE.x+1, y*TILE_SIZE.y+1, TILE_SIZE.x-2, TILE_SIZE.y-2)
                     end
                 end
-                pt.poke(0x550b,0x00)
-                pt.fillp()
-                pt.reset_color()
             end
+            pt.poke(0x550b,0x00)
+            pt.fillp()
+            pt.reset_color()
         end
+    end
+    profile("draw_map_pre_rows")
+    
+    profile("draw_map_rows")
+    for y = 0, self.map_height-1 do
+        pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+
         pt.map(layer_path, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
         while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
@@ -329,9 +336,10 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         end
 
         pt.map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-        profile("draw_map_row_"..y)
     end
+    profile("draw_map_rows")
 
+    profile("draw_map_post_rows")
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
@@ -343,6 +351,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     end
 
     draw_target_manager:draw(draw_x, 0)
+    profile("draw_map_pre_rows")
     profile("tactics_map_draw")
 end
 

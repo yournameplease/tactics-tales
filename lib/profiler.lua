@@ -78,7 +78,7 @@ function profile.clear_lingers()
 end
 
 local function draw_cpu()
-	print("cpu:"..string.sub(stat(1)*100,1,5).."%",1,1,7)
+	print("cpu:"..string.sub(stat(1)*100,1,5).."%",1,1,30)
 end
 
 -- This draws the profiles, and then resets everything for the next frame.
@@ -89,13 +89,13 @@ local function display_profiles()
 	for prof in all(profiles) do
 		local usage = string.sub(prof.time*100,1,5).."%"
 		local to_print = prof.name..":"..usage
-		print(to_print,1,1+i*9,7)
+		print(to_print,1,1+i*9,30)
 		i = i+1
 	end
 	for name,prof in pairs(lingers) do
 		local usage = string.sub(prof.time*100,1,5).."%"
 		local to_print = name..(prof.this_frame and "[X]:" or "[ ]:")..usage
-		print(to_print,1,1+i*9,7)
+		print(to_print,1,1+i*9,30)
 		prof.this_frame = false
 		i = i+1
 	end
