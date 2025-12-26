@@ -13,6 +13,8 @@ global interface TextUIElement
     is UIElement
     draw_properties: text.DrawProperties
     text_color: UITextColor
+
+    text_object: text.Text
 end
 
 
@@ -57,6 +59,13 @@ function TextNode.new(props: TextNode): TextNode
     box.transparent = props.transparent ~= false
     box.text_color = props.text_color or "dark"
 
+    box.text_object = text.new(
+        {},
+        box.draw_properties,
+        box.w,
+        box.h
+    )
+    
     return box
 end
 
@@ -78,12 +87,14 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
         light = ui_theme.COLOR_DECORATION_SHADOW,
     }
 
-    local text_obj = text.new(lines, self.draw_properties)
+    local text_obj = self.text_object
+
+    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
+    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
+    text_obj:set_lines(lines)
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
-        self.w-self.internal_margin.l-self.internal_margin.r,
-        self.h-self.internal_margin.t-self.internal_margin.b,
         colors[self.text_color]
     )
 end

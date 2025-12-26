@@ -31,7 +31,12 @@ local record DrawProperties
 end
 
 local interface Text
-    draw: function(self, x: integer, y: integer, w: integer, h: integer, color: Color)
+    set_width: function(self, w: integer)
+    set_height: function(self, h: integer)
+    set_lines: function(self, lines: {string})
+
+    draw: function(self, x: integer, y: integer, color: Color)
+    
 end
 
 local text = {
@@ -42,17 +47,35 @@ local text = {
     Text = Text
 }
 
+local record TextLine
+    text: string
+    wrapped_lines: {string}
+end
+
+local function text_lines(lines: {string}): {TextLine}
+    local out: {TextLine} = {}
+    for _,l in ipairs(lines) do
+        pt.add(out, {
+            text = l
+        })
+    end
+    return out
+end
+
 local record TextImpl
     is Text
     
     justify: Justify  
     direction: Direction  
     wrap: Wrap
+
+    width: integer
+    height: integer
     
-    lines: {string}
+    lines: {TextLine}
 end
 
-function text.new(lines: {string}, draw_properties: DrawProperties): Text
+function text.new(lines: {string}, draw_properties: DrawProperties, w: integer, h: integer): Text
     local self: TextImpl = setmetatable({},{
         __index = TextImpl
     })
@@ -60,13 +83,27 @@ function text.new(lines: {string}, draw_properties: DrawProperties): Text
     self.justify = draw_properties.justify or "left"
     self.direction = draw_properties.direction or "down"
     self.wrap = draw_properties.wrap or "ellipsis"
-    self.lines = lines
+
+    self.width = w
+    self.height = h
+    
+    self.lines = text_lines(lines)
 
     return self
 end
 
 
-function TextImpl:width(row: string): integer
+
+local function text_lines(lines: {string}): {TextLine}
+    local out: {TextLine} = {}
+    for _,l in ipairs(lines) do
+        pt.add(out, {
+            text = l
+        })
+    end
+    return out
+end
+local function width_of(row: string): integer
     return pt.print(row, 0, -1000) as integer
 end
 
@@ -84,7 +121,7 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
         repeat
             char_count = char_count + 1
             out = pt.sub(row,1, char_count)
-            out_width = self:width(out)
+            out_width = width_of(out)
         until out_width > width or char_count == #row
         if out_width > width then
             return {pt.sub(row, 1,char_count-3).."..."}
@@ -92,7 +129,7 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             return {row}
         end
     elseif self.wrap == "wrap" then
-        -- this needs unit tests x.x
+        -- this neetext_ds un(linesit tests x.x
         local out: {string} = {}
         local line_start = 1
         local previous_word_end: integer = -1
@@ -105,7 +142,7 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             end
             local line_end = line_start
             local line = pt.sub(row, line_start, line_end)
-            while line_end <= #row and self:width(line) <= width do
+            while line_end <= #row and width_of(line) <= width do
                 line_end = line_end + 1
                 line = pt.sub(row, line_start, line_end)
                 if (pt.sub(row, line_end, true) == ' ' and pt.sub(row, line_end-1, true) ~= ' ') then
@@ -113,7 +150,7 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
                 end
             end
 
-            if line_end > #row and self:width(line) <= width then
+            if line_end > #row and width_of(line) <= width then
                 -- end of row without overflow
                 pt.add(out, line)
                 return out
@@ -124,6 +161,32 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
                 -- need to hyphenate
                 pt.add(out, pt.sub(row, line_start, line_end-2)..'-')
     			line_start = line_end - 1
+            end
+        end
+    end
+end
+
+function TextImpl:set_width(w: integer)
+    if self.width ~= w then
+        for _,l in ipairs(self.lines) do
+            l.wrapped_lines = nil
+        end
+    end
+    self.width = w
+end
+
+function TextImpl:set_height(h: integer)
+    self.height = h
+end
+
+function TextImpl:set_lines(lines: {string})
+    if #lines ~= #self.lines then
+        self.lines = text_lines(lines)
+    else
+        for i,l in ipairs(lines) do
+            if self.lines[i].text ~= l then
+                self.lines[i].text = l
+                self.lines[i].wrapped_lines = nil
             end
         end
     end
@@ -145,7 +208,7 @@ function TextImpl:draw_text_row(row: string, x: integer, y: integer, color: Colo
 end
 
 function TextImpl:get_text_alignment_offset(row: string, w: integer): integer
-    local line_width = self:width(row)
+    local line_width = width_of(row)
     if self.justify == "left" then
         return 0
     elseif self.justify == "center" then
@@ -157,19 +220,17 @@ function TextImpl:get_text_alignment_offset(row: string, w: integer): integer
     end
 end
 
-function TextImpl:draw(x: integer, y: integer, w: integer, h: integer, color: Color)
-
+function TextImpl:draw(x: integer, y: integer, color: Color)
 	profile("draw_text")
-    local wrapped_text: {{string}} = {}
-    for _, t in ipairs(self.lines) do
-        pt.add(wrapped_text, self:apply_text_wrapping(t, w))
-    end
 
     local row_count = 0
-    for _, paragraph in ipairs(wrapped_text) do
-        for _, text_row in ipairs(paragraph) do
+    for _, paragraph in ipairs(self.lines) do
+        if paragraph.wrapped_lines == nil then
+            paragraph.wrapped_lines = self:apply_text_wrapping(paragraph.text, self.width)
+        end
+        for _, text_row in ipairs(paragraph.wrapped_lines) do
             row_count = row_count + 1
-			local x_offset = self:get_text_alignment_offset(text_row, w)
+			local x_offset = self:get_text_alignment_offset(text_row, self.width)
 
 			local t_x = x + x_offset
 			local t_y = y + ((row_count-1) * (TEXT_ROW_HEIGHT))
