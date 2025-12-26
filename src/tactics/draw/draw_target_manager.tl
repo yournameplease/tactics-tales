@@ -1,3 +1,5 @@
+require("profiler")
+
 local interface DrawTargetManager
 	push_target: function(self, w: integer, h: integer, d_x: integer, d_y: integer)
 	draw: function(self, x: integer, y: integer)
@@ -32,6 +34,7 @@ function DrawTargetManagerImpl:apply_current_target()
 end
 
 function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer, d_y: integer)
+	profile("draw_target_manager_push")
 	local ud = pt.userdata("u8",w,h)
 	local new_target =  {
 		ud = ud,
@@ -46,9 +49,11 @@ function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer,
 	end
 	self.current_target = new_target
 	self:apply_current_target()
+	profile("draw_target_manager_push")
 end
 
 function DrawTargetManagerImpl:draw(x: integer, y: integer)
+	profile("draw_target_manager_draw")
 	assert(self.current_target ~= nil)
 	local prev_target = self.current_target
 	self.current_target = pt.pop(self.targets)
@@ -56,7 +61,7 @@ function DrawTargetManagerImpl:draw(x: integer, y: integer)
 	
 	-- pt.sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)	
 	pt.spr(prev_target.ud, x, y)	
-
+	profile("draw_target_manager_draw")
 end
 
 function draw_target_manager.new(): DrawTargetManager

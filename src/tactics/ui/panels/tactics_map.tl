@@ -232,12 +232,14 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     -- pre-compute actor animations for z-ordering
     local unit_positions = compute_animated_unit_positions(state.battle_context.battle_map)
 
+    profile("sort_units_z")
     local sorted_units = pt.userdata("i16", 2, #unit_positions) as Userdata
     for i,u in ipairs(unit_positions) do
         sorted_units:set(0,i-1, u.point.y)
         sorted_units:set(1,i-1, u.id)
     end
     sorted_units:sort()
+    profile("sort_units_z")
 
     local drawn_unit_count = 0
     -- TODO: preload layers
@@ -258,6 +260,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
 
 
     -- draw ground
+    profile("draw_ground")
     pt.map(layer_ground, 0, 0, 0, 0, self.map_height, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- highlight legal tiles
     if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
@@ -304,6 +307,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
             pt.reset_color()
         end
     end
+    profile("draw_ground")
     profile("draw_map_pre_rows")
     
     profile("draw_map_rows")
