@@ -112,7 +112,8 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
 
     self.services.event_bus:emit("TACTICS_BEGIN_BATTLE", {})
 
-    pt.music(0)
+    -- todo: re-enable when better or i add a mute button
+    -- pt.music(0)
     return self
 end
 
