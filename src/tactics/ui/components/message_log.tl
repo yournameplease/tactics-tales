@@ -27,6 +27,13 @@ function MessageLog.new(props: MessageLog): MessageLog
     box.draw_properties.direction = box.draw_properties.direction or "up"
     box.draw_properties.wrap = box.draw_properties.wrap or "wrap"
 
+    box.text_object = text.new(
+        {},
+        box.draw_properties,
+        box.w,
+        box.h
+    )
+    
     return box
 end
 
@@ -43,13 +50,14 @@ function MessageLog:draw(state: UIContextManager, draw_target_manager: DrawTarge
     --     draw_text_row(self, i, text[#text-i+1], ui_theme)
     -- end
 
-    local text_obj = text.new(lines, self.draw_properties)
-    
+    local text_obj = self.text_object
+
+    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
+    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
+    text_obj:set_lines(lines)
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
-        self.w-self.internal_margin.l-self.internal_margin.r,
-        self.h-self.internal_margin.t-self.internal_margin.b,
         ui_theme.COLOR_INTERIOR_TEXT
     )
 end
