@@ -111,10 +111,13 @@ function BattleManager.new(battle_id: string, char_man: character_manager.Charac
     self.services.ui_context:register_ui_context(battle_ui_ctx)
 
     self.services.event_bus:emit("TACTICS_BEGIN_BATTLE", {})
+
+    pt.music(0)
     return self
 end
 
 function BattleManager:teardown()
+    pt.music(-1)
     self.services.ui_context:unregister_ui_context('battle')
     self.turn_manager:teardown()
     self.script_manager:teardown()
