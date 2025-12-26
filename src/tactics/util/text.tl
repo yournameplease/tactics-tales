@@ -1,3 +1,4 @@
+require("profiler")
 require("src/tactics/debug")
 require("src/tactics/util")
 
@@ -158,6 +159,7 @@ end
 
 function TextImpl:draw(x: integer, y: integer, w: integer, h: integer, color: Color)
 
+	profile("draw_text")
     local wrapped_text: {{string}} = {}
     for _, t in ipairs(self.lines) do
         pt.add(wrapped_text, self:apply_text_wrapping(t, w))
@@ -174,6 +176,7 @@ function TextImpl:draw(x: integer, y: integer, w: integer, h: integer, color: Co
             self:draw_text_row(text_row, t_x, t_y, color)
         end
     end
+	profile("draw_text")
 end
 
 return text

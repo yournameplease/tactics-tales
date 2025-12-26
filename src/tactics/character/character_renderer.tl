@@ -1,3 +1,4 @@
+require("profiler")
 require("src/tactics/debug")
 require("src/tactics/types")
 
@@ -205,6 +206,7 @@ function character_renderer.draw(
 	apply_animation: boolean,
 	draw_shadow: boolean
 )
+	profile("draw_character")
 	local DRAW_TARGET_W = 32
 	local DRAW_TARGET_H = 32
 	-- local DRAW_TARGET_TILE_TOP_LEFT = Point.of(5,11)
@@ -246,6 +248,7 @@ function character_renderer.draw(
     if set_pal then
         pt.reset_pal()
     end
+	profile("draw_character")
 end
 
 local function draw_health_bar(

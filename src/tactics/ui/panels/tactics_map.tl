@@ -1,3 +1,4 @@
+require("profiler")
 require("src/tactics/debug")
 require("src/tactics/config")
 
@@ -212,6 +213,7 @@ local function get_path_layer(state: UIContextManager): Userdata
 end
 
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    profile("tactics_map_draw")
     Box._draw(self, state, draw_target_manager, ui_theme)
 
     local battle_map = state.battle_context.battle_map
@@ -254,6 +256,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     end
 
     for y = 0, self.map_height-1 do
+        profile("draw_map_row_"..y)
         pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
         pt.map(layer_ground, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
 
@@ -326,6 +329,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         end
 
         pt.map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        profile("draw_map_row_"..y)
     end
 
     if cursor_tile ~= nil then
@@ -339,6 +343,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     end
 
     draw_target_manager:draw(draw_x, 0)
+    profile("tactics_map_draw")
 end
 
 return TacticsMap
