@@ -248,7 +248,9 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local layer_wall_back = layers.terrain.back_wall
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
+    profile("compute_path_layer")
     local layer_path = get_path_layer(state)
+    profile("compute_path_layer")
 
     local cursor_tile: Point = nil
     local cursor = menu.menu_cursor

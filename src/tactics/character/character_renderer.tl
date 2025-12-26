@@ -160,13 +160,12 @@ local function draw_character(
 	battle_unit: BattleUnit,
 	point: Point
 )
-    -- TODO: consider pre-rendering some of this
     local flip_h = battle_unit.side == "enemy"
 
 	local animation_frame = get_animation_frame(battle_unit)
 
 	local offset = Point.of(0,0)
-	
+
     local base_point = get_anchor_offsets(
 		point + offset,
 		Point.of(0, 0),
@@ -175,7 +174,7 @@ local function draw_character(
 		false,
 		false
 	)
-    
+
     local HEAD_NECK_X = 9
     local HEAD_NECK_Y = 7
 
@@ -216,16 +215,26 @@ function character_renderer.draw(
 
 	draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
+	if battle_unit.animation_data.dirty or battle_unit.animation_data.baked_sprite == nil then
+		-- bake sprite
+		draw_target_manager:duplicate_target()
+
+		draw_character(battle_unit, Point.of(0,0))
+		
+		battle_unit.animation_data.baked_sprite = draw_target_manager:pop_sprite()
+		battle_unit.animation_data.dirty = false
+	end
+	local unit_sprite = battle_unit.animation_data.baked_sprite
+	
 	if draw_shadow then
 		local shadow_color = battle_unit.has_acted and 21 or 1
         draw.draw_shadow(shadow_color,
             function(draw_x: integer,draw_y: integer)
-                local draw_pos: Point = Point.of(draw_x, draw_y)
-                draw_character(battle_unit, draw_pos)
+				pt.spr(unit_sprite, draw_x, draw_y)
             end,
             0, 0)
 	end
-	draw_character(battle_unit, Point.of(0,0))
+	pt.spr(unit_sprite, 0, 0)
 
 	local animation_frame = get_animation_frame(battle_unit)
 	local offset = animation_frame.offset
