@@ -1,4 +1,17 @@
+require("src/tactics/types")
+
 --https://www.lexaloffle.com/bbs/?tid=149249
+
+local RAINBOW: {{Color, Color}} = {
+	{8, 24},
+	{9, 25},
+	{10, 31},
+	{11, 27},
+	{28, 12},
+	{16, 1},
+	{29, 18},
+	{14, 30},
+}
 
 local enum ColorTableId
 	"paper"
@@ -13,6 +26,10 @@ local colors = {
 	ColorTableId = ColorTableId,
 	PaletteId = PaletteId,
 }
+
+function colors.rainbow(i: integer): {Color, Color}
+	return RAINBOW[i%#RAINBOW+1]
+end
 
 local rows_by_id <total>: {ColorTableId: integer} = {
 	["paper"] = 32	
