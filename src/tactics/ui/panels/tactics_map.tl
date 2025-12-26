@@ -351,7 +351,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     end
 
     draw_target_manager:draw(draw_x, 0)
-    profile("draw_map_pre_rows")
+    profile("draw_map_post_rows")
     profile("tactics_map_draw")
 end
 
