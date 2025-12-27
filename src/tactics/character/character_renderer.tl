@@ -226,15 +226,26 @@ function character_renderer.draw(
 	end
 	local unit_sprite = battle_unit.animation_data.baked_sprite
 	
+	-- for x = 0, unit_sprite:width() - 1 do
+	-- 	local out = ""
+	-- 	for y = 0, unit_sprite:height() - 1 do
+	-- 		out = out .. tostring(unit_sprite:get(x as integer,y as integer)).."|"
+	-- 	end
+	-- 	pt.printh(out)
+	-- end
 	if draw_shadow then
 		local shadow_color = battle_unit.has_acted and 21 or 1
         draw.draw_shadow(shadow_color,
             function(draw_x: integer,draw_y: integer)
-				pt.spr(unit_sprite, draw_x, draw_y)
+				local draw_point = Point.of(draw_x, draw_y) - DRAW_TARGET_D
+				pt.spr(unit_sprite, draw_point.x, draw_point.y)
             end,
             0, 0)
 	end
-	pt.spr(unit_sprite, 0, 0)
+	-- pt.spr(unit_sprite, point.x, point.y)
+	-- pt.spr(unit_sprite, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
+	-- pt.spr(unit_sprite, 0, 0)
+	pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
 	local animation_frame = get_animation_frame(battle_unit)
 	local offset = animation_frame.offset

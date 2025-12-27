@@ -25,7 +25,7 @@ build/%.lua: src/%.tl
 tactics: $(BUILD_MARKER)
 
 $(BUILD_MARKER): $(SRC) $(LUA)
-	$(CYAN) $(CYANFLAGS) build
+	# $(CYAN) $(CYANFLAGS) build
 	@touch $@
 
 all: clean test
