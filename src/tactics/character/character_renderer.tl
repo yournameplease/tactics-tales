@@ -25,6 +25,8 @@ local COLOR_BEARD = 22
 local _COLOR_EYE = 21
 local _COLOR_EYE_WHITE = 7
 
+local COLOR_OUTLINE = 33
+
 local PALETTE_BY_SIDE <total>: {Side: {Color, Color, Color}} = {
 	player = {16, 19, 1},
 	enemy = {8, 24, 2},
@@ -110,7 +112,8 @@ function character_renderer.get_animation_offset(
 end
 
 local function set_palette(
-	battle_unit: BattleUnit
+	battle_unit: BattleUnit,
+	draw_outline: boolean
 )
 	local side_palette = PALETTE_BY_SIDE[battle_unit.side]
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
@@ -121,6 +124,13 @@ local function set_palette(
     pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
     pt.set_pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
     pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+
+	if draw_outline then
+		local outline_color = battle_unit.has_acted and 21 or side_palette[3]
+		pt.set_pal(COLOR_OUTLINE, outline_color)
+	else
+		pt.set_palt(COLOR_OUTLINE, true)
+	end
 end
 
 local function draw_head(
@@ -203,7 +213,7 @@ function character_renderer.draw(
 	draw_target_manager: DrawTargetManager,
 	set_pal: boolean | colors.PaletteId,
 	apply_animation: boolean,
-	draw_shadow: boolean
+	draw_outline: boolean
 )
 	profile("draw_character")
 	local DRAW_TARGET_W = 32
@@ -213,39 +223,44 @@ function character_renderer.draw(
 	-- local draw_target_camera = DRAW_TARGET_TILE_TOP_LEFT + FOOT_GROUND_ANCHOR
 	local DRAW_TARGET_D = Point.of(15, 31)
 
-	draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
+	if battle_unit.sprites[battle_unit.animation_data.current_frame.frame] == nil then
+		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
-	if battle_unit.animation_data.dirty or battle_unit.animation_data.baked_sprite == nil then
-		-- bake sprite
-		draw_target_manager:duplicate_target()
+		if battle_unit.animation_data.dirty or battle_unit.animation_data.baked_sprite == nil then
+			-- bake sprite
+			draw_target_manager:duplicate_target()
 
-		draw_character(battle_unit, Point.of(0,0))
-		
-		battle_unit.animation_data.baked_sprite = draw_target_manager:pop_sprite()
-		battle_unit.animation_data.dirty = false
-	end
-	local unit_sprite = battle_unit.animation_data.baked_sprite
+			draw_character(battle_unit, Point.of(0,0))
 	
-	-- for x = 0, unit_sprite:width() - 1 do
-	-- 	local out = ""
-	-- 	for y = 0, unit_sprite:height() - 1 do
-	-- 		out = out .. tostring(unit_sprite:get(x as integer,y as integer)).."|"
-	-- 	end
-	-- 	pt.printh(out)
-	-- end
-	if draw_shadow then
-		local shadow_color = battle_unit.has_acted and 21 or 1
-        draw.draw_shadow(shadow_color,
+			battle_unit.animation_data.baked_sprite = draw_target_manager:pop_sprite()
+			battle_unit.animation_data.dirty = false
+		end
+		local unit_sprite = battle_unit.animation_data.baked_sprite
+
+		-- for x = 0, unit_sprite:width() - 1 do
+		-- 	local out = ""
+		-- 	for y = 0, unit_sprite:height() - 1 do
+		-- 		out = out .. tostring(unit_sprite:get(x as integer,y as integer)).."|"
+		-- 	end
+		-- 	pt.printh(out)
+		-- end
+		-- if draw_outline then
+        draw.draw_shadow(COLOR_OUTLINE,
             function(draw_x: integer,draw_y: integer)
 				local draw_point = Point.of(draw_x, draw_y) - DRAW_TARGET_D
 				pt.spr(unit_sprite, draw_point.x, draw_point.y)
             end,
             0, 0)
+		-- end
+		-- pt.spr(unit_sprite, point.x, point.y)
+		-- pt.spr(unit_sprite, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
+		-- pt.spr(unit_sprite, 0, 0)
+		pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
+
+		battle_unit.sprites[battle_unit.animation_data.current_frame.frame] = draw_target_manager:pop_sprite()
 	end
-	-- pt.spr(unit_sprite, point.x, point.y)
-	-- pt.spr(unit_sprite, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
-	-- pt.spr(unit_sprite, 0, 0)
-	pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
+
+	local sprite = battle_unit.sprites[battle_unit.animation_data.current_frame.frame]
 
 	local animation_frame = get_animation_frame(battle_unit)
 	local offset = animation_frame.offset
@@ -257,13 +272,13 @@ function character_renderer.draw(
 
     if set_pal is boolean then
 		if set_pal then
-        	set_palette(battle_unit)
+        	set_palette(battle_unit, draw_outline)
 		end
     elseif set_pal is colors.PaletteId then
 		colors.apply_palette(set_pal)
 	end
 	
-	draw_target_manager:draw(draw_point.x,draw_point.y)
+	pt.spr(sprite,draw_point.x,draw_point.y)
 
     if set_pal then
         pt.reset_pal()
@@ -335,7 +350,7 @@ function character_renderer.draw_health_bar(
 	)
     
     if set_pal then
-        set_palette(battle_unit)
+        set_palette(battle_unit, true)
     end
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, Point.of(0,0), flip_h, false)
