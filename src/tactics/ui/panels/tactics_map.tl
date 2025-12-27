@@ -212,6 +212,32 @@ local function get_path_layer(state: UIContextManager): Userdata
     end
 end
 
+function TacticsMap:draw_map_decorations(layers: MapLayers, z_0: integer, z_1: integer)
+    local layer_wall_back = layers.terrain.back_wall
+    local layer_wall_mid = layers.terrain.mid_wall
+    local layer_wall_front = layers.terrain.front_wall
+
+    local t_y = TILE_SIZE.y
+    local t_y_2 = t_y >> 1
+    local y_0 = pt.flr(z_0 / t_y)
+    local y_1 = pt.flr(z_1 / t_y)
+    for z=z_0,z_1 do
+        --this is kinda dumb
+        if z % t_y == 0 then
+            local y = pt.flr(z / t_y)
+            pt.map(layer_wall_back, 0, y, 0, (y - 1) * t_y, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        end
+        if z % t_y == t_y_2 then
+            local y = pt.flr(z / t_y)
+            pt.map(layer_wall_mid, 0, y, 0, (y) * t_y - t_y_2, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        end
+        if z % t_y == 0 then
+            local y = pt.flr(z / t_y)
+            pt.map(layer_wall_front, 0, y, 0, (y) * t_y, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        end
+    end
+end
+
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
@@ -245,9 +271,6 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     -- TODO: preload layers
     local layers = state.battle_context.battle_map.layers
     local layer_ground = layers.terrain.ground
-    local layer_wall_back = layers.terrain.back_wall
-    local layer_wall_mid = layers.terrain.mid_wall
-    local layer_wall_front = layers.terrain.front_wall
     profile("compute_path_layer")
     local layer_path = get_path_layer(state)
     profile("compute_path_layer")
@@ -263,7 +286,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
 
     -- draw ground
     profile("draw_ground")
-    pt.map(layer_ground, 0, 0, 0, 0, self.map_height, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    pt.map(layer_ground, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- highlight legal tiles
     if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
         if cursor.legal_tiles ~= nil then
@@ -309,47 +332,37 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
             pt.reset_color()
         end
     end
+    pt.map(layer_path, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    -- TODO: this is better with transparency
+    if cursor_tile ~= nil then
+        local c_x = cursor_tile.x * TILE_SIZE.x
+        local c_y = cursor_tile.y * TILE_SIZE.y
+        pt.spr(CURSOR_SPRITE, c_x, c_y)
+    end
     profile("draw_ground")
     profile("draw_map_pre_rows")
     
     profile("draw_map_rows")
-    for y = 0, self.map_height-1 do
-        pt.map(layer_wall_back, 0, y, 0, (y-1) * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-
-        pt.map(layer_path, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y) * TILE_SIZE.y + HALF_HEIGHT do
-            local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit, draw_target_manager, state.battle_context)
-            drawn_unit_count = drawn_unit_count + 1
+    local prev_z = 0
+    for i=0,#unit_positions-1 do
+        local unit_id = sorted_units:get(1, i)
+        local unit = battle_map:get_unit_by_id(unit_id)
+        local next_z = sorted_units:get(0, i)
+        if next_z > prev_z then
+            self:draw_map_decorations(layers, prev_z, next_z)
+            prev_z = next_z
         end
-
-        pt.map(layer_wall_mid, 0, y, 0, y * TILE_SIZE.y - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
-
-        while drawn_unit_count < #unit_positions and sorted_units:get(0, drawn_unit_count) <= (y+1) * TILE_SIZE.y do
-            local unit_id = sorted_units:get(1, drawn_unit_count)
-            local unit = battle_map:get_unit_by_id(unit_id)
-            draw_unit(unit, draw_target_manager, state.battle_context)
-            drawn_unit_count = drawn_unit_count + 1
-        end
-
-        -- TODO: this is better with transparency
-        if cursor_tile ~= nil then
-            local c_x = cursor_tile.x * TILE_SIZE.x
-            local c_y = cursor_tile.y * TILE_SIZE.y
-            pt.spr(CURSOR_SPRITE, c_x, c_y)
-        end
-
-        pt.map(layer_wall_front, 0, y, 0, y * TILE_SIZE.y, self.map_width, 1, nil, TILE_SIZE.x, TILE_SIZE.y)
+        draw_unit(unit, draw_target_manager, state.battle_context)
     end
+    self:draw_map_decorations(layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
+    
     profile("draw_map_rows")
 
     profile("draw_map_post_rows")
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
-        -- pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+        pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
         if cursor is list_cursor.ListMenuCursor<BattleMenuContext> then
             draw_floating_menu(x, y, cursor)
