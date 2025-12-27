@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-26 15:12:20",revision=89,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2025-12-27 20:25:11",revision=90,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -27,7 +27,7 @@ DATP = ""
 pt = include "lib/picotron.lua"
 
 include "lib/profiler.lua"
-profile.enabled(true, true)
+--profile.enabled(true, true)
 
 include "build/tactics/main.lua"
 
