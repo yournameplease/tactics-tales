@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-
+require("src/tactics/character/animation_data")
 require("src/tactics/animation")
 require("src/tactics/types")
 require("src/tactics/character/object/character")
@@ -21,6 +21,9 @@ global record BattleUnit
     has_acted: boolean
 
     animation_data: AnimatedSpriteData
+    -- prerendered sprites by animation frame name
+    sprites: { AnimationFrameName: Userdata }
+    
     character: Character
 
     unit_ai: unit_ai.UnitAI
@@ -66,6 +69,7 @@ function battle_unit.spawn_unit(permanent_unit: Character, tile: Point, labels: 
         labels = maps.set(labels),
         side = side,
         unit_ai = ai,
+        sprites = {},
     }
 
     setmetatable(instance, { __index = BattleUnit })

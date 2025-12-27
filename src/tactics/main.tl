@@ -97,6 +97,8 @@ function _update()
     profile("update_tasks")
     task_manager:update_tasks()
     profile("update_tasks")
+
+    -- LOG.debug("MEM",  pt.stat(0))
 end
 
 function _draw()
