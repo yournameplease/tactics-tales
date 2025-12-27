@@ -8,9 +8,6 @@ require("src/tactics/character/animation_data")
 global record AnimatedSpriteData
     current_frame: AnimationFrameData
     playing: boolean
-
-    dirty: boolean
-    baked_sprite: Userdata
 end
 
 local enum AnimationType
@@ -372,10 +369,7 @@ end
 function AnimationManager:generate_frame_data()
     LOG.trace("Rendering "..#self.active_animations.." animations")
     for _, animation in ipairs(self.active_animations) do
-        local frame_data = self:get_frame_data(animation)
-        animation.animated_object.dirty =
-            animation.animated_object.current_frame == nil
-            or animation.animated_object.current_frame.frame ~= frame_data.frame         animation.animated_object.current_frame = frame_data
+        animation.animated_object.current_frame = self:get_frame_data(animation)
         animation.animated_object.playing = animation.playing
     end
 end
