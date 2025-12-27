@@ -224,18 +224,15 @@ function character_renderer.draw(
 	local DRAW_TARGET_D = Point.of(15, 31)
 
 	if battle_unit.sprites[battle_unit.animation_data.current_frame.frame] == nil then
+		LOG.debug("prerendering sprite for unit "..battle_unit.id..","..battle_unit.animation_data.current_frame.frame)
 		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
-		if battle_unit.animation_data.dirty or battle_unit.animation_data.baked_sprite == nil then
-			-- bake sprite
-			draw_target_manager:duplicate_target()
+		-- bake sprite
+		draw_target_manager:duplicate_target()
 
-			draw_character(battle_unit, Point.of(0,0))
-	
-			battle_unit.animation_data.baked_sprite = draw_target_manager:pop_sprite()
-			battle_unit.animation_data.dirty = false
-		end
-		local unit_sprite = battle_unit.animation_data.baked_sprite
+		draw_character(battle_unit, Point.of(0,0))
+
+		local unit_sprite = draw_target_manager:pop_sprite()
 
 		-- for x = 0, unit_sprite:width() - 1 do
 		-- 	local out = ""
