@@ -220,9 +220,9 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local battle_map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager
 
-    local ud_width = self.w
+    local ud_width = self.w - self.internal_margin.l - self.internal_margin.r
     -- to top of screen
-    local ud_height = self.h + self.x + self.internal_margin.t
+    local ud_height = self.h + self.x - self.internal_margin.b
     local draw_x = self.x + self.internal_margin.l
     local draw_y = self.y + self.internal_margin.t
     draw_target_manager:push_target(ud_width, ud_height, 0, draw_y)

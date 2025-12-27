@@ -1,3 +1,4 @@
+require("src/tactics/debug")
 require("profiler")
 local colors = require("src/tactics/colors")
 
@@ -53,14 +54,20 @@ function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer,
 	self.current_target = new_target
 	self:apply_current_target()
 	if true then
-		local color = colors.rainbow(#self.targets)	
-		pt.rrectfill(d_x, d_y, 0, 0, 0, color[2])
+		-- local color = colors.rainbow(#self.targets)	
+		-- pt.rrectfill(d_x, d_y, w, h, 0, color[2])
 	end
 	profile("draw_target_manager_push")
 end
 
 function DrawTargetManagerImpl:duplicate_target()
-	self:push_target(self.current_target.w, self.current_target.h, -self.current_target.camera_x, -self.current_target.camera_y)
+	self:push_target(
+		self.current_target.w,
+		self.current_target.h,
+		-- 0, 0
+		-self.current_target.camera_x,
+		-self.current_target.camera_y
+	)
 end
 
 function DrawTargetManagerImpl:draw(x: integer, y: integer)
@@ -73,8 +80,8 @@ function DrawTargetManagerImpl:draw(x: integer, y: integer)
 	-- pt.sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)	
 	pt.spr(prev_target.ud, x, y)
 	if true then
-		local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
-		pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
+		-- local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
+		-- pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
 	end
 	profile("draw_target_manager_draw")
 end
@@ -84,7 +91,15 @@ function DrawTargetManagerImpl:pop_sprite(): Userdata
 	local prev_target = self.current_target
 	self.current_target = pt.pop(self.targets)
 	self:apply_current_target()
-	
+
+	-- LOG.debug("popping sprite", prev_target.ud)
+	-- for x = 0, prev_target.ud:width() - 1 do
+	-- 	local out = ""
+	-- 	for y = 0, prev_target.ud:height() - 1 do
+	-- 		out = out .. tostring(prev_target.ud:get(x as integer,y as integer)).."|"
+	-- 	end
+	-- 	pt.printh(out)
+	-- end
 	return prev_target.ud
 end
 
