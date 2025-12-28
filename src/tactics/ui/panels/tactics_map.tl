@@ -78,7 +78,7 @@ local function compute_animated_unit_positions(battle_map: BattleMap): { Animate
     )
 end
 
-local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext>)
+local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
     local selected_i = cursor.i
     local options = cursor.options
     local PADDING = 2
@@ -364,7 +364,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
         local y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
 
-        if cursor is list_cursor.ListMenuCursor<BattleMenuContext> then
+        if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
             draw_floating_menu(x, y, cursor)
         end
     end

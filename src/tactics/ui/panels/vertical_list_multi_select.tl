@@ -30,7 +30,7 @@ function VerticalMultiSelectMenu.new(
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
 			local subcursor = opt.cursor
-			assert(subcursor is list_cursor.ListMenuCursor<T>, "Only list cursor is implemented!") 
+			assert(subcursor is list_cursor.ListMenuCursor<T, string|integer>, "Only list cursor is implemented!") 
 			local out_line = String.format(
 				template,
 				{

@@ -31,6 +31,18 @@ global HEADWEAR_SPRITE_DATA <total>: {HeadwearId: HeadwearSpriteData} = {
 		draw_beard = false,
 		draw_eyewear = false,
 		sprite = 99
-	}
+	},
+	fancy_hat = {
+		draw_hair = false,
+		draw_beard = true,
+		draw_eyewear = true,
+		sprite = 101,
+	},
+	animal_mask = {
+		draw_hair = true,
+		draw_beard = true,
+		draw_eyewear = false,
+		sprite = 103,
+	},
 }
 

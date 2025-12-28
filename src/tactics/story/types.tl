@@ -8,6 +8,7 @@ local enum StoryNodeType
 	'battle'
 	'jump'
 	'new_page'
+	'character_customizer'
 end
 
 local interface StoryNode
@@ -44,6 +45,11 @@ local record BattleNode
 	next_node_failure: NodeId
 end
 
+local record CharacterCustomizerNode
+	is StoryNode
+	where self.type == 'character_customizer'
+end
+
 -- TODO: conditional jumps
 local record JumpNode
 	is StoryNode
@@ -60,6 +66,7 @@ local story_node = {
 	JumpNode = JumpNode,
 	NewPageNode = NewPageNode,
 	RosterAddNode = RosterAddNode,
+	CharacterCustomizerNode = CharacterCustomizerNode,
 }
 
 function story_node.new_page(): NewPageNode
@@ -94,6 +101,12 @@ function story_node.battle(battle_id: string, next_node_victory: NodeId, next_no
 		battle_id = battle_id,
 		next_node_victory = next_node_victory,
 		next_node_failure = next_node_failure,
+	}
+end
+
+function story_node.character_customizer(): CharacterCustomizerNode
+	return {
+		type = 'character_customizer',
 	}
 end
 

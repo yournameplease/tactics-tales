@@ -91,7 +91,7 @@ end
 function randomizer.random_range.between(min_value: integer, max_value: integer): RandomRange
 	return setmetatable({
 		min_value = min_value,
-		max_value = max_value
+		max_value = max_value+1
 	}, { __index = RandomRange })
 end
 

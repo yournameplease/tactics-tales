@@ -47,7 +47,7 @@ local STORIES: {story_types.StoryId: story_types.StoryDefinition} = {
 		starting_node = 'part_1',
 		nodes = {
 			part_1 = {
-				story_node.roster_add("village_hero"),
+				story_node.character_customizer(),
 				story_node.story_text("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
 				story_node.story_text('Thisisalotoftext.Awhooooooooooooooooooooooooooooooooooooooolelot.Totriggerhyphenation.'),
 				story_node.story_text('text 1.3'),
