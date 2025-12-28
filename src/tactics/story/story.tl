@@ -20,6 +20,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
 local story_types = require("src/tactics/story/types")
+local story_node = story_types.story_node
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 local STORY_DATA = require("src/tactics/data/story")
@@ -29,7 +30,7 @@ global record Story
     record ActiveNode
         node_id: string
         node_step: integer
-        definition: story_types.StoryNode
+        definition: story_node.StoryNode
     end
     
     story_id: story_types.StoryId
@@ -64,22 +65,22 @@ end
 function Story:handle_new_node()
     local node_definition = self.current_node.definition
     LOG.debug("Handling new node: ", node_definition.type)
-    if node_definition is story_types.JumpNode then
+    if node_definition is story_node.JumpNode then
         self:jump_to_node(node_definition.next_node)
-    elseif node_definition is story_types.StoryTextNode then
+    elseif node_definition is story_node.StoryTextNode then
         self.story_page:add_text_line(node_definition.text)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
-    elseif node_definition is story_types.BattleNode then
+    elseif node_definition is story_node.BattleNode then
         local battle_id = node_definition.battle_id
         self.battle_manager = BattleManager.new(battle_id, self.character_manager, self.services)
-    elseif node_definition is story_types.NewPageNode then
+    elseif node_definition is story_node.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
-    elseif node_definition is story_types.RosterAddNode then
+    elseif node_definition is story_node.RosterAddNode then
         local character = self.character_manager:generate_character(node_definition.template)
         self.character_manager:persist_player(character)
         self:advance_node()
-    elseif node_definition is story_types.ExitStoryNode then
+    elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
     else
         error()
@@ -99,7 +100,7 @@ end
 
 function Story:handle_battle_victory()
     local node_definition = self.current_node.definition
-    assert(node_definition is story_types.BattleNode)
+    assert(node_definition is story_node.BattleNode)
 
     self.battle_manager:teardown()    
     self:jump_to_node(node_definition.next_node_victory)
@@ -107,7 +108,7 @@ end
 
 function Story:handle_battle_defeat()
     local node_definition = self.current_node.definition
-    assert(node_definition is story_types.BattleNode)
+    assert(node_definition is story_node.BattleNode)
     
     self.battle_manager:teardown()
     self:jump_to_node(node_definition.next_node_victory)
@@ -152,11 +153,11 @@ end
 
 function Story:update(joy: Joypad)
     local current_node = self.current_node.definition
-    if current_node is story_types.StoryTextNode then
+    if current_node is story_node.StoryTextNode then
         self.menu_manager:update(joy)
-    elseif current_node is story_types.BattleNode then
+    elseif current_node is story_node.BattleNode then
         self.battle_manager:update(joy)
-    elseif current_node is story_types.JumpNode then
+    elseif current_node is story_node.JumpNode then
         error('in a jump node during update')
     end
 end
