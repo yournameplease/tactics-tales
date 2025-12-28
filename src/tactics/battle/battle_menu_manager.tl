@@ -110,7 +110,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
             ["SELECT_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_DESTINATION",
                 get_options = function(msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption} = {}
+                    local options: {list_cursor.ListMenuOption<string>} = {}
                     -- if target in range
                     if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
                         pt.add(options, {
@@ -147,18 +147,18 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
             }),
             ["SELECT_ITEM"] = list_cursor.definition({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: list_cursor.ListMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: MenuContext)
+                set_selected_context = function(s: list_cursor.ListMenuCursor<BattleMenuContext, string>, _msb: BattleMenuContext, ctx: MenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
                     }
                 end,
-                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption}
+                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<string>}
                         local character = ctx.acting_unit.unit
                         local items = character.character.inventory:get_items()
 
                         local options = {}
-                        for _,item in ipairs(items) do
+                        for i,item in ipairs(items) do
                             pt.add(options, {
                                 text = item:get_name(),
                                 next_state = "SELECT_ITEM_ACTION"
@@ -169,7 +169,7 @@ local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
             }),
             ["SELECT_ITEM_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_ITEM",
-                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption}
+                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<string>}
                         local character = ctx.acting_unit.unit
                         local inventory = character.character.inventory
                         local items = inventory:get_items()

@@ -8,28 +8,31 @@ global enum ListDirection
     "horizontal"
 end
 
-local record ListMenuOption
+-- Value is not needed if no context is stored...
+-- I just use string for default
+local record ListMenuOption<Value>
     text: string
+    value: Value
     next_state: MenuStep
     send_command: GameEvent
 end
 
-local record ListMenuCursor<GC>
+local record ListMenuCursor<GC, Value>
     is menu_cursor.MenuCursor<GC>
     where self.type == "CURSOR_LIST"
     i: integer
-    options: { ListMenuOption }
+    options: { ListMenuOption<Value> }
 
     -- from definition
     direction: ListDirection
     wrap: boolean
-    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
+    set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
 end
 
-local record ListMenuDefinition<GC>
+local record ListMenuDefinition<GC, Value>
     is menu_cursor.MenuStepDefinition<GC>
     where self.type == "CURSOR_LIST"
-    set_selected_context: function(ListMenuCursor<GC>, GC, MenuContext)
+    set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
     get_options: function(GC, MenuContext): {ListMenuOption}
     wrap: boolean
     direction: ListDirection
@@ -41,28 +44,29 @@ local list_menu_cursor = {
     ListMenuDefinition = ListMenuDefinition,
 }
 
-function list_menu_cursor.definition<GC>(props: ListMenuDefinition<GC>): ListMenuDefinition<GC>
+function list_menu_cursor.definition<GC, Value>(props: ListMenuDefinition<GC, Value>): ListMenuDefinition<GC, Value>
     props.type = "CURSOR_LIST"
     props.direction = props.direction or "vertical"
     return setmetatable(props, { __index = ListMenuDefinition })
 end
 
-function list_menu_cursor.static_definition<T, GC>(
-    options: {T},
+function list_menu_cursor.static_definition<GC, Value>(
+    options: {Value},
     set_context_key: string,
     direction: ListDirection
-): ListMenuDefinition<GC>
+): ListMenuDefinition<GC, Value>
     local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
         return lists.do_map(
             options,
-            function (o: T): ListMenuOption
+            function (o: Value): ListMenuOption<Value>
                 return {
-                    text = tostring(o)
+                    text = tostring(o),
+                    value = o
                 }
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<GC>, _msb: GC, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuCursor<GC, Value>, _msb: GC, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return list_menu_cursor.definition({
@@ -71,6 +75,23 @@ function list_menu_cursor.static_definition<T, GC>(
         wrap = false,
         direction = direction,
     })
+end
+
+function list_menu_cursor.integer_range<GC>(
+    min_value: integer,
+    max_value: integer,
+    set_context_key: string,
+    direction: ListDirection
+): ListMenuDefinition<GC, integer>
+    local options = {}
+    for i=min_value,max_value do
+        pt.add(options, i)
+    end
+    return list_menu_cursor.static_definition(
+        options,
+        set_context_key,
+        direction
+    )
 end
 
 function ListMenuCursor:update(joy: Joypad)
@@ -98,7 +119,7 @@ function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: Me
 end
 
 function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): menu_cursor.MenuCursor<GC>
-    local cursor: ListMenuCursor<GC> = {
+    local cursor: ListMenuCursor<GC, Value> = {
         type = "CURSOR_LIST",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),

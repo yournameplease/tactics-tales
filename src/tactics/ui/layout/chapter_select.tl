@@ -25,9 +25,9 @@ right:add(TextNode.new( { flex_grow = 1, text = {"Chapters"} } ))
 right:add(VerticalListMenu.new(
 	"{text}",
 	">{text}<",
-	function (state: UIContextManager): list_cursor.ListMenuCursor<GameMenuContext>
+	function (state: UIContextManager): list_cursor.ListMenuCursor<GameMenuContext, string>
 		local cursor = state.game_context.menu_manager.menu_cursor
-		assert(cursor is list_cursor.ListMenuCursor<GameMenuContext>) 
+		assert(cursor is list_cursor.ListMenuCursor<GameMenuContext, string>) 
 		return cursor
 	end,
 	{flex_grow = 1} ))

@@ -80,6 +80,9 @@ function Story:handle_new_node()
         local character = self.character_manager:generate_character(node_definition.template)
         self.character_manager:persist_player(character)
         self:advance_node()
+    elseif node_definition is story_node.CharacterCustomizerNode then
+        self.story_page:add_text_line("Customize your hero!")
+
     elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
     else

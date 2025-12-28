@@ -7,23 +7,23 @@ require("src/tactics/story/story_context")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local String = require("src/tactics/util/string")
 
-local record VerticalListMenu<T>
+local record VerticalListMenu<GC, Value>
     is UIElement, TextUIElement
 	unselected_template: string
 	selected_template: string
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<T>
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
 end
  
 function VerticalListMenu.new(
 	unselected_template: string,
 	selected_template: string,
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<T>,
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>,
 	props: TextNode
-): VerticalListMenu<T>
+): VerticalListMenu<GC, Value>
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
-		local cursor: list_cursor.ListMenuCursor<T> = menu_cursor_func(state)
+		local cursor: list_cursor.ListMenuCursor<GC, Value> = menu_cursor_func(state)
 		local selected = cursor.i
 		LOG.trace("rendering options: ", #cursor.options, selected)
 		for i,opt in ipairs(cursor.options) do

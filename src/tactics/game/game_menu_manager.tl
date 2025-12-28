@@ -28,8 +28,8 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                 next_state = "MAIN_MENU",
             }),
             ["MAIN_MENU"] = list_cursor.definition({
-                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption} = {}
+                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption<string>}
+                    local options: {list_cursor.ListMenuOption<string>} = {}
 
                     pt.add(options, {
                         text = "Play",
@@ -48,13 +48,13 @@ local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
                 end
             }),
             ["CHAPTER_SELECT"] = list_cursor.definition({
-                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext>, _msb: GameMenuContext, ctx: MenuContext)
+                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext, string>, _msb: GameMenuContext, ctx: MenuContext)
                     ctx.story = {
                         id = s.options[s.i].text,
                     }
                 end,
-                get_options = function(msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption} = {}
+                get_options = function(msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption<string>}
+                    local options: {list_cursor.ListMenuOption<string>} = {}
 
                     for _, id in ipairs(msb.story_ids) do
                         pt.add(options, {
