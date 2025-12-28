@@ -125,11 +125,15 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
 end
 
 function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
-    for _, opt in ipairs(self.options) do
-        opt.cursor:handle_select(game_ctx, menu_ctx, menu_state)
+    if self.primary_direction == "select" and self.i ~= #self.options then
+        self.i = self.i + 1
+        return nil, nil
+    else
+        for _, opt in ipairs(self.options) do
+            opt.cursor:handle_select(game_ctx, menu_ctx, menu_state)
+        end
+        return self.next_state, self.send_command
     end
-
-    return self.next_state, self.send_command
 end
 
 function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): menu_cursor.MenuCursor<GC>

@@ -33,7 +33,7 @@ local record ListMenuDefinition<GC, Value>
     is menu_cursor.MenuStepDefinition<GC>
     where self.type == "CURSOR_LIST"
     set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
-    get_options: function(GC, MenuContext): {ListMenuOption}
+    get_options: function(GC, MenuContext): {ListMenuOption<Value>}
     wrap: boolean
     direction: ListDirection
 end
