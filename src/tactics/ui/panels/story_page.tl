@@ -65,15 +65,17 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
             elseif n is rendered_story_node.CharacterCustomization then
 				child = Box.flex_row()
 
-				child:add(VerticalMultiSelectMenu.new(
-					"{label}: {value}",
-					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-					function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
-						local cursor = state.story_context.menu_manager.menu_cursor
-						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
-						return cursor
-					end,
-					{flex_grow = 1} ))
+				local cursor = state.story_context.menu_manager.menu_cursor
+                if cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext> then
+    				child:add(VerticalMultiSelectMenu.new(
+    					"{label}: {value}",
+    					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
+    					function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
+    						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
+    						return cursor
+    					end,
+    					{flex_grow = 1} ))
+                end
             else
                 error()
             end

@@ -4,6 +4,8 @@ require("src/tactics/debug")
 
 global type EventArgs = { string: any }
 
+-- TODO: distinguish commands (menu actions)
+-- from events?
 global enum GameEvent
     "GAME_BEGIN_STORY"
     "GAME_EXIT_STORY"
@@ -29,6 +31,7 @@ global enum GameEvent
     "BATTLE_END_DEFEAT"
 
     "STORY_ADVANCE_TEXT"
+    "STORY_CREATE_CHARACTER"
 end
 
 global record EventCallback

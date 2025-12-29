@@ -7,7 +7,7 @@ local colors = require("src/tactics/colors")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
-require("src/tactics/character/sprite_data")
+local sprite_data = require("src/tactics/character/sprite_data")
 local wpn = require("src/tactics/character/items/object/weapon")
 
 local ANIMATION_DATA = require("src/tactics/character/animation_data")
@@ -63,10 +63,11 @@ local function get_body_type(
 	end
 
 
-	local body_class = battle_unit.character.appearance.body_class
-	if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
-		body_class = "SLEEVELESS"
-	end
+	local body_class_id = battle_unit.character.appearance.body_class
+	local body_class = sprite_data.BODY_CLASS[body_class_id]
+	-- if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
+	-- 	body_class = "SLEEVELESS"
+	-- end
 
 	-- TODO: type safety
     return (body_class.."_"..base_body_type) as AnimationName
@@ -139,9 +140,9 @@ local function draw_head(
 )
     local flip_h = battle_unit.side == "enemy"
 
-	local headwear: HeadwearSpriteData = nil
+	local headwear: sprite_data.HeadwearSpriteData = nil
 	if battle_unit.character.appearance.headwear then
-		headwear = HEADWEAR_SPRITE_DATA[battle_unit.character.appearance.headwear]	
+		headwear = sprite_data.HEADWEAR[battle_unit.character.appearance.headwear]	
 	end
 
     pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
