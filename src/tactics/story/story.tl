@@ -16,7 +16,7 @@ require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
 local story_menu_context = require("src/tactics/story/story_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
-require("src/tactics/story/story_page")
+local story_page = require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
 local story_types = require("src/tactics/story/types")
@@ -82,7 +82,8 @@ function Story:handle_new_node()
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.story_page:add_text_line("Customize your hero!")
-
+        self.story_page:add_character_customization_menu()
+        self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
     else
@@ -129,7 +130,7 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
 
     self.character_manager = character_manager.new(self.services.event_bus)
     
-    self.story_page = StoryPage.new()
+    self.story_page = story_page.story_page()
     self.menu_manager = StoryMenuManager.new(
         story_menu_context.new(),
         self.services.event_bus

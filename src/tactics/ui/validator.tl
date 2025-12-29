@@ -20,7 +20,6 @@ function MenuValidator.validate(node: UIElement, path: string)
 
     if node.auto_height then
         if is_col then
-            assert(#children > 0, "LAYOUT ERROR: "..path.."\nMust have children to use auto_height.")
             for i, child in ipairs(children) do
                 if (child.flex_grow or 0) > 0 then
                     error(
@@ -43,7 +42,6 @@ function MenuValidator.validate(node: UIElement, path: string)
 
     if node.auto_width then
         if is_row then
-            assert(#children > 0, "LAYOUT ERROR: "..path.."\nMust have children to use auto_width.")
             for i, child in ipairs(children) do
                 if (child.flex_grow or 0) > 0 then
                     error(string.format(

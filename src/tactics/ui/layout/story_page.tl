@@ -8,22 +8,16 @@ require("src/tactics/config")
 require("src/tactics/ui/box")
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
+local story_page = require("src/tactics/ui/panels/story_page")
 
 require("src/tactics/ui/validator")
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
 
-local story_page = MessageLog.new({
+local story_page = story_page.new({
     dir="col",
     flex_grow = 1,
     padding = 2,
-    draw_properties = {
-        direction = "down",
-        wrap = "wrap",
-    },
-    func = function(state: UIContextManager, _row_limit: integer): { string }
-        return state.story_context.story_page.text
-    end
 })
 
 local root = SplitPages.new(left, story_page)
