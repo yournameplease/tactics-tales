@@ -83,7 +83,7 @@ function Story:handle_new_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.story_page:add_text_line("Customize your hero!")
         self.story_page:add_character_customization_menu()
-        self.menu_manager:set_menu("MENU_STORY_TEXT")
+        self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
     elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
     else
@@ -142,7 +142,7 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
         self:advance_text()
     end)
 
-    local story_ui_ctx = story_ui_context.new(self.story_page)
+    local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)
     services.ui_context:register_ui_context(story_ui_ctx)
 
     services.event_bus:on("BATTLE_END_VICTORY", function()
