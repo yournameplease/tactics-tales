@@ -210,6 +210,7 @@ function TextImpl:get_wrapped_rows(): integer
         if l.wrapped_lines == nil then
             l.wrapped_lines = self:apply_text_wrapping(l.text, self.width)
         end
+        LOG.trace("wrapped lines", l.text, l.wrapped_lines)
         return #l.wrapped_lines
     end)(self.lines) as integer
 end

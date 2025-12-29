@@ -1,6 +1,14 @@
 require("src/tactics/types")
 require("src/tactics/character/items/object/weapon")
+require("src/tactics/character/animation_data")
+require("src/tactics/animation")
 local ItemInventory = require("src/tactics/character/items/object/item_inventory")
+
+global enum Side
+    "player"
+    "enemy"
+    "neutral"
+end
 
 global SKIN_COLORS: { { Color, Color } } = {
     {15, 31},
@@ -63,6 +71,15 @@ function Character:get_weapon_range(): integer, integer
 
 	-- TODO: dual weilding
 	return weapons[1].min_range, weapons[1].max_range
+end
+
+global interface DrawableCharacterInstance
+	side: Side
+	animation_data: AnimatedSpriteData
+    -- prerendered sprites by animation frame name
+    sprites: { AnimationFrameName: Userdata }
+
+	character: Character
 end
 
 return Character
