@@ -7,22 +7,15 @@ require("src/tactics/character/items/object/weapon")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local maps = require("src/tactics/util/maps")
 
-global enum Side
-    "player"
-    "enemy"
-    "neutral"
-end
 
 global record BattleUnit
+    is DrawableCharacterInstance
+
     id: integer
     tile: Point
     hp_current: integer
     side: Side
     has_acted: boolean
-
-    animation_data: AnimatedSpriteData
-    -- prerendered sprites by animation frame name
-    sprites: { AnimationFrameName: Userdata }
     
     character: Character
 
