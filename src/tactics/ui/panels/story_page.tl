@@ -57,6 +57,9 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
             if n is rendered_story_node.Text then
                 child = TextNode.new({
                     text = {n.text},
+					draw_properties = {
+						-- wrap = "wrap"
+					},
 					flex_grow = 1,
                 })
             elseif n is rendered_story_node.CharacterCustomization then

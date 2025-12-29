@@ -157,12 +157,15 @@ end
 
 function Story:update(joy: Joypad)
     local current_node = self.current_node.definition
-    if current_node is story_node.StoryTextNode then
+    if current_node is story_node.StoryTextNode
+        or current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(joy)
     elseif current_node is story_node.BattleNode then
         self.battle_manager:update(joy)
     elseif current_node is story_node.JumpNode then
         error('in a jump node during update')
+    else
+        error(current_node.type)
     end
 end
 

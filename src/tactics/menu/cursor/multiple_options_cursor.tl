@@ -114,7 +114,10 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
             self:update_option(joy)
         end
     elseif self.primary_direction == "select" then
-        -- handled by handle_menu_select
+        -- movement handled by handle_menu_select
+        if joy.dxp ~= 0 or joy.dyp ~= 0 then
+            self:update_option(joy)
+        end
     end
     
     if self.wrap then
