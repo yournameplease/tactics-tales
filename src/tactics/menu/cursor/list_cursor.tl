@@ -103,11 +103,13 @@ function ListMenuCursor:update(joy: Joypad)
     else
         error()
     end
-    
-    if self.wrap then
-        self.i = new_i % #self.options + 1
-    else
-        self.i = pt.mid(1, new_i, #self.options)
+
+    if new_i ~= self.i then
+        if self.wrap then
+            self.i = (new_i - 1) % #self.options + 1
+        else
+            self.i = pt.mid(1, new_i, #self.options)
+        end
     end
 end
 
