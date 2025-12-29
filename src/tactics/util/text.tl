@@ -159,9 +159,9 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             end
 
             if line_end > #row and width_of(line) <= width then
-                LOG.debug("Wrapping finished! ".. #out.. " rows.")
                 -- end of row without overflow
                 pt.add(out, line)
+                LOG.debug("Wrapping finished! ".. #out.. " rows.")
                 return out
             elseif previous_word_end >= line_start then
                 local sub_row = pt.sub(row, line_start, previous_word_end)
