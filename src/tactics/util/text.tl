@@ -1,5 +1,6 @@
 require("profiler")
 require("src/tactics/debug")
+local lists = require("src/tactics/util/lists")
 require("src/tactics/util")
 
 -- TODO: allow different metric fonts
@@ -34,6 +35,8 @@ local interface Text
     set_width: function(self, w: integer)
     set_height: function(self, h: integer)
     set_lines: function(self, lines: {string})
+
+    get_wrapped_rows: function(self): integer
 
     draw: function(self, x: integer, y: integer, color: Color)
     
@@ -190,6 +193,15 @@ function TextImpl:set_lines(lines: {string})
             end
         end
     end
+end
+
+function TextImpl:get_wrapped_rows(): integer
+    return lists.sum(function(l: TextLine): integer
+        if l.wrapped_lines == nil then
+            l.wrapped_lines = self:apply_text_wrapping(l.text, self.width)
+        end
+        return #l.wrapped_lines
+    end)(self.lines) as integer
 end
 
 function TextImpl:draw_text_row(row: string, x: integer, y: integer, color: Color)

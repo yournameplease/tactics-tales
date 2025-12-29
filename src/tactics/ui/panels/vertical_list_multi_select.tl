@@ -46,6 +46,7 @@ function VerticalMultiSelectMenu.new(
 
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
+    props.draw_properties.wrap = props.draw_properties.wrap or 'no_wrap'
     return TextNode.new(props) as VerticalMultiSelectMenu
 end
 
