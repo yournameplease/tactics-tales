@@ -101,7 +101,7 @@ local function text_lines(lines: {string}): {TextLine}
     local out: {TextLine} = {}
     for _,l in ipairs(lines) do
         pt.add(out, {
-            text = l
+            text = l 
         })
     end
     return out
@@ -132,8 +132,13 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             return {row}
         end
     elseif self.wrap == "wrap" then
-        -- this neetext_ds un(linesit tests x.x
+        if width < 1 then
+            LOG.warn("Can't wrap with non-positive width.")
+            return {}
+        end
+        -- this needs unit tests x.x
         local out: {string} = {}
+        LOG.debug("Wrapping text", row)
         local line_start = 1
         local previous_word_end: integer = -1
         while true do
@@ -154,15 +159,20 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             end
 
             if line_end > #row and width_of(line) <= width then
+                LOG.debug("Wrapping finished! ".. #out.. " rows.")
                 -- end of row without overflow
                 pt.add(out, line)
                 return out
             elseif previous_word_end >= line_start then
-                pt.add(out, pt.sub(row, line_start, previous_word_end))
+                local sub_row = pt.sub(row, line_start, previous_word_end)
+                LOG.debug("Wrapping", sub_row)
+                pt.add(out, sub_row)
                 line_start = previous_word_end + 1
             else
+                local sub_row = pt.sub(row, line_start, line_end-2)
+                LOG.debug("Hyphenating", sub_row)
                 -- need to hyphenate
-                pt.add(out, pt.sub(row, line_start, line_end-2)..'-')
+                pt.add(out, sub_row..'-')
     			line_start = line_end - 1
             end
         end

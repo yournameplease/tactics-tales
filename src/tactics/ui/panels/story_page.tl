@@ -28,6 +28,7 @@ function story_page_panel.new(props: Box): UIElement
     props.gap = props.gap or 4
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
+    props.cross_stretch = true
 
     local self = Box.new(props) as StoryPage
     setmetatable(self, { __index = StoryPage })
@@ -58,7 +59,7 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
                 child = TextNode.new({
                     text = {n.text},
 					draw_properties = {
-						-- wrap = "wrap"
+						wrap = "wrap"
 					},
                     auto_height = true,
                 })
