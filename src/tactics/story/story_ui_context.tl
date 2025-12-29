@@ -1,5 +1,6 @@
 local ui_context = require("src/tactics/ui/ui_context")
 require("src/tactics/story/story_page")
+require("src/tactics/story/story_menu_manager")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 
 local record StoryUIContext
@@ -7,18 +8,23 @@ local record StoryUIContext
     where self.type == "story"
 
     story_page: StoryPage
+    menu_manager: StoryMenuManager
 end
 
 local story_ui_context = {
     StoryUIContext = StoryUIContext
 }
 
-function story_ui_context.new(story_page: StoryPage): StoryUIContext
+function story_ui_context.new(
+    story_page: StoryPage,
+    menu_manager: StoryMenuManager
+): StoryUIContext
     local self: StoryUIContext = setmetatable({
         type = "story"
     }, { __index = StoryUIContext })
 
     self.story_page = story_page
+    self.menu_manager = menu_manager
 
     return self
 end

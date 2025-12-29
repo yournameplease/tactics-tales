@@ -10,6 +10,8 @@ local wpn = require("src/tactics/character/items/object/weapon")
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
 local RenderedStoryNode = rendered_story_node.RenderedStoryNode
+local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
+local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
 
 local record StoryPage
     is UIElement
@@ -58,7 +60,17 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
 					flex_grow = 1,
                 })
             elseif n is rendered_story_node.CharacterCustomization then
-                error("todo")
+				child = Box.flex_row()
+
+				child:add(VerticalMultiSelectMenu.new(
+					"{label}: {value}",
+					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
+					function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
+						local cursor = state.story_context.menu_manager.menu_cursor
+						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
+						return cursor
+					end,
+					{flex_grow = 1} ))
             else
                 error()
             end
