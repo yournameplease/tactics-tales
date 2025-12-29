@@ -85,6 +85,10 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 			end
 		end
 	end
+
+	if character.appearance.sex == "female" and character.appearance.body_class == 3 then
+		character.appearance.body_class = 2
+	end
 	
 	return setmetatable(character, { __index = Character })
 end
