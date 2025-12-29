@@ -65,7 +65,6 @@ end
 
 function StoryPage:add_character_customization_menu()
     pt.add(self.nodes, rendered_story_node.character_customization())
-    
 end
 
 function StoryPage:clear_page()

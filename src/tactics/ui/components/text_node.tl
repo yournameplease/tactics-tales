@@ -79,7 +79,6 @@ function TextNode:measure()
         local rows = text_obj:get_wrapped_rows()
         self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
     end
-
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
