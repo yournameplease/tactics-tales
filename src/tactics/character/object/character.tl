@@ -14,36 +14,30 @@ global enum Sex
     "female"
 end 
 
-global enum HeadwearId
-	"hood"
-	"cultist_hood"
-	"wizard_hat"
-	"hooded_wizard_hat"
-	"fancy_hat"
-	"animal_mask"
+global enum CharacterAppearanceKey
+	"head"
+	"hair"
+	"skin"
+	"hair_color"
+	"body_class"
+	"beard"
+	"eyes"
+	"eyewear"
+	"headwear"
 end
-
-global enum BodyClass
-	"CHILD"
-	"DEFAULT"
-	"SLEEVELESS"
-	"SHIRTLESS" -- for female, this will convert to sleeveless
-	"ROBED"
-end
-
 
 global record CharacterAppearance
     sex: Sex
 	head: integer
     hair: integer
     skin: integer
-    hair_color: Color
-    body_class: BodyClass
+    hair_color: integer
+    body_class: integer
     beard: integer
     -- beard_color: Color
     eyes: integer
 	eyewear: integer
-	headwear: HeadwearId
+	headwear: integer
 end
 
 global record CharacterStats

@@ -118,6 +118,19 @@ function Story:handle_battle_defeat()
     self:jump_to_node(node_definition.next_node_victory)
 end
 
+function Story:create_character(ctx: MenuContext)
+    local appearance = ctx.character_customization.appearance
+    
+    local character = self.character_manager:generate_character("village_hero")
+    character.appearance = {}
+    for k,a in pairs(appearance) do
+        character.appearance[k] = a
+        LOG.debug("seting appearance", k, a)
+    end
+    self.character_manager:persist_player(character)
+    self:advance_node()
+end
+
 function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): Story 
     assert(STORY_DATA[story_id] ~= nil)
 
@@ -140,6 +153,9 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
 
     self.services.event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
+    end)
+    self.services.event_bus:on("STORY_CREATE_CHARACTER", function(ctx: MenuContext)
+        self:create_character(ctx)
     end)
 
     local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)

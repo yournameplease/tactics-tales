@@ -9,8 +9,8 @@ global record CharacterTemplate
 	hp_max: integer
 	item_loadout_options: randomizer.Randomizer<{string}>
 	eyewear_options: randomizer.Randomizer<integer>
-	headwear_options: randomizer.Randomizer<HeadwearId>
-	body_options: randomizer.Randomizer<BodyClass>
+	headwear_options: randomizer.Randomizer<integer>
+	body_options: randomizer.Randomizer<integer>
 	sex_options: randomizer.Randomizer<Sex>
 	skin_color_options: randomizer.Randomizer<integer>
 	hair_color_options: randomizer.Randomizer<integer>
@@ -33,17 +33,17 @@ global BASE_UNIT: CharacterTemplate = {
 
 	headwear_options = randomizer.weighted_option_selector.of_weighted(
 		{nil, 8},
-		{"wizard_hat", 1},	
-		{"hood", 1}
+		{1, 1},	
+		{3, 1}
 	),
 	eyewear_options = randomizer.weighted_option_selector.of_weighted(
 		{nil, 9},
 		{96, 1}	
 	),
 	body_options = randomizer.weighted_option_selector.of_weighted(
-		{"DEFAULT", 8},
-		{"SLEEVELESS", 1},
-		{"ROBED", 1}
+		{1, 8},
+		{2, 1},
+		{4, 1}
 	),
 	sex_options = randomizer.weighted_option_selector.of("male", "female"),
 	skin_color_options = randomizer.random_range.between(1,4),
@@ -69,8 +69,8 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			{"female", 1}
 		),
 		body_options = randomizer.weighted_option_selector.of_weighted(
-			{"SLEEVELESS", 1},
-			{"SHIRTLESS", 5}
+			{2, 1},
+			{3, 5}
 		),
 		headwear_options = randomizer.weighted_option_selector.of_weighted(
 			{nil, 1}
@@ -107,12 +107,12 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	militia_base = {
 		parent_template = "human_base",
 		body_options = randomizer.weighted_option_selector.of_weighted(
-			{"DEFAULT", 1},
-			{"SLEEVELESS", 1}
+			{1, 1},
+			{2, 1}
 		),
 		headwear_options = randomizer.weighted_option_selector.of_weighted(
 			{nil, 3},
-			{"hood", 1}
+			{1, 1}
 		)
 	},
 	militia_leader = {
@@ -147,26 +147,26 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	cultist_base = {
 		parent_template = "human_base",
         hp_max = 3,
-		body_options = randomizer.weighted_option_selector.of("ROBED"),
-		headwear_options = randomizer.weighted_option_selector.of("cultist_hood")
+		body_options = randomizer.weighted_option_selector.of(4),
+		headwear_options = randomizer.weighted_option_selector.of(2)
 	},
 	cultist_goon = {
 		parent_template = "cultist_base",
-		headwear_options = randomizer.weighted_option_selector.of("cultist_hood"),
+		headwear_options = randomizer.weighted_option_selector.of(2),
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "dagger" )
 		),
 	},
 	cultist_spearman = {
 		parent_template = "cultist_base",
-		headwear_options = randomizer.weighted_option_selector.of("cultist_hood"),
+		headwear_options = randomizer.weighted_option_selector.of(2),
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "spear" )
 		),
 	},
 	cultist_guard = {
 		parent_template = "cultist_base",
-		headwear_options = randomizer.weighted_option_selector.of("hooded_wizard_hat"),
+		headwear_options = randomizer.weighted_option_selector.of(4),
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "spear" ),
 			randomizer.weighted_option_selector.of( "shield" )
@@ -175,7 +175,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	cultist_boss = {
 		parent_template = "cultist_base",
         hp_max = 5,
-		headwear_options = randomizer.weighted_option_selector.of("hooded_wizard_hat"),
+		headwear_options = randomizer.weighted_option_selector.of(4),
         item_loadout_options = randomizer.list_selector.of_randomizers(),
 	},
 	village_hero = {

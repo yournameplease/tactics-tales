@@ -7,6 +7,7 @@ require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
+require("src/tactics/character/object/character")
 local event_bus = require("src/tactics/systems/event_bus")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
@@ -14,18 +15,18 @@ local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_option
 
 local lists = require("src/tactics/util/lists")
 
-local record CharacterCustomizationPartOption<Value>
+local record CharacterCustomizationPartOption
     text: string
-    value: Value
+    value: integer
 end
 
-local record CharacterCustomizationPart<Value>
-    key: string
+local record CharacterCustomizationPart
+    key: CharacterAppearanceKey
     text: string
-    options: { CharacterCustomizationPartOption<Value> }
+    options: { CharacterCustomizationPartOption }
 end
 
-local CHARACTER_CUSTOMIZATION_OPTIONS: { string: CharacterCustomizationPart<any> } = {
+local CHARACTER_CUSTOMIZATION_OPTIONS: { string: CharacterCustomizationPart } = {
 	HEAD = {
 		key = "head",
         text = "Head",
@@ -82,10 +83,10 @@ local CHARACTER_CUSTOMIZATION_OPTIONS: { string: CharacterCustomizationPart<any>
 		key = "body_class",
         text = "Body",
 		options = {
-			{text = "Default" , value = "DEFALUT"},
-			{text = "Sleeveless" , value = "SLEEVELESS"},
-			{text = "Shirtless" , value = "SHIRTLESS"},
-			{text = "Robe" , value = "ROBED"},
+			{text = "Default" , value = 1},
+			{text = "Sleeveless" , value = 2},
+			{text = "Shirtless" , value = 3},
+			{text = "Robe" , value = 4},
 		},
 	},
 	BEARD = {
@@ -122,24 +123,35 @@ local CHARACTER_CUSTOMIZATION_OPTIONS: { string: CharacterCustomizationPart<any>
         text = "Headwear",
 		options = {
 			{text = "None" , value = nil},
-			{text = "Wizard Hat" , value = "wizard_hat"},
-			{text = "Hood" , value = "hood"},
-			{text = "Covered Hood" , value = "cultist_hood"},
-			{text = "Hooded Wizard Hat" , value = "hooded_wizard_hat"},
-			{text = "Hat" , value = "fancy_hat"},
-			{text = "Animal Mask" , value = "animal_mask"},
+			{text = "Wizard Hat" , value = 3},
+			{text = "Hood" , value = 1},
+			{text = "Covered Hood" , value = 2},
+			{text = "Hooded Wizard Hat" , value = 4},
+			{text = "Hat" , value = 5},
+			{text = "Animal Mask" , value = 6},
 		},
 	},
 }
 
-local function set_character_customization_option<Value>(cursor: list_cursor.ListMenuCursor<StoryMenuContext, Value>, _: StoryMenuContext, mc: MenuContext)
+local function set_character_customization_option(
+	part_data: CharacterCustomizationPart
+): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, integer>, _: StoryMenuContext, mc: MenuContext)
     -- todo
-    
-    assert("not implemented")
+    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, integer>, _: StoryMenuContext, mc: MenuContext)
+		if mc.character_customization == nil then
+			mc.character_customization = {}
+		end
+		if mc.character_customization.appearance == nil then
+			mc.character_customization.appearance = {}
+		end
+		mc.character_customization.appearance[part_data.key] = cursor.options[cursor.i].value
+	end
 end
 
-local function list_cursor_definition_for_part<Value>(part_data: CharacterCustomizationPart<Value>): list_cursor.ListMenuDefinition<StoryMenuContext, Value>
-    local options = lists.map(function(o: CharacterCustomizationPartOption<Value>): list_cursor.ListMenuOption<Value>
+local function list_cursor_definition_for_part(
+	part_data: CharacterCustomizationPart
+): list_cursor.ListMenuDefinition<StoryMenuContext, integer>
+    local options = lists.map(function(o: CharacterCustomizationPartOption): list_cursor.ListMenuOption<integer>
         return {
             text = o.text,
             value = o.value,
@@ -147,9 +159,9 @@ local function list_cursor_definition_for_part<Value>(part_data: CharacterCustom
     end)(part_data.options)
     
     return list_cursor.definition({
-        set_selected_context = set_character_customization_option,
+        set_selected_context = set_character_customization_option(part_data),
 
-        get_options = function(_: StoryMenuContext, _: MenuContext): {list_cursor.ListMenuOption<Value>}
+        get_options = function(_: StoryMenuContext, _: MenuContext): {list_cursor.ListMenuOption<integer>}
             return options
         end,
         
@@ -158,7 +170,7 @@ local function list_cursor_definition_for_part<Value>(part_data: CharacterCustom
     })
 end
 
-local function multiple_option_cursor_for_part<Value>(part_data: CharacterCustomizationPart<Value>): multiple_options_cursor.MenuMultipleOptionDefinition<StoryMenuContext>
+local function multiple_option_cursor_for_part(part_data: CharacterCustomizationPart): multiple_options_cursor.MenuMultipleOptionDefinition<StoryMenuContext>
     -- local part_data = CHARACTER_CUSTOMIZATION_OPTIONS[id]
     return multiple_options_cursor.option_definition({
             text = part_data.text,
@@ -171,7 +183,7 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
     return multiple_options_cursor.definition({
         primary_direction = "select",
         wrap = false,
-        send_command = "GAME_SET_OPTIONS",
+        send_command = "STORY_CREATE_CHARACTER",
         options = {
             multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HEAD"]),
             multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HAIR"]),

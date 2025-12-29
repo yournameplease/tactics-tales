@@ -2,6 +2,7 @@ require("src/tactics/types")
 require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/battle_unit")
+require("src/tactics/character/object/character")
 local Item = require("src/tactics/character/items/object/item")
 local story_types = require("src/tactics/story/types")
 
@@ -47,6 +48,10 @@ global record StorySelection
     id: story_types.StoryId
 end
 
+global record CharacterCustomizationSelection
+    appearance: { CharacterAppearanceKey: integer}
+end
+
 -- todo: this should be an interface
 global record MenuContext
     acting_unit: UnitSelection
@@ -54,6 +59,7 @@ global record MenuContext
     target_unit: UnitSelection
     selected_item: ItemSelection
     story: StorySelection
+    character_customization: CharacterCustomizationSelection 
     metadata: {string: any}
 end
 
