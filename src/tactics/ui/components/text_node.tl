@@ -28,6 +28,7 @@ end
 setmetatable(TextNode, { __index = Box })
 
 local TEXT_HEIGHT = 8
+local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 -- extra props
 -- func = text callback
@@ -67,6 +68,18 @@ function TextNode.new(props: TextNode): TextNode
     )
     
     return box
+end
+
+function TextNode:measure()
+    Box._measure(self)
+
+    local text_obj = self.text_object
+    
+    if self.auto_height and text_obj ~= nil then
+        local rows = text_obj:get_wrapped_rows()
+        self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
+    end
+
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)

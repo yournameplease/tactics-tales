@@ -151,14 +151,15 @@ end
 -- PASS 1: MEASURE (Bottom-Up)
 -- Calculate intrinsic size of children, then self
 -- =========================================================
-function Box:measure()
+function Box._measure(self: UIElement)
+    local box = self as Box -- Cast!  All classes inherit from box though
     -- A. If we are fixed size, we don't care about children (optimization)
     -- EXCEPT if we contain content that might overflow (not handled here yet)
-    if not self.auto_width and not self.auto_height then
-        self._calculated_w = self.w
-        self._calculated_h = self.h
+    if not box.auto_width and not box.auto_height then
+        box._calculated_w = box.w
+        box._calculated_h = box.h
         -- We still measure children so they know their own size
-        for _, child in ipairs(self.children) do
+        for _, child in ipairs(box.children) do
             if child.measure then child:measure() end
         end
         return
@@ -166,9 +167,9 @@ function Box:measure()
 
     -- B. Measure Children to determine our own size
     local content_w, content_h = 0, 0
-    local is_row = (self.dir == "row")
+    local is_row = (box.dir == "row")
 
-    for i, child in ipairs(self.children) do
+    for i, child in ipairs(box.children) do
         -- Recursively measure child
         if child.measure then
             child:measure()
@@ -181,17 +182,21 @@ function Box:measure()
         if is_row then
             content_w = content_w + child_outer_w
             content_h = pt.max(content_h, child_outer_h)
-            if i > 1 then content_w = content_w + self.gap end
+            if i > 1 then content_w = content_w + box.gap end
         else
             content_w = pt.max(content_w, child_outer_w)
             content_h = content_h + child_outer_h
-            if i > 1 then content_h = content_h + self.gap end
+            if i > 1 then content_h = content_h + box.gap end
         end
     end
 
     -- C. Set our calculated size (Content + Padding)
-    self._calculated_w = self.auto_width and (content_w+self.internal_margin.l+self.internal_margin.r) or self.w
-    self._calculated_h = self.auto_height and (content_h+self.internal_margin.t+self.internal_margin.b) or self.h
+    box._calculated_w = box.auto_width and (content_w+box.internal_margin.l+box.internal_margin.r) or box.w
+    box._calculated_h = box.auto_height and (content_h+box.internal_margin.t+box.internal_margin.b) or box.h
+end
+
+function Box:measure()
+    Box._measure(self)
 end
 
 -- =========================================================

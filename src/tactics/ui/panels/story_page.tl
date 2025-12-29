@@ -60,7 +60,7 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
 					draw_properties = {
 						-- wrap = "wrap"
 					},
-					flex_grow = 1,
+                    auto_height = true,
                 })
             elseif n is rendered_story_node.CharacterCustomization then
 				child = Box.flex_row()
@@ -74,7 +74,8 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
     						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
     						return cursor
     					end,
-    					{flex_grow = 1} ))
+                        {auto_height = true}
+    					))
                 end
             else
                 error()
