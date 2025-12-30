@@ -1,4 +1,3 @@
-local battle_definition_types = require("src/tactics/battle/definition/types")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local battle_map = require("src/tactics/battle/battle_map")
 
