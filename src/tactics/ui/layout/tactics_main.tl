@@ -26,8 +26,8 @@ local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
 left:add(battle_summary)
-left:add(UnitInfo.new({ padding = 2, decoration = "border"  }))
-left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, decoration = "border" }))
+left:add(UnitInfo.new({ padding = 2 }))
+left:add(EventMessageLog.new({ padding = 2, flex_grow = 1, }))
 
 local root = SplitPages.new(left, tactics_map)
 

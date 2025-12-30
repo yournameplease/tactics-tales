@@ -1,9 +1,9 @@
 require("src/tactics/debug")
 require("src/tactics/ui/box")
 require("src/tactics/systems/event_bus")
-require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/story/story_context")
+local text_node = require("src/tactics/ui/components/text_node")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local String = require("src/tactics/util/string")
@@ -47,7 +47,7 @@ function VerticalMultiSelectMenu.new(
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
     props.draw_properties.wrap = props.draw_properties.wrap or 'no_wrap'
-    return TextNode.new(props) as VerticalMultiSelectMenu
+    return text_node.new(props) as VerticalMultiSelectMenu
 end
 
 return VerticalMultiSelectMenu

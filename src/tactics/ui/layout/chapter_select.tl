@@ -10,6 +10,7 @@ require("src/tactics/ui/box")
 require("src/tactics/ui/panels/unit_info")
 require("src/tactics/ui/panels/combat_preview")
 require("src/tactics/ui/panels/event_message_log")
+local text_node = require("src/tactics/ui/components/text_node")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local VerticalListMenu = require("src/tactics/ui/panels/vertical_list_menu")
 local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuContext
@@ -21,7 +22,7 @@ require("src/tactics/ui/validator")
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
 local right = Box.new({ dir = "col", flex_grow = 1, padding = 2})
-right:add(TextNode.new( { flex_grow = 1, text = {"Chapters"} } ))
+right:add(text_node.title( { text = {"Chapters"} } ))
 right:add(VerticalListMenu.new(
 	"{text}",
 	">{text}<",

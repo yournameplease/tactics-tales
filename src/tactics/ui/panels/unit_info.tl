@@ -1,5 +1,5 @@
 require("src/tactics/ui/box")
-require("src/tactics/ui/components/text_node")
+local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
@@ -33,7 +33,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     }))
 
     -- ROW 1: Name and Level
-    info_col:add(TextNode.new({
+    info_col:add(text_node.new({
         rows = 1,
         func = function(state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
@@ -43,7 +43,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     }))
 
     -- ROW 2-4: HP, Weapon
-    info_col:add(TextNode.new({
+    info_col:add(text_node.new({
         rows = 3,
         func = function(state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
@@ -64,7 +64,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
         end
     }))
     
-    info_col:add(TextNode.new({
+    info_col:add(text_node.new({
         rows = 5,
         func = function(state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit

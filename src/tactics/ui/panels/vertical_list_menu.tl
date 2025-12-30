@@ -1,9 +1,9 @@
 require("src/tactics/debug")
 require("src/tactics/ui/box")
 require("src/tactics/systems/event_bus")
-require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/story/story_context")
+local text_node = require("src/tactics/ui/components/text_node")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local String = require("src/tactics/util/string")
 
@@ -37,7 +37,7 @@ function VerticalListMenu.new(
 
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
-    return TextNode.new(props) as VerticalListMenu
+    return text_node.new(props) as VerticalListMenu
 end
 
 return VerticalListMenu

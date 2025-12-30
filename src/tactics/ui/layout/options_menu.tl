@@ -4,6 +4,7 @@ require("src/tactics/ui/types")
 
 require("src/tactics/config")
 
+local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/panels/tactics_map")
 require("src/tactics/ui/box")
 require("src/tactics/ui/panels/unit_info")
@@ -20,7 +21,7 @@ require("src/tactics/ui/validator")
 
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
 local right = Box.new({ dir = "col", flex_grow = 1, padding = 2})
-right:add(TextNode.new( { flex_grow = 1, text = {"Main Menu"} } ))
+right:add(text_node.title( { text = {"Main Menu"} } ))
 right:add(VerticalMultiSelectMenu.new(
 	"{label}: {value}",
 	"{label}: "..pt.chr(139).."{value}"..pt.chr(145),

@@ -1,5 +1,5 @@
 require("src/tactics/ui/box")
-require("src/tactics/ui/components/text_node")
+local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/ui/ui_context_manager")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
@@ -61,7 +61,7 @@ function CombatPreview.new(props: UIElement): CombatPreview
     right:add(defender_portrait)
     right:add(Box.spacer(1))
 
-    local preview_text = TextNode.new({
+    local preview_text = text_node.new({
         flex_grow = 1,
         rows = 6,
         func = get_preview_text

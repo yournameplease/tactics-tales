@@ -7,6 +7,7 @@ global record UITheme
     COLOR_INTERIOR: Color
     COLOR_INTERIOR_TEXT: Color
     COLOR_TRIM: Color
+    COLOR_PAGE_DECOR: Color
     COLOR_CLEAR: Color
 end
 
