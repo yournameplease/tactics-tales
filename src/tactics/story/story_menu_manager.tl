@@ -6,7 +6,7 @@ require("src/tactics/joypad")
 require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
 local menu_manager = require("src/tactics/menu/menu_manager")
-require("src/tactics/story/story_context")
+local StoryMenuContext = require("src/tactics/story/story_context").StoryMenuContext
 require("src/tactics/character/object/character")
 local event_bus = require("src/tactics/systems/event_bus")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
