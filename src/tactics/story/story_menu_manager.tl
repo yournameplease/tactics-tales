@@ -5,7 +5,7 @@ require("src/tactics/menu/menu_manager")
 require("src/tactics/joypad")
 require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
-require("src/tactics/menu/menu_manager")
+local menu_manager = require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_context")
 require("src/tactics/character/object/character")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -222,7 +222,7 @@ local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
 }
 
 function StoryMenuManager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): StoryMenuManager
-    return BaseMenuManager.new(
+    return menu_manager.new(
         MENU_DATA,
         ctx,
         bus
