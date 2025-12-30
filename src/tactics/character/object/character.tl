@@ -75,6 +75,8 @@ end
 
 global interface DrawableCharacterInstance
 	side: Side
+	has_acted: boolean -- used for outline color...
+	
 	animation_data: AnimatedSpriteData
     -- prerendered sprites by animation frame name
     sprites: { AnimationFrameName: Userdata }

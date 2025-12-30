@@ -174,6 +174,7 @@ local function multiple_option_cursor_for_part(part_data: CharacterCustomization
     -- local part_data = CHARACTER_CUSTOMIZATION_OPTIONS[id]
     return multiple_options_cursor.option_definition({
             text = part_data.text,
+			key = part_data.key,
             definition = list_cursor_definition_for_part(part_data),
             must_select = false,
         })

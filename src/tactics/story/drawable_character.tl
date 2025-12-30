@@ -21,9 +21,9 @@ local drawable_character = {
     DrawableCharacter = DrawableCharacter
 }
 
-function drawable_character.spawn_unit(permanent_unit: Character, tile: Point, labels: {string}, side: Side, ai: unit_ai.UnitAI): DrawableCharacter
+function drawable_character.create_drawable_unit(character: Character, side: Side): DrawableCharacter
     local instance: DrawableCharacter = {
-        character = permanent_unit,
+        character = character,
         side = side,
         sprites = {},
     }

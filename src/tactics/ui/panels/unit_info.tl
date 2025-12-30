@@ -22,7 +22,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
     local left = self:add(Box.flex_col())
-    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end))
+    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
     left:add(Box.spacer(1))
 
     local info_col = self:add(Box.new({
