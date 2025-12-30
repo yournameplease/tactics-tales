@@ -48,22 +48,16 @@ local STORIES: {story_types.StoryId: story_types.StoryDefinition} = {
 		nodes = {
 			part_1 = {
 				story_node.character_customizer(),
+				story_node.new_page(),
 				story_node.story_text("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
 				story_node.story_text('Thisisalotoftext.Awhooooooooooooooooooooooooooooooooooooooolelot.Totriggerhyphenation.'),
 				story_node.story_text('text 1.3'),
 				story_node.story_text('text 1.4'),
-				story_node.jump('part_2')
-			},
-			part_2 = {
-				story_node.new_page(),
-				story_node.story_text('text 2.1'),
-				story_node.story_text('text 2.2'),
 				story_node.jump('part_3')
 			},
 			part_3 = {
 				story_node.story_text('text 3.1'),
 				story_node.battle('bandit_village', 'part_4_v', 'part_4_f'),
-				story_node.new_page(),
 				story_node.story_text('text 3.2'),
 				story_node.jump('part_4')
 			},

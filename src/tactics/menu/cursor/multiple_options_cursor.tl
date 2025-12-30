@@ -20,7 +20,7 @@ end
 global enum MultipleOptionsDirection
     "vertical"
     "horizontal"
-    "none"
+    "select"
 end
 
 local record MultipleOptionsMenuCursor<GC>
