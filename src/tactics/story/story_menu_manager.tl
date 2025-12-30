@@ -182,7 +182,7 @@ end
 
 local function menu_definition_for_character_select(): multiple_options_cursor.MultipleOptionsMenuDefinition<StoryMenuContext>
     return multiple_options_cursor.definition({
-        primary_direction = "select",
+        primary_direction = "vertical",
         wrap = false,
         send_command = "STORY_CREATE_CHARACTER",
         options = {
