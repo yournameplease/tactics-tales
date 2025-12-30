@@ -13,7 +13,6 @@ local GameMenuContext = require("src/tactics/game/base_game_context").GameMenuCo
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
-local story_types = require("src/tactics/story/types")
 
 global record GameMenuManager
     is MenuManager<GameMenuContext>

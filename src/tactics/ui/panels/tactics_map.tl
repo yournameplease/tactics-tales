@@ -41,7 +41,6 @@ local HALF_HEIGHT = TILE_HEIGHT >> 1
 local BASE_TILE_SPRITE = 2 * 256
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
-local UNIT_OFFSET_Y = -3
 local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7

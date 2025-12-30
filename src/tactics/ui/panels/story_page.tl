@@ -7,20 +7,19 @@ require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
 require("src/tactics/ui/panels/portrait_box")
-local wpn = require("src/tactics/character/items/object/weapon")
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
 local RenderedStoryNode = rendered_story_node.RenderedStoryNode
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
 
-local record StoryPage
+local record StoryPagePanel
     is UIElement
 
     rendered_nodes: {rendered_story_node.RenderedStoryNode}
 end
 
-setmetatable(StoryPage, { __index = Box })
+setmetatable(StoryPagePanel, { __index = Box })
 
 local story_page_panel = {}
 
@@ -31,14 +30,14 @@ function story_page_panel.new(props: Box): UIElement
     props.auto_height = props.auto_height or true
     props.cross_stretch = true
 
-    local self = Box.new(props) as StoryPage
-    setmetatable(self, { __index = StoryPage })
+    local self = Box.new(props) as StoryPagePanel
+    setmetatable(self, { __index = StoryPagePanel })
 
 	self.rendered_nodes = {}
     return self
 end
 
-function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     -- TODO: move to a pre-layout step?
 
     -- why is cast needed?
