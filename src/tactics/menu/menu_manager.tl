@@ -48,7 +48,13 @@ global record BaseMenuManager<GC>
     menu_definitions: { MenuId: MenuDefinition<GC> }
 end
 
-function BaseMenuManager.new(
+local menu_manager = {
+    MenuManager = MenuManager,
+    SelectionHistory = SelectionHistory,
+    MenuDefinition = MenuDefinition,
+}
+
+function menu_manager.new<GC>(
     menu_definitions: { MenuId: MenuDefinition },
     ctx: GC,
     bus: event_bus.EventBus
@@ -138,4 +144,4 @@ function BaseMenuManager:update(joy: Joypad)
     end
 end
 
-return MenuManager
+return menu_manager

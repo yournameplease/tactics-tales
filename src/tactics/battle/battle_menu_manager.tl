@@ -3,7 +3,7 @@ require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")
-require("src/tactics/menu/menu_manager")
+local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local array_2d = require("src/tactics/util/array_2d")
@@ -221,7 +221,7 @@ function BattleMenuManager.new(
     ctx: BattleMenuContext,
     bus: event_bus.EventBus
 ): BattleMenuManager
-    return BaseMenuManager.new(
+    return menu_manager.new(
         MENU_DATA,
         ctx,
         bus
