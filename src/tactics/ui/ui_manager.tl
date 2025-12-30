@@ -75,6 +75,7 @@ function UIManager.new(): UIManager
         COLOR_INTERIOR = 15,
         COLOR_INTERIOR_TEXT = 21,
         COLOR_TRIM = 9,
+        COLOR_PAGE_DECOR = 24,
         COLOR_CLEAR = 20
     }
 

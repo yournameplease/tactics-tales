@@ -1,7 +1,7 @@
 
 require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-require("src/tactics/ui/components/text_node")
+local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
@@ -57,7 +57,7 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
             pt.add(self.rendered_nodes, n)
             local child: UIElement
             if n is rendered_story_node.Text then
-                child = TextNode.new({
+                child = text_node.new({
                     text = {n.text},
 					draw_properties = {
 						wrap = "wrap"

@@ -129,12 +129,20 @@ end
 
 -- utility constructors
 
+function Box.col(): Box
+    return Box.new({ dir = "col", padding = 0, gap = 0, auto_height = true})
+end
+
+function Box.row(): Box
+    return Box.new({ dir = "row", padding = 0, gap = 0, auto_width = true})
+end
+
 function Box.flex_col(): Box
-    return Box.new({ dir = "col", auto_width = true})
+    return Box.new({ dir = "col", padding = 0, auto_width = true})
 end
 
 function Box.flex_row(): Box
-    return Box.new({ dir = "row", auto_height = true})
+    return Box.new({ dir = "row", padding = 0, auto_height = true})
 end
 
 -- good for lazy justification
@@ -445,7 +453,7 @@ function Box:draw_border(ui_theme: UITheme)
     local w = self.w - (self.internal_margin.l + self.internal_margin.r - 2*d_pad)
     local h = self.h - (self.internal_margin.t + self.internal_margin.b - 2*d_pad)
     local r = pt.max(0, d_pad-1)
-    pt.rrect(x, y, w, h, r, ui_theme.COLOR_DECORATION_PRIMARY)
+    pt.rrect(x, y, w, h, r, ui_theme.COLOR_PAGE_DECOR)
 end
 
 function Box:draw_solid(ui_theme: UITheme)

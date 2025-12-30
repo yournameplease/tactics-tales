@@ -2,6 +2,7 @@ require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")
+local section_divider = require("src/tactics/ui/decoration/section_divider")
 
 global enum UITextColor
     "dark"
@@ -31,46 +32,6 @@ setmetatable(TextNode, { __index = Box })
 
 local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
-
--- extra props
--- func = text callback
--- rows = defaults to 1
--- justify
-function TextNode.new(props: TextNode): TextNode
-    local box = Box.new(props) as TextNode
-    setmetatable(box, { __index = TextNode })
-
-    box.padding = props.padding or 0
-    box.decoration_padding = 0
-    if props.text then
-        box.text = props.text
-    elseif props.func then
-        box.func = props.func
-    else
-        error("Need either `text` or `func` for text node!")
-    end
-    if props.rows then
-        box.rows = props.rows
-        box.h = (box.rows) * (TEXT_HEIGHT + 2)
-    end
-
-    box.draw_properties = props.draw_properties or {}
-    box.draw_properties.justify = box.draw_properties.justify or "left"
-    box.draw_properties.direction = box.draw_properties.direction or "down"
-    box.draw_properties.wrap = box.draw_properties.wrap or "ellipsis"
-
-    box.transparent = props.transparent ~= false
-    box.text_color = props.text_color or "dark"
-
-    box.text_object = text.new(
-        {},
-        box.draw_properties,
-        box.w,
-        box.h
-    )
-    
-    return box
-end
 
 function TextNode:measure()
     Box._measure(self)
@@ -116,4 +77,53 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
     )
 end
 
-return TextNode
+local text_node = {}
+
+function text_node.new(props: TextNode): TextNode
+    local box = Box.new(props) as TextNode
+    setmetatable(box, { __index = TextNode })
+
+    box.padding = props.padding or 0
+    box.decoration_padding = 0
+    if props.text then
+        box.text = props.text
+    elseif props.func then
+        box.func = props.func
+    else
+        error("Need either `text` or `func` for text node!")
+    end
+    if props.rows then
+        box.rows = props.rows
+        box.h = (box.rows) * (TEXT_HEIGHT + 2)
+    end
+
+    box.draw_properties = props.draw_properties or {}
+    box.draw_properties.justify = box.draw_properties.justify or "left"
+    box.draw_properties.direction = box.draw_properties.direction or "down"
+    box.draw_properties.wrap = box.draw_properties.wrap or "ellipsis"
+
+    box.transparent = props.transparent ~= false
+    box.text_color = props.text_color or "dark"
+
+    box.text_object = text.new(
+        {},
+        box.draw_properties,
+        box.w,
+        box.h
+    )
+    
+    return box
+end
+
+function text_node.title(props: TextNode): UIElement
+    props.auto_height = props.auto_height or true
+    props.draw_properties = props.draw_properties or {}
+    props.draw_properties.justify = props.draw_properties.justify or "center"
+
+    local box = Box.col()
+    box:add(text_node.new(props))
+    box:add(section_divider.new(2))
+    return box
+end
+
+return text_node
