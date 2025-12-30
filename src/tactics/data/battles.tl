@@ -1,7 +1,5 @@
-local unit_ai <const> = require("src/tactics/battle/unit/unit_ai")
 local battle_definition <const> = require("src/tactics/battle/definition")
 local battle_script <const> = require("src/tactics/battle/scripts/battle_script")
-local battle_definition_types <const> = require("src/tactics/battle/definition/types")
 local unit_spawn_data <const> = require("src/tactics/battle/unit/spawn_data")
 
 local character_template <const> = unit_spawn_data.character_source.template

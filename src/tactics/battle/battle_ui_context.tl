@@ -1,5 +1,4 @@
 local ui_context = require("src/tactics/ui/ui_context")
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
 local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
