@@ -1,4 +1,4 @@
-global record StoryMenuContext
+local record StoryMenuContext
 	
 end
 
