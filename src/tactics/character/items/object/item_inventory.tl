@@ -188,7 +188,7 @@ function ItemInventoryImpl:remove_item(slot: integer)
 	self:compute_current_slots()
 end
 
-function ItemInventoryImpl:move_item(index: integer, before_index: integer)
+function ItemInventoryImpl:move_item(_index: integer, _before_index: integer)
 	error("not implemented")
 	
 	self:compute_current_slots()

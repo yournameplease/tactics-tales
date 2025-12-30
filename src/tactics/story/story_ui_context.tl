@@ -19,14 +19,14 @@ local story_ui_context = {
 }
 
 function story_ui_context.new(
-    story_page: StoryPage,
+    page: StoryPage,
     menu_manager: StoryMenuManager
 ): StoryUIContext
     local self: StoryUIContext = setmetatable({
         type = "story"
     }, { __index = StoryUIContext })
 
-    self.story_page = story_page
+    self.story_page = page
     self.menu_manager = menu_manager
 
     return self

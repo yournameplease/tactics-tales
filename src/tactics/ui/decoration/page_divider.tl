@@ -15,7 +15,7 @@ function PageDivider.new(width: integer): PageDivider
     return box
 end
 
-function PageDivider:draw(_: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+function PageDivider:draw(_: UIContextManager, _draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     -- Box._draw(self, state, ui_theme)
 
     local l = self.x

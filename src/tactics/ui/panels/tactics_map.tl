@@ -36,7 +36,8 @@ local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
-local HALF_HEIGHT = TILE_SIZE.y >> 1
+local TILE_HEIGHT = CONFIG.TILE_SIZE.y
+local HALF_HEIGHT = TILE_HEIGHT >> 1
 local BASE_TILE_SPRITE = 2 * 256
 
 -- UNIT offset should instead be the feet position, and draw using skeleton position
@@ -217,23 +218,21 @@ function TacticsMap:draw_map_decorations(layers: MapLayers, z_0: integer, z_1: i
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
 
-    local t_y = TILE_SIZE.y
-    local t_y_2 = t_y >> 1
-    local y_0 = pt.flr(z_0 / t_y)
-    local y_1 = pt.flr(z_1 / t_y)
+    -- local y_0 = pt.flr(z_0 / t_y)
+    -- local y_1 = pt.flr(z_1 / t_y)
     for z=z_0,z_1 do
         --this is kinda dumb
-        if z % t_y == 0 then
-            local y = pt.flr(z / t_y)
-            pt.map(layer_wall_back, 0, y, 0, (y - 1) * t_y, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        if z % TILE_HEIGHT == 0 then
+            local y = pt.flr(z / TILE_HEIGHT)
+            pt.map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
-        if z % t_y == t_y_2 then
-            local y = pt.flr(z / t_y)
-            pt.map(layer_wall_mid, 0, y, 0, (y) * t_y - t_y_2, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        if z % TILE_HEIGHT == HALF_HEIGHT then
+            local y = pt.flr(z / TILE_HEIGHT)
+            pt.map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
-        if z % t_y == 0 then
-            local y = pt.flr(z / t_y)
-            pt.map(layer_wall_front, 0, y, 0, (y) * t_y, self.map_width, 1, nil, TILE_SIZE.x, t_y)
+        if z % TILE_HEIGHT == 0 then
+            local y = pt.flr(z / TILE_HEIGHT)
+            pt.map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
     end
 end
@@ -267,7 +266,6 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     sorted_units:sort()
     profile("sort_units_z")
 
-    local drawn_unit_count = 0
     -- TODO: preload layers
     local layers = state.battle_context.battle_map.layers
     local layer_ground = layers.terrain.ground
