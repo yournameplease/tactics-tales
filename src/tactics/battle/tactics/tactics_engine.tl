@@ -107,10 +107,12 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
             else
                 error()
             end
-            local unit = battle_unit.spawn_unit(character, spawn_point, labels, side, spawn_data.ai)
+            if character ~= nil then
+                local unit = battle_unit.spawn_unit(character, spawn_point, labels, side, spawn_data.ai)
             
-            self:spawn_unit(unit, spawn_point)
-            pt.add(spawned_units, unit)
+                self:spawn_unit(unit, spawn_point)
+                pt.add(spawned_units, unit)
+            end
         end
     end
     return spawned_units
