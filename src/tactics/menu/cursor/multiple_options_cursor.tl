@@ -5,12 +5,14 @@ local Joypad = require("src/tactics/joypad").Joypad
 
 local record MenuMultipleOptionCursor<GC>
     text: string -- label
+    key: string --ugh.  here for ui context
     cursor: menu_cursor.MenuCursor<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
 end
 
 local record MenuMultipleOptionDefinition<GC>
     text: string -- label
+    key: string --ugh.  here for ui context
     definition: menu_cursor.MenuStepDefinition<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
 end
@@ -18,7 +20,7 @@ end
 global enum MultipleOptionsDirection
     "vertical"
     "horizontal"
-    "select"
+    "none"
 end
 
 local record MultipleOptionsMenuCursor<GC>
@@ -36,6 +38,7 @@ end
 function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
     return {
         text = self.text,
+        key = self.key,
         cursor = self.definition:to_cursor(game_context, menu_ctx, menu_state),
         must_select = self.must_select,
     }
@@ -67,30 +70,31 @@ function multiple_options_cursor.definition<GC>(props: MultipleOptionsMenuDefini
     return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
 end
 
-function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuCursor<GC>
-    assert(step_definition is MultipleOptionsMenuDefinition<GC>)
-    local self: MultipleOptionsMenuCursor<GC> = {
-        type = "CURSOR_MULTIPLE_OPTIONS",
-        i = 1,
-        options = lists.do_map(
-            step_definition.options,
-            function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
-                return {
-                    text = o.text,
-                    cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
-                    must_select = o.must_select == true
-                }
-            end
-        ),
-    }
-    return setmetatable(self, { __index = function(t: any, k: string): any 
-            if (MultipleOptionsMenuCursor as {string: any})[k] then
-                return (MultipleOptionsMenuCursor as {string: any})[k]
-            end
-            return (step_definition as {string: any})[k]
-        end
-        })
-end
+-- function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuCursor<GC>
+--     assert(step_definition is MultipleOptionsMenuDefinition<GC>)
+--     local self: MultipleOptionsMenuCursor<GC> = {
+--         type = "CURSOR_MULTIPLE_OPTIONS",
+--         i = 1,
+--         options = lists.do_map(
+--             step_definition.options,
+--             function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
+--                 return {
+--                     text = o.text,
+--                     key = o.key,
+--                     cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
+--                     must_select = o.must_select == true
+--                 }
+--             end
+--         ),
+--     }
+--     return setmetatable(self, { __index = function(t: any, k: string): any 
+--             if (MultipleOptionsMenuCursor as {string: any})[k] then
+--                 return (MultipleOptionsMenuCursor as {string: any})[k]
+--             end
+--             return (step_definition as {string: any})[k]
+--         end
+--         })
+-- end
 
 function MultipleOptionsMenuCursor:update_option(joy: Joypad)
     local current_selection = self.options[self.i]
@@ -148,6 +152,7 @@ function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuCon
             function(o: MenuMultipleOptionDefinition<GC>): MenuMultipleOptionCursor<GC>
                 return {
                     text = o.text,
+                    key = o.key,
                     cursor = o.definition:to_cursor(game_ctx, menu_ctx, menu_state),
                     must_select = o.must_select == true
                 }

@@ -6,6 +6,7 @@ require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
+require("src/tactics/ui/panels/portrait_box")
 local wpn = require("src/tactics/character/items/object/weapon")
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
@@ -71,13 +72,16 @@ function StoryPage:draw(state: UIContextManager, draw_target_manager: DrawTarget
     				child:add(VerticalMultiSelectMenu.new(
     					"{label}: {value}",
     					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-    					function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
+    					function (_: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
     						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
     						return cursor
     					end,
-                        {auto_height = true}
+                        {auto_height = true, flex_grow = 1}
     					))
                 end
+                child:add(PortraitBox.new(function(_: UIContextManager): DrawableCharacter
+                    return n.character
+                end, nil))
             else
                 error()
             end

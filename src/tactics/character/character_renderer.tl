@@ -53,9 +53,9 @@ local function get_anchor_offsets(
 end
 
 local function get_body_type(
-	battle_unit: BattleUnit
+	drawable_unit: DrawableCharacterInstance
 ): AnimationName
-    local weapons = battle_unit.character.inventory:get_equipped_weapons()
+    local weapons = drawable_unit.character.inventory:get_equipped_weapons()
 	
     local base_body_type: wpn.WeaponBodyType = "BACK_HAND"
 	if #weapons > 0 then
@@ -63,9 +63,9 @@ local function get_body_type(
 	end
 
 
-	local body_class_id = battle_unit.character.appearance.body_class
+	local body_class_id = drawable_unit.character.appearance.body_class
 	local body_class = sprite_data.BODY_CLASS[body_class_id]
-	-- if battle_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
+	-- if drawable_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
 	-- 	body_class = "SLEEVELESS"
 	-- end
 
@@ -80,20 +80,20 @@ local record RenderedAnimationFrame
 end
 
 local function get_animation_frame(
-	battle_unit: BattleUnit
+	drawable_unit: DrawableCharacterInstance
 ): RenderedAnimationFrame
 	local frame_name: AnimationFrameName 
 	local offset: Point
-	if battle_unit.animation_data ~= nil and battle_unit.animation_data.current_frame ~= nil then
-		frame_name = battle_unit.animation_data.current_frame.frame
-		offset = battle_unit.animation_data.current_frame.offset
+	if drawable_unit.animation_data ~= nil and drawable_unit.animation_data.current_frame ~= nil then
+		frame_name = drawable_unit.animation_data.current_frame.frame
+		offset = drawable_unit.animation_data.current_frame.offset
 	else
 		LOG.debug("Unrecognized animation frame.")
 		frame_name = "idle_1"
 		offset = {x = 0, y = 0}
 	end
 
-    local animation_frame = ANIMATION_DATA[get_body_type(battle_unit)][frame_name]
+    local animation_frame = ANIMATION_DATA[get_body_type(drawable_unit)][frame_name]
 
 	return {
 		offset = offset,
@@ -104,30 +104,30 @@ end
 
 -- @return the position of the "feet_center" anchor
 function character_renderer.get_animation_offset(
-	battle_unit: BattleUnit
+	drawable_unit: DrawableCharacterInstance
 ): Point
-    local frame_data = get_animation_frame(battle_unit)
+    local frame_data = get_animation_frame(drawable_unit)
 
     return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
              y = frame_data.offset.y + frame_data.anchors.feet_center.y}
 end
 
 local function set_palette(
-	battle_unit: BattleUnit,
+	drawable_unit: DrawableCharacterInstance,
 	draw_outline: boolean
 )
-	local side_palette = PALETTE_BY_SIDE[battle_unit.side]
+	local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
     pt.set_pal(COLOR_SIDE_2, side_palette[2])
     pt.set_pal(COLOR_SIDE_3, side_palette[3])
-    local skin = battle_unit.character.appearance.skin
+    local skin = drawable_unit.character.appearance.skin
     pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
     pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-    pt.set_pal(COLOR_HAIR, battle_unit.character.appearance.hair_color)
-    pt.set_pal(COLOR_BEARD, battle_unit.character.appearance.hair_color)
+    pt.set_pal(COLOR_HAIR, drawable_unit.character.appearance.hair_color)
+    pt.set_pal(COLOR_BEARD, drawable_unit.character.appearance.hair_color)
 
 	if draw_outline then
-		local outline_color = battle_unit.has_acted and 21 or side_palette[3]
+		local outline_color = drawable_unit.has_acted and 21 or side_palette[3]
 		pt.set_pal(COLOR_OUTLINE, outline_color)
 	else
 		pt.set_palt(COLOR_OUTLINE, true)
@@ -135,31 +135,31 @@ local function set_palette(
 end
 
 local function draw_head(
-	battle_unit: BattleUnit,
+	drawable_unit: DrawableCharacterInstance,
 	point: Point
 )
-    local flip_h = battle_unit.side == "enemy"
+    local flip_h = drawable_unit.side == "enemy"
 
 	local headwear: sprite_data.HeadwearSpriteData = nil
-	if battle_unit.character.appearance.headwear then
-		headwear = sprite_data.HEADWEAR[battle_unit.character.appearance.headwear]	
+	if drawable_unit.character.appearance.headwear then
+		headwear = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]	
 	end
 
-    pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.head, point.x, point.y, flip_h)
+    pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.head, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
 	if headwear == nil or headwear.draw_beard then
-	    if battle_unit.character.appearance.beard ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.beard, point.x, point.y, flip_h)
+	    if drawable_unit.character.appearance.beard ~= nil then
+	        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.beard, point.x, point.y, flip_h)
 	    end
 	end
 	if headwear == nil or headwear.draw_eyewear then
-	    pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyes, point.x, point.y, flip_h)
-		if battle_unit.character.appearance.eyewear ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+	    pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.eyes, point.x, point.y, flip_h)
+		if drawable_unit.character.appearance.eyewear ~= nil then
+	        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.eyewear, point.x, point.y, flip_h)
 		end
 	end
 	if headwear == nil or headwear.draw_hair then
-        pt.spr(BASE_UNIT_SPRITE + battle_unit.character.appearance.hair, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.hair, point.x, point.y, flip_h)
 	end
 	if headwear ~= nil then
         pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
@@ -168,12 +168,12 @@ local function draw_head(
 end
 
 local function draw_character(
-	battle_unit: BattleUnit,
+	drawable_unit: DrawableCharacterInstance,
 	point: Point
 )
-    local flip_h = battle_unit.side == "enemy"
+    local flip_h = drawable_unit.side == "enemy"
 
-	local animation_frame = get_animation_frame(battle_unit)
+	local animation_frame = get_animation_frame(drawable_unit)
 
 	local offset = Point.of(0,0)
 
@@ -192,9 +192,9 @@ local function draw_character(
     pt.spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
-    draw_head(battle_unit, head_anchor)
+    draw_head(drawable_unit, head_anchor)
 
-	local equipment = battle_unit.character.inventory:get_equipped_items()
+	local equipment = drawable_unit.character.inventory:get_equipped_items()
 	for slot,equip in pairs(equipment) do
 		if slot == "BODY" then
 
@@ -209,7 +209,7 @@ local function draw_character(
 end
 
 function character_renderer.draw(
-	battle_unit: BattleUnit,
+	drawable_unit: DrawableCharacterInstance,
 	point: Point,
 	draw_target_manager: DrawTargetManager,
 	set_pal: boolean | colors.PaletteId,
@@ -224,14 +224,14 @@ function character_renderer.draw(
 	-- local draw_target_camera = DRAW_TARGET_TILE_TOP_LEFT + FOOT_GROUND_ANCHOR
 	local DRAW_TARGET_D = Point.of(15, 31)
 
-	if battle_unit.sprites[battle_unit.animation_data.current_frame.frame] == nil then
-		LOG.debug("prerendering sprite for unit "..battle_unit.id..","..battle_unit.animation_data.current_frame.frame)
+	local current_frame = drawable_unit.animation_data.current_frame.frame
+	if drawable_unit.sprites[current_frame] == nil then
 		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
 		-- bake sprite
 		draw_target_manager:duplicate_target()
 
-		draw_character(battle_unit, Point.of(0,0))
+		draw_character(drawable_unit, Point.of(0,0))
 
 		local unit_sprite = draw_target_manager:pop_sprite()
 
@@ -255,12 +255,12 @@ function character_renderer.draw(
 		-- pt.spr(unit_sprite, 0, 0)
 		pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
-		battle_unit.sprites[battle_unit.animation_data.current_frame.frame] = draw_target_manager:pop_sprite()
+		drawable_unit.sprites[drawable_unit.animation_data.current_frame.frame] = draw_target_manager:pop_sprite()
 	end
 
-	local sprite = battle_unit.sprites[battle_unit.animation_data.current_frame.frame]
+	local sprite = drawable_unit.sprites[drawable_unit.animation_data.current_frame.frame]
 
-	local animation_frame = get_animation_frame(battle_unit)
+	local animation_frame = get_animation_frame(drawable_unit)
 	local offset = animation_frame.offset
 	if not apply_animation then
 		offset = Point.of(0,0)
@@ -270,7 +270,7 @@ function character_renderer.draw(
 
     if set_pal is boolean then
 		if set_pal then
-        	set_palette(battle_unit, draw_outline)
+        	set_palette(drawable_unit, draw_outline)
 		end
     elseif set_pal is colors.PaletteId then
 		colors.apply_palette(set_pal)

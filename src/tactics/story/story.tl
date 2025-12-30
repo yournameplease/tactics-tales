@@ -7,6 +7,7 @@ require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")
 
+require("src/tactics/animation")
 require("src/tactics/battle/battle_manager")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/story/story_menu_manager")
@@ -31,7 +32,11 @@ global record Story
         node_id: string
         node_step: integer
         definition: story_node.StoryNode
+        rendered_node: story_page.rendered_story_node.RenderedStoryNode
     end
+
+    idle_animation: AnimatedSpriteData
+    customized_character: Character
     
     story_id: story_types.StoryId
 
@@ -82,7 +87,8 @@ function Story:handle_new_node()
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.story_page:add_text_line("Customize your hero!")
-        self.story_page:add_character_customization_menu()
+        self.customized_character = self.character_manager:generate_character("village_hero")
+        self.story_page:add_character_customization_menu(self.customized_character, self.idle_animation)
         self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
     elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
@@ -120,14 +126,13 @@ end
 
 function Story:create_character(ctx: MenuContext)
     local appearance = ctx.character_customization.appearance
-    
-    local character = self.character_manager:generate_character("village_hero")
-    character.appearance = {}
+
+    self.customized_character.appearance = {}
     for k,a in pairs(appearance) do
-        character.appearance[k] = a
-        LOG.debug("seting appearance", k, a)
+        self.customized_character.appearance[k] = a
     end
-    self.character_manager:persist_player(character)
+    self.character_manager:persist_player(self.customized_character)
+    self.customized_character = nil
     self:advance_node()
 end
 
@@ -149,7 +154,7 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
         self.services.event_bus
     )
 
-    self:jump_to_node(story_definition.starting_node)
+    self.idle_animation = self.services.animation_manager:create_idle_animation()
 
     self.services.event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
@@ -167,7 +172,9 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
     services.event_bus:on("BATTLE_END_DEFEAT", function()
         self:handle_battle_defeat( )
     end)
-
+    
+    self:jump_to_node(story_definition.starting_node)
+    
     return self
 end
 

@@ -7,14 +7,18 @@ local Colors = require("src/tactics/colors")
 
 global record PortraitBox
     is UIElement
-    get_selected_unit: function(UIContextManager): BattleUnit
+    get_selected_unit: function(UIContextManager): DrawableCharacterInstance
+    palette: Colors.PaletteId
 end
 
 setmetatable(PortraitBox, { __index = Box })
 
 local FEET_ANCHOR = Point.of(11, 22)
 
-function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUnit): PortraitBox
+function PortraitBox.new(
+    get_selected_unit: function(UIContextManager): DrawableCharacterInstance,
+    palette: Colors.PaletteId
+): PortraitBox
     local box = Box.new({
         w=24, h=28,
         padding = 4,
@@ -23,6 +27,7 @@ function PortraitBox.new(get_selected_unit: function(UIContextManager): BattleUn
     }) as PortraitBox
     setmetatable(box, {__index = PortraitBox})
     box.get_selected_unit = get_selected_unit
+    box.palette = palette
     return box
 end
 
@@ -32,7 +37,14 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
     local unit = self.get_selected_unit(state)
     if unit then
         local self_pos: Point = Point.of(self.x, self.y)
-        CharacterRenderer.draw(unit, (FEET_ANCHOR+self_pos) as Point, draw_target_manager, "paper", false, true)
+        CharacterRenderer.draw(
+            unit,
+            (FEET_ANCHOR+self_pos) as Point,
+            draw_target_manager,
+            self.palette or true,
+            false,
+            true
+        )
         pt.reset_pal()
     end
 end
