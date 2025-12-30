@@ -95,17 +95,6 @@ function text.new(lines: {string}, draw_properties: DrawProperties, w: integer, 
     return self
 end
 
-
-
-local function text_lines(lines: {string}): {TextLine}
-    local out: {TextLine} = {}
-    for _,l in ipairs(lines) do
-        pt.add(out, {
-            text = l 
-        })
-    end
-    return out
-end
 local function width_of(row: string): integer
     return pt.print(row, 0, -1000) as integer
 end
