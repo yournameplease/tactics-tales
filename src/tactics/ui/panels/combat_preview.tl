@@ -1,4 +1,4 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/ui/ui_context_manager")
@@ -7,9 +7,9 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 local record CombatPreview
-    is UIElement
+    is box.UIElement
 end
-setmetatable(CombatPreview, { __index = Box })
+setmetatable(CombatPreview, { __index = box.Box })
 
 local function get_preview_text(state: UIContextManager): {string}
     local attacker = state.battle_context.acting_unit
@@ -43,26 +43,26 @@ end
 
 local combat_preview = {}
 
-function combat_preview.new(props: UIElement): UIElement
+function combat_preview.new(props: box.UIElement): box.UIElement
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
 
-    local self = Box.new(props) as CombatPreview
+    local self = box.new(props) as CombatPreview
     setmetatable(self, { __index = CombatPreview })
 
     local attacker_portrait = portrait_box.new(
         function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end,
         "paper")
-    local left = Box.flex_col()
+    local left = box.flex_col()
     left:add(attacker_portrait)
-    left:add(Box.spacer(1))
+    left:add(box.spacer(1))
 
     local defender_portrait = portrait_box.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper")
-    local right = Box.flex_col()
+    local right = box.flex_col()
     right:add(defender_portrait)
-    right:add(Box.spacer(1))
+    right:add(box.spacer(1))
 
     local preview_text = text_node.new({
         flex_grow = 1,

@@ -1,17 +1,17 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local Colors = require("src/tactics/colors")
 
 local record PortraitBox
-    is UIElement
+    is box.UIElement
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance
     palette: Colors.PaletteId
 end
-setmetatable(PortraitBox, { __index = Box })
+setmetatable(PortraitBox, { __index = box.Box })
 
 local portrait_box = {}
 
@@ -20,21 +20,21 @@ local FEET_ANCHOR = point.of(11, 22)
 function portrait_box.new(
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance,
     palette: Colors.PaletteId
-): UIElement
-    local box = Box.new({
+): box.UIElement
+    local self = box.new({
         w=24, h=28,
         padding = 4,
         decoration_padding = 3,
         decoration = 'border'
     }) as PortraitBox
-    setmetatable(box, {__index = PortraitBox})
-    box.get_selected_unit = get_selected_unit
-    box.palette = palette
-    return box
+    setmetatable(self, {__index = PortraitBox})
+    self.get_selected_unit = get_selected_unit
+    self.palette = palette
+    return self
 end
 
 function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
-    Box._draw(self, state, draw_target_manager, ui_theme)
+    box.Box._draw(self, state, draw_target_manager, ui_theme)
 
     local unit = self.get_selected_unit(state)
     if unit then

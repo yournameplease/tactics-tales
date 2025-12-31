@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 require("src/tactics/systems/event_bus")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/story/story_menu_context")
@@ -8,7 +8,7 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local String = require("src/tactics/util/string")
 
 local record VerticalListMenu<GC, Value>
-    is UIElement, text_node.TextUIElement
+    is box.UIElement, text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>

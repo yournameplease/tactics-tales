@@ -1,18 +1,18 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/ui_context_manager")
 
 local record PageDivider
-    is UIElement
+    is box.UIElement
 end
 
-setmetatable(PageDivider, { __index = Box })
+setmetatable(PageDivider, { __index = box.Box })
 
 
 function PageDivider.new(width: integer): PageDivider
-    local box = Box.new({ w=width, cross_stretch = true }) as PageDivider
-    setmetatable(box, {__index = PageDivider})
-    return box
+    local self = box.new({ w=width, cross_stretch = true }) as PageDivider
+    setmetatable(self, {__index = PageDivider})
+    return self
 end
 
 function PageDivider:draw(_: UIContextManager, _draw_target_manager: DrawTargetManager, ui_theme: UITheme)

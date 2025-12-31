@@ -1,15 +1,15 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 
 global record MenuValidator
 
 end 
 
-local function get_node_name(_node: UIElement, index: integer): string
+local function get_node_name(_node: box.UIElement, index: integer): string
     return ("child[" .. index .. "]")
 end
 
 --- Recursively validates a UI tree.
-function MenuValidator.validate(node: UIElement, path: string)
+function MenuValidator.validate(node: box.UIElement, path: string)
     if not node then return end
 
     local is_col = (node.dir == "col")

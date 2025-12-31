@@ -1,4 +1,4 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
@@ -9,9 +9,9 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 local record UnitInfo
-    is UIElement
+    is box.UIElement
 end
-setmetatable(UnitInfo, { __index = Box })
+setmetatable(UnitInfo, { __index = box.Box })
 
 local unit_info = {}
 
@@ -21,14 +21,14 @@ function unit_info.new(props: UnitInfo): UnitInfo
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
 
-    local self = Box.new(props) as UnitInfo
+    local self = box.new(props) as UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
-    local left = self:add(Box.flex_col())
+    local left = self:add(box.flex_col())
     left:add(portrait_box.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
-    left:add(Box.spacer(1))
+    left:add(box.spacer(1))
 
-    local info_col = self:add(Box.new({
+    local info_col = self:add(box.new({
         auto_height = true,
         flex_grow = 1,
         dir = "col",

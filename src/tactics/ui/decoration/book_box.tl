@@ -1,22 +1,23 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/ui_context_manager")
 
 local record BookBox
-    is UIElement
+    is box.UIElement
 	pages_height: integer
 end
-
-setmetatable(BookBox, { __index = Box })
+setmetatable(BookBox, { __index = box.Box })
 
 local TRIM_PADDING = 3
 
-function BookBox.new(
+local book_box = {}
+
+function book_box.new(
 	width: integer,
 	height: integer,
 	pages_height: integer
-): BookBox
-    local box = Box.new({
+): box.UIElement
+    local self = box.new({
 		dir="col",
 		w=width,
 		h=height,
@@ -27,9 +28,9 @@ function BookBox.new(
 			r = TRIM_PADDING,
 		}
 	}) as BookBox
-    setmetatable(box, {__index = BookBox})
-	box.pages_height = pages_height
-    return box
+    setmetatable(self, {__index = BookBox})
+	self.pages_height = pages_height
+    return self
 end
 
 function BookBox:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
@@ -64,4 +65,4 @@ function BookBox:draw(state: UIContextManager, draw_target_manager: DrawTargetMa
     end
 end
 
-return BookBox
+return book_box
