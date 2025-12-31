@@ -24,9 +24,9 @@ local interface UIElement
     x: integer
     y: integer
     w: integer
-    -- _calculated_w: integer
+    calculated_w: integer
     h: integer
-    -- _calculated_h: integer
+    calculated_h: integer
     internal_margin: Margin
     auto_width: boolean
     auto_height: boolean
@@ -48,23 +48,6 @@ end
 
 local record Box
     is UIElement
-    -- x: integer
-    -- y: integer
-    -- w: integer
-    _calculated_w: integer
-    -- h: integer
-    _calculated_h: integer
-    -- internal_margin: Margin
-    -- auto_width: boolean
-    -- auto_height: boolean
-    -- flex_grow: integer
-    -- cross_stretch: boolean
-    -- dir: BoxDirection
-    -- gap: integer
-    -- padding: integer
-    -- decoration_padding: integer
-    -- decoration: DecorationStyle
-    -- children: { Box }
 end
 
 local box = {
@@ -171,8 +154,8 @@ function Box._measure(self: UIElement)
     -- A. If we are fixed size, we don't care about children (optimization)
     -- EXCEPT if we contain content that might overflow (not handled here yet)
     if not element.auto_width and not element.auto_height then
-        element._calculated_w = element.w
-        element._calculated_h = element.h
+        element.calculated_w = element.w
+        element.calculated_h = element.h
         -- We still measure children so they know their own size
         for _, child in ipairs(element.children) do
             if child.measure then child:measure() end
@@ -191,8 +174,8 @@ function Box._measure(self: UIElement)
         end
 
         -- Get child's total footprint (Size + Margins)
-        local child_outer_w = (child._calculated_w or child.w) 
-        local child_outer_h = (child._calculated_h or child.h) 
+        local child_outer_w = (child.calculated_w or child.w) 
+        local child_outer_h = (child.calculated_h or child.h) 
 
         if is_row then
             content_w = content_w + child_outer_w
@@ -206,8 +189,8 @@ function Box._measure(self: UIElement)
     end
 
     -- C. Set our calculated size (Content + Padding)
-    element._calculated_w = element.auto_width and (content_w+element.internal_margin.l+element.internal_margin.r) or element.w
-    element._calculated_h = element.auto_height and (content_h+element.internal_margin.t+element.internal_margin.b) or element.h
+    element.calculated_w = element.auto_width and (content_w+element.internal_margin.l+element.internal_margin.r) or element.w
+    element.calculated_h = element.auto_height and (content_h+element.internal_margin.t+element.internal_margin.b) or element.h
 end
 
 function Box:measure()
@@ -220,8 +203,8 @@ end
 -- =========================================================
 function Box:layout(parent_x: integer, parent_y: integer)
     -- Use calculated sizes if available, otherwise fixed
-    local my_w = (self._calculated_w or self.w) - self.internal_margin.l - self.internal_margin.r
-    local my_h = (self._calculated_h or self.h) - self.internal_margin.t - self.internal_margin.b
+    local my_w = (self.calculated_w or self.w) - self.internal_margin.l - self.internal_margin.r
+    local my_h = (self.calculated_h or self.h) - self.internal_margin.t - self.internal_margin.b
 
     -- Apply our own position (usually passed from parent)
     -- If no parent (root), use self.x/y
@@ -247,8 +230,8 @@ function Box:layout(parent_x: integer, parent_y: integer)
             total_flex = total_flex + child.flex_grow
             -- Don't add to used_space yet, flex takes remainder
         else
-            local child_w = (child._calculated_w or child.w)
-            local child_h = (child._calculated_h or child.h)
+            local child_w = (child.calculated_w or child.w)
+            local child_h = (child.calculated_h or child.h)
 
             if is_row then
                 used_space = used_space + child_w
@@ -267,8 +250,8 @@ function Box:layout(parent_x: integer, parent_y: integer)
 
     for _, child in ipairs(self.children) do
         -- Calculate Final Child Size
-        local child_w = child._calculated_w or child.w
-        local child_h = child._calculated_h or child.h
+        local child_w = child.calculated_w or child.w
+        local child_h = child.calculated_h or child.h
 
         -- Handle Flex
         if child.flex_grow > 0 and total_flex > 0 then
@@ -497,8 +480,8 @@ function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager
         -- pt.rrect(
         --         element.x+element.padding+element.internal_margin.l,
         --         element.y+element.padding+element.internal_margin.t,
-        --         element._calculated_w - 2*element.padding,
-        --         element._calculated_h - 2*element.padding,
+        --         element.calculated_w - 2*element.padding,
+        --         element.calculated_h - 2*element.padding,
         --         0, 28)
 
     -- 2. Draw Children

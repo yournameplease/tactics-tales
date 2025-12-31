@@ -24,8 +24,6 @@ local record TextNode
     func: function(UIContextManager): { string }
     text: { string }
     rows: integer
-
-    _calculated_h: integer
 end
 
 setmetatable(TextNode, { __index = box.Box })
@@ -41,7 +39,7 @@ function TextNode:measure()
     if self.auto_height and text_obj ~= nil then
         local rows = text_obj:get_wrapped_rows()
         self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
-        self._calculated_h = self.h
+        self.calculated_h = self.h
     end
 end
 
