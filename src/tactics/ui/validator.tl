@@ -1,15 +1,13 @@
 local box = require("src/tactics/ui/box")
 
-global record MenuValidator
-
-end 
+local menu_validator = {}
 
 local function get_node_name(_node: box.UIElement, index: integer): string
     return ("child[" .. index .. "]")
 end
 
 --- Recursively validates a UI tree.
-function MenuValidator.validate(node: box.UIElement, path: string)
+function menu_validator.validate(node: box.UIElement, path: string)
     if not node then return end
 
     local is_col = (node.dir == "col")
@@ -63,8 +61,8 @@ function MenuValidator.validate(node: box.UIElement, path: string)
 
     for i, child in ipairs(children) do
         local child_path = path .. " > " .. get_node_name(child, i)
-        MenuValidator.validate(child, child_path)
+        menu_validator.validate(child, child_path)
     end
 end
 
-return MenuValidator
+return menu_validator
