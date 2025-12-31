@@ -9,6 +9,7 @@ local menu_validator = require("src/tactics/ui/validator")
 
 require("profiler")
 
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local tactics_main = require("src/tactics/ui/layout/tactics_main")
 local combat_preview = require("src/tactics/ui/layout/combat_preview")
 local story_page = require("src/tactics/ui/layout/story_page")

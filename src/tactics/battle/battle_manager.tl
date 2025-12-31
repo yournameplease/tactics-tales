@@ -7,7 +7,6 @@ require("src/tactics/data/battles")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
-require("src/tactics/ui/ui_context_manager")
 local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local character_manager = require("src/tactics/character/character_manager")

@@ -1,12 +1,10 @@
-require("src/tactics/ui/types")
 local ui_context = require("src/tactics/ui/ui_context")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
-require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 
-global record UIContextManager
+local record UIContextManager
 
     battle_context: battle_ui_context.BattleUIContext
     story_context: story_ui_context.StoryUIContext
@@ -15,6 +13,10 @@ global record UIContextManager
     layout: UILayoutId
     
 end
+
+local ui_context_manager = {
+    UIContextManager = UIContextManager
+}
 
 function UIContextManager:register_ui_context(ctx: ui_context.UIContext)
     if ctx is battle_ui_context.BattleUIContext then
@@ -42,7 +44,7 @@ function UIContextManager:unregister_ui_context(ctx_type: ui_context.UIContextTy
     end
 end
 
-function UIContextManager.new(): UIContextManager
+function ui_context_manager.new(): UIContextManager
     local self: UIContextManager = setmetatable({}, { __index = UIContextManager })
     self.layout = "TACTICS"
     return self
@@ -76,4 +78,4 @@ function UIContextManager:enrich()
     end
 end
 
-return UIContextManager
+return ui_context_manager
