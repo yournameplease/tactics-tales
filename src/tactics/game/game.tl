@@ -2,6 +2,7 @@ require("src/tactics/debug")
 
 local story = require("src/tactics/story/story")
 require("src/tactics/ui/ui_context_manager")
+local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local Joypad = require("src/tactics/joypad").Joypad
@@ -11,7 +12,7 @@ local story_types = require("src/tactics/story/types")
 local STORY_DATA = require("src/tactics/data/story")
 
 local record Game
-	menu_manager: GameMenuManager
+	menu_manager: game_menu_manager.GameMenuManager
        	
     story: story.Story
 
@@ -47,7 +48,7 @@ function game.new(services: GameServiceBundle): Game
     local game_menu_ctx = game_menu_context.new(
         story_ids
     )
-	self.menu_manager = GameMenuManager.new(game_menu_ctx, self.services.event_bus)
+	self.menu_manager = game_menu_manager.new(game_menu_ctx, self.services.event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 
     local game_ui_ctx = game_ui_context.new(self.services.event_bus, self.menu_manager)
