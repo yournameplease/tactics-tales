@@ -14,10 +14,10 @@ local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_option
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 
 global record GameMenuManager
-    is MenuManager<GameMenuContext>
+    is menu_manager.MenuManager<GameMenuContext>
 end
 
-local MENU_DATA: { MenuId: MenuDefinition<GameMenuContext> } = {
+local MENU_DATA: { MenuId: menu_manager.MenuDefinition<GameMenuContext> } = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
         -- initial_step = "MAIN_MENU",

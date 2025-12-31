@@ -8,22 +8,18 @@ require("src/tactics/battle/tactics/battle_unit")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
--- require("src/tactics/menu/cursor/button_advance_cursor")
--- require("src/tactics/menu/cursor/grid_cursor")
--- require("src/tactics/menu/cursor/list_cursor")
--- require("src/tactics/menu/cursor/multiple_options_cursor")
 
-global record SelectionHistory<GC>
+local record SelectionHistory<GC>
     step: MenuStep
     selection: menu_cursor.MenuCursor<GC>
 end
 
-global record MenuDefinition<GC>
+local record MenuDefinition<GC>
     initial_step: MenuStep
     steps: { MenuStep: menu_cursor.MenuStepDefinition<GC> }
 end
 
-global interface MenuManager<GC>
+local interface MenuManager<GC>
     
     menu_definitions: { MenuId: MenuDefinition }
 
@@ -43,7 +39,7 @@ global interface MenuManager<GC>
     update: function(self, joy: Joypad)
 end
 
-global record BaseMenuManager<GC>
+local record BaseMenuManager<GC>
     is MenuManager<GC>
 
     menu_definitions: { MenuId: MenuDefinition<GC> }

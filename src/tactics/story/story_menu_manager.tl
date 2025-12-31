@@ -97,10 +97,10 @@ end
 
 
 global record StoryMenuManager
-    is MenuManager<StoryMenuContext>
+    is menu_manager.MenuManager<StoryMenuContext>
 end
 
-local MENU_DATA: { MenuId: MenuDefinition<StoryMenuContext> } = {
+local MENU_DATA: { MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
     ["MENU_STORY_TEXT"] = {
         initial_step = "ADVANCE_TEXT",
         steps = {

@@ -11,7 +11,7 @@ local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 
 global record BattleMenuManager
-    is MenuManager<BattleMenuContext>
+    is menu_manager.MenuManager<BattleMenuContext>
 end
 
 
@@ -71,7 +71,7 @@ end
 -- kind
 -- selected_data_mapper -- returns (success bool, data) to store
 -- select_transition
-local MENU_DATA: { MenuId: MenuDefinition<BattleMenuContext> } = {
+local MENU_DATA: { MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
     ["MENU_PLAYER_TURN"] = {
         initial_step = "SELECT_UNIT",
         steps = {
