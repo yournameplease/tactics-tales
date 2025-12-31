@@ -1,12 +1,9 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 
-local record ItemTypes
-end
+local type ItemId = string
 
-global type ItemId = string
-
-global enum ItemType
+local enum ItemType
 	"WEAPON"
 	"ARMOR"
 	"SHIELD"
@@ -14,7 +11,7 @@ global enum ItemType
 	"MISC"
 end
 
-global enum EquipSlot
+local enum EquipSlot
 	"MAIN_HAND"
 	"OFF_HAND"
 	"TWO_HANDS"
@@ -23,9 +20,16 @@ global enum EquipSlot
 	"NONE"
 end
 
-global record ItemSpriteData
+local record ItemSpriteData
 	sprite: integer
 	anchor: Point
 end
 
-return ItemTypes
+local item_types = {
+	ItemId = ItemId,
+	ItemType = ItemType,
+	EquipSlot = EquipSlot,
+	ItemSpriteData = ItemSpriteData,
+}
+
+return item_types

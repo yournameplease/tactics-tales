@@ -1,31 +1,33 @@
-require("src/tactics/character/items/types")
+local item_types = require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 
-local record ItemModule
-	interface Item
-		get_name: function(self): string
-		get_slots: function(self): integer
-		get_type: function(self): ItemType
+local interface Item
+	get_name: function(self): string
+	get_slots: function(self): integer
+	get_type: function(self): item_types.ItemType
 
-		get_equip_slot: function(self): EquipSlot
-		get_sprite_data: function(self): ItemSpriteData
+	get_equip_slot: function(self): item_types.EquipSlot
+	get_sprite_data: function(self): item_types.ItemSpriteData
 
-		get_weapon_data: function(self): wpn.Weapon
+	get_weapon_data: function(self): wpn.Weapon
 
-		get_equipment_effects: function(self): { wpn.EquipmentEffect } 
-	end
+	get_equipment_effects: function(self): { wpn.EquipmentEffect } 
 end
 
-local record ItemImpl
-	is ItemModule.Item
+local item = {
+	Item = Item,
+}
 
-	id: ItemId
+local record ItemImpl
+	is Item
+
+	id: item_types.ItemId
 	name: string
-	type: ItemType
+	type: item_types.ItemType
 	slots: integer
 
-	equip_slot: EquipSlot
-	sprite_data: ItemSpriteData
+	equip_slot: item_types.EquipSlot
+	sprite_data: item_types.ItemSpriteData
 	weapon: wpn.Weapon
 	equipment_effects: { wpn.EquipmentEffect }
 end
@@ -39,15 +41,15 @@ function ItemImpl:get_slots(): integer
 	return self.slots
 end
 
-function ItemImpl:get_type(): ItemType
+function ItemImpl:get_type(): item_types.ItemType
 	return self.type
 end
 
-function ItemImpl:get_equip_slot(): EquipSlot
+function ItemImpl:get_equip_slot(): item_types.EquipSlot
 	return self.equip_slot
 end
 
-function ItemImpl:get_sprite_data(): ItemSpriteData
+function ItemImpl:get_sprite_data(): item_types.ItemSpriteData
 	return self.sprite_data
 end
 
@@ -59,17 +61,17 @@ function ItemImpl:get_equipment_effects(): { wpn.EquipmentEffect }
 	return self.equipment_effects
 end
 
-function ItemModule.new(
-	id: ItemId,
+function item.new(
+	id: item_types.ItemId,
 	name: string,
-	item_type: ItemType,
+	item_type: item_types.ItemType,
 	slots: integer,
-	equip_slot: EquipSlot,
-	sprite_data: ItemSpriteData,
+	equip_slot: item_types.EquipSlot,
+	sprite_data: item_types.ItemSpriteData,
 	equipment_effects: {wpn.EquipmentEffect},
 	weapon: wpn.Weapon
-): ItemModule.Item
-	local item: ItemImpl = {
+): Item
+	local self: ItemImpl = {
 		id = id,
 		name = name,
 		type = item_type,
@@ -79,7 +81,7 @@ function ItemModule.new(
 		equipment_effects = equipment_effects, -- note: copied by reference
 		weapon = weapon
 	}
-	return setmetatable(item, { __index = ItemImpl })
+	return setmetatable(self, { __index = ItemImpl })
 end
 
-return ItemModule
+return item

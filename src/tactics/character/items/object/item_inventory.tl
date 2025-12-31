@@ -1,5 +1,5 @@
 local Item = require("src/tactics/character/items/object/item")
-require("src/tactics/character/items/types")
+local item_types = require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
@@ -10,7 +10,7 @@ local interface ItemInventory
 	get_items: function(self): { Item.Item }
 	get_items_by_slot: function(self): { integer: Item.Item }
 	get_max_slots: function(self): integer
-	get_equipped_items: function(self): { EquipSlot: Item.Item }
+	get_equipped_items: function(self): { item_types.EquipSlot: Item.Item }
 	get_equipped_weapons: function(self): { wpn.Weapon }
 
 	can_equip: function(self, index: integer): boolean
@@ -19,7 +19,7 @@ local interface ItemInventory
 	add_item: function(self, item: Item.Item)
 	equip_item: function(self, index: integer)
 	unequip_item: function(self, index: integer)
-	unequip_item_in_equip_slot: function(self, slot: EquipSlot)
+	unequip_item_in_equip_slot: function(self, slot: item_types.EquipSlot)
 	remove_item: function(self, index: integer)
 	move_item: function(self, index: integer, before_index: integer)
 end
@@ -28,7 +28,7 @@ local record InventoryItem
 	item: Item.Item
 	-- recalculate this when updated 
 	_current_slot: integer
-	equip_slot: EquipSlot
+	equip_slot: item_types.EquipSlot
 end
 	
 
@@ -41,7 +41,7 @@ local record ItemInventoryImpl
 
 	-- recalculate after updates
 	_items_by_slot: { integer: InventoryItem }
-	_items_by_equip_slot: { EquipSlot: InventoryItem }
+	_items_by_equip_slot: { item_types.EquipSlot: InventoryItem }
 	_current_slot_usage: integer
 end
 
@@ -81,9 +81,9 @@ function ItemInventoryImpl:get_max_slots(): integer
 	return self.max_slots
 end
 
-function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
+function ItemInventoryImpl:get_equipped_items(): { item_types.EquipSlot: Item.Item }
 	return maps.map(
-		function(_: EquipSlot, i: InventoryItem): Item.Item
+		function(_: item_types.EquipSlot, i: InventoryItem): Item.Item
 			return i.item
 		end
 	)(self._items_by_equip_slot)
@@ -145,7 +145,7 @@ function ItemInventoryImpl:equip_item(index: integer)
 	assert(slot_to_equip ~= "NONE")
 	assert(slot_to_equip ~= "ANY_HAND", "NOT IMPLEMENTED")
 
-	local slots_to_unequip: {EquipSlot}
+	local slots_to_unequip: {item_types.EquipSlot}
 	if slot_to_equip == "MAIN_HAND" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
 	elseif slot_to_equip == "OFF_HAND" then
@@ -167,7 +167,7 @@ function ItemInventoryImpl:equip_item(index: integer)
 	self._items_by_equip_slot[slot_to_equip] = inventory_item
 end
 
-function ItemInventoryImpl:unequip_item_in_equip_slot(slot: EquipSlot)
+function ItemInventoryImpl:unequip_item_in_equip_slot(slot: item_types.EquipSlot)
 	if (self._items_by_equip_slot[slot] ~= nil) then
 		self._items_by_equip_slot[slot].equip_slot = nil
 		self._items_by_equip_slot[slot] = nil
