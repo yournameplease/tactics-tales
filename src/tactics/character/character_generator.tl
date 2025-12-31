@@ -68,6 +68,7 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 		character.appearance.beard = template.beard_options:pick_random()
 	else
 		character.appearance.hair = template.hair_options_f:pick_random()
+		character.appearance.beard = "none"
 	end
 	character.appearance.eyes = template.eye_options:pick_random()
 
