@@ -1,6 +1,5 @@
 local point = require("src/tactics/util/point")
 require("src/tactics/debug")
-require ("src/tactics/types")
 require ("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
 local event_bus = require("src/tactics/systems/event_bus")

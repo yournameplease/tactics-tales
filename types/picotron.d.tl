@@ -1,3 +1,6 @@
+-- nice utility types
+global type Angle = number
+global type Color = integer
 
 --- @class __MenuItem
 --- @field id? integer Unique identifier, used to sort items (otherwise order added is used)
@@ -156,32 +159,32 @@ global record Picotron
 	mount: function(target: string, origin: string) 
 	include: function(filename: string) : any
 	vid: function(mode: integer) 
-	cls: function(col?: integer) 
-	print: function(value: string | integer, x: integer, y: integer, col?: integer): integer, integer
+	cls: function(col?: Color) 
+	print: function(value: string | integer, x: integer, y: integer, col?: Color): integer, integer
 	clip: function(x: integer, y: integer, w: integer, h: integer, clip_previous?: boolean) 
 	-- clip: function(): integer, integer, integer, integer 
-	pset: function(x: integer, y: integer, col?: integer) 
+	pset: function(x: integer, y: integer, col?: Color) 
 	pget: function(x: integer, y: integer) : integer
 	-- fget: function(n: integer, f: integer) : boolean
 	fget_one: function(n: integer, f: integer) : boolean
 	fget: function(n: integer) : integer
 	fset: function(n: integer, f: integer, val: boolean) 
-	cursor: function(x: integer, y: integer, col?: integer) 
+	cursor: function(x: integer, y: integer, col?: Color) 
 	set_color: function(col: integer) 
 	reset_color: function() 
 	set_camera: function(x: integer, y: integer) : integer, integer
 	reset_camera: function()
 	-- camera: function()
-	circ: function(x: integer, y: integer, r: integer, col?: integer) 
-	circfill: function(x: integer, y: integer, r: integer, col?: integer) 
-	oval: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
-	ovalfill: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
-	line: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
+	circ: function(x: integer, y: integer, r: integer, col?: Color) 
+	circfill: function(x: integer, y: integer, r: integer, col?: Color) 
+	oval: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: Color) 
+	ovalfill: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: Color) 
+	line: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: Color) 
 	-- line: function()  
-	rect: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
-	rrect: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
-	rectfill: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: integer) 
-	rrectfill: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: integer) 
+	rect: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: Color) 
+	rrect: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: Color) 
+	rectfill: function(x0: integer, y0: integer, x1: integer, y1: integer, col?: Color) 
+	rrectfill: function(x: integer, y: integer, w: integer, h: integer, radius?: integer, col?: Color) 
 	set_pal: function(c0: integer, c1: integer, p?: integer) 
 	reset_pal: function() 
 	-- pal: function(c0: integer, argb: integer, p: integer) 
@@ -230,9 +233,9 @@ global record Picotron
 	-- abs: function(n: number) : number
 	abs: function(n: integer) : integer
 	sgn: function(n: number) : integer
-	atan2: function(dx: number, dy: number) : number
-	sin: function(angle: number) : number
-	cos: function(angle: number) : number
+	atan2: function(dx: number, dy: number) : Angle
+	sin: function(angle: Angle) : number
+	cos: function(angle: Angle) : number
 	sqrt: function(n: number) : number
 	peek: function(addr: integer, n?: integer): integer
 	peek2: function(addr: integer, n?: integer): integer
