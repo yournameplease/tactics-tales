@@ -96,7 +96,7 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
 end
 
 
-global record StoryMenuManager
+local record StoryMenuManager
     is menu_manager.MenuManager<StoryMenuContext>
 end
 
@@ -117,7 +117,11 @@ local MENU_DATA: { MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
     }
 }
 
-function StoryMenuManager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): StoryMenuManager
+local story_menu_manager = {
+    StoryMenuManager = StoryMenuManager,
+}
+
+function story_menu_manager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): StoryMenuManager
     return menu_manager.new(
         MENU_DATA,
         ctx,
@@ -125,5 +129,5 @@ function StoryMenuManager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): S
     ) as StoryMenuManager
 end
 
-return StoryMenuManager
+return story_menu_manager
 

@@ -1,12 +1,11 @@
 require("src/tactics/debug")
 
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
-require("src/tactics/battle/battle_menu_manager")
-require("src/tactics/util/data_utils")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
 require("src/tactics/battle/tactics/tactics_engine")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")

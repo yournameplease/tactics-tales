@@ -3,7 +3,7 @@ local Point = point.Point
 local ui_context = require("src/tactics/ui/ui_context")
 local turn_manager =require("src/tactics/turn_manager")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
-require("src/tactics/battle/battle_menu_manager")
+local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
@@ -14,7 +14,7 @@ local record BattleUIContext
     where self.type == "battle"
 
     battle_map: BattleMap
-    battle_menu_manager: BattleMenuManager
+    battle_menu_manager: battle_menu_manager.BattleMenuManager
     turn_manager: turn_manager.TurnManager
     
     hovered_unit: BattleUnit
@@ -29,7 +29,7 @@ local battle_ui_context = {
 
 function battle_ui_context.new(
     map: BattleMap,
-    battle_menu_mgr: BattleMenuManager,
+    battle_menu_mgr: battle_menu_manager.BattleMenuManager,
     turn_mgr: turn_manager.TurnManager
 ): BattleUIContext
     local self: BattleUIContext = setmetatable({

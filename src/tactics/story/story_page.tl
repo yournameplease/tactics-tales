@@ -46,7 +46,7 @@ function rendered_story_node.character_customization(base_character: Character, 
     return node
 end
 
-global record StoryPage
+local record StoryPage
     nodes: {RenderedStoryNode}
 end
 
@@ -76,7 +76,5 @@ end
 function StoryPage:clear_page()
     self.nodes = {}
 end
-
-
 
 return story_page
