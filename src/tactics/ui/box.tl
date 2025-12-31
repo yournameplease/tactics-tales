@@ -1,5 +1,6 @@
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 require("src/tactics/ui/theme")
+local mouse_menu_selection = require("src/tactics/menu/menu_mouse_input")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 
 local record Margin
@@ -45,6 +46,9 @@ local interface UIElement
     measure: function(self)
     layout: function(self, integer, integer)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
+
+    -- nillable
+    get_selection_at: function(self, lx: integer, ly: integer): mouse_menu_selection.MenuMouseSelection
 end
 
 local record Box

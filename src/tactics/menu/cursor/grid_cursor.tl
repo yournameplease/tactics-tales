@@ -16,7 +16,7 @@ end
 
 local record GridMenuCursor<GC>
     is menu_cursor.MenuCursor<GC>
-    where self.type == "CURSOR_GRID"
+    where self.type == "grid"
     point: Point
     x_max: integer
     y_max: integer
@@ -33,7 +33,7 @@ end
 
 local record GridMenuDefinition<GC>
     is menu_cursor.MenuStepDefinition<GC>
-    where self.type == "CURSOR_GRID"
+    where self.type == "grid"
 
     set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean

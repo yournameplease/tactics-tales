@@ -21,7 +21,7 @@ end
 
 local record ListMenuCursor<GC, Value>
     is menu_cursor.MenuCursor<GC>
-    where self.type == "CURSOR_LIST"
+    where self.type == "list"
     i: integer
     options: { ListMenuOption<Value> }
 
@@ -33,7 +33,7 @@ end
 
 local record ListMenuDefinition<GC, Value>
     is menu_cursor.MenuStepDefinition<GC>
-    where self.type == "CURSOR_LIST"
+    where self.type == "list"
     set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
     get_options: function(GC, MenuContext): {ListMenuOption<Value>}
     wrap: boolean

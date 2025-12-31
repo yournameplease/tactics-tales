@@ -27,7 +27,7 @@ end
 
 local record MultipleOptionsMenuCursor<GC>
     is menu_cursor.MenuCursor<GC>
-    where self.type == "CURSOR_MULTIPLE_OPTIONS"
+    where self.type == "multiple_options"
     i: integer
     primary_direction: MultipleOptionsDirection
     wrap: boolean
@@ -48,7 +48,7 @@ end
 
 local record MultipleOptionsMenuDefinition<GC>
     is menu_cursor.MenuStepDefinition<GC>
-    where self.type == "CURSOR_MULTIPLE_OPTIONS"
+    where self.type == "multiple_options"
     primary_direction: MultipleOptionsDirection
     wrap: boolean
     options: { MenuMultipleOptionDefinition<GC> }
@@ -68,7 +68,7 @@ function multiple_options_cursor.option_definition<GC>(props: MenuMultipleOption
 end
 
 function multiple_options_cursor.definition<GC>(props: MultipleOptionsMenuDefinition<GC>): MultipleOptionsMenuDefinition<GC>
-    props.type = "CURSOR_MULTIPLE_OPTIONS"
+    props.type = "multiple_options"
     return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
 end
 
@@ -147,7 +147,7 @@ end
 
 function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>
     local cursor: MultipleOptionsMenuCursor<GC> = {
-        type = "CURSOR_MULTIPLE_OPTIONS",
+        type = "multiple_options",
         i = 1,
         options = lists.do_map(
             self.options,

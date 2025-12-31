@@ -4,10 +4,8 @@ require("src/tactics/config")
 
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-require("src/tactics/battle/battle_menu_manager")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local battle_map = require("src/tactics/battle/battle_map")
-require("src/tactics/util/array_2d")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
@@ -18,6 +16,7 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local mouse_menu_selection = require("src/tactics/menu/menu_mouse_input")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
@@ -39,6 +38,7 @@ local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
+local TILE_WIDTH = CONFIG.TILE_SIZE.x
 local TILE_HEIGHT = CONFIG.TILE_SIZE.y
 local HALF_HEIGHT = TILE_HEIGHT >> 1
 local BASE_TILE_SPRITE = 2 * 256
@@ -371,6 +371,22 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     draw_target_manager:draw(draw_x, 0)
     profile("draw_map_post_rows")
     profile("tactics_map_draw")
+end
+
+-- TODO: consider using unit sprite masks for more accurate grid selection
+function TacticsMap:get_selection_at(
+    lx: integer,
+    ly: integer
+): mouse_menu_selection.MenuMouseSelection
+    local tx = pt.flr(lx / TILE_WIDTH)
+    local ty = pt.flr(ly / TILE_HEIGHT)
+
+    if tx >= 0 and tx < MAP_WIDTH
+        and ty >= 0 and ty < MAP_HEIGHT
+    then
+        return mouse_menu_selection.grid(tx, ty)
+    end
+    return nil
 end
 
 return tactics_map
