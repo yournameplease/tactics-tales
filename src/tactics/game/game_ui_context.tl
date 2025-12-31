@@ -1,7 +1,7 @@
 local event_bus = require("src/tactics/systems/event_bus")
 local ui_context = require("src/tactics/ui/ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
-require("src/tactics/game/game_menu_manager")
+local GameMenuManager = require("src/tactics/game/game_menu_manager").GameMenuManager
 
 global record GameUIContext
     is ui_context.UIContext

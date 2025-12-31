@@ -8,9 +8,13 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 
-global record GameMenuManager
+local record GameMenuManager
     is menu_manager.MenuManager<GameMenuContext>
 end
+
+local game_menu_manager = {
+    GameMenuManager = GameMenuManager
+}
 
 local MENU_DATA: { MenuId: menu_manager.MenuDefinition<GameMenuContext> } = {
     ["MENU_MAIN_MENU"] = {
@@ -87,7 +91,7 @@ local MENU_DATA: { MenuId: menu_manager.MenuDefinition<GameMenuContext> } = {
 
 }
 
-function GameMenuManager.new(ctx: GameMenuContext, bus: event_bus.EventBus): GameMenuManager
+function game_menu_manager.new(ctx: GameMenuContext, bus: event_bus.EventBus): GameMenuManager
     return menu_manager.new(
         MENU_DATA,
         ctx,
@@ -95,5 +99,5 @@ function GameMenuManager.new(ctx: GameMenuContext, bus: event_bus.EventBus): Gam
     ) as GameMenuManager
 end
 
-return GameMenuManager
+return game_menu_manager
 
