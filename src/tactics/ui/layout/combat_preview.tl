@@ -1,5 +1,3 @@
-require("src/tactics/ui/types")
-
 require("src/tactics/config")
 
 local tactics_map = require("src/tactics/ui/panels/tactics_map")
@@ -9,8 +7,6 @@ local event_message_log = require("src/tactics/ui/panels/event_message_log")
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 local BattleSummary = require("src/tactics/ui/panels/battle_summary")
-
-require("src/tactics/ui/validator")
 
 local battle_summary = BattleSummary.new()
 local map = tactics_map.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,

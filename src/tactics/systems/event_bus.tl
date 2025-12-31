@@ -1,4 +1,3 @@
-require("src/tactics/systems/service")
 local id_generator = require("src/tactics/util/id_generator")
 require("src/tactics/debug")
 
@@ -40,8 +39,6 @@ global record EventCallback
 end
 
 local record EventBus
-    is GameService
-    where self.id == "event_bus"
     id_generator: id_generator.IdGenerator
     event_history: { GameEvent }
     listeners: { GameEvent: {EventCallback}}
@@ -51,17 +48,12 @@ local event_bus = {
     EventBus = EventBus
 }
 
-function EventBus:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
-
-end
-
 local MAX_EVENT_HISTORY = 20
 
 function event_bus.new(): EventBus
-    local self: EventBus = setmetatable({
-        id = "event_bus",
-        dependencies = {},
-    }, { __index = EventBus })
+    local self: EventBus = setmetatable({}, {
+        __index = EventBus
+    })
 
     self.id_generator = id_generator.new()
     self.event_history = {}

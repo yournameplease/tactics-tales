@@ -4,8 +4,6 @@ local Point = point.Point
 local array_2d = require("src/tactics/util/array_2d")
 local lists = require("src/tactics/util/lists")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
-require("src/tactics/battle/map/map_generator")
-require("src/tactics/systems/service")
 
 -- tile flags:
 -- 0: empty/solid

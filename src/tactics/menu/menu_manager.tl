@@ -3,8 +3,6 @@ require("src/tactics/debug")
 require ("src/tactics/types")
 require ("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
-require("src/tactics/systems/service")
-require("src/tactics/battle/tactics/battle_unit")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
@@ -31,7 +29,6 @@ local interface MenuManager<GC>
     game_ctx: GC
     event_writer: event_writer.EventWriter
 
-    init: function(self, service_manager: ServiceManager, services: { ServiceId: GameService }) 
     populate_menu_state: function(self, new_step: MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)

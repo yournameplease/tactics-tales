@@ -1,4 +1,3 @@
-require("src/tactics/systems/service")
 require("src/tactics/debug")
 require("src/tactics/types")
 local point = require("src/tactics/util/point")
@@ -234,21 +233,14 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
 
 
 global record AnimationManager
-    is GameService
-    where self.id == "animation_manager"
     active_animations: { AnimationInstance }
     global_frame: integer
 end
 
-function AnimationManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
-    self.active_animations = {}
-    self.global_frame = 0
-end
-
 function AnimationManager.new(): AnimationManager
     return setmetatable({
-        id = "animation_manager",
-        dependencies = {},
+        active_animations = {},
+        global_frame = 0,
     }, { __index = AnimationManager })
 end
 

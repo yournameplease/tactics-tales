@@ -1,6 +1,3 @@
-require("src/tactics/systems/service")
-require("src/tactics/ui/types")
-
 require("src/tactics/config")
 
 local box = require("src/tactics/ui/box")

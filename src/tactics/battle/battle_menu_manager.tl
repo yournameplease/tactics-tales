@@ -2,7 +2,6 @@ require("src/tactics/debug")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src/tactics/util/point").Point
-require("src/tactics/systems/service")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
