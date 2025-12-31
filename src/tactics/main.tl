@@ -39,7 +39,7 @@ require("src/tactics/debug")
 local event_bus = require("src/tactics/systems/event_bus")
 require("src/tactics/character/character_manager")
 require("src/tactics/animation")
-require("src/tactics/ui/ui_manager")
+local ui_mgr = require("src/tactics/ui/ui_manager")
 local game = require("src/tactics/game/game")
 local ui_context_manager = require("src/tactics/ui/ui_context_manager")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
@@ -49,14 +49,14 @@ require("profiler")
 
 local ui_context: ui_context_manager.UIContextManager
 local animation_manager: AnimationManager
-local ui_manager: UIManager
+local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
 
 local game_manager: game.Game
 
 function _init()
     task_manager = tasks.task_manager()
-    ui_manager = UIManager.new()
+    ui_manager = ui_mgr.new()
     animation_manager = AnimationManager.new()
     event_bus = event_bus.new()
 
