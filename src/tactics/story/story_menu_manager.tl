@@ -6,7 +6,8 @@ local sprite_data = require("src/tactics/character/sprite_data")
 local customization_options = sprite_data.customization_options
 local menu_manager = require("src/tactics/menu/menu_manager")
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
+local CharacterAppearanceKey = character.CharacterAppearanceKey
 local event_bus = require("src/tactics/systems/event_bus")
 local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")

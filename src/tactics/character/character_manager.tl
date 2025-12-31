@@ -1,14 +1,12 @@
 require("src/tactics/debug")
 local event_bus = require("src/tactics/systems/event_bus")
 local id_generator = require("src/tactics/util/id_generator")
-require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 require("src/tactics/menu/types")
 require("src/tactics/character/animation_data")
 require("src/tactics/character/items/object/weapon")
-require("src/tactics/animation")
-require("src/tactics/character/object/character")
-local CharacterGenerator = require("src/tactics/character/character_generator")
+local Character = require("src/tactics/character/object/character").Character
+local character_generator = require("src/tactics/character/character_generator")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
 
@@ -37,7 +35,7 @@ local record CharacterManagerImpl
 end
 
 function CharacterManagerImpl:generate_character(template_id: string): Character
-    local character: Character = CharacterGenerator.generate_from_template(
+    local character: Character = character_generator.generate_from_template(
         self.id_generator:get_id(),
         template_id
     )

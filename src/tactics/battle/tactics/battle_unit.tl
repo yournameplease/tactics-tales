@@ -3,22 +3,22 @@ require("src/tactics/character/animation_data")
 require("src/tactics/animation")
 local point = require("src/tactics/util/point")
 local Point = point.Point
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
 require("src/tactics/character/items/object/weapon")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local maps = require("src/tactics/util/maps")
 
 
 local record BattleUnit
-    is DrawableCharacterInstance
+    is character.DrawableCharacterInstance
 
     id: integer
     tile: Point
     hp_current: integer
-    side: Side
+    side: character.Side
     has_acted: boolean
     
-    character: Character
+    character: character.Character
 
     unit_ai: unit_ai.UnitAI
     labels: maps.Set<string>
@@ -30,7 +30,7 @@ end
 
 local battle_unit = {
     BattleUnit = BattleUnit,
-    Side = Side,
+    Side = character.Side,
 }
 
 function BattleUnit:is_player(): boolean
@@ -45,7 +45,7 @@ function BattleUnit:is_enemy(): boolean
     return self.side == "enemy"
 end
 
-function battle_unit.spawn_unit(permanent_unit: Character, tile: Point, labels: {string}, side: Side, ai: unit_ai.UnitAI): BattleUnit
+function battle_unit.spawn_unit(permanent_unit: character.Character, tile: Point, labels: {string}, side: character.Side, ai: unit_ai.UnitAI): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,

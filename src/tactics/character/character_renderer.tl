@@ -8,7 +8,9 @@ local colors = require("src/tactics/colors")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
+local Side = character.Side
+local DrawableCharacterInstance = character.DrawableCharacterInstance
 local sprite_data = require("src/tactics/character/sprite_data")
 local wpn = require("src/tactics/character/items/object/weapon")
 

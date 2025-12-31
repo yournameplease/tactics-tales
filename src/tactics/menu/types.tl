@@ -1,7 +1,7 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 require("src/tactics/joypad")
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Item = require("src/tactics/character/items/object/item")
@@ -50,7 +50,7 @@ global record StorySelection
 end
 
 global record CharacterCustomizationSelection
-    appearance: { CharacterAppearanceKey: string}
+    appearance: { character.CharacterAppearanceKey: string}
 end
 
 -- todo: this should be an interface

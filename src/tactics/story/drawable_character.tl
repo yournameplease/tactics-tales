@@ -1,20 +1,20 @@
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
 
 local record DrawableCharacter
-    is DrawableCharacterInstance
+    is character.DrawableCharacterInstance
 
-    side: Side
+    side: character.Side
     
-    character: Character
+    character: character.Character
 end
 
 local drawable_character = {
     DrawableCharacter = DrawableCharacter
 }
 
-function drawable_character.create_drawable_unit(character: Character, side: Side): DrawableCharacter
+function drawable_character.create_drawable_unit(char: character.Character, side: character.Side): DrawableCharacter
     local instance: DrawableCharacter = {
-        character = character,
+        character = char,
         side = side,
         sprites = {},
     }

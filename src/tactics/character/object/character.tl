@@ -3,18 +3,18 @@ require("src/tactics/character/animation_data")
 local animation = require("src/tactics/animation")
 local ItemInventory = require("src/tactics/character/items/object/item_inventory")
 
-global enum Side
+local enum Side
     "player"
     "enemy"
     "neutral"
 end
 
-global enum Sex
+local enum Sex
     "male"
     "female"
 end 
 
-global enum CharacterAppearanceKey
+local enum CharacterAppearanceKey
 	"head"
 	"hair"
 	"skin"
@@ -26,7 +26,7 @@ global enum CharacterAppearanceKey
 	"headwear"
 end
 
-global record CharacterAppearance
+local record CharacterAppearance
     sex: Sex
 	head: string
     hair: string
@@ -39,13 +39,13 @@ global record CharacterAppearance
 	headwear: string
 end
 
-global record CharacterStats
+local record CharacterStats
     hp_max: integer
     movement: integer
     def: integer
 end
 
-global record Character
+local record Character
     id: integer
     name: string
     appearance: CharacterAppearance
@@ -64,7 +64,7 @@ function Character:get_weapon_range(): integer, integer
 	return weapons[1].min_range, weapons[1].max_range
 end
 
-global interface DrawableCharacterInstance
+local interface DrawableCharacterInstance
 	side: Side
 	has_acted: boolean -- used for outline color...
 	
@@ -75,4 +75,14 @@ global interface DrawableCharacterInstance
 	character: Character
 end
 
-return Character
+local character = {
+	Side = Side,
+	Sex = Sex,
+	CharacterAppearanceKey = CharacterAppearanceKey,
+	CharacterAppearance = CharacterAppearance,
+	CharacterStats = CharacterStats,
+	Character = Character,
+	DrawableCharacterInstance = DrawableCharacterInstance,
+}
+
+return character

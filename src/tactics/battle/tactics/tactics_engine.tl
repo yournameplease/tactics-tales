@@ -16,6 +16,7 @@ local tasks = require("src/tactics/systems/tasks")
 local animation = require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
+local Character = require("src/tactics/character/object/character").Character
 
 local character_manager = require("src/tactics/character/character_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
@@ -147,7 +148,7 @@ function TacticsEngine:spawn_all(
     lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy"))
     lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral"))
 
-    if animation ~= nil and #spawned > 0 then
+    if anim ~= nil and #spawned > 0 then
         local max_offset = 0
         for _,unit in ipairs(spawned) do
             local offset: integer

@@ -5,6 +5,7 @@ local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMe
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
+local character = require("src/tactics/character/object/character")
 
 local record StoryUIContext
     is ui_context.UIContext
@@ -38,13 +39,13 @@ function StoryUIContext:enrich()
     if self.menu_manager.menu_state.menu_id == "MENU_CUSTOMIZE_CHARACTER" then
         local cursor = self.menu_manager.menu_cursor
         assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>)
-        local appearance: { CharacterAppearanceKey: string} = {}
+        local appearance: { character.CharacterAppearanceKey: string} = {}
         for _,o in ipairs(cursor.options) do
             local option_cursor = o.cursor
             assert(option_cursor is list_cursor.ListMenuCursor<StoryMenuContext,string>)
 
             local key = o.key 
-            assert(key is CharacterAppearanceKey)
+            assert(key is character.CharacterAppearanceKey)
             appearance[key] = option_cursor.options[option_cursor.i].value
         end
 

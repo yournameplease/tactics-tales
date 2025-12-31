@@ -5,6 +5,7 @@ local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local Colors = require("src/tactics/colors")
+local DrawableCharacterInstance = require("src/tactics/character/object/character").DrawableCharacterInstance
 
 local record PortraitBox
     is box.UIElement
