@@ -1,6 +1,6 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
-require("src/tactics/character/items/types")
+local item_types = require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 
 local record WeaponDefinition
@@ -18,12 +18,12 @@ end
 
 local record ItemDefinition
 	name: string
-	type: ItemType
+	type: item_types.ItemType
 	slots: integer
 
 	-- Equippables
-	equip_slot: EquipSlot
-	sprite_data: ItemSpriteData
+	equip_slot: item_types.EquipSlot
+	sprite_data: item_types.ItemSpriteData
 	weapon_definition: WeaponDefinition
 	equipment_effects: { wpn.EquipmentEffect }
 

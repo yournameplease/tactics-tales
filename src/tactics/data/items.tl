@@ -1,4 +1,5 @@
 local point = require("src/tactics/util/point")
+local item_types = require("src/tactics/character/items/types")
 require("src/tactics/character/items/object/weapon")
 local item_definition = require("src/tactics/types/item_definition")
 local wpn = require("src/tactics/character/items/object/weapon")
@@ -56,8 +57,8 @@ local default_weapon: item_definition.WeaponDefinition = {
 local function weapon(
     name: string,
     slots: integer,
-    equip_slot: EquipSlot,
-    sprite_data: ItemSpriteData,
+    equip_slot: item_types.EquipSlot,
+    sprite_data: item_types.ItemSpriteData,
     data: item_definition.WeaponDefinition
 ) : item_definition.ItemDefinition
     setmetatable(data, { __index = default_weapon })
