@@ -10,11 +10,11 @@ require("src/tactics/game/game_menu_manager")
 require("src/tactics/systems/service")
 require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
-require("src/tactics/story/story_context")
+require("src/tactics/story/story_menu_context")
 require("src/tactics/story/story")
 require("src/tactics/story/story_page")
 require("src/tactics/ui/ui_context_manager")
-local game_menu_context = require("src/tactics/game/base_game_context")
+local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local Joypad = require("src/tactics/joypad").Joypad
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
