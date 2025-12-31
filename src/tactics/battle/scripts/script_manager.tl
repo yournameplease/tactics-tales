@@ -27,7 +27,7 @@ function ScriptManagerImpl:register_script(
 	script: battle_script.BattleScript
 )
 
-	local event: GameEvent
+	local event: event_bus.GameEvent
 	local filter: function({string: any}): boolean
 
 	local trigger = script.trigger

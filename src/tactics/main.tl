@@ -32,7 +32,7 @@
 -- inheritence? (the human kind)
 ]]
 
-require("src/tactics/systems/tasks")
+local tasks = require("src/tactics/systems/tasks")
 
 require("src/tactics/debug")
 
@@ -50,12 +50,12 @@ require("profiler")
 local ui_context: UIContextManager = {}
 local animation_manager: AnimationManager
 local ui_manager: UIManager
-local task_manager: TaskManager
+local task_manager: tasks.TaskManager
 
 local game_manager: game.Game
 
 function _init()
-    task_manager = TaskManager.new()
+    task_manager = tasks.task_manager()
     ui_manager = UIManager.new()
     animation_manager = AnimationManager.new()
     event_bus = event_bus.new()

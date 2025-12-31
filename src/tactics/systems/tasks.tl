@@ -1,10 +1,14 @@
 require("src/tactics/debug")
 
-global record TaskManager
+local record TaskManager
     tasks: { any }
 end
 
-function TaskManager.new(): TaskManager
+local tasks = {
+    TaskManager = TaskManager,
+}
+
+function tasks.task_manager(): TaskManager
     return setmetatable({
         tasks = {},
     }, { __index = TaskManager })
@@ -28,3 +32,5 @@ function TaskManager:update_tasks()
         end
     end
 end
+
+return tasks

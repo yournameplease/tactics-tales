@@ -1,5 +1,5 @@
 local box = require("src/tactics/ui/box")
-require("src/tactics/systems/event_bus")
+local event_bus = require("src/tactics/systems/event_bus")
 require("src/tactics/ui/components/text_node")
 require("src/tactics/util/text")
 local text_node = require("src/tactics/ui/components/text_node")
@@ -17,7 +17,7 @@ local event_message_log = {}
 function event_message_log.new(props: message_log.MessageLog): box.UIElement
     props.func = function(state: UIContextManager, row_limit: integer): { string }
         return lists.map(
-            function(e: GameEvent): string return "> "..e  end
+            function(e: event_bus.GameEvent): string return "> "..e  end
         )(state.game_context.event_bus:get_event_history(row_limit))
     end
 

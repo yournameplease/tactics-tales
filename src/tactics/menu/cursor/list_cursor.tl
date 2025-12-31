@@ -2,6 +2,7 @@ local menu_cursor = require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/types")
 local lists = require("src/tactics/util/lists")
 local Joypad = require("src/tactics/joypad").Joypad
+local event_bus = require("src/tactics/systems/event_bus")
 
 global enum ListDirection
     "vertical"
@@ -14,7 +15,7 @@ local record ListMenuOption<Value>
     text: string
     value: Value
     next_state: MenuStep
-    send_command: GameEvent
+    send_command: event_bus.GameEvent
 end
 
 local record ListMenuCursor<GC, Value>
@@ -113,7 +114,7 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
-function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): string, GameEvent
+function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): string, event_bus.GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
     end
