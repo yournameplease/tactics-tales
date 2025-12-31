@@ -15,7 +15,9 @@ setmetatable(PortraitBox, { __index = Box })
 
 local FEET_ANCHOR = Point.of(11, 22)
 
-function PortraitBox.new(
+local portrait_box = {}
+
+function portrait_box.new(
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance,
     palette: Colors.PaletteId
 ): PortraitBox
@@ -49,4 +51,4 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
     end
 end
 
-return PortraitBox
+return portrait_box

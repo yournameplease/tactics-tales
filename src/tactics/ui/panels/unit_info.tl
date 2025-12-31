@@ -1,6 +1,6 @@
 require("src/tactics/ui/box")
 local text_node = require("src/tactics/ui/components/text_node")
-require("src/tactics/ui/panels/portrait_box")
+local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
@@ -22,7 +22,7 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     setmetatable(self, { __index = UnitInfo })
 
     local left = self:add(Box.flex_col())
-    left:add(PortraitBox.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
+    left:add(portrait_box.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
     left:add(Box.spacer(1))
 
     local info_col = self:add(Box.new({
