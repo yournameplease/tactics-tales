@@ -1,5 +1,4 @@
 require("src/tactics/debug")
-require("src/tactics/types")
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local lists = require("src/tactics/util/lists")
