@@ -2,6 +2,7 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local ui_context = require("src/tactics/ui/ui_context")
 local turn_manager =require("src/tactics/turn_manager")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 require("src/tactics/battle/battle_menu_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -27,7 +28,7 @@ local battle_ui_context = {
 }
 
 function battle_ui_context.new(
-    battle_map: BattleMap,
+    map: BattleMap,
     battle_menu_mgr: BattleMenuManager,
     turn_mgr: turn_manager.TurnManager
 ): BattleUIContext
@@ -37,7 +38,7 @@ function battle_ui_context.new(
 
     self.layout = "TACTICS"
     
-    self.battle_map = battle_map
+    self.battle_map = map
     self.battle_menu_manager = battle_menu_mgr
     self.turn_manager = turn_mgr
 

@@ -6,7 +6,7 @@ local BattleUnit = battle_unit.BattleUnit
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
-require("src/tactics/battle/battle_map")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 
 local interface ScriptManager

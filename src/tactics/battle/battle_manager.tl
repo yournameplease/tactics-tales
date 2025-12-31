@@ -7,7 +7,7 @@ require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")
 
-require("src/tactics/battle/battle_map")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 require("src/tactics/menu/menu_manager")

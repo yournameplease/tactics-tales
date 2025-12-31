@@ -2,6 +2,7 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 require("src/tactics/battle/pathfinding")
 require("src/tactics/debug")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local lists = require("src/tactics/util/lists")
@@ -119,10 +120,10 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
     return double
 end
 
-local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): integer
+local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: BattleMap): integer
     local accuracy = weapon.accuracy
 
-    local terrain = battle_map:get_terrain(defender.tile)
+    local terrain = map:get_terrain(defender.tile)
     local terrain_avoid = (terrain.dodge or 0)
 
     local unit_avoid = 0
@@ -185,12 +186,12 @@ local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble
     return can_attack(defender, attacker, attack)
 end
 
-local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, battle_map: BattleMap): CombatResult.CombatStep
+local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: BattleMap): CombatResult.CombatStep
     if weapon ~= nil then
         local step: CombatResult.CombatStep = {
             attacker = attacker.unit,
             defender = defender.unit,
-            hit_chance = get_hit_chance(attacker, defender, weapon, battle_map),
+            hit_chance = get_hit_chance(attacker, defender, weapon, map),
             dmg = get_damage(attacker, defender, weapon),
             hit_roll = random.rndi(100)
         }
@@ -200,7 +201,7 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
     return nil
 end
 
-function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): combat_calculator.CombatResult
+function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, map: BattleMap): combat_calculator.CombatResult
     local result: combat_calculator.CombatResult = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -210,7 +211,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], map)
     if step1 ~= nil then
         pt.add(result.steps, step1)
         if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
@@ -218,7 +219,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
 
     -- defender counterattack
     if can_counter_attack(attacker, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
-        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
         end
@@ -227,7 +228,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     return result
 end
 
-function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, battle_map: BattleMap): CombatPreviewResult
+function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, map: BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -238,7 +239,7 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], map)
     if step1 ~= nil then
         pt.add(result.steps, step1)
     end
@@ -246,7 +247,7 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
     -- defender counterattack
 
     if can_counter_attack(attacker, defender, defender_attacks[1]) then
-        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
         end

@@ -6,6 +6,7 @@ require("src/tactics/util/data_utils")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 require("src/tactics/battle/tactics/tactics_engine")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
@@ -40,7 +41,7 @@ local record TurnManagerImpl
 end
 
 function turn_manager.new(
-    battle_map: BattleMap,
+    map: BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
     enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,
@@ -53,7 +54,7 @@ function turn_manager.new(
     self.turn = 1
     self.phase = "PLAYER"
 
-    self.battle_map = battle_map 
+    self.battle_map = map 
     self.tactics_engine = tactics_eng
     self.battle_objective_service = battle_objective_srv
     self.enemy_ai_engine = enemy_ai_eng

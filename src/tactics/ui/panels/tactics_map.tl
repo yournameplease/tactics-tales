@@ -6,7 +6,7 @@ local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/battle/battle_map")
+local battle_map = require("src/tactics/battle/battle_map")
 require("src/tactics/util/array_2d")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
@@ -68,7 +68,7 @@ local record AnimatedUnitPosition
     point: Point
 end
 
-local function compute_animated_unit_positions(battle_map: BattleMap): { AnimatedUnitPosition }
+local function compute_animated_unit_positions(map: battle_map.BattleMap): { AnimatedUnitPosition }
     return lists.map(
             function(unit: BattleUnit): AnimatedUnitPosition
                 local animation_offset = CharacterRenderer.get_animation_offset(unit)
@@ -77,7 +77,7 @@ local function compute_animated_unit_positions(battle_map: BattleMap): { Animate
                     point = unit.tile * TILE_SIZE + animation_offset,
                 }
             end
-    )(battle_map:get_all_units())
+    )(map:get_all_units())
 end
 
 local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
@@ -214,7 +214,7 @@ local function get_path_layer(state: UIContextManager): Userdata
     end
 end
 
-function TacticsMap:draw_map_decorations(layers: MapLayers, z_0: integer, z_1: integer)
+function TacticsMap:draw_map_decorations(layers: battle_map.MapLayers, z_0: integer, z_1: integer)
     local layer_wall_back = layers.terrain.back_wall
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
@@ -243,7 +243,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     profile("draw_map_pre_rows")
     box.Box._draw(self, state, draw_target_manager, ui_theme)
 
-    local battle_map = state.battle_context.battle_map
+    local map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager
 
     local ud_width = self.w - self.internal_margin.l - self.internal_margin.r
@@ -345,7 +345,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local prev_z = 0
     for i=0,#unit_positions-1 do
         local unit_id = sorted_units:get(1, i)
-        local unit = battle_map:get_unit_by_id(unit_id)
+        local unit = map:get_unit_by_id(unit_id)
         local next_z = sorted_units:get(0, i)
         if next_z > prev_z then
             self:draw_map_decorations(layers, prev_z, next_z)
