@@ -2,11 +2,11 @@
 require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text_node = require("src/tactics/ui/components/text_node")
-require("src/tactics/ui/panels/portrait_box")
+local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
-require("src/tactics/ui/panels/portrait_box")
+local portrait_box = require("src/tactics/ui/panels/portrait_box")
 local StoryMenuContext = require("src/tactics/story/story_context").StoryMenuContext
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
@@ -79,7 +79,7 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
                         {auto_height = true, flex_grow = 1}
     					))
                 end
-                child:add(PortraitBox.new(function(_: UIContextManager): DrawableCharacter
+                child:add(portrait_box.new(function(_: UIContextManager): DrawableCharacter
                     return n.character
                 end, nil))
             else
