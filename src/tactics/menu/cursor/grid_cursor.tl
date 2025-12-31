@@ -7,6 +7,12 @@ local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local event_bus = require("src/tactics/systems/event_bus")
 
+local record MenuTileHighlight
+    reachable: boolean
+    valid_selection: boolean
+    can_attack: boolean
+end
+
 local record GridMenuCursor<GC>
     is menu_cursor.MenuCursor<GC>
     where self.type == "CURSOR_GRID"
@@ -38,6 +44,7 @@ local record GridMenuDefinition<GC>
 end
 
 local grid_cursor = {
+    MenuTileHighlight = MenuTileHighlight,
     GridMenuCursor = GridMenuCursor,
     GridMenuDefinition = GridMenuDefinition,
 }

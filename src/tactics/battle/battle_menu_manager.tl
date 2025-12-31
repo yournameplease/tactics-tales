@@ -97,7 +97,7 @@ local MENU_DATA: { MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
                 end,
                 next_state = "SELECT_ACTION",
                 previous_state = "SELECT_UNIT",
-                get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
                     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
                 end,
                 get_max_path_length = function(_: BattleMenuContext, ctx: MenuContext): integer
@@ -141,7 +141,7 @@ local MENU_DATA: { MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
                     return validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, s.point) 
                 end,
                 send_command = "MOVE_AND_ATTACK",
-                get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
+                get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
                     return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
                 end
             }),
