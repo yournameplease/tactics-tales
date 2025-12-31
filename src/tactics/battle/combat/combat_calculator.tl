@@ -1,4 +1,5 @@
-require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 require("src/tactics/battle/pathfinding")
 require("src/tactics/debug")
 local point = require("src/tactics/util/point")

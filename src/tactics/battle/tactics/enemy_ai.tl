@@ -1,7 +1,8 @@
 require("src/tactics/debug")
 
 require("src/tactics/menu/menu_manager")
-require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local pathfinding = require("src/tactics/battle/pathfinding")

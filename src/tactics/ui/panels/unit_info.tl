@@ -5,6 +5,8 @@ require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
 local wpn = require("src/tactics/character/items/object/weapon")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 
 global record UnitInfo
     is UIElement

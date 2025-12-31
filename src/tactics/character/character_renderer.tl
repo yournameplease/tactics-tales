@@ -6,7 +6,8 @@ local Point = point.Point
 local draw = require("src/tactics/draw")
 local colors = require("src/tactics/colors")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 require("src/tactics/character/object/character")
 local sprite_data = require("src/tactics/character/sprite_data")
 local wpn = require("src/tactics/character/items/object/weapon")
@@ -275,13 +276,13 @@ function character_renderer.draw(
 end
 
 local function draw_health_bar(
-	battle_unit: BattleUnit,
+	unit: BattleUnit,
 	draw_point: Point
 )
-	local flip_h = battle_unit.side == "enemy"
+	local flip_h = unit.side == "enemy"
 
-	local hp_current = battle_unit.hp_current
-	local hp_max = battle_unit.character.stats.hp_max
+	local hp_current = unit.hp_current
+	local hp_max = unit.character.stats.hp_max
 	local cell_width = pt.flr((MAX_HEALTH_BAR_WIDTH-1) / hp_max)
 	--TODO: switch to continuous renderer if cell_width < 1
 	cell_width = pt.max(cell_width, 1)
@@ -313,15 +314,15 @@ end
 
 
 function character_renderer.draw_health_bar(
-	battle_unit: BattleUnit,
+	unit: BattleUnit,
 	draw_point: Point,
 	set_pal: boolean,
 	apply_animation: boolean
 )
     -- TODO: consider pre-rendering some of this
-    local flip_h = battle_unit.side == "enemy"
+    local flip_h = unit.side == "enemy"
 
-	local animation_frame = get_animation_frame(battle_unit)
+	local animation_frame = get_animation_frame(unit)
 
 	local offset = animation_frame.offset
 	if not apply_animation then
@@ -338,12 +339,12 @@ function character_renderer.draw_health_bar(
 	)
     
     if set_pal then
-        set_palette(battle_unit, true)
+        set_palette(unit, true)
     end
 
     local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, point.of(0,0), flip_h, false)
 	local health_bar_anchor = head_anchor - point.of(0,9)
-    draw_health_bar(battle_unit, health_bar_anchor)
+    draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
         pt.reset_pal()

@@ -3,6 +3,8 @@ local Point = point.Point
 local ui_context = require("src/tactics/ui/ui_context")
 local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 

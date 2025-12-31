@@ -1,4 +1,6 @@
 require("src/tactics/battle/battle_map")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 
 local record BattleObjectiveService
     battle_map: BattleMap
