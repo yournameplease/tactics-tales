@@ -5,7 +5,7 @@ local draw_target_manager = require("src/tactics/draw/draw_target_manager")
 
 local box = require("src/tactics/ui/box")
 
-require("src/tactics/ui/validator")
+local menu_validator = require("src/tactics/ui/validator")
 
 require("profiler")
 
@@ -44,7 +44,7 @@ function UIManager.new(): UIManager
 
     -- Validate layouts
     for id, v in pairs(self.layouts) do
-        MenuValidator.validate(v.root, id)
+        menu_validator.validate(v.root, id)
     end
 
     self.current_layout = self.layouts.TACTICS
