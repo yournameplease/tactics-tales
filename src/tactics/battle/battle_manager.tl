@@ -125,7 +125,9 @@ function BattleManager:teardown()
 end
 
 function BattleManager:update(joy: Joypad)
-    self.battle_menu_manager:update(joy)
+    if not self.tactics_engine.battle_is_blocked then
+        self.battle_menu_manager:update(joy)
+    end
     self.tactics_engine:update()
 end
 
