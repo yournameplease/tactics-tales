@@ -53,16 +53,16 @@ function StoryUIContext:enrich()
 
         local drawable_character = character_customizer_node.character
         drawable_character.character.appearance = {}
-        -- local any_change = false
+        local any_change = false
         for k,a in pairs(appearance) do
-            -- if drawable_character.character.appearance[k] ~= a then
+            if drawable_character.character.appearance[k] ~= a then
                 drawable_character.character.appearance[k] = a
-                -- any_change = true
-            -- end
+                any_change = true
+            end
         end
-        -- if any_change then
+        if any_change then
             drawable_character.sprites = {}
-        -- end
+        end
     end
 end
 

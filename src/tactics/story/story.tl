@@ -129,6 +129,7 @@ function Story:create_character(ctx: MenuContext)
 
     self.customized_character.appearance = {}
     for k,a in pairs(appearance) do
+        LOG.debug("Setting character appearance", k, a)
         self.customized_character.appearance[k] = a
     end
     self.character_manager:persist_player(self.customized_character)

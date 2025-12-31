@@ -1,4 +1,5 @@
 require("src/tactics/character/object/character")
+local lists = require("src/tactics/util/lists")
 
 local interface NamedSpriteData
 	name: string
@@ -500,6 +501,112 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 	},
 }
 
+--- Ordered options, for character selection
+
+local HEAD_OPTIONS = {
+	"round",
+	"strong_chin",
+	"narrow_chin",
+}
+
+local HAIR_OPTIONS = {
+	"bald",
+	"pompadour",
+	"short",
+	"wavy",
+	"afro_a",
+	"buzz_a",
+	"emo",
+	"balding",
+	"flat_top",
+	"bob_bangs",
+	"bob_a",
+	"bob_b",
+	"bob_c",
+	"afro_b",
+	"pigtails",
+	"bun",
+	"buzz_b",	
+}
+
+local HAIR_COLOR_OPTIONS = lists.merge(
+	NATURAL_HAIR_COLORS,
+	UNNATURAL_HAIR_COLORS
+)
+
+local FACIAL_HAIR_OPTIONS = {
+	"none",
+	"beard",
+	"handlebar",
+	"walrus",
+	"sideburns",
+	"chin_beard",
+	"goatee",
+	"bushy_beard",
+	"long_beard",
+}
+
+local EYES_OPTIONS = {
+	"a",
+	"b",
+	"c",
+	"d",
+	"e",
+	"f",
+	"g",
+	"h",
+}
+
+local EYEWEAR_OPTIONS = {
+	"none",
+	"glasses_a",
+	"glasses_b",
+	"glasses_c",
+	"monacle_l",
+	"monacle_r",
+	"mask",
+	"eyepatch_l",
+	"eyepatch_r",
+}
+
+local SKIN_COLOR_OPTIONS = {
+	"a",
+	"b",
+	"c",
+	"d",
+}
+
+local BODY_CLASS_OPTIONS = {
+	"default",
+	"sleeveless",
+	"shirtless",
+	"robed",
+}
+
+local HEADWEAR_OPTIONS = {
+	"none",
+	"hood",
+	"cultist_hood",
+	"wizard_hat",
+	"hooded_wizard_hat",
+	"fancy_hat",
+	"animal_mask",
+	"bandana",
+	"outlaw_hat",
+}
+
+local customization_options = {
+	HEAD = HEAD_OPTIONS,
+	HAIR = HAIR_OPTIONS,
+	HAIR_COLOR = HAIR_COLOR_OPTIONS,
+	FACIAL_HAIR = FACIAL_HAIR_OPTIONS,
+	EYES = EYES_OPTIONS,
+	EYEWEAR = EYEWEAR_OPTIONS,
+	SKIN_COLOR = SKIN_COLOR_OPTIONS,
+	BODY_CLASS = BODY_CLASS_OPTIONS,
+	HEADWEAR = HEADWEAR_OPTIONS,
+}
+
 
 local sprite_data = {
 	NamedSpriteData = NamedSpriteData,
@@ -519,6 +626,9 @@ local sprite_data = {
 	SKIN_COLOR = SKIN_COLOR,
 	BODY_CLASS = BODY_CLASS,
 	HEADWEAR = HEADWEAR,
+
+	customization_options = customization_options,
 }
 
 return sprite_data
+

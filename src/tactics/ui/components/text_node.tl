@@ -36,12 +36,10 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 function TextNode:measure()
     Box._measure(self)
 
-    LOG.debug("Measuring text node")
     local text_obj = self.text_object
     
     if self.auto_height and text_obj ~= nil then
         local rows = text_obj:get_wrapped_rows()
-        LOG.debug("Measuring text node rows: ", rows)
         self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
         self._calculated_h = self.h
     end
