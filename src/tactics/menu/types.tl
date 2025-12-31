@@ -49,7 +49,7 @@ global record StorySelection
 end
 
 global record CharacterCustomizationSelection
-    appearance: { CharacterAppearanceKey: integer}
+    appearance: { CharacterAppearanceKey: string}
 end
 
 -- todo: this should be an interface

@@ -10,13 +10,6 @@ global enum Side
     "neutral"
 end
 
-global SKIN_COLORS: { { Color, Color } } = {
-    {15, 31},
-    {31, 4},
-    {4, 20},
-    {20, 21}
-}
-
 global enum Sex
     "male"
     "female"
@@ -36,16 +29,15 @@ end
 
 global record CharacterAppearance
     sex: Sex
-	head: integer
-    hair: integer
-    skin: integer
-    hair_color: integer
-    body_class: integer
-    beard: integer
-    -- beard_color: Color
-    eyes: integer
-	eyewear: integer
-	headwear: integer
+	head: string
+    hair: string
+    skin: string
+    hair_color: string
+    body_class: string
+    beard: string
+    eyes: string
+	eyewear: string
+	headwear: string
 end
 
 global record CharacterStats

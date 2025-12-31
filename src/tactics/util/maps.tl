@@ -13,12 +13,39 @@ function maps.set<Value>(values: {Value}): Set<Value>
     return out
 end
 
-function maps.map<Key, From, To>(m: {Key: From}, fn: function(From): To): { Key: To }
+function maps.do_map<Key, From, To>(m: {Key: From}, fn: function(Key, From): To): { Key: To }
     local out = {}
     for k,v in pairs(m) do
-        out[k] = fn(v)
+        out[k] = fn(k, v)
     end
     return out
+end
+
+function maps.map<Key, From, To>(fn: function(Key, From): To): function(m: {Key: From}) : { Key: To }
+    return function(m: {Key: From}): { Key: To }
+        return maps.do_map(m, fn)
+    end
+end
+
+local function full_map<KeyFrom, KeyTo, From, To>(
+    m: {KeyFrom: From},
+    key_fn: function(KeyFrom, From): KeyTo,
+    val_fn: function(KeyFrom, From): To
+): { KeyTo: To }
+    local out = {}
+    for k,v in pairs(m) do
+        out[key_fn(k, v)] = val_fn(k, v)
+    end
+    return out
+end
+
+function maps.full_map<KeyFrom, KeyTo, From, To>(
+    key_fn: function(KeyFrom, From): KeyTo,
+    val_fn: function(KeyFrom, From): To
+) : function({KeyFrom: From}): { KeyTo: To }
+    return function(m: {KeyFrom: From}): { KeyTo: To }
+        return full_map(m, key_fn, val_fn)
+    end
 end
 
 function maps.do_get_at<K,V>(m: {K: V}, k: K): V 
@@ -29,6 +56,40 @@ function maps.get_at<K,V>(m: {K: V}): function(k: K): V
     return function(k: K): V
         return maps.do_get_at(m,k)
     end
+end
+
+function maps.to_list<Key, Value>(m: {Key: Value}): {Value}
+    --todo: add a sort function
+    local out: {Value} = {}
+    for _,v in pairs(m) do
+        pt.add(out, v)
+    end
+    return out
+end
+
+function maps.collect<Key,Value,ListValue>(
+    list: {ListValue},
+    key_fn: function(ListValue): Key,
+    value_fn: function(ListValue): Value
+): {Key: Value}
+    local out = {}
+    for _,elem in ipairs(list) do
+        out[key_fn(elem)] = value_fn(elem)
+    end
+    return out
+end
+
+function maps.merge<Key, Value>(...: {Key: Value}): {Key: Value}
+    local ms = {...}
+    local out: {Key: Value} = {}
+    for _,m in ipairs(ms) do
+        for k,v in pairs(m) do
+            if out[k] == nil then
+                out[k] = v
+            end
+        end
+    end
+    return out
 end
 
 return maps

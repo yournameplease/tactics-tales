@@ -53,7 +53,7 @@ local type BaseAnimation = { AnimationFrameName: BaseAnimationFrame }
 global type Animation = { AnimationFrameName: AnimationFrame }
 
 
-local BASE_FRAMES: { BaseAnimationName: BaseAnimation } = {
+local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimation } = {
     BACK_HAND = {
         idle_1 = {
             sprite_offset = 0,
@@ -179,7 +179,13 @@ local function frame_from_base_frame(s: integer, base_frame: BaseAnimationFrame 
 end
 
 local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
-    return maps.map(BASE_FRAMES[base_frame], function (f: BaseAnimationFrame): AnimationFrame return frame_from_base_frame(s, f) end)
+    local base_animation: BaseAnimation = BASE_FRAMES[base_frame]
+
+    return maps.map(
+        function (_: AnimationFrameName, f: BaseAnimationFrame): AnimationFrame
+            return frame_from_base_frame(s, f)
+        end
+    )(base_animation)
 end
 
 local ANIMATION_DATA: { AnimationName: Animation } = {

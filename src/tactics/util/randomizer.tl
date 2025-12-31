@@ -1,8 +1,6 @@
 require("src/tactics/util")
 local random = require("src/tactics/util/random")
 local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
-
 
 local interface Randomizer<V>
 	pick_random: function(self): V
@@ -39,7 +37,9 @@ local randomizer = {
 
 function randomizer.weighted_option_selector.of<V>(...: V): WeightedOptionSelector<V>
 	local array = {...}
-	local options: {WeightedOption<V>} = maps.map(array, function(v: V): WeightedOption<V> return { v, 1 } end)
+	local options: {WeightedOption<V>} = lists.map(
+		function(v: V): WeightedOption<V> return { v, 1 } end
+	)(array)
 	return setmetatable({
 		options = options,
 		total_weight = #array
@@ -55,6 +55,26 @@ function randomizer.weighted_option_selector.of_weighted<V>(...: WeightedOption<
 			function(o: WeightedOption<V>): number return o[2] end
 			) as integer
 	}, { __index = WeightedOptionSelector })
+end
+
+function randomizer.weighted_option_selector.of_recursive<V>(...: WeightedOption<WeightedOptionSelector<V>>): WeightedOptionSelector<V>
+	local array: {WeightedOption<WeightedOptionSelector<V>>} = {...}
+	--uhhhh
+	-- lua is not great for fp lolll
+	local options = lists.flat_map(
+		function(o: WeightedOption<WeightedOptionSelector<V>>): {WeightedOption<V>}
+			local weight = o[2]
+			return lists.map(
+				function(n_o: WeightedOption<V>): WeightedOption<V>
+					return { n_o[1], n_o[2]*weight }
+				end
+			)(o[1].options)
+		end
+	)(array)
+	
+	return randomizer.weighted_option_selector.of_weighted(
+		table.unpack(options)
+	)
 end
 
 function WeightedOptionSelector:pick_random(): V
