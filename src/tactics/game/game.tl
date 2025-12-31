@@ -1,7 +1,7 @@
 require("src/tactics/debug")
 
 local story = require("src/tactics/story/story")
-require("src/tactics/ui/ui_context_manager")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")

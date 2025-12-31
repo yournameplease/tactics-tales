@@ -1,5 +1,6 @@
 local menu_cursor = require("src/tactics/menu/menu_cursor")
-require("src/tactics/menu/types")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local lists = require("src/tactics/util/lists")
 local Joypad = require("src/tactics/joypad").Joypad
 local event_bus = require("src/tactics/systems/event_bus")
@@ -14,7 +15,7 @@ end
 local record ListMenuOption<Value>
     text: string
     value: Value
-    next_state: MenuStep
+    next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
 end
 
@@ -114,14 +115,14 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
-function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): string, event_bus.GameEvent
+function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): string, event_bus.GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state, self.options[self.i].send_command
 end
 
-function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: MenuState): menu_cursor.MenuCursor<GC>
+function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor<GC>
     local cursor: ListMenuCursor<GC, Value> = {
         type = "CURSOR_LIST",
         i = 1,

@@ -1,5 +1,6 @@
 local menu_cursor = require("src/tactics/menu/menu_cursor")
-require("src/tactics/menu/types")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local lists = require("src/tactics/util/lists")
 local event_bus = require("src/tactics/systems/event_bus")
 local Joypad = require("src/tactics/joypad").Joypad
@@ -36,7 +37,7 @@ local record MultipleOptionsMenuCursor<GC>
     send_command: event_bus.GameEvent
 end
 
-function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
+function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuMultipleOptionCursor<GC>
     return {
         text = self.text,
         key = self.key,
@@ -132,7 +133,7 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
     end
 end
 
-function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, event_bus.GameEvent
+function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string, event_bus.GameEvent
     if self.primary_direction == "select" and self.i ~= #self.options then
         self.i = self.i + 1
         return nil, nil
@@ -144,7 +145,7 @@ function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuCon
     end
 end
 
-function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): menu_cursor.MenuCursor<GC>
+function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>
     local cursor: MultipleOptionsMenuCursor<GC> = {
         type = "CURSOR_MULTIPLE_OPTIONS",
         i = 1,

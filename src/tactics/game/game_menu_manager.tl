@@ -1,6 +1,7 @@
 
 require("src/tactics/debug")
-require("src/tactics/menu/types")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
 local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
@@ -16,7 +17,7 @@ local game_menu_manager = {
     GameMenuManager = GameMenuManager
 }
 
-local MENU_DATA: { MenuId: menu_manager.MenuDefinition<GameMenuContext> } = {
+local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContext> } = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
         -- initial_step = "MAIN_MENU",

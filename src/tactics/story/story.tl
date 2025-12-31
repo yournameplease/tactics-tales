@@ -1,9 +1,8 @@
 
 require("src/tactics/debug")
 
-require("src/tactics/data/battles")
-
 local animation = require("src/tactics/animation")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local battle_manager = require("src/tactics/battle/battle_manager")
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local character_manager = require("src/tactics/character/character_manager")

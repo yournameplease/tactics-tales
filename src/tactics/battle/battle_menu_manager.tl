@@ -9,6 +9,8 @@ local BattleMenuContext = require("src/tactics/battle/battle_menu_context").Batt
 local array_2d = require("src/tactics/util/array_2d")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 
 local record BattleMenuManager
     is menu_manager.MenuManager<BattleMenuContext>
@@ -71,7 +73,7 @@ end
 -- kind
 -- selected_data_mapper -- returns (success bool, data) to store
 -- select_transition
-local MENU_DATA: { MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
+local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
     ["MENU_PLAYER_TURN"] = {
         initial_step = "SELECT_UNIT",
         steps = {

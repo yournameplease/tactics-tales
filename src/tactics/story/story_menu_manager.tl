@@ -1,7 +1,6 @@
 require("src/tactics/debug")
-require("src/tactics/menu/types")
-require("src/tactics/menu/menu_manager")
-require("src/tactics/story/story_page")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local sprite_data = require("src/tactics/character/sprite_data")
 local customization_options = sprite_data.customization_options
 local menu_manager = require("src/tactics/menu/menu_manager")
@@ -99,7 +98,7 @@ local record StoryMenuManager
     is menu_manager.MenuManager<StoryMenuContext>
 end
 
-local MENU_DATA: { MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
+local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
     ["MENU_STORY_TEXT"] = {
         initial_step = "ADVANCE_TEXT",
         steps = {

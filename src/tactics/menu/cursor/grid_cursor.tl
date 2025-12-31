@@ -1,7 +1,8 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local menu_cursor = require("src/tactics/menu/menu_cursor")
-require("src/tactics/menu/types")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local Joypad = require("src/tactics/joypad").Joypad
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
@@ -26,7 +27,7 @@ local record GridMenuCursor<GC>
     -- from definition
     set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
-    next_state: MenuStep
+    next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
 end
 
@@ -36,7 +37,7 @@ local record GridMenuDefinition<GC>
 
     set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
-    next_state: MenuStep
+    next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
     get_legal_tiles: function(GC, MenuContext): array_2d.Array2D<MenuTileHighlight>
     get_path_anchor: function(GC, MenuContext): Point
@@ -79,7 +80,7 @@ end
 function GridMenuCursor:handle_select(
     game_ctx: GC,
     menu_ctx: MenuContext,
-    menu_state: MenuState
+    menu_state: menu_types.MenuState
 ): string, event_bus.GameEvent
     local validation = self.validator(self, game_ctx, menu_ctx)
     if not validation then return end
@@ -92,7 +93,7 @@ end
 function GridMenuDefinition:to_cursor(
     game_ctx: GC,
     menu_ctx: MenuContext,
-    menu_state: MenuState
+    menu_state: menu_types.MenuState
 ): menu_cursor.MenuCursor<GC>
     local cursor: GridMenuCursor<GC> = {
         type = "CURSOR_GRID",
