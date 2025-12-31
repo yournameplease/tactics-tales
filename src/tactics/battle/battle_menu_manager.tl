@@ -1,5 +1,5 @@
 require("src/tactics/debug")
-require("src/tactics/types")
+local Point = require("src/tactics/util/point").Point
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")

@@ -1,4 +1,3 @@
-require("src/tactics/types")
 require("src/tactics/animation")
 local drawable_character = require("src/tactics/story/drawable_character")
 

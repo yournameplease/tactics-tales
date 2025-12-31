@@ -1,3 +1,5 @@
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local ui_context = require("src/tactics/ui/ui_context")
 local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
@@ -51,8 +53,8 @@ function BattleUIContext:enrich()
 
     if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
-            local point = selection.point
-            local unit = self.battle_map:get_at_tile(point)
+            local selection_point = selection.point
+            local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
                 self.last_hovered_unit = unit
@@ -60,8 +62,8 @@ function BattleUIContext:enrich()
         end
 
         if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
-            local point = selection.point
-            local unit = self.battle_map:get_at_tile(point)
+            local selection_point = selection.point
+            local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
                 self.layout = "COMBAT_PREVIEW"

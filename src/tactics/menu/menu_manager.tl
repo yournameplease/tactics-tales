@@ -1,3 +1,4 @@
+local point = require("src/tactics/util/point")
 require("src/tactics/debug")
 require ("src/tactics/types")
 require ("src/tactics/menu/types")
@@ -64,7 +65,7 @@ function menu_manager.new<GC>(
     self.menu_definitions = menu_definitions
 
     self.menu_state = {
-        point = Point.of(0, 0)
+        point = point.of(0, 0)
     }
     self.menu_ctx = {
         metadata = {}

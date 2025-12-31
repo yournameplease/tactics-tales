@@ -1,4 +1,3 @@
-require("src/tactics/types")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/theme")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager

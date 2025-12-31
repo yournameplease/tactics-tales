@@ -1,6 +1,5 @@
 require("src/tactics/debug")
 
-require("src/tactics/types")
 require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")

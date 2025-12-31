@@ -1,4 +1,5 @@
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 require("src/tactics/data/maps")
 require("src/tactics/battle/battle_map")
 local MAP_DEFINITIONS = require("src/tactics/data/maps")
@@ -98,12 +99,12 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         for y = 0,metatiles_layer:width()-1 do
             local metatile = metatiles_layer:get(x, y) - BASE_METATILE
             if labels_by_metatile[metatile] ~= nil then
-                local point = Point.of(x, y)
+                local p = point.of(x, y)
                 for _,label in ipairs(labels_by_metatile[metatile]) do
                     if labels[label] == nil then
                         labels[label] = {}
                     end
-                    pt.add(labels[label], point)
+                    pt.add(labels[label], p)
                 end
             end
         end

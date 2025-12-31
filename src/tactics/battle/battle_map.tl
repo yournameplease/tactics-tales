@@ -1,4 +1,5 @@
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local fp = require("src/tactics/util/fp")
 local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
@@ -200,7 +201,7 @@ end
 
 function BattleMap:tile_has_distance_from_tile(t1: Point, t2: Point, min_distance: integer, max_distance: integer): boolean
     max_distance = max_distance or min_distance
-    local distance = taxicab_distance(t1, t2)
+    local distance = point.taxicab_distance(t1, t2)
     return distance >= min_distance and distance <= max_distance
 end
 

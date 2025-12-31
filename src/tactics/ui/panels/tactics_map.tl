@@ -14,7 +14,8 @@ local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
 local lists = require("src/tactics/util/lists")
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
@@ -45,7 +46,7 @@ local CURSOR_SPRITE = 8
 
 local TEXT_HEIGHT = 7
 
-local FOOT_GROUND_ANCHOR = Point.of(8,12)
+local FOOT_GROUND_ANCHOR = point.of(8,12)
 
 function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
     local box = Box.new(props) as TacticsMap

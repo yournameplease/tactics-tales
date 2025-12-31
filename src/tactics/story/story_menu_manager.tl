@@ -1,5 +1,4 @@
 require("src/tactics/debug")
-require("src/tactics/types")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/joypad")
@@ -16,7 +15,6 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 
 local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
 
 local function set_character_customization_option(
     key: CharacterAppearanceKey

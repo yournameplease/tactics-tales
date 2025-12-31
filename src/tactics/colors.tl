@@ -1,5 +1,3 @@
-require("src/tactics/types")
-
 --https://www.lexaloffle.com/bbs/?tid=149249
 
 local RAINBOW: {{Color, Color}} = {

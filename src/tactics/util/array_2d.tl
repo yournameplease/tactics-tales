@@ -2,7 +2,8 @@
 --- Data structure with a 0-indexed 2d array
 --- with utilities for point access
 
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 
 local interface Array2D<V>
     w: integer
@@ -73,7 +74,7 @@ end
 function Array2DImpl:foreachpoint(fn: function(point: Point, v: V))
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
-            fn(Point.of(x-1, y-1), v)
+            fn(point.of(x-1, y-1), v)
         end
     end
 end

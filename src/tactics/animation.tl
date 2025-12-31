@@ -1,6 +1,8 @@
 require("src/tactics/systems/service")
 require("src/tactics/debug")
 require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local lists = require("src/tactics/util/lists")
 require("src/tactics/character/animation_data")
 
@@ -136,7 +138,7 @@ function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: 
 
     local direction = self.direction
     local offset = track[self.frame]
-    return Point.of_angle(direction, offset)
+    return point.of_angle(direction, offset)
 end
 
 global record GlobalAnimationInstance
@@ -155,7 +157,7 @@ function GlobalAnimationInstance:get_sprite_frame_name(global_frame: integer): A
 end
 
 function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): Point
-    return Point.of(0, 0)
+    return point.of(0, 0)
 end
 
 global record AnimationFrameData

@@ -2,6 +2,8 @@ require("src/tactics/debug")
 
 require("src/tactics/menu/menu_manager")
 require("src/tactics/battle/tactics/battle_unit")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -103,19 +105,19 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             end
         end
         -- follow until first tile in range
-        local point = min_cost_deep_move.destination
-        while all_tile_costs:get_point(point).cost > unit.character.stats.movement
-            or not self.battle_map:tile_is_legal_destination(unit, point) do
-            point = all_tile_costs:get_point(point).prev
+        local current_point = min_cost_deep_move.destination
+        while all_tile_costs:get_point(current_point).cost > unit.character.stats.movement
+            or not self.battle_map:tile_is_legal_destination(unit, current_point) do
+            current_point = all_tile_costs:get_point(current_point).prev
         end
 
-        local path = pathfinding.get_path_to_tile(all_tile_costs, point)
+        local path = pathfinding.get_path_to_tile(all_tile_costs, current_point)
 
         local action_ctx = {
             acting_unit = { unit = unit },
-            destination = { point = point, path = path }
+            destination = { point = current_point, path = path }
         }
-        LOG.info(unit.id .. " will move to "..point.x..","..point.y)
+        LOG.info(unit.id .. " will move to "..current_point.x..","..current_point.y)
         self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
     else
         LOG.warn("WARN: No valid moves for "..unit.id.. "!")

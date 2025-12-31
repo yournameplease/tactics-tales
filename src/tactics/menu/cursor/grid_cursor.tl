@@ -1,3 +1,5 @@
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/types")
 local Joypad = require("src/tactics/joypad").Joypad
