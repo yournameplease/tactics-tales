@@ -1,16 +1,6 @@
 require("src/tactics/debug")
 
-require("src/tactics/systems/tasks")
-
-require("src/tactics/data/battles")
-
-require("src/tactics/battle/battle_manager")
-require("src/tactics/game/game_menu_manager")
-require("src/tactics/turn_manager")
-require("src/tactics/battle/tactics/enemy_ai")
-require("src/tactics/story/story_menu_context")
-require("src/tactics/story/story")
-require("src/tactics/story/story_page")
+local story = require("src/tactics/story/story")
 require("src/tactics/ui/ui_context_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
@@ -20,27 +10,31 @@ local GameServiceBundle = require("src/tactics/systems/service/game_service_bund
 local story_types = require("src/tactics/story/types")
 local STORY_DATA = require("src/tactics/data/story")
 
-global record Game
+local record Game
 	menu_manager: GameMenuManager
        	
-    story: Story
+    story: story.Story
 
     services: GameServiceBundle
 end
+
+local game = {
+    Game = Game
+}
 
 function Game:begin_story(ctx: MenuContext)
     local story_id = "test_story"
     if ctx.story ~= nil then
         story_id = ctx.story.id
     end
-    self.story = Story.new(story_id, self.services)
+    self.story = story.new(story_id, self.services)
 end
 
 function Game:exit_story()
     self.story:teardown()
 end
 
-function Game.new(services: GameServiceBundle): Game 
+function game.new(services: GameServiceBundle): Game 
 
     local story_ids: {story_types.StoryId} = {}
     for id,_ in pairs(STORY_DATA) do
@@ -85,4 +79,4 @@ function Game:update(joy: Joypad)
     end
 end
 
-return Game
+return game

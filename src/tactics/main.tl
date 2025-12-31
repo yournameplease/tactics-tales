@@ -40,23 +40,19 @@ local event_bus = require("src/tactics/systems/event_bus")
 require("src/tactics/character/character_manager")
 require("src/tactics/animation")
 require("src/tactics/ui/ui_manager")
-require("src/tactics/story/story")
-require("src/tactics/game/game")
+local game = require("src/tactics/game/game")
 require("src/tactics/ui/ui_context_manager")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
-
-require("src/tactics/battle/tactics/enemy_ai")
 local joypad = require("src/tactics/joypad")
 
 require("profiler")
--- TODO: local battle_manager
 
 local ui_context: UIContextManager = {}
 local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: TaskManager
 
-local game: Game
+local game_manager: game.Game
 
 function _init()
     task_manager = TaskManager.new()
@@ -74,7 +70,7 @@ function _init()
         ui_context = ui_context,
     }
     
-    game = Game.new(game_services)
+    game_manager = game.new(game_services)
 end
 
 function _update()
@@ -84,7 +80,7 @@ function _update()
     LOG.trace("Getting Joypad.")
     local joy = joypad.get_joypad()
     profile("game_update")
-    game:update(joy)
+    game_manager:update(joy)
     profile("game_update")
     profile("update_tasks")
     task_manager:update_tasks()

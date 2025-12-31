@@ -22,7 +22,7 @@ local battle_menu_context = require("src/tactics/battle/battle_menu_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local script_manager = require("src/tactics/battle/scripts/script_manager")
 
-global record BattleManager
+local record BattleManager
 
     battle_id: string
 	
@@ -40,7 +40,11 @@ global record BattleManager
     services: GameServiceBundle
 end
 
-function BattleManager.new(battle_id: string, char_man: character_manager.CharacterManager, services: GameServiceBundle): BattleManager 
+local battle_manager = {
+    BattleManager = BattleManager
+}
+
+function battle_manager.new(battle_id: string, char_man: character_manager.CharacterManager, services: GameServiceBundle): BattleManager 
     assert(BATTLE_DATA[battle_id] ~= nil)
 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
@@ -132,4 +136,4 @@ function BattleManager:update(joy: Joypad)
     self.tactics_engine:update()
 end
 
-return BattleManager
+return battle_manager

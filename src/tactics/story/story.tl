@@ -7,8 +7,7 @@ require("src/tactics/systems/tasks")
 require("src/tactics/data/battles")
 
 require("src/tactics/animation")
-require("src/tactics/battle/battle_manager")
-require("src/tactics/menu/menu_manager")
+local battle_manager = require("src/tactics/battle/battle_manager")
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
@@ -25,7 +24,7 @@ local GameServiceBundle = require("src/tactics/systems/service/game_service_bund
 local STORY_DATA = require("src/tactics/data/story")
 
 
-global record Story
+local record Story
     record ActiveNode
         node_id: string
         node_step: integer
@@ -44,7 +43,7 @@ global record Story
     menu_manager: story_menu_manager.StoryMenuManager
     current_node: ActiveNode
 
-    battle_manager: BattleManager
+    battle_manager: battle_manager.BattleManager
 
     jump_to_node: function(self, node_id: string)
     handle_new_node: function(self)
@@ -52,6 +51,10 @@ global record Story
 
     services: GameServiceBundle
 end
+
+local story = {
+    Story = Story
+}
 
 function Story:jump_to_node(node_id: string)
     local story_definition = STORY_DATA[self.story_id]
@@ -75,7 +78,7 @@ function Story:handle_new_node()
         self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_node.BattleNode then
         local battle_id = node_definition.battle_id
-        self.battle_manager = BattleManager.new(battle_id, self.character_manager, self.services)
+        self.battle_manager = battle_manager.new(battle_id, self.character_manager, self.services)
     elseif node_definition is story_node.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
@@ -135,7 +138,7 @@ function Story:create_character(ctx: MenuContext)
     self:advance_node()
 end
 
-function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): Story 
+function story.new(story_id: story_types.StoryId, services: GameServiceBundle): Story 
     assert(STORY_DATA[story_id] ~= nil)
 
     local self: Story = setmetatable({}, { __index = Story })
@@ -195,4 +198,4 @@ function Story:teardown()
     self.character_manager:teardown()    
 end
 
-return Story
+return story
