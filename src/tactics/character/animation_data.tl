@@ -1,4 +1,4 @@
-require("src/tactics/util")
+require("src/tactics/types")
 local maps = require("src/tactics/util/maps")
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc

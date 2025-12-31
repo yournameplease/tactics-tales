@@ -3,7 +3,6 @@ require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
-require("src/tactics/util")
 
 local interface ItemInventory
 

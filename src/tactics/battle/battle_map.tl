@@ -1,5 +1,5 @@
 require("src/tactics/types")
-require("src/tactics/util")
+local fp = require("src/tactics/util/fp")
 local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local battle_definition_types = require("src/tactics/battle/definition/types")
@@ -234,7 +234,7 @@ function BattleMap:get_units(filter: function(battle_unit.BattleUnit): boolean):
 end
 
 function BattleMap:get_all_units(): { battle_unit.BattleUnit }
-    return self:get_units(fn_true)
+    return self:get_units(fp.fn_true)
 end
 
 return battle_map

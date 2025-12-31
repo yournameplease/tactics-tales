@@ -1,6 +1,5 @@
 require("src/tactics/types")
 
-require("src/tactics/util")
 local array_2d = require("src/tactics/util/array_2d")
 local lists = require("src/tactics/util/lists")
 require("src/tactics/battle/battle_map")

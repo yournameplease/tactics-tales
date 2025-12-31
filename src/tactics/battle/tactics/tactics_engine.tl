@@ -3,7 +3,7 @@ require("src/tactics/debug")
 
 require ("src/tactics/menu/types")
 
-require("src/tactics/util")
+local fp = require("src/tactics/util/fp")
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
@@ -71,6 +71,20 @@ function tactics_engine.new(
     self.event_writer = event_writer.new(bus)
     
     return self
+end
+
+-- normalize to offsets from first tile
+-- multiply by tile scale
+local function to_tile_path(path: { Point }): { Point }
+    assert(#path > 0)
+    --if #path == 0 then return path end
+
+    local base_point = path[1]
+    local normalize_point: function(Point): Point =
+        function(p: Point): Point
+            return (p - base_point) * CONFIG.TILE_SIZE
+        end
+    return lists.map(normalize_point)(path)
 end
 
 -- unit spawning
@@ -294,7 +308,7 @@ end
 -- Turn flow
 
 function TacticsEngine:refresh_all_units()
-    self:refresh_units(fn_true)
+    self:refresh_units(fp.fn_true)
 end
 
 function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)

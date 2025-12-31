@@ -137,4 +137,13 @@ function lists.collect_map<K,V>(): function({lists.MapEntry<K,V>}): { K: V }
 	end
 end
 
+function lists.contains<V>(tab: {V}, val: V): boolean
+    for _,v in ipairs(tab) do
+        if v == val then
+            return true
+        end
+    end
+    return false
+end
+
 return lists
