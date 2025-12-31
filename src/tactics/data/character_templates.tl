@@ -43,7 +43,7 @@ global BASE_UNIT: CharacterTemplate = {
 		{"glasses_a", 2},
 		{"glasses_b", 2},
 		{"glasses_c", 2},
-		{"eyepacth_l", 1},
+		{"eyepatch_l", 1},
 		{"eyepatch_r", 1}
 	),
 	body_options = randomizer.weighted_option_selector.of_weighted(
@@ -122,8 +122,14 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			{"sleeveless", 1},
 			{"shirtless", 4}
 		),
+		eyewear_options = randomizer.weighted_option_selector.of_weighted(
+			{"none", 9},
+			{"eyepatch_l", 1},
+			{"eyepatch_r", 1}
+		),
 		headwear_options = randomizer.weighted_option_selector.of_weighted(
-			{nil, 1}
+			{"none", 9},
+			{"bandana", 1}
 		)
 	},
     bandit_goon = {
