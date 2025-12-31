@@ -159,29 +159,29 @@ end
 
 
 local ITEM_DATA: {string: item_definition.ItemDefinition} = {
-    dagger = melee_weapon( "Dagger", 104, 1, 90, 1 ),
-    sword = melee_weapon( "Sword", 105, 2, 80, 1 ),
-    axe = melee_weapon( "Axe", 106, 2, 70, 1, {
+    dagger = melee_weapon( "Dagger", 96, 1, 90, 1 ),
+    sword = melee_weapon( "Sword", 97, 2, 80, 1 ),
+    axe = melee_weapon( "Axe", 98, 2, 70, 1, {
             effect.ShieldsplitterEffect.of()
         }
     ),
-    spear = melee_weapon( "Spear", 107, 1, 90, 1, {
+    spear = melee_weapon( "Spear", 99, 1, 90, 1, {
             effect.LongReachEffect.of()
         }
     ),
-    poleaxe = melee_weapon( "Poleaxe", 108, 2, 60, 1, {
+    poleaxe = melee_weapon( "Poleaxe", 100, 2, 60, 1, {
             effect.LongReachEffect.of(),
             effect.ShieldsplitterEffect.of()
         }
     ),
-    club = melee_weapon( "Club", 109, 1, 80, 1),
-    mace = melee_weapon( "Mace", 110, 2, 70, 1, {
+    club = melee_weapon( "Club", 101, 1, 80, 1),
+    mace = melee_weapon( "Mace", 102, 2, 70, 1, {
             effect.ArmorkillerEffect.of()
         }
     ),
-    greatsword = two_handed_weapon( "Greatsword", 111, 3, 70, 2),
-    bow = ranged_weapon( "Bow", 112, 2, 90, 2, 2, 2 ),
-    shield = shield("Shield", 113, 1, 1, 20),
+    greatsword = two_handed_weapon( "Greatsword", 103, 3, 70, 2),
+    bow = ranged_weapon( "Bow", 104, 2, 90, 2, 2, 2 ),
+    shield = shield("Shield", 105, 1, 1, 20),
     armor = armor("Armor", 2, 1, 20)
 }
 

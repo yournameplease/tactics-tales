@@ -64,13 +64,13 @@ local function get_body_type(
 
 
 	local body_class_id = drawable_unit.character.appearance.body_class
-	local body_class = sprite_data.BODY_CLASS[body_class_id]
+	local body_class_prefix = sprite_data.BODY_CLASS[body_class_id].id_prefix
 	-- if drawable_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
 	-- 	body_class = "SLEEVELESS"
 	-- end
 
 	-- TODO: type safety
-    return (body_class.."_"..base_body_type) as AnimationName
+    return (body_class_prefix.."_"..base_body_type) as AnimationName
 end
 
 local record RenderedAnimationFrame
@@ -121,10 +121,10 @@ local function set_palette(
     pt.set_pal(COLOR_SIDE_2, side_palette[2])
     pt.set_pal(COLOR_SIDE_3, side_palette[3])
     local skin = drawable_unit.character.appearance.skin
-    pt.set_pal(COLOR_SKIN, SKIN_COLORS[skin][1])
-    pt.set_pal(COLOR_SKIN_SHADOW, SKIN_COLORS[skin][2])
-    pt.set_pal(COLOR_HAIR, drawable_unit.character.appearance.hair_color)
-    pt.set_pal(COLOR_BEARD, drawable_unit.character.appearance.hair_color)
+    pt.set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
+    pt.set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
+    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[drawable_unit.character.appearance.hair_color].color)
+    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[drawable_unit.character.appearance.hair_color].color)
 
 	if draw_outline then
 		local outline_color = drawable_unit.has_acted and 21 or side_palette[3]
@@ -140,26 +140,34 @@ local function draw_head(
 )
     local flip_h = drawable_unit.side == "enemy"
 
-	local headwear: sprite_data.HeadwearSpriteData = nil
-	if drawable_unit.character.appearance.headwear then
-		headwear = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]	
-	end
+	local head: sprite_data.SpriteData =
+		sprite_data.HEAD[drawable_unit.character.appearance.head]	
+	local headwear: sprite_data.HeadwearSpriteData =
+		sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]	
+	local eyes: sprite_data.SpriteData =
+		sprite_data.EYES[drawable_unit.character.appearance.eyes]	
+	local eyewear: sprite_data.SpriteData =
+		sprite_data.HEAD[drawable_unit.character.appearance.head]	
+	local hair: sprite_data.SpriteData =
+		sprite_data.HEAD[drawable_unit.character.appearance.head]	
+	local facial_hair: sprite_data.SpriteData =
+		sprite_data.HEAD[drawable_unit.character.appearance.head]	
 
-    pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.head, point.x, point.y, flip_h)
+    pt.spr(BASE_UNIT_SPRITE + head.sprite, point.x, point.y, flip_h)
 	-- Eye sprite currently is just the default.
 	if headwear == nil or headwear.draw_beard then
 	    if drawable_unit.character.appearance.beard ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.beard, point.x, point.y, flip_h)
+	        pt.spr(BASE_UNIT_SPRITE + facial_hair.sprite, point.x, point.y, flip_h)
 	    end
 	end
 	if headwear == nil or headwear.draw_eyewear then
-	    pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.eyes, point.x, point.y, flip_h)
+	    pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
 		if drawable_unit.character.appearance.eyewear ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.eyewear, point.x, point.y, flip_h)
+	        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, point.x, point.y, flip_h)
 		end
 	end
 	if headwear == nil or headwear.draw_hair then
-        pt.spr(BASE_UNIT_SPRITE + drawable_unit.character.appearance.hair, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + hair.sprite, point.x, point.y, flip_h)
 	end
 	if headwear ~= nil then
         pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)

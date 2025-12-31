@@ -12,6 +12,16 @@ function lists.add_all<Value>(list: {Value}, elements: {Value})
 	end
 end
 
+function lists.merge<Value>(...: {Value}): {Value}
+	local out = {}
+	for _,l in ipairs({...}) do
+		for _,elem in ipairs(l) do
+			pt.add(out, elem)
+		end
+	end
+	return out
+end
+
 function lists.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
 	local fns = {...}
 	local result: any = list 
@@ -70,6 +80,23 @@ end
 function lists.map<A, B>(fn: function(A): B): function({A}): {B}
 	return function(list: {A}): {B}
 		return lists.do_map(list, fn)
+	end
+end
+
+function lists.do_flat_map<A, B>(list: {A}, fn: function(A): {B}): { B }
+    local out: {B} = {}
+    for _,v in ipairs(list) do
+		local bs = fn(v)
+		for _,b in ipairs(bs) do
+	        pt.add(out, b)
+		end
+    end
+    return out
+end
+
+function lists.flat_map<A, B>(fn: function(A): {B}): function({A}): {B}
+	return function(list: {A}): {B}
+		return lists.do_flat_map(list, fn)
 	end
 end
 

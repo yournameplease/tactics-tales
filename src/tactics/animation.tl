@@ -2,7 +2,6 @@ require("src/tactics/systems/service")
 require("src/tactics/debug")
 require("src/tactics/types")
 local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
 require("src/tactics/character/animation_data")
 
 global record AnimatedSpriteData
@@ -324,12 +323,14 @@ function AnimationManager:create_walk_animation(
     LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8 * time_scale
 
-    local path_points: { PathAnimationPoint } = maps.map(path, function(p: Point): PathAnimationPoint
-        return {
-            point = p,
-            duration = DURATION_PER_TILE
-        }
-    end)
+    local path_points: { PathAnimationPoint } = lists.map(
+        function(p: Point): PathAnimationPoint
+            return {
+                point = p,
+                duration = DURATION_PER_TILE
+            }
+        end
+    )(path)
     path_points[#path].duration = nil
 
     local instance: PathAnimationInstance = {

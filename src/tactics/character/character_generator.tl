@@ -3,6 +3,7 @@ require("src/tactics/character/object/character")
 require("src/tactics/data/items")
 require("src/tactics/character/items/object/weapon")
 require("src/tactics/util")
+local sprite_data = require("src/tactics/character/sprite_data")
 local random = require("src/tactics/util/random")
 require("src/tactics/util/randomizer")
 local ItemInventory  = require("src/tactics/character/items/object/item_inventory")
@@ -59,8 +60,9 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	character.appearance.skin = template.skin_color_options:pick_random()
     repeat
         character.appearance.hair_color = template.hair_color_options:pick_random()
-    until character.appearance.hair_color ~= SKIN_COLORS[character.appearance.skin][1]
-	character.appearance.head = character.appearance.sex == "male" and 64 or 68
+    until sprite_data.COLOR_NAMES[character.appearance.hair_color].color
+		~= sprite_data.SKIN_COLOR[character.appearance.skin].colors[1]
+	character.appearance.head = character.appearance.sex == "male" and "round" or "narrow_chin"
 	if character.appearance.sex == "male" then
 		character.appearance.hair = template.hair_options_m:pick_random()
 		character.appearance.beard = template.beard_options:pick_random()
@@ -86,8 +88,8 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 		end
 	end
 
-	if character.appearance.sex == "female" and character.appearance.body_class == 3 then
-		character.appearance.body_class = 2
+	if character.appearance.sex == "female" and character.appearance.body_class == "shirtless" then
+		character.appearance.body_class = "sleeveless"
 	end
 	
 	return setmetatable(character, { __index = Character })

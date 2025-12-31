@@ -5,7 +5,7 @@ require("src/tactics/util/text")
 require("src/tactics/ui/components/message_log")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/story/story_context")
-local maps = require("src/tactics/util/maps")
+local lists = require("src/tactics/util/lists")
 
 global record EventMessageLog
     is UIElement, TextUIElement
@@ -13,7 +13,9 @@ end
  
 function EventMessageLog.new(props: MessageLog): EventMessageLog
     props.func = function(state: UIContextManager, row_limit: integer): { string }
-        return maps.map(state.game_context.event_bus:get_event_history(row_limit), function(e: GameEvent): string return "> "..e  end)
+        return lists.map(
+            function(e: GameEvent): string return "> "..e  end
+        )(state.game_context.event_bus:get_event_history(row_limit))
     end
 
     props.draw_properties = props.draw_properties or {}

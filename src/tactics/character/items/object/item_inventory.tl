@@ -72,11 +72,10 @@ end
 
 function ItemInventoryImpl:get_items_by_slot(): { integer: Item.Item }
 	return maps.map(
-		self._items_by_slot,
-		function(i: InventoryItem): Item.Item
+		function(_: integer, i: InventoryItem): Item.Item
 			return i.item
 		end
-	)
+	)(self._items_by_slot)
 end
 
 function ItemInventoryImpl:get_max_slots(): integer
@@ -85,11 +84,10 @@ end
 
 function ItemInventoryImpl:get_equipped_items(): { EquipSlot: Item.Item }
 	return maps.map(
-		self._items_by_equip_slot,
-		function(i: InventoryItem): Item.Item
+		function(_: EquipSlot, i: InventoryItem): Item.Item
 			return i.item
 		end
-	)
+	)(self._items_by_equip_slot)
 end
 
 function ItemInventoryImpl:get_equipped_weapons(): { wpn.Weapon }

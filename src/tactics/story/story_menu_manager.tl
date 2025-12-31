@@ -5,6 +5,7 @@ require("src/tactics/menu/menu_manager")
 require("src/tactics/joypad")
 require("src/tactics/story/story_page")
 require("src/tactics/systems/service")
+local sprite_data = require("src/tactics/character/sprite_data")
 local menu_manager = require("src/tactics/menu/menu_manager")
 local StoryMenuContext = require("src/tactics/story/story_context").StoryMenuContext
 require("src/tactics/character/object/character")
@@ -14,155 +15,39 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 
 local lists = require("src/tactics/util/lists")
-
-local record CharacterCustomizationPartOption
-    text: string
-    value: integer
-end
-
-local record CharacterCustomizationPart
-    key: CharacterAppearanceKey
-    text: string
-    options: { CharacterCustomizationPartOption }
-end
-
-local CHARACTER_CUSTOMIZATION_OPTIONS: { string: CharacterCustomizationPart } = {
-	HEAD = {
-		key = "head",
-        text = "Head",
-		options = {
-			{text = "A" , value = 64},
-			{text = "B" , value = 68},
-		},
-	},
-	HAIR = {
-		key = "hair",
-        text = "Hair",
-		options = {
-			{text = "A" , value = 72},
-			{text = "B" , value = 73},
-			{text = "C" , value = 74},
-			{text = "D" , value = 75},
-			{text = "E" , value = 77},
-			{text = "F" , value = 80},
-			{text = "G" , value = 81},
-			{text = "H" , value = 82},
-			{text = "I" , value = 83},
-			{text = "J" , value = 85},
-			{text = "K" , value = 80},
-		},
-	},
-	SKIN = {
-		key = "skin",
-        text = "Skin",
-		options = {
-			{text = "A" , value = 1},
-			{text = "B" , value = 2},
-			{text = "C" , value = 3},
-			{text = "D" , value = 4},
-		},
-	},
-	HAIR_COLOR = {
-		key = "hair_color",
-        text = "Hair Color",
-		options = {
-			{text = "4" , value = 4},
-			{text = "5" , value = 5},
-			{text = "6" , value = 6},
-			{text = "9" , value = 9},
-			{text = "10" , value = 10},
-			{text = "20" , value = 20},
-			{text = "21" , value = 21},
-			{text = "22" , value = 22},
-			{text = "24" , value = 24},
-			{text = "25" , value = 25},
-			{text = "31" , value = 31},
-		},
-	},
-	BODY_CLASS = {
-		key = "body_class",
-        text = "Body",
-		options = {
-			{text = "Default" , value = 1},
-			{text = "Sleeveless" , value = 2},
-			{text = "Shirtless" , value = 3},
-			{text = "Robe" , value = 4},
-		},
-	},
-	BEARD = {
-		key = "beard",
-        text = "Facial Hair",
-		options = {
-			{text = "None" , value = nil},
-			{text = "Unshaven" , value = 89},
-			{text = "Mustache" , value = 90},
-			{text = "Sideburns" , value = 91},
-			{text = "Beard" , value = 92},
-			{text = "Goatee" , value = 93},
-			{text = "Bushy Beard" , value = 94},
-		},
-	},
-	EYES = {
-		key = "eyes",
-        text = "Eyes",
-		options = {
-			{text = "A" , value = 120},
-		},
-	},
-	EYEWEAR = {
-		key = "eyewear",
-        text = "Eyewear",
-		options = {
-			{text = "None" , value = nil},
-			{text = "Glasses" , value = 96},
-			{text = "Mask" , value = 102},
-		},
-	},
-	HEADWEAR = {
-		key = "headwear",
-        text = "Headwear",
-		options = {
-			{text = "None" , value = nil},
-			{text = "Wizard Hat" , value = 3},
-			{text = "Hood" , value = 1},
-			{text = "Covered Hood" , value = 2},
-			{text = "Hooded Wizard Hat" , value = 4},
-			{text = "Hat" , value = 5},
-			{text = "Animal Mask" , value = 6},
-		},
-	},
-}
+local maps = require("src/tactics/util/maps")
 
 local function set_character_customization_option(
-	part_data: CharacterCustomizationPart
-): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, integer>, _: StoryMenuContext, mc: MenuContext)
+    key: CharacterAppearanceKey
+): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: MenuContext)
     -- todo
-    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, integer>, _: StoryMenuContext, mc: MenuContext)
+    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: MenuContext)
 		if mc.character_customization == nil then
 			mc.character_customization = {}
 		end
 		if mc.character_customization.appearance == nil then
 			mc.character_customization.appearance = {}
 		end
-		mc.character_customization.appearance[part_data.key] = cursor.options[cursor.i].value
+		mc.character_customization.appearance[key] = cursor.options[cursor.i].value
 	end
 end
 
 local function list_cursor_definition_for_part(
-	part_data: CharacterCustomizationPart
-): list_cursor.ListMenuDefinition<StoryMenuContext, integer>
-    local options = lists.map(function(o: CharacterCustomizationPartOption): list_cursor.ListMenuOption<integer>
+    key: CharacterAppearanceKey,
+    options: { string: sprite_data.NamedSpriteData }
+): list_cursor.ListMenuDefinition<StoryMenuContext, string>
+    local cursor_options = maps.to_list(maps.map(function(id: string, data: sprite_data.NamedSpriteData): list_cursor.ListMenuOption<string>
         return {
-            text = o.text,
-            value = o.value,
+            text = data.name,
+            value = id,
         }
-    end)(part_data.options)
+    end)(options))
     
     return list_cursor.definition({
-        set_selected_context = set_character_customization_option(part_data),
+        set_selected_context = set_character_customization_option(key),
 
-        get_options = function(_: StoryMenuContext, _: MenuContext): {list_cursor.ListMenuOption<integer>}
-            return options
+        get_options = function(_: StoryMenuContext, _: MenuContext): {list_cursor.ListMenuOption<string>}
+            return cursor_options
         end,
         
         wrap = true,
@@ -170,12 +55,16 @@ local function list_cursor_definition_for_part(
     })
 end
 
-local function multiple_option_cursor_for_part(part_data: CharacterCustomizationPart): multiple_options_cursor.MenuMultipleOptionDefinition<StoryMenuContext>
+local function multiple_option_cursor_for_part(
+    key: CharacterAppearanceKey,
+    text: string,
+    options: { string: sprite_data.NamedSpriteData }
+): multiple_options_cursor.MenuMultipleOptionDefinition<StoryMenuContext>
     -- local part_data = CHARACTER_CUSTOMIZATION_OPTIONS[id]
     return multiple_options_cursor.option_definition({
-            text = part_data.text,
-			key = part_data.key,
-            definition = list_cursor_definition_for_part(part_data),
+            text = text,
+			key = key,
+            definition = list_cursor_definition_for_part(key, options),
             must_select = false,
         })
 end
@@ -186,15 +75,20 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
         wrap = false,
         send_command = "STORY_CREATE_CHARACTER",
         options = {
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HEAD"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HAIR"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["SKIN"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HAIR_COLOR"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["BODY_CLASS"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["BEARD"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["EYES"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["EYEWEAR"]),
-            multiple_option_cursor_for_part(CHARACTER_CUSTOMIZATION_OPTIONS["HEADWEAR"]),
+            multiple_option_cursor_for_part("head", "Head", sprite_data.HEAD),
+            multiple_option_cursor_for_part("hair", "Hair", sprite_data.HAIR),
+            multiple_option_cursor_for_part("skin", "Skin Color", sprite_data.SKIN_COLOR),
+            multiple_option_cursor_for_part("hair_color", "Hair Color",
+				maps.collect(
+					lists.merge(sprite_data.NATURAL_HAIR_COLORS, sprite_data.UNNATURAL_HAIR_COLORS),
+					function(color: string): string return color end,
+					function(color: string): sprite_data.NamedColor return sprite_data.COLOR_NAMES[color] end
+				)),
+            multiple_option_cursor_for_part("body_class", "Body", sprite_data.BODY_CLASS),
+            multiple_option_cursor_for_part("beard", "Facial Hair", sprite_data.FACIAL_HAIR),
+            multiple_option_cursor_for_part("eyes", "Eyes", sprite_data.EYES),
+            multiple_option_cursor_for_part("eyewear", "Eyewear", sprite_data.EYEWEAR),
+            multiple_option_cursor_for_part("headwear", "Headwear", sprite_data.HEADWEAR),
         }
     })
 end

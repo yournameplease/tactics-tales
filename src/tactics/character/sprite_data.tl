@@ -1,21 +1,432 @@
 require("src/tactics/character/object/character")
 
--- why so many integer ids?
--- I want all same (all strings or all ints) for easier typing
--- strings are probably better but I don't want to think of a string id
--- for every option.
--- This makes character templates less readable, so may want to go to strings
--- eventuall.
+local interface NamedSpriteData
+	name: string
+end
 
-local BODY_CLASS: {integer: string} = {
-	[1] = "DEFAULT",
-	[2] = "SLEEVELESS",
-	[3] = "SHIRTLESS", -- for female, this should convert to sleeveless,
-	[4] = "ROBED",
-	[5] = "CHILD",
+local record NamedColor
+	is NamedSpriteData
+	name: string
+	color: Color
+end
+
+-- Names from https://picotron.fandom.com/wiki/Palette
+local COLOR_NAMES: {string: NamedColor} = {
+	black = {
+		name = "Black",
+		color = 0,
+	},
+	dark_blue = {
+		name = "Dark Blue",
+		color = 1,
+	},
+	dark_purple = {
+		name = "Dark Purple",
+		color = 2,
+	},
+	dark_green = {
+		name = "Dark Green",
+		color = 3,
+	},
+	brown = {
+		name = "Brown",
+		color = 4,
+	},
+	dark_grey = {
+		name = "Dark Grey",
+		color = 5,
+	},
+	light_grey = {
+		name = "Light Grey",
+		color = 6,
+	},
+	white = {
+		name = "White",
+		color = 7,
+	},
+	red = {
+		name = "Red",
+		color = 8,
+	},
+	orange = {
+		name = "Orange",
+		color = 9,
+	},
+	yellow = {
+		name = "Yellow",
+		color = 10,
+	},
+	green = {
+		name = "Green",
+		color = 11,
+	},
+	blue = {
+		name = "Blue",
+		color = 12,
+	},
+	lavender = {
+		name = "Lavender",
+		color = 13,
+	},
+	pink = {
+		name = "Pink",
+		color = 14,
+	},
+	light_peach = {
+		name = "Light Peach",
+		color = 15,
+	} ,
+	true_blue = {
+		name = "True Blue",
+		color = 16,
+	},
+	teal = {
+		name = "Teal",
+		color = 17,
+	},
+	purple = {
+		name = "Purple",
+		color = 18,
+	},
+	dark_teal = {
+		name = "Dark Teal",
+		color = 19,
+	},
+	dark_brown = {
+		name = "Dark Brown",
+		color = 20,
+	},
+	darker_grey = {
+		name = "Darker Grey",
+		color = 21,
+	},
+	medium_grey = {
+		name = "Medium Grey",
+		color = 22,
+	},
+	light_pink = {
+		name = "Light Pink",
+		color = 23,
+	},
+	dark_red = {
+		name = "Dark Red",
+		color = 24,
+	},
+	dark_orange = {
+		name = "Dark Orange",
+		color = 25,
+	},
+	lime_green = {
+		name = "Lime Green",
+		color = 26,
+	},
+	medium_green = {
+		name = "Medium Green",
+		color = 27,
+	},
+	light_blue = {
+		name = "Light Blue",
+		color = 28,
+	},
+	mauve = {
+		name = "Mauve",
+		color = 29,
+	},
+	magenta = {
+		name = "Magenta",
+		color = 30,
+	},
+	peach = {
+		name = "Peach",
+		color = 31,
+	},
+}
+
+local NATURAL_HAIR_COLORS = {
+	"brown",
+	"dark_grey",
+	"light_grey",
+	"orange",
+	"yellow",
+	"dark_brown",
+	"darker_grey",
+	"dark_red",
+	"dark_orange",
+	"dark_grey",
+	"peach",
+}
+
+local UNNATURAL_HAIR_COLORS = {
+	"pink",
+	"lavender",
+	"mauve",
+	"medium_green",
+	"dark_green",
+	"light_pink",
+}
+
+
+local record SpriteData
+	is NamedSpriteData
+	name: string
+	sprite: integer
+end
+
+local record SkinColorData
+	is NamedSpriteData
+	name: string
+	colors: {Color, Color}
+end
+
+local record BodyClassData
+	is NamedSpriteData
+	name: string
+	id_prefix: string
+end
+
+local HEAD: {string: SpriteData} = {
+	round = {
+		name = "Round",
+		sprite = 0,
+	},
+	strong_chin = {
+		name = "Strong",
+		sprite = 1,
+	},
+	narrow_chin = {
+		name = "Narrow",
+		sprite = 4,
+	}
+}
+
+local HAIR: {string: SpriteData} = {
+	bald = {
+		name = "Bald",
+		sprite = nil,
+	},
+	pompadour = {
+		name = "Pompadour",
+		sprite = 16,
+	},
+	short = {
+		name = "Short",
+		sprite = 17,
+	},
+	wavy = {
+		name = "Wavy",
+		sprite = 18,
+	},
+	afro_a = {
+		name = "Afro A",
+		sprite = 19,
+	},
+	buzz_a = {
+		name = "Buzz A",
+		sprite = 20,
+	},
+	emo = {
+		name = "Emo",
+		sprite = 21,
+	},
+	balding = {
+		name = "Balding",
+		sprite = 22,
+	},
+	flat_top = {
+		name = "Flat Top",
+		sprite = 23,
+	},
+	bob_bangs = {
+		name = "Bob Bangs",
+		sprite = 24,
+	},
+	bob_a = {
+		name = "Bob A",
+		sprite = 25,
+	},
+	bob_b = {
+		name = "Bob B",
+		sprite = 26,
+	},
+	bob_c = {
+		name = "Bob C",
+		sprite = 27,
+	},
+	afro_b = {
+		name = "Afro B",
+		sprite = 28,
+	},
+	pigtails = {
+		name = "Pigtails",
+		sprite = 29,
+	},
+	bun = {
+		name = "Bun",
+		sprite = 30,
+	},
+	buzz_b = {
+		name = "Buzz B",
+		sprite = 31,
+	},
+}
+
+local FACIAL_HAIR: {string: SpriteData} = {
+	none = {
+		name = "None",
+		sprite = nil,
+	},
+	beard = {
+		name = "Beard",
+		sprite = 48,
+	},
+	handlebar = {
+		name = "Handlebar",
+		sprite = 49,
+	},
+	walrus = {
+		name = "Walrus",
+		sprite = 50,
+	},
+	sideburns = {
+		name = "Sideburns",
+		sprite = 51,
+	},
+	chin_beard = {
+		name = "Chin Beard",
+		sprite = 52,
+	},
+	goatee = {
+		name = "Goatee",
+		sprite = 53,
+	},
+	bushy_beard = {
+		name = "Bushy Beard",
+		sprite = 54,
+	},
+	long_beard = {
+		name = "Long Beard",
+		sprite = 55,
+	},
+}
+
+local EYES: {string: SpriteData} = {
+	a = {
+		name = "A",
+		sprite = 8,
+	},
+	b = {
+		name = "B",
+		sprite = 9,
+	},
+	c = {
+		name = "C",
+		sprite = 10,
+	},
+	d = {
+		name = "D",
+		sprite = 11,
+	},
+	e = {
+		name = "E",
+		sprite = 12,
+	},
+	f = {
+		name = "F",
+		sprite = 13,
+	},
+	g = {
+		name = "G",
+		sprite = 14,
+	},
+	h = {
+		name = "H",
+		sprite = 15,
+	},
+}
+
+local EYEWEAR: {string: SpriteData} = {
+	none = {
+		name = "None",
+		sprite = nil,
+	},
+	glasses_a = {
+		name = "Glasses A",
+		sprite = 80,
+	},
+	glasses_b = {
+		name = "Glasses B",
+		sprite = 81,
+	},
+	glasses_c = {
+		name = "Glasses C",
+		sprite = 82,
+	},
+	monacle_l = {
+		name = "Monacle L",
+		sprite = 83,
+	},
+	monacle_r = {
+		name = "Monacle R",
+		sprite = 84,
+	},
+	mask = {
+		name = "Mask",
+		sprite = 85,
+	},
+	eyepatch_l = {
+		name = "Eyepatch L",
+		sprite = 86,
+	},
+	eyepatch_r = {
+		name = "Eyepatch R",
+		sprite = 87,
+	},
+}
+
+local SKIN_COLOR: {string: SkinColorData} = {
+	a = {
+		name = "A",
+		colors = {15, 31},
+	},
+	b = {
+		name = "B",
+		colors = {31, 4},
+	},
+	c = {
+		name = "C",
+		colors = {4, 20},
+	},
+	d = {
+		name = "D",
+		colors = {20, 21},
+	},
+}
+
+local BODY_CLASS: {string: BodyClassData} = {
+	default = {
+		name = "Shirt",
+		id_prefix = "DEFAULT",
+	},
+	sleeveless = {
+		name = "Sleeveless",
+		id_prefix = "SLEEVELESS",
+	},
+	shirtless = {
+		name = "Shirtless",
+		id_prefix = "SHIRTLESS",
+	}, 
+	robed = {
+		name = "Robed",
+		id_prefix = "ROBED",
+	},
+	-- child = {
+	-- 	name = "Child",
+	-- 	id_prefix = "CHILD",
+	-- },
 }
 
 local record HeadwearSpriteData
+	is NamedSpriteData
 	name: string -- currently unused, more for readability
 	draw_hair: boolean
 	draw_beard: boolean
@@ -23,54 +434,89 @@ local record HeadwearSpriteData
 	sprite: integer
 end
 
-local HEADWEAR: {integer: HeadwearSpriteData} = {
-	[1] = {
-		name = 'hood',
+local HEADWEAR: {string: HeadwearSpriteData} = {
+	none = {
+		name = "None",
+		draw_hair = true,
+		draw_beard = true,
+		draw_eyewear = true,
+		sprite = nil,
+	},
+	hood = {
+		name = 'Hood',
 		draw_hair = false,
 		draw_beard = true,
 		draw_eyewear = true,
-		sprite = 100
+		sprite = 65
 	},
-	[2] = {
-		name = 'cultist_hood',
+	cultist_hood = {
+		name = 'Covered Hood',
 		draw_hair = false,
 		draw_beard = false,
 		draw_eyewear = false,
-		sprite = 98
+		sprite = 70
 	},
-	[3] = {
-		name = 'wizard_hat',
+	wizard_hat = {
+		name = 'Wizard Hat',
 		draw_hair = false,
 		draw_beard = true,
 		draw_eyewear = true,
-		sprite = 97
+		sprite = 64
 	},
-	[4] = {
-		name = 'hooded_wizard_hat',
+	hooded_wizard_hat = {
+		name = 'Hooded Wizard Hat',
 		draw_hair = false,
 		draw_beard = false,
 		draw_eyewear = false,
-		sprite = 99
+		sprite = 71
 	},
-	[5] = {
-		name = 'fancy_hat',
+	fancy_hat = {
+		name = 'Fancy Hat',
 		draw_hair = false,
 		draw_beard = true,
 		draw_eyewear = true,
-		sprite = 101,
+		sprite = 69,
 	},
-	[6] = {
-		name = 'animal_mask',
+	animal_mask = {
+		name = 'Animal Mask',
 		draw_hair = true,
 		draw_beard = true,
 		draw_eyewear = false,
-		sprite = 103,
+		sprite = 68,
+	},
+	bandana = {
+		name = 'Bandana',
+		draw_hair = true,
+		draw_beard = false,
+		draw_eyewear = true,
+		sprite = 66,
+	},
+	outlaw_hat = {
+		name = 'Outlaw Hat',
+		draw_hair = false,
+		draw_beard = false,
+		draw_eyewear = true,
+		sprite = 67,
 	},
 }
 
 
 local sprite_data = {
+	NamedSpriteData = NamedSpriteData,
+	NamedColor = NamedColor,
+	SpriteData = SpriteData,
+	SkinColorData = SkinColorData,
 	HeadwearSpriteData = HeadwearSpriteData,
+
+	COLOR_NAMES = COLOR_NAMES,
+	NATURAL_HAIR_COLORS = NATURAL_HAIR_COLORS,
+	UNNATURAL_HAIR_COLORS = UNNATURAL_HAIR_COLORS,
+	HEAD = HEAD,
+	HAIR = HAIR,
+	FACIAL_HAIR = FACIAL_HAIR,
+	EYES = EYES,
+	EYEWEAR = EYEWEAR,
+	SKIN_COLOR = SKIN_COLOR,
 	BODY_CLASS = BODY_CLASS,
 	HEADWEAR = HEADWEAR,
 }

@@ -13,7 +13,7 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
 local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
-local maps = require("src/tactics/util/maps")
+local lists = require("src/tactics/util/lists")
 require("src/tactics/types")
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
@@ -66,8 +66,7 @@ local record AnimatedUnitPosition
 end
 
 local function compute_animated_unit_positions(battle_map: BattleMap): { AnimatedUnitPosition }
-    return maps.map(
-            battle_map:get_all_units(),
+    return lists.map(
             function(unit: BattleUnit): AnimatedUnitPosition
                 local animation_offset = CharacterRenderer.get_animation_offset(unit)
                 return {
@@ -75,7 +74,7 @@ local function compute_animated_unit_positions(battle_map: BattleMap): { Animate
                     point = unit.tile * TILE_SIZE + animation_offset,
                 }
             end
-    )
+    )(battle_map:get_all_units())
 end
 
 local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
