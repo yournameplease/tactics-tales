@@ -1,5 +1,6 @@
 local menu_cursor = require("src/tactics/menu/menu_cursor")
-require("src/tactics/menu/types")
+local menu_types = require("src/tactics/menu/types")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local Joypad = require("src/tactics/joypad").Joypad
 local event_bus = require("src/tactics/systems/event_bus")
 
@@ -8,14 +9,14 @@ local record ButtonAdvanceCursor<GC>
     where self.type == "CURSOR_BUTTON_ADVANCE"
 
     -- from definition
-    next_state: MenuStep
+    next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
 end
 
 local record ButtonAdvanceMenuDefinition<GC>
     is menu_cursor.MenuStepDefinition<GC>
     where self.type == "CURSOR_BUTTON_ADVANCE" 
-    next_state: MenuStep
+    next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
 end
 
@@ -32,11 +33,11 @@ end
 function ButtonAdvanceCursor:update(_joy: Joypad)
 end
 
-function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: MenuState): string, event_bus.GameEvent
+function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): string, event_bus.GameEvent
     return self.next_state, self.send_command
 end
 
-function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: MenuState): menu_cursor.MenuCursor<GC>
+function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>
     local cursor: ButtonAdvanceCursor<GC> = {
         type = "CURSOR_BUTTON_ADVANCE",
     }

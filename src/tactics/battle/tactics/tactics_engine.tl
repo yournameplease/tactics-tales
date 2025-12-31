@@ -1,9 +1,8 @@
 require("src/tactics/config")
 require("src/tactics/debug")
 
-require ("src/tactics/menu/types")
-
 local MenuTileHighlight = require("src/tactics/menu/cursor/grid_cursor").MenuTileHighlight
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local fp = require("src/tactics/util/fp")

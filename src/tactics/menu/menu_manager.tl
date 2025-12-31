@@ -1,26 +1,27 @@
 local point = require("src/tactics/util/point")
 require("src/tactics/debug")
-require ("src/tactics/menu/types")
+local menu_types = require ("src/tactics/menu/types")
+local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local Joypad = require("src/tactics/joypad").Joypad
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 
 local record SelectionHistory<GC>
-    step: MenuStep
+    step: menu_types.MenuStep
     selection: menu_cursor.MenuCursor<GC>
 end
 
 local record MenuDefinition<GC>
-    initial_step: MenuStep
-    steps: { MenuStep: menu_cursor.MenuStepDefinition<GC> }
+    initial_step: menu_types.MenuStep
+    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GC> }
 end
 
 local interface MenuManager<GC>
     
-    menu_definitions: { MenuId: MenuDefinition }
+    menu_definitions: { menu_types.MenuId: MenuDefinition }
 
-    menu_state: MenuState
+    menu_state: menu_types.MenuState
     menu_ctx: MenuContext
     menu_cursor: menu_cursor.MenuCursor<GC>
     selection_history: { SelectionHistory<GC> }
@@ -28,17 +29,17 @@ local interface MenuManager<GC>
     game_ctx: GC
     event_writer: event_writer.EventWriter
 
-    populate_menu_state: function(self, new_step: MenuStep)
+    populate_menu_state: function(self, new_step: menu_types.MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)
-    set_menu: function(self, menu_id: MenuId)
+    set_menu: function(self, menu_id: menu_types.MenuId)
     update: function(self, joy: Joypad)
 end
 
 local record BaseMenuManager<GC>
     is MenuManager<GC>
 
-    menu_definitions: { MenuId: MenuDefinition<GC> }
+    menu_definitions: { menu_types.MenuId: MenuDefinition<GC> }
 end
 
 local menu_manager = {
@@ -48,7 +49,7 @@ local menu_manager = {
 }
 
 function menu_manager.new<GC>(
-    menu_definitions: { MenuId: MenuDefinition },
+    menu_definitions: { menu_types.MenuId: MenuDefinition },
     ctx: GC,
     bus: event_bus.EventBus
 ): MenuManager<GC>
@@ -71,7 +72,7 @@ function menu_manager.new<GC>(
     return self
 end
 
-function BaseMenuManager:populate_menu_state(new_step: MenuStep)
+function BaseMenuManager:populate_menu_state(new_step: menu_types.MenuStep)
     self.menu_state.step = new_step
 
     local menu_data = self.menu_definitions[self.menu_state.menu_id]
@@ -116,7 +117,7 @@ function BaseMenuManager:handle_menu_back()
 end
 
 
-function BaseMenuManager:set_menu(menu_id: MenuId)
+function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
     self.menu_state.menu_id = menu_id
     self.selection_history = {}
     local step = self.menu_definitions[menu_id].initial_step

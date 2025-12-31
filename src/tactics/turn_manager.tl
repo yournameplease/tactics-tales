@@ -8,6 +8,7 @@ local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 
 local enum Phase
     "PLAYER"

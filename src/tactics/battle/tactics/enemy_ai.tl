@@ -1,6 +1,5 @@
 require("src/tactics/debug")
 
-require("src/tactics/menu/menu_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local point = require("src/tactics/util/point")
@@ -11,6 +10,7 @@ local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local tasks = require("src/tactics/systems/tasks")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 
 --[[
 AI Mk 1:
