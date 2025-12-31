@@ -9,7 +9,7 @@ local record Margin
     r: integer
 end
 
-local enum BoxDirection
+local enum UIDirection
     "col"
     "row"
 end
@@ -32,13 +32,14 @@ local interface UIElement
     auto_height: boolean
     flex_grow: integer
     cross_stretch: boolean
-    dir: BoxDirection
+    dir: UIDirection
     gap: integer
     padding: integer
     decoration_padding: integer
     decoration: DecorationStyle
     transparent: boolean
-    children: { Box }
+
+    children: { UIElement }
 
     add: function(self, UIElement): UIElement
     measure: function(self)
@@ -52,14 +53,14 @@ end
 
 local box = {
     Margin = Margin,
-    BoxDirection = BoxDirection,
+    UIDirection = UIDirection,
     DecorationStyle = DecorationStyle,
     UIElement = UIElement,
     Box = Box,
 }
 
-function box.new(props: UIElement): Box
-    local self: Box = setmetatable({}, { __index = box.Box})
+function box.new(props: UIElement): UIElement
+    local self: Box = setmetatable({}, { __index = Box})
     self.x = props.x or 0
     self.y = props.y or 0
     self.w = props.w or 0
@@ -119,24 +120,24 @@ end
 
 -- utility constructors
 
-function box.col(): Box
+function box.col(): UIElement
     return box.new({ dir = "col", padding = 0, gap = 0, auto_height = true})
 end
 
-function box.row(): Box
+function box.row(): UIElement
     return box.new({ dir = "row", padding = 0, gap = 0, auto_width = true})
 end
 
-function box.flex_col(): Box
+function box.flex_col(): UIElement
     return box.new({ dir = "col", padding = 0, auto_width = true})
 end
 
-function box.flex_row(): Box
+function box.flex_row(): UIElement
     return box.new({ dir = "row", padding = 0, auto_height = true})
 end
 
 -- good for lazy justification
-function box.spacer(grow: integer): Box
+function box.spacer(grow: integer): UIElement
     return box.new({ flex_grow = grow, transparent = true})
 end
 
