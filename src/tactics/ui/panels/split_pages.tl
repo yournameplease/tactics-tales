@@ -3,7 +3,7 @@ require("src/tactics/systems/event_bus")
 require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/components/message_log")
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/game/base_game_context")
+require("src/tactics/game/game_menu_context")
 local PageDivider = require("src/tactics/ui/decoration/page_divider")
 
 local record SplitPages

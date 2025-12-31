@@ -1,7 +1,7 @@
 local ui_context = require("src/tactics/ui/ui_context")
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
-local StoryMenuContext = require("src/tactics/story/story_context").StoryMenuContext
+local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
 require("src/tactics/story/story_menu_manager")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")

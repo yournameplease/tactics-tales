@@ -17,7 +17,7 @@ local character_manager = require("src/tactics/character/character_manager")
 local turn_manager = require("src/tactics/turn_manager")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
-local battle_menu_context = require("src/tactics/battle/battle_context")
+local battle_menu_context = require("src/tactics/battle/battle_menu_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local script_manager = require("src/tactics/battle/scripts/script_manager")
 

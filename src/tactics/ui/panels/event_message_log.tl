@@ -4,7 +4,7 @@ require("src/tactics/ui/components/text_node")
 require("src/tactics/util/text")
 require("src/tactics/ui/components/message_log")
 require("src/tactics/ui/ui_context_manager")
-require("src/tactics/story/story_context")
+require("src/tactics/story/story_menu_context")
 local lists = require("src/tactics/util/lists")
 
 global record EventMessageLog

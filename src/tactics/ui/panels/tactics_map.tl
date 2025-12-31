@@ -11,7 +11,7 @@ require("src/tactics/util/array_2d")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
-local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
+local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
 local lists = require("src/tactics/util/lists")
 require("src/tactics/types")

@@ -1,7 +1,7 @@
 local ui_context = require("src/tactics/ui/ui_context")
 local turn_manager =require("src/tactics/turn_manager")
 require("src/tactics/battle/battle_menu_manager")
-local BattleMenuContext = require("src/tactics/battle/battle_context").BattleMenuContext
+local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 
 local record BattleUIContext
