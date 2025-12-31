@@ -1,3 +1,5 @@
+require("src/tactics/types")
+
 global record UITheme
     COLOR_DECORATION_PRIMARY: Color
     COLOR_DECORATION_HIGHLIGHT: Color

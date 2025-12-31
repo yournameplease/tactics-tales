@@ -8,7 +8,7 @@ local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local String = require("src/tactics/util/string")
 
 local record VerticalListMenu<GC, Value>
-    is UIElement, TextUIElement
+    is UIElement, text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
@@ -18,7 +18,7 @@ function VerticalListMenu.new(
 	unselected_template: string,
 	selected_template: string,
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>,
-	props: TextNode
+	props: text_node.TextNode
 ): VerticalListMenu<GC, Value>
 	
     props.func = function(state: UIContextManager): { string }

@@ -1,20 +1,24 @@
 require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-require("src/tactics/ui/components/text_node")
+local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
 local text = require("src/tactics/util/text")
 
-global record MessageLog
-    is UIElement, TextUIElement
+local record MessageLog
+    is UIElement, text_node.TextUIElement
     func: function(UIContextManager, integer): { string }
-end 
+end
+setmetatable(MessageLog, { __index = Box})
 
+local message_log = {
+    MessageLog = MessageLog
+}
 
 -- extra props
 -- func(state, (opt)row_limit) = text callback
 -- rows = defaults to 1
 -- justify
-function MessageLog.new(props: MessageLog): MessageLog
+function message_log.new(props: MessageLog): UIElement
     local box = Box.new(props) as MessageLog
     setmetatable(box, { __index = MessageLog })
 
@@ -62,6 +66,4 @@ function MessageLog:draw(state: UIContextManager, draw_target_manager: DrawTarge
     )
 end
 
-setmetatable(MessageLog, { __index = Box})
-
-return MessageLog
+return message_log

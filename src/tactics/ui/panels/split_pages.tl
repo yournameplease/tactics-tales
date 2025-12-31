@@ -1,16 +1,13 @@
 require("src/tactics/ui/box")
-require("src/tactics/systems/event_bus")
-require("src/tactics/ui/components/text_node")
-require("src/tactics/ui/components/message_log")
-require("src/tactics/ui/ui_context_manager")
-require("src/tactics/game/game_menu_context")
 local PageDivider = require("src/tactics/ui/decoration/page_divider")
 
 local record SplitPages
-    is UIElement, TextUIElement
+    is UIElement 
 end
- 
-function SplitPages.new(left: UIElement, right: UIElement): SplitPages
+
+local split_pages = {}
+
+function split_pages.new(left: UIElement, right: UIElement): SplitPages
     local root = Box.new({
         x=0, y=0,
         w=480, h=270,
@@ -27,4 +24,4 @@ function SplitPages.new(left: UIElement, right: UIElement): SplitPages
     return root as SplitPages
 end
 
-return SplitPages
+return split_pages

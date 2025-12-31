@@ -6,22 +6,21 @@ local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTa
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local Colors = require("src/tactics/colors")
 
-global record PortraitBox
+local record PortraitBox
     is UIElement
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance
     palette: Colors.PaletteId
 end
-
 setmetatable(PortraitBox, { __index = Box })
 
-local FEET_ANCHOR = point.of(11, 22)
-
 local portrait_box = {}
+
+local FEET_ANCHOR = point.of(11, 22)
 
 function portrait_box.new(
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance,
     palette: Colors.PaletteId
-): PortraitBox
+): UIElement
     local box = Box.new({
         w=24, h=28,
         padding = 4,

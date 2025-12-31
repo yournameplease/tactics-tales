@@ -4,13 +4,13 @@ local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTa
 local text = require("src/tactics/util/text")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
 
-global enum UITextColor
+local enum UITextColor
     "dark"
     "trim"
     "light"
 end
 
-global interface TextUIElement
+local interface TextUIElement
     is UIElement
     draw_properties: text.DrawProperties
     text_color: UITextColor
@@ -19,7 +19,7 @@ global interface TextUIElement
 end
 
 
-global record TextNode
+local record TextNode
     is UIElement, TextUIElement
     func: function(UIContextManager): { string }
     text: { string }
@@ -75,7 +75,10 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
     )
 end
 
-local text_node = {}
+local text_node = {
+    TextNode = TextNode,
+    TextUIElement = TextUIElement,
+}
 
 function text_node.new(props: TextNode): TextNode
     local box = Box.new(props) as TextNode

@@ -2,11 +2,10 @@ require("src/tactics/ui/types")
 
 require("src/tactics/config")
 
-require("src/tactics/ui/panels/tactics_map")
+local tactics_map = require("src/tactics/ui/panels/tactics_map")
 require("src/tactics/ui/box")
-require("src/tactics/ui/panels/unit_info")
-require("src/tactics/ui/panels/combat_preview")
-require("src/tactics/ui/panels/event_message_log")
+local combat_preview = require("src/tactics/ui/panels/combat_preview")
+local event_message_log = require("src/tactics/ui/panels/event_message_log")
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 local BattleSummary = require("src/tactics/ui/panels/battle_summary")
@@ -14,7 +13,7 @@ local BattleSummary = require("src/tactics/ui/panels/battle_summary")
 require("src/tactics/ui/validator")
 
 local battle_summary = BattleSummary.new()
-local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+local map = tactics_map.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
         {
             decoration_padding = 2,
             decoration = "border",
@@ -22,9 +21,9 @@ local tactics_map = TacticsMap.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
         })
 local left = Box.new({ dir="col", flex_grow = 1, padding = 2})
 left:add(battle_summary)
-left:add(CombatPreview.new({ padding = 2 }))
-left:add(EventMessageLog.new({ padding = 2, flex_grow = 1}))
+left:add(combat_preview.new({ padding = 2 }))
+left:add(event_message_log.new({ padding = 2, flex_grow = 1}))
 
-local root = SplitPages.new(left, tactics_map)
+local root = SplitPages.new(left, map)
 
 return { root = root }
