@@ -1,4 +1,4 @@
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
 require("src/tactics/character/items/object/weapon")
 local item_definition = require("src/tactics/types/item_definition")
 local wpn = require("src/tactics/character/items/object/weapon")
@@ -17,7 +17,7 @@ local function shield(name: string, sprite_id: integer, slots: integer, defense:
         equip_slot = "OFF_HAND",
         sprite_data = {
             sprite = sprite_id,
-            anchor = Point.of(14, 12)
+            anchor = point.of(14, 12)
         },
 
         equipment_effects = {
@@ -44,7 +44,7 @@ end
 local default_weapon: item_definition.WeaponDefinition = {
     name = "Default Weapon",
     sprite = 104,
-    hand_anchor = Point.of(1,8), -- the top left position of the handle
+    hand_anchor = point.of(1,8), -- the top left position of the handle
     damage = 1,
     accuracy = 90,
     type = "MELEE",
@@ -87,7 +87,7 @@ local function melee_weapon(
         "MAIN_HAND",
         {
             sprite = sprite,
-            anchor = Point.of(1,8)
+            anchor = point.of(1,8)
         },
         {
             name = name,
@@ -112,7 +112,7 @@ local function two_handed_weapon(
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = Point.of(3,12)
+            anchor = point.of(3,12)
         },
         {
             name = name,
@@ -141,7 +141,7 @@ local function ranged_weapon(
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = Point.of(13,9) 
+            anchor = point.of(13,9) 
         },
         {
             name = name,

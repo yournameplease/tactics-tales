@@ -1,3 +1,5 @@
+local point = require("src/tactics/util/point")
+local Point = point.Point
 require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 

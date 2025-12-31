@@ -3,6 +3,8 @@ require("src/tactics/debug")
 
 require ("src/tactics/menu/types")
 
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local fp = require("src/tactics/util/fp")
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
@@ -165,18 +167,18 @@ function TacticsEngine:spawn_all(
 
         local offset_point: Point
         if animation == "from_north" then
-            offset_point = Point.of(0,-max_offset)
+            offset_point = point.of(0,-max_offset)
         elseif animation == "from_south" then
-            offset_point = Point.of(0,max_offset)
+            offset_point = point.of(0,max_offset)
         elseif animation == "from_east" then
-            offset_point = Point.of(max_offset,0)
+            offset_point = point.of(max_offset,0)
         elseif animation == "from_west" then
-            offset_point = Point.of(-max_offset,0)
+            offset_point = point.of(-max_offset,0)
         else
             error()
         end
 
-        local path = { offset_point * TILE_SIZE, Point.of(0,0) }
+        local path = { offset_point * TILE_SIZE, point.of(0,0) }
 
         self.task_manager:start_routine(function()
             local spawn_animation = self.animation_manager:create_walk_animation(path, max_offset)

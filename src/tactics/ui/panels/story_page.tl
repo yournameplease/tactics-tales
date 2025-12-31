@@ -6,7 +6,6 @@ local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/character/items/object/item_inventory")
-local portrait_box = require("src/tactics/ui/panels/portrait_box")
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node

@@ -1,7 +1,6 @@
 
 require("src/tactics/debug")
 
-require("src/tactics/types")
 require("src/tactics/systems/event_bus")
 require("src/tactics/systems/tasks")
 

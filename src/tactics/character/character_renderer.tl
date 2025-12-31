@@ -1,6 +1,7 @@
 require("profiler")
 require("src/tactics/debug")
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 
 local draw = require("src/tactics/draw")
 local colors = require("src/tactics/colors")
@@ -136,7 +137,7 @@ end
 
 local function draw_head(
 	drawable_unit: DrawableCharacterInstance,
-	point: Point
+	draw_point: Point
 )
     local flip_h = drawable_unit.side == "enemy"
 
@@ -153,39 +154,38 @@ local function draw_head(
 	local beard: sprite_data.SpriteData =
 		sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard]	
 
-    pt.spr(BASE_UNIT_SPRITE + head.sprite, point.x, point.y, flip_h)
+    pt.spr(BASE_UNIT_SPRITE + head.sprite, draw_point.x, draw_point.y, flip_h)
 	if eyes.sprite ~= nil then
-        pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + eyes.sprite, draw_point.x, draw_point.y, flip_h)
 	end
 	if beard.sprite ~= nil and headwear.draw_beard then
-        pt.spr(BASE_UNIT_SPRITE + beard.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + beard.sprite, draw_point.x, draw_point.y, flip_h)
 	end
 	if eyewear.sprite ~= nil and headwear.draw_eyewear then
-	    -- pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
-        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, draw_point.x, draw_point.y, flip_h)
 	end
 	if hair.sprite ~= nil and headwear.draw_hair then
-        pt.spr(BASE_UNIT_SPRITE + hair.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + hair.sprite, draw_point.x, draw_point.y, flip_h)
 	end
 	if headwear.sprite ~= nil then
-        pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + headwear.sprite, draw_point.x, draw_point.y, flip_h)
 	end
 
 end
 
 local function draw_character(
 	drawable_unit: DrawableCharacterInstance,
-	point: Point
+	draw_point: Point
 )
     local flip_h = drawable_unit.side == "enemy"
 
 	local animation_frame = get_animation_frame(drawable_unit)
 
-	local offset = Point.of(0,0)
+	local offset = point.of(0,0)
 
     local base_point = get_anchor_offsets(
-		point + offset,
-		Point.of(0, 0),
+		draw_point + offset,
+		point.of(0, 0),
 		animation_frame.anchors.feet_center,
 		-- flip_h,
 		false,
@@ -216,7 +216,7 @@ end
 
 function character_renderer.draw(
 	drawable_unit: DrawableCharacterInstance,
-	point: Point,
+	draw_point: Point,
 	draw_target_manager: DrawTargetManager,
 	set_pal: boolean | colors.PaletteId,
 	apply_animation: boolean,
@@ -225,10 +225,7 @@ function character_renderer.draw(
 	profile("draw_character")
 	local DRAW_TARGET_W = 32
 	local DRAW_TARGET_H = 32
-	-- local DRAW_TARGET_TILE_TOP_LEFT = Point.of(5,11)
-	-- local FOOT_GROUND_ANCHOR = Point.of(8,12)
-	-- local draw_target_camera = DRAW_TARGET_TILE_TOP_LEFT + FOOT_GROUND_ANCHOR
-	local DRAW_TARGET_D = Point.of(15, 31)
+	local DRAW_TARGET_D = point.of(15, 31)
 
 	local current_frame = drawable_unit.animation_data.current_frame.frame
 	if drawable_unit.sprites[current_frame] == nil then
@@ -237,28 +234,15 @@ function character_renderer.draw(
 		-- bake sprite
 		draw_target_manager:duplicate_target()
 
-		draw_character(drawable_unit, Point.of(0,0))
+		draw_character(drawable_unit, point.of(0,0))
 
 		local unit_sprite = draw_target_manager:pop_sprite()
-
-		-- for x = 0, unit_sprite:width() - 1 do
-		-- 	local out = ""
-		-- 	for y = 0, unit_sprite:height() - 1 do
-		-- 		out = out .. tostring(unit_sprite:get(x as integer,y as integer)).."|"
-		-- 	end
-		-- 	pt.printh(out)
-		-- end
-		-- if draw_outline then
         draw.draw_shadow(COLOR_OUTLINE,
             function(draw_x: integer,draw_y: integer)
-				local draw_point = Point.of(draw_x, draw_y) - DRAW_TARGET_D
-				pt.spr(unit_sprite, draw_point.x, draw_point.y)
+				local outline_draw_point = point.of(draw_x, draw_y) - DRAW_TARGET_D
+				pt.spr(unit_sprite, outline_draw_point.x, outline_draw_point.y)
             end,
             0, 0)
-		-- end
-		-- pt.spr(unit_sprite, point.x, point.y)
-		-- pt.spr(unit_sprite, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
-		-- pt.spr(unit_sprite, 0, 0)
 		pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
 		drawable_unit.sprites[drawable_unit.animation_data.current_frame.frame] = draw_target_manager:pop_sprite()
@@ -269,10 +253,10 @@ function character_renderer.draw(
 	local animation_frame = get_animation_frame(drawable_unit)
 	local offset = animation_frame.offset
 	if not apply_animation then
-		offset = Point.of(0,0)
+		offset = point.of(0,0)
 	end
 
-	local draw_point = point + offset - DRAW_TARGET_D
+	local sprite_draw_point = draw_point + offset - DRAW_TARGET_D
 
     if set_pal is boolean then
 		if set_pal then
@@ -282,7 +266,7 @@ function character_renderer.draw(
 		colors.apply_palette(set_pal)
 	end
 	
-	pt.spr(sprite,draw_point.x,draw_point.y)
+	pt.spr(sprite,sprite_draw_point.x,sprite_draw_point.y)
 
     if set_pal then
         pt.reset_pal()
@@ -292,7 +276,7 @@ end
 
 local function draw_health_bar(
 	battle_unit: BattleUnit,
-	point: Point
+	draw_point: Point
 )
 	local flip_h = battle_unit.side == "enemy"
 
@@ -307,11 +291,11 @@ local function draw_health_bar(
 
 	local x: integer
 	if flip_h then
-		x = point.x + (width>>1)
+		x = draw_point.x + (width>>1)
 	else
-		x = point.x - (width>>1)
+		x = draw_point.x - (width>>1)
 	end
-	local y = point.y - 2
+	local y = draw_point.y - 2
 	local COLOR_SIDE = 16
 	-- TODO: get this from UI theme
 	local COLOR_BORDER = 21
@@ -330,7 +314,7 @@ end
 
 function character_renderer.draw_health_bar(
 	battle_unit: BattleUnit,
-	point: Point,
+	draw_point: Point,
 	set_pal: boolean,
 	apply_animation: boolean
 )
@@ -341,12 +325,12 @@ function character_renderer.draw_health_bar(
 
 	local offset = animation_frame.offset
 	if not apply_animation then
-		offset = Point.of(0,0)
+		offset = point.of(0,0)
 	end
 	
     local base_point = get_anchor_offsets(
-		point + offset,
-		Point.of(0, 0),
+		draw_point + offset,
+		point.of(0, 0),
 		animation_frame.anchors.feet_center,
 		-- flip_h,
 		false,
@@ -357,8 +341,8 @@ function character_renderer.draw_health_bar(
         set_palette(battle_unit, true)
     end
 
-    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, Point.of(0,0), flip_h, false)
-	local health_bar_anchor = head_anchor - Point.of(0,9)
+    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, point.of(0,0), flip_h, false)
+	local health_bar_anchor = head_anchor - point.of(0,9)
     draw_health_bar(battle_unit, health_bar_anchor)
 
     if set_pal then

@@ -1,4 +1,5 @@
-require("src/tactics/types")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
@@ -13,7 +14,7 @@ end
 
 setmetatable(PortraitBox, { __index = Box })
 
-local FEET_ANCHOR = Point.of(11, 22)
+local FEET_ANCHOR = point.of(11, 22)
 
 local portrait_box = {}
 
@@ -38,7 +39,7 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
 
     local unit = self.get_selected_unit(state)
     if unit then
-        local self_pos: Point = Point.of(self.x, self.y)
+        local self_pos: Point = point.of(self.x, self.y)
         CharacterRenderer.draw(
             unit,
             (FEET_ANCHOR+self_pos) as Point,

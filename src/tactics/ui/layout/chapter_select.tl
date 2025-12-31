@@ -1,6 +1,5 @@
 
 require("src/tactics/systems/service")
-require("src/tactics/types")
 require("src/tactics/ui/types")
 
 require("src/tactics/config")

@@ -1,6 +1,8 @@
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/battle/pathfinding")
 require("src/tactics/debug")
+local point = require("src/tactics/util/point")
+local Point = point.Point
 local lists = require("src/tactics/util/lists")
 local random = require("src/tactics/util/random")
 local wpn = require("src/tactics/character/items/object/weapon")
@@ -152,7 +154,7 @@ end
 
 local function is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
   
-    local dist = taxicab_distance(attacker.tile, defender.tile)
+    local dist = point.taxicab_distance(attacker.tile, defender.tile)
 
     return dist >= attack.min_range and dist <= attack.max_range
 end

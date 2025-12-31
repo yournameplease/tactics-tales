@@ -1,4 +1,3 @@
-require("src/tactics/types")
 require("src/tactics/character/items/object/weapon")
 require("src/tactics/character/animation_data")
 require("src/tactics/animation")
