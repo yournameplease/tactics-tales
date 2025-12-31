@@ -1,11 +1,11 @@
-local event_bus = require("src/tactics/systems/event_bus")
-local tasks = require("src/tactics/systems/tasks")
+local EventBus = require("src/tactics/systems/event_bus").EventBus
+local TaskManager = require("src/tactics/systems/tasks").TaskManager
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-require("src/tactics/animation")
+local AnimationManager = require("src/tactics/animation").AnimationManager
 
 local record GameServiceBundle
-	event_bus: event_bus.EventBus
-	task_manager: tasks.TaskManager
+	event_bus: EventBus
+	task_manager: TaskManager
 	animation_manager: AnimationManager
 	ui_context: UIContextManager
 end

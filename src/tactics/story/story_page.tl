@@ -1,4 +1,4 @@
-require("src/tactics/animation")
+local animation = require("src/tactics/animation")
 local drawable_character = require("src/tactics/story/drawable_character")
 
 local enum RenderedStoryNodeType
@@ -36,13 +36,13 @@ function rendered_story_node.text(text: string): RenderedStoryNode
     return node
 end
 
-function rendered_story_node.character_customization(base_character: Character, animation: AnimatedSpriteData): RenderedStoryNode
+function rendered_story_node.character_customization(base_character: Character, anim: animation.AnimatedSpriteData): RenderedStoryNode
     local node: rendered_story_node.CharacterCustomization = {
         type = 'character_customization',
     }
 
     node.character = drawable_character.create_drawable_unit(base_character, "player")
-    node.character.animation_data = animation
+    node.character.animation_data = anim
     return node
 end
 
@@ -68,8 +68,8 @@ function StoryPage:add_text_line(text: string)
     pt.add(self.nodes, node)
 end
 
-function StoryPage:add_character_customization_menu(base_character: Character, animation: AnimatedSpriteData)
-    local node = rendered_story_node.character_customization(base_character, animation)
+function StoryPage:add_character_customization_menu(base_character: Character, anim: animation.AnimatedSpriteData)
+    local node = rendered_story_node.character_customization(base_character, anim)
     pt.add(self.nodes, node)
 end
 

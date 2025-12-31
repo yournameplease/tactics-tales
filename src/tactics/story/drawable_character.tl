@@ -1,10 +1,6 @@
-require("src/tactics/debug")
-require("src/tactics/character/animation_data")
-require("src/tactics/animation")
 require("src/tactics/character/object/character")
-require("src/tactics/character/items/object/weapon")
 
-global record DrawableCharacter
+local record DrawableCharacter
     is DrawableCharacterInstance
 
     side: Side

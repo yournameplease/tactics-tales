@@ -13,7 +13,7 @@ local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tasks = require("src/tactics/systems/tasks")
-require("src/tactics/animation")
+local animation = require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 
@@ -35,7 +35,7 @@ local record TacticsEngine
     character_manager: character_manager.CharacterManager
 
     task_manager: tasks.TaskManager
-    animation_manager: AnimationManager
+    animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
 
 
@@ -60,7 +60,7 @@ function tactics_engine.new(
     map: BattleMap,
     character_mgr: character_manager.CharacterManager,
     task_manager: tasks.TaskManager,
-    animation_manager: AnimationManager,
+    animation_manager: animation.AnimationManager,
     bus: event_bus.EventBus
 ): tactics_engine.TacticsEngine
     local self: tactics_engine.TacticsEngine = setmetatable({
@@ -140,7 +140,7 @@ function TacticsEngine:spawn_all(
     players: {unit_spawn_data.UnitSpawnData},
     enemies: {unit_spawn_data.UnitSpawnData},
     neutral: {unit_spawn_data.UnitSpawnData},
-    animation: unit_spawn_data.UnitSpawnAnimation
+    anim: unit_spawn_data.UnitSpawnAnimation
 )
     local spawned: {battle_unit.BattleUnit} = {}
     lists.add_all(spawned, self:spawn_units(players or {}, "player"))
@@ -151,13 +151,13 @@ function TacticsEngine:spawn_all(
         local max_offset = 0
         for _,unit in ipairs(spawned) do
             local offset: integer
-            if animation == "from_north" then
+            if anim == "from_north" then
                 offset = unit.tile.y + 1
-            elseif animation == "from_south" then
+            elseif anim == "from_south" then
                 offset = MAP_HEIGHT - unit.tile.y
-            elseif animation == "from_east" then
+            elseif anim == "from_east" then
                 offset = MAP_WIDTH - unit.tile.x
-            elseif animation == "from_west" then
+            elseif anim == "from_west" then
                 offset = unit.tile.x + 1
             else
                 error()
@@ -168,13 +168,13 @@ function TacticsEngine:spawn_all(
         end
 
         local offset_point: Point
-        if animation == "from_north" then
+        if anim == "from_north" then
             offset_point = point.of(0,-max_offset)
-        elseif animation == "from_south" then
+        elseif anim == "from_south" then
             offset_point = point.of(0,max_offset)
-        elseif animation == "from_east" then
+        elseif anim == "from_east" then
             offset_point = point.of(max_offset,0)
-        elseif animation == "from_west" then
+        elseif anim == "from_west" then
             offset_point = point.of(-max_offset,0)
         else
             error()
@@ -211,10 +211,10 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
         if #path > 1 then
-            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.animation_data = animation
-            LOG.debug("Animating!", animation.playing)
-            while animation.playing do
+            local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
+            unit.animation_data = anim
+            LOG.debug("Animating!", anim.playing)
+            while anim.playing do
                 pt.yield()
             end
         end
@@ -237,10 +237,10 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
     self.battle_is_blocked = true
     self.task_manager:start_routine(function()
         if #path > 1 then
-            local animation = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.animation_data = animation
+            local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
+            unit.animation_data = anim
 
-            while animation.playing do
+            while anim.playing do
                 pt.yield()
             end
         end
