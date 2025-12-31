@@ -37,8 +37,6 @@ require("src/tactics/systems/tasks")
 require("src/tactics/debug")
 
 local event_bus = require("src/tactics/systems/event_bus")
-require("src/tactics/systems/service")
-
 require("src/tactics/character/character_manager")
 require("src/tactics/animation")
 require("src/tactics/ui/ui_manager")
@@ -60,26 +58,20 @@ local task_manager: TaskManager
 
 local game: Game
 
-local service_manager: ServiceManager
-
-
 function _init()
-    service_manager = ServiceManager.new()
-    
-    task_manager = service_manager:register(TaskManager.new())
-    ui_manager = service_manager:register(UIManager.new())
-    animation_manager = service_manager:register(AnimationManager.new())
-
-    service_manager:register(event_bus.new())
+    task_manager = TaskManager.new()
+    ui_manager = UIManager.new()
+    animation_manager = AnimationManager.new()
+    event_bus = event_bus.new()
 
     ui_context = UIContextManager.new()
     
     -- this is stupid.  delete the bundle class
     local game_services: GameServiceBundle = {
-    	event_bus = service_manager.persistent_services.event_bus as event_bus.EventBus,
-    	task_manager = service_manager.persistent_services.task_manager as TaskManager,
-    	animation_manager = service_manager.persistent_services.animation_manager as AnimationManager,
-        ui_context = ui_context
+    	event_bus = event_bus,
+    	task_manager = task_manager,
+    	animation_manager = animation_manager,
+        ui_context = ui_context,
     }
     
     game = Game.new(game_services)

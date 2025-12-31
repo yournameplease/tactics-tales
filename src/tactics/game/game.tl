@@ -6,7 +6,6 @@ require("src/tactics/data/battles")
 
 require("src/tactics/battle/battle_manager")
 require("src/tactics/game/game_menu_manager")
-require("src/tactics/systems/service")
 require("src/tactics/turn_manager")
 require("src/tactics/battle/tactics/enemy_ai")
 require("src/tactics/story/story_menu_context")

@@ -21,26 +21,17 @@ global record UILayout
 end
 
 global record UIManager
-    is GameService
-    where self.id == "ui_manager"
     layouts: { UILayoutId: UILayout }
     current_layout: UILayout
     theme: UITheme
     draw_target_manager: draw_target_manager.DrawTargetManager
 end
 
-function UIManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
-
-end
-
--- Define Layouts
 function UIManager.new(): UIManager
-
-    local self: UIManager = setmetatable({
-        id = "ui_manager",
-        dependencies = {},
-    }, { __index = UIManager }) 
-    -- 1. Create the BATTLE layout tree
+    local self: UIManager = setmetatable({}, {
+        __index = UIManager
+    })
+         
     self.layouts = {}
 
     self.layouts["TACTICS"] = tactics_main
@@ -51,12 +42,11 @@ function UIManager.new(): UIManager
     self.layouts["CHAPTER_SELECT_PAGE"] = chapter_select
     self.layouts["OPTIONS_MENU_PAGE"] = options_menu
 
-    -- Validate all layouts
+    -- Validate layouts
     for id, v in pairs(self.layouts) do
         MenuValidator.validate(v.root, id)
     end
 
-    -- Set initial
     self.current_layout = self.layouts.TACTICS
 
     -- old "stone" theme
@@ -87,8 +77,8 @@ function UIManager:draw(battle_context: UIContextManager)
     self.current_layout = self.layouts[battle_context.layout]
 
     local root = self.current_layout.root
+    
     -- Recalculate size and positions
-
     profile("ui_manager_measure")
     root:measure()
     profile("ui_manager_measure")

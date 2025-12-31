@@ -1,22 +1,10 @@
-require("src/tactics/systems/service")
-require("src/tactics/ui/types")
-
-require("src/tactics/config")
-
 local text_node = require("src/tactics/ui/components/text_node")
-require("src/tactics/ui/panels/tactics_map")
 local box = require("src/tactics/ui/box")
-require("src/tactics/ui/panels/unit_info")
-require("src/tactics/ui/panels/combat_preview")
-require("src/tactics/ui/panels/event_message_log")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
 local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
-
-require("src/tactics/ui/validator")
-
 
 local left = box.new({ dir="col", flex_grow = 1, padding = 2})
 local right = box.new({ dir = "col", flex_grow = 1, padding = 2})

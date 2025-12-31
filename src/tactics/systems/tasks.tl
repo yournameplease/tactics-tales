@@ -1,20 +1,12 @@
-require("src/tactics/systems/service")
 require("src/tactics/debug")
 
 global record TaskManager
-    is GameService
-    where self.id == "task_manager"
     tasks: { any }
-end
-
-function TaskManager:init(_service_manager: ServiceManager, _services: { ServiceId: GameService })
-    self.tasks = {}
 end
 
 function TaskManager.new(): TaskManager
     return setmetatable({
-        id = "task_manager",
-        dependencies = {},
+        tasks = {},
     }, { __index = TaskManager })
 end
 

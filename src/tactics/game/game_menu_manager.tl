@@ -1,12 +1,7 @@
 
 require("src/tactics/debug")
 require("src/tactics/menu/types")
-require("src/tactics/menu/menu_manager")
-require("src/tactics/joypad")
-require("src/tactics/story/story_page")
-require("src/tactics/systems/service")
 local menu_manager = require("src/tactics/menu/menu_manager")
-require("src/tactics/story/story_menu_context")
 local event_bus = require("src/tactics/systems/event_bus")
 local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")

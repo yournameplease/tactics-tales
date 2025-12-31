@@ -1,9 +1,7 @@
 require("src/tactics/debug")
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
-require("src/tactics/joypad")
 require("src/tactics/story/story_page")
-require("src/tactics/systems/service")
 local sprite_data = require("src/tactics/character/sprite_data")
 local customization_options = sprite_data.customization_options
 local menu_manager = require("src/tactics/menu/menu_manager")
