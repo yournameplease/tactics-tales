@@ -1,8 +1,7 @@
 local randomizer = require("src/tactics/util/randomizer")
 local sprite_data = require("src/tactics/character/sprite_data")
-require("src/tactics/character/object/character")
+local character = require("src/tactics/character/object/character")
 require("src/tactics/character/items/object/weapon")
-require("src/tactics/animation")
 
 -- all fields are optional in the templates
 global record CharacterTemplate
@@ -12,7 +11,7 @@ global record CharacterTemplate
 	eyewear_options: randomizer.Randomizer<string>
 	headwear_options: randomizer.Randomizer<string>
 	body_options: randomizer.Randomizer<string>
-	sex_options: randomizer.Randomizer<Sex>
+	sex_options: randomizer.Randomizer<character.Sex>
 	skin_color_options: randomizer.Randomizer<string>
 	hair_color_options: randomizer.Randomizer<string>
 	hair_options_m: randomizer.Randomizer<string>

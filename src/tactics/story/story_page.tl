@@ -1,5 +1,6 @@
 local animation = require("src/tactics/animation")
 local drawable_character = require("src/tactics/story/drawable_character")
+local Character = require("src/tactics/character/object/character").Character
 
 local enum RenderedStoryNodeType
     "text"

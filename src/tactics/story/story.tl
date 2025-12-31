@@ -14,6 +14,7 @@ local Joypad = require("src/tactics/joypad").Joypad
 local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local Character = require("src/tactics/character/object/character").Character
 
 local STORY_DATA = require("src/tactics/data/story")
 
