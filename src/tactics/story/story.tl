@@ -9,7 +9,7 @@ require("src/tactics/data/battles")
 require("src/tactics/animation")
 require("src/tactics/battle/battle_manager")
 require("src/tactics/menu/menu_manager")
-require("src/tactics/story/story_menu_manager")
+local story_menu_manager = require("src/tactics/story/story_menu_manager")
 require("src/tactics/systems/service")
 local character_manager = require("src/tactics/character/character_manager")
 require("src/tactics/turn_manager")
@@ -39,10 +39,10 @@ global record Story
     
     story_id: story_types.StoryId
 
-    story_page: StoryPage
+    story_page: story_page.StoryPage
 
     character_manager: character_manager.CharacterManager	
-    menu_manager: StoryMenuManager
+    menu_manager: story_menu_manager.StoryMenuManager
     current_node: ActiveNode
 
     battle_manager: BattleManager
@@ -149,7 +149,7 @@ function Story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
     self.character_manager = character_manager.new(self.services.event_bus)
     
     self.story_page = story_page.story_page()
-    self.menu_manager = StoryMenuManager.new(
+    self.menu_manager = story_menu_manager.new(
         story_menu_context.new(),
         self.services.event_bus
     )

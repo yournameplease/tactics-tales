@@ -2,8 +2,6 @@ require("src/tactics/debug")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src/tactics/util/point").Point
-require("src/tactics/menu/types")
-require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local menu_manager = require("src/tactics/menu/menu_manager")
@@ -13,7 +11,7 @@ local array_2d = require("src/tactics/util/array_2d")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 
-global record BattleMenuManager
+local record BattleMenuManager
     is menu_manager.MenuManager<BattleMenuContext>
 end
 
@@ -220,7 +218,11 @@ local MENU_DATA: { MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
     }
 }
 
-function BattleMenuManager.new(
+local battle_menu_manager = {
+    BattleMenuManager = BattleMenuManager
+}
+
+function battle_menu_manager.new(
     ctx: BattleMenuContext,
     bus: event_bus.EventBus
 ): BattleMenuManager
@@ -231,4 +233,4 @@ function BattleMenuManager.new(
     ) as BattleMenuManager
 end
 
-return BattleMenuManager
+return battle_menu_manager

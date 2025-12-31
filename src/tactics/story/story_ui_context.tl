@@ -2,7 +2,7 @@ local ui_context = require("src/tactics/ui/ui_context")
 local story_page = require("src/tactics/story/story_page")
 local rendered_story_node = story_page.rendered_story_node
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
-require("src/tactics/story/story_menu_manager")
+local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 
@@ -10,8 +10,8 @@ local record StoryUIContext
     is ui_context.UIContext
     where self.type == "story"
 
-    story_page: StoryPage
-    menu_manager: StoryMenuManager
+    story_page: story_page.StoryPage
+    menu_manager: story_menu_manager.StoryMenuManager
 end
 
 local story_ui_context = {
@@ -19,8 +19,8 @@ local story_ui_context = {
 }
 
 function story_ui_context.new(
-    page: StoryPage,
-    menu_manager: StoryMenuManager
+    page: story_page.StoryPage,
+    menu_manager: story_menu_manager.StoryMenuManager
 ): StoryUIContext
     local self: StoryUIContext = setmetatable({
         type = "story"
