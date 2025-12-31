@@ -11,6 +11,7 @@ local pathfinding = require("src/tactics/battle/pathfinding")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 require("src/tactics/systems/tasks")
 require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
@@ -56,7 +57,7 @@ local tactics_engine = {
 }
 
 function tactics_engine.new(
-    battle_map: BattleMap,
+    map: BattleMap,
     character_mgr: character_manager.CharacterManager,
     task_manager: TaskManager,
     animation_manager: AnimationManager,
@@ -66,7 +67,7 @@ function tactics_engine.new(
     }, { __index = TacticsEngine })
     self.battle_is_blocked = false
 
-    self.battle_map = battle_map
+    self.battle_map = map
     self.character_manager = character_mgr
 
     self.task_manager = task_manager

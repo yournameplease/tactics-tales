@@ -1,4 +1,4 @@
-require('src/tactics/battle/battle_map')
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 
 local record BattleMenuContext
@@ -11,11 +11,11 @@ local battle_menu_context = {
 }
 
 function battle_menu_context.new(
-    battle_map: BattleMap,
+    map: BattleMap,
     tactics: tactics_engine.TacticsEngine
 ): BattleMenuContext
     return {
-        battle_map = battle_map,
+        battle_map = map,
         tactics_engine = tactics,
     }
 end

@@ -5,6 +5,7 @@ local Point = require("src/tactics/util/point").Point
 require("src/tactics/menu/types")
 require("src/tactics/menu/menu_manager")
 require("src/tactics/systems/service")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
@@ -18,11 +19,11 @@ end
 
 
 local function grid_selection_is_empty_or_acting_unit(
-    battle_map: BattleMap,
+    map: BattleMap,
     grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>,
     ctx: MenuContext
 ): boolean
-    local destination_unit = battle_map:get_at_tile(grid_selection.point)
+    local destination_unit = map:get_at_tile(grid_selection.point)
     if destination_unit == nil then
         return true
     end
@@ -31,10 +32,10 @@ local function grid_selection_is_empty_or_acting_unit(
 end
 
 local function grid_selection_is_available_player(
-    battle_map: BattleMap,
+    map: BattleMap,
     grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>
 ): boolean
-    local unit = battle_map:get_at_tile(grid_selection.point)
+    local unit = map:get_at_tile(grid_selection.point)
 
     if unit == nil then return false end
     if not unit:is_player() then return false end
@@ -44,30 +45,30 @@ local function grid_selection_is_available_player(
 end
 
 local function any_target_in_range(
-    battle_map: BattleMap,
+    map: BattleMap,
     ctx: MenuContext
 ): boolean
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
     
-    local units_in_range = battle_map:get_targets_in_range(unit.id, destination)
+    local units_in_range = map:get_targets_in_range(unit.id, destination)
     return #units_in_range > 0
 end
 
 local function validate_tile_is_in_unit_attack_range(
-    battle_map: BattleMap,
+    map: BattleMap,
     unit: BattleUnit,
     unit_position: Point,
     target_point: Point 
 ): boolean
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local target_unit = battle_map:get_at_tile(target_point)
+    local target_unit = map:get_at_tile(target_point)
     if target_unit == nil then return false end
 
     if target_unit.side == unit.side then return false end
 
-    return battle_map:tile_has_distance_from_tile(target_point, unit_position, min_range, max_range)
+    return map:tile_has_distance_from_tile(target_point, unit_position, min_range, max_range)
 end
 
 -- kind

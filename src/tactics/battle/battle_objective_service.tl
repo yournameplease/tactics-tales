@@ -1,4 +1,4 @@
-require("src/tactics/battle/battle_map")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
@@ -17,12 +17,12 @@ local battle_objective_service = {
 }
 
 function battle_objective_service.new(
-    battle_map: BattleMap
+    map: BattleMap
 ): BattleObjectiveService 
     local self: BattleObjectiveService = setmetatable({
     }, { __index = BattleObjectiveService })
 
-    self.battle_map = battle_map
+    self.battle_map = map
     
     return self
 end

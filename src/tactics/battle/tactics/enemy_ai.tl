@@ -10,7 +10,7 @@ local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 require("src/tactics/systems/tasks")
-require("src/tactics/battle/battle_map")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 
 --[[
 AI Mk 1:
@@ -141,7 +141,7 @@ function EnemyAIEngine:handle_enemy_turn()
 end
 
 function enemy_ai_engine.new(
-    battle_map: BattleMap,
+    map: BattleMap,
     tactics: tactics_engine.TacticsEngine,
     bus: event_bus.EventBus,
     task_manager: TaskManager
@@ -149,7 +149,7 @@ function enemy_ai_engine.new(
     local self: EnemyAIEngine = setmetatable({
     }, { __index = EnemyAIEngine })
 
-    self.battle_map = battle_map
+    self.battle_map = map
     self.tactics_engine = tactics
     self.event_writer = event_writer.new(bus)
     self.task_manager = task_manager

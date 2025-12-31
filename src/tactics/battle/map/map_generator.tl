@@ -1,7 +1,8 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 require("src/tactics/data/maps")
-require("src/tactics/battle/battle_map")
+local battle_map = require("src/tactics/battle/battle_map")
+local BattleMap = battle_map.BattleMap
 local MAP_DEFINITIONS = require("src/tactics/data/maps")
 local map_types = require("src/tactics/battle/map/types")
 local battle_definition_types = require("src/tactics/battle/definition/types")
@@ -27,19 +28,19 @@ local MID_WALL_LAYER = 3
 local BACK_WALL_LAYER = 4
 local GROUND_LAYER = 5
 
-local function as_map(battle_map: MapFetchResult): MapLayers
+local function as_map(map: MapFetchResult): battle_map.MapLayers
     return {
-        metatiles = battle_map[METATILES_LAYER].bmp,
+        metatiles = map[METATILES_LAYER].bmp,
         terrain = {
-            front_wall = battle_map[FRONT_WALL_LAYER].bmp,
-            mid_wall = battle_map[MID_WALL_LAYER].bmp,
-            back_wall = battle_map[BACK_WALL_LAYER].bmp,
-            ground = battle_map[GROUND_LAYER].bmp,
+            front_wall = map[FRONT_WALL_LAYER].bmp,
+            mid_wall = map[MID_WALL_LAYER].bmp,
+            back_wall = map[BACK_WALL_LAYER].bmp,
+            ground = map[GROUND_LAYER].bmp,
         }
     }
 end
 
-local function apply_checkerboard(map_layers: MapLayers)
+local function apply_checkerboard(map_layers: battle_map.MapLayers)
     local ground = map_layers.terrain.ground
     for x = 0,ground:height()-1 do
         for y = 0,ground:width()-1 do
@@ -51,7 +52,7 @@ local function apply_checkerboard(map_layers: MapLayers)
     end
 end
 
-local function apply_default_walls(map_layers: MapLayers)
+local function apply_default_walls(map_layers: battle_map.MapLayers)
     local ground = map_layers.terrain.ground
     local back_wall = map_layers.terrain.back_wall
     -- mid wall makes ui look ugly
@@ -110,15 +111,15 @@ local function load_static(definition: map_types.StaticMapDefinition, tile_label
         end
     end
     
-    local battle_map: BattleMap = BattleMap.new(metatiles_layer:width(), metatiles_layer:height(), labels)
-    battle_map.layers = layers
-    battle_map.metadata = {
+    local map: BattleMap = battle_map.new(metatiles_layer:width(), metatiles_layer:height(), labels)
+    map.layers = layers
+    map.metadata = {
         player_spawners = {},
         enemy_spawners = {},
     }
 
 
-    return battle_map
+    return map
 end
 
 -- function MapGenerator:_generate_procedural(definition) end
@@ -131,16 +132,16 @@ function map_generator.load_map(map_id: string, labels: {battle_definition_types
     local definition = MAP_DEFINITIONS[map_id]
     assert(definition ~= nil)
 
-    local battle_map: BattleMap
+    local map: BattleMap
     if definition is map_types.StaticMapDefinition then
-        battle_map = load_static(definition, labels)
+        map = load_static(definition, labels)
     -- elseif definition is ProceduralMapDefinition then
 
     else
         error("unknown map type")
     end
 
-    return battle_map
+    return map
 end
 
 return map_generator

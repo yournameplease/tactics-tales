@@ -3,7 +3,7 @@ local Point = point.Point
 
 local array_2d = require("src/tactics/util/array_2d")
 local lists = require("src/tactics/util/lists")
-require("src/tactics/battle/battle_map")
+local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 require("src/tactics/battle/map/map_generator")
 require("src/tactics/systems/service")
 
@@ -20,11 +20,11 @@ require("src/tactics/systems/service")
 -- 7
 
 -- cost to move onto x,y from any neighbor
-local function movement_cost(battle_map: BattleMap, tile: Point, side: Side): integer
-    local terrain = battle_map:get_terrain(tile)
+local function movement_cost(map: BattleMap, tile: Point, side: Side): integer
+    local terrain = map:get_terrain(tile)
     if terrain == nil then return 999 end
 
-    local unit = battle_map:get_at_tile(tile)
+    local unit = map:get_at_tile(tile)
     if unit ~= nil then
         if unit.side ~= side then return 999 end
     end
@@ -43,9 +43,9 @@ local record ShortestPathEntry
 end
 
 local type DistanceFunction = function(tile: Point): integer
-local function distance_for_unit(battle_map: BattleMap, side: Side): DistanceFunction
+local function distance_for_unit(map: BattleMap, side: Side): DistanceFunction
     return function(tile: Point): integer
-        return movement_cost(battle_map, tile, side)
+        return movement_cost(map, tile, side)
     end
 end
 
@@ -142,9 +142,9 @@ local pathfinding = {
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function pathfinding.calculate_all_tile_costs(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
+function pathfinding.calculate_all_tile_costs(map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), limit, point.of(battle_map.width, battle_map.height))
+    return _dijkstra_traversal(start_x, start_y, distance_for_unit(map, side), limit, point.of(map.width, map.height))
 end 
 
 -- @return list of { { x, y } } tile coordinates from start position
@@ -162,9 +162,9 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function pathfinding.find_reachable_tiles(battle_map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
+function pathfinding.find_reachable_tiles(map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(battle_map, side), total_cost, point.of(battle_map.width, battle_map.height))
+    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(map, side), total_cost, point.of(map.width, map.height))
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable: array_2d.Array2D<boolean> = array_2d.new(full_map.w, full_map.h, false)

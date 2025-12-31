@@ -6,16 +6,16 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
-global enum TerrainLocation
+local enum TerrainLocation
 	"front_wall"
 	"mid_wall"
 	"back_wall"
 	"ground"
 end
 
-global type NewTilesMap = {TerrainLocation: integer}
+local type NewTilesMap = {TerrainLocation: integer}
 
-global record TerrainData
+local record TerrainData
     solid: boolean
     movement_cost: integer
     dodge: integer
@@ -56,18 +56,18 @@ local TERRAIN_DATA: { integer: TerrainData } = {
     }
 }
 
-global record MapLayers
+local record MapLayers
     metatiles: Userdata
     -- should be total
     terrain: {TerrainLocation: Userdata}
 end
 
-global record MapMetadata
+local record MapMetadata
     player_spawners: { integer: Point }
     enemy_spawners: { integer: { Point } }
 end
 
-global record BattleMap    
+local record BattleMap    
     width: integer
     height: integer
     
@@ -84,9 +84,10 @@ local battle_map = {
     BattleMap = BattleMap,
     TerrainLocation = TerrainLocation,
     NewTilesMap = NewTilesMap,
+    MapLayers = MapLayers,
 }
 
-function BattleMap.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
+function battle_map.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
         units_by_x_y = array_2d.new(width, height),
