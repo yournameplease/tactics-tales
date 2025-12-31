@@ -1,3 +1,8 @@
+---@brief
+--- collection of static data for unit sprites
+--- contains ids, names, sprites, and other information
+--- has ordered lists for use in character customization menus
+
 require("src/tactics/character/object/character")
 local lists = require("src/tactics/util/lists")
 
@@ -158,12 +163,13 @@ local NATURAL_HAIR_COLORS = {
 }
 
 local UNNATURAL_HAIR_COLORS = {
-	"pink",
-	"lavender",
-	"mauve",
-	"medium_green",
-	"dark_green",
-	"light_pink",
+	"white",
+	-- "pink",
+	-- "lavender",
+	-- "mauve",
+	-- "medium_green",
+	-- "dark_green",
+	-- "light_pink",
 }
 
 
