@@ -12,7 +12,7 @@ local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
-require("src/tactics/systems/tasks")
+local tasks = require("src/tactics/systems/tasks")
 require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
@@ -34,7 +34,7 @@ local record TacticsEngine
     battle_map: BattleMap
     character_manager: character_manager.CharacterManager
 
-    task_manager: TaskManager
+    task_manager: tasks.TaskManager
     animation_manager: AnimationManager
     event_writer: event_writer.EventWriter
 
@@ -59,7 +59,7 @@ local tactics_engine = {
 function tactics_engine.new(
     map: BattleMap,
     character_mgr: character_manager.CharacterManager,
-    task_manager: TaskManager,
+    task_manager: tasks.TaskManager,
     animation_manager: AnimationManager,
     bus: event_bus.EventBus
 ): tactics_engine.TacticsEngine

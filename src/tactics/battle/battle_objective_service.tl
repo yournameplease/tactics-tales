@@ -1,6 +1,7 @@
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local event_bus = require("src/tactics/systems/event_bus")
 
 local record BattleObjectiveService
     battle_map: BattleMap
@@ -8,7 +9,7 @@ end
 
 local record BattleFinishState
     finished: boolean
-    command: GameEvent
+    command: event_bus.GameEvent
 end
 
 local battle_objective_service = {

@@ -1,11 +1,11 @@
 local id_generator = require("src/tactics/util/id_generator")
 require("src/tactics/debug")
 
-global type EventArgs = { string: any }
+local type EventArgs = { string: any }
 
 -- TODO: distinguish commands (menu actions)
 -- from events?
-global enum GameEvent
+local enum GameEvent
     "GAME_BEGIN_STORY"
     "GAME_EXIT_STORY"
     "GAME_SET_OPTIONS"
@@ -33,7 +33,7 @@ global enum GameEvent
     "STORY_CREATE_CHARACTER"
 end
 
-global record EventCallback
+local record EventCallback
     id: integer
     callback: function(args: { string: any })
 end
@@ -45,7 +45,10 @@ local record EventBus
 end
 
 local event_bus = {
-    EventBus = EventBus
+    EventArgs = EventArgs,
+    GameEvent = GameEvent,
+    EventCallback = EventCallback,
+    EventBus = EventBus,
 }
 
 local MAX_EVENT_HISTORY = 20

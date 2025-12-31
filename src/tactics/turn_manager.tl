@@ -62,28 +62,28 @@ function turn_manager.new(
     self.event_listener = event_listener.new(bus)
     self.event_writer = event_writer.new(bus)
 
-    self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: event_bus.EventArgs)
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
             turn = self.turn
         })
     end)
 
-    self.event_listener:on("TACTICS_UNIT_END_ACTION", function(_: EventArgs)
+    self.event_listener:on("TACTICS_UNIT_END_ACTION", function(_: event_bus.EventArgs)
         if self.phase == "PLAYER" then
             LOG.debug("Setting to player turn menu")
             self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         end        
     end)
 
-    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
         LOG.info("Begin player turn!")
         self.phase = "PLAYER"
         self.tactics_engine:refresh_all_units()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
     end)
 
-    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: event_bus.EventArgs)
         if self.phase ~= "PLAYER" then
             LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -96,12 +96,12 @@ function turn_manager.new(
         })
     end)
 
-    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
         self.phase = "ENEMY"
         LOG.info("Begin enemy turn!")
     end)
 
-    self.event_listener:on("TACTICS_END_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_ENEMY_TURN", function(_: event_bus.EventArgs)
         if self.phase ~= "ENEMY" then
             LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
@@ -137,15 +137,15 @@ function turn_manager.new(
         self.tactics_engine:handle_move_and_attack(ctx)
     end)
 
-    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
         self.tactics_engine.is_player_turn = true
     end)
 
-    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: event_bus.EventArgs)
         self.tactics_engine.is_player_turn = false
     end)
 
-    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: EventArgs)
+    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
         self.enemy_ai_engine:handle_enemy_turn()
     end)
 

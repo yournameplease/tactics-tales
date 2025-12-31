@@ -5,7 +5,7 @@ local event_bus = require("src/tactics/systems/event_bus")
 
 
 local interface EventWriter
-	emit: function(self, event_name: GameEvent, args: {string: any})
+	emit: function(self, event_name: event_bus.GameEvent, args: {string: any})
 end
 
 local event_writer = {
@@ -31,7 +31,7 @@ function event_writer.new(
 end
 
 function EventWriterImpl:emit(
-	event_name: GameEvent,
+	event_name: event_bus.GameEvent,
 	args: {string: any}
 )
 	self.bus:emit(event_name, args)

@@ -1,16 +1,12 @@
 require("src/tactics/debug")
-require("src/tactics/systems/event_bus")
-require("src/tactics/systems/event_bus")
 
 local Joypad = require("src/tactics/joypad").Joypad
-require("src/tactics/systems/tasks")
 
 require("src/tactics/data/battles")
 
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
-require("src/tactics/menu/menu_manager")
 require("src/tactics/ui/ui_context_manager")
 local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")

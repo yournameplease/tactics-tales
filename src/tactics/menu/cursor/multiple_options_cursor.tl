@@ -1,6 +1,7 @@
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 require("src/tactics/menu/types")
 local lists = require("src/tactics/util/lists")
+local event_bus = require("src/tactics/systems/event_bus")
 local Joypad = require("src/tactics/joypad").Joypad
 
 local record MenuMultipleOptionCursor<GC>
@@ -32,7 +33,7 @@ local record MultipleOptionsMenuCursor<GC>
     is_option_selected: boolean -- if the current selection has been selected.  Needed if the selection is must_select
     options: { MenuMultipleOptionCursor<GC> }
     next_state: string
-    send_command: GameEvent
+    send_command: event_bus.GameEvent
 end
 
 function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: MenuState): MenuMultipleOptionCursor<GC>
@@ -51,7 +52,7 @@ local record MultipleOptionsMenuDefinition<GC>
     wrap: boolean
     options: { MenuMultipleOptionDefinition<GC> }
     next_state: string
-    send_command: GameEvent
+    send_command: event_bus.GameEvent
 end
 
 local multiple_options_cursor = {
@@ -131,7 +132,7 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
     end
 end
 
-function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, GameEvent
+function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: MenuState): string, event_bus.GameEvent
     if self.primary_direction == "select" and self.i ~= #self.options then
         self.i = self.i + 1
         return nil, nil
