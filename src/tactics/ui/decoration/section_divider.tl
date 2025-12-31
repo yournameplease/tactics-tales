@@ -1,22 +1,22 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/ui/ui_context_manager")
 
 local record SectionDivider
-    is UIElement
+    is box.UIElement
 end
 
-setmetatable(SectionDivider, { __index = Box })
+setmetatable(SectionDivider, { __index = box.Box })
 
 local section_divider = {}
 
 function section_divider.new(h: integer): SectionDivider
-    local box = Box.new({
+    local self = box.new({
 		h = h,
 		cross_stretch = true
 	}) as SectionDivider
-    setmetatable(box, {__index = SectionDivider})
-    return box
+    setmetatable(self, {__index = SectionDivider})
+    return self
 end
 
 function SectionDivider:draw(_: UIContextManager, _draw_target_manager: DrawTargetManager, ui_theme: UITheme)

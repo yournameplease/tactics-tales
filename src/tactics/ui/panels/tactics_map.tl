@@ -2,7 +2,7 @@ require("profiler")
 require("src/tactics/debug")
 require("src/tactics/config")
 
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/battle_menu_manager")
 require("src/tactics/ui/ui_context_manager")
@@ -22,11 +22,11 @@ local BattleUnit = battle_unit.BattleUnit
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
 local record TacticsMap
-    is UIElement
+    is box.UIElement
     map_width: integer
     map_height: integer
 end
-setmetatable(TacticsMap, { __index = Box})
+setmetatable(TacticsMap, { __index = box.Box})
 
 local tactics_map = {}
 
@@ -50,17 +50,17 @@ local TEXT_HEIGHT = 7
 
 local FOOT_GROUND_ANCHOR = point.of(8,12)
 
-function tactics_map.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
-    local box = Box.new(props) as TacticsMap
-    setmetatable(box, { __index = TacticsMap})
+function tactics_map.new(map_width: integer, map_height: integer, props: box.UIElement): TacticsMap
+    local self = box.new(props) as TacticsMap
+    setmetatable(self, { __index = TacticsMap})
 
-    box.map_width = map_width or MAP_WIDTH
-    box.map_height = map_height or MAP_HEIGHT
+    self.map_width = map_width or MAP_WIDTH
+    self.map_height = map_height or MAP_HEIGHT
 
-    box.w = box.map_width * TILE_SIZE.x + box.internal_margin.l + box.internal_margin.r
-    box.h = box.map_height * TILE_SIZE.y + box.internal_margin.t + box.internal_margin.b
+    self.w = self.map_width * TILE_SIZE.x + self.internal_margin.l + self.internal_margin.r
+    self.h = self.map_height * TILE_SIZE.y + self.internal_margin.t + self.internal_margin.b
 
-    return box
+    return self
 end
 
 local record AnimatedUnitPosition
@@ -241,7 +241,7 @@ end
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
-    Box._draw(self, state, draw_target_manager, ui_theme)
+    box.Box._draw(self, state, draw_target_manager, ui_theme)
 
     local battle_map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager

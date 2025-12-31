@@ -1,5 +1,5 @@
 
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
@@ -14,23 +14,23 @@ local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_option
 local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
 
 local record StoryPagePanel
-    is UIElement
+    is box.UIElement
 
     rendered_nodes: {rendered_story_node.RenderedStoryNode}
 end
 
-setmetatable(StoryPagePanel, { __index = Box })
+setmetatable(StoryPagePanel, { __index = box.Box })
 
 local story_page_panel = {}
 
-function story_page_panel.new(props: Box): UIElement
+function story_page_panel.new(props: box.Box): box.UIElement
     props.dir = "col"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
     props.auto_height = props.auto_height or true
     props.cross_stretch = true
 
-    local self = Box.new(props) as StoryPagePanel
+    local self = box.new(props) as StoryPagePanel
     setmetatable(self, { __index = StoryPagePanel })
 
 	self.rendered_nodes = {}
@@ -54,7 +54,7 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
         self.rendered_nodes = {}
         for _,n in ipairs(nodes) do
             pt.add(self.rendered_nodes, n)
-            local child: UIElement
+            local child: box.UIElement
             if n is rendered_story_node.Text then
                 child = text_node.new({
                     text = {n.text},
@@ -64,7 +64,7 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
                     auto_height = true,
                 })
             elseif n is rendered_story_node.CharacterCustomization then
-				child = Box.flex_row()
+				child = box.flex_row()
 
 				local cursor = state.story_context.menu_manager.menu_cursor
                 if cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext> then
@@ -84,12 +84,12 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
             else
                 error()
             end
-            pt.add(self.children, child as Box)
+            pt.add(self.children, child as box.Box)
         end
     end
 
 
-    Box._draw(self, state, draw_target_manager, ui_theme)
+    box.Box._draw(self, state, draw_target_manager, ui_theme)
 end
 
 return story_page_panel

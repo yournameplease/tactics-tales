@@ -1,14 +1,14 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text_node = require("src/tactics/ui/components/text_node")
 require("src/tactics/ui/ui_context_manager")
 local text = require("src/tactics/util/text")
 
 local record MessageLog
-    is UIElement, text_node.TextUIElement
+    is box.UIElement, text_node.TextUIElement
     func: function(UIContextManager, integer): { string }
 end
-setmetatable(MessageLog, { __index = Box})
+setmetatable(MessageLog, { __index = box.Box})
 
 local message_log = {
     MessageLog = MessageLog
@@ -18,31 +18,31 @@ local message_log = {
 -- func(state, (opt)row_limit) = text callback
 -- rows = defaults to 1
 -- justify
-function message_log.new(props: MessageLog): UIElement
-    local box = Box.new(props) as MessageLog
-    setmetatable(box, { __index = MessageLog })
+function message_log.new(props: MessageLog): box.UIElement
+    local self = box.new(props) as MessageLog
+    setmetatable(self, { __index = MessageLog })
 
-    box.padding = props.padding or 1
-    box.decoration_padding = 0
-    box.func = props.func or error("Need text getter `func`")
+    self.padding = props.padding or 1
+    self.decoration_padding = 0
+    self.func = props.func or error("Need text getter `func`")
 
-    box.draw_properties = props.draw_properties or {}
-    box.draw_properties.justify = box.draw_properties.justify or "left"
-    box.draw_properties.direction = box.draw_properties.direction or "up"
-    box.draw_properties.wrap = box.draw_properties.wrap or "wrap"
+    self.draw_properties = props.draw_properties or {}
+    self.draw_properties.justify = self.draw_properties.justify or "left"
+    self.draw_properties.direction = self.draw_properties.direction or "up"
+    self.draw_properties.wrap = self.draw_properties.wrap or "wrap"
 
-    box.text_object = text.new(
+    self.text_object = text.new(
         {},
-        box.draw_properties,
-        box.w,
-        box.h
+        self.draw_properties,
+        self.w,
+        self.h
     )
     
-    return box
+    return self
 end
 
 function MessageLog:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
-    Box._draw(self, state, draw_target_manager, ui_theme)
+    box.Box._draw(self, state, draw_target_manager, ui_theme)
 
     local row_limit = (self.h-self.internal_margin.t-self.internal_margin.b) // 10
 

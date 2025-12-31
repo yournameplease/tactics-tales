@@ -3,7 +3,7 @@ local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/config")
 local draw_target_manager = require("src/tactics/draw/draw_target_manager")
 
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 
 require("src/tactics/ui/validator")
 
@@ -17,7 +17,7 @@ local main_menu = require("src/tactics/ui/layout/main_menu")
 local chapter_select = require("src/tactics/ui/layout/chapter_select")
 local options_menu = require("src/tactics/ui/layout/options_menu")
 global record UILayout
-    root: UIElement
+    root: box.UIElement
 end
 
 global record UIManager

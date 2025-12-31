@@ -2,25 +2,25 @@ require("src/tactics/ui/ui_context_manager")
 require("src/tactics/ui/theme")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 
-global record Margin
+local record Margin
     t: integer
     b: integer
     l: integer
     r: integer
 end
 
-global enum BoxDirection
+local enum BoxDirection
     "col"
     "row"
 end
 
-global enum DecorationStyle
+local enum DecorationStyle
     "embossed"
     "recessed"
     "border"
 end
 
-global interface UIElement
+local interface UIElement
     x: integer
     y: integer
     w: integer
@@ -46,7 +46,7 @@ global interface UIElement
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
 end
 
-global record Box
+local record Box
     is UIElement
     -- x: integer
     -- y: integer
@@ -67,8 +67,16 @@ global record Box
     -- children: { Box }
 end
 
-function Box.new(props: UIElement): Box
-    local self: Box = setmetatable({}, { __index = Box})
+local box = {
+    Margin = Margin,
+    BoxDirection = BoxDirection,
+    DecorationStyle = DecorationStyle,
+    UIElement = UIElement,
+    Box = Box,
+}
+
+function box.new(props: UIElement): Box
+    local self: Box = setmetatable({}, { __index = box.Box})
     self.x = props.x or 0
     self.y = props.y or 0
     self.w = props.w or 0
@@ -128,25 +136,25 @@ end
 
 -- utility constructors
 
-function Box.col(): Box
-    return Box.new({ dir = "col", padding = 0, gap = 0, auto_height = true})
+function box.col(): Box
+    return box.new({ dir = "col", padding = 0, gap = 0, auto_height = true})
 end
 
-function Box.row(): Box
-    return Box.new({ dir = "row", padding = 0, gap = 0, auto_width = true})
+function box.row(): Box
+    return box.new({ dir = "row", padding = 0, gap = 0, auto_width = true})
 end
 
-function Box.flex_col(): Box
-    return Box.new({ dir = "col", padding = 0, auto_width = true})
+function box.flex_col(): Box
+    return box.new({ dir = "col", padding = 0, auto_width = true})
 end
 
-function Box.flex_row(): Box
-    return Box.new({ dir = "row", padding = 0, auto_height = true})
+function box.flex_row(): Box
+    return box.new({ dir = "row", padding = 0, auto_height = true})
 end
 
 -- good for lazy justification
-function Box.spacer(grow: integer): Box
-    return Box.new({ flex_grow = grow, transparent = true})
+function box.spacer(grow: integer): Box
+    return box.new({ flex_grow = grow, transparent = true})
 end
 
 function Box:add(child: UIElement): UIElement
@@ -159,14 +167,14 @@ end
 -- Calculate intrinsic size of children, then self
 -- =========================================================
 function Box._measure(self: UIElement)
-    local box = self as Box -- Cast!  All classes inherit from box though
+    local element = self as Box -- Cast!  All classes inherit from box though
     -- A. If we are fixed size, we don't care about children (optimization)
     -- EXCEPT if we contain content that might overflow (not handled here yet)
-    if not box.auto_width and not box.auto_height then
-        box._calculated_w = box.w
-        box._calculated_h = box.h
+    if not element.auto_width and not element.auto_height then
+        element._calculated_w = element.w
+        element._calculated_h = element.h
         -- We still measure children so they know their own size
-        for _, child in ipairs(box.children) do
+        for _, child in ipairs(element.children) do
             if child.measure then child:measure() end
         end
         return
@@ -174,9 +182,9 @@ function Box._measure(self: UIElement)
 
     -- B. Measure Children to determine our own size
     local content_w, content_h = 0, 0
-    local is_row = (box.dir == "row")
+    local is_row = (element.dir == "row")
 
-    for i, child in ipairs(box.children) do
+    for i, child in ipairs(element.children) do
         -- Recursively measure child
         if child.measure then
             child:measure()
@@ -189,17 +197,17 @@ function Box._measure(self: UIElement)
         if is_row then
             content_w = content_w + child_outer_w
             content_h = pt.max(content_h, child_outer_h)
-            if i > 1 then content_w = content_w + box.gap end
+            if i > 1 then content_w = content_w + element.gap end
         else
             content_w = pt.max(content_w, child_outer_w)
             content_h = content_h + child_outer_h
-            if i > 1 then content_h = content_h + box.gap end
+            if i > 1 then content_h = content_h + element.gap end
         end
     end
 
     -- C. Set our calculated size (Content + Padding)
-    box._calculated_w = box.auto_width and (content_w+box.internal_margin.l+box.internal_margin.r) or box.w
-    box._calculated_h = box.auto_height and (content_h+box.internal_margin.t+box.internal_margin.b) or box.h
+    element._calculated_w = element.auto_width and (content_w+element.internal_margin.l+element.internal_margin.r) or element.w
+    element._calculated_h = element.auto_height and (content_h+element.internal_margin.t+element.internal_margin.b) or element.h
 end
 
 function Box:measure()
@@ -464,37 +472,37 @@ function Box:draw_solid(ui_theme: UITheme)
 end
 
 function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
-    local box = self as Box -- Cast!  All classes inherit from box though
+    local element = self as Box -- Cast!  All classes inherit from box though
 
-    if not box.transparent then
-        box:draw_solid(ui_theme)
+    if not element.transparent then
+        element:draw_solid(ui_theme)
     end
     
-    if box.decoration == 'embossed' then
-        box:draw_embossed(ui_theme)
-    elseif box.decoration == 'recessed' then
-        box:draw_recessed(ui_theme)
-    elseif box.decoration == 'border' then
-        box:draw_border(ui_theme)
+    if element.decoration == 'embossed' then
+        element:draw_embossed(ui_theme)
+    elseif element.decoration == 'recessed' then
+        element:draw_recessed(ui_theme)
+    elseif element.decoration == 'border' then
+        element:draw_border(ui_theme)
     end
 
     -- Debug rectangle
-    -- LOG.trace(box.x, box.y, box.w, box.h)
+    -- LOG.trace(element.x, element.y, element.w, element.h)
     --     pt.rrect(
-    --             box.x+box.internal_margin.l-box.decoration_padding,
-    --             box.y+box.internal_margin.t-box.decoration_padding,
-    --             box.w - (box.internal_margin.l+box.internal_margin.r)+2*box.decoration_padding,
-    --             box.h - (box.internal_margin.t+box.internal_margin.b)+2*box.decoration_padding,
+    --             element.x+element.internal_margin.l-element.decoration_padding,
+    --             element.y+element.internal_margin.t-element.decoration_padding,
+    --             element.w - (element.internal_margin.l+element.internal_margin.r)+2*element.decoration_padding,
+    --             element.h - (element.internal_margin.t+element.internal_margin.b)+2*element.decoration_padding,
     --             0, 14)
         -- pt.rrect(
-        --         box.x+box.padding+box.internal_margin.l,
-        --         box.y+box.padding+box.internal_margin.t,
-        --         box._calculated_w - 2*box.padding,
-        --         box._calculated_h - 2*box.padding,
+        --         element.x+element.padding+element.internal_margin.l,
+        --         element.y+element.padding+element.internal_margin.t,
+        --         element._calculated_w - 2*element.padding,
+        --         element._calculated_h - 2*element.padding,
         --         0, 28)
 
     -- 2. Draw Children
-    for _, child in ipairs(box.children) do
+    for _, child in ipairs(element.children) do
         child:draw(state, draw_target_manager, ui_theme)
     end
 end
@@ -503,4 +511,4 @@ function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManage
     Box._draw(self, state, draw_target_manager, ui_theme)
 end
 
-return Box
+return box

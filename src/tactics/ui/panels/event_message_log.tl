@@ -1,4 +1,4 @@
-require("src/tactics/ui/box")
+local box = require("src/tactics/ui/box")
 require("src/tactics/systems/event_bus")
 require("src/tactics/ui/components/text_node")
 require("src/tactics/util/text")
@@ -9,12 +9,12 @@ require("src/tactics/story/story_menu_context")
 local lists = require("src/tactics/util/lists")
 
 local record EventMessageLog
-    is UIElement, text_node.TextUIElement
+    is box.UIElement, text_node.TextUIElement
 end
 
 local event_message_log = {}
 
-function event_message_log.new(props: message_log.MessageLog): UIElement
+function event_message_log.new(props: message_log.MessageLog): box.UIElement
     props.func = function(state: UIContextManager, row_limit: integer): { string }
         return lists.map(
             function(e: GameEvent): string return "> "..e  end
