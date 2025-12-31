@@ -41,13 +41,13 @@ require("src/tactics/character/character_manager")
 require("src/tactics/animation")
 require("src/tactics/ui/ui_manager")
 local game = require("src/tactics/game/game")
-require("src/tactics/ui/ui_context_manager")
+local ui_context_manager = require("src/tactics/ui/ui_context_manager")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local joypad = require("src/tactics/joypad")
 
 require("profiler")
 
-local ui_context: UIContextManager = {}
+local ui_context: ui_context_manager.UIContextManager
 local animation_manager: AnimationManager
 local ui_manager: UIManager
 local task_manager: tasks.TaskManager
@@ -60,7 +60,7 @@ function _init()
     animation_manager = AnimationManager.new()
     event_bus = event_bus.new()
 
-    ui_context = UIContextManager.new()
+    ui_context = ui_context_manager.new()
     
     -- this is stupid.  delete the bundle class
     local game_services: GameServiceBundle = {

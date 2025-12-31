@@ -5,6 +5,7 @@ local text_node = require("src/tactics/ui/components/text_node")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local VerticalListMenu = require("src/tactics/ui/panels/vertical_list_menu")
 local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 

@@ -12,7 +12,6 @@ require("src/tactics/battle/tactics/enemy_ai")
 local story_menu_context = require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local story_page = require("src/tactics/story/story_page")
-require("src/tactics/ui/ui_context_manager")
 local Joypad = require("src/tactics/joypad").Joypad
 local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node

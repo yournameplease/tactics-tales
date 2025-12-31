@@ -1,4 +1,4 @@
-require("src/tactics/ui/ui_context_manager")
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")

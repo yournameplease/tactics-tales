@@ -4,7 +4,7 @@ local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTa
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
 require("src/tactics/character/items/object/item")
-require("src/tactics/ui/ui_context_manager")
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 require("src/tactics/character/items/object/item_inventory")
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
 local story_page = require("src/tactics/story/story_page")

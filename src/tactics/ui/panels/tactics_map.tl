@@ -5,7 +5,7 @@ require("src/tactics/config")
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 require("src/tactics/battle/battle_menu_manager")
-require("src/tactics/ui/ui_context_manager")
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local battle_map = require("src/tactics/battle/battle_map")
 require("src/tactics/util/array_2d")
 local menu_cursor = require("src/tactics/menu/menu_cursor")

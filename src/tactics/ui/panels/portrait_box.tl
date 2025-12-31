@@ -1,6 +1,6 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
-require("src/tactics/ui/ui_context_manager")
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local CharacterRenderer = require("src/tactics/character/character_renderer")
