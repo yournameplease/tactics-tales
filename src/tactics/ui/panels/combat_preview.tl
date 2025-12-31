@@ -6,9 +6,8 @@ local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
-global record CombatPreview
+local record CombatPreview
     is UIElement
-
 end
 setmetatable(CombatPreview, { __index = Box })
 
@@ -42,7 +41,9 @@ local function get_preview_text(state: UIContextManager): {string}
     return out
 end
 
-function CombatPreview.new(props: UIElement): CombatPreview
+local combat_preview = {}
+
+function combat_preview.new(props: UIElement): UIElement
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
@@ -76,4 +77,4 @@ function CombatPreview.new(props: UIElement): CombatPreview
     return self
 end
 
-return CombatPreview
+return combat_preview

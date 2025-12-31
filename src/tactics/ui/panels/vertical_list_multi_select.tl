@@ -9,7 +9,7 @@ local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_option
 local String = require("src/tactics/util/string")
 
 local record VerticalMultiSelectMenu<T>
-    is UIElement, TextUIElement
+    is UIElement, text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<T>
@@ -19,7 +19,7 @@ function VerticalMultiSelectMenu.new(
 	unselected_template: string,
 	selected_template: string,
 	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<T>,
-	props: TextNode
+	props: text_node.TextNode
 ): VerticalMultiSelectMenu<T>
 	
     props.func = function(state: UIContextManager): { string }

@@ -8,13 +8,14 @@ local wpn = require("src/tactics/character/items/object/weapon")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
-global record UnitInfo
+local record UnitInfo
     is UIElement
 end
-
 setmetatable(UnitInfo, { __index = Box })
 
-function UnitInfo.new(props: UnitInfo): UnitInfo
+local unit_info = {}
+
+function unit_info.new(props: UnitInfo): UnitInfo
     props.dir = "row"
     props.gap = props.gap or 4
     props.padding = props.padding or 4
@@ -93,4 +94,4 @@ function UnitInfo.new(props: UnitInfo): UnitInfo
     return self
 end
 
-return UnitInfo
+return unit_info

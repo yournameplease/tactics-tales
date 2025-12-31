@@ -21,14 +21,14 @@ local BattleUnit = battle_unit.BattleUnit
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
-global record TacticsMap
+local record TacticsMap
     is UIElement
     map_width: integer
     map_height: integer
 end
-
 setmetatable(TacticsMap, { __index = Box})
 
+local tactics_map = {}
 
 local COLOR_MENU_PRIMARY = CONFIG.COLOR_MENU_PRIMARY
 local COLOR_MENU_SECONDARY = CONFIG.COLOR_MENU_SECONDARY
@@ -50,7 +50,7 @@ local TEXT_HEIGHT = 7
 
 local FOOT_GROUND_ANCHOR = point.of(8,12)
 
-function TacticsMap.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
+function tactics_map.new(map_width: integer, map_height: integer, props: UIElement): TacticsMap
     local box = Box.new(props) as TacticsMap
     setmetatable(box, { __index = TacticsMap})
 
@@ -373,4 +373,4 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     profile("tactics_map_draw")
 end
 
-return TacticsMap
+return tactics_map
