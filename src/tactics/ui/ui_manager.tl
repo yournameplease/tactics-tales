@@ -17,18 +17,23 @@ local title_screen = require("src/tactics/ui/layout/title_screen")
 local main_menu = require("src/tactics/ui/layout/main_menu")
 local chapter_select = require("src/tactics/ui/layout/chapter_select")
 local options_menu = require("src/tactics/ui/layout/options_menu")
-global record UILayout
+
+local record UILayout
     root: box.UIElement
 end
 
-global record UIManager
+local record UIManager
     layouts: { UILayoutId: UILayout }
     current_layout: UILayout
     theme: UITheme
     draw_target_manager: draw_target_manager.DrawTargetManager
 end
 
-function UIManager.new(): UIManager
+local ui_manager = {
+    UIManager = UIManager
+}
+
+function ui_manager.new(): UIManager
     local self: UIManager = setmetatable({}, {
         __index = UIManager
     })
@@ -94,4 +99,4 @@ function UIManager:draw(battle_context: UIContextManager)
     profile("ui_manager_draw")
 end
 
-return UIManager
+return ui_manager

@@ -25,7 +25,7 @@ function UIContextManager:register_ui_context(ctx: ui_context.UIContext)
     elseif ctx is story_ui_context.StoryUIContext then
         assert(self.story_context == nil, "Attempt to register game context which was already registered!")
         self.story_context = ctx
-    elseif ctx is GameUIContext then
+    elseif ctx is game_ui_context.GameUIContext then
         assert(self.game_context == nil, "Attempt to register game context which was already registered!")
         self.game_context = ctx
     else

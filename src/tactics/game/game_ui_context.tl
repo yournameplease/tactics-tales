@@ -3,7 +3,7 @@ local ui_context = require("src/tactics/ui/ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 local GameMenuManager = require("src/tactics/game/game_menu_manager").GameMenuManager
 
-global record GameUIContext
+local record GameUIContext
     is ui_context.UIContext
     where self.type == "game"
 
