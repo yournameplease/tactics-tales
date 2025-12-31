@@ -5,7 +5,7 @@ local Point = point.Point
 local lists = require("src/tactics/util/lists")
 require("src/tactics/character/animation_data")
 
-global record AnimatedSpriteData
+local record AnimatedSpriteData
     current_frame: AnimationFrameData
     playing: boolean
 end
@@ -16,7 +16,7 @@ local enum AnimationType
     "global"
 end
 
-global interface AnimationInstance
+local interface AnimationInstance
     type: AnimationType
     playing: boolean
     tick: function(self)
@@ -140,7 +140,7 @@ function DirectionalOffsetAnimationInstance:get_animation_offset(_global_frame: 
     return point.of_angle(direction, offset)
 end
 
-global record GlobalAnimationInstance
+local record GlobalAnimationInstance
     is AnimationInstance
     where self.type == "global"
     sprites: SpriteFrameData
@@ -159,12 +159,12 @@ function GlobalAnimationInstance:get_animation_offset(_global_frame: integer): P
     return point.of(0, 0)
 end
 
-global record AnimationFrameData
+local record AnimationFrameData
     frame: AnimationFrameName
     offset: Point
 end
 
-global enum OffsetAnimationId
+local enum OffsetAnimationId
     "BUMP"
     "DODGE"
     "HURT"
@@ -232,12 +232,17 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
 }
 
 
-global record AnimationManager
+local record AnimationManager
     active_animations: { AnimationInstance }
     global_frame: integer
 end
 
-function AnimationManager.new(): AnimationManager
+local animation = {
+    AnimationManager = AnimationManager,
+    AnimatedSpriteData = AnimatedSpriteData,
+}
+
+function animation.animation_manager(): AnimationManager
     return setmetatable({
         active_animations = {},
         global_frame = 0,
@@ -248,8 +253,8 @@ function AnimationManager:tick()
     self.global_frame = self.global_frame + 1
 
     LOG.trace("Ticking "..#self.active_animations.." animations")
-    for _, animation in ipairs(self.active_animations) do
-        animation:tick()
+    for _, anim in ipairs(self.active_animations) do
+        anim:tick()
     end
     local i = 1
     while i <= #self.active_animations do
@@ -314,7 +319,6 @@ function AnimationManager:create_walk_animation(
     -- - different terrain/unit speeds
     -- - faux elevation
     assert(#path > 0)
-    LOG.debug("creating path animation", #path)
     local DURATION_PER_TILE = 8 * time_scale
 
     local path_points: { PathAnimationPoint } = lists.map(
@@ -344,16 +348,15 @@ function AnimationManager:create_walk_animation(
         animated_object = { playing = true },
         playing = true
     }
-LOG.debug("confirming...", #instance.path_points)
     pt.add(self.active_animations, instance)
     setmetatable(instance, { __index = PathAnimationInstance })
 
     return instance.animated_object
 end
 
-function AnimationManager:get_frame_data(animation: AnimationInstance): AnimationFrameData
-    local offset = animation:get_animation_offset(self.global_frame)
-    local frame_name = animation:get_sprite_frame_name(self.global_frame)
+function AnimationManager:get_frame_data(anim: AnimationInstance): AnimationFrameData
+    local offset = anim:get_animation_offset(self.global_frame)
+    local frame_name = anim:get_sprite_frame_name(self.global_frame)
 
     return {
         frame = frame_name,
@@ -363,10 +366,10 @@ end
 
 function AnimationManager:generate_frame_data()
     LOG.trace("Rendering "..#self.active_animations.." animations")
-    for _, animation in ipairs(self.active_animations) do
-        animation.animated_object.current_frame = self:get_frame_data(animation)
-        animation.animated_object.playing = animation.playing
+    for _, anim in ipairs(self.active_animations) do
+        anim.animated_object.current_frame = self:get_frame_data(anim)
+        anim.animated_object.playing = anim.playing
     end
 end
 
-return AnimationManager
+return animation

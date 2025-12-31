@@ -37,8 +37,7 @@ local tasks = require("src/tactics/systems/tasks")
 require("src/tactics/debug")
 
 local event_bus = require("src/tactics/systems/event_bus")
-require("src/tactics/character/character_manager")
-require("src/tactics/animation")
+local animation = require("src/tactics/animation")
 local ui_mgr = require("src/tactics/ui/ui_manager")
 local game = require("src/tactics/game/game")
 local ui_context_manager = require("src/tactics/ui/ui_context_manager")
@@ -48,7 +47,7 @@ local joypad = require("src/tactics/joypad")
 require("profiler")
 
 local ui_context: ui_context_manager.UIContextManager
-local animation_manager: AnimationManager
+local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
 
@@ -57,7 +56,7 @@ local game_manager: game.Game
 function _init()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
-    animation_manager = AnimationManager.new()
+    animation_manager = animation.animation_manager()
     event_bus = event_bus.new()
 
     ui_context = ui_context_manager.new()

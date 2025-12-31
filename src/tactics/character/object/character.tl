@@ -1,6 +1,6 @@
 require("src/tactics/character/items/object/weapon")
 require("src/tactics/character/animation_data")
-require("src/tactics/animation")
+local animation = require("src/tactics/animation")
 local ItemInventory = require("src/tactics/character/items/object/item_inventory")
 
 global enum Side
@@ -68,7 +68,7 @@ global interface DrawableCharacterInstance
 	side: Side
 	has_acted: boolean -- used for outline color...
 	
-	animation_data: AnimatedSpriteData
+	animation_data: animation.AnimatedSpriteData
     -- prerendered sprites by animation frame name
     sprites: { AnimationFrameName: Userdata }
 

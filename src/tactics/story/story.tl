@@ -3,12 +3,10 @@ require("src/tactics/debug")
 
 require("src/tactics/data/battles")
 
-require("src/tactics/animation")
+local animation = require("src/tactics/animation")
 local battle_manager = require("src/tactics/battle/battle_manager")
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local character_manager = require("src/tactics/character/character_manager")
-require("src/tactics/turn_manager")
-require("src/tactics/battle/tactics/enemy_ai")
 local story_menu_context = require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local story_page = require("src/tactics/story/story_page")
@@ -28,7 +26,7 @@ local record Story
         rendered_node: story_page.rendered_story_node.RenderedStoryNode
     end
 
-    idle_animation: AnimatedSpriteData
+    idle_animation: animation.AnimatedSpriteData
     customized_character: Character
     
     story_id: story_types.StoryId
