@@ -127,7 +127,7 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
         end
         -- this needs unit tests x.x
         local out: {string} = {}
-        LOG.debug("Wrapping text", row)
+        LOG.trace("Wrapping text", row)
         local line_start = 1
         local previous_word_end: integer = -1
         while true do
@@ -150,16 +150,16 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             if line_end > #row and width_of(line) <= width then
                 -- end of row without overflow
                 pt.add(out, line)
-                LOG.debug("Wrapping finished! ".. #out.. " rows.")
+                LOG.trace("Wrapping finished! ".. #out.. " rows.")
                 return out
             elseif previous_word_end >= line_start then
                 local sub_row = pt.sub(row, line_start, previous_word_end)
-                LOG.debug("Wrapping", sub_row)
+                LOG.trace("Wrapping", sub_row)
                 pt.add(out, sub_row)
                 line_start = previous_word_end + 1
             else
                 local sub_row = pt.sub(row, line_start, line_end-2)
-                LOG.debug("Hyphenating", sub_row)
+                LOG.trace("Hyphenating", sub_row)
                 -- need to hyphenate
                 pt.add(out, sub_row..'-')
     			line_start = line_end - 1

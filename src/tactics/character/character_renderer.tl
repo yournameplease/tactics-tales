@@ -147,29 +147,27 @@ local function draw_head(
 	local eyes: sprite_data.SpriteData =
 		sprite_data.EYES[drawable_unit.character.appearance.eyes]	
 	local eyewear: sprite_data.SpriteData =
-		sprite_data.HEAD[drawable_unit.character.appearance.head]	
+		sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear]	
 	local hair: sprite_data.SpriteData =
-		sprite_data.HEAD[drawable_unit.character.appearance.head]	
-	local facial_hair: sprite_data.SpriteData =
-		sprite_data.HEAD[drawable_unit.character.appearance.head]	
+		sprite_data.HAIR[drawable_unit.character.appearance.hair]	
+	local beard: sprite_data.SpriteData =
+		sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard]	
 
     pt.spr(BASE_UNIT_SPRITE + head.sprite, point.x, point.y, flip_h)
-	-- Eye sprite currently is just the default.
-	if headwear == nil or headwear.draw_beard then
-	    if drawable_unit.character.appearance.beard ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + facial_hair.sprite, point.x, point.y, flip_h)
-	    end
+	if eyes.sprite ~= nil then
+        pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
 	end
-	if headwear == nil or headwear.draw_eyewear then
-	    pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
-		if drawable_unit.character.appearance.eyewear ~= nil then
-	        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, point.x, point.y, flip_h)
-		end
+	if beard.sprite ~= nil and headwear.draw_beard then
+        pt.spr(BASE_UNIT_SPRITE + beard.sprite, point.x, point.y, flip_h)
 	end
-	if headwear == nil or headwear.draw_hair then
+	if eyewear.sprite ~= nil and headwear.draw_eyewear then
+	    -- pt.spr(BASE_UNIT_SPRITE + eyes.sprite, point.x, point.y, flip_h)
+        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, point.x, point.y, flip_h)
+	end
+	if hair.sprite ~= nil and headwear.draw_hair then
         pt.spr(BASE_UNIT_SPRITE + hair.sprite, point.x, point.y, flip_h)
 	end
-	if headwear ~= nil then
+	if headwear.sprite ~= nil then
         pt.spr(BASE_UNIT_SPRITE + headwear.sprite, point.x, point.y, flip_h)
 	end
 
