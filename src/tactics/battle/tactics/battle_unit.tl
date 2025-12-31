@@ -9,7 +9,7 @@ local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local maps = require("src/tactics/util/maps")
 
 
-global record BattleUnit
+local record BattleUnit
     is DrawableCharacterInstance
 
     id: integer
@@ -44,14 +44,6 @@ end
 function BattleUnit:is_enemy(): boolean
     return self.side == "enemy"
 end
-
--- local function access_fallback(tab, k)
---     if tab.source.stats[k] then
---         return tab.source.stats[k]
---     end
-
---     return tab.source[k]
--- end
 
 function battle_unit.spawn_unit(permanent_unit: Character, tile: Point, labels: {string}, side: Side, ai: unit_ai.UnitAI): BattleUnit
     local instance: BattleUnit = {

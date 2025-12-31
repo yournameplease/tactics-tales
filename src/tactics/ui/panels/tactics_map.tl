@@ -16,6 +16,8 @@ local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUI
 local lists = require("src/tactics/util/lists")
 local point = require("src/tactics/util/point")
 local Point = point.Point
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 

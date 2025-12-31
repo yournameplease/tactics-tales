@@ -4,6 +4,8 @@ require("src/tactics/joypad")
 require("src/tactics/systems/event_bus")
 require("src/tactics/battle/tactics/battle_unit")
 require("src/tactics/character/object/character")
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 local Item = require("src/tactics/character/items/object/item")
 local story_types = require("src/tactics/story/types")
 
