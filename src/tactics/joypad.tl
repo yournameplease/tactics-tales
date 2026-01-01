@@ -8,6 +8,9 @@ local record Mouse
     mrp: boolean
     mm: boolean
     mmp: boolean
+
+    wheel_x: number
+    wheel_y: number
 end
 
 local record Joypad
@@ -57,7 +60,7 @@ local record InputServiceImpl
 end
 
 function InputServiceImpl:get_mouse(): Mouse
-    local mouse_x, mouse_y, mouse_b, _wheel_x, _wheel_y = pt.get_mouse()
+    local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = pt.get_mouse()
                 
     local mouse: Mouse = {
         mx = mouse_x,
@@ -65,6 +68,8 @@ function InputServiceImpl:get_mouse(): Mouse
         ml = mouse_b & 0x1 == 0x1,
         mr = mouse_b & 0x2 == 0x2,
         mm = mouse_b & 0x4 == 0x4,
+        wheel_x = wheel_x,
+        wheel_y = wheel_y,
     }
 
     if self.mouse_prev ~= nil then
