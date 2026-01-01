@@ -16,8 +16,7 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local mouse_menu_selection = require("src/tactics/menu/menu_mouse_input")
-
+local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
 local record TacticsMap
@@ -375,11 +374,11 @@ end
 
 -- TODO: consider using unit sprite masks for more accurate grid selection
 function TacticsMap:get_selection_at(
-    lx: integer,
-    ly: integer
+    lx: number,
+    ly: number
 ): mouse_menu_selection.MenuMouseSelection
-    local tx = pt.flr(lx / TILE_WIDTH)
-    local ty = pt.flr(ly / TILE_HEIGHT)
+    local tx = pt.flr((lx-self.internal_margin.l) / TILE_WIDTH)
+    local ty = pt.flr((ly-self.internal_margin.t) / TILE_HEIGHT)
 
     if tx >= 0 and tx < MAP_WIDTH
         and ty >= 0 and ty < MAP_HEIGHT

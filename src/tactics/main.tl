@@ -1,51 +1,23 @@
 -- tactics game
 -- ynp
 
---[[
--- TODO: LIST
--- Next Goals
--- battle goal
-
--- mid term goals
-- mouse control
-- learn sfx/music
-- more tiles
-- make ~5 maps
-- title screen
-- investigate mounted units possibility
-
---- Small but not time-critical
--- combat log
-- transparency effect
-- r button to cycle units
-
-
--- PROTOTYPE GOALS
--- Fully random characters, no story
--- 3-5 levels, with units carrying over between levels, plus 1-2 recruits added per level
--- Maps made with player and enemy spawn points
--- Decent UI
-
--- LONG TERM TODO
--- character relationships
--- class progression
--- inheritence? (the human kind)
-]]
-
-local tasks = require("src/tactics/systems/tasks")
-
 require("src/tactics/debug")
 
+
+local tasks = require("src/tactics/systems/tasks")
 local event_bus = require("src/tactics/systems/event_bus")
 local animation = require("src/tactics/animation")
 local ui_mgr = require("src/tactics/ui/ui_manager")
 local game = require("src/tactics/game/game")
 local ui_context_manager = require("src/tactics/ui/ui_context_manager")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
-local joypad = require("src/tactics/joypad")
+local input_service = require("src/tactics/joypad")
+local input_context = require("src/tactics/input/input_context")
+local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
 require("profiler")
 
+local input: input_service.InputService
 local ui_context: ui_context_manager.UIContextManager
 local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
@@ -54,6 +26,7 @@ local task_manager: tasks.TaskManager
 local game_manager: game.Game
 
 function _init()
+    input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
     animation_manager = animation.animation_manager()
@@ -77,9 +50,21 @@ function _update()
     animation_manager:tick()
     profile("animation_tick")
     LOG.trace("Getting Joypad.")
-    local joy = joypad.get_joypad()
+    local user_input = input:get_user_input()
+    local input_ctx: input_context.InputContext
+    if user_input.active_method == "joypad" then
+        input_ctx = input_context.joypad(user_input.joypad)
+    elseif user_input.active_method == "mouse" then
+        local hovered: MenuMouseSelection
+        if user_input.mouse ~= nil then
+            hovered = ui_manager:get_mouse_selection(user_input.mouse.mx, user_input.mouse.my)
+        end
+        input_ctx = input_context.mouse(user_input.mouse, hovered)
+    else
+        error()
+    end
     profile("game_update")
-    game_manager:update(joy)
+    game_manager:update(input_ctx)
     profile("game_update")
     profile("update_tasks")
     task_manager:update_tasks()
@@ -96,6 +81,7 @@ function _draw()
     ui_context:enrich()
     profile("enrich_ui_context")
     profile("draw")
+    ui_manager:calculate(ui_context)
     ui_manager:draw(ui_context)
     profile("draw")
     profile.draw()

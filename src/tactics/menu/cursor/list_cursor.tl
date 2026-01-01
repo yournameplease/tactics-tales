@@ -2,7 +2,12 @@ local menu_cursor = require("src/tactics/menu/menu_cursor")
 local menu_types = require("src/tactics/menu/types")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local lists = require("src/tactics/util/lists")
+local input_service = require("src/tactics/joypad")
 local Joypad = require("src/tactics/joypad").Joypad
+local Mouse = input_service.Mouse
+local input_context = require("src/tactics/input/input_context")
+local InputContext = input_context.InputContext
+local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 local event_bus = require("src/tactics/systems/event_bus")
 
 global enum ListDirection
@@ -47,7 +52,7 @@ local list_menu_cursor = {
 }
 
 function list_menu_cursor.definition<GC, Value>(props: ListMenuDefinition<GC, Value>): ListMenuDefinition<GC, Value>
-    props.type = "CURSOR_LIST"
+    props.type = "list"
     props.direction = props.direction or "vertical"
     return setmetatable(props, { __index = ListMenuDefinition })
 end
@@ -96,7 +101,7 @@ function list_menu_cursor.integer_range<GC>(
     )
 end
 
-function ListMenuCursor:update(joy: Joypad)
+function ListMenuCursor:update_joy(joy: Joypad)
     local new_i = self.i
     if self.direction == "vertical" then
         new_i = new_i + joy.dyp
@@ -115,6 +120,22 @@ function ListMenuCursor:update(joy: Joypad)
     end
 end
 
+function ListMenuCursor:update_mouse(
+    mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection
+)
+end
+
+function ListMenuCursor:update(input: InputContext)
+    if input is input_context.JoypadContext then
+        self:update_joy(input.joypad)
+    elseif input is input_context.MouseContext then
+        self:update_mouse(input.mouse, input.hovered)
+    else
+        error()
+    end
+end
+
 function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): string, event_bus.GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
@@ -124,7 +145,7 @@ end
 
 function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor<GC>
     local cursor: ListMenuCursor<GC, Value> = {
-        type = "CURSOR_LIST",
+        type = "list",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
     }

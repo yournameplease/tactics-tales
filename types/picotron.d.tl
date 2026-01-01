@@ -211,7 +211,8 @@ global record Picotron
 	clear_key: function(k: string) 
 	peektext: function(): boolean
 	readtext: function(clear?: boolean) 
-	mouse: function(new_mx: number, new_my: number): number, number, integer, number, number 
+	get_mouse: function(): number, number, integer, number, number 
+	set_mouse: function(new_mx: number, new_my: number)  
 	mouselock: function(lock: boolean, event_sensitivity: number, move_sensitivity: number): number, number 
 	-- map: function(tile_x: any, tile_y: any, sx: any, sy: any, tiles_x: any, tiles_y: any, p8layers: any, tile_w: any, tile_h: any) 
 	map: function(src: any, tile_x: any, tile_y: any, sx?: any, sy?: any, tiles_x?: any, tiles_y?: any, p8layers?: any, tile_w?: any, tile_h?: any) 
@@ -232,6 +233,7 @@ global record Picotron
 	tonum: function(val: any, format_flags: integer) : number
 	-- abs: function(n: number) : number
 	abs: function(n: integer) : integer
+	absf: function(n: number) : number
 	sgn: function(n: number) : integer
 	atan2: function(dx: number, dy: number) : Angle
 	sin: function(angle: Angle) : number

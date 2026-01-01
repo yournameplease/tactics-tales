@@ -9,7 +9,7 @@ local character_manager = require("src/tactics/character/character_manager")
 local story_menu_context = require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local story_page = require("src/tactics/story/story_page")
-local Joypad = require("src/tactics/joypad").Joypad
+local InputContext = require("src/tactics/input/input_context").InputContext
 local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
@@ -174,13 +174,13 @@ function story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
     return self
 end
 
-function Story:update(joy: Joypad)
+function Story:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
         or current_node is story_node.CharacterCustomizerNode then
-        self.menu_manager:update(joy)
+        self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then
-        self.battle_manager:update(joy)
+        self.battle_manager:update(input)
     elseif current_node is story_node.JumpNode then
         error('in a jump node during update')
     else

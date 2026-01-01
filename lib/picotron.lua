@@ -753,8 +753,11 @@ end
 --- @return integer mouse_b
 --- @return number wheel_x
 --- @return number wheel_y
-function pt.mouse(new_mx, new_my)
-	return mouse(new_mx, new_my)
+function pt.get_mouse()
+	return mouse()
+end
+function pt.set_mouse(new_mx, new_my)
+	mouse(new_mx, new_my)
 end
 
 --- Requests to capture the mouse to control speed and move_sensitivity
@@ -917,6 +920,9 @@ end
 --- @return number
 -- global abs: function(n: number)
 function pt.abs(n)
+	return abs(n)
+end
+function pt.absf(n)
 	return abs(n)
 end
 

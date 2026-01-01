@@ -3,7 +3,12 @@ local Point = point.Point
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local menu_types = require("src/tactics/menu/types")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local Joypad = require("src/tactics/joypad").Joypad
+local input_service = require("src/tactics/joypad")
+local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
+local input_context = require("src/tactics/input/input_context")
+local InputContext = input_context.InputContext
+local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -53,13 +58,11 @@ local grid_cursor = {
 function grid_cursor.definition<GC>(
     props: GridMenuDefinition<GC>
 ): GridMenuDefinition<GC>
-    props.type = "CURSOR_GRID"
+    props.type = "grid"
     return setmetatable(props, { __index = GridMenuDefinition })
 end
 
-function GridMenuCursor:update(
-    joy: Joypad
-)
+function GridMenuCursor:update_joy(joy: Joypad)
     local prev_point = self.point:copy()
     self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
     self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
@@ -75,6 +78,43 @@ function GridMenuCursor:update(
             LOG.debug(#self.path, self.path[1],self.path[#self.path])
         end
     end 
+end
+
+function GridMenuCursor:update_mouse(
+    _mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection
+)
+    if hovered == nil then return end
+
+    if hovered is mouse_menu_selection.Grid then
+        local prev_point = self.point:copy()
+        self.point.x = pt.mid(0, hovered.x, self.x_max - 1)
+        self.point.y = pt.mid(0, hovered.y, self.y_max - 1)
+
+        if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
+            LOG.debug(prev_point, self.point, #self.path)
+            if self.legal_tiles:get_point(self.point) then
+            
+                local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
+                    return h ~= nil and h.reachable
+                end)
+                self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
+                LOG.debug(#self.path, self.path[1],self.path[#self.path])
+            end
+        end
+    end
+end
+
+function GridMenuCursor:update(
+    input: InputContext
+)
+    if input is input_context.JoypadContext then
+        self:update_joy(input.joypad)
+    elseif input is input_context.MouseContext then
+        self:update_mouse(input.mouse, input.hovered)
+    else
+        error()
+    end
 end
 
 function GridMenuCursor:handle_select(
@@ -96,7 +136,7 @@ function GridMenuDefinition:to_cursor(
     menu_state: menu_types.MenuState
 ): menu_cursor.MenuCursor<GC>
     local cursor: GridMenuCursor<GC> = {
-        type = "CURSOR_GRID",
+        type = "grid",
         point = menu_state.point, 
         x_max = 16,
         y_max = 16
