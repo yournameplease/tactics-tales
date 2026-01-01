@@ -1,6 +1,6 @@
 require("src/tactics/debug")
 
-local Joypad = require("src/tactics/joypad").Joypad
+local InputContext = require("src/tactics/input/input_context").InputContext
 
 require("src/tactics/data/battles")
 
@@ -124,9 +124,9 @@ function BattleManager:teardown()
     self.script_manager:teardown()
 end
 
-function BattleManager:update(joy: Joypad)
+function BattleManager:update(input: InputContext)
     if not self.tactics_engine.battle_is_blocked then
-        self.battle_menu_manager:update(joy)
+        self.battle_menu_manager:update(input)
     end
     self.tactics_engine:update()
 end

@@ -1,6 +1,6 @@
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 require("src/tactics/ui/theme")
-local mouse_menu_selection = require("src/tactics/menu/menu_mouse_input")
+local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 
 local record Margin
@@ -48,7 +48,7 @@ local interface UIElement
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
 
     -- nillable
-    get_selection_at: function(self, lx: integer, ly: integer): mouse_menu_selection.MenuMouseSelection
+    get_selection_at: function(self, lx: number, ly: number): MenuMouseSelection
 end
 
 local record Box
@@ -493,6 +493,26 @@ function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager
     for _, child in ipairs(element.children) do
         child:draw(state, draw_target_manager, ui_theme)
     end
+end
+
+-- assumes layout has already been called
+function box.find_topmost_selection(elem: UIElement, mx: number, my: number): MenuMouseSelection 
+    for _,child in ipairs(elem.children) do
+        local c_w = child.calculated_w or child.w
+        local c_h = child.calculated_h or child.h
+        if child.x <= mx and mx < child.x + c_w
+            and child.y <= my and my < child.y + c_h
+        then
+            local child_selection = box.find_topmost_selection(child, mx-child.x, my-child.y)
+            if child_selection ~= nil then
+                return child_selection
+            end
+        end
+    end
+    if elem.get_selection_at ~= nil then
+        return elem:get_selection_at(mx, my)
+    end
+    return nil
 end
 
 function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)

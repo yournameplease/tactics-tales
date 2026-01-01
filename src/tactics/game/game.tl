@@ -5,7 +5,7 @@ local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
-local Joypad = require("src/tactics/joypad").Joypad
+local InputContext = require("src/tactics/input/input_context").InputContext
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 
 local story_types = require("src/tactics/story/types")
@@ -72,11 +72,11 @@ function game.new(services: GameServiceBundle): Game
     return self
 end
 
-function Game:update(joy: Joypad)
+function Game:update(input: InputContext)
     if self.story ~= nil then
-        self.story:update(joy)
+        self.story:update(input)
     else
-        self.menu_manager:update(joy)
+        self.menu_manager:update(input)
     end
 end
 

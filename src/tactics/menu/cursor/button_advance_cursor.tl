@@ -1,8 +1,13 @@
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local menu_types = require("src/tactics/menu/types")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local Joypad = require("src/tactics/joypad").Joypad
+local input_service = require("src/tactics/joypad")
 local event_bus = require("src/tactics/systems/event_bus")
+local Joypad = require("src/tactics/joypad").Joypad
+local Mouse = input_service.Mouse
+local input_context = require("src/tactics/input/input_context")
+local InputContext = input_context.InputContext
+local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
 local record ButtonAdvanceCursor<GC>
     is menu_cursor.MenuCursor<GC>
@@ -30,7 +35,23 @@ function button_advance_cursor.definition<GC>(props: ButtonAdvanceMenuDefinition
     return setmetatable(props, { __index = ButtonAdvanceMenuDefinition })
 end
 
-function ButtonAdvanceCursor:update(_joy: Joypad)
+function ButtonAdvanceCursor:update_joy(_joy: Joypad)
+end
+
+function ButtonAdvanceCursor:update_mouse(
+    _mouse: Mouse,
+    _hovered: MenuMouseSelection
+)
+end
+
+function ButtonAdvanceCursor:update(input: InputContext)
+    if input is input_context.JoypadContext then
+        self:update_joy(input.joypad)
+    elseif input is input_context.MouseContext then
+        self:update_mouse(input.mouse, input.hovered)
+    else
+        error()
+    end
 end
 
 function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): string, event_bus.GameEvent

@@ -1,14 +1,11 @@
-require("src/tactics/ui/types")
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
 require("src/tactics/config")
-local draw_target_manager = require("src/tactics/draw/draw_target_manager")
-
-local box = require("src/tactics/ui/box")
-
-local menu_validator = require("src/tactics/ui/validator")
-
 require("profiler")
 
+local UILayoutId = require("src/tactics/ui/types").UILayoutId
+local draw_target_manager = require("src/tactics/draw/draw_target_manager")
+local box = require("src/tactics/ui/box")
+local menu_validator = require("src/tactics/ui/validator")
+local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local tactics_main = require("src/tactics/ui/layout/tactics_main")
 local combat_preview = require("src/tactics/ui/layout/combat_preview")
@@ -79,22 +76,29 @@ function ui_manager.new(): UIManager
     return self
 end
 
-function UIManager:draw(battle_context: UIContextManager)
+function UIManager:get_mouse_selection(mx: number, my: number): MenuMouseSelection 
+    local root = self.current_layout.root
+    
+    return box.find_topmost_selection(root, mx, my)
+end
+
+function UIManager:calculate(battle_context: UIContextManager)
     self.current_layout = self.layouts[battle_context.layout]
 
     local root = self.current_layout.root
     
     -- Recalculate size and positions
-    profile("ui_manager_measure")
+    profile("ui_manager_calculate")
     root:measure()
-    profile("ui_manager_measure")
-    profile("ui_manager_layout")
     root:layout(root.x, root.y)
-    profile("ui_manager_layout")
+    profile("ui_manager_calculate")
+end
 
+function UIManager:draw(battle_context: UIContextManager)
+    local root = self.current_layout.root
     -- Render
-    pt.cls(self.theme.COLOR_CLEAR)
     profile("ui_manager_draw")
+    pt.cls(self.theme.COLOR_CLEAR)
     root:draw(battle_context, self.draw_target_manager, self.theme)
     profile("ui_manager_draw")
 end

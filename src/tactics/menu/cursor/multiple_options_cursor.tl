@@ -3,7 +3,12 @@ local menu_types = require("src/tactics/menu/types")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local lists = require("src/tactics/util/lists")
 local event_bus = require("src/tactics/systems/event_bus")
-local Joypad = require("src/tactics/joypad").Joypad
+local input_service = require("src/tactics/joypad")
+local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
+local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local input_context = require("src/tactics/input/input_context")
+local InputContext = input_context.InputContext
 
 local record MenuMultipleOptionCursor<GC>
     text: string -- label
@@ -98,31 +103,41 @@ end
 --         })
 -- end
 
-function MultipleOptionsMenuCursor:update_option(joy: Joypad)
+function MultipleOptionsMenuCursor:update_option_joy(joy: Joypad)
     local current_selection = self.options[self.i]
     if self.is_option_selected or not current_selection.must_select then
-        current_selection.cursor:update(joy)
+        current_selection.cursor:update_joy(joy)
     end
 end
 
-function MultipleOptionsMenuCursor:update(joy: Joypad)
+function MultipleOptionsMenuCursor:update_option_mouse(
+    mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection
+)
+    local current_selection = self.options[self.i]
+    if self.is_option_selected or not current_selection.must_select then
+        current_selection.cursor:update_mouse(mouse, hovered)
+    end
+end
+
+function MultipleOptionsMenuCursor:update_joy(joy: Joypad)
     local new_i = self.i
     if self.primary_direction == "vertical" then
         if joy.dyp ~= 0 then
             new_i = new_i + joy.dyp
         else
-            self:update_option(joy)
+            self:update_option_joy(joy)
         end
     elseif self.primary_direction == "horizontal" then
         if joy.dxp ~= 0 then
             new_i = new_i + joy.dxp
         else
-            self:update_option(joy)
+            self:update_option_joy(joy)
         end
     elseif self.primary_direction == "select" then
         -- movement handled by handle_menu_select
         if joy.dxp ~= 0 or joy.dyp ~= 0 then
-            self:update_option(joy)
+            self:update_option_joy(joy)
         end
     end
     
@@ -130,6 +145,22 @@ function MultipleOptionsMenuCursor:update(joy: Joypad)
         self.i = new_i % #self.options + 1
     else
         self.i = pt.mid(1, new_i, #self.options)
+    end
+end
+
+function MultipleOptionsMenuCursor:update_mouse(
+    mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection
+)
+end
+
+function MultipleOptionsMenuCursor:update(input: InputContext)
+    if input is input_context.JoypadContext then
+        self:update_joy(input.joypad)
+    elseif input is input_context.MouseContext then
+        self:update_mouse(input.mouse, input.hovered)
+    else
+        error()
     end
 end
 

@@ -2,10 +2,15 @@ local point = require("src/tactics/util/point")
 require("src/tactics/debug")
 local menu_types = require ("src/tactics/menu/types")
 local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
-local Joypad = require("src/tactics/joypad").Joypad
+local input_service = require("src/tactics/joypad")
+local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
+local input_context = require("src/tactics/input/input_context")
+local InputContext = input_context.InputContext
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
+local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 
 local record SelectionHistory<GC>
     step: menu_types.MenuStep
@@ -33,7 +38,7 @@ local interface MenuManager<GC>
     handle_menu_select: function(self)
     handle_menu_back: function(self)
     set_menu: function(self, menu_id: menu_types.MenuId)
-    update: function(self, joy: Joypad)
+    update: function(self, input: InputContext)
 end
 
 local record BaseMenuManager<GC>
@@ -125,16 +130,38 @@ function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
 end
 
 
-function BaseMenuManager:update(joy: Joypad)
-    if joy.lp then
+function BaseMenuManager:update(input: InputContext)
+    local skip_turn = false
+    local select = false
+    local back = false
+    
+    if input is input_context.JoypadContext then
+        skip_turn = input.joypad.lp      
+        select = input.joypad.ap      
+        back = input.joypad.bp        
+    elseif input is input_context.MouseContext then
+        select = input.mouse.mlp        
+        back = input.mouse.mrp        
+    else
+        error()
+    end
+
+    if skip_turn then
         -- DEBUG Only for now.  consider where to put
         self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
-    elseif joy.bp then
+    elseif back then
         self:handle_menu_back()
-    elseif joy.ap then
+    elseif select then
         self:handle_menu_select()
     else
-        self.menu_cursor:update(joy)
+        input_context.handle_update(
+            input,
+            function(joy: Joypad) self.menu_cursor:update_joy(joy) end,
+            function(
+                mouse: Mouse,
+                hovered: mouse_menu_selection.MenuMouseSelection
+            ) self.menu_cursor:update_mouse(mouse, hovered) end
+        )
     end
 end
 
