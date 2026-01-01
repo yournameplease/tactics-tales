@@ -2102,7 +2102,10 @@ end
 --- @param width integer
 --- @param height integer
 --- @param attribs? __WindowAttribs
-function pt.window(width, height, attribs) 
+function pt.set_window_size(attribs) 
+	window(attribs)
+end
+function pt.set_window_attributes(width, height, attribs) 
 	window(width, height, attribs)
 end
 

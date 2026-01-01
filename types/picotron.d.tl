@@ -307,7 +307,8 @@ global record Picotron
 	get_display: function() : Userdata 
 	set_draw_target: function(ud?: Userdata) 
 	get_draw_target: function(): Userdata 
-	window: function(width: integer, height: integer, attribs?: __WindowAttribs) 
+	set_window_attributes: function(attribs: __WindowAttribs) 
+	set_window_size: function(width: integer, height: integer, attribs?: __WindowAttribs) 
 	-- window: function(attribs: __WindowAttribs) 
 	wrangle_working_file: function(save_state?: any, load_state?: any, untitled_filename?: string, get_hlocation?: any, set_hlocation?: any) 
 	pwf: function() : string | nil 
