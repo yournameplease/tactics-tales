@@ -123,6 +123,8 @@ function InputServiceImpl:get_user_input(): UserInput
     if any_joy then self.current_input = "joypad" end
     if any_mouse then self.current_input = "mouse" end
 
+    self.mouse_prev = mouse
+
     return {
         joypad = joy,
         mouse = mouse,
