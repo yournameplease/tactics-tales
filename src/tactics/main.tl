@@ -41,6 +41,7 @@ function _init()
     	task_manager = task_manager,
     	animation_manager = animation_manager,
         ui_context = ui_context,
+        input_service = input,
     }
     
     game_manager = game.new(game_services)

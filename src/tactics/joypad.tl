@@ -42,6 +42,7 @@ local record UserInput
 end
 
 local interface InputService
+    current_input: InputMethod
     get_user_input: function(self): UserInput
 end
 
@@ -56,7 +57,6 @@ local input_service = {
 local record InputServiceImpl
     is InputService
 
-    current_input: InputMethod
     previous_input: InputMethod
     mouse_prev: Mouse
 end
