@@ -240,8 +240,11 @@ end
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
+    
     box.Box._draw(self, state, draw_target_manager, ui_theme)
 
+    local draw_cursor = state.game_context.input_service.current_input == "joypad"
+    
     local map = state.battle_context.battle_map
     local menu = state.battle_context.battle_menu_manager
 
@@ -332,7 +335,7 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     end
     pt.map(layer_path, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency
-    if cursor_tile ~= nil then
+    if draw_cursor and cursor_tile ~= nil then
         local c_x = cursor_tile.x * TILE_SIZE.x
         local c_y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, c_x, c_y)
@@ -360,7 +363,9 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
-        pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+        if draw_cursor then
+            pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+        end
 
         if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
             draw_floating_menu(x, y, cursor)
