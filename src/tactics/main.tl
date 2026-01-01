@@ -18,11 +18,12 @@ local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selecti
 require("profiler")
 
 local input: input_service.InputService
+local user_input: input_service.UserInput
+
 local ui_context: ui_context_manager.UIContextManager
 local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
-
 local game_manager: game.Game
 
 function _init()
@@ -50,8 +51,8 @@ function _update()
     animation_manager:tick()
     profile("animation_tick")
     LOG.trace("Getting Joypad.")
-    local user_input = input:get_user_input()
-    local input_ctx: input_context.InputContext
+    user_input = input:get_user_input()
+    local input_ctx: input_context.InputContext = nil
     if user_input.active_method == "joypad" then
         input_ctx = input_context.joypad(user_input.joypad)
     elseif user_input.active_method == "mouse" then
@@ -74,6 +75,14 @@ function _update()
 end
 
 function _draw()
+    if user_input.method_changed then
+        if user_input.active_method == "joypad" then
+            pt.set_window_attributes({cursor = 0})
+        elseif user_input.active_method == "mouse" then
+            pt.set_window_attributes({cursor = 1})
+        end
+    end
+
     profile("generate_frame_data")
     animation_manager:generate_frame_data()
     profile("generate_frame_data")

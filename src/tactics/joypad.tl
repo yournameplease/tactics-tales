@@ -35,6 +35,7 @@ end
 
 local record UserInput
     active_method: InputMethod
+    method_changed: boolean
 
     joypad: Joypad
     mouse: Mouse
@@ -56,6 +57,7 @@ local record InputServiceImpl
     is InputService
 
     current_input: InputMethod
+    previous_input: InputMethod
     mouse_prev: Mouse
 end
 
@@ -128,18 +130,23 @@ function InputServiceImpl:get_user_input(): UserInput
     if any_joy then self.current_input = "joypad" end
     if any_mouse then self.current_input = "mouse" end
 
-    self.mouse_prev = mouse
-
-    return {
+    local out = {
         joypad = joy,
         mouse = mouse,
         active_method = self.current_input,
+        method_changed = self.current_input ~= self.previous_input
     }
+
+    self.mouse_prev = mouse
+    self.previous_input = self.current_input
+
+    return out
 end
 
 function input_service.new(): InputService
     local self: InputServiceImpl = setmetatable({
         current_input = "joypad",
+        previous_input = nil,
         mouse_prev = nil,
     },{
         __index = InputServiceImpl
