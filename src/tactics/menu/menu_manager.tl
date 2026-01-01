@@ -131,27 +131,27 @@ end
 
 
 function BaseMenuManager:update(input: InputContext)
-    local skip_turn = false
-    local select = false
-    local back = false
+    local btn_skip_turn = false
+    local btn_select = false
+    local btn_back = false
     
     if input is input_context.JoypadContext then
-        skip_turn = input.joypad.lp      
-        select = input.joypad.ap      
-        back = input.joypad.bp        
+        btn_skip_turn = input.joypad.lp      
+        btn_select = input.joypad.ap      
+        btn_back = input.joypad.bp        
     elseif input is input_context.MouseContext then
-        select = input.mouse.mlp        
-        back = input.mouse.mrp        
+        btn_select = input.mouse.mlp
+        btn_back = input.mouse.mrp
     else
         error()
     end
 
-    if skip_turn then
+    if btn_skip_turn then
         -- DEBUG Only for now.  consider where to put
         self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
-    elseif back then
+    elseif btn_back then
         self:handle_menu_back()
-    elseif select then
+    elseif btn_select then
         self:handle_menu_select()
     else
         input_context.handle_update(
