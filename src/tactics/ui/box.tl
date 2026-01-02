@@ -110,6 +110,10 @@ function box.new(props: UIElement): UIElement
 
     if self.decoration_padding < 0 then self.decoration_padding = 0 end
 
+    if props.get_selection_at ~= nil then
+        self.get_selection_at = props.get_selection_at
+    end
+
     assert(not (self.flex_grow > 0  and (self.auto_width and self.auto_height)), "Cannot flex grow with auto_width and auto_height")
     assert(
         self.decoration_padding == 0
@@ -125,6 +129,19 @@ function box.new(props: UIElement): UIElement
 end
 
 -- utility constructors
+
+function box.floating(node: UIElement, x: integer, y: integer): UIElement
+    local self = box.new({
+        -- x = x,
+        -- y = y,
+        internal_margin = { t = y, l = x},
+        transparent = true,
+        auto_height = true,
+        auto_width = true,
+    })
+    self:add(node)
+    return self
+end
 
 function box.col(): UIElement
     return box.new({ dir = "col", padding = 0, gap = 0, auto_height = true})
@@ -158,8 +175,6 @@ end
 -- =========================================================
 function Box._measure(self: UIElement)
     local element = self as Box -- Cast!  All classes inherit from box though
-    -- A. If we are fixed size, we don't care about children (optimization)
-    -- EXCEPT if we contain content that might overflow (not handled here yet)
     if not element.auto_width and not element.auto_height then
         element.calculated_w = element.w
         element.calculated_h = element.h
@@ -170,17 +185,15 @@ function Box._measure(self: UIElement)
         return
     end
 
-    -- B. Measure Children to determine our own size
+    -- Measure Children to determine our own size
     local content_w, content_h = 0, 0
     local is_row = (element.dir == "row")
 
     for i, child in ipairs(element.children) do
-        -- Recursively measure child
         if child.measure then
             child:measure()
         end
 
-        -- Get child's total footprint (Size + Margins)
         local child_outer_w = (child.calculated_w or child.w) 
         local child_outer_h = (child.calculated_h or child.h) 
 
@@ -195,7 +208,6 @@ function Box._measure(self: UIElement)
         end
     end
 
-    -- C. Set our calculated size (Content + Padding)
     element.calculated_w = element.auto_width and (content_w+element.internal_margin.l+element.internal_margin.r) or element.w
     element.calculated_h = element.auto_height and (content_h+element.internal_margin.t+element.internal_margin.b) or element.h
 end
