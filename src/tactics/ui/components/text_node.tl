@@ -55,7 +55,7 @@ function TextNode:measure()
 end
 
 function TextNode:get_hovered_line(lx: number, ly: number): integer
-    return 1
+    return 2
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
@@ -116,6 +116,10 @@ function text_node.new(props: TextNode): TextNode
     self.draw_properties.direction = self.draw_properties.direction or "down"
     self.draw_properties.wrap = self.draw_properties.wrap or "ellipsis"
 
+    if props.auto_width and self.draw_properties.wrap ~= "no_wrap" then
+        error("auto_width must use no_wrap")
+    end
+    
     self.transparent = props.transparent ~= false
     self.text_color = props.text_color or "dark"
 
@@ -125,6 +129,11 @@ function text_node.new(props: TextNode): TextNode
         self.w,
         self.h
     )
+
+    if props.get_selection_at ~= nil then
+        LOG.debug("setting get_selection_at")
+        self.get_selection_at = props.get_selection_at
+    end
     
     return self
 end

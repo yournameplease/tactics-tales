@@ -29,12 +29,6 @@ setmetatable(TacticsMap, { __index = box.Box})
 
 local tactics_map = {}
 
-local COLOR_MENU_PRIMARY = CONFIG.COLOR_MENU_PRIMARY
-local COLOR_MENU_SECONDARY = CONFIG.COLOR_MENU_SECONDARY
-local COLOR_MENU_TEXT = CONFIG.COLOR_MENU_TEXT
-local COLOR_MENU_HIGHLIGHT = CONFIG.COLOR_MENU_HIGHLIGHT
-local COLOR_MENU_HIGHLIGHT_TEXT = CONFIG.COLOR_MENU_HIGHLIGHT_TEXT
-
 local MAP_WIDTH = CONFIG.MAP_WIDTH
 local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 local TILE_SIZE = CONFIG.TILE_SIZE
@@ -43,10 +37,7 @@ local TILE_HEIGHT = CONFIG.TILE_SIZE.y
 local HALF_HEIGHT = TILE_HEIGHT >> 1
 local BASE_TILE_SPRITE = 2 * 256
 
--- UNIT offset should instead be the feet position, and draw using skeleton position
 local CURSOR_SPRITE = 8
-
-local TEXT_HEIGHT = 7
 
 local FOOT_GROUND_ANCHOR = point.of(8,12)
 
@@ -279,6 +270,9 @@ function TacticsMap:compute_children(state: UIContextManager)
                 		return c
                 	end,
                 	{
+                        draw_properties = {
+                            wrap = "no_wrap",
+                        },
                         auto_height = true,
                         auto_width = true,
                         -- internal_margin = { t = y, l = x}
