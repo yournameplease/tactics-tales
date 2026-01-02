@@ -72,6 +72,7 @@ function ScriptManagerImpl:register_script(
 
 	if script is battle_script.script.SpawnUnits then
 		effect = function()
+			LOG.debug("Handling SpawnUnits event")
 		    self.tactics_engine:spawn_all(
 		        script.players,
 		        script.enemies,
@@ -81,6 +82,7 @@ function ScriptManagerImpl:register_script(
 		end
 	elseif script is battle_script.script.ModifyTerrain then
 		effect = function()
+			LOG.debug("Handling ModifyTerrain event")
 			self.battle_map:update_terrain(
 				script.tile_label,
 				script.new_terrain

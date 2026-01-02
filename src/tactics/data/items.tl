@@ -182,8 +182,8 @@ local ITEM_DATA: {string: item_definition.ItemDefinition} = {
     ),
     greatsword = two_handed_weapon( "Greatsword", 103, 3, 70, 2),
     bow = ranged_weapon( "Bow", 104, 2, 90, 2, 2, 2 ),
-    shield = shield("Shield", 105, 1, 1, 20),
-    armor = armor("Armor", 2, 1, 20)
+    shield = shield("Shield", 105, 1, 1, -10),
+    armor = armor("Armor", 2, 1, -10)
 }
 
 return ITEM_DATA
