@@ -134,6 +134,7 @@ function box.floating(node: UIElement, x: integer, y: integer): UIElement
     local self = box.new({
         -- x = x,
         -- y = y,
+        dir = "row", -- row helps with bounding box... somehow.  remove when fixed
         internal_margin = { t = y, l = x},
         transparent = true,
         auto_height = true,
