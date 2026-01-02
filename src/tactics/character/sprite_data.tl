@@ -426,10 +426,10 @@ local BODY_CLASS: {string: BodyClassData} = {
 		name = "Robed",
 		id_prefix = "ROBED",
 	},
-	-- child = {
-	-- 	name = "Child",
-	-- 	id_prefix = "CHILD",
-	-- },
+	child = {
+		name = "Child",
+		id_prefix = "CHILD",
+	},
 }
 
 local record HeadwearSpriteData
@@ -587,6 +587,7 @@ local BODY_CLASS_OPTIONS = {
 	"sleeveless",
 	"shirtless",
 	"robed",
+	"child",
 }
 
 local HEADWEAR_OPTIONS = {
