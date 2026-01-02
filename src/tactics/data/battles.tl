@@ -124,7 +124,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             },
                 2,
                 "before_player",
-                "from_west"
+                "from_east"
             ),
             spawn_enemies({
                 { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
@@ -132,7 +132,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 3,
                 3,
                 "after_enemy",
-                "from_east"
+                "from_west"
             ),
             spawn_enemies({
                 { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
@@ -140,7 +140,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 6,
                 3,
                 "after_enemy",
-                "from_west"
+                "from_east"
             ),
             open_door_mid("bandit_miniboss_gate","bandit_miniboss_gate"),
             free_players(

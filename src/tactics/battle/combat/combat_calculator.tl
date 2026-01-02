@@ -129,7 +129,8 @@ local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, w
     local unit_avoid = 0
 
     for defense_type, amount in pairs(defender.avoid) do
-        if not weapon.ignored_avoids[defense_type] then
+        -- don't ignore penalties
+        if (not weapon.ignored_avoids[defense_type]) or amount < 0 then
             unit_avoid = unit_avoid + amount or 0
         end
     end
@@ -142,7 +143,8 @@ local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapo
     local def = 0
 
     for avoid_type, amount in pairs(defender.defense) do
-        if not weapon.ignored_defenses[avoid_type] then
+        -- don't ignore penalties
+        if (not weapon.ignored_defenses[avoid_type]) or amount < 0 then
             def = def + amount or 0
         end
     end
