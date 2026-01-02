@@ -41,7 +41,7 @@ function unit_info.new(props: UnitInfo): UnitInfo
         func = function(state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
             if not u then return { "No Unit Selected" } end
-            return { u.character.name .. " Lv." .. 1 }
+            return { u.character.name }
         end
     }))
 

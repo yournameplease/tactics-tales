@@ -107,10 +107,10 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         } },
         enemies = {
             { character_source = character_template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
+            { character_source = character_template("bandit_weakling"), ai = ai.move_two, tile = "bandit_goon" },
             { character_source = character_template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
-            { character_source = character_template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_l" },
-            { character_source = character_template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_r" },
-            { character_source = character_template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l" },
+            { character_source = character_template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r" },
         },
         players = {
             { character_source = player_roster(), tile = "player_deployment" },
@@ -127,7 +127,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 "from_east"
             ),
             spawn_enemies({
-                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
+                { character_source = character_template("bandit_weakling"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
             },
                 3,
                 3,
@@ -135,7 +135,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 "from_west"
             ),
             spawn_enemies({
-                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
+                { character_source = character_template("bandit_weakling"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
             },
                 6,
                 3,
