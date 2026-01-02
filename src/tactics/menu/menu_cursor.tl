@@ -31,6 +31,7 @@ end
 local record List
 	is MenuMouseSelection
 	where self.type == "list"
+	i: integer
 end
 
 local record MultipleOptions
@@ -51,6 +52,14 @@ function mouse_selection.grid(x: integer, y: integer): MenuMouseSelection
 		type = "grid",
 		x = x,
 		y = y,
+	}
+	return self
+end
+
+function mouse_selection.list(i: integer): MenuMouseSelection
+	local self: List =  {
+		type = "list",
+		i = i,
 	}
 	return self
 end

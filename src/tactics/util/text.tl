@@ -36,6 +36,7 @@ local interface Text
     set_lines: function(self, lines: {string})
 
     get_wrapped_rows: function(self): integer
+    calculate_wrapping: function(self)
 
     draw: function(self, x: integer, y: integer, color: Color)
     
@@ -231,14 +232,20 @@ function TextImpl:get_text_alignment_offset(row: string, w: integer): integer
     end
 end
 
-function TextImpl:draw(x: integer, y: integer, color: Color)
-	profile("draw_text")
-
-    local row_count = 0
+function TextImpl:calculate_wrapping()
     for _, paragraph in ipairs(self.lines) do
         if paragraph.wrapped_lines == nil then
             paragraph.wrapped_lines = self:apply_text_wrapping(paragraph.text, self.width)
         end
+    end
+end
+
+function TextImpl:draw(x: integer, y: integer, color: Color)
+	profile("draw_text")
+
+    self:calculate_wrapping()
+    local row_count = 0
+    for _, paragraph in ipairs(self.lines) do
         for _, text_row in ipairs(paragraph.wrapped_lines) do
             row_count = row_count + 1
 			local x_offset = self:get_text_alignment_offset(text_row, self.width)

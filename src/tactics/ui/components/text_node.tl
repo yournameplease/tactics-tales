@@ -16,6 +16,8 @@ local interface TextUIElement
     text_color: UITextColor
 
     text_object: text.Text
+
+    get_hovered_line: function(self, lx: number, ly: number): integer
 end
 
 
@@ -32,10 +34,12 @@ local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 function TextNode:measure()
+    local text_obj = self.text_object
+    if text_obj ~= nil then
+        self.text_object:calculate_wrapping()
+    end
     box.Box._measure(self)
 
-    local text_obj = self.text_object
-    
     if self.auto_height and text_obj ~= nil then
         local rows = text_obj:get_wrapped_rows()
         self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
@@ -47,6 +51,10 @@ function TextNode:measure()
         -- self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
         self.calculated_w = self.w
     end
+end
+
+function TextNode:get_hovered_line(lx: number, ly: number): integer
+    return 1
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)

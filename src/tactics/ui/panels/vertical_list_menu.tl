@@ -4,9 +4,10 @@ local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextM
 local text_node = require("src/tactics/ui/components/text_node")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local String = require("src/tactics/util/string")
+local menu_mouse_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 
 local record VerticalListMenu<GC, Value>
-    is box.UIElement, text_node.TextUIElement
+    is text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
@@ -38,6 +39,12 @@ function vertical_list_menu.new<GC, Value>(
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
     return text_node.new(props) 
+end
+
+function VerticalListMenu:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
+	local line = self:get_hovered_line(lx, ly)
+
+	return menu_mouse_selection.list(line)
 end
 
 return vertical_list_menu

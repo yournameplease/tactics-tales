@@ -121,9 +121,16 @@ function ListMenuCursor:update_joy(joy: Joypad)
 end
 
 function ListMenuCursor:update_mouse(
-    mouse: Mouse,
+    _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
+    if hovered == nil then return end
+
+    if hovered is mouse_menu_selection.List then
+        if hovered.i > 0 and hovered.i <= #self.options then
+            self.i = hovered.i
+        end
+    end
 end
 
 function ListMenuCursor:update(input: InputContext)
