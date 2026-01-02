@@ -16,7 +16,7 @@ local wpn = require("src/tactics/character/items/object/weapon")
 
 local ANIMATION_DATA = require("src/tactics/character/animation_data")
 
-local BASE_UNIT_SPRITE = 256
+local BASE_UNIT_SPRITE = 6 * 256
 
 local COLOR_SIDE_1 = 16
 local COLOR_SIDE_2 = 19
