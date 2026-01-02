@@ -9,7 +9,7 @@ local function static_map(file: string): map_types.MapDefinition
 end
 
 local MAP_DEFINITIONS: {string: map_types.MapDefinition} = {
-    bandit_village = static_map("map/bandit_village.map"),
+    bandit_village = static_map("map/bandit_village_2.map"),
     cultist_cave = static_map("map/cultist_cave.map"),
 }
 

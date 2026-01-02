@@ -111,6 +111,23 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
         movement = 5,
         hp_max = 4
     },
+    child_base = {
+        movement = 5,
+        hp_max = 3,
+		body_options = randomizer.weighted_option_selector.of( "child" )
+    },
+	child_axe = {
+        parent_template = "child_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "axe" )
+		)
+	},
+	child_bow = {
+        parent_template = "child_base",
+        item_loadout_options = randomizer.list_selector.of_randomizers(
+			randomizer.weighted_option_selector.of( "bow" )
+		)
+	},
 	bandit_base = {
 		parent_template = "human_base",
 		sex_options = randomizer.weighted_option_selector.of_weighted(
@@ -133,12 +150,14 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 	},
     bandit_goon = {
         parent_template = "bandit_base",
+		hp_max = 3,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "club" )
 		)
     },
     bandit_guard = {
         parent_template = "bandit_base",
+		hp_max = 4,
         item_loadout_options = randomizer.list_selector.of_randomizers(
 			randomizer.weighted_option_selector.of( "axe" ),
 			randomizer.weighted_option_selector.of("shield")
@@ -170,7 +189,7 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
 			{"hood", 1}
 		)
 	},
-	militia_leader = {
+	militia_captain = {
 		parent_template = "militia_base",
         hp_max = 5,
         item_loadout_options = randomizer.list_selector.of_randomizers(

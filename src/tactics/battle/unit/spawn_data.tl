@@ -33,6 +33,7 @@ local record UnitSpawnData
     -- optional for now, may want to make an interface
     ai: unit_ai.UnitAI
     tile: battle_definition_types.TileLabel
+	tags: { string } -- spawn tile is added as a tag as well
 end
 
 local unit_spawn_data = {
