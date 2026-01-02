@@ -20,7 +20,8 @@ right:add(VerticalListMenu.new(
 		assert(cursor is list_cursor.ListMenuCursor<GameMenuContext, string>) 
 		return cursor
 	end,
-	{flex_grow = 1} ))
+	{flex_grow = 1}
+))
 
 
 

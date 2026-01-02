@@ -82,24 +82,25 @@ function UIManager:get_mouse_selection(mx: number, my: number): MenuMouseSelecti
     return box.find_topmost_selection(root, mx, my)
 end
 
-function UIManager:calculate(battle_context: UIContextManager)
-    self.current_layout = self.layouts[battle_context.layout]
+function UIManager:calculate(ui_ctx: UIContextManager)
+    self.current_layout = self.layouts[ui_ctx.layout]
 
     local root = self.current_layout.root
     
     -- Recalculate size and positions
     profile("ui_manager_calculate")
+    box.compute_children(root, ui_ctx)
     root:measure()
     root:layout(root.x, root.y)
     profile("ui_manager_calculate")
 end
 
-function UIManager:draw(battle_context: UIContextManager)
+function UIManager:draw(ui_ctx: UIContextManager)
     local root = self.current_layout.root
     -- Render
     profile("ui_manager_draw")
     pt.cls(self.theme.COLOR_CLEAR)
-    root:draw(battle_context, self.draw_target_manager, self.theme)
+    root:draw(ui_ctx, self.draw_target_manager, self.theme)
     profile("ui_manager_draw")
 end
 

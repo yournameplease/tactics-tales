@@ -17,6 +17,7 @@ local Point = point.Point
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 
 local record TacticsMap
@@ -237,11 +238,59 @@ function TacticsMap:draw_map_decorations(layers: battle_map.MapLayers, z_0: inte
     end
 end
 
+local function get_cursor_tile(state: UIContextManager): Point
+    local menu = state.battle_context.battle_menu_manager
+    local cursor = menu.menu_cursor
+    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        return cursor.point
+    elseif menu.menu_state.point ~= nil then
+        return menu.menu_state.point
+    end
+end
+
+function TacticsMap:compute_children(state: UIContextManager)
+    local menu = state.battle_context.battle_menu_manager
+    local cursor = menu.menu_cursor
+    local cursor_tile = get_cursor_tile(state)
+
+    if cursor_tile ~= nil then
+        local x = cursor_tile.x * TILE_SIZE.x
+        local y = cursor_tile.y * TILE_SIZE.y
+
+        if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
+            local children = self.children
+            if #children == 0 then
+                LOG.info("Adding list child")
+                local node = vertical_list_menu.new(
+                    " {text}",
+                    ">{text}",
+                	function (s: UIContextManager): list_cursor.ListMenuCursor<BattleMenuContext, string>
+                		local c = s.battle_context.battle_menu_manager.menu_cursor
+                		assert(c is list_cursor.ListMenuCursor<BattleMenuContext, string>)
+                		return c
+                	end,
+                	{
+                        auto_height = true,
+                        auto_width = true,
+                        internal_margin = { t = y, l = x}
+                    }
+                )
+                self.children = { node }
+            end
+        else
+            if #self.children ~= 0 then
+                LOG.info("removing list child")
+                self.children = {}
+            end
+        end
+    end
+end
+
 function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
     
-    box.Box._draw(self, state, draw_target_manager, ui_theme)
+    box.Box._draw_background(self, ui_theme)
 
     local draw_cursor = state.game_context.input_service.current_input == "joypad"
     
@@ -276,14 +325,8 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
     local layer_path = get_path_layer(state)
     profile("compute_path_layer")
 
-    local cursor_tile: Point = nil
     local cursor = menu.menu_cursor
-    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
-        cursor_tile = cursor.point
-    elseif menu.menu_state.point ~= nil then
-        cursor_tile = menu.menu_state.point
-    end
-
+    local cursor_tile = get_cursor_tile(state)
 
     -- draw ground
     profile("draw_ground")
@@ -367,14 +410,16 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
             pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
         end
 
-        if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
-            draw_floating_menu(x, y, cursor)
-        end
+        -- if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
+        --     draw_floating_menu(x, y, cursor)
+        -- end
     end
 
     draw_target_manager:draw(draw_x, 0)
     profile("draw_map_post_rows")
     profile("tactics_map_draw")
+
+    box.Box._draw_children(self, state, draw_target_manager, ui_theme)
 end
 
 -- TODO: consider using unit sprite masks for more accurate grid selection

@@ -36,9 +36,7 @@ function story_page_panel.new(props: box.Box): box.UIElement
     return self
 end
 
-function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
-    -- TODO: move to a pre-layout step?
-
+function StoryPagePanel:compute_children(state: UIContextManager)
     -- why is cast needed?
     local nodes: {RenderedStoryNode} = state.story_context.story_page.nodes as {RenderedStoryNode}
 
@@ -86,9 +84,6 @@ function StoryPagePanel:draw(state: UIContextManager, draw_target_manager: DrawT
             pt.add(self.children, child as box.Box)
         end
     end
-
-
-    box.Box._draw(self, state, draw_target_manager, ui_theme)
 end
 
 return story_page_panel

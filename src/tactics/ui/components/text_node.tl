@@ -41,6 +41,12 @@ function TextNode:measure()
         self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
         self.calculated_h = self.h
     end
+    if self.auto_width and text_obj ~= nil then
+        self.w = 40
+        -- local rows = text_obj:get_wrapped_rows()
+        -- self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
+        self.calculated_w = self.w
+    end
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
