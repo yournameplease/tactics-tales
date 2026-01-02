@@ -47,6 +47,8 @@ local interface UIElement
     layout: function(self, integer, integer)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
 
+    -- nillable, for dynamic children
+    compute_children: function(self, UIContextManager)
     -- nillable
     get_selection_at: function(self, lx: number, ly: number): MenuMouseSelection
 end
@@ -459,7 +461,7 @@ function Box:draw_solid(ui_theme: UITheme)
     pt.rrectfill(x, y, w, h, 0, ui_theme.COLOR_INTERIOR)
 end
 
-function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+function Box._draw_background(self: UIElement, ui_theme: UITheme)
     local element = self as Box -- Cast!  All classes inherit from box though
 
     if not element.transparent then
@@ -473,7 +475,19 @@ function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager
     elseif element.decoration == 'border' then
         element:draw_border(ui_theme)
     end
+end
 
+function Box._draw_children(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    local element = self as Box -- Cast!  All classes inherit from box though
+
+    for _, child in ipairs(element.children) do
+        child:draw(state, draw_target_manager, ui_theme)
+    end
+end
+
+function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    Box._draw_background(self, ui_theme)
+    
     -- Debug rectangle
     -- LOG.trace(element.x, element.y, element.w, element.h)
     --     pt.rrect(
@@ -489,10 +503,7 @@ function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager
         --         element.calculated_h - 2*element.padding,
         --         0, 28)
 
-    -- 2. Draw Children
-    for _, child in ipairs(element.children) do
-        child:draw(state, draw_target_manager, ui_theme)
-    end
+    Box._draw_children(self, state, draw_target_manager, ui_theme)
 end
 
 -- assumes layout has already been called
@@ -513,6 +524,16 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
         return elem:get_selection_at(mx, my)
     end
     return nil
+end
+
+function box.compute_children(elem: UIElement, state: UIContextManager): MenuMouseSelection 
+    if elem.compute_children ~= nil then
+        elem:compute_children(state)
+    end
+
+    for _,child in ipairs(elem.children) do
+        box.compute_children(child, state)
+    end
 end
 
 function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)

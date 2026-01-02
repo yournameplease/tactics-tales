@@ -11,13 +11,15 @@ local record VerticalListMenu<GC, Value>
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
 end
- 
-function VerticalListMenu.new(
+
+local vertical_list_menu = {}
+
+function vertical_list_menu.new<GC, Value>(
 	unselected_template: string,
 	selected_template: string,
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>,
 	props: text_node.TextNode
-): VerticalListMenu<GC, Value>
+): box.UIElement
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
@@ -35,8 +37,8 @@ function VerticalListMenu.new(
 
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
-    return text_node.new(props) as VerticalListMenu
+    return text_node.new(props) 
 end
 
-return VerticalListMenu
+return vertical_list_menu
 
