@@ -23,6 +23,9 @@ global enum AnimationName
     "ROBED_BACK_HAND"
     "ROBED_HORIZONTAL"
     "ROBED_FRONT_HAND"
+    "CHILD_BACK_HAND"
+    "CHILD_HORIZONTAL"
+    "CHILD_FRONT_HAND"
 end
 
 global enum AnimationFrameName
@@ -171,6 +174,123 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimation } = {
     }
 }
 
+local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimation } = {
+    BACK_HAND = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = point.of(9, 7),
+                main_hand = point.of(1, 10),
+                off_hand = point.of(14, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+        idle_2 = {
+            sprite_offset = 1,
+            anchors = {
+                neck = point.of(10, 9),
+                main_hand = point.of(1, 9),
+                off_hand = point.of(14, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = point.of(9, 9),
+                main_hand = point.of(1, 10),
+                off_hand = point.of(14, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = point.of(9, 9),
+                main_hand = point.of(1, 10),
+                off_hand = point.of(14, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+    },
+    HORIZONTAL = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = point.of(7, 9),
+                main_hand = point.of(3, 12),
+                off_hand = point.of(11, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+        idle_2 = {
+           sprite_offset = 1,
+           anchors = {
+               neck = point.of(6, 9),
+               main_hand = point.of(3, 11),
+               off_hand = point.of(10, 13),
+               feet_center = point.of(7, 15)
+           }
+        },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = point.of(7, 9),
+                main_hand = point.of(3, 12),
+                off_hand = point.of(11, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = point.of(7, 9),
+                main_hand = point.of(3, 12),
+                off_hand = point.of(11, 13),
+                feet_center = point.of(7, 15)
+            }
+        },
+    },
+    FRONT_HAND = {
+        idle_1 = {
+            sprite_offset = 0,
+            anchors = {
+                neck = point.of(6, 9),
+                main_hand = point.of(12, 10),
+                off_hand = point.of(3, 12),
+                feet_center = point.of(7, 15)
+            }
+        },
+        idle_2 = {
+           sprite_offset = 1,
+           anchors = {
+               neck = point.of(7, 9),
+               main_hand = point.of(13, 9),
+               off_hand = point.of(4, 12),
+               feet_center = point.of(7, 15)
+           }
+        },
+        walk_1 = {
+            sprite_offset = 2,
+            anchors = {
+                neck = point.of(6, 9),
+                main_hand = point.of(12, 10),
+                off_hand = point.of(3, 12),
+                feet_center = point.of(7, 15)
+            }
+        },
+        walk_2 = {
+            sprite_offset = 3,
+            anchors = {
+                neck = point.of(6, 9),
+                main_hand = point.of(12, 10),
+                off_hand = point.of(3, 12),
+                feet_center = point.of(7, 15)
+            }
+        },
+    }
+}
+
 local function frame_from_base_frame(s: integer, base_frame: BaseAnimationFrame ): AnimationFrame
     local frame = {
         sprite = s + base_frame.sprite_offset,
@@ -179,14 +299,18 @@ local function frame_from_base_frame(s: integer, base_frame: BaseAnimationFrame 
     return frame
 end
 
-local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
-    local base_animation: BaseAnimation = BASE_FRAMES[base_frame]
+local function frames_from_base_frame_data(s: integer, base_frame: BaseAnimationName, base_frame_data: {BaseAnimationName: BaseAnimation}): Animation
+    local base_animation: BaseAnimation = base_frame_data[base_frame]
 
     return maps.map(
         function (_: AnimationFrameName, f: BaseAnimationFrame): AnimationFrame
             return frame_from_base_frame(s, f)
         end
     )(base_animation)
+end
+
+local function frames_from_base_frame(s: integer, base_frame: BaseAnimationName): Animation
+    return frames_from_base_frame_data(s, base_frame, BASE_FRAMES)
 end
 
 local ANIMATION_DATA: { AnimationName: Animation } = {
@@ -202,6 +326,9 @@ local ANIMATION_DATA: { AnimationName: Animation } = {
     ROBED_BACK_HAND = frames_from_base_frame(224, "BACK_HAND"),
     ROBED_HORIZONTAL = frames_from_base_frame(232, "HORIZONTAL"),
     ROBED_FRONT_HAND = frames_from_base_frame(240, "FRONT_HAND"),
+    CHILD_BACK_HAND = frames_from_base_frame_data(256, "BACK_HAND", CHILD_BASE_FRAMES),
+    CHILD_HORIZONTAL = frames_from_base_frame_data(264, "HORIZONTAL", CHILD_BASE_FRAMES),
+    CHILD_FRONT_HAND = frames_from_base_frame_data(272, "FRONT_HAND", CHILD_BASE_FRAMES),
 }
 
 return ANIMATION_DATA
