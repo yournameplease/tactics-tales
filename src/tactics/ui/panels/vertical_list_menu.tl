@@ -15,6 +15,12 @@ end
 
 local vertical_list_menu = {}
 
+function VerticalListMenu:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
+	local line = self:get_hovered_line(lx, ly)
+
+	return menu_mouse_selection.list(line)
+end
+
 function vertical_list_menu.new<GC, Value>(
 	unselected_template: string,
 	selected_template: string,
@@ -38,13 +44,8 @@ function vertical_list_menu.new<GC, Value>(
 
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
-    return text_node.new(props) 
-end
-
-function VerticalListMenu:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
-	local line = self:get_hovered_line(lx, ly)
-
-	return menu_mouse_selection.list(line)
+	props.get_selection_at = VerticalListMenu.get_selection_at
+    return text_node.new(props)
 end
 
 return vertical_list_menu

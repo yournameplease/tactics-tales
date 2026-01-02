@@ -3,6 +3,7 @@ local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
+local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
 local enum UITextColor
     "dark"

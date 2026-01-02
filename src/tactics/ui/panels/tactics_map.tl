@@ -261,8 +261,11 @@ function TacticsMap:compute_children(state: UIContextManager)
             local children = self.children
             if #children == 0 then
                 local menu_box = box.new({
+                    -- x = x,
+                    -- y = y,
                     auto_height = true,
                     auto_width = true,
+                    decoration_padding = 1,
                     padding = 2,
                     decoration = "border",
                 })
@@ -278,11 +281,11 @@ function TacticsMap:compute_children(state: UIContextManager)
                 	{
                         auto_height = true,
                         auto_width = true,
-                        internal_margin = { t = y, l = x}
+                        -- internal_margin = { t = y, l = x}
                     }
                 )
                 menu_box:add(node)
-                self.children = { menu_box }
+                self.children = { box.floating(menu_box, x, y) }
             end
         else
             if #self.children ~= 0 then
