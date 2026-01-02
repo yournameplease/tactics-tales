@@ -80,32 +80,32 @@ local function compute_animated_unit_positions(map: battle_map.BattleMap): { Ani
     )(map:get_all_units())
 end
 
-local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
-    local selected_i = cursor.i
-    local options = cursor.options
-    local PADDING = 2
+-- local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
+--     local selected_i = cursor.i
+--     local options = cursor.options
+--     local PADDING = 2
 
-    local max_text_width = 0
-    for _,opt in ipairs(options) do
-        local text_width = pt.print(opt.text, 0, -1000) as integer
-        max_text_width = pt.max(max_text_width, text_width)
-    end
+--     local max_text_width = 0
+--     for _,opt in ipairs(options) do
+--         local text_width = pt.print(opt.text, 0, -1000) as integer
+--         max_text_width = pt.max(max_text_width, text_width)
+--     end
 
-    local menu_x = x + TILE_SIZE.x
-    local menu_y = y + TILE_SIZE.y
-    local menu_w = 2*PADDING + max_text_width
-    local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
-    pt.rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
-    for i,opt in ipairs(options) do
-        if i == selected_i then
-            pt.rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
-            pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
-        else
-            pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
-        end
-    end
-    pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
-end
+--     local menu_x = x + TILE_SIZE.x
+--     local menu_y = y + TILE_SIZE.y
+--     local menu_w = 2*PADDING + max_text_width
+--     local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
+--     pt.rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
+--     for i,opt in ipairs(options) do
+--         if i == selected_i then
+--             pt.rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
+--             pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
+--         else
+--             pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
+--         end
+--     end
+--     pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
+-- end
 
 local function should_draw_shadow(unit: BattleUnit, ctx: BattleUIContext): boolean
     if ctx.acting_unit ~= nil and unit.id == ctx.acting_unit.id then
@@ -260,6 +260,12 @@ function TacticsMap:compute_children(state: UIContextManager)
         if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
             local children = self.children
             if #children == 0 then
+                local menu_box = box.new({
+                    auto_height = true,
+                    auto_width = true,
+                    padding = 2,
+                    decoration = "border",
+                })
                 LOG.info("Adding list child")
                 local node = vertical_list_menu.new(
                     " {text}",
@@ -275,7 +281,8 @@ function TacticsMap:compute_children(state: UIContextManager)
                         internal_margin = { t = y, l = x}
                     }
                 )
-                self.children = { node }
+                menu_box:add(node)
+                self.children = { menu_box }
             end
         else
             if #self.children ~= 0 then
