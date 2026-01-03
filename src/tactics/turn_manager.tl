@@ -48,7 +48,7 @@ function turn_manager.new(
     battle_menu_manager: BattleMenuManager
 ): TurnManager
     local self: TurnManagerImpl = setmetatable({
-    }, { __index = TurnManager })
+    }, { __index = TurnManagerImpl })
 
     self.turn = 1
     self.phase = "PLAYER"
