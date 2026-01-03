@@ -286,6 +286,14 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
     end
 
     if step.is_hit then
+        if step.destroy_shield then
+            local off_hand = defender.character.inventory:get_equipped_items()["OFF_HAND"]
+            -- lazy, probably should temp disable or destroy instead
+            if off_hand:get_name() == "shield" then
+                defender.character.inventory:unequip_item_in_equip_slot("OFF_HAND")
+            end
+        end
+    
         defender:take_damage(step.dmg)
         local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
         defender.animation_data = hurt_animation

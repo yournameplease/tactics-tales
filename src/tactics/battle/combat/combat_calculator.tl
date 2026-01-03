@@ -18,6 +18,7 @@ local record CombatResult
         hit_roll: integer
         is_hit: boolean
         dmg: integer
+        destroy_shield: boolean
     end
 
     steps: { CombatStep }
@@ -30,6 +31,7 @@ local record CombatPreviewResult
         defender: BattleUnit
         hit_chance: integer
         dmg: integer
+        destroy_shield: boolean
     end
     steps: { CombatPreviewStep }
 end
@@ -46,6 +48,7 @@ local record AttackDouble
     max_range: integer
 
     long_reach: boolean
+    shieldsplitter: boolean
 
     ignored_defenses: {effect.DefenseType: boolean}
     ignored_avoids: {effect.AvoidType: boolean}
@@ -63,7 +66,7 @@ local record CombatDouble
 end
 
 local function build_attack_double(weapon: wpn.Weapon): AttackDouble
-    local double = {
+    local double: AttackDouble = {
         damage = weapon.damage,
         accuracy = weapon.accuracy,
         min_range = weapon.min_range,
@@ -76,7 +79,7 @@ local function build_attack_double(weapon: wpn.Weapon): AttackDouble
         if eff is effect.LongReachEffect then
             double.long_reach = true
         elseif eff is effect.ShieldsplitterEffect then
-            
+            double.shieldsplitter = true
         elseif eff is effect.ArmorkillerEffect then
             double.ignored_defenses["ARMOR"] = true 
             double.ignored_avoids["ARMOR"] = true 
@@ -199,6 +202,7 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
             defender = defender.unit,
             hit_chance = get_hit_chance(attacker, defender, weapon, map),
             dmg = get_damage(attacker, defender, weapon),
+            destroy_shield = weapon.shieldsplitter,
             hit_roll = random.rndi(100)
         }
         step.is_hit = step.hit_roll < step.hit_chance
