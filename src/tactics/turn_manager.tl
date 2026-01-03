@@ -110,7 +110,7 @@ function turn_manager.new(
 
         self.turn = self.turn + 1
 
-        local battle_result = self.battle_objective_service:check_for_end()
+        local battle_result = self.battle_objective_service:check_objectives(self.turn)
 
         if not battle_result.finished then
             self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {

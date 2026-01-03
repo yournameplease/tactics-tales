@@ -75,7 +75,9 @@ function battle_manager.new(battle_id: string, char_man: character_manager.Chara
     )
 
     self.battle_objective_service = battle_objective_service.new(
-        self.battle_map
+        self.battle_map,
+        battle_def.victory_conditions,
+        battle_def.failure_conditions
     )
 
     self.enemy_ai_engine = enemy_ai_engine.new(
