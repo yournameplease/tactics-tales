@@ -161,13 +161,12 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         tile_labels = {
             ["player_deployment"] = { 0x00 },
             ["cultist_boss"] = { 0x10 },
+            ["cultist_goon"] = { 0x12 },
             ["cultist_guard"] = { 0x11 },
-            ["cultist_door_guard_a"] = { 0x12 },
             ["cultist_door_guard_b"] = { 0x13 },
             ["cultist_door_guard_c"] = { 0x14 },
             ["cultist_door_guard_d"] = { 0x15 },
             ["cultist_door_guard_e"] = { 0x16 },
-            ["door_a"] = { 0x32 },
             ["door_b"] = { 0x33 },
             ["door_c"] = { 0x34 },
             ["door_d"] = { 0x35 },
@@ -188,8 +187,8 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
         },
         enemies = {
             { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
+            { character_source = character_template("cultist_goon"), ai = ai.stationary, tile = "cultist_goon" },
             { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
-            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_a" },
             { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_b" },
             { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
             { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_d" },
@@ -221,7 +220,6 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
                 "after_enemy",
                 "from_south"
             ),
-            open_door_front("cultist_door_guard_a","door_a"),
             open_door_front("cultist_door_guard_b","door_b"),
             open_door_front("cultist_door_guard_c","door_c"),
             open_door_front("cultist_door_guard_d","door_d"),
