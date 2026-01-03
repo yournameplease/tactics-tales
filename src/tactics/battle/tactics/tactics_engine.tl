@@ -110,7 +110,7 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
 
     for _, spawn_data in ipairs(units) do
         local tile_label = spawn_data.tile
-        local tags = spawn_data.tags
+        local tags = spawn_data.tags or {}
         local labels = lists.merge(tags, {tile_label})
 
         local spawn_points = self.battle_map:get_tiles_by_label(spawn_data.tile)
