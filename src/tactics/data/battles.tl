@@ -101,7 +101,7 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             ["player_armor"] = { 0x0A },
         },
         victory_conditions = {
-            objectives.rout()
+            objectives.defeat_tagged("boss")
         },
         failure_conditions = {
             objectives.turn_limit(10)
@@ -180,13 +180,14 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             ["jailed_bandit_bro"] = { 0x29 },
         },
         victory_conditions = {
-            objectives.rout()
+            objectives.defeat_tagged("boss"),
+            objectives.escape(),
         },
         failure_conditions = {
-            objectives.turn_limit(10)
+            objectives.turn_limit(10),
         },
         enemies = {
-            { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss" },
+            { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
             { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
             { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_a" },
             { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_b" },
