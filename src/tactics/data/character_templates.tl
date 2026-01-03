@@ -114,7 +114,8 @@ global UNIT_TEMPLATES: { string: CharacterTemplate } = {
     child_base = {
         movement = 5,
         hp_max = 3,
-		body_options = randomizer.weighted_option_selector.of( "child" )
+		body_options = randomizer.weighted_option_selector.of( "child" ),
+		beard_options = randomizer.weighted_option_selector.of("none")
     },
 	child_axe = {
         parent_template = "child_base",
