@@ -52,6 +52,7 @@ local record AttackDouble
 end
 
 local record CombatDouble
+    id: integer -- for debugging
     tile: Point
     hp_current: integer
     hp_max: integer
@@ -89,6 +90,7 @@ end
 
 local function build_combat_double(unit: BattleUnit): CombatDouble
     local double: CombatDouble = {
+        id = unit.id,
         tile = unit.tile,
         hp_current = unit.hp_current,
         hp_max = unit.character.stats.hp_max,
@@ -157,8 +159,9 @@ local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapo
 end
 
 local function is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
-  
     local dist = point.taxicab_distance(attacker.tile, defender.tile)
+
+    LOG.debug("Checking combat range", attacker.id, attacker.tile, defender.id, defender.tile, attack.min_range, attack.max_range, dist)
 
     return dist >= attack.min_range and dist <= attack.max_range
 end
@@ -181,6 +184,7 @@ end
 
 local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
     local is_long_reach = unit_is_long_reach(attacker)
+    LOG.debug("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
     if is_long_reach and not attack.long_reach then
         return false
     end
@@ -220,7 +224,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     end
 
     -- defender counterattack
-    if can_counter_attack(attacker, attacker, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
+    if can_counter_attack(attacker, defender, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
