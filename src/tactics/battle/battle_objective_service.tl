@@ -1,10 +1,11 @@
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
-local BattleUnit = battle_unit.BattleUnit
 local event_bus = require("src/tactics/systems/event_bus")
+local battle_objective_definition = require("src/tactics/battle/definition/objective")
+local battle_objective = require("src/tactics/battle/objective")
+local lists = require("src/tactics/util/lists")
 
-local record BattleObjectiveService
-    battle_map: BattleMap
+local interface BattleObjectiveService
+    check_objectives: function(self, turn_number: integer): BattleFinishState
 end
 
 local record BattleFinishState
@@ -17,36 +18,44 @@ local battle_objective_service = {
     BattleFinishState = BattleFinishState
 }
 
+local record BattleObjectiveServiceImpl
+    is BattleObjectiveService
+    battle_map: BattleMap
+    victory_conditions: { battle_objective.VictoryCondition }
+    failure_conditions: { battle_objective.FailureCondition }
+end
+
 function battle_objective_service.new(
-    map: BattleMap
+    map: BattleMap,
+    victory_conditions: { battle_objective_definition.VictoryCondition },
+    failure_conditions: { battle_objective_definition.FailureCondition }
 ): BattleObjectiveService 
-    local self: BattleObjectiveService = setmetatable({
-    }, { __index = BattleObjectiveService })
+    local self: BattleObjectiveServiceImpl = setmetatable({
+    }, { __index = BattleObjectiveServiceImpl })
 
     self.battle_map = map
+    self.victory_conditions = lists.map(battle_objective_definition.to_victory_condition)(victory_conditions)
+    self.failure_conditions = lists.map(battle_objective_definition.to_failure_condition)(failure_conditions)
     
     return self
-end
--- 
--- legacy function, doesn't support different end conditions
-function BattleObjectiveService:check_for_end(): BattleFinishState
-    local players = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
-    local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_enemy() end)
-
-    if (#players == 0) then
-        return { finished = true, command = "BATTLE_END_VICTORY" }
-    elseif (#enemies == 0) then
-        return { finished = true, command = "BATTLE_END_DEFEAT" }
-    else
-        return { finished = false }
-    end
 end
 
 --- Checks if current state satisfies Victory/Failure conditions
 -- Called by TurnManager at end of actions
-function BattleObjectiveService:check_objectives(): BattleFinishState
+function BattleObjectiveServiceImpl:check_objectives(turn_number: integer): BattleFinishState
     -- returns "WIN", "LOSS", or nil (continue)
-    return self:check_for_end()
+    for _,f in ipairs(self.failure_conditions) do
+        if f:check(self.battle_map, turn_number) then
+            return { finished = true, command = "BATTLE_END_DEFEAT" }
+        end
+    end
+    for _,v in ipairs(self.victory_conditions) do
+        if v:check(self.battle_map, turn_number) then
+            return { finished = true, command = "BATTLE_END_VICTORY" }
+        end
+    end
+
+    return { finished = false }    
 end
 
 return battle_objective_service

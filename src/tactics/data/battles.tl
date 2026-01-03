@@ -1,11 +1,12 @@
 local battle_definition <const> = require("src/tactics/battle/definition")
+local objectives <const> = require("src/tactics/battle/definition/objective")
 local battle_script <const> = require("src/tactics/battle/scripts/battle_script")
 local unit_spawn_data <const> = require("src/tactics/battle/unit/spawn_data")
 
 local character_template <const> = unit_spawn_data.character_source.template
 local player_roster <const> = unit_spawn_data.character_source.player_roster
 
-local ai = {
+local ai <const> = {
     default = { move = "two", target = "player"},
     move_one = { move = "one", target = "player"},
     move_two = { move = "two", target = "player"},
@@ -99,12 +100,12 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             ["player_archer"] = { 0x09 },
             ["player_armor"] = { 0x0A },
         },
-        victory_conditions = { {
-            type = "ROUT"
-        } },
-        failure_conditions = { {
-            type = "TURN_LIMIT"
-        } },
+        victory_conditions = {
+            objectives.rout()
+        },
+        failure_conditions = {
+            objectives.turn_limit(10)
+        },
         enemies = {
             { character_source = character_template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
             { character_source = character_template("bandit_weakling"), ai = ai.move_two, tile = "bandit_goon" },
@@ -178,12 +179,12 @@ global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
             ["jailed_bandit"] = { 0x28 },
             ["jailed_bandit_bro"] = { 0x29 },
         },
-        victory_conditions = { {
-            type = "ROUT"
-        } },
-        failure_conditions = { {
-            type = "TURN_LIMIT"
-        } },
+        victory_conditions = {
+            objectives.rout()
+        },
+        failure_conditions = {
+            objectives.turn_limit(10)
+        },
         enemies = {
             { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss" },
             { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
