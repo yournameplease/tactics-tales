@@ -1,3 +1,6 @@
+global todo: function(message?: string): any
+global unexpected: function(state: string)
+
 -- nice utility types
 global type Angle = number
 global type Color = integer
