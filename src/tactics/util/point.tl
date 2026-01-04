@@ -11,8 +11,14 @@ local record Point
     metamethod __tostring: function(Point): string
 end
 
+local record PointRecord
+    x: integer
+    y: integer
+end
+
 local point = {
-	Point = Point
+	Point = Point,
+    PointRecord = PointRecord,
 }
 
 local point_of: (function(integer, integer): Point)
@@ -64,6 +70,13 @@ function point.of_angle(angle: number, scale: number): Point
     local y = pt.flr(scale * pt.sin(angle) + 0.5)
     return point.of(x, y)
 end
+
+function point.of_record(rec: PointRecord): Point
+    local x = rec.x
+    local y = rec.y
+    return point.of(x, y)
+end
+
 function Point:copy(): Point
     return setmetatable({
         x = self.x,

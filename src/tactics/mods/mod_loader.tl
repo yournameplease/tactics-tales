@@ -33,7 +33,8 @@ end
 
 function mod_loader.new(): ModLoader
 	local self: ModLoaderImpl = setmetatable({
-		
+		registered = {},
+		registered_map = {}
 	}, { __index = ModLoaderImpl })
 
 	return self
