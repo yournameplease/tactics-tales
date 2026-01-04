@@ -3,9 +3,6 @@
 --- contains ids, names, sprites, and other information
 --- has ordered lists for use in character customization menus
 
-require("src/tactics/character/object/character")
-local lists = require("src/tactics/util/lists")
-
 local interface NamedSpriteData
 	name: string
 end
@@ -147,31 +144,6 @@ local COLOR_NAMES: {string: NamedColor} = {
 		color = 31,
 	},
 }
-
-local NATURAL_HAIR_COLORS = {
-	"brown",
-	"dark_grey",
-	"light_grey",
-	"orange",
-	"yellow",
-	"dark_brown",
-	"darker_grey",
-	"dark_red",
-	"dark_orange",
-	"dark_grey",
-	"peach",
-}
-
-local UNNATURAL_HAIR_COLORS = {
-	"white",
-	-- "pink",
-	-- "lavender",
-	-- "mauve",
-	-- "medium_green",
-	-- "dark_green",
-	-- "light_pink",
-}
-
 
 local record SpriteData
 	is NamedSpriteData
@@ -535,10 +507,20 @@ local HAIR_OPTIONS = {
 	"buzz_b",	
 }
 
-local HAIR_COLOR_OPTIONS = lists.merge(
-	NATURAL_HAIR_COLORS,
-	UNNATURAL_HAIR_COLORS
-)
+local HAIR_COLOR_OPTIONS = {
+	"brown",
+	"dark_grey",
+	"light_grey",
+	"orange",
+	"yellow",
+	"dark_brown",
+	"darker_grey",
+	"dark_red",
+	"dark_orange",
+	"medium_grey",
+	"peach",
+	"white"	
+}
 
 local FACIAL_HAIR_OPTIONS = {
 	"none",
@@ -623,8 +605,7 @@ local sprite_data = {
 	HeadwearSpriteData = HeadwearSpriteData,
 
 	COLOR_NAMES = COLOR_NAMES,
-	NATURAL_HAIR_COLORS = NATURAL_HAIR_COLORS,
-	UNNATURAL_HAIR_COLORS = UNNATURAL_HAIR_COLORS,
+
 	HEAD = HEAD,
 	HAIR = HAIR,
 	FACIAL_HAIR = FACIAL_HAIR,

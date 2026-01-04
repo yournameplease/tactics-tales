@@ -69,9 +69,6 @@ local function get_body_type(
 
 	local body_class_id = drawable_unit.character.appearance.body_class
 	local body_class_prefix = sprite_data.BODY_CLASS[body_class_id].id_prefix
-	-- if drawable_unit.character.appearance.sex == "female" and body_class == "SHIRTLESS" then
-	-- 	body_class = "SLEEVELESS"
-	-- end
 
 	-- TODO: type safety
     return (body_class_prefix.."_"..base_body_type) as AnimationName

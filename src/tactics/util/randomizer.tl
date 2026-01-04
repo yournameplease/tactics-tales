@@ -45,6 +45,19 @@ function randomizer.weighted_option_selector.of<V>(...: V): WeightedOptionSelect
 	}, { __index = WeightedOptionSelector })
 end
 
+function randomizer.weighted_option_selector.of_weight_map<V>(weights: {V: integer}): WeightedOptionSelector<V>
+	local options: {WeightedOption<V>} = {}
+	local total_weight = 0
+	for v,w in pairs(weights) do
+		pt.add(options, { v, w })
+		total_weight = total_weight + w
+	end
+	return setmetatable({
+		options = options,
+		total_weight = total_weight
+	}, { __index = WeightedOptionSelector })
+end
+
 function randomizer.weighted_option_selector.of_weighted<V>(...: WeightedOption<V>): WeightedOptionSelector<V>
 	local array: {WeightedOption<V>} = {...}
 	return setmetatable({

@@ -1,4 +1,10 @@
 
+local point = {}
+
+function point.of(x,y)
+    return {x = x, y = y}
+end
+
 local effect = {}
 
 function effect.long_reach()
@@ -22,7 +28,7 @@ end
 function effect.increase_defense(
     amount,
     defense_type
-): IncreaseDefenseEffect
+)
     return {
         type = "increase_defense",
         amount = amount,
@@ -30,18 +36,18 @@ function effect.increase_defense(
     }
 end
 
-function IncreaseDefenseEffect.of(
+function effect.increase_avoid(
     amount,
-    defense_type
-): IncreaseDefenseEffect
+    avoid_type
+)
     return {
-        type = "increase_defense",
+        type = "increase_avoid",
         amount = amount,
-        defense_type = defense_type
+        avoid_type = avoid_type
     }
 end
 
-local function shield(name: string, sprite_id: integer, slots: integer, defense: integer, avoid: integer): item_definition.ItemDefinition
+local function shield(name, sprite_id, slots, defense, avoid)
     return {
         name = name,
         type = "SHIELD",
@@ -53,13 +59,13 @@ local function shield(name: string, sprite_id: integer, slots: integer, defense:
         },
 
         equipment_effects = {
-            effect.IncreaseDefenseEffect.of(defense, "SHIELD"),
-            effect.IncreaseAvoidEffect.of(avoid, "SHIELD")
+            effect.increase_defense(defense, "SHIELD"),
+            effect.increase_avoid(avoid, "SHIELD")
         }        
     }
 end
 
-local function armor(name: string, slots: integer, defense: integer, avoid: integer): item_definition.ItemDefinition
+local function armor(name, slots, defense, avoid)
     return {
         name = name,
         type = "ARMOR",
@@ -67,13 +73,13 @@ local function armor(name: string, slots: integer, defense: integer, avoid: inte
         equip_slot = "BODY",
 
         equipment_effects = {
-            effect.IncreaseDefenseEffect.of(defense, "ARMOR"),
-            effect.IncreaseAvoidEffect.of(avoid, "ARMOR")
+            effect.increase_defense(defense, "ARMOR"),
+            effect.increase_avoid(avoid, "ARMOR")
         }        
     }
 end
 
-local default_weapon: item_definition.WeaponDefinition = {
+local default_weapon = {
     name = "Default Weapon",
     sprite = 104,
     hand_anchor = point.of(1,8), -- the top left position of the handle
@@ -86,12 +92,12 @@ local default_weapon: item_definition.WeaponDefinition = {
 }
 
 local function weapon(
-    name: string,
-    slots: integer,
-    equip_slot: item_types.EquipSlot,
-    sprite_data: item_types.ItemSpriteData,
-    data: item_definition.WeaponDefinition
-) : item_definition.ItemDefinition
+    name,
+    slots,
+    equip_slot,
+    sprite_data,
+    data
+)
     setmetatable(data, { __index = default_weapon })
     return {
         name = name,
@@ -106,13 +112,13 @@ local function weapon(
 end
 
 local function melee_weapon(
-    name: string,
-    sprite: integer,
-    damage: integer,
-    accuracy: integer,
-    slots: integer,
-    effects?: { wpn.WeaponEffect }
-): item_definition.ItemDefinition
+    name,
+    sprite,
+    damage,
+    accuracy,
+    slots,
+    effects
+)
     return weapon(
         name,
         slots,
@@ -131,13 +137,13 @@ local function melee_weapon(
 end
 
 local function two_handed_weapon(
-    name: string,
-    sprite: integer,
-    damage: integer,
-    accuracy: integer,
-    slots: integer,
-    effects?: { wpn.WeaponEffect }
-): item_definition.ItemDefinition
+    name,
+    sprite,
+    damage,
+    accuracy,
+    slots,
+    effects
+)
     return weapon(
         name,
         slots,
@@ -158,15 +164,15 @@ local function two_handed_weapon(
 end
 
 local function ranged_weapon(
-    name: string,
-    sprite: integer,
-    damage: integer,
-    accuracy: integer,
-    min_range: integer,
-    max_range: integer,
-    slots: integer,
-    effects?: { wpn.WeaponEffect }
-): item_definition.ItemDefinition
+    name,
+    sprite,
+    damage,
+    accuracy,
+    min_range,
+    max_range,
+    slots,
+    effects
+)
     return weapon(
         name,
         slots,
@@ -190,25 +196,25 @@ local function ranged_weapon(
 end
 
 
-local ITEM_DATA: {string: item_definition.ItemDefinition} = {
+local ITEM_DATA = {
     dagger = melee_weapon( "Dagger", 96, 1, 90, 1 ),
     sword = melee_weapon( "Sword", 97, 2, 80, 1 ),
     axe = melee_weapon( "Axe", 98, 2, 70, 1, {
-            effect.ShieldsplitterEffect.of()
+            effect.shieldsplitter()
         }
     ),
     spear = melee_weapon( "Spear", 99, 1, 90, 1, {
-            effect.LongReachEffect.of()
+            effect.long_reach()
         }
     ),
     poleaxe = melee_weapon( "Poleaxe", 100, 2, 60, 1, {
-            effect.LongReachEffect.of(),
-            effect.ShieldsplitterEffect.of()
+            effect.long_reach(),
+            effect.shieldsplitter()
         }
     ),
     club = melee_weapon( "Club", 101, 1, 80, 1),
     mace = melee_weapon( "Mace", 102, 2, 70, 1, {
-            effect.ArmorkillerEffect.of()
+            effect.armorkiller()
         }
     ),
     greatsword = two_handed_weapon( "Greatsword", 103, 3, 70, 2),

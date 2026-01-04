@@ -3,14 +3,14 @@ local BattleDefinition = require("src/tactics/battle/definition").BattleDefiniti
 local story = require("src/tactics/story/types")
 local StoryId = story.StoryId
 local StoryDefinition = story.StoryDefinition
--- local MapDefinition = require("src/tactics/battle/map/types").MapDefinition
+local CharacterTemplate = require("src/tactics/character/definition").CharacterTemplate
 local ItemDefinition = require("src/tactics/types/item_definition").ItemDefinition
 
 local record GameData
 	maps: { string: MapDefinition }
 	battles: { string: BattleDefinition }
 	stories: { StoryId: StoryDefinition }
-	-- characters: { string:  }
+	characters: { string: CharacterTemplate }
 	items: { string: ItemDefinition }
 end
 

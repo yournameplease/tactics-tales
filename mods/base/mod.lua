@@ -9,6 +9,7 @@ return {
     maps = "game_data/maps",
     battles = "game_data/battles",
     stories = "game_data/stories",
+    characters = "game_data/characters",
     items = "game_data/items"
   },
 }
