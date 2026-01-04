@@ -1,6 +1,6 @@
 require("src/tactics/data/character_templates")
 local character = require("src/tactics/character/object/character")
-require("src/tactics/data/items")
+local GameData = require("src/tactics/game_data").GameData
 require("src/tactics/character/items/object/weapon")
 local sprite_data = require("src/tactics/character/sprite_data")
 local random = require("src/tactics/util/random")
@@ -40,7 +40,11 @@ local function build_template(template_id: string): CharacterTemplate
 	return apply_template_to_parent(template_parent, template_definition)
 end
 
-function CharacterGenerator.generate_from_template(id: integer, template_id: string): character.Character
+function CharacterGenerator.generate_from_template(
+	id: integer,
+	template_id: string,
+	game_data: GameData
+): character.Character
 	LOG.debug("Generating from template ", template_id)
 	local template = build_template(template_id)
 	local char: character.Character = {
@@ -79,7 +83,7 @@ function CharacterGenerator.generate_from_template(id: integer, template_id: str
 	char.inventory = ItemInventory.new(4)
 	local item_ids = template.item_loadout_options:pick_random()
 	for i, item_id in ipairs(item_ids) do
-		local item = ItemGenerator.generate(item_id)
+		local item = ItemGenerator.generate(item_id, game_data.items)
 		if char.inventory:can_add_item(item) then
 			char.inventory:add_item(item)
 			if char.inventory:can_equip(i) then

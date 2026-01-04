@@ -1,9 +1,7 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
-require("src/tactics/data/maps")
 local battle_map = require("src/tactics/battle/battle_map")
 local BattleMap = battle_map.BattleMap
-local MAP_DEFINITIONS = require("src/tactics/data/maps")
 local map_types = require("src/tactics/battle/map/types")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
@@ -76,7 +74,10 @@ local function apply_default_walls(map_layers: battle_map.MapLayers)
     end
 end
 
-local function load_static(definition: map_types.StaticMapDefinition, tile_labels: {battle_definition_types.TileLabel: {integer}}): BattleMap
+local function load_static(
+    definition: map_types.StaticMapDefinition,
+    tile_labels: {battle_definition_types.TileLabel: {integer}}
+): BattleMap
     local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
@@ -128,10 +129,10 @@ end
 -- @param map_def: The entry from MAP_DEFINITIONS
 -- @return map: The Picotron map data
 -- @return meta: table containing { events={} }
-function map_generator.load_map(map_id: string, labels: {battle_definition_types.TileLabel: {integer}}): BattleMap
-    local definition = MAP_DEFINITIONS[map_id]
-    assert(definition ~= nil)
-
+function map_generator.load_map(
+    definition: map_types.MapDefinition,
+    labels: {battle_definition_types.TileLabel: {integer}}
+): BattleMap
     local map: BattleMap
     if definition is map_types.StaticMapDefinition then
         map = load_static(definition, labels)

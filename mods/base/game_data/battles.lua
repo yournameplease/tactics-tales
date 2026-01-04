@@ -1,27 +1,74 @@
-local battle_definition <const> = require("src/tactics/battle/definition")
-local objectives <const> = require("src/tactics/battle/definition/objective")
-local battle_script <const> = require("src/tactics/battle/scripts/battle_script")
-local unit_spawn_data <const> = require("src/tactics/battle/unit/spawn_data")
-
-local character_template <const> = unit_spawn_data.character_source.template
-local player_roster <const> = unit_spawn_data.character_source.player_roster
-
 local ai <const> = {
     default = { move = "two", target = "player"},
     move_one = { move = "one", target = "player"},
     move_two = { move = "two", target = "player"},
     move_inf = { move = "infinity", target = "player"},
-    stationary = { move = "zero", target = "player"},
+    stationary = { move = "zero", target = "player"}
 }
 
+local scripts = {
+    trigger = {},
+    script = {}
+}
+
+function scripts.trigger.turn(
+	turn,
+	repeating,
+	phase
+)
+	return {
+		type = "turn",
+		turn = turn,
+		repeating = repeating,
+		phase = phase,
+	}
+end
+
+function scripts.trigger.unit_death(
+	unit_label
+)
+	return {
+		type = "unit_death",
+		unit_label = unit_label,
+	}
+end
+
+function scripts.script.spawn_units(
+	trigger,
+	players,
+	enemies,
+	animation
+)
+	return {
+		type = "spawn_units",
+		trigger = trigger,
+		players = players,
+		enemies = enemies,
+		animation = animation,
+	}
+end
+
+function scripts.script.modify_terrain(
+	trigger,
+	tile_label,
+	new_terrain.NewTilesMap
+)
+	return {
+		type = "modify_terrain",
+		trigger = trigger,
+		tile_label = tile_label,
+		new_terrain = new_terrain
+	}
+end
+
 local function spawn_players(
-    players: { unit_spawn_data.UnitSpawnData },
-    turn: integer,
-    phase: battle_script.trigger.TurnTriggerPhase,
-	animation: unit_spawn_data.UnitSpawnAnimation
-): battle_script.BattleScript
-    return battle_script.script.spawn_units(
-        battle_script.trigger.turn(turn, nil, phase),
+    players,
+    turn,
+    phase,
+	animation.UnitSpawnAnimation
+)
+    return scripts.script.spawn_units(
+        scripts.trigger.turn(turn, nil, phase),
         players,
         {},
         animation
@@ -29,12 +76,12 @@ local function spawn_players(
 end
 
 local function free_players(
-    players: { unit_spawn_data.UnitSpawnData },
-    unit_label: string,
-	animation: unit_spawn_data.UnitSpawnAnimation
-): battle_script.BattleScript
-    return battle_script.script.spawn_units(
-        battle_script.trigger.unit_death(unit_label),
+    players,
+    unit_label,
+    animation
+)
+    return scripts.script.spawn_units(
+        scripts.trigger.unit_death(unit_label),
         players,
         {},
         animation
@@ -42,14 +89,14 @@ local function free_players(
 end
 
 local function spawn_enemies(
-    enemies: { unit_spawn_data.UnitSpawnData },
-    turn: integer,
-    repeating: integer, --nillable
-    phase: battle_script.trigger.TurnTriggerPhase,
-	animation: unit_spawn_data.UnitSpawnAnimation
-): battle_script.BattleScript
-    return battle_script.script.spawn_units(
-        battle_script.trigger.turn(turn, repeating, phase),
+    enemies,
+    turn,
+    repeating, --nillable
+    phase,
+    animation
+)
+    return scripts.script.spawn_units(
+        scripts.trigger.turn(turn, repeating, phase),
         {},
         enemies,
         animation
@@ -57,11 +104,11 @@ local function spawn_enemies(
 end
 
 local function open_door_front(
-    enemy_label: string,
-    tile_label: string
-): battle_script.BattleScript
-    return battle_script.script.modify_terrain(
-        battle_script.trigger.unit_death(enemy_label),
+    enemy_label,
+    tile_label
+)
+    return scripts.script.modify_terrain(
+        scripts.trigger.unit_death(enemy_label),
         tile_label,
         {
             ["front_wall"] = 0
@@ -70,11 +117,11 @@ local function open_door_front(
 end
 
 local function open_door_mid(
-    enemy_label: string,
-    tile_label: string
-): battle_script.BattleScript
-    return battle_script.script.modify_terrain(
-        battle_script.trigger.unit_death(enemy_label),
+    enemy_label,
+    tile_label
+)
+    return scripts.script.modify_terrain(
+        scripts.trigger.unit_death(enemy_label),
         tile_label,
         {
             ["mid_wall"] = 0
@@ -83,7 +130,7 @@ local function open_door_mid(
 end
 
 
-global BATTLE_DATA: { string: battle_definition.BattleDefinition } = {
+local BATTLE_DATA = {
     ["bandit_village"] = {
         map_id = "bandit_village",
         tile_labels = {

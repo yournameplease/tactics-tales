@@ -2,13 +2,6 @@ local fp = require("src/tactics/util/fp")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
 local GameData = require("src/tactics/game_data").GameData
-local MapDefinition = require("src/tactics/battle/map/types").MapDefinition
-local BattleDefinition = require("src/tactics/battle/definition").BattleDefinition
-local story = require("src/tactics/story/types")
-local StoryId = story.StoryId
-local StoryDefinition = story.StoryDefinition
--- local MapDefinition = require("src/tactics/battle/map/types").MapDefinition
-local ItemDefinition = require("src/tactics/types/item_definition").ItemDefinition
 local mods = require("src/tactics/mods")
 local ModId = mods.ModId
 local ModSpec = mods.ModSpec
@@ -47,10 +40,18 @@ function mod_loader.new(): ModLoader
 end
 
 function ModLoaderImpl:register_mod(path: string)
-	local full_path = "mods/"..path
-	local modspec: ModSpec = pt.include(full_path) as ModSpec
+	local full_path = "mods/"..path.."/mod.lua"
+	local mod_spec: ModSpec = pt.include(full_path) as ModSpec
 
-	
+	-- TODO: validate dependencies
+
+	local registered_mod = {
+		id = mod_spec.id,
+		path = path,
+		spec = mod_spec
+	}
+	pt.add(self.registered, registered_mod)
+	self.registered_map[mod_spec.id] = registered_mod
 end
 
 function ModLoaderImpl:validate_mod(id: ModId)
@@ -107,3 +108,5 @@ function ModLoaderImpl:load_mod_data(): GameData
 
 	return game_data
 end
+
+return mod_loader

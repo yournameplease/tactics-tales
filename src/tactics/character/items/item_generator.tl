@@ -1,10 +1,8 @@
 local Item = require("src/tactics/character/items/object/item")
 local wpn = require("src/tactics/character/items/object/weapon")
-local ITEM_DATA = require("src/tactics/data/items")
 local item_definition = require("src/tactics/types/item_definition")
 
-local record ItemGenerator
-end
+local item_generator = {}
 
 local function generate_weapon(def: item_definition.WeaponDefinition): wpn.Weapon
 	if def == nil then
@@ -14,8 +12,11 @@ local function generate_weapon(def: item_definition.WeaponDefinition): wpn.Weapo
 	return setmetatable({},{ __index = def})
 end
 
-function ItemGenerator.generate(item_id: string): Item.Item
-	local data = ITEM_DATA[item_id]
+function item_generator.generate(
+	item_id: string,
+	item_data: {string: item_definition.ItemDefinition}
+): Item.Item
+	local data = item_data[item_id]
 	assert(data ~= nil)
 	
 	return Item.new(
@@ -30,4 +31,4 @@ function ItemGenerator.generate(item_id: string): Item.Item
 	)
 end
 
-return ItemGenerator
+return item_generator
