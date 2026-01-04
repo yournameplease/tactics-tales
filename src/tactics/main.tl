@@ -46,7 +46,7 @@ function _init()
         input_service = input,
     }
 
-    local mod_loader = mod_ldr.new()
+    mod_loader = mod_ldr.new()
     
     game_manager = game.new(game_services, mod_loader)
 end
