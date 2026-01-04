@@ -43,7 +43,7 @@ function game.new(
     services: GameServiceBundle,
     mod_loader: ModLoader
 ): Game 
-
+    
     mod_loader:register_mod("base")
     local game_data = mod_loader:load_mod_data()
 
@@ -53,6 +53,7 @@ function game.new(
     end
     
     local self: Game = setmetatable({}, { __index = Game })
+    self.mod_loader = mod_loader
     self.services = services
 
     local game_menu_ctx = game_menu_context.new(

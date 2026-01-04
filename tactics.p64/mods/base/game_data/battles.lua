@@ -227,28 +227,28 @@ local BATTLE_DATA = {
             objectives.turn_limit(10)
         },
         enemies = {
-            { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
-            { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
-            { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l" },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r" },
+            { character_source = character_template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
+            { character_source = character_template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
+            { character_source = character_template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l" },
+            { character_source = character_template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r" },
         },
         players = {
-            { character_source = character_source.player_roster(), tile = "player_deployment" },
+            { character_source = player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_players({
-                { character_source = character_source.template("militia_captain"), tile = "player_captain" },
-                { character_source = character_source.template("militia_spearman"), tile = "player_spearman" },
-                { character_source = character_source.template("militia_archer"), tile = "player_archer" },
-                { character_source = character_source.template("militia_armor"), tile = "player_armor" },
+                { character_source = character_template("militia_captain"), tile = "player_captain" },
+                { character_source = character_template("militia_spearman"), tile = "player_spearman" },
+                { character_source = character_template("militia_archer"), tile = "player_archer" },
+                { character_source = character_template("militia_armor"), tile = "player_armor" },
             },
                 2,
                 "before_player",
                 "from_east"
             ),
             spawn_enemies({
-                { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
+                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
             },
                 3,
                 3,
@@ -256,7 +256,7 @@ local BATTLE_DATA = {
                 "from_west"
             ),
             spawn_enemies({
-                { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
+                { character_source = character_template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
             },
                 6,
                 3,
@@ -265,12 +265,12 @@ local BATTLE_DATA = {
             ),
             open_door_mid("bandit_miniboss_gate","bandit_miniboss_gate"),
             free_players(
-                {{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }},
+                {{ character_source = character_template("child_bow"), tile = "bandit_miniboss_l" }},
                 "bandit_miniboss_l",
                 nil
             ),
             free_players(
-                {{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }},
+                {{ character_source = character_template("child_axe"), tile = "bandit_miniboss_r" }},
                 "bandit_miniboss_r",
                 nil
             ),
@@ -306,26 +306,26 @@ local BATTLE_DATA = {
             objectives.turn_limit(10),
         },
         enemies = {
-            { character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
-            { character_source = character_source.template("cultist_goon"), ai = ai.stationary, tile = "cultist_goon" },
-            { character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
-            { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_b" },
-            { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
-            { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_d" },
-            { character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_door_guard_c" },
+            { character_source = character_template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
+            { character_source = character_template("cultist_goon"), ai = ai.stationary, tile = "cultist_goon" },
+            { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_b" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
+            { character_source = character_template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_d" },
+            { character_source = character_template("cultist_guard"), ai = ai.stationary, tile = "cultist_door_guard_c" },
         },
         neutral = {
-            { character_source = character_source.template("old_fart"), ai = ai.stationary, tile = "jailed_priest" },
-            { character_source = character_source.template("village_hero"), ai = ai.stationary, tile = "jailed_royal" },
-            { character_source = character_source.template("bandit_guard"), ai = ai.move_inf, tile = "jailed_bandit" },
-            { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro" },
+            { character_source = character_template("old_fart"), ai = ai.stationary, tile = "jailed_priest" },
+            { character_source = character_template("village_hero"), ai = ai.stationary, tile = "jailed_royal" },
+            { character_source = character_template("bandit_guard"), ai = ai.move_inf, tile = "jailed_bandit" },
+            { character_source = character_template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro" },
         },
         players = {
-            { character_source = character_source.player_roster(), tile = "player_deployment" },
+            { character_source = player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_enemies({
-                { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
+                { character_source = character_template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
             },
                 3,
                 3,
@@ -333,7 +333,7 @@ local BATTLE_DATA = {
                 "from_south"
             ),
             spawn_enemies({
-                { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
+                { character_source = character_template("cultist_spear"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
             },
                 6,
                 3,

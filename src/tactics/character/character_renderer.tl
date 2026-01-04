@@ -210,7 +210,13 @@ local function draw_character(
 		else
 			if equip:get_sprite_data() ~= nil then
 				local anchor: AnchorPointName = slot == "OFF_HAND" and "off_hand" or "main_hand"
-			    local equip_anchor = get_anchor_offsets(base_point, animation_frame.anchors[anchor], equip:get_sprite_data().anchor, flip_h, false)
+			    local equip_anchor = get_anchor_offsets(
+					base_point,
+					animation_frame.anchors[anchor],
+					point.of_record(equip:get_sprite_data().anchor),
+					flip_h,
+					false
+				)
 			    pt.spr(BASE_UNIT_SPRITE + equip:get_sprite_data().sprite, equip_anchor.x, equip_anchor.y, flip_h)
 			end
 		end

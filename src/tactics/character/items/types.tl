@@ -1,5 +1,5 @@
 local point = require("src/tactics/util/point")
-local Point = point.Point
+local PointRecord = point.PointRecord
 
 local type ItemId = string
 
@@ -22,7 +22,7 @@ end
 
 local record ItemSpriteData
 	sprite: integer
-	anchor: Point
+	anchor: PointRecord
 end
 
 local item_types = {

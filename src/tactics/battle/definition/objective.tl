@@ -67,60 +67,6 @@ local battle_objective_definition = {
 	FailureCondition = FailureCondition,
 }
 
-function battle_objective_definition.rout(): VictoryCondition
-    local self: Rout = {
-        type = "rout",
-    }
-    return self
-end
-
-function battle_objective_definition.defeat_tagged(tag: string): VictoryCondition
-    local self: DefeatTagged = {
-        type = "defeat_tagged",
-        tag = tag,
-    }
-    return self
-end
-
-function battle_objective_definition.survive(turn_limit: integer): VictoryCondition
-    local self: Survive = {
-        type = "survive",
-		turn_limit = turn_limit
-    }
-    return self
-end
-
-function battle_objective_definition.escape(): VictoryCondition
-    local self: Escape = {
-        type = "escape",
-    }
-    return self
-end
-
-
-function battle_objective_definition.all_players_die(): FailureCondition
-    local self: AllPlayersDie = {
-        type = "all_players_die",
-    }
-    return self
-end
-
-function battle_objective_definition.tagged_player_dies(tag: string): FailureCondition
-    local self: TaggedPlayerDies = {
-        type = "tagged_player_dies",
-        tag = tag,
-    }
-    return self
-end
-
-function battle_objective_definition.turn_limit(turn_limit: integer): FailureCondition
-    local self: TurnLimit = {
-        type = "turn_limit",
-		turn_limit = turn_limit
-    }
-    return self
-end
-
 function battle_objective_definition.to_victory_condition(def: VictoryCondition): battle_objectives.VictoryCondition
 	if def is Rout then
 		return battle_objectives.rout()

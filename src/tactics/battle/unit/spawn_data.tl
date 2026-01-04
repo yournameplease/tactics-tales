@@ -47,19 +47,4 @@ local unit_spawn_data = {
 	}
 }
 
-function unit_spawn_data.character_source.template(template: string): CharacterSource
-	local self: CharacterTemplateSource = {
-		type = "template",
-		template = template,
-	}
-	return self
-end
-
-function unit_spawn_data.character_source.player_roster(): CharacterSource
-	local self: PlayerRosterSource = {
-		type = "player_roster",
-	}
-	return self
-end
-
 return unit_spawn_data
