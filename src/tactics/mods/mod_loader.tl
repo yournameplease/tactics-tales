@@ -98,10 +98,10 @@ function ModLoaderImpl:load_mod_data(): GameData
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.stories end
 	)
-	-- game_data.characters = load_mod_map(
-	-- 	self.registered,
-	-- 	function(mod: RegisteredMod): Path return mod.spec.content.characters end
-	-- )
+	game_data.characters = load_mod_map(
+		self.registered,
+		function(mod: RegisteredMod): Path return mod.spec.content.characters end
+	)
 	game_data.items = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.items end

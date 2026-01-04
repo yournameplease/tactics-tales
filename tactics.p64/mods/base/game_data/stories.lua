@@ -1,33 +1,33 @@
 local stories = {}
 
 
-function stories.new_page(): NewPageNode
+function stories.new_page()
 	return {
 		type = 'new_page'
 	}
 end
 
-function stories.story_text(text: string): StoryTextNode
+function stories.story_text(text)
 	return {
 		type = 'text',
 		text = text
 	}
 end
 
-function stories.exit_story(): ExitStoryNode
+function stories.exit_story()
 	return {
 		type = 'exit_story',
 	}
 end
 
-function stories.roster_add(template: string): RosterAddNode
+function stories.roster_add(template)
 	return {
 		type = 'roster_add',
 		template = template
 	}
 end
 
-function stories.battle(battle_id: string, next_node_victory: NodeId, next_node_failure: NodeId): BattleNode
+function stories.battle(battle_id, next_node_victory, next_node_failure)
 	return {
 		type = 'battle',
 		battle_id = battle_id,
@@ -36,13 +36,13 @@ function stories.battle(battle_id: string, next_node_victory: NodeId, next_node_
 	}
 end
 
-function stories.character_customizer(): CharacterCustomizerNode
+function stories.character_customizer()
 	return {
 		type = 'character_customizer',
 	}
 end
 
-function stories.jump(next_node: NodeId): JumpNode
+function stories.jump(next_node)
 	return {
 		type = 'jump',
 		next_node = next_node

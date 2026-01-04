@@ -9,11 +9,6 @@ local enum Side
     "neutral"
 end
 
-local enum Sex
-    "male"
-    "female"
-end 
-
 local enum CharacterAppearanceKey
 	"head"
 	"hair"
@@ -27,7 +22,7 @@ local enum CharacterAppearanceKey
 end
 
 local record CharacterAppearance
-    sex: Sex
+    gender: string
 	head: string
     hair: string
     skin: string
@@ -77,7 +72,6 @@ end
 
 local character = {
 	Side = Side,
-	Sex = Sex,
 	CharacterAppearanceKey = CharacterAppearanceKey,
 	CharacterAppearance = CharacterAppearance,
 	CharacterStats = CharacterStats,
