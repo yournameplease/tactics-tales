@@ -12,11 +12,11 @@ local story_page = require("src/tactics/story/story_page")
 local InputContext = require("src/tactics/input/input_context").InputContext
 local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node
+local StoryId = story_types.StoryId
+local StoryDefinition = story_types.StoryDefinition
+local GameData = require("src/tactics/game_data").GameData
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local Character = require("src/tactics/character/object/character").Character
-
-local STORY_DATA = require("src/tactics/data/story")
-
 
 local record Story
     record ActiveNode
@@ -25,6 +25,9 @@ local record Story
         definition: story_node.StoryNode
         rendered_node: story_page.rendered_story_node.RenderedStoryNode
     end
+
+    story_definition: StoryDefinition
+    game_data: GameData
 
     idle_animation: animation.AnimatedSpriteData
     customized_character: Character
@@ -51,8 +54,7 @@ local story = {
 }
 
 function Story:jump_to_node(node_id: string)
-    local story_definition = STORY_DATA[self.story_id]
-    local node_definition = story_definition.nodes[node_id][1]
+    local node_definition = self.story_definition.nodes[node_id][1]
     self.current_node = {
         node_id = node_id,
         node_step = 1,
@@ -72,7 +74,7 @@ function Story:handle_new_node()
         self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_node.BattleNode then
         local battle_id = node_definition.battle_id
-        self.battle_manager = battle_manager.new(battle_id, self.character_manager, self.services)
+        self.battle_manager = battle_manager.new(battle_id, self.game_data, self.character_manager, self.services)
     elseif node_definition is story_node.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
@@ -93,9 +95,8 @@ function Story:handle_new_node()
 end
 
 function Story:advance_node()
-    local story_definition = STORY_DATA[self.story_id]
     self.current_node.node_step = self.current_node.node_step + 1
-    self.current_node.definition = story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
+    self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
     self:handle_new_node()
 end
 
@@ -132,17 +133,25 @@ function Story:create_character(ctx: MenuContext)
     self:advance_node()
 end
 
-function story.new(story_id: story_types.StoryId, services: GameServiceBundle): Story 
-    assert(STORY_DATA[story_id] ~= nil)
+function story.new(
+    story_id: StoryId,
+    game_data: GameData,
+    services: GameServiceBundle
+): Story
+    assert(game_data.stories[story_id] ~= nil)
 
     local self: Story = setmetatable({}, { __index = Story })
     self.story_id = story_id
 
-    local story_definition = STORY_DATA[self.story_id]
+    self.story_definition = game_data.stories[self.story_id]
+    self.game_data = game_data
 
     self.services = services
 
-    self.character_manager = character_manager.new(self.services.event_bus)
+    self.character_manager = character_manager.new(
+        game_data,
+        self.services.event_bus
+    )
     
     self.story_page = story_page.story_page()
     self.menu_manager = story_menu_manager.new(
@@ -169,7 +178,7 @@ function story.new(story_id: story_types.StoryId, services: GameServiceBundle): 
         self:handle_battle_defeat( )
     end)
     
-    self:jump_to_node(story_definition.starting_node)
+    self:jump_to_node(self.story_definition.starting_node)
     
     return self
 end

@@ -69,55 +69,6 @@ local story_node = {
 	CharacterCustomizerNode = CharacterCustomizerNode,
 }
 
-function story_node.new_page(): NewPageNode
-	return {
-		type = 'new_page'
-	}
-end
-
-function story_node.story_text(text: string): StoryTextNode
-	return {
-		type = 'text',
-		text = text
-	}
-end
-
-function story_node.exit_story(): ExitStoryNode
-	return {
-		type = 'text',
-	}
-end
-
-function story_node.roster_add(template: string): RosterAddNode
-	return {
-		type = 'roster_add',
-		template = template
-	}
-end
-
-function story_node.battle(battle_id: string, next_node_victory: NodeId, next_node_failure: NodeId): BattleNode
-	return {
-		type = 'battle',
-		battle_id = battle_id,
-		next_node_victory = next_node_victory,
-		next_node_failure = next_node_failure,
-	}
-end
-
-function story_node.character_customizer(): CharacterCustomizerNode
-	return {
-		type = 'character_customizer',
-	}
-end
-
-function story_node.jump(next_node: NodeId): JumpNode
-	return {
-		type = 'jump',
-		next_node = next_node
-	}
-end
-
-
 local record StoryDefinition
 	nodes: { string: {StoryNode}}
 	starting_node: string

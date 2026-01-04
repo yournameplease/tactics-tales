@@ -7,12 +7,14 @@ local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local InputContext = require("src/tactics/input/input_context").InputContext
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local ModLoader = require("src/tactics/mods/mod_loader").ModLoader
 
 local story_types = require("src/tactics/story/types")
-local STORY_DATA = require("src/tactics/data/story")
 
 local record Game
 	menu_manager: game_menu_manager.GameMenuManager
+
+    mod_loader: ModLoader
        	
     story: story.Story
 
@@ -28,17 +30,25 @@ function Game:begin_story(ctx: MenuContext)
     if ctx.story ~= nil then
         story_id = ctx.story.id
     end
-    self.story = story.new(story_id, self.services)
+
+    local game_data = self.mod_loader:load_mod_data()
+    self.story = story.new(story_id, game_data, self.services)
 end
 
 function Game:exit_story()
     self.story:teardown()
 end
 
-function game.new(services: GameServiceBundle): Game 
+function game.new(
+    services: GameServiceBundle,
+    mod_loader: ModLoader
+): Game 
+
+    mod_loader:register_mod("base")
+    local game_data = mod_loader:load_mod_data()
 
     local story_ids: {story_types.StoryId} = {}
-    for id,_ in pairs(STORY_DATA) do
+    for id,_ in pairs(game_data.stories) do
         pt.add(story_ids, id)
     end
     

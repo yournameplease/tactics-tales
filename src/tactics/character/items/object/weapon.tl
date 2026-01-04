@@ -1,7 +1,6 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 
-
 local enum WeaponType
     "MELEE"
     "RANGED"
@@ -13,7 +12,6 @@ local enum WeaponBodyType
     "FRONT_HAND" -- bows, rapiers,
     "HORIZONTAL" -- heavy weapons
 end
-
 
 local enum WeaponEffectType
     "long_reach"
@@ -30,32 +28,14 @@ local record LongReachEffect
     where self.type == "long_reach"
 end
 
-function LongReachEffect.of(): LongReachEffect
-    return {
-        type = "long_reach"
-    }
-end
-
 local record ShieldsplitterEffect
     is WeaponEffect
     where self.type == "shieldsplitter"
 end
 
-function ShieldsplitterEffect.of(): ShieldsplitterEffect
-    return {
-        type = "shieldsplitter"
-    }
-end
-
 local record ArmorkillerEffect
     is WeaponEffect
     where self.type == "armorkiller"
-end
-
-function ArmorkillerEffect.of(): ArmorkillerEffect
-    return {
-        type = "armorkiller"
-    }
 end
 
 local record Weapon
@@ -98,17 +78,6 @@ local record IncreaseDefenseEffect
     defense_type: DefenseType
 end
 
-function IncreaseDefenseEffect.of(
-    amount: integer,
-    defense_type: DefenseType
-): IncreaseDefenseEffect
-    return {
-        type = "increase_defense",
-        amount = amount,
-        defense_type = defense_type
-    }
-end
-
 local enum AvoidType
     "ARMOR"
     "SHIELD"
@@ -122,17 +91,6 @@ local record IncreaseAvoidEffect
     
     amount: integer
     avoid_type: AvoidType
-end
-
-function IncreaseAvoidEffect.of(
-    amount: integer,
-    avoid_type: AvoidType
-): IncreaseAvoidEffect
-    return {
-        type = "increase_avoid",
-        amount = amount,
-        avoid_type = avoid_type
-    }
 end
 
 local weapon = {

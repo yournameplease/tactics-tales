@@ -8,6 +8,7 @@ local tasks = require("src/tactics/systems/tasks")
 local event_bus = require("src/tactics/systems/event_bus")
 local animation = require("src/tactics/animation")
 local ui_mgr = require("src/tactics/ui/ui_manager")
+local mod_ldr = require("src/tactics/mods/mod_loader")
 local game = require("src/tactics/game/game")
 local ui_context_manager = require("src/tactics/ui/ui_context_manager")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
@@ -25,6 +26,7 @@ local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
 local game_manager: game.Game
+local mod_loader: mod_ldr.ModLoader
 
 function _init()
     input = input_service.new()
@@ -43,8 +45,10 @@ function _init()
         ui_context = ui_context,
         input_service = input,
     }
+
+    local mod_loader = mod_ldr.new()
     
-    game_manager = game.new(game_services)
+    game_manager = game.new(game_services, mod_loader)
 end
 
 function _update()

@@ -2,8 +2,6 @@ require("src/tactics/debug")
 
 local InputContext = require("src/tactics/input/input_context").InputContext
 
-require("src/tactics/data/battles")
-
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
@@ -15,12 +13,11 @@ local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_menu_context")
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local GameData = require("src/tactics/game_data").GameData
 local script_manager = require("src/tactics/battle/scripts/script_manager")
 
 local record BattleManager
 
-    battle_id: string
-	
     battle_map: BattleMap
 
     tactics_engine: tactics_engine.TacticsEngine
@@ -39,18 +36,20 @@ local battle_manager = {
     BattleManager = BattleManager
 }
 
-function battle_manager.new(battle_id: string, char_man: character_manager.CharacterManager, services: GameServiceBundle): BattleManager 
-    assert(BATTLE_DATA[battle_id] ~= nil)
-
+function battle_manager.new(
+    battle_id: string,
+    game_data: GameData,
+    char_man: character_manager.CharacterManager,
+    services: GameServiceBundle
+): BattleManager 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
     self.services = services
 
-    self.battle_id = battle_id
     self.character_manager = char_man
 
-    local battle_def = BATTLE_DATA[self.battle_id]
-
-    self.battle_map = map_generator.load_map(battle_def.map_id, battle_def.tile_labels)
+    local battle_def = game_data.battles[battle_id]
+    local map_def = game_data.maps[battle_def.map_id]
+    self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
 
     self.tactics_engine = tactics_engine.new(
         self.battle_map,

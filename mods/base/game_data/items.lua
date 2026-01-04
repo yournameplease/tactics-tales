@@ -1,14 +1,45 @@
-local point = require("src/tactics/util/point")
-local item_types = require("src/tactics/character/items/types")
-require("src/tactics/character/items/object/weapon")
-local item_definition = require("src/tactics/types/item_definition")
-local wpn = require("src/tactics/character/items/object/weapon")
-local effect = wpn.effect
 
--- potential additions
--- shields
--- dual wielding (use front hand sprite)
+local effect = {}
 
+function effect.long_reach()
+    return {
+        type = "long_reach"
+    }
+end
+
+function effect.shieldsplitter()
+    return {
+        type = "shieldsplitter"
+    }
+end
+
+function effect.armorkiller()
+    return {
+        type = "armorkiller"
+    }
+end
+
+function effect.increase_defense(
+    amount,
+    defense_type
+): IncreaseDefenseEffect
+    return {
+        type = "increase_defense",
+        amount = amount,
+        defense_type = defense_type
+    }
+end
+
+function IncreaseDefenseEffect.of(
+    amount,
+    defense_type
+): IncreaseDefenseEffect
+    return {
+        type = "increase_defense",
+        amount = amount,
+        defense_type = defense_type
+    }
+end
 
 local function shield(name: string, sprite_id: integer, slots: integer, defense: integer, avoid: integer): item_definition.ItemDefinition
     return {
