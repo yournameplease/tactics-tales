@@ -4,6 +4,7 @@ global unexpected: function(state: string)
 -- nice utility types
 global type Angle = number
 global type Color = integer
+global type Path = string
 
 --- @class __MenuItem
 --- @field id? integer Unique identifier, used to sort items (otherwise order added is used)

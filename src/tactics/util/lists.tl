@@ -22,23 +22,6 @@ function lists.merge<Value>(...: {Value}): {Value}
 	return out
 end
 
-function lists.do_pipeline<A,B>(list: {A}, ...: function(any): any): B
-	local fns = {...}
-	local result: any = list 
-	for _,fn in ipairs(fns) do
-		result = fn(result)
-	end
-	return result as B
-end
-
--- This doesn't seem to work with typing rules
--- function lists.pipeline<A,B>(...: function(any): any): function({A}): B
--- 	local args = {...}
--- 	return function(list: {A}): B
--- 		return lists.do_pipeline(list, table.unpack(args))
--- 	end
--- end
-
 function lists.do_reverse<A>(list: {A}): {A} 
     local out = {}
     for i = 1,#list do
