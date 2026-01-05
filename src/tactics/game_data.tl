@@ -6,10 +6,15 @@ local StoryDefinition = story.StoryDefinition
 local CharacterTemplate = require("src/tactics/character/definition").CharacterTemplate
 local ItemDefinition = require("src/tactics/types/item_definition").ItemDefinition
 
+local record StoryData
+	data: { StoryId: StoryDefinition }
+	story_select: { StoryId } 
+end
+
 local record GameData
 	maps: { string: MapDefinition }
 	battles: { string: BattleDefinition }
-	stories: { StoryId: StoryDefinition }
+	stories: StoryData
 	characters: { string: CharacterTemplate }
 	items: { string: ItemDefinition }
 end

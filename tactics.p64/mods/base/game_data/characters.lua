@@ -201,8 +201,7 @@ local UNIT_TEMPLATES = {
         parent_template = "bandit_base",
 			hp_max = 4,
         item_loadout = {
-			 "axe" ,
-			"shield"
+			 "axe" 
 		}
     },
     bandit_guard = {
@@ -251,7 +250,7 @@ local UNIT_TEMPLATES = {
 		parent_template = "militia_base",
         hp_max = 5,
         item_loadout = {
-			"spear" ,
+			"sword" ,
 			"shield" 
 		}
 	}, 
