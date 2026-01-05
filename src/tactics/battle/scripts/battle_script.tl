@@ -1,5 +1,7 @@
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local battle_map = require("src/tactics/battle/battle_map")
+local unit_ai = require("src/tactics/battle/unit/unit_ai")
+local character = require("src/tactics/character/object/character")
 
 local enum ScriptTriggerType
 	"turn"
@@ -33,6 +35,7 @@ end
 
 local enum ScriptType
 	"spawn_units"
+	"modify_units"
 	"modify_terrain"
 end
 
@@ -48,6 +51,14 @@ local record SpawnUnits
     enemies: { unit_spawn_data.UnitSpawnData}
     neutral: { unit_spawn_data.UnitSpawnData}
     players: { unit_spawn_data.UnitSpawnData}
+end
+
+local record ModifyUnits
+	is BattleScript
+	where self.type == "modify_units"
+	unit_tag: string
+    new_side: character.Side
+    new_ai: unit_ai.UnitAI
 end
 
 local record ModifyTerrain
@@ -66,6 +77,7 @@ local battle_script = {
 	},
 	script = {
 		SpawnUnits = SpawnUnits,
+		ModifyUnits = ModifyUnits,
 		TerrainLocation = battle_map.TerrainLocation,
 		ModifyTerrain = ModifyTerrain
 	}

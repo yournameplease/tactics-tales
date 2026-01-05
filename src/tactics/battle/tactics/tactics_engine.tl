@@ -16,6 +16,7 @@ local tasks = require("src/tactics/systems/tasks")
 local animation = require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
+local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local Character = require("src/tactics/character/object/character").Character
 
 local character_manager = require("src/tactics/character/character_manager")
@@ -27,8 +28,13 @@ local MAP_HEIGHT = CONFIG.MAP_HEIGHT
 
 local TILE_SIZE = CONFIG.TILE_SIZE
 
-local record TacticsEngine
+local record NewUnitProperties
+    new_side: battle_unit.Side
+    new_ai: unit_ai.UnitAI
+end
 
+local record TacticsEngine
+    
     battle_is_blocked: boolean
     is_player_turn: boolean
 
@@ -39,17 +45,22 @@ local record TacticsEngine
     animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
 
-
+    -- queries
+    
+    is_blocked: function(self): boolean
+    tiles_with_distance_from_unit_attacks: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
+    tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    
+    -- mutations
     spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
-    is_blocked: function(self): boolean
-    tiles_with_distance_from_unit_attacks: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
-    find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
-    tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    modify_units: function(self, unit_tag: string, new_unit_properties: NewUnitProperties)
+    
     update: function(self)
 end
 
@@ -259,6 +270,19 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
         target.animation_data = self.animation_manager:create_idle_animation()
         self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
     end)
+end
+
+function TacticsEngine:modify_units(unit_tag: string, new_unit_properties: NewUnitProperties)
+    local units = self.battle_map:get_units(battle_unit.has_tag(unit_tag))
+
+    for _,u in ipairs(units) do
+        if new_unit_properties.new_ai ~= nil then
+            u.unit_ai = new_unit_properties.new_ai
+        end
+        if new_unit_properties.new_side ~= nil then
+            u.side = new_unit_properties.new_side
+        end
+    end
 end
 
 -- Combat

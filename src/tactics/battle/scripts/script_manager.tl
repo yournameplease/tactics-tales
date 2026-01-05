@@ -65,7 +65,7 @@ function ScriptManagerImpl:register_script(
 			return defender.labels[trigger.unit_label]
 		end
 	else
-		error()
+		unexpected(script.trigger.type)
 	end
 	
 	local effect: function
@@ -80,6 +80,17 @@ function ScriptManagerImpl:register_script(
 				script.animation
 		    )
 		end
+	elseif script is battle_script.script.ModifyUnits then
+		effect = function()
+			LOG.debug("Handling ModifyUnits event")
+			self.tactics_engine:modify_units(
+				script.unit_tag,
+				{
+					new_side = script.new_side,
+					new_ai = script.new_ai,
+				}
+			)
+		end
 	elseif script is battle_script.script.ModifyTerrain then
 		effect = function()
 			LOG.debug("Handling ModifyTerrain event")
@@ -89,7 +100,7 @@ function ScriptManagerImpl:register_script(
 			)
 		end
 	else
-		error()
+		unexpected(script.type)
 	end
 
 	self.event_listener:on(

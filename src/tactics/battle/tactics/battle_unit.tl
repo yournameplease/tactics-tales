@@ -33,6 +33,10 @@ local battle_unit = {
     Side = character.Side,
 }
 
+function BattleUnit:has_tag(tag: string): boolean
+    return self.labels[tag]
+end
+
 function BattleUnit:is_player(): boolean
     return self.side == "player"
 end
@@ -61,6 +65,12 @@ function battle_unit.spawn_unit(permanent_unit: character.Character, tile: Point
     setmetatable(instance, { __index = BattleUnit })
 
     return instance
+end
+
+function battle_unit.has_tag(tag: string): function(BattleUnit): boolean
+    return function(unit: BattleUnit): boolean
+        return unit:has_tag(tag)
+    end
 end
 
 function BattleUnit:is_alive(): boolean
