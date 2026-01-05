@@ -138,7 +138,7 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
                     roster_count = roster_count + 1
                 end
             else
-                error()
+                unexpected(character_source.type)
             end
             if character ~= nil then
                 local unit = battle_unit.spawn_unit(character, spawn_point, labels, side, spawn_data.ai)
@@ -175,7 +175,7 @@ function TacticsEngine:spawn_all(
             elseif anim == "from_west" then
                 offset = unit.tile.x + 1
             else
-                error()
+                unexpected(anim)
             end
             if offset > max_offset then
                 max_offset = offset 
@@ -192,7 +192,7 @@ function TacticsEngine:spawn_all(
         elseif anim == "from_west" then
             offset_point = point.of(-max_offset,0)
         else
-            error()
+            unexpected(anim)
         end
 
         local path = { offset_point * TILE_SIZE, point.of(0,0) }

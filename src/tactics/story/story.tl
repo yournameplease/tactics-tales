@@ -90,7 +90,7 @@ function Story:handle_new_node()
     elseif node_definition is story_node.ExitStoryNode then
         self.services.event_bus:emit("GAME_EXIT_STORY", {})
     else
-        error()
+        unexpected(node_definition.type)
     end
 end
 

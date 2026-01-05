@@ -44,16 +44,6 @@ function ButtonAdvanceCursor:update_mouse(
 )
 end
 
-function ButtonAdvanceCursor:update(input: InputContext)
-    if input is input_context.JoypadContext then
-        self:update_joy(input.joypad)
-    elseif input is input_context.MouseContext then
-        self:update_mouse(input.mouse, input.hovered)
-    else
-        error()
-    end
-end
-
 function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): string, event_bus.GameEvent
     return self.next_state, self.send_command
 end

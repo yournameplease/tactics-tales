@@ -67,7 +67,7 @@ function _update()
         end
         input_ctx = input_context.mouse(user_input.mouse, hovered)
     else
-        error()
+        unexpected(user_input.active_method)
     end
     profile("game_update")
     game_manager:update(input_ctx)

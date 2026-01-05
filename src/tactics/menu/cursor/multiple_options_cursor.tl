@@ -154,16 +154,6 @@ function MultipleOptionsMenuCursor:update_mouse(
 )
 end
 
-function MultipleOptionsMenuCursor:update(input: InputContext)
-    if input is input_context.JoypadContext then
-        self:update_joy(input.joypad)
-    elseif input is input_context.MouseContext then
-        self:update_mouse(input.mouse, input.hovered)
-    else
-        error()
-    end
-end
-
 function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string, event_bus.GameEvent
     if self.primary_direction == "select" and self.i ~= #self.options then
         self.i = self.i + 1
