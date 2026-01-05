@@ -58,8 +58,8 @@ function stories.chapter_debug(
 	for k,u in ipairs(roster_units) do
 		add(intro_node, stories.roster_add(u))
 	end
-	add(intro_node, stories.story_text("text"))
-	add(intro_node, stories.battle('bandit_village', 'victory', 'defeat'))
+	add(intro_node, stories.story_text(text))
+	add(intro_node, stories.battle(battle_id, 'victory', 'defeat'))
 
 	return {
 		starting_node = 'intro',
@@ -88,7 +88,7 @@ local STORIES = {
 	cultist_cave = stories.chapter_debug(
 		{
 			"village_hero",
-			"militia_leader",
+			"militia_spear_captain",
 			"militia_spearman",
 			"militia_armor",
 			"militia_archer",
@@ -101,7 +101,7 @@ local STORIES = {
 	fortress_town = stories.chapter_debug(
 		{
 			"village_hero",
-			"militia_leader",
+			"militia_spear_captain",
 			"militia_spearman",
 			"militia_armor",
 			"militia_archer",

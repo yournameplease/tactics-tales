@@ -42,7 +42,7 @@ function ScriptManagerImpl:register_script(
 		elseif trigger.phase == "after_enemy" then
 			event = "TACTICS_END_ENEMY_TURN"
 		else
-			error()	
+			unexpected(trigger.phase)	
 		end
 
 		if trigger.repeating == nil then

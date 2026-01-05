@@ -211,8 +211,8 @@ end
 
 local function modify_units(
     turn,
-    unit_tag,
     phase,
+    unit_tag,
     new_ai,
     new_side
 )
@@ -421,20 +421,20 @@ local BATTLE_DATA = {
             objectives.turn_limit(10),
         },
         enemies = {
-            { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
+            { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
             { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_guard" }
         },
         neutral = {
             -- civilians
             { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("civilian_sword"), ai = ai.stationary, tile = "child_sword", tags = {"civilian"} },
-            { character_source = character_source.template("civilian_axe"), ai = ai.stationary, tile = "village_axe", tags = {"civilian"} },
+            { character_source = character_source.template("child_greatsword"), ai = ai.stationary, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("village_axe"), ai = ai.stationary, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
             { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationairy"}},
-            { character_source = character_source.template("militia_bow"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
+            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
             { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_boss"), ai = ai.stationary_neutral, tile = "militia_sword_captain", tags = {"enemy_militia_stationairy"}}
+            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationairy"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
             -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
@@ -461,12 +461,14 @@ local BATTLE_DATA = {
             ),
             modify_units(
                 4,
+                "after_enemy",
                 "enemy_militia_stationary",
                 ai.move_zero,
                 "enemy"
             ),
             modify_units(
                 4,
+                "after_enemy",
                 "enemy_militia_mobile",
                 ai.move_inf,
                 "enemy"
