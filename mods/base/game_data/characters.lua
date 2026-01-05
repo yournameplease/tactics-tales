@@ -251,7 +251,7 @@ local UNIT_TEMPLATES = {
 		parent_template = "militia_base",
         hp_max = 5,
         item_loadout = {
-			"spear" ,
+			"sword" ,
 			"shield" 
 		}
 	}, 
