@@ -143,7 +143,7 @@ function BaseMenuManager:update(input: InputContext)
         btn_select = input.mouse.mlp
         btn_back = input.mouse.mrp
     else
-        error()
+        unexpected(input.type)
     end
 
     if btn_skip_turn then

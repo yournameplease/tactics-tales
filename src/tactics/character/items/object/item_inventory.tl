@@ -155,7 +155,7 @@ function ItemInventoryImpl:equip_item(index: integer)
 	elseif slot_to_equip == "BODY" then
 		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
 	else
-		error()
+		unexpected(slot_to_equip)
 	end
 	--unequip
 

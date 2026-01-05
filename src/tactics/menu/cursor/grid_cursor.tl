@@ -105,18 +105,6 @@ function GridMenuCursor:update_mouse(
     end
 end
 
-function GridMenuCursor:update(
-    input: InputContext
-)
-    if input is input_context.JoypadContext then
-        self:update_joy(input.joypad)
-    elseif input is input_context.MouseContext then
-        self:update_mouse(input.mouse, input.hovered)
-    else
-        error()
-    end
-end
-
 function GridMenuCursor:handle_select(
     game_ctx: GC,
     menu_ctx: MenuContext,

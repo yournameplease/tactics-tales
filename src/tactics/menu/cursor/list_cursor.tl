@@ -108,7 +108,7 @@ function ListMenuCursor:update_joy(joy: Joypad)
     elseif self.direction == "horizontal" then
         new_i = new_i + joy.dxp
     else
-        error()
+        unexpected(self.direction)
     end
 
     if new_i ~= self.i then
@@ -130,16 +130,6 @@ function ListMenuCursor:update_mouse(
         if hovered.i > 0 and hovered.i <= #self.options then
             self.i = hovered.i
         end
-    end
-end
-
-function ListMenuCursor:update(input: InputContext)
-    if input is input_context.JoypadContext then
-        self:update_joy(input.joypad)
-    elseif input is input_context.MouseContext then
-        self:update_mouse(input.mouse, input.hovered)
-    else
-        error()
     end
 end
 

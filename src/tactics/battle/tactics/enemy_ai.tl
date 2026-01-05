@@ -54,7 +54,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     elseif ai.move == "infinity" then
         max_move = 999
     else
-        error()
+        unexpected(ai.move)
     end
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 

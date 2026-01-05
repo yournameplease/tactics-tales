@@ -51,7 +51,7 @@ function input_context.handle_update(
     elseif ctx is input_context.MouseContext then
         update_mouse(ctx.mouse, ctx.hovered)
     else
-        error()
+        error(ctx.type)
     end
 end
 

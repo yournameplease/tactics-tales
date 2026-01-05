@@ -84,7 +84,7 @@ local function build_attack_double(weapon: wpn.Weapon): AttackDouble
             double.ignored_defenses["ARMOR"] = true 
             double.ignored_avoids["ARMOR"] = true 
         else
-            error()
+            unexpected(eff.type)
         end
     end
     
@@ -117,7 +117,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
             elseif eff is effect.IncreaseAvoidEffect then
                 double.avoid[eff.avoid_type] = (double.avoid[eff.avoid_type] or 0) + eff.amount  
             else
-                error()
+                unexpected(eff.type)
             end
         end
     end

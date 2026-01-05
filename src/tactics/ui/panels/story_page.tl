@@ -79,7 +79,7 @@ function StoryPagePanel:compute_children(state: UIContextManager)
                     return n.character
                 end, nil))
             else
-                error()
+                unexpected(n.type)
             end
             pt.add(self.children, child as box.Box)
         end
