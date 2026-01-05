@@ -9,6 +9,7 @@ end
 local MAP_DEFINITIONS = {
     bandit_village = static_map("map/bandit_village_2.map"),
     cultist_cave = static_map("map/cultist_cave.map"),
+    fortress_town = static_map("map/fortress_town.map"),
 }
 
 return MAP_DEFINITIONS

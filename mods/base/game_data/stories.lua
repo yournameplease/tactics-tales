@@ -147,4 +147,12 @@ local STORIES = {
 }
 
 
-return STORIES
+return {
+	data = STORIES,
+	story_select = {
+		"test_story",
+		"bandit_village",
+		"cultist_cave",
+		"fortress_town"
+	}
+}

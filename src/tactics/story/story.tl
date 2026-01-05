@@ -138,12 +138,12 @@ function story.new(
     game_data: GameData,
     services: GameServiceBundle
 ): Story
-    assert(game_data.stories[story_id] ~= nil)
+    assert(game_data.stories.data[story_id] ~= nil)
 
     local self: Story = setmetatable({}, { __index = Story })
     self.story_id = story_id
 
-    self.story_definition = game_data.stories[self.story_id]
+    self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
 
     self.services = services

@@ -423,7 +423,7 @@ local BATTLE_DATA = {
         enemies = {
             { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
-            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_guard" }
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_axe" }
         },
         neutral = {
             -- civilians

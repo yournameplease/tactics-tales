@@ -47,10 +47,7 @@ function game.new(
     mod_loader:register_mod("base")
     local game_data = mod_loader:load_mod_data()
 
-    local story_ids: {story_types.StoryId} = {}
-    for id,_ in pairs(game_data.stories) do
-        pt.add(story_ids, id)
-    end
+    local story_ids = game_data.stories.story_select
     
     local self: Game = setmetatable({}, { __index = Game })
     self.mod_loader = mod_loader

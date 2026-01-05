@@ -58,4 +58,16 @@ function fp.pipeline_4<In,T1,T2,T3,Out>(
 	end
 end
 
+function fp.pipeline_5<In,T1,T2,T3,T4,Out>(
+    fn_1: function(In): T1,
+    fn_2: function(T1): T2,
+    fn_3: function(T2): T3,
+    fn_4: function(T3): T4,
+    fn_5: function(T4): Out
+): function(In): Out
+	return function(val: In): Out
+		return do_pipeline(val, fn_1, fn_2, fn_3, fn_4, fn_5)
+	end
+end
+
 return fp
