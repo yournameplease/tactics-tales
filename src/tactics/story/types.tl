@@ -9,6 +9,7 @@ local enum StoryNodeType
 	'jump'
 	'new_page'
 	'character_customizer'
+	'exit_story'
 end
 
 local interface StoryNode
@@ -28,7 +29,7 @@ end
 
 local record ExitStoryNode
 	is StoryNode
-	where self.type == 'text'
+	where self.type == 'exit_story'
 end
 
 local record RosterAddNode
