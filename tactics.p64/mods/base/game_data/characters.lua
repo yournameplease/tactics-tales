@@ -151,6 +151,18 @@ local UNIT_TEMPLATES = {
 			 "bow" 
 		}
 	},
+	child_greatsword = {
+		parent_template = "child_base",
+		item_loadout = {
+			"greatsword"
+		}
+	},
+	village_axe = {
+		parent_template = "human_base",
+		item_loadout = {
+			"axe"
+		}
+	},
 	bandit_base = {
 		parent_template = "human_base",
 		gender_options = options.weighted{
@@ -185,9 +197,17 @@ local UNIT_TEMPLATES = {
 			 "club" 
 		}
     },
+    bandit_axe = {
+        parent_template = "bandit_base",
+			hp_max = 4,
+        item_loadout = {
+			 "axe" ,
+			"shield"
+		}
+    },
     bandit_guard = {
         parent_template = "bandit_base",
-		hp_max = 4,
+			hp_max = 4,
         item_loadout = {
 			 "axe" ,
 			"shield"
@@ -219,7 +239,15 @@ local UNIT_TEMPLATES = {
 			["hood"] = 1
 		}
 	},
-	militia_captain = {
+	militia_spear_captain = {
+		parent_template = "militia_base",
+        hp_max = 5,
+        item_loadout = {
+			"spear" ,
+			"shield" 
+		}
+	}, 
+	militia_sword_captain = {
 		parent_template = "militia_base",
         hp_max = 5,
         item_loadout = {
@@ -231,6 +259,12 @@ local UNIT_TEMPLATES = {
 		parent_template = "militia_base",
         item_loadout = {
 			 "spear" 
+		}
+	}, 
+	militia_sword = {
+		parent_template = "militia_base",
+    item_loadout = {
+			 "sword" 
 		}
 	}, 
 	militia_armor = {
@@ -293,6 +327,16 @@ local UNIT_TEMPLATES = {
         hp_max = 2,
         item_loadout = {
 		},
+	},
+	civilian = {
+		parent_template = "human_base",
+        hp_max = 3,
+        body_options = options.list{
+        	"default",
+        	"robed",
+        	"child"
+        },
+        item_loadout = {},
 	},
 }
 

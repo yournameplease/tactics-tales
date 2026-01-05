@@ -3,7 +3,9 @@ local ai <const> = {
     move_one = { move = "one", target = "player"},
     move_two = { move = "two", target = "player"},
     move_inf = { move = "infinity", target = "player"},
-    stationary = { move = "zero", target = "player"}
+    stationary = { move = "zero", target = "player"},
+    stationary_allied = { move = "zero", target = "enemy"},
+    stationary_neutral = { move = "zero", target = nil }
 }
 
 local character_source = {}
@@ -121,6 +123,37 @@ function scripts.script.spawn_units(
 	}
 end
 
+function scripts.script.modify_units(
+	trigger,
+	unit_tag,
+	new_ai,
+	new_side
+)
+	return {
+		type = "modify_units",
+		trigger = trigger,
+		unit_tag = unit_tag,
+		new_ai = new_ai,
+		new_side = new_side,
+	}
+end
+
+function scripts.script.change_side(
+    trigger,
+    unit_tag,
+    new_side
+)
+    return scripts.script.modify_units(trigger, unit_tag, nil, new_side)
+end
+
+function scripts.script.change_ai(
+    trigger,
+    unit_tag,
+    new_ai
+)
+    return scripts.script.modify_units(trigger, unit_tag, new_ai, nil)
+end
+
 function scripts.script.modify_terrain(
 	trigger,
 	tile_label,
@@ -173,6 +206,21 @@ local function spawn_enemies(
         {},
         enemies,
         animation
+    )
+end
+
+local function modify_units(
+    turn,
+    unit_tag,
+    phase,
+    new_ai,
+    new_side
+)
+    return scripts.script.modify_units(
+        scripts.trigger.turn(turn, nil, phase),
+        unit_tag,
+        new_ai,
+        new_side
     )
 end
 
@@ -238,7 +286,7 @@ local BATTLE_DATA = {
         },
         scripts = {
             spawn_players({
-                { character_source = character_source.template("militia_captain"), tile = "player_captain" },
+                { character_source = character_source.template("militia_spear_captain"), tile = "player_captain" },
                 { character_source = character_source.template("militia_spearman"), tile = "player_spearman" },
                 { character_source = character_source.template("militia_archer"), tile = "player_archer" },
                 { character_source = character_source.template("militia_armor"), tile = "player_armor" },
@@ -344,6 +392,85 @@ local BATTLE_DATA = {
             open_door_front("cultist_door_guard_c","door_c"),
             open_door_front("cultist_door_guard_d","door_d"),
             open_door_front("cultist_door_guard_e","door_e"),
+        }
+    },
+    ["fortress_town"] = {
+        map_id = "fortress_town",
+        tile_labels = {
+            ["player_deployment"] = { 0x00, 0x01 },
+            ["bandit_goon"] = { 0x10 },
+            ["bandit_axe"] = { 0x11, 0x13 },
+            ["bandit_boss"] = { 0x18 },
+            ["bandit_reinforce_w"] = { 0x11 },
+            ["bandit_reinforce_sw"] = { 0x01 },
+            ["civilian_sword"] = { 0x20 },
+            ["civilian_axe"] = { 0x21 },
+            ["civilian_noncombatant"] = { 0x22 },
+            ["barricade"] = { 0x30 },
+            ["militia_armor"] = { 0x2A },
+            ["militia_bow"] = { 0x2B },
+            ["militia_sword"] = { 0x2C },
+            ["militia_boss"] = { 0x2D },
+            ["monarch"] = { 0x29 },
+            ["counselor"] = { 0x29 }
+        },
+        victory_conditions = {
+            objectives.defeat_tagged("boss"),
+        },
+        failure_conditions = {
+            objectives.turn_limit(10),
+        },
+        enemies = {
+            { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
+            { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_guard" }
+        },
+        neutral = {
+            -- civilians
+            { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
+            { character_source = character_source.template("civilian_sword"), ai = ai.stationary, tile = "child_sword", tags = {"civilian"} },
+            { character_source = character_source.template("civilian_axe"), ai = ai.stationary, tile = "village_axe", tags = {"civilian"} },
+            -- militia who turn enemy
+            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationairy"}},
+            { character_source = character_source.template("militia_bow"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
+            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie"}},
+            { character_source = character_source.template("militia_boss"), ai = ai.stationary_neutral, tile = "militia_sword_captain", tags = {"enemy_militia_stationairy"}}
+            -- story units
+            -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
+            -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
+        },
+        players = {
+            { character_source = character_source.player_roster(), tile = "player_deployment" },
+        },
+        scripts = {
+            spawn_enemies({
+                { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
+            },
+                6,
+                3,
+                "after_enemy",
+                "from_west"
+            ),
+            spawn_enemies({
+                { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
+            },
+                3,
+                3,
+                "after_enemy",
+                "from_west"
+            ),
+            modify_units(
+                4,
+                "enemy_militia_stationary",
+                ai.move_zero,
+                "enemy"
+            ),
+            modify_units(
+                4,
+                "enemy_militia_mobile",
+                ai.move_inf,
+                "enemy"
+            ),
         }
     }
 }

@@ -49,48 +49,68 @@ function stories.jump(next_node)
 	}
 end
 
-local STORIES = {
-	bandit_village = {
-		starting_node = 'intro',
-		nodes = {
-			intro = {
-				stories.roster_add("village_hero"),
-				stories.story_text("A young hero finds their village under attack by bandits!"),
-				stories.battle('bandit_village', 'victory', 'defeat'),
-			},
-			victory = {
-				stories.story_text("You Win!"),
-				stories.exit_story(),
-			},
-			defeat = {
-				stories.story_text("You Lose..."),
-				stories.exit_story(),
-			},
-		}	
-	},
-	cultist_cave = {
-		starting_node = 'intro',
-		nodes = {
-			intro = {
-				stories.roster_add("village_hero"),
-				stories.roster_add("militia_leader"),
-				stories.roster_add("militia_spearman"),
-				stories.roster_add("militia_armor"),
-				stories.roster_add("militia_archer"),
-				stories.story_text("The heros find a cave where cultists keep prisoners for sacrifice."),
-				stories.battle('cultist_cave', 'victory', 'defeat'),
-			},
-			victory = {
-				stories.story_text("You Win!"),
-				stories.exit_story(),
+function stories.chapter_debug(
+	roster_units,
+	text,
+	battle_id
+)
+	local intro_node = {}
+	for k,u in ipairs(roster_units) do
+		add(intro_node, stories.roster_add(u))
+	end
+	add(intro_node, stories.story_text("text"))
+	add(intro_node, stories.battle('bandit_village', 'victory', 'defeat'))
 
+	return {
+		starting_node = 'intro',
+		nodes = {
+			intro = intro_node,
+			victory = {
+				stories.story_text("You Win!"),
+				stories.exit_story(),
 			},
 			defeat = {
 				stories.story_text("You Lose..."),
 				stories.exit_story(),
 			},
 		}	
-	},
+	}
+end
+
+local STORIES = {
+	bandit_village = stories.chapter_debug(
+		{
+			"village_hero"
+		},
+		"A young hero finds their village under attack by bandits!",
+		"bandit_village"
+	),
+	cultist_cave = stories.chapter_debug(
+		{
+			"village_hero",
+			"militia_leader",
+			"militia_spearman",
+			"militia_armor",
+			"militia_archer",
+			"child_axe",
+			"child_bow"
+		},
+		"The heros find a cave where cultists keep prisoners for sacrifice.",
+		"cultist_cave"
+	),
+	fortress_town = stories.chapter_debug(
+		{
+			"village_hero",
+			"militia_leader",
+			"militia_spearman",
+			"militia_armor",
+			"militia_archer",
+			"child_axe",
+			"child_bow"
+		},
+		"Corrupt local militia have allied with bandits!",
+		"fortress_town"
+	),
 	test_story = {
 		starting_node = 'part_1',
 		nodes = {
