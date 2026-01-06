@@ -447,22 +447,8 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): arr
     return tiles
 end
 
+-- this probably is no longer needed?
 function TacticsEngine:update()
-    local all_players_acted = true
-
-    local is_player = function(u: BattleUnit): boolean
-        return u:is_player()
-    end
-
-    for _,unit in ipairs(self.battle_map:get_units(is_player)) do
-        if not unit.has_acted then
-            all_players_acted = false
-        end
-    end
-
-    if self.is_player_turn and all_players_acted then
-        self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
-    end
 end
 
 return tactics_engine

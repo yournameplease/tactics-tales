@@ -1,5 +1,6 @@
 require("src/tactics/debug")
 
+local fp = require("src/tactics/util/fp")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local point = require("src/tactics/util/point")
@@ -121,22 +122,29 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         LOG.info(unit.id .. " will move to "..current_point.x..","..current_point.y)
         self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
     else
-        LOG.warn("WARN: No valid moves for "..unit.id.. "!")
+        LOG.info(unit.id.." will not act.")
+        local action_ctx = {
+            acting_unit = { unit = unit },
+            destination = { point = unit.tile, path = {} }
+        }
+        self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
     end
 end
 
-function EnemyAIEngine:handle_enemy_turn()
+function EnemyAIEngine:handle_one_enemy_action()
     self.task_manager:start_routine(function()
-        local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_enemy() end)
+        local to_act = function(u: BattleUnit): boolean
+            return not u.has_acted
+        end
+        local enemies_to_act = self.battle_map
+            :get_units(fp.fn_and(BattleUnit.is_enemy, to_act))
+        assert(#enemies_to_act > 0)
 
-        for _,enemy in ipairs(enemies) do
-            self:compute_enemy_ai(enemy)
-            while self.tactics_engine:is_blocked() do
-                pt.yield()
-            end
+        self:compute_enemy_ai(enemies_to_act[1])
+        while self.tactics_engine:is_blocked() do
+            pt.yield()
         end
 
-        self.event_writer:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
     end)
 end
 

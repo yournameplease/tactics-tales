@@ -9,8 +9,6 @@ local InputContext = require("src/tactics/input/input_context").InputContext
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local ModLoader = require("src/tactics/mods/mod_loader").ModLoader
 
-local story_types = require("src/tactics/story/types")
-
 local record Game
 	menu_manager: game_menu_manager.GameMenuManager
 

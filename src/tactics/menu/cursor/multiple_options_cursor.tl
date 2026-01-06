@@ -7,8 +7,6 @@ local input_service = require("src/tactics/joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
-local input_context = require("src/tactics/input/input_context")
-local InputContext = input_context.InputContext
 
 local record MenuMultipleOptionCursor<GC>
     text: string -- label
