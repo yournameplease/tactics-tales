@@ -278,8 +278,8 @@ local BATTLE_DATA = {
             { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
             { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l" },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r" },
+            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
+            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
         },
         players = {
             { character_source = character_source.player_roster(), tile = "player_deployment" },
@@ -314,12 +314,12 @@ local BATTLE_DATA = {
             open_door_mid("bandit_miniboss_gate","bandit_miniboss_gate"),
             free_players(
                 {{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }},
-                "bandit_miniboss_l",
+                "spawn_child_bow",
                 nil
             ),
             free_players(
                 {{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }},
-                "bandit_miniboss_r",
+                "spawn_child_bow",
                 nil
             ),
         }
