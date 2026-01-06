@@ -524,17 +524,26 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
     for _,child in ipairs(elem.children) do
         local c_w = child.calculated_w or child.w
         local c_h = child.calculated_h or child.h
-        if child.x <= mx and mx < child.x + c_w
-            and child.y <= my and my < child.y + c_h
+
+        local c_l = child.x-child.internal_margin.l
+        local c_r = child.x+c_w+child.internal_margin.r
+        local c_t = child.y-child.internal_margin.t
+        local c_b = child.y+c_h+child.internal_margin.b
+        
+        if c_l <= mx and mx < c_r
+            and c_t <= my and my < c_b
         then
-            local child_selection = box.find_topmost_selection(child, mx-child.x, my-child.y)
+            LOG.trace("checking child box for selection", child.x, child.y, c_l, c_r, c_t, c_b)
+            local child_selection = box.find_topmost_selection(child, mx, my)
             if child_selection ~= nil then
+                LOG.trace("returning hovered selection", child_selection.type)
                 return child_selection
             end
         end
     end
     if elem.get_selection_at ~= nil then
-        return elem:get_selection_at(mx, my)
+        LOG.trace("checking box for selection", elem.x, elem.y)
+        return elem:get_selection_at(mx - elem.x, my - elem.y)
     end
     return nil
 end

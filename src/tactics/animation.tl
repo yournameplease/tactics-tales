@@ -364,7 +364,6 @@ function AnimationManager:get_frame_data(anim: AnimationInstance): AnimationFram
 end
 
 function AnimationManager:generate_frame_data()
-    LOG.trace("Rendering "..#self.active_animations.." animations")
     for _, anim in ipairs(self.active_animations) do
         anim.animated_object.current_frame = self:get_frame_data(anim)
         anim.animated_object.playing = anim.playing

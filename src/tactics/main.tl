@@ -55,7 +55,6 @@ function _update()
     profile("animation_tick")
     animation_manager:tick()
     profile("animation_tick")
-    LOG.trace("Getting Joypad.")
     user_input = input:get_user_input()
     local input_ctx: input_context.InputContext = nil
     if user_input.active_method == "joypad" then
