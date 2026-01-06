@@ -5,8 +5,6 @@ local input_service = require("src/tactics/joypad")
 local event_bus = require("src/tactics/systems/event_bus")
 local Joypad = require("src/tactics/joypad").Joypad
 local Mouse = input_service.Mouse
-local input_context = require("src/tactics/input/input_context")
-local InputContext = input_context.InputContext
 local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
 local record ButtonAdvanceCursor<GC>

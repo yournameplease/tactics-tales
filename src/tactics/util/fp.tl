@@ -1,5 +1,18 @@
 local fp = {}
 
+function fp.fn_and<Arg>(...: function(Arg): boolean): function(Arg): boolean
+	local fns = {...}
+
+	return function(a: Arg): boolean
+		for _,fn in ipairs(fns) do
+			if not fn(a) then
+				return false
+			end
+		end
+		return true
+	end
+end
+
 function fp.fn_true(): boolean
     return true
 end

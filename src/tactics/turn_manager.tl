@@ -1,5 +1,6 @@
 require("src/tactics/debug")
 
+local fp = require("src/tactics/util/fp")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
@@ -9,6 +10,8 @@ local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").Batt
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
+local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local BattleUnit = battle_unit.BattleUnit
 
 local enum Phase
     "PLAYER"
@@ -39,6 +42,20 @@ local record TurnManagerImpl
     event_writer: event_writer.EventWriter
 end
 
+---@return boolean true if battle is finished
+function TurnManagerImpl:check_objectives(): boolean
+    local battle_result = self.battle_objective_service:check_objectives(self.turn)
+
+    if not battle_result.finished then
+        LOG.debug("Battle still ongoing")
+        return false
+    else
+        LOG.debug("Battle finished!")
+        self.event_writer:emit(battle_result.command, {})
+        return true
+    end
+end
+
 function turn_manager.new(
     map: BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
@@ -67,13 +84,6 @@ function turn_manager.new(
         self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
             turn = self.turn
         })
-    end)
-
-    self.event_listener:on("TACTICS_UNIT_END_ACTION", function(_: event_bus.EventArgs)
-        if self.phase == "PLAYER" then
-            LOG.debug("Setting to player turn menu")
-            self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-        end        
     end)
 
     self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
@@ -110,14 +120,40 @@ function turn_manager.new(
 
         self.turn = self.turn + 1
 
-        local battle_result = self.battle_objective_service:check_objectives(self.turn)
-
-        if not battle_result.finished then
+        if not self:check_objectives() then
             self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
-            turn = self.turn
-        })
-        else
-            self.event_writer:emit(battle_result.command, {})
+                turn = self.turn
+            })
+        end
+    end)
+
+    self.event_listener:on("TACTICS_UNIT_END_ACTION", function()
+        local to_act = function(u: BattleUnit): boolean
+            return not u.has_acted
+        end
+        
+        if not self:check_objectives() then
+            if self.phase == "PLAYER" then
+                self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+                local players_to_act = self.battle_map
+                    :get_units(fp.fn_and(BattleUnit.is_player, to_act))
+                if #players_to_act > 0 then
+                    LOG.debug("Setting to player turn menu")
+                else
+                    LOG.debug("Finishing player action")
+                    self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
+                end
+            elseif self.phase == "ENEMY" then
+                local enemies_to_act = self.battle_map
+                    :get_units(fp.fn_and(BattleUnit.is_enemy, to_act))
+                if #enemies_to_act > 0 then
+                    LOG.debug("Enemy turn still ongoing, handling next enemy action.")
+                    self.enemy_ai_engine:handle_one_enemy_action()
+                else
+                    LOG.debug("Finishing enemy action")
+                    self.event_writer:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
+                end
+            end
         end
     end)
 
@@ -146,7 +182,7 @@ function turn_manager.new(
     end)
 
     self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
-        self.enemy_ai_engine:handle_enemy_turn()
+        self.enemy_ai_engine:handle_one_enemy_action()
     end)
 
     self.event_listener:on("TACTICS_FINISH_ENEMY_ACTIONS", function()
