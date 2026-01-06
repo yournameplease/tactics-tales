@@ -120,7 +120,6 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
-    -- LOG.trace(t, s)
     ud:set(t.x, t.y, BASE_TILE_SPRITE + s)
 end
 

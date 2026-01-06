@@ -36,6 +36,7 @@ local interface Text
     set_lines: function(self, lines: {string})
 
     get_wrapped_rows: function(self): integer
+    get_lines: function(self): {{string}}
     calculate_wrapping: function(self)
 
     draw: function(self, x: integer, y: integer, color: Color)
@@ -202,6 +203,17 @@ function TextImpl:get_wrapped_rows(): integer
         LOG.trace("wrapped lines", l.text, l.wrapped_lines)
         return #l.wrapped_lines
     end)(self.lines) as integer
+end
+
+function TextImpl:get_lines(): {{string}}
+    return lists.map(
+        function(l: TextLine): {string}
+            if l.wrapped_lines == nil then
+                l.wrapped_lines = self:apply_text_wrapping(l.text, self.width)
+            end
+            return l.wrapped_lines
+        end
+    )(self.lines)
 end
 
 function TextImpl:draw_text_row(row: string, x: integer, y: integer, color: Color)

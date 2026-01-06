@@ -24,7 +24,6 @@ function VerticalMultiSelectMenu.new(
         local out = {}
 		local cursor: multiple_options_cursor.MultipleOptionsMenuCursor<T> = menu_cursor_func(state)
 		local selected = cursor.i
-		LOG.trace("rendering options: ", #cursor.options, selected)
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
 			local subcursor = opt.cursor
@@ -36,7 +35,6 @@ function VerticalMultiSelectMenu.new(
 					["value"] = subcursor.options[subcursor.i].text,
 				}
 			)
-			LOG.trace("out line", template, out_line)
 			pt.add(out, out_line)
 		end
 		return out

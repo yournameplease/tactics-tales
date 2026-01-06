@@ -3,7 +3,8 @@ local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
+local fp = require("src/tactics/util/fp")
+local lists = require("src/tactics/util/lists")
 
 local enum UITextColor
     "dark"
@@ -54,8 +55,18 @@ function TextNode:measure()
     end
 end
 
-function TextNode:get_hovered_line(lx: number, ly: number): integer
-    return 2
+function TextNode:get_hovered_line(_lx: number, ly: number): integer
+    local paragraph_heights = lists.map(
+        function(p: {string}): integer return #p end
+    )(self.text_object:get_lines())
+
+    local line_count = 0
+    local i = 0
+    while ly > line_count * TEXT_ROW_HEIGHT and i < #paragraph_heights do
+        i = i + 1
+        line_count = line_count + paragraph_heights[i]
+    end
+    return i
 end
 
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
@@ -129,11 +140,6 @@ function text_node.new(props: TextNode): TextNode
         self.w,
         self.h
     )
-
-    if props.get_selection_at ~= nil then
-        LOG.debug("setting get_selection_at")
-        self.get_selection_at = props.get_selection_at
-    end
     
     return self
 end

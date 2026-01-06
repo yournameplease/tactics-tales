@@ -18,16 +18,11 @@ global record Config
 	MAP_HEIGHT: integer 
 	TILE_SIZE: Point
 	WALL_HEIGHT: integer 
-	COLOR_MENU_PRIMARY: integer 
-	COLOR_MENU_SECONDARY: integer 
-	COLOR_MENU_TEXT: integer 
-	COLOR_MENU_HIGHLIGHT: integer 
-	COLOR_MENU_HIGHLIGHT_TEXT: integer 
 end
 
 global CONFIG: Config = {
 
-	LOG_LEVEL = "DEBUG",
+	LOG_LEVEL = "INFO",
 
 	SCREEN_WIDTH = 480,
 	SCREEN_HEIGHT = 270,
@@ -35,12 +30,6 @@ global CONFIG: Config = {
 	MAP_HEIGHT = 16,
 	TILE_SIZE = point.of(20,16),
 	WALL_HEIGHT = 16,
-
-	COLOR_MENU_PRIMARY = 32,
-	COLOR_MENU_SECONDARY = 7,
-	COLOR_MENU_TEXT = 7,
-	COLOR_MENU_HIGHLIGHT = 6,
-	COLOR_MENU_HIGHLIGHT_TEXT = 32
 
 }
 

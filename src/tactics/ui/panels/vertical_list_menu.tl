@@ -12,6 +12,7 @@ local record VerticalListMenu<GC, Value>
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
 end
+setmetatable(VerticalListMenu, { __index = text_node.TextNode })
 
 local vertical_list_menu = {}
 
@@ -34,11 +35,9 @@ function vertical_list_menu.new<GC, Value>(
         local out = {}
 		local cursor: list_cursor.ListMenuCursor<GC, Value> = menu_cursor_func(state)
 		local selected = cursor.i
-		LOG.trace("rendering options: ", #cursor.options, selected)
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
 			local out_line = String.format(template, { ["text"] = opt.text })
-			LOG.trace("out line", template, out_line)
 			pt.add(out, out_line)
 		end
 		return out
@@ -47,7 +46,11 @@ function vertical_list_menu.new<GC, Value>(
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.direction = props.draw_properties.direction or 'down'
 	props.get_selection_at = VerticalListMenu.get_selection_at
-    return text_node.new(props)
+
+    local self = text_node.new(props)
+	setmetatable(self, { __index = VerticalListMenu })
+
+	return self
 end
 
 return vertical_list_menu
