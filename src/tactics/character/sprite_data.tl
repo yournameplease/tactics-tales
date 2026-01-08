@@ -149,6 +149,7 @@ local record SpriteData
 	is NamedSpriteData
 	name: string
 	sprite: integer
+	back_sprite: integer
 end
 
 local record SkinColorData
@@ -411,6 +412,7 @@ local record HeadwearSpriteData
 	draw_beard: boolean
 	draw_eyewear: boolean
 	sprite: integer
+	back_sprite: integer
 end
 
 local HEADWEAR: {string: HeadwearSpriteData} = {
