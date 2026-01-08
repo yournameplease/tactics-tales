@@ -30,10 +30,12 @@ function lists.do_reverse<A>(list: {A}): {A}
     return out
 end
 
-function lists.reverse<A>(): function({A}): {A}
-	return function(list: {A}): {A} 
-		return lists.do_reverse(list) 
-	end
+function lists.reverse<A>(list: {A}): {A}
+    local out = {}
+    for i = 1,#list do
+        out[#list-i+1] = list[i]
+    end
+    return out
 end
 
 function lists.do_filter<A>(list: {A}, filter: function(A): boolean): { A }
