@@ -49,7 +49,14 @@ function BattleUnit:is_enemy(): boolean
     return self.side == "enemy"
 end
 
-function battle_unit.spawn_unit(permanent_unit: character.Character, tile: Point, labels: {string}, side: character.Side, ai: unit_ai.UnitAI): BattleUnit
+function battle_unit.spawn_unit(
+    permanent_unit: character.Character,
+    tile: Point,
+    labels: {string},
+    side: character.Side,
+    facing: character.Facing,
+    ai: unit_ai.UnitAI
+): BattleUnit
     local instance: BattleUnit = {
         id = permanent_unit.id,
         tile = tile,
@@ -58,6 +65,7 @@ function battle_unit.spawn_unit(permanent_unit: character.Character, tile: Point
         character = permanent_unit,
         labels = maps.set(labels),
         side = side,
+        facing = facing,
         unit_ai = ai,
         sprites = {},
     }

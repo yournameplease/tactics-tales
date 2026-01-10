@@ -1,6 +1,5 @@
 
 local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager

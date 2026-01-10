@@ -42,7 +42,11 @@ function rendered_story_node.character_customization(base_character: Character, 
         type = 'character_customization',
     }
 
-    node.character = drawable_character.create_drawable_unit(base_character, "player")
+    node.character = drawable_character.create_drawable_unit(
+        base_character,
+        "player",
+        { vertical = "down", horizontal = "left" }
+    )
     node.character.animation_data = anim
     return node
 end

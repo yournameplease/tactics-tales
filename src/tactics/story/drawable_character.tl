@@ -12,10 +12,15 @@ local drawable_character = {
     DrawableCharacter = DrawableCharacter
 }
 
-function drawable_character.create_drawable_unit(char: character.Character, side: character.Side): DrawableCharacter
+function drawable_character.create_drawable_unit(
+    char: character.Character,
+    side: character.Side,
+    facing: character.Facing
+): DrawableCharacter
     local instance: DrawableCharacter = {
         character = char,
         side = side,
+        facing = facing,
         sprites = {},
     }
 

@@ -13,12 +13,11 @@ local Side = character.Side
 local DrawableCharacterInstance = character.DrawableCharacterInstance
 local sprite_data = require("src/tactics/character/sprite_data")
 local wpn = require("src/tactics/character/items/object/weapon")
-local item_types = require("src/tactics/character/items/types")
-local lists = require("src/tactics/util/lists")
+
+local animated_skeleton = require("src/tactics/animation/animated_skeleton")
+local SkeletonNodeDefinition = animated_skeleton.SkeletonNodeDefinition
 
 local ANIMATION_DATA = require("src/tactics/character/animation_data")
-
-local BASE_UNIT_SPRITE = 6 * 256
 
 local COLOR_SIDE_1 = 16
 local COLOR_SIDE_2 = 19
@@ -33,6 +32,8 @@ local _COLOR_EYE_WHITE = 7
 
 local COLOR_OUTLINE = 33
 
+local BASE_UNIT_SPRITE = 6 * 256
+
 local PALETTE_BY_SIDE <total>: {Side: {Color, Color, Color}} = {
 	player = {16, 19, 1},
 	enemy = {8, 24, 2},
@@ -41,19 +42,11 @@ local PALETTE_BY_SIDE <total>: {Side: {Color, Color, Color}} = {
 
 local MAX_HEALTH_BAR_WIDTH = 18
 
-local enum CharacterSpritePart
-	"head"
-	"eyes"
-	"beard"
-	"eyewear_back"
-	"eyewear_front"
-	"hair_back"
-	"hair_front"
-	"headwear_back"
-	"headwear_front"
-	"body"
-	"off_hand"
-	"main_hand"
+local NECK_ROOT = { x = 9, y = 7 }
+
+local record AnimationFrame
+	offset: Point
+	node: SkeletonNodeDefinition
 end
 
 local SPRITE_PART_ORDER: {string} = {
@@ -70,8 +63,6 @@ local SPRITE_PART_ORDER: {string} = {
 	"hair_front",
 	"headwear_front",
 }
-
-local SPRITE_PART_ORDER_REVERSED = lists.reverse(SPRITE_PART_ORDER)
 
 local character_renderer = {}
 
@@ -108,15 +99,9 @@ local function get_body_type(
     return (body_class_prefix.."_"..base_body_type) as AnimationName
 end
 
-local record RenderedAnimationFrame
-	offset: Point
-	sprite: integer
-	anchors: { AnchorPointName: Point }
-end
-
 local function get_animation_frame(
 	drawable_unit: DrawableCharacterInstance
-): RenderedAnimationFrame
+): AnimationFrame
 	local frame_name: AnimationFrameName 
 	local offset: Point
 	if drawable_unit.animation_data ~= nil and drawable_unit.animation_data.current_frame ~= nil then
@@ -132,8 +117,7 @@ local function get_animation_frame(
 
 	return {
 		offset = offset,
-		sprite = BASE_UNIT_SPRITE + animation_frame.sprite,
-		anchors = animation_frame.anchors
+		node = animation_frame
 	}
 end
 
@@ -143,8 +127,8 @@ function character_renderer.get_animation_offset(
 ): Point
     local frame_data = get_animation_frame(drawable_unit)
 
-    return { x = frame_data.offset.x + frame_data.anchors.feet_center.x,
-             y = frame_data.offset.y + frame_data.anchors.feet_center.y}
+    return { x = frame_data.offset.x + frame_data.node.root.x,
+             y = frame_data.offset.y + frame_data.node.root.y}
 end
 
 local function set_palette(
@@ -169,125 +153,98 @@ local function set_palette(
 	end
 end
 
-local function draw_head(
-	drawable_unit: DrawableCharacterInstance,
-	draw_point: Point
-)
-    local flip_h = drawable_unit.side == "enemy"
-
-	local head: sprite_data.SpriteData =
-		sprite_data.HEAD[drawable_unit.character.appearance.head]	
-	local headwear: sprite_data.HeadwearSpriteData =
-		sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]	
-	local eyes: sprite_data.SpriteData =
-		sprite_data.EYES[drawable_unit.character.appearance.eyes]	
-	local eyewear: sprite_data.SpriteData =
-		sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear]	
-	local hair: sprite_data.SpriteData =
-		sprite_data.HAIR[drawable_unit.character.appearance.hair]	
-	local beard: sprite_data.SpriteData =
-		sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard]	
-
-    pt.spr(BASE_UNIT_SPRITE + head.sprite, draw_point.x, draw_point.y, flip_h)
-	if eyes.sprite ~= nil then
-        pt.spr(BASE_UNIT_SPRITE + eyes.sprite, draw_point.x, draw_point.y, flip_h)
-	end
-	if beard.sprite ~= nil and headwear.draw_beard then
-        pt.spr(BASE_UNIT_SPRITE + beard.sprite, draw_point.x, draw_point.y, flip_h)
-	end
-	if eyewear.sprite ~= nil and headwear.draw_eyewear then
-        pt.spr(BASE_UNIT_SPRITE + eyewear.sprite, draw_point.x, draw_point.y, flip_h)
-	end
-	if hair.sprite ~= nil and headwear.draw_hair then
-        pt.spr(BASE_UNIT_SPRITE + hair.sprite, draw_point.x, draw_point.y, flip_h)
-	end
-	if headwear.sprite ~= nil then
-        pt.spr(BASE_UNIT_SPRITE + headwear.sprite, draw_point.x, draw_point.y, flip_h)
-	end
-
-end
-
 local function draw_character(
 	drawable_unit: DrawableCharacterInstance,
-	draw_point: Point
+	draw_point: Point,
+	backwards: boolean
 )
-    local flip_h = drawable_unit.side == "enemy"
 	local animation_frame = get_animation_frame(drawable_unit)
+	local body_node = animation_frame.node
 	
 	local equipment = drawable_unit.character.inventory:get_equipped_items()
-	local equipment_sprites: { item_types.EquipSlot: integer } = {}
-	local equipment_offsets: { item_types.EquipSlot: Point } = {}
+	local equipment_nodes: { string: SkeletonNodeDefinition } = {}
 	for slot,equip in pairs(equipment) do
 		if slot == "BODY" then
 			-- this should modify the base frame?
 		else
 			if equip:get_sprite_data() ~= nil then
-				local anchor: AnchorPointName = slot == "OFF_HAND" and "off_hand" or "main_hand"
-			    local equip_anchor = get_anchor_offsets(
-					base_point,
-					animation_frame.anchors[anchor],
-					point.of_record(equip:get_sprite_data().anchor),
-					flip_h,
-					false
-				)
-				equipment_sprites[slot] = equip:get_sprite_data()
-				equipment_offsets[slot] = equip_anchor
+				local anchor: string = slot == "OFF_HAND" and "off_hand" or "main_hand"
+				local item_sprite_data = equip:get_sprite_data()
+				equipment_nodes[anchor] = {
+					sprite = item_sprite_data.sprite,
+					root = item_sprite_data.anchor,
+					parent = "body",
+				}
 			end
 		end
 	end
 
 	-- move to an animation skeleton manager if we need to render non humans, geez
 	
-	local sprites_by_part <total>: {CharacterSpritePart: integer} = {
-		head = sprite_data.HEAD[drawable_unit.character.appearance.head].sprite,
-		eyes = sprite_data.EYES[drawable_unit.character.appearance.eyes].sprite,
-		beard = sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard].sprite,
-		eyewear_front = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].sprite,
-		eyewear_back = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].sprite_back,
-		hair_front = sprite_data.HAIR[drawable_unit.character.appearance.hair].sprite,
-		hair_back = sprite_data.HAIR[drawable_unit.character.appearance.hair].sprite_back,
-		headwear_front = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].sprite,
-		headwear_back = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].sprite_back,
-		body = animation_frame.sprite,
-		main_hand = equipment_sprites["main_hand"],
-		off_hand = equipment_sprites["off_hand"],	
+	local skeleton_nodes: {string: SkeletonNodeDefinition} = {
+		head = {
+			parent = "body",
+			sprite = sprite_data.HEAD[drawable_unit.character.appearance.head].sprite,
+			root = NECK_ROOT
+		},
+		eyes = {
+			parent = "head",
+			sprite = sprite_data.EYES[drawable_unit.character.appearance.eyes].sprite,
+		},
+		beard = {
+			parent = "head",
+			sprite = sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard].sprite,
+		},
+		eyewear_front = {
+			parent = "head",
+			sprite = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].sprite,
+		},
+		eyewear_back = {
+			parent = "head",
+			sprite = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].back_sprite,
+		},
+		hair_front = {
+			parent = "head",
+			sprite = sprite_data.HAIR[drawable_unit.character.appearance.hair].sprite,
+		},
+		hair_back = {
+			parent = "head",
+			sprite = sprite_data.HAIR[drawable_unit.character.appearance.hair].back_sprite,
+		},
+		headwear_front = {
+			parent = "head",
+			sprite = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].sprite,
+		},
+		headwear_back = {
+			parent = "head",
+			sprite = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].back_sprite,
+		},
+		body = body_node,
+		main_hand = equipment_nodes["main_hand"],
+		off_hand = equipment_nodes["off_hand"]	
 	}
-
-	local offsets_by_part <total>: {CharacterSpritePart: Point} = {
-		head = sprite_data.HEAD[drawable_unit.character.appearance.head],
-		eyes = sprite_data.EYES[drawable_unit.character.appearance.eyes],
-		beard = sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard],
-		eyewear_back = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear],
-		eyewear_back = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear],
-		hair_back = sprite_data.HAIR[drawable_unit.character.appearance.hair],
-		hair_front = sprite_data.HAIR[drawable_unit.character.appearance.hair],
-		headwear_back = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear],
-		headwear_back = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear],
-		body = animation_frame.sprite,
-		main_hand = equipment_offsets["main_hand"],
-		off_hand = equipment_offsets["off_hand"],	
-	}
-
 
 	local offset = point.of(0,0)
 
     local base_point = get_anchor_offsets(
 		draw_point + offset,
 		point.of(0, 0),
-		animation_frame.anchors.feet_center,
+		point.of_record(body_node.root),
 		-- flip_h,
 		false,
 		false
 	)
 
-    local HEAD_NECK_X = 9
-    local HEAD_NECK_Y = 7
+	local skeleton = animated_skeleton.new(
+		skeleton_nodes,
+		SPRITE_PART_ORDER
+	)
 
-    pt.spr(animation_frame.sprite, base_point.x, base_point.y, flip_h)
-
-    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, { x = HEAD_NECK_X, y = HEAD_NECK_Y }, flip_h, false)
-    draw_head(drawable_unit, head_anchor)
-
+	if backwards then
+		skeleton:draw_backwards(BASE_UNIT_SPRITE, base_point.x, base_point.y)
+	else
+		skeleton:draw(BASE_UNIT_SPRITE, base_point.x, base_point.y)
+	end
 end
 
 function character_renderer.draw(
@@ -303,14 +260,20 @@ function character_renderer.draw(
 	local DRAW_TARGET_H = 32
 	local DRAW_TARGET_D = point.of(15, 31)
 
+	local facing_v = drawable_unit.facing.vertical
+	local facing_h = drawable_unit.facing.horizontal
+
 	local current_frame = drawable_unit.animation_data.current_frame.frame
 	if drawable_unit.sprites[current_frame] == nil then
+		drawable_unit.sprites[current_frame] = {}
+	end
+	if drawable_unit.sprites[current_frame][facing_v] == nil then
 		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
 		-- bake sprite
 		draw_target_manager:duplicate_target()
 
-		draw_character(drawable_unit, point.of(0,0))
+		draw_character(drawable_unit, point.of(0,0), facing_v == "up")
 
 		local unit_sprite = draw_target_manager:pop_sprite()
         draw.draw_shadow(COLOR_OUTLINE,
@@ -321,10 +284,10 @@ function character_renderer.draw(
             0, 0)
 		pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
-		drawable_unit.sprites[drawable_unit.animation_data.current_frame.frame] = draw_target_manager:pop_sprite()
+		drawable_unit.sprites[current_frame][facing_v] = draw_target_manager:pop_sprite()
 	end
 
-	local sprite = drawable_unit.sprites[drawable_unit.animation_data.current_frame.frame]
+	local sprite = drawable_unit.sprites[current_frame][facing_v]
 
 	local animation_frame = get_animation_frame(drawable_unit)
 	local offset = animation_frame.offset
@@ -341,8 +304,9 @@ function character_renderer.draw(
     elseif set_pal is colors.PaletteId then
 		colors.apply_palette(set_pal)
 	end
-	
-	pt.spr(sprite,sprite_draw_point.x,sprite_draw_point.y)
+
+	local flip_h = facing_h == "left"
+	pt.spr(sprite,sprite_draw_point.x,sprite_draw_point.y, flip_h)
 
     if set_pal then
         pt.reset_pal()
@@ -395,8 +359,6 @@ function character_renderer.draw_health_bar(
 	apply_animation: boolean
 )
     -- TODO: consider pre-rendering some of this
-    local flip_h = unit.side == "enemy"
-
 	local animation_frame = get_animation_frame(unit)
 
 	local offset = animation_frame.offset
@@ -407,7 +369,7 @@ function character_renderer.draw_health_bar(
     local base_point = get_anchor_offsets(
 		draw_point + offset,
 		point.of(0, 0),
-		animation_frame.anchors.feet_center,
+		point.of_record(animation_frame.node.root),
 		-- flip_h,
 		false,
 		false
@@ -416,9 +378,7 @@ function character_renderer.draw_health_bar(
     if set_pal then
         set_palette(unit, true)
     end
-
-    local head_anchor = get_anchor_offsets(base_point, animation_frame.anchors.neck, point.of(0,0), flip_h, false)
-	local health_bar_anchor = head_anchor - point.of(0,9)
+	local health_bar_anchor = base_point - point.of(0, 13)
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
