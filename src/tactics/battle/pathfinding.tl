@@ -53,7 +53,7 @@ end
 -- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
 local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_function: DistanceFunction, max_cost: integer, max_point: Point): array_2d.Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
-    LOG.debug("doing Dijkstra: ", start_x, start_y, max_point)
+    LOG.trace("doing Dijkstra: ", start_x, start_y, max_point)
     local visited_info: array_2d.Array2D<ShortestPathEntry> = array_2d.new(max_point.x, max_point.y)
 
     local record ShortestPathQueueEntry
@@ -192,18 +192,17 @@ function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_leng
         return path
     end
     
-    LOG.debug("Extend path")
-    LOG.debug("Extend path", #path, target, max_length)
+    LOG.trace("Extend path")
+    LOG.trace("Extend path", #path, target, max_length)
 
     local distance = function(tile: Point): integer
         return legal_tiles:get_point(tile) and 1 or 999
     end
     local extend_path = function(current_path: {Point}, t: Point, full_map: array_2d.Array2D<ShortestPathEntry>): {Point}
         local new_points = { t }
-        LOG.debug("Extending path!", t)
+        LOG.trace("Extending path!", t)
         while (full_map:get_point(new_points[#new_points]).prev ~= current_path[#current_path]) do
             local prev = full_map:get_point(new_points[#new_points]).prev
-            LOG.debug("prev", prev)
             pt.add(new_points, prev)
         end
         -- TODO: config

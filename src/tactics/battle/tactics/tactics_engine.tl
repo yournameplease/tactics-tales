@@ -228,6 +228,15 @@ end
 
 -- handlers
 
+function TacticsEngine:finish_unit_action(unit: BattleUnit)
+    unit.has_acted = true
+
+    self.battle_is_blocked = false
+    unit.animation_data = self.animation_manager:create_idle_animation()
+    unit.facing.vertical = "down"
+    self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
+end
+
 function TacticsEngine:handle_move_unit(ctx: MenuContext)
     local unit = ctx.acting_unit.unit
     local destination = ctx.destination.point
@@ -245,11 +254,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
         end
 
         self.battle_map:move_unit(unit, destination)
-        unit.has_acted = true
-
-        self.battle_is_blocked = false
-        unit.animation_data = self.animation_manager:create_idle_animation()
-        self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
+        self:finish_unit_action(unit)
     end)
 end
 
@@ -272,13 +277,9 @@ function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
 
         self.battle_map:move_unit(unit, destination)
         self:do_combat(unit, target)
-        unit.has_acted = true
 
-        self.battle_is_blocked = false
-        LOG.debug("unblocking battle")
-        unit.animation_data = self.animation_manager:create_idle_animation()
         target.animation_data = self.animation_manager:create_idle_animation()
-        self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
+        self:finish_unit_action(unit)
     end)
 end
 

@@ -4,6 +4,13 @@ local Point = point.Point
 local lists = require("src/tactics/util/lists")
 require("src/tactics/character/animation_data")
 
+local enum Facing
+    "up"
+    "down"
+    "left"
+    "right"
+end
+
 local record AnimatedSpriteData
     current_frame: AnimationFrameData
     playing: boolean
@@ -22,6 +29,7 @@ local interface AnimationInstance
     -- takes a the global frame as input
     get_sprite_frame_name: function(self, integer): AnimationFrameName
     get_animation_offset: function(self, integer): Point
+    get_animation_facing: function(self, integer): Facing
 
     animated_object: AnimatedSpriteData
 end
@@ -109,6 +117,30 @@ function PathAnimationInstance:get_animation_offset(_global_frame: integer): Poi
     return lerp_offsets(prev_point.point, next_point.point, self.frame, prev_point.duration)
 end
 
+function PathAnimationInstance:get_animation_facing(_global_frame: integer): Facing
+    if #self.path_points == 1 then
+        return nil
+    end
+
+    local prev_point = self.path_points[self.current_point]
+    local next_point = self.path_points[self.current_point+1]
+    if prev_point.point == nil or next_point.point == nil then
+        return nil
+    end
+
+    local d = next_point.point - prev_point.point
+    local angle = pt.atan2(d.x, d.y)
+    if pt.absf(angle) <= 0.125 then
+        return "right"
+    elseif angle > 0.125 and angle < 0.375 then
+        return "up"
+    elseif angle < -0.125 and angle > 0.875 then
+        return "down"
+    else
+        return "left"
+    end
+end
+
 local record DirectionalOffsetAnimationInstance
     is AnimationInstance
     where self.type == "offset"
@@ -160,6 +192,7 @@ end
 
 local record AnimationFrameData
     frame: AnimationFrameName
+    facing: Facing -- nillable
     offset: Point
 end
 
@@ -355,10 +388,12 @@ end
 
 function AnimationManager:get_frame_data(anim: AnimationInstance): AnimationFrameData
     local offset = anim:get_animation_offset(self.global_frame)
+    local facing = anim.get_animation_facing and anim:get_animation_facing(self.global_frame) or nil
     local frame_name = anim:get_sprite_frame_name(self.global_frame)
 
     return {
         frame = frame_name,
+        facing = facing,
         offset = offset
     }
 end

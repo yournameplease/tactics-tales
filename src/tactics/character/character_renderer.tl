@@ -27,8 +27,13 @@ local COLOR_SKIN = 29
 local COLOR_SKIN_SHADOW = 13
 local COLOR_HAIR = 23
 local COLOR_BEARD = 22
-local _COLOR_EYE = 21
-local _COLOR_EYE_WHITE = 7
+
+local COLOR_EYE = 21
+local COLOR_EYE_WHITE = 7
+local COLOR_EYE_L_INNER = 27
+local COLOR_EYE_L_OUTER = 3
+local COLOR_EYE_R_INNER = 11
+local COLOR_EYE_R_OUTER = 26
 
 local COLOR_OUTLINE = 33
 
@@ -151,6 +156,15 @@ local function set_palette(
 	else
 		pt.set_palt(COLOR_OUTLINE, true)
 	end
+
+	--eyes
+	-- todo: looking support
+	do
+	    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+	    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+	    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+	    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+	end
 end
 
 local function draw_character(
@@ -179,7 +193,17 @@ local function draw_character(
 		end
 	end
 
-	-- move to an animation skeleton manager if we need to render non humans, geez
+	local headwear = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]
+	local hair = headwear.draw_hair
+		and sprite_data.HAIR[drawable_unit.character.appearance.hair]
+		or nil
+	local eyewear = headwear.draw_eyewear
+		and sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear]
+		or nil
+	local beard = headwear.draw_beard
+		and sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard]
+		or nil
+	
 	
 	local skeleton_nodes: {string: SkeletonNodeDefinition} = {
 		head = {
@@ -193,23 +217,23 @@ local function draw_character(
 		},
 		beard = {
 			parent = "head",
-			sprite = sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard].sprite,
+			sprite = beard and beard.sprite or nil,
 		},
 		eyewear_front = {
 			parent = "head",
-			sprite = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].sprite,
+			sprite = eyewear and eyewear.sprite or nil,
 		},
 		eyewear_back = {
 			parent = "head",
-			sprite = sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear].back_sprite,
+			sprite = eyewear and eyewear.back_sprite or nil,
 		},
 		hair_front = {
 			parent = "head",
-			sprite = sprite_data.HAIR[drawable_unit.character.appearance.hair].sprite,
+			sprite = hair and hair.sprite or nil,
 		},
 		hair_back = {
 			parent = "head",
-			sprite = sprite_data.HAIR[drawable_unit.character.appearance.hair].back_sprite,
+			sprite = hair and hair.back_sprite or nil,
 		},
 		headwear_front = {
 			parent = "head",
@@ -257,19 +281,38 @@ function character_renderer.draw(
 	apply_animation: boolean,
 	draw_outline: boolean
 )
-	profile("draw_character")
 	local DRAW_TARGET_W = 32
 	local DRAW_TARGET_H = 32
 	local DRAW_TARGET_D = point.of(15, 31)
 
+	profile("draw_character")
+	local current_frame = drawable_unit.animation_data.current_frame
+
+	-- update facing
+	do
+		if current_frame.facing ~= nil then
+			if current_frame.facing == "up" then
+				drawable_unit.facing.vertical = "up"
+			elseif current_frame.facing == "down" then
+				drawable_unit.facing.vertical = "down"
+			elseif current_frame.facing == "left" then
+				drawable_unit.facing.horizontal = "left"
+			elseif current_frame.facing == "right" then
+				drawable_unit.facing.horizontal = "right"
+			else
+				unexpected(current_frame.facing)
+			end
+		end		
+	end
+
 	local facing_v = drawable_unit.facing.vertical
 	local facing_h = drawable_unit.facing.horizontal
 
-	local current_frame = drawable_unit.animation_data.current_frame.frame
-	if drawable_unit.sprites[current_frame] == nil then
-		drawable_unit.sprites[current_frame] = {}
+	local frame_name = current_frame.frame
+	if drawable_unit.sprites[frame_name] == nil then
+		drawable_unit.sprites[frame_name] = {}
 	end
-	if drawable_unit.sprites[current_frame][facing_v] == nil then
+	if drawable_unit.sprites[frame_name][facing_v] == nil then
 		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
 		-- bake sprite
@@ -286,10 +329,10 @@ function character_renderer.draw(
             0, 0)
 		pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
-		drawable_unit.sprites[current_frame][facing_v] = draw_target_manager:pop_sprite()
+		drawable_unit.sprites[frame_name][facing_v] = draw_target_manager:pop_sprite()
 	end
 
-	local sprite = drawable_unit.sprites[current_frame][facing_v]
+	local sprite = drawable_unit.sprites[frame_name][facing_v]
 
 	local animation_frame = get_animation_frame(drawable_unit)
 	local offset = animation_frame.offset
@@ -320,7 +363,7 @@ local function draw_health_bar(
 	unit: BattleUnit,
 	draw_point: Point
 )
-	local flip_h = unit.side == "enemy"
+	local flip_h = unit.facing.horizontal == "left"
 
 	local hp_current = unit.hp_current
 	local hp_max = unit.character.stats.hp_max
@@ -360,27 +403,16 @@ function character_renderer.draw_health_bar(
 	set_pal: boolean,
 	apply_animation: boolean
 )
-    -- TODO: consider pre-rendering some of this
 	local animation_frame = get_animation_frame(unit)
-
 	local offset = animation_frame.offset
 	if not apply_animation then
 		offset = point.of(0,0)
 	end
-	
-    local base_point = get_anchor_offsets(
-		draw_point + offset,
-		point.of(0, 0),
-		point.of_record(animation_frame.node.root),
-		-- flip_h,
-		false,
-		false
-	)
     
     if set_pal then
         set_palette(unit, true)
     end
-	local health_bar_anchor = base_point - point.of(0, 13)
+	local health_bar_anchor = draw_point + offset - point.of(0, 16)
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then

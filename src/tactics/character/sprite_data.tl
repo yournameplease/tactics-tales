@@ -183,70 +183,87 @@ local HAIR: {string: SpriteData} = {
 	bald = {
 		name = "Bald",
 		sprite = nil,
+		back_sprite = nil,
 	},
 	pompadour = {
 		name = "Pompadour",
 		sprite = 16,
+		back_sprite = 32,
 	},
 	short = {
 		name = "Short",
 		sprite = 17,
+		back_sprite = 33,
 	},
 	wavy = {
 		name = "Wavy",
 		sprite = 18,
+		back_sprite = 33,
 	},
 	afro_a = {
 		name = "Afro A",
 		sprite = 19,
+		back_sprite = 35,
 	},
 	buzz_a = {
 		name = "Buzz A",
 		sprite = 20,
+		back_sprite = 36,
 	},
 	emo = {
 		name = "Emo",
 		sprite = 21,
+		back_sprite = 33,
 	},
 	balding = {
 		name = "Balding",
 		sprite = 22,
+		back_sprite = 38,
 	},
 	flat_top = {
 		name = "Flat Top",
 		sprite = 23,
+		back_sprite = 39,
 	},
 	bob_bangs = {
 		name = "Bob Bangs",
 		sprite = 24,
+		back_sprite = 40,
 	},
 	bob_a = {
 		name = "Bob A",
 		sprite = 25,
+		back_sprite = 41,
 	},
 	bob_b = {
 		name = "Bob B",
 		sprite = 26,
+		back_sprite = 42,
 	},
 	bob_c = {
 		name = "Bob C",
 		sprite = 27,
+		back_sprite = 43,
 	},
 	afro_b = {
 		name = "Afro B",
 		sprite = 28,
+		back_sprite = 44,
 	},
 	pigtails = {
 		name = "Pigtails",
 		sprite = 29,
+		back_sprite = 45,
 	},
 	bun = {
 		name = "Bun",
 		sprite = 30,
+		back_sprite = 46,
 	},
 	buzz_b = {
 		name = "Buzz B",
 		sprite = 31,
+		back_sprite = 47,
 	},
 }
 
@@ -352,14 +369,17 @@ local EYEWEAR: {string: SpriteData} = {
 	mask = {
 		name = "Mask",
 		sprite = 85,
+		back_sprite = 93,
 	},
 	eyepatch_l = {
 		name = "Eyepatch L",
 		sprite = 86,
+		back_sprite = 94,
 	},
 	eyepatch_r = {
 		name = "Eyepatch R",
 		sprite = 87,
+		back_sprite = 95,
 	},
 }
 
@@ -428,28 +448,32 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		draw_hair = false,
 		draw_beard = true,
 		draw_eyewear = true,
-		sprite = 65
+		sprite = 65,
+		back_sprite = 73,
 	},
 	cultist_hood = {
 		name = 'Covered Hood',
 		draw_hair = false,
 		draw_beard = false,
 		draw_eyewear = false,
-		sprite = 70
+		sprite = 70,
+		back_sprite = 78,
 	},
 	wizard_hat = {
 		name = 'Wizard Hat',
 		draw_hair = false,
 		draw_beard = true,
 		draw_eyewear = true,
-		sprite = 64
+		sprite = 64,
+		back_sprite = 72,
 	},
 	hooded_wizard_hat = {
 		name = 'Hooded Wizard Hat',
 		draw_hair = false,
 		draw_beard = false,
 		draw_eyewear = false,
-		sprite = 71
+		sprite = 71,
+		back_sprite = 79,
 	},
 	fancy_hat = {
 		name = 'Fancy Hat',
@@ -457,6 +481,7 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		draw_beard = true,
 		draw_eyewear = true,
 		sprite = 69,
+		back_sprite = 77,
 	},
 	animal_mask = {
 		name = 'Animal Mask',
@@ -471,6 +496,7 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		draw_beard = false,
 		draw_eyewear = true,
 		sprite = 66,
+		back_sprite = 74,
 	},
 	outlaw_hat = {
 		name = 'Outlaw Hat',
@@ -478,6 +504,7 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		draw_beard = false,
 		draw_eyewear = true,
 		sprite = 67,
+		back_sprite = 75,
 	},
 }
 
