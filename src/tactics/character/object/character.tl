@@ -59,19 +59,36 @@ function Character:get_weapon_range(): integer, integer
 	return weapons[1].min_range, weapons[1].max_range
 end
 
+local enum FacingVertical
+	"up"
+	"down"
+end
+
+local enum FacingHorizontal
+	"left"
+	"right"
+end
+
+local record Facing
+	vertical: FacingVertical
+	horizontal : FacingHorizontal
+end
+
 local interface DrawableCharacterInstance
 	side: Side
+	facing: Facing
 	has_acted: boolean -- used for outline color...
 	
 	animation_data: animation.AnimatedSpriteData
     -- prerendered sprites by animation frame name
-    sprites: { AnimationFrameName: Userdata }
+    sprites: { AnimationFrameName: { FacingVertical: Userdata} }
 
 	character: Character
 end
 
 local character = {
 	Side = Side,
+	Facing = Facing,
 	CharacterAppearanceKey = CharacterAppearanceKey,
 	CharacterAppearance = CharacterAppearance,
 	CharacterStats = CharacterStats,

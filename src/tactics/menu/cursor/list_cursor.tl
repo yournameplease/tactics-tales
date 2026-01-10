@@ -5,8 +5,6 @@ local lists = require("src/tactics/util/lists")
 local input_service = require("src/tactics/joypad")
 local Joypad = require("src/tactics/joypad").Joypad
 local Mouse = input_service.Mouse
-local input_context = require("src/tactics/input/input_context")
-local InputContext = input_context.InputContext
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 local event_bus = require("src/tactics/systems/event_bus")
 
