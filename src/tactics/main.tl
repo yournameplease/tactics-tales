@@ -26,7 +26,6 @@ local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
 local game_manager: game.Game
-local mod_loader: mod_ldr.ModLoader
 
 function _init()
     input = input_service.new()
@@ -46,7 +45,7 @@ function _init()
         input_service = input,
     }
 
-    mod_loader = mod_ldr.new()
+    local mod_loader = mod_ldr.new()
     
     game_manager = game.new(game_services, mod_loader)
 end

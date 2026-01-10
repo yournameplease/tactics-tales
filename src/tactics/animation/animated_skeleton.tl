@@ -80,7 +80,7 @@ function AnimatedSkeletonImpl:compute_offset(key: string)
 		local parent_anchor = parent.anchors[key]
 		local child_anchor = node.root
 		if child_anchor ~= nil then
-			node.computed_offset = parent.computed_offset + child_anchor - parent_anchor
+			node.computed_offset = parent.computed_offset + parent_anchor - child_anchor
 		else
 			node.computed_offset = parent.computed_offset
 		end
