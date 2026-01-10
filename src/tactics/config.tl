@@ -22,7 +22,7 @@ end
 
 global CONFIG: Config = {
 
-	LOG_LEVEL = "INFO",
+	LOG_LEVEL = "DEBUG",
 
 	SCREEN_WIDTH = 480,
 	SCREEN_HEIGHT = 270,
