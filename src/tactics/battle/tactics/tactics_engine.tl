@@ -141,6 +141,7 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
                 unexpected(character_source.type)
             end
             if character ~= nil then
+                local facing_r = spawn_point.x <= (MAP_WIDTH >> 1)
                 local unit = battle_unit.spawn_unit(
                     character,
                     spawn_point,
@@ -148,7 +149,7 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
                     side,
                     {
                         vertical = "down",
-                        horizontal = side == "player" and "right" or "left",
+                        horizontal = facing_r and "right" or "left",
                     },
                     spawn_data.ai
                 )
