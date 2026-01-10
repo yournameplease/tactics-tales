@@ -155,9 +155,9 @@ end
 
 local function draw_character(
 	drawable_unit: DrawableCharacterInstance,
-	draw_point: Point,
-	backwards: boolean
+	draw_point: Point
 )
+	local facing = drawable_unit.facing
 	local animation_frame = get_animation_frame(drawable_unit)
 	local body_node = animation_frame.node
 	
@@ -240,6 +240,8 @@ local function draw_character(
 		SPRITE_PART_ORDER
 	)
 
+	local backwards = facing.vertical == "up"
+
 	if backwards then
 		skeleton:draw_backwards(BASE_UNIT_SPRITE, base_point.x, base_point.y)
 	else
@@ -273,7 +275,7 @@ function character_renderer.draw(
 		-- bake sprite
 		draw_target_manager:duplicate_target()
 
-		draw_character(drawable_unit, point.of(0,0), facing_v == "up")
+		draw_character(drawable_unit, point.of(0,0))
 
 		local unit_sprite = draw_target_manager:pop_sprite()
         draw.draw_shadow(COLOR_OUTLINE,
