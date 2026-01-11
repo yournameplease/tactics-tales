@@ -363,8 +363,6 @@ local function draw_health_bar(
 	unit: BattleUnit,
 	draw_point: Point
 )
-	local flip_h = unit.facing.horizontal == "left"
-
 	local hp_current = unit.hp_current
 	local hp_max = unit.character.stats.hp_max
 	local cell_width = pt.flr((MAX_HEALTH_BAR_WIDTH-1) / hp_max)
@@ -375,11 +373,6 @@ local function draw_health_bar(
 	local height = 4
 
 	local x: integer
-	if flip_h then
-		x = draw_point.x + (width>>1)
-	else
-		x = draw_point.x - (width>>1)
-	end
 	local y = draw_point.y - 2
 	local COLOR_SIDE = 16
 	-- TODO: get this from UI theme
@@ -412,7 +405,7 @@ function character_renderer.draw_health_bar(
     if set_pal then
         set_palette(unit, true)
     end
-	local health_bar_anchor = draw_point + offset - point.of(0, 16)
+	local health_bar_anchor = draw_point + offset + point.of(0, -16)
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
