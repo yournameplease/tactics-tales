@@ -1,6 +1,8 @@
 require("src/tactics/debug")
 
 local story = require("src/tactics/story/story")
+local story_types = require("src/tactics/story/types")
+local StoryId = story_types.StoryId
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
@@ -13,7 +15,8 @@ local record Game
 	menu_manager: game_menu_manager.GameMenuManager
 
     mod_loader: ModLoader
-       	
+
+    default_story: StoryId
     story: story.Story
 
     services: GameServiceBundle
@@ -24,7 +27,7 @@ local game = {
 }
 
 function Game:begin_story(ctx: MenuContext)
-    local story_id = "test_story"
+    local story_id = self.default_story
     if ctx.story ~= nil then
         story_id = ctx.story.id
     end
@@ -48,6 +51,7 @@ function game.new(
     local story_ids = game_data.stories.story_select
     
     local self: Game = setmetatable({}, { __index = Game })
+    self.default_story = game_data.stories.default_story
     self.mod_loader = mod_loader
     self.services = services
 

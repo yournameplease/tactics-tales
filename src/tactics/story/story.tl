@@ -69,6 +69,9 @@ function Story:handle_new_node()
     LOG.debug("Handling new node: ", node_definition.type)
     if node_definition is story_node.JumpNode then
         self:jump_to_node(node_definition.next_node)
+    elseif node_definition is story_node.ChapterHeader then
+        self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
+        self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_node.StoryTextNode then
         self.story_page:add_text_line(node_definition.text)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
@@ -186,14 +189,18 @@ end
 function Story:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
-        or current_node is story_node.CharacterCustomizerNode then
+        or current_node is story_node.CharacterCustomizerNode
+        or current_node is story_node.ChapterHeader
+    then
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then
         self.battle_manager:update(input)
     elseif current_node is story_node.JumpNode then
         error('in a jump node during update')
     else
-        error(current_node.type)
+        LOG.warn("Unexpected node, add a case: "..current_node.type)
+        -- unexpected(current_node.type)
+        self.menu_manager:update(input)
     end
 end
 

@@ -151,6 +151,13 @@ function ModLoaderImpl:load_mod_data(): GameData
 				return spec.data as {StoryId: StoryDefinition}
 			end
 		),
+		default_story = load_mod_val(
+			self.registered,
+			function(mod: RegisteredMod): Path return mod.spec.content.stories end,
+			function(spec: {string: any}): StoryId
+				return spec.default_story as StoryId
+			end
+		),
 		story_select = load_mod_val(
 			self.registered,
 			function(mod: RegisteredMod): Path return mod.spec.content.stories end,

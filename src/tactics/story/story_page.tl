@@ -5,6 +5,7 @@ local Character = require("src/tactics/character/object/character").Character
 local enum RenderedStoryNodeType
     "text"
     "character_customization"
+    "chapter_header"
 end
 
 local interface RenderedStoryNode
@@ -23,14 +24,31 @@ local record CharacterCustomization
     character: drawable_character.DrawableCharacter
 end
 
+local record ChapterHeader
+    is RenderedStoryNode
+    where self.type == "chapter_header"
+    text: string
+    number: integer
+end
+
 local rendered_story_node = {
     RenderedStoryNode = RenderedStoryNode,
     Text = Text,
+    ChapterHeader = ChapterHeader,
     CharacterCustomization = CharacterCustomization,
 }
 
+function rendered_story_node.chapter_header(text: string, number: integer): RenderedStoryNode
+    local node: ChapterHeader = {
+        type = 'chapter_header',
+        text = text,
+        number = number,
+    }
+    return node
+end
+
 function rendered_story_node.text(text: string): RenderedStoryNode
-    local node: rendered_story_node.Text = {
+    local node: Text = {
         type = 'text',
         text = text,
     }
@@ -67,6 +85,11 @@ function story_page.story_page(): StoryPage
 end
 
 -- data access
+
+function StoryPage:add_chapter_header(text: string, number: integer)
+    local node = rendered_story_node.chapter_header(text, number)
+    pt.add(self.nodes, node)
+end
 
 function StoryPage:add_text_line(text: string)
     local node = rendered_story_node.text(text)

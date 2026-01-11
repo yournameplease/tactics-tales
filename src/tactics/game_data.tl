@@ -8,6 +8,7 @@ local ItemDefinition = require("src/tactics/types/item_definition").ItemDefiniti
 
 local record StoryData
 	data: { StoryId: StoryDefinition }
+	default_story: StoryId
 	story_select: { StoryId } 
 end
 
