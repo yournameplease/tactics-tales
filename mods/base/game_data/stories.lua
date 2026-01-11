@@ -7,6 +7,14 @@ function stories.new_page()
 	}
 end
 
+function stories.chapter_header(text, number)
+	return {
+		type = 'chapter_header',
+		text = text,
+		chapter_number = number,
+	}
+end
+
 function stories.story_text(text)
 	return {
 		type = 'text',
@@ -111,36 +119,32 @@ local STORIES = {
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
 	),
-	test_story = {
-		starting_node = 'part_1',
+	demo_story = {
+		starting_node = 'prologue',
 		nodes = {
-			part_1 = {
+			prologue = {
+				stories.chapter_header("Prologue"),
 				stories.character_customizer(),
 				stories.new_page(),
-				stories.story_text("This is a lot of text.  A whooooooooooooooooooooooooooooooooooooooole lot.  To trigger screenwrap."),
-				stories.story_text('Thisisalotoftext.Awhooooooooooooooooooooooooooooooooooooooolelot.Totriggerhyphenation.'),
-				stories.story_text('text 1.3'),
-				stories.story_text('text 1.4'),
-				stories.jump('part_3')
+				stories.jump('ch_1_intro')
 			},
-			part_3 = {
-				stories.story_text('text 3.1'),
-				stories.battle('bandit_village', 'part_4_v', 'part_4_f'),
-				stories.story_text('text 3.2'),
-				stories.jump('part_4')
+			ch_1_intro = {
+				stories.chapter_header("Homecoming", 1),
+
+				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were the ${bandit_clan} Bandits!")
+				stories.story_text("The ${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat on their own.")
+				stories.story_text("Prepare for battle!")
+
+				stories.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
 			},
-			part_4_v = {
+			ch_1_v = {
 				stories.story_text("You Win!"),
-				stories.jump('part_5'),
+				stories.jump('ch_2_intro'),
 			},
-			part_4_f = {
-				stories.story_text("You Lose..."),
-				stories.jump('part_5'),
-			},
-			part_5 = {
-				stories.story_text("Restarting the story"),
-				stories.new_page(),
-				stories.jump('part_1')
+			ch_1_f = {
+				stories.story_text(''),
+				stories.jump('ch_2_intro'),
 			},
 		}
 	}

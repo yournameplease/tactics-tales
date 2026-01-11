@@ -3,6 +3,7 @@ local type StoryId = string
 local type NodeId = string
 
 local enum StoryNodeType
+	'chapter_header'
 	'text'
 	'roster_add'
 	'battle'
@@ -19,6 +20,13 @@ end
 local record NewPageNode
 	is StoryNode
 	where self.type == 'new_page'
+end
+
+local record ChapterHeader
+	is StoryNode
+	where self.type == 'chapter_header'
+	text: string
+	chapter_number: integer
 end
 
 local record StoryTextNode
