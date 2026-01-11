@@ -51,7 +51,20 @@ function StoryPagePanel:compute_children(state: UIContextManager)
         for _,n in ipairs(nodes) do
             pt.add(self.rendered_nodes, n)
             local child: box.UIElement
-            if n is rendered_story_node.Text then
+            if n is rendered_story_node.ChapterHeader then
+                child = text_node.new({
+                    text = {n.text},
+					draw_properties = {
+						wrap = "wrap"
+					},
+                    auto_height = true,
+                })
+				child = box.flex_col()
+                if n.number ~= nil then
+                    child:add(text_node.new( { text = {"Chapter "..n.number} } ))
+                end
+                child:add(text_node.title( { text = {n.text} } ))
+            elseif n is rendered_story_node.Text then
                 child = text_node.new({
                     text = {n.text},
 					draw_properties = {

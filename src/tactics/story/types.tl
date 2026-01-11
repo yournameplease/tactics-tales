@@ -71,6 +71,7 @@ local story_node = {
 	StoryNodeType = StoryNodeType,
 	StoryTextNode = StoryTextNode,
 	ExitStoryNode = ExitStoryNode,
+	ChapterHeader = ChapterHeader,
 	BattleNode = BattleNode,
 	JumpNode = JumpNode,
 	NewPageNode = NewPageNode,

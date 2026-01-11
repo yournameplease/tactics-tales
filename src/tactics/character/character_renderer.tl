@@ -372,7 +372,7 @@ local function draw_health_bar(
 	local current_width = cell_width * hp_current + 1
 	local height = 4
 
-	local x: integer
+	local x = draw_point.x - (width >> 1)
 	local y = draw_point.y - 2
 	local COLOR_SIDE = 16
 	-- TODO: get this from UI theme
