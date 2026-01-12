@@ -32,6 +32,7 @@ local record GridMenuCursor<GC>
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
+    back_command: event_bus.GameEvent
 end
 
 local record GridMenuDefinition<GC>
@@ -42,6 +43,7 @@ local record GridMenuDefinition<GC>
     validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
+    back_command: event_bus.GameEvent
     get_legal_tiles: function(GC, MenuContext): array_2d.Array2D<MenuTileHighlight>
     get_path_anchor: function(GC, MenuContext): Point
     get_max_path_length: function(GC, MenuContext): integer
@@ -114,6 +116,14 @@ function GridMenuCursor:handle_select(
     menu_state.point = self.point:copy()
     self.set_selected_context(self, game_ctx, menu_ctx)
     return self.next_state, self.send_command
+end
+
+function GridMenuCursor:handle_back(
+    _game_ctx: GC,
+    _menu_ctx: MenuContext,
+    _menu_state: menu_types.MenuState
+): event_bus.GameEvent
+    return self.back_command
 end
 
 function GridMenuDefinition:to_cursor(

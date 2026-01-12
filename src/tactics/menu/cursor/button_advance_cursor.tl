@@ -14,6 +14,7 @@ local record ButtonAdvanceCursor<GC>
     -- from definition
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
+    back_command: event_bus.GameEvent
 end
 
 local record ButtonAdvanceMenuDefinition<GC>
@@ -21,6 +22,7 @@ local record ButtonAdvanceMenuDefinition<GC>
     where self.type == "button_advance" 
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
+    back_command: event_bus.GameEvent
 end
 
 local button_advance_cursor = {
@@ -44,6 +46,14 @@ end
 
 function ButtonAdvanceCursor:handle_select(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): string, event_bus.GameEvent
     return self.next_state, self.send_command
+end
+
+function ButtonAdvanceCursor:handle_back(
+    _game_ctx: GC,
+    _menu_ctx: MenuContext,
+    _menu_state: menu_types.MenuState
+): event_bus.GameEvent
+    return self.back_command
 end
 
 function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>

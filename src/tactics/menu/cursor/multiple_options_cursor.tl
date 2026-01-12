@@ -20,6 +20,7 @@ local record MenuMultipleOptionDefinition<GC>
     key: string --ugh.  here for ui context
     definition: menu_cursor.MenuStepDefinition<GC>
     must_select: boolean -- true if must be picked before using.  Default to false
+    back_command: event_bus.GameEvent
 end
 
 global enum MultipleOptionsDirection
@@ -38,6 +39,7 @@ local record MultipleOptionsMenuCursor<GC>
     options: { MenuMultipleOptionCursor<GC> }
     next_state: string
     send_command: event_bus.GameEvent
+    back_command: event_bus.GameEvent
 end
 
 function MenuMultipleOptionDefinition:to_cursor(game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuMultipleOptionCursor<GC>
@@ -162,6 +164,14 @@ function MultipleOptionsMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuCon
         end
         return self.next_state, self.send_command
     end
+end
+
+function MultipleOptionsMenuCursor:handle_back(
+    _game_ctx: GC,
+    _menu_ctx: MenuContext,
+    _menu_state: menu_types.MenuState
+): event_bus.GameEvent
+    return self.back_command
 end
 
 function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>

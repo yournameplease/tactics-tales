@@ -26,6 +26,7 @@ local enum GameEvent
     
     "MOVE_AND_ATTACK"
     "MOVE_AND_WAIT"
+    "MARK_UNIT_RANGE"
     "BATTLE_END_VICTORY"
     "BATTLE_END_DEFEAT"
 
