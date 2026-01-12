@@ -71,6 +71,8 @@ end
 
 local record StoryPage
     nodes: {RenderedStoryNode}
+    chapter_text: string
+    chapter_number: integer
 end
 
 local story_page = {
@@ -89,6 +91,15 @@ end
 function StoryPage:add_chapter_header(text: string, number: integer)
     local node = rendered_story_node.chapter_header(text, number)
     pt.add(self.nodes, node)
+end
+
+-- 
+function StoryPage:clear_chapter_header()
+    local chapter_header_node = self.nodes[#self.nodes]
+    assert(chapter_header_node is ChapterHeader)
+    self.chapter_text = chapter_header_node.text
+    self.chapter_number = chapter_header_node.number
+    pt.pop(self.nodes)
 end
 
 function StoryPage:add_text_line(text: string)

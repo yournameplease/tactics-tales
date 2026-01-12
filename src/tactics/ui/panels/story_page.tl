@@ -46,24 +46,33 @@ function StoryPagePanel:compute_children(state: UIContextManager)
         end
     end
     if #nodes ~= #self.rendered_nodes or any_new_node then
-        self.children = {}
         self.rendered_nodes = {}
+        self.children = {}
+        local page_contents: {box.UIElement} = {}
+
+        local is_chapter_header_page = false
         for _,n in ipairs(nodes) do
             pt.add(self.rendered_nodes, n)
             local child: box.UIElement
             if n is rendered_story_node.ChapterHeader then
-                child = text_node.new({
+                is_chapter_header_page = true
+				child = box.flex_col()
+                if n.number ~= nil then
+                    child:add(text_node.new( {
+                        text = {"Chapter "..n.number},
+    					draw_properties = {
+    						wrap = "wrap"
+    					},
+                        auto_height = true,
+                    } ))
+                end
+                child:add(text_node.title( {
                     text = {n.text},
 					draw_properties = {
 						wrap = "wrap"
 					},
                     auto_height = true,
-                })
-				child = box.flex_col()
-                if n.number ~= nil then
-                    child:add(text_node.new( { text = {"Chapter "..n.number} } ))
-                end
-                child:add(text_node.title( { text = {n.text} } ))
+                } ))
             elseif n is rendered_story_node.Text then
                 child = text_node.new({
                     text = {n.text},
@@ -93,7 +102,26 @@ function StoryPagePanel:compute_children(state: UIContextManager)
             else
                 unexpected(n.type)
             end
-            pt.add(self.children, child as box.Box)
+            pt.add(page_contents, child as box.Box)
+        end
+
+        if is_chapter_header_page then
+			local page = box.flex_col()
+            page:add(box.spacer(1))
+            local page_content_box = box.flex_col()
+            for _,b in ipairs(page_contents) do
+                page_content_box:add(b)
+            end
+            page:add(page_content_box)
+            page:add(box.spacer(1))
+            
+            self.children = {page}
+        else
+            local page_content_box = box.flex_col()
+            for _,b in ipairs(page_contents) do
+                page_content_box:add(b)
+            end
+            self.children = {page_content_box}
         end
     end
 end
