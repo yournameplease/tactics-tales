@@ -8,6 +8,7 @@ local lists = require("src/tactics/util/lists")
 local enum UITextColor
     "dark"
     "trim"
+    "strong"
     "light"
 end
 
@@ -83,6 +84,7 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
     local colors <total>: {UITextColor: Color} = {
         dark = ui_theme.COLOR_INTERIOR_TEXT,
         trim = ui_theme.COLOR_TRIM,
+        strong = ui_theme.COLOR_PAGE_DECOR,
         light = ui_theme.COLOR_DECORATION_SHADOW,
     }
 
