@@ -1,10 +1,5 @@
-SRC = \
-	$(wildcard src/tactics/*.tl) \
-	$(wildcard src/tactics/**/*.tl) \
-	$(wildcard src/spec/*.tl) \
-	$(wildcard src/spec/**/*.tl) \
-	
-LUA = $(SRC:src/%.tl=build/%.lua)
+TL_SRC = $(shell find src/ -type f -name '*.tl')
+LUA_BUILD = $(patsubst src/%.tl, build/%.lua, $(TL_SRC))
 
 TL = tl
 TLFLAGS = --quiet -I src
@@ -18,24 +13,13 @@ BUILD_MARKER = build/.cyan_built
 
 build/%.lua: src/%.tl
 	$(CYAN) $(CYANFLAGS) build
-	# $(TL) $(TLFLAGS) gen --check $< -o $@
 
-
-# tactics: $(LUA)
 tactics: $(BUILD_MARKER)
 
-$(BUILD_MARKER): $(SRC) $(LUA)
-	# $(CYAN) $(CYANFLAGS) build
+$(BUILD_MARKER): $(TL_SRC) $(LUA_BUILD)
 	@touch $@
 
 all: clean test
-
-# build_directories:
-# 	mkdir -p \
-# 		build/tactics/ui/{panels,components,decoration,layout} \
-# 		build/tactics/{story,character,data,corpora,systems,types,util,game} \
-# 		build/tactics/battle/{combat,map,tactics}
-		# build/spec/{}
 
 clean:
 	rm -rf build
