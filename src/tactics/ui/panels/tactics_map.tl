@@ -2,6 +2,7 @@ require("profiler")
 require("src/tactics/debug")
 require("src/tactics/config")
 
+local fp = require("src/tactics/util/fp")
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
@@ -71,38 +72,14 @@ local function compute_animated_unit_positions(map: battle_map.BattleMap): { Ani
     )(map:get_all_units())
 end
 
--- local function draw_floating_menu(x: integer, y: integer, cursor: list_cursor.ListMenuCursor<BattleMenuContext, string>)
---     local selected_i = cursor.i
---     local options = cursor.options
---     local PADDING = 2
-
---     local max_text_width = 0
---     for _,opt in ipairs(options) do
---         local text_width = pt.print(opt.text, 0, -1000) as integer
---         max_text_width = pt.max(max_text_width, text_width)
---     end
-
---     local menu_x = x + TILE_SIZE.x
---     local menu_y = y + TILE_SIZE.y
---     local menu_w = 2*PADDING + max_text_width
---     local menu_h = 2*PADDING + #options * (TEXT_HEIGHT+1) -1
---     pt.rrectfill(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_PRIMARY)
---     for i,opt in ipairs(options) do
---         if i == selected_i then
---             pt.rrectfill(menu_x, menu_y+PADDING-1+(TEXT_HEIGHT+1)*(i-1), menu_w, TEXT_HEIGHT+2, 0, COLOR_MENU_HIGHLIGHT)
---             pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_HIGHLIGHT_TEXT)
---         else
---             pt.print(opt.text, menu_x+PADDING, menu_y+PADDING+(TEXT_HEIGHT+1)*(i-1), COLOR_MENU_TEXT)
---         end
---     end
---     pt.rrect(menu_x, menu_y, menu_w, menu_h, 1, COLOR_MENU_SECONDARY)
--- end
-
 local function should_draw_shadow(unit: BattleUnit, ctx: BattleUIContext): boolean
     if ctx.acting_unit ~= nil and unit.id == ctx.acting_unit.id then
         return true
     end
     if ctx.hovered_unit ~= nil and unit.id == ctx.hovered_unit.id then
+        return true
+    end
+    if unit.marked then
         return true
     end
 
@@ -289,7 +266,11 @@ function TacticsMap:compute_children(state: UIContextManager)
     end
 end
 
-function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+function TacticsMap:draw(
+    state: UIContextManager,
+    draw_target_manager: DrawTargetManager,
+    ui_theme: UITheme
+)
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
     
@@ -333,52 +314,83 @@ function TacticsMap:draw(state: UIContextManager, draw_target_manager: DrawTarge
 
     -- draw ground
     profile("draw_ground")
+    
     pt.map(layer_ground, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
-    -- highlight legal tiles
-    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
-        if cursor.legal_tiles ~= nil then
-            pt.fillp(
-            -- 1:2 diagonal slashes
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111,
-            --0b00111111,
-            --0b11111100,
-            --0b11110011,
-            --0b11001111
-            -- 1:2 checkerboard
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC,
-                    0x33,
-                    0xCC
-            )
-            pt.poke(0x550b,0x3f)
-            pt.set_palt(0, true)
-            for x = 0, self.map_width-1 do
-                for y = 0, self.map_height-1 do
-                    local highlighted_tile = cursor.legal_tiles:get(x, y)
-                    if highlighted_tile ~= nil and (highlighted_tile.reachable or highlighted_tile.can_attack)  then
-                        if (highlighted_tile.reachable) then
-                            pt.set_color(28)
-                        elseif highlighted_tile.can_attack then
-                            pt.set_color(8)
-                        else
-                            error("invalid state")
+
+    do
+        -- todo: this should be precomputed on mark
+        local marked_units = map:get_units(BattleUnit.is_marked)
+        local marked_attack_tiles = fp.pipeline_2(
+            lists.map(function(u: BattleUnit): Userdata return u.valid_tiles end),
+            lists.reduce(
+                pt.userdata("u8", state.battle_context.battle_map.width, state.battle_context.battle_map.height),
+                function(acc: Userdata, elem: Userdata): Userdata
+                    LOG.debug("reducing marked tiles...", acc, elem)
+                        for x = 0, self.map_width-1 do
+                            local row = ""
+                            for y = 0, self.map_height-1 do
+                                row = row .. acc:get(x, y)
+                            end
+                            LOG.debug(x..": "..row)
                         end
-                        pt.rrectfill(x*TILE_SIZE.x+1, y*TILE_SIZE.y+1, TILE_SIZE.x-2, TILE_SIZE.y-2)
-                    end
-                end
-            end
-            pt.poke(0x550b,0x00)
-            pt.fillp()
-            pt.reset_color()
+                        for x = 0, self.map_width-1 do
+                            local row = ""
+                            for y = 0, self.map_height-1 do
+                                row = row .. elem:get(x, y)
+                            end
+                            LOG.debug(x..": "..row)
+                        end
+                    return acc | (elem & 0x4)
+            end)
+        )(marked_units)
+
+        local hovered_unit = state.battle_context.hovered_unit
+
+        local hovered_unit_tiles: Userdata
+        if hovered_unit ~= nil then
+            hovered_unit_tiles = hovered_unit.valid_tiles
         end
+        local acting_unit = state.battle_context.acting_unit
+        local acting_player_tiles: Userdata
+        if acting_unit ~= nil then
+            acting_player_tiles = acting_unit.valid_tiles
+        end
+        
+        LOG.debug("Marked Units")
+        for x = 0, self.map_width-1 do
+            local row = ""
+            for y = 0, self.map_height-1 do
+                row = row .. marked_attack_tiles:get(x, y)
+            end
+            LOG.debug(x..": "..row)
+        end
+        
+        local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
+        for x = 0, self.map_width-1 do
+            for y = 0, self.map_height-1 do
+                if acting_player_tiles and (acting_player_tiles:get(x, y) & 0x1) ~= 0 then
+                    highlighted_tiles:set(x, y, 10)
+                elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x4) ~= 0 then
+                    highlighted_tiles:set(x, y, 11)
+                elseif acting_unit == nil
+                    and hovered_unit_tiles ~= nil
+                    and (hovered_unit_tiles:get(x,y) & 0x5) ~= 0
+                then
+                    if (hovered_unit_tiles:get(x, y) & 0x1) ~= 0 then
+                        highlighted_tiles:set(x, y, 10)
+                    elseif (hovered_unit_tiles:get(x, y) & 0x4) ~= 0 then
+                        highlighted_tiles:set(x, y, 11)
+                    end
+                elseif (marked_attack_tiles:get(x, y) & 0x4) ~= 0 then
+                    highlighted_tiles:set(x, y, 13)
+                end
+                
+            end
+        end
+
+        pt.map(highlighted_tiles, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
+    
     pt.map(layer_path, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency
     if draw_cursor and cursor_tile ~= nil then

@@ -23,6 +23,10 @@ local record BattleUnit
     unit_ai: unit_ai.UnitAI
     labels: maps.Set<string>
 
+    valid_tiles: Userdata
+    marked: boolean
+
+    is_marked: function(self): boolean
     is_player: function(self): boolean
     is_neutral: function(self): boolean
     is_enemy: function(self): boolean
@@ -35,6 +39,10 @@ local battle_unit = {
 
 function BattleUnit:has_tag(tag: string): boolean
     return self.labels[tag]
+end
+
+function BattleUnit:is_marked(): boolean
+    return self.marked
 end
 
 function BattleUnit:is_player(): boolean
@@ -66,6 +74,8 @@ function battle_unit.spawn_unit(
         labels = maps.set(labels),
         side = side,
         facing = facing,
+        valid_tiles = nil,
+        marked = false,
         unit_ai = ai,
         sprites = {},
     }
