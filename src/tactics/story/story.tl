@@ -98,6 +98,10 @@ function Story:handle_new_node()
 end
 
 function Story:advance_node()
+    local node_definition = self.current_node.definition
+    if node_definition is story_node.ChapterHeader then
+        self.story_page:clear_chapter_header()
+    end
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
     self:handle_new_node()

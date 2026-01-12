@@ -405,7 +405,7 @@ function character_renderer.draw_health_bar(
     if set_pal then
         set_palette(unit, true)
     end
-	local health_bar_anchor = draw_point + offset + point.of(0, -16)
+	local health_bar_anchor = draw_point + offset + point.of(2, -16)
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
