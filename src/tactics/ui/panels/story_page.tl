@@ -2,6 +2,7 @@
 local box = require("src/tactics/ui/box")
 local text_node = require("src/tactics/ui/components/text_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
+local section_divider = require("src/tactics/ui/decoration/section_divider")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
 local story_page = require("src/tactics/story/story_page")
@@ -37,7 +38,8 @@ end
 
 function StoryPagePanel:compute_children(state: UIContextManager)
     -- why is cast needed?
-    local nodes: {RenderedStoryNode} = state.story_context.story_page.nodes as {RenderedStoryNode}
+    local rendered_page = state.story_context.story_page
+    local nodes: {RenderedStoryNode} = rendered_page.nodes as {RenderedStoryNode}
 
     local any_new_node = false
     for i,n in ipairs(nodes) do
@@ -60,6 +62,7 @@ function StoryPagePanel:compute_children(state: UIContextManager)
                 if n.number ~= nil then
                     child:add(text_node.new( {
                         text = {"Chapter "..n.number},
+                        text_color = "light",
     					draw_properties = {
     						wrap = "wrap"
     					},
@@ -117,11 +120,32 @@ function StoryPagePanel:compute_children(state: UIContextManager)
             
             self.children = {page}
         else
+            local page = box.flex_col()
+            if rendered_page.chapter_text ~= nil then
+                local num_text = rendered_page.chapter_number
+                    and tostring(rendered_page.chapter_number)
+                    or ""
+                local chapter_text = rendered_page.chapter_text
+                page:add(text_node.new( {
+                    text = {num_text.."|"..chapter_text.."|"},
+                    text_color = "light",
+					draw_properties = {
+                        
+					},
+                    auto_height = true,
+                }))
+                page:add(section_divider.new(1))
+            end
             local page_content_box = box.flex_col()
+
             for _,b in ipairs(page_contents) do
                 page_content_box:add(b)
             end
-            self.children = {page_content_box}
+
+            page:add(page_content_box)
+            page:add(box.spacer(1))
+            
+            self.children = {page}
         end
     end
 end
