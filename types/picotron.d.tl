@@ -75,6 +75,15 @@ global record Userdata
 	get: function(self, integer, integer): integer
 	set: function(self, integer, ...: integer)
 	sort: function(self)
+
+	metamethod __add: function(Userdata, Userdata): Userdata
+	metamethod __sub: function(Userdata, Userdata): Userdata
+	metamethod __band: function(Userdata, Userdata|integer): Userdata
+	metamethod __bor: function(Userdata, Userdata|integer): Userdata
+	metamethod __bxor: function(Userdata, Userdata|integer): Userdata
+	metamethod __bnot: function(Userdata): Userdata
+	metamethod __shl: function(Userdata, integer): Userdata
+	metamethod __shr: function(Userdata, integer): Userdata
 end
 
 
