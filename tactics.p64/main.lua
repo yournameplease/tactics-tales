@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-04 05:58:28",revision=93,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-11 21:42:47",revision=94,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -21,7 +21,7 @@ DATP = ""
 --if not fetch "build/main.lua" then
 	cp("/desktop/projects/tactics/build/tactics", "build/tactics")
 	cp("/desktop/projects/tactics/lib", "lib")
-	cp("/desktop/projects/tactics/mods", "mods")
+ 	cp("/desktop/projects/tactics/mods", "mods")
 	--DATP = "tactics.p64/"
 --end
 

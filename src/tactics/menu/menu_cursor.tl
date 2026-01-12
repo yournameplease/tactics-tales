@@ -80,10 +80,17 @@ local interface MenuStepDefinition<GC>
     to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor<GC>
 end
 
+-- utility record, used by back commands
+local record MenuContextAndCursor<GC>
+    ctx: MenuContext<GC>
+	cursor: MenuCursor<GC>
+end
+
 local menu_cursor = {
     CursorType = CursorType,
     MenuCursor = MenuCursor,
     MenuStepDefinition = MenuStepDefinition,
+	MenuContextAndCursor = MenuContextAndCursor,
 
     mouse_selection = mouse_selection,
 }

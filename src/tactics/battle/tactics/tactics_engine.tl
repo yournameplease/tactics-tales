@@ -54,6 +54,7 @@ local record TacticsEngine
     
     -- mutations
     spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
+    handle_mark_unit: function(self, Point)
     handle_move_unit: function(self, MenuContext)
     handle_move_and_attack: function(self, MenuContext)
     do_combat: function(self, BattleUnit, BattleUnit)
@@ -236,6 +237,15 @@ function TacticsEngine:finish_unit_action(unit: BattleUnit)
     unit.animation_data = self.animation_manager:create_idle_animation()
     unit.facing.vertical = "down"
     self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
+end
+
+function TacticsEngine:handle_mark_unit(p: Point)
+    local unit = self.battle_map:get_at_tile(p)
+    if unit == nil then return end
+
+    if unit:is_enemy() then
+        unit.marked = not unit.marked
+    end
 end
 
 function TacticsEngine:handle_move_unit(ctx: MenuContext)
@@ -428,33 +438,80 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x: integer, tile_
 
 end
 
-function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
-    local unit = ctx.acting_unit.unit
+---@desc
+--- Returns a u8 Userdata whose bits signify:
+--- 0x1 - reachable
+--- 0x2 - is valid selection
+--- 0x4 - can attack
+function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
+    unit: BattleUnit
+): Userdata
     local min_range, max_range = unit.character:get_weapon_range()
 
-    local reachable_tiles = pathfinding.find_reachable_tiles(self.battle_map, unit.tile.x, unit.tile.y, unit.side, unit.character.stats.movement)
+    local movement = unit.character.stats.movement
+    if unit.unit_ai ~= nil and unit.unit_ai.move == "zero" then
+        movement = 0
+    end
 
-    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
+    local reachable_tiles = pathfinding.find_reachable_tiles(
+        self.battle_map,
+        unit.tile.x,
+        unit.tile.y,
+        unit.side,
+        movement
+    )
 
+    local tiles: Userdata = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+    
     reachable_tiles:foreach(function(x: integer, y: integer, reachable: boolean)
         if reachable then
-            local tile = tiles:get(x,y)
-            if tile == nil then tile = {} end
-            tile.reachable = true
-            tile.valid_selection = true
+            local tile = tiles:get(x, y)
+            if tile == nil then tile = 0 end
+            tile = tile | 0x1
+            tile = tile | 0x2
             tiles:set(x, y, tile)
             local tiles_in_attack_range = self:find_tiles_with_distance_from_tile(x, y, min_range, max_range)
 
             tiles_in_attack_range:foreach(function(ax: integer, ay: integer, can_attack: boolean)
                     if can_attack then
                         local a_tile = tiles:get(ax,ay)
-                        if a_tile == nil then a_tile = {} end
-                        a_tile.can_attack = true
+                        if a_tile == nil then a_tile = 0 end
+                        a_tile = a_tile | 0x4
                         tiles:set(ax, ay, a_tile)
                     end
             end)
         end
     end)
+
+    return tiles
+end
+
+-- todo: this could be ran in background,
+-- during combat animations
+function TacticsEngine:compute_unit_valid_tiles()
+    local units = self.battle_map:get_all_units()
+
+    for _,unit in ipairs(units) do
+        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+    end
+end
+
+function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
+    local unit = ctx.acting_unit.unit
+
+    local tiles_ud = unit.valid_tiles
+    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
+
+    for x=0,MAP_WIDTH-1 do
+        for y=0,MAP_HEIGHT-1 do
+            local tile = tiles_ud:get(x, y)
+            tiles:set(x, y, {
+                reachable = (tile & 0x1) ~= 0,
+                valid_selection = (tile & 0x2) ~= 0,
+                can_attack = (tile & 0x4) ~= 0,
+            })
+        end
+    end
 
     return tiles
 end

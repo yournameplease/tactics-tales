@@ -111,10 +111,11 @@ function BaseMenuManager:handle_menu_back()
 
     if back_command ~= nil then
         LOG.info("Emitting menu back command ", back_command)
-        self.event_writer:emit(back_command, {
+        local message: menu_cursor.MenuContextAndCursor<GC> = {
             ctx = self.menu_ctx,
             cursor = self.menu_cursor,
-        })
+        } 
+        self.event_writer:emit(back_command, message)
     end
 
     local previous_step = self.menu_definitions[self.menu_state.menu_id].steps[self.menu_state.step]

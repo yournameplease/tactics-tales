@@ -7,9 +7,12 @@ local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
+local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
+local MenuContextAndCursor = require("src/tactics/menu/menu_cursor").MenuContextAndCursor
+local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
@@ -80,6 +83,7 @@ function turn_manager.new(
     self.event_writer = event_writer.new(bus)
 
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: event_bus.EventArgs)
+        self.tactics_engine:compute_unit_valid_tiles()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
             turn = self.turn
@@ -131,6 +135,8 @@ function turn_manager.new(
         local to_act = function(u: BattleUnit): boolean
             return not u.has_acted
         end
+
+        self.tactics_engine:compute_unit_valid_tiles()
         
         if not self:check_objectives() then
             if self.phase == "PLAYER" then
@@ -163,6 +169,12 @@ function turn_manager.new(
 
     self.event_listener:on("BATTLE_END_DEFEAT", function()
         LOG.info("You lose!")
+    end)
+    
+    self.event_listener:on("MARK_UNIT_RANGE", function(ctx: MenuContextAndCursor<BattleMenuContext>)
+        local cursor = ctx.cursor
+        assert(cursor is grid_cursor.GridMenuCursor<BattleMenuContext>) 
+        self.tactics_engine:handle_mark_unit(cursor.point)
     end)
     
     self.event_listener:on("MOVE_AND_WAIT", function(ctx: MenuContext)
