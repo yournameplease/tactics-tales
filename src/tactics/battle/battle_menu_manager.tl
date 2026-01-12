@@ -86,7 +86,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 end,
                 validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: MenuContext): boolean
                     return grid_selection_is_available_player(msb.battle_map, s) end,
-                next_state = "SELECT_DESTINATION"
+                next_state = "SELECT_DESTINATION",
+                back_command = "MARK_UNIT_RANGE",
             }),
             ["SELECT_DESTINATION"] = grid_cursor.definition({
                 set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: MenuContext)

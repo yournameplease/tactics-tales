@@ -32,6 +32,7 @@ local record ListMenuCursor<GC, Value>
     direction: ListDirection
     wrap: boolean
     set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
+    back_command: event_bus.GameEvent
 end
 
 local record ListMenuDefinition<GC, Value>
@@ -41,6 +42,7 @@ local record ListMenuDefinition<GC, Value>
     get_options: function(GC, MenuContext): {ListMenuOption<Value>}
     wrap: boolean
     direction: ListDirection
+    back_command: event_bus.GameEvent
 end
 
 local list_menu_cursor = {
@@ -136,6 +138,14 @@ function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: me
         self.set_selected_context(self, game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state, self.options[self.i].send_command
+end
+
+function ListMenuCursor:handle_back(
+    _game_ctx: GC,
+    _menu_ctx: MenuContext,
+    _menu_state: menu_types.MenuState
+): event_bus.GameEvent
+    return self.back_command
 end
 
 function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor<GC>

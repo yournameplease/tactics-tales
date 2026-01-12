@@ -71,6 +71,7 @@ local interface MenuCursor<GC>
 --- @return next state
 --- @return send command
     handle_select: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string, event_bus.GameEvent
+    handle_back: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): event_bus.GameEvent
 end
 
 local interface MenuStepDefinition<GC>

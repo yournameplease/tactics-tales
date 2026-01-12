@@ -107,6 +107,16 @@ function BaseMenuManager:handle_menu_select()
 end
 
 function BaseMenuManager:handle_menu_back()
+    local back_command = self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx, self.menu_state)
+
+    if back_command ~= nil then
+        LOG.info("Emitting menu back command ", back_command)
+        self.event_writer:emit(back_command, {
+            ctx = self.menu_ctx,
+            cursor = self.menu_cursor,
+        })
+    end
+
     local previous_step = self.menu_definitions[self.menu_state.menu_id].steps[self.menu_state.step]
         .previous_state
 
