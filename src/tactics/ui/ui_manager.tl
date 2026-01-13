@@ -90,7 +90,7 @@ function UIManager:calculate(ui_ctx: UIContextManager)
     -- Recalculate size and positions
     profile("ui_manager_calculate")
     box.compute_children(root, ui_ctx)
-    root:measure()
+    root:measure(1)
     root:layout(root.x, root.y)
     profile("ui_manager_calculate")
 end

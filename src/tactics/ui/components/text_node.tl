@@ -35,12 +35,12 @@ setmetatable(TextNode, { __index = box.Box })
 local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
-function TextNode:measure()
+function TextNode:measure(depth: integer)
     local text_obj = self.text_object
     if text_obj ~= nil then
         self.text_object:calculate_wrapping()
     end
-    box.Box._measure(self)
+    box.Box._measure(self, depth)
 
     if self.auto_height and text_obj ~= nil then
         local rows = text_obj:get_wrapped_rows()

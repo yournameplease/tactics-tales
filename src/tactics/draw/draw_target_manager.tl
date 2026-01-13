@@ -1,5 +1,5 @@
 require("profiler")
--- local colors = require("src/tactics/colors")
+local colors = require("src/tactics/colors")
 
 local interface DrawTargetManager
 	push_target: function(self, w: integer, h: integer, d_x: integer, d_y: integer)
@@ -52,9 +52,9 @@ function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer,
 	end
 	self.current_target = new_target
 	self:apply_current_target()
-	if true then
-		-- local color = colors.rainbow(#self.targets)	
-		-- pt.rrectfill(d_x, d_y, w, h, 0, color[2])
+	if DYNAMIC_CONFIG.draw_target_debug then
+		local color = colors.rainbow(#self.targets)	
+		pt.rrectfill(d_x, d_y, w, h, 0, color[2])
 	end
 	profile("draw_target_manager_push")
 end
@@ -78,9 +78,9 @@ function DrawTargetManagerImpl:draw(x: integer, y: integer)
 	
 	-- pt.sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)	
 	pt.spr(prev_target.ud, x, y)
-	if true then
-		-- local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
-		-- pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
+	if DYNAMIC_CONFIG.draw_target_debug then
+		local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
+		pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
 	end
 	profile("draw_target_manager_draw")
 end
