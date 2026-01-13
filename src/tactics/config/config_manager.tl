@@ -19,6 +19,7 @@ local record ConfigManagerImpl
 end
 
 function ConfigManagerImpl:store_config(new_config: DynamicConfig)
+	self.user_config = new_config
 	pt.store("/appdata/tactics_tales/config.pod", new_config, nil)
 end
 

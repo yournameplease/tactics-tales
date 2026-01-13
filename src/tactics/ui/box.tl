@@ -1,7 +1,12 @@
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 require("src/tactics/ui/theme")
+local colors = require("src/tactics/colors")
 local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
+
+-- Note: this class is a bit of a mess with inheritence
+-- as I wrote it before fully understanding how to do classes well.
+-- may rewrite sometime
 
 local record Margin
     t: integer
@@ -22,6 +27,7 @@ local enum DecorationStyle
 end
 
 local interface UIElement
+    depth: integer -- currently just used for debug drawing
     x: integer
     y: integer
     w: integer
@@ -43,7 +49,7 @@ local interface UIElement
     children: { UIElement }
 
     add: function(self, UIElement): UIElement
-    measure: function(self)
+    measure: function(self, depth: integer)
     layout: function(self, integer, integer)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
 
@@ -174,14 +180,16 @@ end
 -- PASS 1: MEASURE (Bottom-Up)
 -- Calculate intrinsic size of children, then self
 -- =========================================================
-function Box._measure(self: UIElement)
+function Box._measure(self: UIElement, depth: integer)
     local element = self as Box -- Cast!  All classes inherit from box though
+    self.depth = depth
+    
     if not element.auto_width and not element.auto_height then
         element.calculated_w = element.w
         element.calculated_h = element.h
         -- We still measure children so they know their own size
         for _, child in ipairs(element.children) do
-            if child.measure then child:measure() end
+            if child.measure then child:measure(depth+1) end
         end
         return
     end
@@ -192,7 +200,7 @@ function Box._measure(self: UIElement)
 
     for i, child in ipairs(element.children) do
         if child.measure then
-            child:measure()
+            child:measure(depth+1)
         end
 
         local child_outer_w = (child.calculated_w or child.w) 
@@ -213,8 +221,8 @@ function Box._measure(self: UIElement)
     element.calculated_h = element.auto_height and (content_h+element.internal_margin.t+element.internal_margin.b) or element.h
 end
 
-function Box:measure()
-    Box._measure(self)
+function Box:measure(depth: integer)
+    Box._measure(self, depth)
 end
 
 -- =========================================================
@@ -500,21 +508,22 @@ end
 
 function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     Box._draw_background(self, ui_theme)
-    
-    -- Debug rectangle
-    -- log.trace(element.x, element.y, element.w, element.h)
-    --     pt.rrect(
-    --             element.x+element.internal_margin.l-element.decoration_padding,
-    --             element.y+element.internal_margin.t-element.decoration_padding,
-    --             element.w - (element.internal_margin.l+element.internal_margin.r)+2*element.decoration_padding,
-    --             element.h - (element.internal_margin.t+element.internal_margin.b)+2*element.decoration_padding,
-    --             0, 14)
-        -- pt.rrect(
-        --         element.x+element.padding+element.internal_margin.l,
-        --         element.y+element.padding+element.internal_margin.t,
-        --         element.calculated_w - 2*element.padding,
-        --         element.calculated_h - 2*element.padding,
-        --         0, 28)
+
+    if DYNAMIC_CONFIG.draw_flexbox_debug then
+		local color = colors.rainbow(self.depth-1)	
+        pt.rrect(
+                self.x+self.internal_margin.l-self.decoration_padding,
+                self.y+self.internal_margin.t-self.decoration_padding,
+                self.w - (self.internal_margin.l+self.internal_margin.r)+2*self.decoration_padding,
+                self.h - (self.internal_margin.t+self.internal_margin.b)+2*self.decoration_padding,
+                0, color[2])
+         pt.rrect(
+                 self.x+self.internal_margin.l,
+                 self.y+self.internal_margin.t,
+                 self.w - self.internal_margin.l - self.internal_margin.r,
+                 self.h - self.internal_margin.t - self.internal_margin.b,
+                 0, color[1])
+    end
 
     Box._draw_children(self, state, draw_target_manager, ui_theme)
 end
