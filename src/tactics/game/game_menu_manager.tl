@@ -83,7 +83,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                         )
                     }),
                     multiple_options_cursor.option_definition({
-                        text = "Draw Flexbox Debug",
+                        text = "Draw Target Debug",
                         definition = list_cursor.boolean_yes_no(
                             "draw_target_debug",
                             "horizontal"
