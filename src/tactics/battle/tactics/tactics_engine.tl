@@ -1,5 +1,4 @@
 require("src/tactics/config")
-require("src/tactics/debug")
 
 local MenuTileHighlight = require("src/tactics/menu/cursor/grid_cursor").MenuTileHighlight
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
@@ -23,10 +22,12 @@ local character_manager = require("src/tactics/character/character_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
-local MAP_WIDTH = CONFIG.MAP_WIDTH
-local MAP_HEIGHT = CONFIG.MAP_HEIGHT
+local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
+local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
 
-local TILE_SIZE = CONFIG.TILE_SIZE
+local TILE_WIDTH = STATIC_CONFIG.TILE_WIDTH
+local TILE_HEIGHT = STATIC_CONFIG.TILE_HEIGHT
+local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 
 local record NewUnitProperties
     new_side: battle_unit.Side
@@ -99,7 +100,7 @@ local function to_tile_path(path: { Point }): { Point }
     local base_point = path[1]
     local normalize_point: function(Point): Point =
         function(p: Point): Point
-            return (p - base_point) * CONFIG.TILE_SIZE
+            return (p - base_point) * TILE_SIZE
         end
     return lists.map(normalize_point)(path)
 end
@@ -258,7 +259,7 @@ function TacticsEngine:handle_move_unit(ctx: MenuContext)
         if #path > 1 then
             local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
             unit.animation_data = anim
-            LOG.debug("Animating!", anim.playing)
+            log.debug("Animating!", anim.playing)
             while anim.playing do
                 pt.yield()
             end
@@ -363,7 +364,7 @@ function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
     local combat_result: combat_calculator.CombatResult = combat_calculator.compute_combat(attacker, defender, self.battle_map)
 
     for i,combat_step in ipairs(combat_result.steps) do
-        LOG.debug("Combat step: ",i)
+        log.debug("Combat step: ",i)
         self:apply_combat_step(combat_step as combat_calculator.CombatResult.CombatStep)
     end
 end

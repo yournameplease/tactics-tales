@@ -1,5 +1,4 @@
 require("profiler")
-require("src/tactics/debug")
 local point = require("src/tactics/util/point")
 local Point = point.Point
 
@@ -113,7 +112,7 @@ local function get_animation_frame(
 		frame_name = drawable_unit.animation_data.current_frame.frame
 		offset = drawable_unit.animation_data.current_frame.offset
 	else
-		LOG.debug("Unrecognized animation frame.")
+		log.debug("Unrecognized animation frame.")
 		frame_name = "idle_1"
 		offset = {x = 0, y = 0}
 	end

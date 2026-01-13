@@ -1,7 +1,5 @@
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-require("src/tactics/battle/pathfinding")
-require("src/tactics/debug")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local point = require("src/tactics/util/point")
 local Point = point.Point
@@ -164,7 +162,7 @@ end
 local function is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
     local dist = point.taxicab_distance(attacker.tile, defender.tile)
 
-    LOG.debug("Checking combat range", attacker.id, attacker.tile, defender.id, defender.tile, attack.min_range, attack.max_range, dist)
+    log.debug("Checking combat range", attacker.id, attacker.tile, defender.id, defender.tile, attack.min_range, attack.max_range, dist)
 
     return dist >= attack.min_range and dist <= attack.max_range
 end
@@ -187,7 +185,7 @@ end
 
 local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
     local is_long_reach = unit_is_long_reach(attacker)
-    LOG.debug("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
+    log.debug("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
     if is_long_reach and not attack.long_reach then
         return false
     end

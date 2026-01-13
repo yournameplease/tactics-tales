@@ -1,5 +1,3 @@
-require("src/tactics/debug")
-
 local record TaskManager
     tasks: { any }
 end
@@ -24,7 +22,7 @@ function TaskManager:update_tasks()
         if pt.costatus(co) == "suspended" then
             local ok, err = pt.coresume(co)
             if not ok then
-                LOG.error("Task Error: "..err)
+                log.error("Task Error: "..err)
                 assert(ok)
             end
         elseif pt.costatus(co) == "dead" then

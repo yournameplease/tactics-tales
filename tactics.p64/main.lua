@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-11 21:42:47",revision=94,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-13 02:20:43",revision=99,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -33,3 +33,5 @@ include "lib/profiler.lua"
 include "build/tactics/main.lua"
 
 include "lib/error_explorer.lua"
+
+mkdir("/appdata/tactics_tales")

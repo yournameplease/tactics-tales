@@ -1,10 +1,7 @@
-require("src/tactics/config")
 
-global LOG = {}
-
-local log_level = CONFIG.LOG_LEVEL
 
 local function should_print (level: LogLevel): boolean
+    local log_level = DYNAMIC_CONFIG.log_level
     if log_level == "ERROR" then
         return level == "ERROR"
     elseif log_level == "WARN" then
@@ -55,24 +52,20 @@ local function debug_print(level: LogLevel, ...: any)
     end
 end
 
-function LOG.error(...: any)
-    debug_print("ERROR", ...)
-end
-
-function LOG.warn(...: any)
-    debug_print("WARN", ...)
-end
-
-function LOG.info(...: any)
-    debug_print("INFO", ...)
-end
-
-function LOG.debug(...: any)
-    debug_print("DEBUG", ...)
-end
-
-function LOG.trace(...: any)
-    debug_print("TRACE", ...)
-end
-
-return LOG
+log = {
+    error = function(...: any)
+        debug_print("ERROR", ...)
+    end,
+    warn = function(...: any)
+        debug_print("WARN", ...)
+    end,
+    info = function(...: any)
+        debug_print("INFO", ...)
+    end,
+    debug = function(...: any)
+        debug_print("DEBUG", ...)
+    end,
+    trace = function(...: any)
+        debug_print("TRACE", ...)
+    end,
+}

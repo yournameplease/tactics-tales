@@ -1,5 +1,4 @@
 require("profiler")
-require("src/tactics/debug")
 require("src/tactics/config")
 
 local fp = require("src/tactics/util/fp")
@@ -30,11 +29,11 @@ setmetatable(TacticsMap, { __index = box.Box})
 
 local tactics_map = {}
 
-local MAP_WIDTH = CONFIG.MAP_WIDTH
-local MAP_HEIGHT = CONFIG.MAP_HEIGHT
-local TILE_SIZE = CONFIG.TILE_SIZE
-local TILE_WIDTH = CONFIG.TILE_SIZE.x
-local TILE_HEIGHT = CONFIG.TILE_SIZE.y
+local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
+local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
+local TILE_WIDTH = STATIC_CONFIG.TILE_WIDTH
+local TILE_HEIGHT = STATIC_CONFIG.TILE_HEIGHT
+local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 local HALF_HEIGHT = TILE_HEIGHT >> 1
 local BASE_TILE_SPRITE = 2 * 256
 
@@ -236,7 +235,7 @@ function TacticsMap:compute_children(state: UIContextManager)
                     padding = 2,
                     decoration = "border",
                 })
-                LOG.info("Adding list child")
+                log.info("Adding list child")
                 local node = vertical_list_menu.new(
                     " {text}",
                     ">{text}",
@@ -259,7 +258,7 @@ function TacticsMap:compute_children(state: UIContextManager)
             end
         else
             if #self.children ~= 0 then
-                LOG.info("removing list child")
+                log.info("removing list child")
                 self.children = {}
             end
         end
@@ -325,20 +324,20 @@ function TacticsMap:draw(
             lists.reduce(
                 pt.userdata("u8", state.battle_context.battle_map.width, state.battle_context.battle_map.height),
                 function(acc: Userdata, elem: Userdata): Userdata
-                    LOG.debug("reducing marked tiles...", acc, elem)
+                    log.debug("reducing marked tiles...", acc, elem)
                         for x = 0, self.map_width-1 do
                             local row = ""
                             for y = 0, self.map_height-1 do
                                 row = row .. acc:get(x, y)
                             end
-                            LOG.debug(x..": "..row)
+                            log.debug(x..": "..row)
                         end
                         for x = 0, self.map_width-1 do
                             local row = ""
                             for y = 0, self.map_height-1 do
                                 row = row .. elem:get(x, y)
                             end
-                            LOG.debug(x..": "..row)
+                            log.debug(x..": "..row)
                         end
                     return acc | (elem & 0x4)
             end)
@@ -356,13 +355,13 @@ function TacticsMap:draw(
             acting_player_tiles = acting_unit.valid_tiles
         end
         
-        LOG.debug("Marked Units")
+        log.debug("Marked Units")
         for x = 0, self.map_width-1 do
             local row = ""
             for y = 0, self.map_height-1 do
                 row = row .. marked_attack_tiles:get(x, y)
             end
-            LOG.debug(x..": "..row)
+            log.debug(x..": "..row)
         end
         
         local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)

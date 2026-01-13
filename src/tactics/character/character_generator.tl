@@ -58,7 +58,7 @@ function character_generator.generate_from_template(
 	template_id: string,
 	game_data: GameData
 ): character.Character
-	LOG.debug("Generating from template ", template_id)
+	log.debug("Generating from template ", template_id)
 	local template = build_template(template_id, game_data)
 	local char: character.Character = {
 		id = id,

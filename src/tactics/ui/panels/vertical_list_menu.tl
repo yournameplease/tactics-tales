@@ -1,4 +1,3 @@
-require("src/tactics/debug")
 local box = require("src/tactics/ui/box")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local text_node = require("src/tactics/ui/components/text_node")
@@ -19,7 +18,7 @@ local vertical_list_menu = {}
 function VerticalListMenu:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
 	local line = self:get_hovered_line(lx, ly)
 
-	LOG.debug("GET LIST LINE: ", line)
+	log.debug("GET LIST LINE: ", line)
 
 	return menu_mouse_selection.list(line)
 end

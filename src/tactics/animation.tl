@@ -1,4 +1,3 @@
-require("src/tactics/debug")
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local lists = require("src/tactics/util/lists")
@@ -284,14 +283,14 @@ end
 function AnimationManager:tick()
     self.global_frame = self.global_frame + 1
 
-    LOG.trace("Ticking "..#self.active_animations.." animations")
+    log.trace("Ticking "..#self.active_animations.." animations")
     for _, anim in ipairs(self.active_animations) do
         anim:tick()
     end
     local i = 1
     while i <= #self.active_animations do
         if not self.active_animations[i].playing then
-            LOG.debug("Ending animation")
+            log.debug("Ending animation")
             self.active_animations[i].animated_object.playing = false
             pt.deli(self.active_animations, i)
         else

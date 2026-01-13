@@ -1,5 +1,3 @@
-require("src/tactics/debug")
-
 local story = require("src/tactics/story/story")
 local story_types = require("src/tactics/story/types")
 local StoryId = story_types.StoryId
@@ -9,6 +7,7 @@ local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local InputContext = require("src/tactics/input/input_context").InputContext
 local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local ConfigManager = require("src/tactics/config/config_manager").ConfigManager
 local ModLoader = require("src/tactics/mods/mod_loader").ModLoader
 
 local record Game
@@ -42,6 +41,7 @@ end
 
 function game.new(
     services: GameServiceBundle,
+    config_manager: ConfigManager,
     mod_loader: ModLoader
 ): Game 
     
@@ -71,10 +71,22 @@ function game.new(
         self:exit_story()
     end)
     services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
-        LOG.debug(
+        log.debug(
             "TODO: set options: ",
             ctx.metadata["log_level"],
             ctx.metadata["draw_flexbox_debug"]
+            )
+        local config: DynamicConfig = {
+        	log_level = ctx.metadata["log_level"] as LogLevel,
+        	draw_flexbox_debug = ctx.metadata["draw_flexbox_debug"] as boolean,
+        	draw_target_debug = ctx.metadata["draw_target_debug"] as boolean,
+        }
+        config_manager:store_config(config)
+        log.debug(
+            "Set options: ",
+            config.log_level,
+            config.draw_flexbox_debug,
+            config.draw_target_debug
             )
         self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)

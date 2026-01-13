@@ -1,5 +1,3 @@
-require("src/tactics/debug")
-
 local fp = require("src/tactics/util/fp")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -50,10 +48,10 @@ function TurnManagerImpl:check_objectives(): boolean
     local battle_result = self.battle_objective_service:check_objectives(self.turn)
 
     if not battle_result.finished then
-        LOG.debug("Battle still ongoing")
+        log.debug("Battle still ongoing")
         return false
     else
-        LOG.debug("Battle finished!")
+        log.debug("Battle finished!")
         self.event_writer:emit(battle_result.command, {})
         return true
     end
@@ -91,7 +89,7 @@ function turn_manager.new(
     end)
 
     self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
-        LOG.info("Begin player turn!")
+        log.info("Begin player turn!")
         self.phase = "PLAYER"
         self.tactics_engine:refresh_all_units()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
@@ -99,11 +97,11 @@ function turn_manager.new(
 
     self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: event_bus.EventArgs)
         if self.phase ~= "PLAYER" then
-            LOG.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
+            log.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
         end
 
-        LOG.info("End player turn!")
+        log.info("End player turn!")
 
         self.event_writer:emit("TACTICS_BEGIN_ENEMY_TURN", {
             turn = self.turn
@@ -112,15 +110,15 @@ function turn_manager.new(
 
     self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
         self.phase = "ENEMY"
-        LOG.info("Begin enemy turn!")
+        log.info("Begin enemy turn!")
     end)
 
     self.event_listener:on("TACTICS_END_ENEMY_TURN", function(_: event_bus.EventArgs)
         if self.phase ~= "ENEMY" then
-            LOG.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
+            log.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
             return
         end
-        LOG.info("End enemy turn!")
+        log.info("End enemy turn!")
 
         self.turn = self.turn + 1
 
@@ -144,19 +142,19 @@ function turn_manager.new(
                 local players_to_act = self.battle_map
                     :get_units(fp.fn_and(BattleUnit.is_player, to_act))
                 if #players_to_act > 0 then
-                    LOG.debug("Setting to player turn menu")
+                    log.debug("Setting to player turn menu")
                 else
-                    LOG.debug("Finishing player action")
+                    log.debug("Finishing player action")
                     self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
                 end
             elseif self.phase == "ENEMY" then
                 local enemies_to_act = self.battle_map
                     :get_units(fp.fn_and(BattleUnit.is_enemy, to_act))
                 if #enemies_to_act > 0 then
-                    LOG.debug("Enemy turn still ongoing, handling next enemy action.")
+                    log.debug("Enemy turn still ongoing, handling next enemy action.")
                     self.enemy_ai_engine:handle_one_enemy_action()
                 else
-                    LOG.debug("Finishing enemy action")
+                    log.debug("Finishing enemy action")
                     self.event_writer:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
                 end
             end
@@ -164,11 +162,11 @@ function turn_manager.new(
     end)
 
     self.event_listener:on("BATTLE_END_VICTORY", function()
-        LOG.info("You win!")
+        log.info("You win!")
     end)
 
     self.event_listener:on("BATTLE_END_DEFEAT", function()
-        LOG.info("You lose!")
+        log.info("You lose!")
     end)
     
     self.event_listener:on("MARK_UNIT_RANGE", function(ctx: MenuContextAndCursor<BattleMenuContext>)

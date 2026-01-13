@@ -9,7 +9,9 @@ local SplitPages = require("src/tactics/ui/panels/split_pages")
 local BattleSummary = require("src/tactics/ui/panels/battle_summary")
 
 local battle_summary = BattleSummary.new()
-local map = tactics_map.new(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT,
+local map = tactics_map.new(
+	STATIC_CONFIG.MAP_WIDTH,
+	STATIC_CONFIG.MAP_HEIGHT,
         {
             decoration_padding = 2,
             decoration = "border",

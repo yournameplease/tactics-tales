@@ -84,6 +84,34 @@ function list_menu_cursor.static_definition<GC, Value>(
     })
 end
 
+function list_menu_cursor.boolean_yes_no<GC>(
+    set_context_key: string,
+    direction: ListDirection
+): ListMenuDefinition<GC, boolean>
+    local options: {boolean} = {false, true}
+    
+    local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
+        return lists.do_map(
+            options,
+            function (o: boolean): ListMenuOption<boolean>
+                return {
+                    text = o and "YES" or "NO",
+                    value = o
+                }
+            end
+        )
+    end
+    local set_selected_context = function(s: ListMenuCursor<GC, boolean>, _msb: GC, ctx: MenuContext)
+        ctx.metadata[set_context_key] = options[s.i]
+    end
+    return list_menu_cursor.definition({
+        set_selected_context = set_selected_context,
+        get_options = get_options,
+        wrap = false,
+        direction = direction,
+    })
+end
+
 function list_menu_cursor.integer_range<GC>(
     min_value: integer,
     max_value: integer,

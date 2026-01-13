@@ -1,5 +1,4 @@
 local id_generator = require("src/tactics/util/id_generator")
-require("src/tactics/debug")
 
 local type EventArgs = { string: any }
 
@@ -95,7 +94,7 @@ function EventBus:remove_all(ids: {integer})
 end
 
 function EventBus:emit(event_name: GameEvent, args: {string: any})
-    LOG.debug("Recieved event", event_name)
+    log.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
         pt.deli(self.event_history, 1)
     end
