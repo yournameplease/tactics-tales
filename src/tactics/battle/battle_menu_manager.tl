@@ -1,4 +1,3 @@
-require("src/tactics/debug")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src/tactics/util/point").Point

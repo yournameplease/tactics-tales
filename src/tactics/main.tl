@@ -1,8 +1,11 @@
 -- tactics game
 -- ynp
 
+-- static global imports
+require("src/tactics/config")
 require("src/tactics/debug")
 
+local config_manager = require("src/tactics/config/config_manager")
 
 local tasks = require("src/tactics/systems/tasks")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -45,9 +48,14 @@ function _init()
         input_service = input,
     }
 
+    local config_mgr = config_manager.new()
     local mod_loader = mod_ldr.new()
     
-    game_manager = game.new(game_services, mod_loader)
+    game_manager = game.new(
+        game_services,
+        config_mgr,
+        mod_loader
+    )
 end
 
 function _update()
@@ -74,7 +82,7 @@ function _update()
     task_manager:update_tasks()
     profile("update_tasks")
 
-    -- LOG.debug("MEM",  pt.stat(0))
+    -- log.debug("MEM",  pt.stat(0))
 end
 
 function _draw()

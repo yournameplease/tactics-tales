@@ -1,4 +1,3 @@
-require("src/tactics/debug")
 require("profiler")
 -- local colors = require("src/tactics/colors")
 
@@ -92,7 +91,7 @@ function DrawTargetManagerImpl:pop_sprite(): Userdata
 	self.current_target = pt.pop(self.targets)
 	self:apply_current_target()
 
-	-- LOG.debug("popping sprite", prev_target.ud)
+	-- log.debug("popping sprite", prev_target.ud)
 	-- for x = 0, prev_target.ud:width() - 1 do
 	-- 	local out = ""
 	-- 	for y = 0, prev_target.ud:height() - 1 do

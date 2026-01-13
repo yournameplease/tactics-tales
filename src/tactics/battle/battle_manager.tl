@@ -1,7 +1,4 @@
-require("src/tactics/debug")
-
 local InputContext = require("src/tactics/input/input_context").InputContext
-
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")

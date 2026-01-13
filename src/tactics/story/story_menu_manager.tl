@@ -1,4 +1,3 @@
-require("src/tactics/debug")
 local menu_types = require("src/tactics/menu/types")
 local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local sprite_data = require("src/tactics/character/sprite_data")
@@ -24,7 +23,7 @@ local function set_character_customization_option(
 		if mc.character_customization.appearance == nil then
 			mc.character_customization.appearance = {}
 		end
-		LOG.debug("storing context", key, cursor.options[cursor.i].value)
+		log.debug("storing context", key, cursor.options[cursor.i].value)
 		mc.character_customization.appearance[key] = cursor.options[cursor.i].value
 	end
 end

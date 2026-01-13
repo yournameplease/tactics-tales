@@ -1,5 +1,4 @@
 local point = require("src/tactics/util/point")
-require("src/tactics/debug")
 local menu_types = require ("src/tactics/menu/types")
 local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local input_service = require("src/tactics/joypad")
@@ -87,7 +86,7 @@ function BaseMenuManager:populate_menu_state(new_step: menu_types.MenuStep)
 end
 
 function BaseMenuManager:handle_menu_select()
-    LOG.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
+    log.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
 
     local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
     
@@ -97,7 +96,7 @@ function BaseMenuManager:handle_menu_select()
     })
 
     if send_command ~= nil then
-        LOG.info("Emitting menu command ", send_command)
+        log.info("Emitting menu command ", send_command)
         self.event_writer:emit(send_command, self.menu_ctx)
     end
 
@@ -110,7 +109,7 @@ function BaseMenuManager:handle_menu_back()
     local back_command = self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx, self.menu_state)
 
     if back_command ~= nil then
-        LOG.info("Emitting menu back command ", back_command)
+        log.info("Emitting menu back command ", back_command)
         local message: menu_cursor.MenuContextAndCursor<GC> = {
             ctx = self.menu_ctx,
             cursor = self.menu_cursor,

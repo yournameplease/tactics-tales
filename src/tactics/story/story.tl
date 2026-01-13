@@ -1,6 +1,3 @@
-
-require("src/tactics/debug")
-
 local animation = require("src/tactics/animation")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local battle_manager = require("src/tactics/battle/battle_manager")
@@ -66,7 +63,7 @@ end
 
 function Story:handle_new_node()
     local node_definition = self.current_node.definition
-    LOG.debug("Handling new node: ", node_definition.type)
+    log.debug("Handling new node: ", node_definition.type)
     if node_definition is story_node.JumpNode then
         self:jump_to_node(node_definition.next_node)
     elseif node_definition is story_node.ChapterHeader then
@@ -132,7 +129,7 @@ function Story:create_character(ctx: MenuContext)
 
     self.customized_character.appearance = {}
     for k,a in pairs(appearance) do
-        LOG.debug("Setting character appearance", k, a)
+        log.debug("Setting character appearance", k, a)
         self.customized_character.appearance[k] = a
     end
     self.character_manager:persist_player(self.customized_character)
@@ -202,7 +199,7 @@ function Story:update(input: InputContext)
     elseif current_node is story_node.JumpNode then
         error('in a jump node during update')
     else
-        LOG.warn("Unexpected node, add a case: "..current_node.type)
+        log.warn("Unexpected node, add a case: "..current_node.type)
         -- unexpected(current_node.type)
         self.menu_manager:update(input)
     end

@@ -1,5 +1,3 @@
-require("src/tactics/debug")
-
 local fp = require("src/tactics/util/fp")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -95,7 +93,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             destination = { point = destination, path = path},
             target_unit = { unit = choice.target }
         }
-        LOG.info(unit.id .. " will attack "..choice.target.id)
+        log.info(unit.id .. " will attack "..choice.target.id)
         self.event_writer:emit("MOVE_AND_ATTACK", action_ctx)
     elseif #deep_moves > 0 then
         local min_cost_deep_move = deep_moves[1]
@@ -119,10 +117,10 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             acting_unit = { unit = unit },
             destination = { point = current_point, path = path }
         }
-        LOG.info(unit.id .. " will move to "..current_point.x..","..current_point.y)
+        log.info(unit.id .. " will move to "..current_point.x..","..current_point.y)
         self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
     else
-        LOG.info(unit.id.." will not act.")
+        log.info(unit.id.." will not act.")
         local action_ctx = {
             acting_unit = { unit = unit },
             destination = { point = unit.tile, path = {} }

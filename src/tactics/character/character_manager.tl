@@ -1,11 +1,10 @@
-require("src/tactics/debug")
 local event_bus = require("src/tactics/systems/event_bus")
 local id_generator = require("src/tactics/util/id_generator")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local GameData = require("src/tactics/game_data").GameData
-require("src/tactics/character/animation_data")
-require("src/tactics/character/items/object/weapon")
+-- require("src/tactics/character/animation_data")
+-- require("src/tactics/character/items/object/weapon")
 local Character = require("src/tactics/character/object/character").Character
 local character_generator = require("src/tactics/character/character_generator")
 local lists = require("src/tactics/util/lists")

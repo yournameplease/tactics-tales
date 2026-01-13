@@ -502,7 +502,7 @@ function Box._draw(self: UIElement, state: UIContextManager, draw_target_manager
     Box._draw_background(self, ui_theme)
     
     -- Debug rectangle
-    -- LOG.trace(element.x, element.y, element.w, element.h)
+    -- log.trace(element.x, element.y, element.w, element.h)
     --     pt.rrect(
     --             element.x+element.internal_margin.l-element.decoration_padding,
     --             element.y+element.internal_margin.t-element.decoration_padding,
@@ -533,16 +533,16 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
         if c_l <= mx and mx < c_r
             and c_t <= my and my < c_b
         then
-            LOG.trace("checking child box for selection", child.x, child.y, c_l, c_r, c_t, c_b)
+            log.trace("checking child box for selection", child.x, child.y, c_l, c_r, c_t, c_b)
             local child_selection = box.find_topmost_selection(child, mx, my)
             if child_selection ~= nil then
-                LOG.trace("returning hovered selection", child_selection.type)
+                log.trace("returning hovered selection", child_selection.type)
                 return child_selection
             end
         end
     end
     if elem.get_selection_at ~= nil then
-        LOG.trace("checking box for selection", elem.x, elem.y)
+        log.trace("checking box for selection", elem.x, elem.y)
         return elem:get_selection_at(mx - elem.x, my - elem.y)
     end
     return nil

@@ -1,10 +1,47 @@
+-- utility error messages
 global todo: function(message?: string): any
 global unexpected: function(state: string)
 
 -- nice utility types
+global enum LogLevel
+    "ERROR"
+    "WARN"
+    "INFO"
+    "DEBUG"
+    "TRACE"
+end
+
 global type Angle = number
 global type Color = integer
 global type Path = string
+
+--- various global configs that I don't want to import everywhere
+
+global record DynamicConfig
+	log_level: LogLevel
+	draw_flexbox_debug: boolean
+	draw_target_debug: boolean
+end
+global DYNAMIC_CONFIG: DynamicConfig
+global record StaticConfig
+	SCREEN_WIDTH: integer 
+	SCREEN_HEIGHT: integer 
+	MAP_WIDTH: integer 
+	MAP_HEIGHT: integer 
+	TILE_WIDTH: integer
+	TILE_HEIGHT: integer
+	WALL_HEIGHT: integer 
+end
+global STATIC_CONFIG: StaticConfig
+
+global record Logger
+	error: function(...: any)
+	warn: function(...: any)
+	info: function(...: any)
+	debug: function(...: any)
+	trace: function(...: any)
+end
+global log: Logger
 
 --- @class __MenuItem
 --- @field id? integer Unique identifier, used to sort items (otherwise order added is used)

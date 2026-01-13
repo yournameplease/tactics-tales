@@ -1,5 +1,3 @@
-
-require("src/tactics/debug")
 local menu_types = require("src/tactics/menu/types")
 local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local menu_manager = require("src/tactics/menu/menu_manager")
@@ -79,9 +77,15 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                     }),
                     multiple_options_cursor.option_definition({
                         text = "Draw Flexbox Debug",
-                        definition = list_cursor.static_definition(
-                            {"NO", "YES"},
+                        definition = list_cursor.boolean_yes_no(
                             "draw_flexbox_debug",
+                            "horizontal"
+                        )
+                    }),
+                    multiple_options_cursor.option_definition({
+                        text = "Draw Flexbox Debug",
+                        definition = list_cursor.boolean_yes_no(
+                            "draw_target_debug",
                             "horizontal"
                         )
                     }),

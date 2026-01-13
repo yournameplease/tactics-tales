@@ -1,5 +1,4 @@
 require("profiler")
-require("src/tactics/debug")
 local lists = require("src/tactics/util/lists")
 
 -- TODO: allow different metric fonts
@@ -123,12 +122,12 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
         end
     elseif self.wrap == "wrap" then
         if width < 1 then
-            LOG.warn("Can't wrap with non-positive width.")
+            log.warn("Can't wrap with non-positive width.")
             return {}
         end
         -- this needs unit tests x.x
         local out: {string} = {}
-        LOG.trace("Wrapping text", row)
+        log.trace("Wrapping text", row)
         local line_start = 1
         local previous_word_end: integer = -1
         while true do
@@ -151,16 +150,16 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             if line_end > #row and width_of(line) <= width then
                 -- end of row without overflow
                 pt.add(out, line)
-                LOG.trace("Wrapping finished! ".. #out.. " rows.")
+                log.trace("Wrapping finished! ".. #out.. " rows.")
                 return out
             elseif previous_word_end >= line_start then
                 local sub_row = pt.sub(row, line_start, previous_word_end)
-                LOG.trace("Wrapping", sub_row)
+                log.trace("Wrapping", sub_row)
                 pt.add(out, sub_row)
                 line_start = previous_word_end + 1
             else
                 local sub_row = pt.sub(row, line_start, line_end-2)
-                LOG.trace("Hyphenating", sub_row)
+                log.trace("Hyphenating", sub_row)
                 -- need to hyphenate
                 pt.add(out, sub_row..'-')
     			line_start = line_end - 1
@@ -200,7 +199,7 @@ function TextImpl:get_wrapped_rows(): integer
         if l.wrapped_lines == nil then
             l.wrapped_lines = self:apply_text_wrapping(l.text, self.width)
         end
-        LOG.trace("wrapped lines", l.text, l.wrapped_lines)
+        log.trace("wrapped lines", l.text, l.wrapped_lines)
         return #l.wrapped_lines
     end)(self.lines) as integer
 end
