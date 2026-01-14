@@ -55,7 +55,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 9, y = 7},
+                ["head"] = { x = 9, y = 8},
                 ["main_hand"] = { x = 1, y = 8},
                 ["off_hand"] = { x = 14, y = 12},
             },
@@ -64,7 +64,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                ["head"] = { x = 10, y = 7},
+                ["head"] = { x = 10, y = 8},
                 ["main_hand"] = { x = 1, y = 7},
                 ["off_hand"] = { x = 14, y = 12},
             },
@@ -73,7 +73,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 9, y = 7},
+                ["head"] = { x = 9, y = 8},
                 ["main_hand"] = { x = 1, y = 8},
                 ["off_hand"] = { x = 14, y = 12},
             },
@@ -82,7 +82,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 9, y = 7},
+                ["head"] = { x = 9, y = 8},
                 ["main_hand"] = { x = 1, y = 8},
                 ["off_hand"] = { x = 14, y = 12},
             },
@@ -93,7 +93,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 7, y = 7},
+                ["head"] = { x = 7, y = 8},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 12, y = 12},
             },
@@ -102,7 +102,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               ["head"] = { x = 6, y = 7},
+               ["head"] = { x = 6, y = 8},
                ["main_hand"] = { x = 4, y = 11},
                ["off_hand"] = { x = 11, y = 12},
            },
@@ -111,7 +111,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 7, y = 7},
+                ["head"] = { x = 7, y = 8},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 12, y = 12},
             },
@@ -120,7 +120,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 7, y = 7},
+                ["head"] = { x = 7, y = 8},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 12, y = 12},
             },
@@ -131,7 +131,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 7},
+                ["head"] = { x = 6, y = 8},
                 ["main_hand"] = { x = 13, y = 9},
                 ["off_hand"] = { x = 3, y = 11},
             },
@@ -140,7 +140,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               ["head"] = { x = 7, y = 7},
+               ["head"] = { x = 7, y = 8},
                ["main_hand"] = { x = 14, y = 8},
                ["off_hand"] = { x = 4, y = 11},
            },
@@ -149,7 +149,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 6, y = 7},
+                ["head"] = { x = 6, y = 8},
                 ["main_hand"] = { x = 13, y = 9},
                 ["off_hand"] = { x = 3, y = 11},
             },
@@ -158,7 +158,7 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 6, y = 7},
+                ["head"] = { x = 6, y = 8},
                 ["main_hand"] = { x = 13, y = 9},
                 ["off_hand"] = { x = 3, y = 11},
             },
@@ -172,7 +172,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 9, y = 8},
+                ["head"] = { x = 9, y = 9},
                 ["main_hand"] = { x = 1, y = 10},
                 ["off_hand"] = { x = 14, y = 13},
             },
@@ -181,7 +181,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                ["head"] = { x = 10, y = 8},
+                ["head"] = { x = 10, y = 9},
                 ["main_hand"] = { x = 1, y = 9},
                 ["off_hand"] = { x = 14, y = 13},
             },
@@ -190,7 +190,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 9, y = 8},
+                ["head"] = { x = 9, y = 9},
                 ["main_hand"] = { x = 1, y = 10},
                 ["off_hand"] = { x = 14, y = 13},
             },
@@ -199,7 +199,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 9, y = 8},
+                ["head"] = { x = 9, y = 9},
                 ["main_hand"] = { x = 1, y = 10},
                 ["off_hand"] = { x = 14, y = 13},
             },
@@ -210,7 +210,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 8},
+                ["head"] = { x = 6, y = 9},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 11, y = 13},
             },
@@ -219,7 +219,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               ["head"] = { x = 5, y = 8},
+               ["head"] = { x = 5, y = 9},
                ["main_hand"] = { x = 3, y = 11},
                ["off_hand"] = { x = 10, y = 13},
            },
@@ -228,7 +228,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 6, y = 8},
+                ["head"] = { x = 6, y = 9},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 11, y = 13},
             },
@@ -237,7 +237,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 6, y = 8},
+                ["head"] = { x = 6, y = 9},
                 ["main_hand"] = { x = 3, y = 12},
                 ["off_hand"] = { x = 11, y = 13},
             },
@@ -248,7 +248,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 5, y = 8},
+                ["head"] = { x = 5, y = 9},
                 ["main_hand"] = { x = 12, y = 10},
                 ["off_hand"] = { x = 3, y = 12},
             },
@@ -257,7 +257,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         idle_2 = {
            sprite_offset = 1,
            anchors = {
-               ["head"] = { x = 6, y = 8},
+               ["head"] = { x = 6, y = 9},
                ["main_hand"] = { x = 13, y = 9},
                ["off_hand"] = { x = 4, y = 12},
            },
@@ -266,7 +266,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 5, y = 8},
+                ["head"] = { x = 5, y = 9},
                 ["main_hand"] = { x = 12, y = 10},
                 ["off_hand"] = { x = 3, y = 12},
             },
@@ -275,7 +275,7 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 5, y = 8},
+                ["head"] = { x = 5, y = 9},
                 ["main_hand"] = { x = 12, y = 10},
                 ["off_hand"] = { x = 3, y = 12},
             },

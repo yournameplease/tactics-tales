@@ -46,7 +46,7 @@ local PALETTE_BY_SIDE <total>: {Side: {Color, Color, Color}} = {
 
 local MAX_HEALTH_BAR_WIDTH = 18
 
-local NECK_ROOT = { x = 9, y = 7 }
+local NECK_ROOT = { x = 9, y = 8 }
 
 local record AnimationFrame
 	offset: Point
@@ -208,7 +208,9 @@ local function draw_character(
 		head = {
 			parent = "body",
 			sprite = sprite_data.HEAD[drawable_unit.character.appearance.head].sprite,
-			root = NECK_ROOT
+			root = NECK_ROOT,
+			scale_x = DYNAMIC_CONFIG.head_scale,
+			scale_y = DYNAMIC_CONFIG.head_scale,
 		},
 		eyes = {
 			parent = "head",

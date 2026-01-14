@@ -7,8 +7,13 @@ local PointRecord = point.PointRecord
 local record SkeletonNode
 	parent: string
 	sprite: integer
+	-- scale affects child offsets
+	scale_x: integer
+	scale_y: integer
 	sprite_back: integer
 	computed_offset: Point
+	computed_scale_x: integer
+	computed_scale_y: integer
 	root: Point
 	anchors: {string: Point}
 end
@@ -16,6 +21,8 @@ end
 local record SkeletonNodeDefinition
 	parent: string
 	sprite: integer
+	scale_x: integer
+	scale_y: integer
 	sprite_back: integer
 	root: PointRecord
 	anchors: {string: PointRecord}
@@ -52,8 +59,12 @@ function animated_skeleton.new(
 		local node: SkeletonNode = {
 			parent = n.parent,
 			sprite = n.sprite,
+			scale_x = n.scale_x or 1,
+			scale_y = n.scale_y or 1,
 			sprite_back = n.sprite_back,
 			computed_offset = nil,
+			computed_scale_x = nil,
+			computed_scale_y = nil,
 			root = n.root ~= nil and point.of_record(n.root) or nil,
 			anchors = n.anchors ~= nil and maps.map(
 				function(_: string, p: PointRecord): Point
@@ -72,7 +83,11 @@ function AnimatedSkeletonImpl:compute_offset(key: string)
 	if node.computed_offset ~= nil then
 		-- memoized
 	elseif node.parent == nil then
-		node.computed_offset = point.of(0, 0)
+		-- assert(node.root ~= nil, "Parent skeleton node must have a root.")
+		-- node.computed_offset = -node.root
+		node.computed_offset = point.of(0,0)
+		node.computed_scale_x = node.scale_x
+		node.computed_scale_y = node.scale_y
 	else
 		self:compute_offset(node.parent)
 		local parent = self.nodes[node.parent]
@@ -80,9 +95,15 @@ function AnimatedSkeletonImpl:compute_offset(key: string)
 		local parent_anchor = parent.anchors[key]
 		local child_anchor = node.root
 		if child_anchor ~= nil then
-			node.computed_offset = parent.computed_offset + parent_anchor - child_anchor
+			node.computed_scale_x = parent.computed_scale_x * node.scale_x
+			node.computed_scale_y = parent.computed_scale_y * node.scale_y
+			node.computed_offset = parent.computed_offset
+				+ parent_anchor
+				- child_anchor * point.of(node.computed_scale_x, node.computed_scale_y)
 		else
 			node.computed_offset = parent.computed_offset
+			node.computed_scale_x = parent.computed_scale_x
+			node.computed_scale_y = parent.computed_scale_y
 		end
 	end
 end
@@ -93,17 +114,40 @@ function AnimatedSkeletonImpl:compute_offsets()
 	end
 end
 
+function AnimatedSkeletonImpl:draw_sprite(
+	node: SkeletonNode,
+	base_sprite: integer,
+	s: integer,
+	x: integer,
+	y: integer
+)
+	if s ~= nil then
+		local n_x = x + node.computed_offset.x
+		local n_y = y + node.computed_offset.y
+		local n_sx = node.computed_scale_x
+		local n_sy = node.computed_scale_y
+		if n_sx ~= 1 or n_sy ~= 1 then
+			local spr_ud = pt.get_spr(s)
+			local s_w = spr_ud:width()
+			local s_h = spr_ud:height()
+			pt.sspr(base_sprite + s,
+				0, 0, s_w, s_h,
+				n_x, n_y,
+				s_w * n_sx, s_h * n_sy)
+		else
+			pt.spr(base_sprite + s, n_x, n_y)
+		end
+	end
+
+end
+
 function AnimatedSkeletonImpl:draw(base_sprite: integer, x: integer, y: integer)
 	self:compute_offsets()
 	for _,k in ipairs(self.node_order) do
 		local node = self.nodes[k]
 		if node ~= nil then
 			local s = node.sprite
-			if s ~= nil then
-				local n_x = x + node.computed_offset.x
-				local n_y = y + node.computed_offset.y
-				pt.spr(base_sprite + s, n_x, n_y)
-			end
+			self:draw_sprite(node, base_sprite, s, x, y)
 		end
 	end
 end
@@ -114,11 +158,7 @@ function AnimatedSkeletonImpl:draw_backwards(base_sprite: integer, x: integer, y
 		local node = self.nodes[k]
 		if node ~= nil then
 			local s = node.sprite_back or node.sprite
-			if s ~= nil then
-				local n_x = x + node.computed_offset.x
-				local n_y = y + node.computed_offset.y
-				pt.spr(base_sprite + s, n_x, n_y)
-			end
+			self:draw_sprite(node, base_sprite, s, x, y)
 		end
 	end
 end

@@ -71,23 +71,14 @@ function game.new(
         self:exit_story()
     end)
     services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
-        log.debug(
-            "TODO: set options: ",
-            ctx.metadata["log_level"],
-            ctx.metadata["draw_flexbox_debug"]
-            )
+        -- todo: i'd like this to be built by the menumanager if possible
         local config: DynamicConfig = {
         	log_level = ctx.metadata["log_level"] as LogLevel,
         	draw_flexbox_debug = ctx.metadata["draw_flexbox_debug"] as boolean,
         	draw_target_debug = ctx.metadata["draw_target_debug"] as boolean,
+        	head_scale = ctx.metadata["head_scale"] as integer,
         }
         config_manager:store_config(config)
-        log.debug(
-            "Set options: ",
-            config.log_level,
-            config.draw_flexbox_debug,
-            config.draw_target_debug
-            )
         self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)
 
