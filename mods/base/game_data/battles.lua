@@ -319,7 +319,7 @@ local BATTLE_DATA = {
             ),
             free_players(
                 {{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }},
-                "spawn_child_bow",
+                "spawn_child_axe",
                 nil
             ),
         }
@@ -474,7 +474,88 @@ local BATTLE_DATA = {
                 "enemy"
             ),
         }
+    },
+    ["cliff_crossing"] = {
+            map_id = "cliff_crossing",
+            tile_labels = {
+                ["player_deployment"] = { 0x00, 0x01, 0x02 },
+                ["bandit_boss"] = { 0x17 },
+                ["bandit_goon"] = { 0x10 },
+                ["cultist_goon"] = { 0x11 },
+                ["bandit_guard"] = { 0x12 },
+                ["cultist_guard"] = { 0x13 },
+                ["enemy_reinforce_e"] = { 0x18 },
+                ["enemy_reinforce_se"] = { 0x19 },
+                ["enemy_reinforce_sw_goon"] = { 0x01 },
+                ["enemy_reinforce_sw_boss"] = { 0x02 },
+            },
+            victory_conditions = {
+                objectives.escape()
+            },
+            failure_conditions = {
+                objectives.turn_limit(10)
+            },
+            enemies = {
+                { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
+                { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+                { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
+                { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
+                { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
+            },
+            players = {
+                { character_source = character_source.player_roster(), tile = "player_deployment" },
+            },
+            scripts = {
+                spawn_enemies({
+                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
+                },
+                    2,
+                    2,
+                    "after_enemy",
+                    "from_east"
+                ),
+                spawn_enemies({
+                    { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
+                },
+                    3,
+                    2,
+                    "after_enemy",
+                    "from_east"
+                ),
+                spawn_enemies({
+                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
+                },
+                    5,
+                    2,
+                    "after_enemy",
+                    "from_east"
+                ),
+                spawn_enemies({
+                    { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
+                },
+                    6,
+                    2,
+                    "after_enemy",
+                    "from_east"
+                ),
+                spawn_enemies({
+                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_sw_goon" },
+                },
+                    6,
+                    nil,
+                    "after_enemy",
+                    "from_west"
+                ),
+                spawn_enemies({
+                    { charactex_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "enemy_reinforce_sw_boss" },
+                },
+                    6,
+                    nil,
+                    "after_enemy",
+                    "from_west"
+                ),
+            }
+        }
     }
-}
 
 return BATTLE_DATA
