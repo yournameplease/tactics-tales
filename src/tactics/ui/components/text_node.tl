@@ -35,6 +35,25 @@ setmetatable(TextNode, { __index = box.Box })
 local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
+function TextNode:compute_children(state: UIContextManager)
+    -- compute text as a "child", so it may be measured
+    -- in the same frame
+    local lines = self.text or self.func(state)
+
+    if self.rows then
+        assert(
+                #lines ==
+                self.rows, "`func` should return expected number of rows"
+        )
+    end
+
+    local text_obj = self.text_object
+    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
+    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
+    text_obj:set_lines(lines)
+    text_obj:calculate_wrapping()
+end
+
 function TextNode:measure(depth: integer)
     local text_obj = self.text_object
     if text_obj ~= nil then
@@ -72,15 +91,6 @@ end
 function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     box.Box._draw(self, state, draw_target_manager, ui_theme)
 
-    local lines = self.text or self.func(state)
-
-    if self.rows then
-        assert(
-                #lines ==
-                self.rows, "`func` should return expected number of rows"
-        )
-    end
-
     local colors <total>: {UITextColor: Color} = {
         dark = ui_theme.COLOR_INTERIOR_TEXT,
         trim = ui_theme.COLOR_TRIM,
@@ -89,10 +99,6 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
     }
 
     local text_obj = self.text_object
-
-    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
-    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
-    text_obj:set_lines(lines)
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
