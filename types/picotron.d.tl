@@ -21,6 +21,7 @@ global record DynamicConfig
 	log_level: LogLevel
 	draw_flexbox_debug: boolean
 	draw_target_debug: boolean
+	head_scale: integer
 end
 global DYNAMIC_CONFIG: DynamicConfig
 global record StaticConfig
