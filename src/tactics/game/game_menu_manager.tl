@@ -89,6 +89,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                             "horizontal"
                         )
                     }),
+                    multiple_options_cursor.option_definition({
+                        text = "Head Scale",
+                        definition = list_cursor.static_definition(
+                            {1, 2, 3, 4},
+                            "head_scale",
+                            "horizontal"
+                        )
+                    }),
                 },
             }),
         }
