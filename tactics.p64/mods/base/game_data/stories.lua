@@ -119,6 +119,21 @@ local STORIES = {
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
 	),
+	cliff_crossing = stories.chapter_debug(
+		{
+			"village_hero",
+			"militia_spear_captain",
+			"militia_spearman",
+			"militia_armor",
+			"militia_archer",
+			"child_axe",
+			"child_bow",
+			"child_greatsword",
+			"village_axe",
+		},
+		"Corrupt local militia have allied with bandits!",
+		"cliff_crossing"
+	),
 	demo_story = {
 		starting_node = 'prologue',
 		nodes = {
