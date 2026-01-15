@@ -18,6 +18,7 @@ global type Path = string
 --- various global configs that I don't want to import everywhere
 
 global enum DialogueSpeed
+	"very_slow"
 	"slow"
 	"normal"
 	"fast"

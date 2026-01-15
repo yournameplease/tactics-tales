@@ -110,13 +110,7 @@ function game.new(
         self:exit_story()
     end)
     self.event_listener:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
-        -- todo: i'd like this to be built by the menumanager if possible
-        local config: DynamicConfig = {
-        	log_level = ctx.metadata["log_level"] as LogLevel,
-        	draw_flexbox_debug = ctx.metadata["draw_flexbox_debug"] as boolean,
-        	draw_target_debug = ctx.metadata["draw_target_debug"] as boolean,
-        	head_scale = ctx.metadata["head_scale"] as integer,
-        }
+        local config: DynamicConfig = ctx.metadata as DynamicConfig
         config_manager:store_config(config)
         self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)

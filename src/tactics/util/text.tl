@@ -235,7 +235,11 @@ function TextImpl:draw_text_row(
     -- pt.print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
     local out = row
     if line_count ~= nil then
-        out = pt.sub(out, 1, line_count)
+        if line_count <= 0 then
+            out = ""
+        else
+            out = pt.sub(out, 1, line_count)
+        end
     end
     pt.print(out, x, y, color)
 end
@@ -272,6 +276,10 @@ function TextImpl:draw(
     self:calculate_wrapping()
     local row_count = 0
     for i, paragraph in ipairs(self.lines) do
+        local line_count: integer = nil
+        if line_counts ~= nil then
+            line_count = line_counts[i]
+        end
         for _, text_row in ipairs(paragraph.wrapped_lines) do
             row_count = row_count + 1
 			local x_offset = self:get_text_alignment_offset(text_row, self.width)
@@ -283,7 +291,11 @@ function TextImpl:draw(
                 t_x,
                 t_y,
                 color,
-                line_counts ~= nil and line_counts[i] or nil)
+                line_count
+            )
+            if line_count ~= nil then
+                line_count = line_count - #text_row
+            end 
         end
     end
 	profile("draw_text")

@@ -97,6 +97,20 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                             "horizontal"
                         )
                     }),
+                    multiple_options_cursor.option_definition({
+                        text = "Text Speed",
+                        definition = list_cursor.static_definition(
+                            {
+                            	"very_slow",
+                            	"slow",
+                            	"normal",
+                            	"fast",
+                            	"instant",
+                            },
+                            "text_speed",
+                            "horizontal"
+                        )
+                    }),
                 },
             }),
         }

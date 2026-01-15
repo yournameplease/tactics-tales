@@ -55,10 +55,11 @@ function DialogueManagerImpl:update(_: InputContext)
 end
 
 local SPEED_MASK <total>: {DialogueSpeed: integer} = {
-	slow = 0x8,
-	normal = 0x10,
-	fast = 0x4,
-	instant = 0x0,
+	very_slow = 0x1F,
+	slow = 0x0F,
+	normal = 0x07,
+	fast = 0x03,
+	instant = 0x00,
 }
 
 local function time_at_speed(timer: integer, speed: DialogueSpeed): integer
