@@ -121,8 +121,12 @@ end
 
 function Story:advance_node()
     local node_definition = self.current_node.definition
+    -- these probably belong in the story page itself
     if node_definition is story_node.ChapterHeader then
         self.story_page:clear_chapter_header()
+    end
+    if node_definition is story_node.StoryTextNode then
+        self.story_page:finish_text()
     end
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]

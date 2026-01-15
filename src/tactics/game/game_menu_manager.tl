@@ -105,9 +105,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                             	"slow",
                             	"normal",
                             	"fast",
+                            	"very_fast",
                             	"instant",
                             },
-                            "text_speed",
+                            "dialogue_speed",
                             "horizontal"
                         )
                     }),

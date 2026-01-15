@@ -44,26 +44,36 @@ function dialogue_manager.new(): DialogueManager
 	return self
 end
 
+-- negative N: every frame, for N chars
+local SPEED_MASK <total>: {DialogueSpeed: integer} = {
+	very_slow = 0x07,
+	slow = 0x03,
+	normal = 0x01,
+	fast = -2,
+	very_fast = -8,
+	instant = -9999,
+}
+
 function DialogueManagerImpl:update(_: InputContext)
 	self.global_timer = self.global_timer + 1
 
 	for _,d in ipairs(self.active_dialogues) do
-		if d.timer == 0 then
-			d.characters_rendered = d.characters_rendered + 1
+		if d.characters_rendered < #d.text and d.timer == 0 then
+			local mask = SPEED_MASK[d.speed]
+			if mask > 0 then
+				d.characters_rendered = d.characters_rendered + 1
+			else
+				d.characters_rendered = d.characters_rendered + -mask
+			end
 		end
 	end
 end
 
-local SPEED_MASK <total>: {DialogueSpeed: integer} = {
-	very_slow = 0x1F,
-	slow = 0x0F,
-	normal = 0x07,
-	fast = 0x03,
-	instant = 0x00,
-}
-
 local function time_at_speed(timer: integer, speed: DialogueSpeed): integer
-	return timer & SPEED_MASK[speed]
+	local mask = SPEED_MASK[speed]
+	return mask > 0
+		and timer & mask
+		or 0
 end
 
 function DialogueManagerImpl:create_dialogue(
@@ -93,6 +103,7 @@ function DialogueManagerImpl:create_dialogue(
 	setmetatable(d, dialogue_mt)
 
 	d.timer_offset = time_at_speed(self.global_timer, d.speed)
+	log.debug("created text with speed: "..d.speed)
 
 	pt.add(self.active_dialogues, d)
 

@@ -81,6 +81,7 @@ local interface StoryPage
     update: function(self, input: InputContext)
     add_chapter_header: function(self, text: string, number: integer)
     clear_chapter_header: function(self)
+    finish_text: function(self)
     add_text_line: function(self, text: string)
     add_character_customization_menu: function(self, base_character: Character, anim: animation.AnimatedSpriteData)
     clear_page: function(self)
@@ -123,6 +124,12 @@ function StoryPageImpl:clear_chapter_header()
     self.chapter_text = chapter_header_node.text
     self.chapter_number = chapter_header_node.number
     pt.pop(self.nodes)
+end
+
+function StoryPageImpl:finish_text()
+    local text_node = self.nodes[#self.nodes]
+    assert(text_node is Text)
+    text_node.text.characters_rendered = #text_node.text.text
 end
 
 function StoryPageImpl:add_text_line(text: string)
