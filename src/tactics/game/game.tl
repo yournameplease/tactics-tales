@@ -5,10 +5,24 @@ local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
+local event_listener = require("src/tactics/systems/event_bus/event_listener")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local InputContext = require("src/tactics/input/input_context").InputContext
-local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local ConfigManager = require("src/tactics/config/config_manager").ConfigManager
 local ModLoader = require("src/tactics/mods/mod_loader").ModLoader
+local EventBus = require("src/tactics/systems/event_bus").EventBus
+local InputService = require("src/tactics/joypad").InputService
+local TaskManager = require("src/tactics/systems/tasks").TaskManager
+local AnimationManager = require("src/tactics/animation").AnimationManager
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+
+---@desc
+--- services needed to create a story
+local record StoryServicesBundle
+    task_manager: TaskManager
+    animation_manager: AnimationManager
+    event_bus: EventBus
+end
 
 local record Game
 	menu_manager: game_menu_manager.GameMenuManager
@@ -18,7 +32,12 @@ local record Game
     default_story: StoryId
     story: story.Story
 
-    services: GameServiceBundle
+    event_listener: event_listener.EventListener
+    event_writer: event_writer.EventWriter
+
+    ui_context: UIContextManager
+
+    story_services_bundle: StoryServicesBundle
 end
 
 local game = {
@@ -32,7 +51,14 @@ function Game:begin_story(ctx: MenuContext)
     end
 
     local game_data = self.mod_loader:load_mod_data()
-    self.story = story.new(story_id, game_data, self.services)
+    self.story = story.new(
+        story_id,
+        game_data,
+        self.story_services_bundle.task_manager,
+        self.story_services_bundle.animation_manager,
+        self.story_services_bundle.event_bus,
+        self.ui_context
+    )
 end
 
 function Game:exit_story()
@@ -40,9 +66,13 @@ function Game:exit_story()
 end
 
 function game.new(
-    services: GameServiceBundle,
+    task_manager: TaskManager,
+    animation_manager: AnimationManager,
+    event_bus: EventBus,
+    ui_context: UIContextManager,
     config_manager: ConfigManager,
-    mod_loader: ModLoader
+    mod_loader: ModLoader,
+    input_service: InputService
 ): Game 
     
     mod_loader:register_mod("base")
@@ -53,24 +83,33 @@ function game.new(
     local self: Game = setmetatable({}, { __index = Game })
     self.default_story = game_data.stories.default_story
     self.mod_loader = mod_loader
-    self.services = services
+
+    self.event_listener = event_listener.new(event_bus)
+    self.event_writer = event_writer.new(event_bus)
 
     local game_menu_ctx = game_menu_context.new(
         story_ids
     )
-	self.menu_manager = game_menu_manager.new(game_menu_ctx, self.services.event_bus)
+	self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 
-    local game_ui_ctx = game_ui_context.new(self.services.event_bus, self.menu_manager, self.services.input_service)
-    self.services.ui_context:register_ui_context(game_ui_ctx)
+    self.story_services_bundle = {
+        task_manager = task_manager,
+        animation_manager = animation_manager,
+        event_bus = event_bus,
+    }
 
-    self.services.event_bus:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
+    local game_ui_ctx = game_ui_context.new(event_bus, self.menu_manager, input_service)
+    self.ui_context = ui_context
+    self.ui_context:register_ui_context(game_ui_ctx)
+
+    self.event_listener:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
         self:begin_story(ctx)
     end)
-    self.services.event_bus:on("GAME_EXIT_STORY", function(_: MenuContext)
+    self.event_listener:on("GAME_EXIT_STORY", function(_: MenuContext)
         self:exit_story()
     end)
-    services.event_bus:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
+    self.event_listener:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
         -- todo: i'd like this to be built by the menumanager if possible
         local config: DynamicConfig = {
         	log_level = ctx.metadata["log_level"] as LogLevel,
@@ -91,6 +130,11 @@ function Game:update(input: InputContext)
     else
         self.menu_manager:update(input)
     end
+end
+
+function Game:teardown()
+    self.ui_context:unregister_ui_context("game")
+    self.event_listener:teardown()
 end
 
 return game

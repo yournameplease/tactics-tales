@@ -11,9 +11,22 @@ local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node
 local StoryId = story_types.StoryId
 local StoryDefinition = story_types.StoryDefinition
-local GameData = require("src/tactics/game_data").GameData
-local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
+local event_listener = require("src/tactics/systems/event_bus/event_listener")
+local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local Character = require("src/tactics/character/object/character").Character
+local EventBus = require("src/tactics/systems/event_bus").EventBus
+local GameData = require("src/tactics/game_data").GameData
+local TaskManager = require("src/tactics/systems/tasks").TaskManager
+local AnimationManager = require("src/tactics/animation").AnimationManager
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+
+---@desc
+--- services needed to create a battle
+local record BattleServicesBundle
+    task_manager: TaskManager
+    animation_manager: AnimationManager
+    event_bus: EventBus
+end
 
 local record Story
     record ActiveNode
@@ -43,7 +56,11 @@ local record Story
     handle_new_node: function(self)
     advance_node: function(self)
 
-    services: GameServiceBundle
+    event_listener: event_listener.EventListener
+    event_writer: event_writer.EventWriter
+
+    battle_services_bundle: BattleServicesBundle
+    ui_context: UIContextManager
 end
 
 local story = {
@@ -74,7 +91,15 @@ function Story:handle_new_node()
         self.menu_manager:set_menu("MENU_STORY_TEXT")
     elseif node_definition is story_node.BattleNode then
         local battle_id = node_definition.battle_id
-        self.battle_manager = battle_manager.new(battle_id, self.game_data, self.character_manager, self.services)
+        self.battle_manager = battle_manager.new(
+            battle_id,
+            self.game_data,
+            self.character_manager,
+            self.battle_services_bundle.task_manager,
+            self.battle_services_bundle.animation_manager,
+            self.battle_services_bundle.event_bus,
+            self.ui_context
+        )
     elseif node_definition is story_node.NewPageNode then
         self.story_page:clear_page()
         self:advance_node()
@@ -88,7 +113,7 @@ function Story:handle_new_node()
         self.story_page:add_character_customization_menu(self.customized_character, self.idle_animation)
         self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
     elseif node_definition is story_node.ExitStoryNode then
-        self.services.event_bus:emit("GAME_EXIT_STORY", {})
+        self.event_writer:emit("GAME_EXIT_STORY", {})
     else
         unexpected(node_definition.type)
     end
@@ -140,7 +165,10 @@ end
 function story.new(
     story_id: StoryId,
     game_data: GameData,
-    services: GameServiceBundle
+    task_manager: TaskManager,
+    animation_manager: AnimationManager,
+    event_bus: EventBus,
+    ui_context: UIContextManager
 ): Story
     assert(game_data.stories.data[story_id] ~= nil)
 
@@ -150,35 +178,44 @@ function story.new(
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
 
-    self.services = services
-
     self.character_manager = character_manager.new(
         game_data,
-        self.services.event_bus
+        event_bus
     )
+
+    self.event_listener = event_listener.new(event_bus)
+    self.event_writer = event_writer.new(event_bus)
     
     self.story_page = story_page.story_page()
     self.menu_manager = story_menu_manager.new(
         story_menu_context.new(),
-        self.services.event_bus
+        event_bus
     )
 
-    self.idle_animation = self.services.animation_manager:create_idle_animation()
+    self.idle_animation = animation_manager:create_idle_animation()
 
-    self.services.event_bus:on("STORY_ADVANCE_TEXT", function()
+    self.battle_services_bundle = {
+        task_manager = task_manager,
+        animation_manager = animation_manager,
+        event_bus = event_bus,
+    }
+
+    event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
     end)
-    self.services.event_bus:on("STORY_CREATE_CHARACTER", function(ctx: MenuContext)
+    event_bus:on("STORY_CREATE_CHARACTER", function(ctx: MenuContext)
         self:create_character(ctx)
     end)
 
     local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)
-    services.ui_context:register_ui_context(story_ui_ctx)
 
-    services.event_bus:on("BATTLE_END_VICTORY", function()
+    self.ui_context = ui_context
+    self.ui_context:register_ui_context(story_ui_ctx)
+
+    self.event_listener:on("BATTLE_END_VICTORY", function()
         self:handle_battle_victory( )
     end)
-    services.event_bus:on("BATTLE_END_DEFEAT", function()
+    self.event_listener:on("BATTLE_END_DEFEAT", function()
         self:handle_battle_defeat( )
     end)
     
@@ -207,6 +244,7 @@ end
 
 function Story:teardown()
     self.character_manager:teardown()    
+    self.event_listener:teardown()
 end
 
 return story
