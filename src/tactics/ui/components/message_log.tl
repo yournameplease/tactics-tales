@@ -62,7 +62,8 @@ function MessageLog:draw(state: UIContextManager, draw_target_manager: DrawTarge
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
-        ui_theme.COLOR_INTERIOR_TEXT
+        ui_theme.COLOR_INTERIOR_TEXT,
+        nil
     )
 end
 

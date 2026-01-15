@@ -4,6 +4,7 @@ local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTa
 local text = require("src/tactics/util/text")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
 local lists = require("src/tactics/util/lists")
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 
 local enum UITextColor
     "dark"
@@ -27,6 +28,7 @@ local record TextNode
     is box.UIElement, TextUIElement
     func: function(UIContextManager): { string }
     text: { string }
+    dialogue: { Dialogue }
     rows: integer
 end
 
@@ -38,7 +40,12 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 function TextNode:compute_children(state: UIContextManager)
     -- compute text as a "child", so it may be measured
     -- in the same frame
-    local lines = self.text or self.func(state)
+    local lines =
+        self.text
+        or (self.func and self.func(state))
+        or (self.dialogue and lists.map(function(d: Dialogue): string
+            return d.text
+        end)(self.dialogue))
 
     if self.rows then
         assert(
@@ -98,11 +105,21 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
         light = ui_theme.COLOR_DECORATION_SHADOW,
     }
 
+    local line_counts: {integer} = nil
+    if self.dialogue then
+        line_counts = lists.map(
+            function(d: Dialogue): integer
+                return d.characters_rendered
+            end
+        )(self.dialogue)
+    end 
+
     local text_obj = self.text_object
     text_obj:draw(
         self.x+self.internal_margin.l,
         self.y+self.internal_margin.t,
-        colors[self.text_color]
+        colors[self.text_color],
+        line_counts
     )
 end
 
@@ -121,8 +138,10 @@ function text_node.new(props: TextNode): TextNode
         self.text = props.text
     elseif props.func then
         self.func = props.func
+    elseif props.dialogue then
+        self.dialogue = props.dialogue
     else
-        error("Need either `text` or `func` for text node!")
+        error("Need either `text`, `func`, or `dialogue` for text node!")
     end
     if props.rows then
         self.rows = props.rows

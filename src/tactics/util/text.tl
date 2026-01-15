@@ -38,7 +38,7 @@ local interface Text
     get_lines: function(self): {{string}}
     calculate_wrapping: function(self)
 
-    draw: function(self, x: integer, y: integer, color: Color)
+    draw: function(self, x: integer, y: integer, color: Color, line_counts: {integer})
     
 end
 
@@ -215,7 +215,13 @@ function TextImpl:get_lines(): {{string}}
     )(self.lines)
 end
 
-function TextImpl:draw_text_row(row: string, x: integer, y: integer, color: Color)
+function TextImpl:draw_text_row(
+    row: string,
+    x: integer,
+    y: integer,
+    color: Color,
+    line_count: integer
+)
     -- local t_x: integer
     -- if self.justify == "left" then
     --     t_x = self.x + self.padding + 1
@@ -227,7 +233,11 @@ function TextImpl:draw_text_row(row: string, x: integer, y: integer, color: Colo
     --     error("Unexpected value!")
     -- end
     -- pt.print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
-    pt.print(row, x, y, color)
+    local out = row
+    if line_count ~= nil then
+        out = pt.sub(out, 1, line_count)
+    end
+    pt.print(out, x, y, color)
 end
 
 function TextImpl:get_text_alignment_offset(row: string, w: integer): integer
@@ -251,19 +261,29 @@ function TextImpl:calculate_wrapping()
     end
 end
 
-function TextImpl:draw(x: integer, y: integer, color: Color)
+function TextImpl:draw(
+    x: integer,
+    y: integer,
+    color: Color,
+    line_counts: {integer}
+)
 	profile("draw_text")
 
     self:calculate_wrapping()
     local row_count = 0
-    for _, paragraph in ipairs(self.lines) do
+    for i, paragraph in ipairs(self.lines) do
         for _, text_row in ipairs(paragraph.wrapped_lines) do
             row_count = row_count + 1
 			local x_offset = self:get_text_alignment_offset(text_row, self.width)
 
 			local t_x = x + x_offset
 			local t_y = y + ((row_count-1) * (TEXT_ROW_HEIGHT))
-            self:draw_text_row(text_row, t_x, t_y, color)
+            self:draw_text_row(
+                text_row,
+                t_x,
+                t_y,
+                color,
+                line_counts ~= nil and line_counts[i] or nil)
         end
     end
 	profile("draw_text")

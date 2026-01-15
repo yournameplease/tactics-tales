@@ -23,6 +23,7 @@ end
 local dialogue_manager = {
 	Dialogue = Dialogue,
 	DialogueImpl = DialogueImpl,
+	DialogueManager = DialogueManager
 }
 
 local record DialogueManagerImpl
@@ -45,6 +46,12 @@ end
 
 function DialogueManagerImpl:update(_: InputContext)
 	self.global_timer = self.global_timer + 1
+
+	for _,d in ipairs(self.active_dialogues) do
+		if d.timer == 0 then
+			d.characters_rendered = d.characters_rendered + 1
+		end
+	end
 end
 
 local SPEED_MASK <total>: {DialogueSpeed: integer} = {
@@ -70,8 +77,8 @@ function DialogueManagerImpl:create_dialogue(
 		can_skip = props.can_skip,
 	}
 	local dialogue_mt = {
-		__index = function(t: DialogueImpl, k: string): any
-			if k == "speed" and t.speed == nil then
+		__index = function(_t: DialogueImpl, k: string): any
+			if k == "speed" then
 				return DYNAMIC_CONFIG.dialogue_speed
 			end
 			if k == "timer" then
@@ -82,11 +89,13 @@ function DialogueManagerImpl:create_dialogue(
 			end
 		end
 	}
-	d.timer_offset = time_at_speed(self.global_timer, d.speed)
-
 	setmetatable(d, dialogue_mt)
+
+	d.timer_offset = time_at_speed(self.global_timer, d.speed)
 
 	pt.add(self.active_dialogues, d)
 
 	return d
 end
+
+return dialogue_manager

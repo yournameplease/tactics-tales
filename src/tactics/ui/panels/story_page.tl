@@ -78,7 +78,7 @@ function StoryPagePanel:compute_children(state: UIContextManager)
                 } ))
             elseif n is rendered_story_node.Text then
                 child = text_node.new({
-                    text = {n.text},
+                    dialogue = {n.text},
 					draw_properties = {
 						wrap = "wrap"
 					},
