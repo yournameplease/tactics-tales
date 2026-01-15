@@ -22,6 +22,7 @@ global enum DialogueSpeed
 	"slow"
 	"normal"
 	"fast"
+	"very_fast"
 	"instant"
 end
 global record DynamicConfig
