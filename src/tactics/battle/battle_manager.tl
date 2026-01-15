@@ -4,14 +4,17 @@ local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
-local character_manager = require("src/tactics/character/character_manager")
 local turn_manager = require("src/tactics/turn_manager")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_menu_context")
-local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
-local GameData = require("src/tactics/game_data").GameData
 local script_manager = require("src/tactics/battle/scripts/script_manager")
+local CharacterManager = require("src/tactics/character/character_manager").CharacterManager
+local EventBus = require("src/tactics/systems/event_bus").EventBus
+local GameData = require("src/tactics/game_data").GameData
+local TaskManager = require("src/tactics/systems/tasks").TaskManager
+local AnimationManager = require("src/tactics/animation").AnimationManager
+local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 
 local record BattleManager
 
@@ -24,9 +27,8 @@ local record BattleManager
     turn_manager: turn_manager.TurnManager
     script_manager: script_manager.ScriptManager
 
-    character_manager: character_manager.CharacterManager
-
-    services: GameServiceBundle
+    character_manager: CharacterManager
+    ui_context: UIContextManager
 end
 
 local battle_manager = {
@@ -36,11 +38,13 @@ local battle_manager = {
 function battle_manager.new(
     battle_id: string,
     game_data: GameData,
-    char_man: character_manager.CharacterManager,
-    services: GameServiceBundle
+    char_man: CharacterManager,
+    task_manager: TaskManager,
+    animation_manager: AnimationManager,
+    event_bus: EventBus,
+    ui_context: UIContextManager
 ): BattleManager 
     local self: BattleManager = setmetatable({}, { __index = BattleManager })
-    self.services = services
 
     self.character_manager = char_man
 
@@ -51,14 +55,14 @@ function battle_manager.new(
     self.tactics_engine = tactics_engine.new(
         self.battle_map,
         self.character_manager,
-        self.services.task_manager,
-        self.services.animation_manager,
-        self.services.event_bus
+        task_manager,
+        animation_manager,
+        event_bus
     )
 
     self.script_manager = script_manager.new(
         battle_def.scripts,
-        self.services.event_bus,
+        event_bus,
         self.battle_map,
         self.tactics_engine
     )
@@ -79,8 +83,8 @@ function battle_manager.new(
     self.enemy_ai_engine = enemy_ai_engine.new(
         self.battle_map,
         self.tactics_engine,
-        self.services.event_bus,
-        self.services.task_manager
+        event_bus,
+        task_manager
     )
     
     local battle_menu_ctx = battle_menu_context.new(
@@ -89,7 +93,7 @@ function battle_manager.new(
     )
     self.battle_menu_manager = battle_menu_manager.new(
         battle_menu_ctx,
-        self.services.event_bus
+        event_bus
     )
     
     self.turn_manager = turn_manager.new(
@@ -97,7 +101,7 @@ function battle_manager.new(
         self.tactics_engine,
         self.battle_objective_service,
         self.enemy_ai_engine,
-        self.services.event_bus,
+        event_bus,
         self.battle_menu_manager
     )
 
@@ -106,9 +110,10 @@ function battle_manager.new(
         self.battle_menu_manager,
         self.turn_manager
     )
-    self.services.ui_context:register_ui_context(battle_ui_ctx)
+    self.ui_context = ui_context
+    self.ui_context:register_ui_context(battle_ui_ctx)
 
-    self.services.event_bus:emit("TACTICS_BEGIN_BATTLE", {})
+    event_bus:emit("TACTICS_BEGIN_BATTLE", {})
 
     -- todo: re-enable when better or i add a mute button
     -- pt.music(0)
@@ -117,7 +122,7 @@ end
 
 function BattleManager:teardown()
     pt.music(-1)
-    self.services.ui_context:unregister_ui_context('battle')
+    self.ui_context:unregister_ui_context('battle')
     self.turn_manager:teardown()
     self.script_manager:teardown()
 end

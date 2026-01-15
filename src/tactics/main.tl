@@ -14,47 +14,42 @@ local ui_mgr = require("src/tactics/ui/ui_manager")
 local mod_ldr = require("src/tactics/mods/mod_loader")
 local game = require("src/tactics/game/game")
 local ui_context_manager = require("src/tactics/ui/ui_context_manager")
-local GameServiceBundle = require("src/tactics/systems/service/game_service_bundle").GameServiceBundle
 local input_service = require("src/tactics/joypad")
 local input_context = require("src/tactics/input/input_context")
 local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
 require("profiler")
 
-local input: input_service.InputService
 local user_input: input_service.UserInput
+local input: input_service.InputService
 
 local ui_context: ui_context_manager.UIContextManager
 local animation_manager: animation.AnimationManager
 local ui_manager: ui_mgr.UIManager
 local task_manager: tasks.TaskManager
 local game_manager: game.Game
+local bus: event_bus.EventBus
 
 function _init()
     input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
     animation_manager = animation.animation_manager()
-    event_bus = event_bus.new()
+    bus = event_bus.new()
 
     ui_context = ui_context_manager.new()
-    
-    -- this is stupid.  delete the bundle class
-    local game_services: GameServiceBundle = {
-    	event_bus = event_bus,
-    	task_manager = task_manager,
-    	animation_manager = animation_manager,
-        ui_context = ui_context,
-        input_service = input,
-    }
 
     local config_mgr = config_manager.new()
     local mod_loader = mod_ldr.new()
     
     game_manager = game.new(
-        game_services,
+        task_manager,
+        animation_manager,
+        bus,
+        ui_context,
         config_mgr,
-        mod_loader
+        mod_loader,
+        input_service
     )
 end
 
