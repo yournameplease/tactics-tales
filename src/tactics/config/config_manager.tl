@@ -3,6 +3,7 @@ local DEFAULT_CONFIG: DynamicConfig = {
 	draw_flexbox_debug = false,
 	draw_target_debug = false,
 	head_scale = 1,
+	dialogue_speed = "normal",
 }
 
 local interface ConfigManager
