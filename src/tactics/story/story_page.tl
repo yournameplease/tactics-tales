@@ -1,6 +1,10 @@
 local animation = require("src/tactics/animation")
 local drawable_character = require("src/tactics/story/drawable_character")
 local Character = require("src/tactics/character/object/character").Character
+local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
+local DialogueManager = dialogue_manager.DialogueManager
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+local InputContext = require("src/tactics/input/input_context").InputContext
 
 local enum RenderedStoryNodeType
     "text"
@@ -15,7 +19,7 @@ end
 local record Text
     is RenderedStoryNode
     where self.type == "text"
-    text: string
+    text: Dialogue
 end
 
 local record CharacterCustomization
@@ -47,7 +51,7 @@ function rendered_story_node.chapter_header(text: string, number: integer): Rend
     return node
 end
 
-function rendered_story_node.text(text: string): RenderedStoryNode
+function rendered_story_node.text(text: Dialogue): RenderedStoryNode
     local node: Text = {
         type = 'text',
         text = text,
@@ -60,7 +64,7 @@ function rendered_story_node.character_customization(base_character: Character, 
         type = 'character_customization',
     }
 
-    node.character = drawable_character.create_drawable_unit(
+   node.character = drawable_character.create_drawable_unit(
         base_character,
         "player",
         { vertical = "down", horizontal = "left" }
@@ -69,10 +73,17 @@ function rendered_story_node.character_customization(base_character: Character, 
     return node
 end
 
-local record StoryPage
+local interface StoryPage
     nodes: {RenderedStoryNode}
     chapter_text: string
     chapter_number: integer
+    
+    update: function(self, input: InputContext)
+    add_chapter_header: function(self, text: string, number: integer)
+    clear_chapter_header: function(self)
+    add_text_line: function(self, text: string)
+    add_character_customization_menu: function(self, base_character: Character, anim: animation.AnimatedSpriteData)
+    clear_page: function(self)
 end
 
 local story_page = {
@@ -80,21 +91,33 @@ local story_page = {
     StoryPage = StoryPage,
 }
 
+local record StoryPageImpl
+    is StoryPage
+    dialogue_manager: DialogueManager
+end
+
+
 function story_page.story_page(): StoryPage
-    local self: StoryPage = setmetatable({}, { __index = StoryPage })
+    local self: StoryPageImpl = setmetatable({
+        dialogue_manager = dialogue_manager.new()
+    }, { __index = StoryPageImpl })
     self.nodes = {}
     return self
 end
 
+function StoryPageImpl:update(input: InputContext)
+    self.dialogue_manager:update(input)
+end
+
 -- data access
 
-function StoryPage:add_chapter_header(text: string, number: integer)
+function StoryPageImpl:add_chapter_header(text: string, number: integer)
     local node = rendered_story_node.chapter_header(text, number)
     pt.add(self.nodes, node)
 end
 
 -- 
-function StoryPage:clear_chapter_header()
+function StoryPageImpl:clear_chapter_header()
     local chapter_header_node = self.nodes[#self.nodes]
     assert(chapter_header_node is ChapterHeader)
     self.chapter_text = chapter_header_node.text
@@ -102,17 +125,23 @@ function StoryPage:clear_chapter_header()
     pt.pop(self.nodes)
 end
 
-function StoryPage:add_text_line(text: string)
-    local node = rendered_story_node.text(text)
+function StoryPageImpl:add_text_line(text: string)
+    local dialogue = self.dialogue_manager:create_dialogue(
+        text,
+        {
+            can_skip = true,
+        }
+    )
+    local node = rendered_story_node.text(dialogue)
     pt.add(self.nodes, node)
 end
 
-function StoryPage:add_character_customization_menu(base_character: Character, anim: animation.AnimatedSpriteData)
+function StoryPageImpl:add_character_customization_menu(base_character: Character, anim: animation.AnimatedSpriteData)
     local node = rendered_story_node.character_customization(base_character, anim)
     pt.add(self.nodes, node)
 end
 
-function StoryPage:clear_page()
+function StoryPageImpl:clear_page()
     self.nodes = {}
 end
 

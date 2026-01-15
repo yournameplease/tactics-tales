@@ -230,6 +230,7 @@ function Story:update(input: InputContext)
         or current_node is story_node.CharacterCustomizerNode
         or current_node is story_node.ChapterHeader
     then
+        self.story_page:update(input)
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then
         self.battle_manager:update(input)
@@ -244,6 +245,7 @@ end
 
 function Story:teardown()
     self.character_manager:teardown()    
+    self.ui_context:unregister_ui_context("story")
     self.event_listener:teardown()
 end
 
