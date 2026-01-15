@@ -17,11 +17,18 @@ global type Path = string
 
 --- various global configs that I don't want to import everywhere
 
+global enum DialogueSpeed
+	"slow"
+	"normal"
+	"fast"
+	"instant"
+end
 global record DynamicConfig
 	log_level: LogLevel
 	draw_flexbox_debug: boolean
 	draw_target_debug: boolean
 	head_scale: integer
+	dialogue_speed: DialogueSpeed
 end
 global DYNAMIC_CONFIG: DynamicConfig
 global record StaticConfig
