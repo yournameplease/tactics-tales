@@ -120,7 +120,14 @@ function StoryImpl:handle_new_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.story_page:add_text_line("Customize your hero!")
         self.customized_character = self.character_manager:generate_character("village_hero")
-        self.story_page:add_character_customization_menu(self.customized_character, self.idle_animation)
+        if node_definition.name_key then
+            self.customized_character.name = self.story_memory:get(node_definition.name_key).text
+        end
+        self.story_page:add_character_customization_menu(
+            self.customized_character,
+            node_definition.key,
+            self.idle_animation
+        )
         self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
     elseif node_definition is story_node.ExitStoryNode then
         self.event_writer:emit("GAME_EXIT_STORY", {})
@@ -137,6 +144,14 @@ function StoryImpl:advance_node()
     end
     if node_definition is story_node.StoryTextNode then
         self.story_page:finish_text()
+    end
+    if node_definition is story_node.CharacterCustomizerNode then
+        self.character_manager:persist_player(self.customized_character)
+        self.story_memory:set(
+            node_definition.key,
+            story_memory.character(self.customized_character.id)
+        )
+        self.customized_character = nil
     end
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
@@ -171,8 +186,6 @@ function StoryImpl:create_character(ctx: MenuContext)
         log.debug("Setting character appearance", k, a)
         self.customized_character.appearance[k] = a
     end
-    self.character_manager:persist_player(self.customized_character)
-    self.customized_character = nil
     self:advance_node()
 end
 
