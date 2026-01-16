@@ -10,7 +10,12 @@ end
 
 local interface DialogueManager
 	update: function(self, input: InputContext)
-	create_dialogue: function(self, text: string, props: DialogueProps): Dialogue
+	create_dialogue: function(
+		self,
+		text: string,
+		props: DialogueProps,
+		replacement_vars: {string: string}
+	): Dialogue
 end
 
 local record DialogueImpl
@@ -78,10 +83,23 @@ end
 
 function DialogueManagerImpl:create_dialogue(
 	text: string,
-	props: DialogueProps
+	props: DialogueProps,
+	replacement_vars: {string: string}
 ): Dialogue
+	local replaced_text = string.gsub(
+		text,
+		"${([%w_%.]+)}",
+		function(key: string): string
+			local val = replacement_vars[key]
+			if val == nil then
+				return "[MISSING KEY: "..key.."]"
+			end
+			return val
+		end
+	)
+	
 	local d: DialogueImpl = {
-		text = text,
+		text = replaced_text,
 		characters_rendered = 0,
 
 		speed = props.speed,
