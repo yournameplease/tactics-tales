@@ -28,13 +28,24 @@ local record BattleServicesBundle
     event_bus: EventBus
 end
 
-local record Story
-    record ActiveNode
-        node_id: string
-        node_step: integer
-        definition: story_node.StoryNode
-        rendered_node: story_page.rendered_story_node.RenderedStoryNode
-    end
+local record ActiveNode
+    node_id: string
+    node_step: integer
+    definition: story_node.StoryNode
+    rendered_node: story_page.rendered_story_node.RenderedStoryNode
+end
+
+local interface Story
+    update: function(self, input: InputContext)
+    teardown: function(self)
+end
+
+local story = {
+    Story = Story
+}
+
+local record StoryImpl
+    is Story
 
     story_definition: StoryDefinition
     game_data: GameData
@@ -61,13 +72,10 @@ local record Story
 
     battle_services_bundle: BattleServicesBundle
     ui_context: UIContextManager
+
 end
 
-local story = {
-    Story = Story
-}
-
-function Story:jump_to_node(node_id: string)
+function StoryImpl:jump_to_node(node_id: string)
     local node_definition = self.story_definition.nodes[node_id][1]
     self.current_node = {
         node_id = node_id,
@@ -78,7 +86,7 @@ function Story:jump_to_node(node_id: string)
     self:handle_new_node()
 end
 
-function Story:handle_new_node()
+function StoryImpl:handle_new_node()
     local node_definition = self.current_node.definition
     log.debug("Handling new node: ", node_definition.type)
     if node_definition is story_node.JumpNode then
@@ -119,7 +127,7 @@ function Story:handle_new_node()
     end
 end
 
-function Story:advance_node()
+function StoryImpl:advance_node()
     local node_definition = self.current_node.definition
     -- these probably belong in the story page itself
     if node_definition is story_node.ChapterHeader then
@@ -133,11 +141,11 @@ function Story:advance_node()
     self:handle_new_node()
 end
 
-function Story:advance_text()
+function StoryImpl:advance_text()
     self:advance_node()
 end
 
-function Story:handle_battle_victory()
+function StoryImpl:handle_battle_victory()
     local node_definition = self.current_node.definition
     assert(node_definition is story_node.BattleNode)
 
@@ -145,7 +153,7 @@ function Story:handle_battle_victory()
     self:jump_to_node(node_definition.next_node_victory)
 end
 
-function Story:handle_battle_defeat()
+function StoryImpl:handle_battle_defeat()
     local node_definition = self.current_node.definition
     assert(node_definition is story_node.BattleNode)
     
@@ -153,7 +161,7 @@ function Story:handle_battle_defeat()
     self:jump_to_node(node_definition.next_node_victory)
 end
 
-function Story:create_character(ctx: MenuContext)
+function StoryImpl:create_character(ctx: MenuContext)
     local appearance = ctx.character_customization.appearance
 
     self.customized_character.appearance = {}
@@ -176,7 +184,7 @@ function story.new(
 ): Story
     assert(game_data.stories.data[story_id] ~= nil)
 
-    local self: Story = setmetatable({}, { __index = Story })
+    local self: StoryImpl = setmetatable({}, { __index = StoryImpl })
     self.story_id = story_id
 
     self.story_definition = game_data.stories.data[self.story_id]
@@ -228,7 +236,7 @@ function story.new(
     return self
 end
 
-function Story:update(input: InputContext)
+function StoryImpl:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
         or current_node is story_node.CharacterCustomizerNode
@@ -247,7 +255,7 @@ function Story:update(input: InputContext)
     end
 end
 
-function Story:teardown()
+function StoryImpl:teardown()
     self.character_manager:teardown()    
     self.ui_context:unregister_ui_context("story")
     self.event_listener:teardown()
