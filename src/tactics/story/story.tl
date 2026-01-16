@@ -93,6 +93,9 @@ function StoryImpl:handle_new_node()
     log.debug("Handling new node: ", node_definition.type)
     if node_definition is story_node.JumpNode then
         self:jump_to_node(node_definition.next_node)
+    elseif node_definition is story_node.SetMemoryNode then
+        self.story_memory:set(node_definition.key, story_memory.text(node_definition.value))
+        self:advance_node()
     elseif node_definition is story_node.ChapterHeader then
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.menu_manager:set_menu("MENU_STORY_TEXT")
