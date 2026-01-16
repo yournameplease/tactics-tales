@@ -162,9 +162,9 @@ local STORIES = {
 			ch_1_intro = {
 				stories.chapter_header("Homecoming", 1),
 
-				stories.story_text("After many months away training to join the royal army, ${hero_name} returned home. However, this would be no peaceful reunion."),
+				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
 				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were the ${bandit_clan} Bandits!"),
-				stories.story_text("The ${hero_village} held no militia of its own, so ${hero_name} would need to face the bandit threat on their own."),
+				stories.story_text("The ${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat on their own."),
 				stories.story_text("Prepare for battle!"),
 
 				stories.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
