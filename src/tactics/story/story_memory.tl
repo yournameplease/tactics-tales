@@ -1,3 +1,6 @@
+local CharacterManager = require("src/tactics/character/character_manager").CharacterManager
+
+local type StoryMemoryMap = { string: string | StoryMemoryMap }
 
 local enum StoryMemoryEntryType
 	"text"
@@ -29,9 +32,28 @@ local story_memory = {
 	StoryMemory = StoryMemory
 }
 
+function story_memory.text(text: string): StoryMemoryEntry
+	local entry: TextMemoryEntry = {
+		type = 'text',
+		text = text,
+	}
+	return entry
+end
+
+function story_memory.character(character_id: integer): StoryMemoryEntry
+	local entry: CharacterMemoryEntry = {
+		type = 'text',
+		character_id = character_id,
+	}
+	return entry
+end
+
 local record StoryMemoryImpl
 	is StoryMemory
+
 	global: {string: StoryMemoryEntry}
+
+    character_manager: CharacterManager
 end
 
 function StoryMemoryImpl:set(key: string, entry: StoryMemoryEntry)
@@ -42,9 +64,30 @@ function StoryMemoryImpl:get(key: string): StoryMemoryEntry
 	return self.global[key]
 end
 
-function story_memory.story_memory(): StoryMemory
+function StoryMemoryImpl:get_as_map(): StoryMemoryMap
+	local out: StoryMemoryMap = {}
+	for k,e in pairs(self.global) do
+		if e is TextMemoryEntry then
+			out[k] = e.text
+		elseif e is CharacterMemoryEntry then
+			local character = self.character_manager:get_character(e.character_id)
+			assert(character ~= nil)
+			local entry_map: StoryMemoryMap = {
+				name = character.name
+			}
+			out[k] = entry_map
+		else
+			unexpected(e.type)
+		end
+	end
+end
+
+function story_memory.new(
+	character_manager: CharacterManager
+): StoryMemory
 	local self: StoryMemoryImpl = setmetatable({
-		global = {}
+		global = {},
+		character_manager = character_manager,
 	}, {
 		__index = StoryMemoryImpl
 	})

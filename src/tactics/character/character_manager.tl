@@ -13,6 +13,7 @@ local maps = require("src/tactics/util/maps")
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
 local interface CharacterManager
+    get_character: function(self, id: integer): Character
     generate_character: function(self, template_id: string): Character
     persist_player: function(self, character: Character)
     get_player_roster: function(self): { Character }
@@ -34,6 +35,10 @@ local record CharacterManagerImpl
     characters: { integer: Character }
 
     player_ids: { integer }
+end
+    
+function CharacterManagerImpl:get_character(id: integer): Character
+    return self.characters[id]
 end
 
 function CharacterManagerImpl:generate_character(

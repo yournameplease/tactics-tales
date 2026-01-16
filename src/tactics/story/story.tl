@@ -6,6 +6,7 @@ local character_manager = require("src/tactics/character/character_manager")
 local story_menu_context = require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local story_page = require("src/tactics/story/story_page")
+local story_memory = require("src/tactics/story/story_memory")
 local InputContext = require("src/tactics/input/input_context").InputContext
 local story_types = require("src/tactics/story/types")
 local story_node = story_types.story_node
@@ -56,6 +57,7 @@ local record StoryImpl
     story_id: story_types.StoryId
 
     story_page: story_page.StoryPage
+    story_memory: story_memory.StoryMemory
 
     character_manager: character_manager.CharacterManager	
     menu_manager: story_menu_manager.StoryMenuManager
@@ -203,6 +205,7 @@ function story.new(
         story_menu_context.new(),
         event_bus
     )
+    self.story_memory = story_memory.new(self.character_manager)
 
     self.idle_animation = animation_manager:create_idle_animation()
 
