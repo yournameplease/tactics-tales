@@ -7,6 +7,7 @@ local enum StoryNodeType
 	'text'
 	'roster_add'
 	'battle'
+	'set_memory'
 	'jump'
 	'new_page'
 	'character_customizer'
@@ -33,6 +34,13 @@ local record StoryTextNode
 	is StoryNode
 	where self.type == 'text'
 	text: string
+end
+
+local record SetMemoryNode
+	is StoryNode
+	where self.type == 'set_memory'
+	key: string
+	value: string
 end
 
 local record ExitStoryNode
@@ -75,6 +83,7 @@ local story_node = {
 	ExitStoryNode = ExitStoryNode,
 	ChapterHeader = ChapterHeader,
 	BattleNode = BattleNode,
+	SetMemoryNode = SetMemoryNode,
 	JumpNode = JumpNode,
 	NewPageNode = NewPageNode,
 	RosterAddNode = RosterAddNode,
