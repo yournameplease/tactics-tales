@@ -213,12 +213,12 @@ function story.new(
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
     
-    self.story_page = story_page.story_page()
+    self.story_memory = story_memory.new(self.character_manager)
+    self.story_page = story_page.story_page(self.story_memory)
     self.menu_manager = story_menu_manager.new(
         story_menu_context.new(),
         event_bus
     )
-    self.story_memory = story_memory.new(self.character_manager)
 
     self.idle_animation = animation_manager:create_idle_animation()
 

@@ -29,6 +29,7 @@ end
 local interface StoryMemory
 	set: function(self, key: string, entry: StoryMemoryEntry)
 	get: function(self, key: string): StoryMemoryEntry
+	get_as_map: function(self): StoryMemoryMap
 end
 
 local story_memory = {

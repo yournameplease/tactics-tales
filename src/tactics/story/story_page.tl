@@ -1,5 +1,6 @@
 local animation = require("src/tactics/animation")
 local drawable_character = require("src/tactics/story/drawable_character")
+local story_memory = require("src/tactics/story/story_memory")
 local Character = require("src/tactics/character/object/character").Character
 local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
@@ -101,12 +102,15 @@ local story_page = {
 local record StoryPageImpl
     is StoryPage
     dialogue_manager: DialogueManager
+    story_memory: story_memory.StoryMemory
 end
 
-
-function story_page.story_page(): StoryPage
+function story_page.story_page(
+    story_mem: story_memory.StoryMemory
+): StoryPage
     local self: StoryPageImpl = setmetatable({
-        dialogue_manager = dialogue_manager.new()
+        dialogue_manager = dialogue_manager.new(),
+        story_memory = story_mem,
     }, { __index = StoryPageImpl })
     self.nodes = {}
     return self
@@ -143,7 +147,8 @@ function StoryPageImpl:add_text_line(text: string)
         text,
         {
             can_skip = true,
-        }
+        },
+        self.story_memory:get_as_map()
     )
     local node = rendered_story_node.text(dialogue)
     pt.add(self.nodes, node)
