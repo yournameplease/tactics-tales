@@ -46,7 +46,7 @@ end
 
 function story_memory.character(character_id: integer): StoryMemoryEntry
 	local entry: CharacterMemoryEntry = {
-		type = 'text',
+		type = 'character',
 		character_id = character_id,
 		text = "[Character ".. character_id .. "]"
 	}
@@ -82,6 +82,7 @@ function StoryMemoryImpl:get_as_map(): StoryMemoryMap
 			unexpected(e.type)
 		end
 	end
+	return out
 end
 
 function story_memory.new(
