@@ -25,6 +25,7 @@ end
 local record CharacterCustomization
     is RenderedStoryNode
     where self.type == "character_customization"
+    key: string
     character: drawable_character.DrawableCharacter
 end
 
@@ -59,12 +60,17 @@ function rendered_story_node.text(text: Dialogue): RenderedStoryNode
     return node
 end
 
-function rendered_story_node.character_customization(base_character: Character, anim: animation.AnimatedSpriteData): RenderedStoryNode
+function rendered_story_node.character_customization(
+    base_character: Character,
+    key: string,
+    anim: animation.AnimatedSpriteData
+): RenderedStoryNode
     local node: rendered_story_node.CharacterCustomization = {
         type = 'character_customization',
     }
 
-   node.character = drawable_character.create_drawable_unit(
+    node.key = key
+    node.character = drawable_character.create_drawable_unit(
         base_character,
         "player",
         { vertical = "down", horizontal = "left" }
@@ -83,7 +89,7 @@ local interface StoryPage
     clear_chapter_header: function(self)
     finish_text: function(self)
     add_text_line: function(self, text: string)
-    add_character_customization_menu: function(self, base_character: Character, anim: animation.AnimatedSpriteData)
+    add_character_customization_menu: function(self, base_character: Character, key: string, anim: animation.AnimatedSpriteData)
     clear_page: function(self)
 end
 
@@ -143,8 +149,16 @@ function StoryPageImpl:add_text_line(text: string)
     pt.add(self.nodes, node)
 end
 
-function StoryPageImpl:add_character_customization_menu(base_character: Character, anim: animation.AnimatedSpriteData)
-    local node = rendered_story_node.character_customization(base_character, anim)
+function StoryPageImpl:add_character_customization_menu(
+    base_character: Character,
+    key: string,
+    anim: animation.AnimatedSpriteData
+)
+    local node = rendered_story_node.character_customization(
+        base_character,
+        key,
+        anim
+    )
     pt.add(self.nodes, node)
 end
 

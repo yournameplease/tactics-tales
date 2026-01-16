@@ -1,6 +1,8 @@
 local CharacterManager = require("src/tactics/character/character_manager").CharacterManager
 
-local type StoryMemoryMap = { string: string | StoryMemoryMap }
+local type StoryMemoryMap = { string: string
+--| StoryMemoryMap
+}
 
 local enum StoryMemoryEntryType
 	"text"
@@ -9,6 +11,7 @@ end
 
 local interface StoryMemoryEntry
 	type: StoryMemoryEntryType
+	text: string
 end
 
 local record TextMemoryEntry
@@ -44,6 +47,7 @@ function story_memory.character(character_id: integer): StoryMemoryEntry
 	local entry: CharacterMemoryEntry = {
 		type = 'text',
 		character_id = character_id,
+		text = "[Character ".. character_id .. "]"
 	}
 	return entry
 end
@@ -72,10 +76,7 @@ function StoryMemoryImpl:get_as_map(): StoryMemoryMap
 		elseif e is CharacterMemoryEntry then
 			local character = self.character_manager:get_character(e.character_id)
 			assert(character ~= nil)
-			local entry_map: StoryMemoryMap = {
-				name = character.name
-			}
-			out[k] = entry_map
+			out[k .. ".name"] = character.name
 		else
 			unexpected(e.type)
 		end

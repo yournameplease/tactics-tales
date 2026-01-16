@@ -57,6 +57,8 @@ end
 local record CharacterCustomizerNode
 	is StoryNode
 	where self.type == 'character_customizer'
+	key: string
+	name_key: string
 end
 
 -- TODO: conditional jumps

@@ -44,9 +44,14 @@ function stories.battle(battle_id, next_node_victory, next_node_failure)
 	}
 end
 
-function stories.character_customizer()
+function stories.character_customizer(
+	key,
+	name_key
+)
 	return {
 		type = 'character_customizer',
+		key = key,
+		name_key = name_key
 	}
 end
 
@@ -139,7 +144,7 @@ local STORIES = {
 		nodes = {
 			prologue = {
 				stories.chapter_header("Prologue"),
-				stories.character_customizer(),
+				stories.character_customizer("hero", "hero_name"),
 				stories.new_page(),
 				stories.jump('ch_1_intro')
 			},
