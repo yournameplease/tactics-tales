@@ -225,6 +225,7 @@ return {
 		"demo_story",
 		"bandit_village",
 		"cultist_cave",
-		"fortress_town"
+		"fortress_town",
+		"cliff_crossing",
 	}
 }

@@ -130,7 +130,7 @@ function StoryPagePanel:compute_children(state: UIContextManager)
                     text = {num_text.."|"..chapter_text.."|"},
                     text_color = "light",
 					draw_properties = {
-                        
+                        align = true
 					},
                     auto_height = true,
                 }))

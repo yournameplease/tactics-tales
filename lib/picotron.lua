@@ -1234,7 +1234,9 @@ end
 --- @param separator? string
 --- @param convert_numbers? true
 --- @return number[]
--- global split: function(str: any, separator: any, convert_numbers: any) 
+function pt.split(str, separator)
+	return split(str, separator, false)
+end 
 
 --- Splits a string on a separator
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#split)

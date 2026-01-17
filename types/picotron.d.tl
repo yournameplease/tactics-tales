@@ -317,8 +317,8 @@ global record Picotron
 	-- ord: function(str: any, index: any, num_results: any) 
 	sub: function(str: string, pos0: integer, pos1: integer | boolean): string 
 	-- tostr: function(value: any, as_hex: any) 
-	-- split: function(str: any, separator: any, convert_numbers: any) 
-	-- split: function(str: any, separator: any, convert_numbers: any) 
+	split: function(str: string, separator: string): {string} 
+	-- split: function(str: string, separator: string, convert_numbers: boolean) 
 	-- create_delta: function(str0: any, str1: any) 
 	-- apply_delta: function(str0: any, delta: any) 
 	env: function() : __Environment 
