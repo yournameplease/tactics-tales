@@ -27,6 +27,7 @@ local record DrawProperties
     justify: Justify
     direction: Direction
     wrap: Wrap
+    align: boolean
 end
 
 local interface Text
@@ -71,6 +72,7 @@ local record TextImpl
     justify: Justify  
     direction: Direction  
     wrap: Wrap
+    align: boolean
 
     width: integer
     height: integer
@@ -85,7 +87,10 @@ function text.new(lines: {string}, draw_properties: DrawProperties, w: integer, 
 
     self.justify = draw_properties.justify or "left"
     self.direction = draw_properties.direction or "down"
-    self.wrap = draw_properties.wrap or "ellipsis"
+    self.align = draw_properties.align or false
+    self.wrap = draw_properties.wrap or (self.align and "no_wrap" or "ellipsis")
+    
+    assert((not self.align) or (self.wrap == "no_wrap"), "Got `align` with a wrap mode")
 
     self.width = w
     self.height = h
@@ -95,6 +100,7 @@ function text.new(lines: {string}, draw_properties: DrawProperties, w: integer, 
     return self
 end
 
+-- in pixels
 local function width_of(row: string): integer
     return pt.print(row, 0, -1000) as integer
 end
@@ -215,24 +221,35 @@ function TextImpl:get_lines(): {{string}}
     )(self.lines)
 end
 
-function TextImpl:draw_text_row(
+function TextImpl:get_text_alignment_offset(
+    row: string,
+    justify: Justify,
+    w: integer
+): integer
+    local line_width = width_of(row)
+    if justify == "left" then
+        return 0
+    elseif justify == "center" then
+        return (w - line_width) // 2
+    elseif justify == "right" then
+        return w - line_width - 1
+    else
+        unexpected(justify)
+    end
+end
+
+function TextImpl:draw_justified_text_row(
     row: string,
     x: integer,
     y: integer,
+    justify: Justify,
     color: Color,
+    row_number: integer,
     line_count: integer
 )
-    -- local t_x: integer
-    -- if self.justify == "left" then
-    --     t_x = self.x + self.padding + 1
-    -- elseif self.justify == "center" then
-    --     t_x = self.x + (self.w - 2 * (self.padding + 1) - line_width) // 2
-    -- elseif self.justify == "right" then
-    --     t_x = self.x + self.w - self.padding - 1 - line_width - 1
-    -- else
-    --     error("Unexpected value!")
-    -- end
-    -- pt.print(text, t_x, self.y + self.padding + 1 + ((i-1) * (TEXT_HEIGHT + 2)), ui_theme.COLOR_INTERIOR_TEXT)
+	local x_offset = self:get_text_alignment_offset(row, justify, self.width)
+	local t_x = x + x_offset
+	local t_y = y + ((row_number-1) * (TEXT_ROW_HEIGHT))
     local out = row
     if line_count ~= nil then
         if line_count <= 0 then
@@ -241,19 +258,97 @@ function TextImpl:draw_text_row(
             out = pt.sub(out, 1, line_count)
         end
     end
-    pt.print(out, x, y, color)
+    pt.print(out, t_x, t_y, color)
 end
 
-function TextImpl:get_text_alignment_offset(row: string, w: integer): integer
-    local line_width = width_of(row)
-    if self.justify == "left" then
-        return 0
-    elseif self.justify == "center" then
-        return (w - line_width) // 2
-    elseif self.justify == "right" then
-        return w - line_width - 1
+function TextImpl:draw_text_row(
+    text_row: string,
+    x: integer,
+    y: integer,
+    color: Color,
+    row_number: integer,
+    line_count: integer
+)
+    if self.align then
+        local subrows = pt.split(text_row, "|")
+
+        if (#subrows == 1) then
+            self:draw_justified_text_row(
+                subrows[1],
+                x,
+                y,
+                self.justify,
+                color,
+                row_number,
+                line_count
+            )
+        elseif (#subrows == 2) then
+            local left = subrows[1]
+            local right = subrows[2]
+
+            self:draw_justified_text_row(
+                left,
+                x,
+                y,
+                "left",
+                color,
+                row_number,
+                line_count
+            )
+            self:draw_justified_text_row(
+                right,
+                x,
+                y,
+                "right",
+                color,
+                row_number,
+                line_count
+            )
+        elseif (#subrows == 3) then
+            local left = subrows[1]
+            local mid = subrows[2]
+            local right = subrows[3]
+
+            self:draw_justified_text_row(
+                left,
+                x,
+                y,
+                "left",
+                color,
+                row_number,
+                line_count
+            )
+            self:draw_justified_text_row(
+                right,
+                x,
+                y,
+                "right",
+                color,
+                row_number,
+                line_count
+            )
+            self:draw_justified_text_row(
+                mid,
+                x,
+                y,
+                "center",
+                color,
+                row_number,
+                line_count
+            )
+        else
+            error("Tried to align with more than 3 segments: "..text_row)
+        end
     else
-        error("Unexpected value!")
+        self:draw_justified_text_row(
+            text_row,
+            x,
+            y,
+            self.justify,
+            color,
+            row_number,
+            line_count
+        )
     end
 end
 
@@ -282,17 +377,7 @@ function TextImpl:draw(
         end
         for _, text_row in ipairs(paragraph.wrapped_lines) do
             row_count = row_count + 1
-			local x_offset = self:get_text_alignment_offset(text_row, self.width)
-
-			local t_x = x + x_offset
-			local t_y = y + ((row_count-1) * (TEXT_ROW_HEIGHT))
-            self:draw_text_row(
-                text_row,
-                t_x,
-                t_y,
-                color,
-                line_count
-            )
+            self:draw_text_row(text_row, x, y, color, row_count, line_count)
             if line_count ~= nil then
                 line_count = line_count - #text_row
             end 

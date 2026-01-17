@@ -151,7 +151,9 @@ function text_node.new(props: TextNode): TextNode
     self.draw_properties = props.draw_properties or {}
     self.draw_properties.justify = self.draw_properties.justify or "left"
     self.draw_properties.direction = self.draw_properties.direction or "down"
-    self.draw_properties.wrap = self.draw_properties.wrap or "ellipsis"
+    self.draw_properties.align = self.draw_properties.align or false
+    self.draw_properties.wrap = self.draw_properties.wrap or
+        (self.draw_properties.align and "no_wrap" or "ellipsis")
 
     if props.auto_width and self.draw_properties.wrap ~= "no_wrap" then
         error("auto_width must use no_wrap")
