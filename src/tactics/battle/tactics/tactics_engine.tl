@@ -56,8 +56,32 @@ local record TacticsEngine
     -- mutations
     spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
     handle_mark_unit: function(self, Point)
-    handle_move_unit: function(self, MenuContext)
-    handle_move_and_attack: function(self, MenuContext)
+    set_unit_idle: function(self, BattleUnit)
+    finish_unit_action: function(self, BattleUnit)
+    handle_move_unit: function(self,
+        unit: BattleUnit,
+        destination: Point,
+        path: {Point}
+    )
+    handle_move_and_wait: function(self,
+        unit: BattleUnit,
+        destination: Point,
+        path: {Point}
+    )
+    jump_unit_to_point: function(self,
+        unit: BattleUnit,
+        destination: Point
+    )
+    handle_attack_unit: function(self,
+        unit: BattleUnit,
+        target: BattleUnit
+    )
+    handle_move_and_attack: function(self,
+        unit: BattleUnit,
+        destination: Point,
+        path: {Point},
+        target: BattleUnit
+    )
     do_combat: function(self, BattleUnit, BattleUnit)
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
@@ -231,6 +255,11 @@ end
 
 -- handlers
 
+
+function TacticsEngine:set_unit_idle(unit: BattleUnit)
+    unit.animation_data = self.animation_manager:create_idle_animation()
+end
+
 function TacticsEngine:finish_unit_action(unit: BattleUnit)
     unit.has_acted = true
 
@@ -249,48 +278,90 @@ function TacticsEngine:handle_mark_unit(p: Point)
     end
 end
 
-function TacticsEngine:handle_move_unit(ctx: MenuContext)
-    local unit = ctx.acting_unit.unit
-    local destination = ctx.destination.point
-    local path = ctx.destination.path
-
+function TacticsEngine:move_unit(
+    unit: BattleUnit,
+    destination: Point,
+    path: {Point}
+)
     self.battle_is_blocked = true
-    self.task_manager:start_routine(function()
-        if #path > 1 then
-            local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.animation_data = anim
-            log.debug("Animating!", anim.playing)
-            while anim.playing do
-                pt.yield()
-            end
+    if #path > 1 then
+        local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
+        unit.animation_data = anim
+        log.debug("Animating!", anim.playing)
+        while anim.playing do
+            pt.yield()
         end
+    end
 
-        self.battle_map:move_unit(unit, destination)
+    self.battle_map:move_unit(unit, destination)
+    self.battle_is_blocked = false
+    self:set_unit_idle(unit)
+end
+
+function TacticsEngine:attack_unit(
+    unit: BattleUnit, 
+    target: BattleUnit 
+)
+    self.battle_is_blocked = true
+    self:do_combat(unit, target)
+
+    target.animation_data = self.animation_manager:create_idle_animation()
+end
+
+function TacticsEngine:handle_move_unit(
+    unit: BattleUnit,
+    destination: Point,
+    path: {Point}
+)
+    self.task_manager:start_routine(function()
+        self:move_unit(
+            unit,
+            destination,
+            path
+        )
+    end)
+end
+
+function TacticsEngine:handle_attack_unit(
+    unit: BattleUnit,
+    target: BattleUnit 
+)
+    
+    self.task_manager:start_routine(function()
+        self:attack_unit(
+            unit,
+            target
+        )
+    end)
+end
+
+function TacticsEngine:jump_unit_to_point(
+    unit: BattleUnit,
+    destination: Point
+)
+    self.battle_map:move_unit(unit, destination)
+end
+
+function TacticsEngine:handle_move_and_wait(
+    unit: BattleUnit,
+    destination: Point,
+    path: {Point}
+)
+    self.task_manager:start_routine(function()
+        self:move_unit(unit, destination, path)
         self:finish_unit_action(unit)
     end)
 end
 
-function TacticsEngine:handle_move_and_attack(ctx: MenuContext)
-    local unit = ctx.acting_unit.unit
-    local destination = ctx.destination.point
-    local path = ctx.destination.path
-    local target = ctx.target_unit.unit
-
-    self.battle_is_blocked = true
+function TacticsEngine:handle_move_and_attack(
+    unit: BattleUnit,
+    destination: Point,
+    path: {Point},
+    target: BattleUnit
+)
     self.task_manager:start_routine(function()
-        if #path > 1 then
-            local anim = self.animation_manager:create_walk_animation(to_tile_path(path))
-            unit.animation_data = anim
-
-            while anim.playing do
-                pt.yield()
-            end
-        end
-
-        self.battle_map:move_unit(unit, destination)
-        self:do_combat(unit, target)
-
-        target.animation_data = self.animation_manager:create_idle_animation()
+        self:move_unit(unit, destination, path)
+        self:attack_unit(unit, target)
         self:finish_unit_action(unit)
     end)
 end

@@ -82,7 +82,7 @@ end
 
 -- utility record, used by back commands
 local record MenuContextAndCursor<GC>
-    ctx: MenuContext<GC>
+    ctx: MenuContext
 	cursor: MenuCursor<GC>
 end
 
