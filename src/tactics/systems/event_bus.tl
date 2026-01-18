@@ -5,10 +5,7 @@ local type EventArgs = { string: any }
 -- TODO: distinguish commands (menu actions)
 -- from events?
 local enum GameEvent
-    "GAME_BEGIN_STORY"
-    "GAME_EXIT_STORY"
-    "GAME_SET_OPTIONS"
-    
+    -- usually events    
     "TACTICS_BEGIN_PLAYER_TURN"
     "TACTICS_END_PLAYER_TURN"
     "TACTICS_BEGIN_ENEMY_TURN"
@@ -19,10 +16,19 @@ local enum GameEvent
     "TACTICS_UNIT_END_ACTION"
     "TACTICS_UNIT_DEATH"
 
+    -- usually menu actions
+    "GAME_BEGIN_STORY"
+    "GAME_EXIT_STORY"
+    "GAME_SET_OPTIONS"
+
     "INVENTORY_EQUIP_ITEM"
     "INVENTORY_UNEQUIP_ITEM"
     "INVENTORY_DISCARD_ITEM"
-    
+
+    "MOVE_UNIT"
+    "JUMP_UNIT"
+    "END_UNIT_TURN"
+    "ATTACK_UNIT"
     "MOVE_AND_ATTACK"
     "MOVE_AND_WAIT"
     "MARK_UNIT_RANGE"

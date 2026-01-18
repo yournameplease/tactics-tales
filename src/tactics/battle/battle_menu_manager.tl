@@ -89,6 +89,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 back_command = "MARK_UNIT_RANGE",
             }),
             ["SELECT_DESTINATION"] = grid_cursor.definition({
+                send_command = "MOVE_UNIT",
                 set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: MenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
@@ -111,6 +112,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_DESTINATION",
+                back_command = "JUMP_UNIT",
                 get_options = function(msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption}
                     local options: {list_cursor.ListMenuOption<string>} = {}
                     -- if target in range
@@ -123,7 +125,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
 
                     pt.add(options, {
                         text = "Wait",
-                        send_command = "MOVE_AND_WAIT"
+                        send_command = "END_UNIT_TURN"
                     })
 
                     pt.add(options, {
@@ -142,7 +144,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator =  function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: MenuContext): boolean
                     return validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, s.point) 
                 end,
-                send_command = "MOVE_AND_ATTACK",
+                send_command = "ATTACK_UNIT",
                 get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
                     return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
                 end
