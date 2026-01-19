@@ -308,7 +308,6 @@ function TacticsMap:draw(
     local layer_path = get_path_layer(state)
     profile("compute_path_layer")
 
-    local cursor = menu.menu_cursor
     local cursor_tile = get_cursor_tile(state)
 
     -- draw ground
@@ -350,11 +349,7 @@ function TacticsMap:draw(
             hovered_unit_tiles = hovered_unit.valid_tiles
         end
         local acting_unit = state.battle_context.acting_unit
-        local acting_player_tiles: Userdata
-        if acting_unit ~= nil then
-            acting_player_tiles = acting_unit.valid_tiles
-        end
-        
+        local acting_player_tiles = state.battle_context.acting_unit_tiles        
         log.debug("Marked Units")
         for x = 0, self.map_width-1 do
             local row = ""

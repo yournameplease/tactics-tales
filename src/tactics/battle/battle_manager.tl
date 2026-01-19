@@ -108,6 +108,7 @@ function battle_manager.new(
     local battle_ui_ctx = battle_ui_context.new(
         self.battle_map,
         self.battle_menu_manager,
+        self.tactics_engine,
         self.turn_manager
     )
     self.ui_context = ui_context

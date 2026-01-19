@@ -223,9 +223,6 @@ function turn_manager.new(
             ctx.acting_unit.unit,
             ctx.target_unit.unit
         )
-        self.tactics_engine:finish_unit_action(
-            ctx.acting_unit.unit
-        )
     end)
 
     self.event_listener:on("END_UNIT_TURN", function(ctx: MenuContext)
