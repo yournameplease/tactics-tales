@@ -95,6 +95,8 @@ function BattleUIContext:enrich()
             tiles_in_distance:foreach(function(x: integer,y: integer, in_range: boolean)
                 self.acting_unit_tiles:set(x,y,in_range and 0x6 or 0x0)
             end)
+        else
+            self.acting_unit_tiles = nil
         end
     else
         self.acting_unit_tiles = nil
