@@ -220,8 +220,8 @@ function TacticsMap:compute_children(state: UIContextManager)
     local cursor_tile = get_cursor_tile(state)
 
     if cursor_tile ~= nil then
-        local x = cursor_tile.x * TILE_SIZE.x
-        local y = cursor_tile.y * TILE_SIZE.y
+        local x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
+        local y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
 
         if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
             local children = self.children
