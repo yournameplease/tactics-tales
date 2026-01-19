@@ -326,11 +326,13 @@ function TacticsEngine:handle_attack_unit(
     unit: BattleUnit,
     target: BattleUnit 
 )
-    
     self.task_manager:start_routine(function()
         self:attack_unit(
             unit,
             target
+        )
+        self:finish_unit_action(
+            unit
         )
     end)
 end
