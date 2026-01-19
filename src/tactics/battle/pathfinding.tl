@@ -244,14 +244,14 @@ function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_leng
     while #path > max_length + 1 do
         pt.pop(path)
     end
-    while #path > 1 do
-        pt.pop(path)
+    while #path > 0 do
         local start = path[#path]
         local remaining_length = max_length + 1 - #path
         local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, max_tile)
         if full_map:get_point(target) ~= nil and full_map:get_point(target).cost <= remaining_length then
             return extend_path(path, target, full_map)
         end
+        pt.pop(path)
     end
     do
         local start = path[1]
