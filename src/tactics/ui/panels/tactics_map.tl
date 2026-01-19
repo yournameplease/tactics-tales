@@ -323,21 +323,6 @@ function TacticsMap:draw(
             lists.reduce(
                 pt.userdata("u8", state.battle_context.battle_map.width, state.battle_context.battle_map.height),
                 function(acc: Userdata, elem: Userdata): Userdata
-                    log.debug("reducing marked tiles...", acc, elem)
-                        for x = 0, self.map_width-1 do
-                            local row = ""
-                            for y = 0, self.map_height-1 do
-                                row = row .. acc:get(x, y)
-                            end
-                            log.debug(x..": "..row)
-                        end
-                        for x = 0, self.map_width-1 do
-                            local row = ""
-                            for y = 0, self.map_height-1 do
-                                row = row .. elem:get(x, y)
-                            end
-                            log.debug(x..": "..row)
-                        end
                     return acc | (elem & 0x4)
             end)
         )(marked_units)
@@ -350,14 +335,6 @@ function TacticsMap:draw(
         end
         local acting_unit = state.battle_context.acting_unit
         local acting_player_tiles = state.battle_context.acting_unit_tiles        
-        log.debug("Marked Units")
-        for x = 0, self.map_width-1 do
-            local row = ""
-            for y = 0, self.map_height-1 do
-                row = row .. marked_attack_tiles:get(x, y)
-            end
-            log.debug(x..": "..row)
-        end
         
         local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
         for x = 0, self.map_width-1 do
