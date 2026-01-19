@@ -342,6 +342,7 @@ function TacticsEngine:jump_unit_to_point(
     destination: Point
 )
     self.battle_map:move_unit(unit, destination)
+    unit.facing.vertical = "down"
 end
 
 function TacticsEngine:handle_move_and_wait(

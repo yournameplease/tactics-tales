@@ -213,9 +213,6 @@ function turn_manager.new(
             ctx.ctx.acting_unit.unit,
             ctx.ctx.acting_unit.point
         )
-        self.tactics_engine:set_unit_idle(
-            ctx.ctx.acting_unit.unit
-        )
     end)
 
     self.event_listener:on("ATTACK_UNIT", function(ctx: MenuContext)
