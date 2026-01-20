@@ -173,10 +173,30 @@ local HEAD: {string: SpriteData} = {
 		name = "Strong",
 		sprite = 1,
 	},
+	bony_chin = {
+		name = "Bony",
+		sprite = 2,
+	},
+	blocky_chin = {
+		name = "Blocky",
+		sprite = 3,
+	},
 	narrow_chin = {
 		name = "Narrow",
 		sprite = 4,
-	}
+	},
+	pointed_chin = {
+		name = "Pointed",
+		sprite = 5,
+	},
+	chubby_chin = {
+		name = "Chubby",
+		sprite = 6,
+	},
+	small_chin = {
+		name = "Small",
+		sprite = 7,
+	},
 }
 
 local HAIR: {string: SpriteData} = {
@@ -513,7 +533,12 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 local HEAD_OPTIONS = {
 	"round",
 	"strong_chin",
+	"bony_chin",
+	"blocky_chin",
 	"narrow_chin",
+	"pointed_chin",
+	"chubby_chin",
+	"small_chin",
 }
 
 local HAIR_OPTIONS = {

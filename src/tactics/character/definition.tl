@@ -30,6 +30,8 @@ local record CharacterTemplate
 	movement: integer
 	hp_max: integer
 	item_loadout: {string}
+	head_options_m: AttributeOptions
+	head_options_f: AttributeOptions
 	eyewear_options: AttributeOptions
 	headwear_options: AttributeOptions
 	body_options: AttributeOptions
