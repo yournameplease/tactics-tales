@@ -14,7 +14,7 @@ local maps = require("src/tactics/util/maps")
 -- and transient characters.  No real reason now though.
 local interface CharacterManager
     get_character: function(self, id: integer): Character
-    generate_character: function(self, template_id: string): Character
+    generate_character: function(self, template_id: string, tags: {string}): Character
     persist_player: function(self, character: Character)
     get_player_roster: function(self): { Character }
     teardown: function(self) 
@@ -42,11 +42,13 @@ function CharacterManagerImpl:get_character(id: integer): Character
 end
 
 function CharacterManagerImpl:generate_character(
-    template_id: string
+    template_id: string,
+    tags: {string}
 ): Character
     local character: Character = character_generator.generate_from_template(
         self.id_generator:get_id(),
         template_id,
+        tags,
         self.game_data
     )
 

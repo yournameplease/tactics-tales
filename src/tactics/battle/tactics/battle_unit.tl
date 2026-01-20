@@ -19,7 +19,7 @@ local record BattleUnit
     character: character.Character
 
     unit_ai: unit_ai.UnitAI
-    labels: maps.Set<string>
+    tags: maps.Set<string>
 
     valid_tiles: Userdata
     marked: boolean
@@ -36,7 +36,7 @@ local battle_unit = {
 }
 
 function BattleUnit:has_tag(tag: string): boolean
-    return self.labels[tag]
+    return self.tags[tag]
 end
 
 function BattleUnit:is_marked(): boolean
@@ -58,7 +58,7 @@ end
 function battle_unit.spawn_unit(
     permanent_unit: character.Character,
     tile: Point,
-    labels: {string},
+    tags: {string},
     side: character.Side,
     facing: character.Facing,
     ai: unit_ai.UnitAI
@@ -69,7 +69,10 @@ function battle_unit.spawn_unit(
         hp_current = permanent_unit.stats.hp_max,
         has_acted = false,
         character = permanent_unit,
-        labels = maps.set(labels),
+        tags = maps.merge(
+            maps.set(tags),
+            permanent_unit.tags
+        ),
         side = side,
         facing = facing,
         valid_tiles = nil,

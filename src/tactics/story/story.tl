@@ -117,12 +117,12 @@ function StoryImpl:handle_new_node()
         self.story_page:clear_page()
         self:advance_node()
     elseif node_definition is story_node.RosterAddNode then
-        local character = self.character_manager:generate_character(node_definition.template)
+        local character = self.character_manager:generate_character(node_definition.template, {})
         self.character_manager:persist_player(character)
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.story_page:add_text_line("Customize your hero!")
-        self.customized_character = self.character_manager:generate_character("village_hero")
+        self.customized_character = self.character_manager:generate_character("village_hero", {"hero"})
         if node_definition.name_key then
             self.customized_character.name = self.story_memory:get(node_definition.name_key).text
         end

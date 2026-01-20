@@ -62,7 +62,7 @@ function ScriptManagerImpl:register_script(
 		event = "TACTICS_UNIT_DEATH"
 		filter = function(ctx: {string: any}): boolean
 			local defender = ctx.defender as BattleUnit
-			return defender.labels[trigger.unit_label]
+			return defender.tags[trigger.unit_label]
 		end
 	else
 		unexpected(script.trigger.type)
