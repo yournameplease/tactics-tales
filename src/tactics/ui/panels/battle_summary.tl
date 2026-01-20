@@ -14,11 +14,15 @@ setmetatable(BattleSummary, { __index = box.Box })
 function BattleSummary.new(): BattleSummary
     local self = box.new({ x = 0, y = 0, auto_height = true, dir = "col", gap = 0 })
     self:add(text_node.title({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end }))
-    self:add(text_node.new({ rows = 1, func = function(state: UIContextManager): { string }
-        local turn = state.battle_context.turn_manager.turn
-        return { "Turn " .. turn }
-    end, draw_properties = {justify = "center"} }))
-    self:add(text_node.new({ rows = 1, func = function(_state: UIContextManager): {string} return { "Defeat all" }  end, draw_properties = {justify = "center"} }))
+    self:add(text_node.new({
+        auto_height = true,
+        func = function(state: UIContextManager): { string }
+            return state.battle_context.objective_text
+        end,
+        draw_properties = {
+            wrap = "wrap",
+            justify = "center",
+        } }))
 	
     return self as BattleSummary
 end

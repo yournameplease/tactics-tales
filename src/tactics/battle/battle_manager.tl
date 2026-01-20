@@ -76,6 +76,7 @@ function battle_manager.new(
 
     self.battle_objective_service = battle_objective_service.new(
         self.battle_map,
+        battle_def.turn_limit,
         battle_def.victory_conditions,
         battle_def.failure_conditions
     )
@@ -109,7 +110,8 @@ function battle_manager.new(
         self.battle_map,
         self.battle_menu_manager,
         self.tactics_engine,
-        self.turn_manager
+        self.turn_manager,
+        self.battle_objective_service
     )
     self.ui_context = ui_context
     self.ui_context:register_ui_context(battle_ui_ctx)
