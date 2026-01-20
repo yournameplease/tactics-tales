@@ -117,7 +117,10 @@ function StoryImpl:handle_new_node()
         self.story_page:clear_page()
         self:advance_node()
     elseif node_definition is story_node.RosterAddNode then
-        local character = self.character_manager:generate_character(node_definition.template, {})
+        local character = self.character_manager:generate_character(
+            node_definition.template,
+            node_definition.tags or {}
+        )
         self.character_manager:persist_player(character)
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
