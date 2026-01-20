@@ -561,19 +561,35 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
     return tiles
 end
 
--- todo: this could be ran in background,
--- during combat animations
 function TacticsEngine:compute_unit_valid_tiles()
     local units = self.battle_map:get_all_units()
+    local marked_units = self.battle_map:get_units(BattleUnit.is_marked)
 
     for _,unit in ipairs(units) do
+        unit.valid_tiles = nil
+    end
+    -- these should be computed ASAP to prevent flickering
+    for _,unit in ipairs(marked_units) do
         unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
+    -- these are less urgent
+    -- this could probably be parallelized further
+    self.task_manager:start_routine(function()
+        for _,unit in ipairs(units) do
+            if unit.valid_tiles == nil then
+                unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+                pt.yield()
+            end
+        end
+    end)
 end
 
 function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
     local unit = ctx.acting_unit.unit
 
+    if unit.valid_tiles == nil then
+        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+    end
     local tiles_ud = unit.valid_tiles
     local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
 

@@ -52,6 +52,7 @@ local record RosterAddNode
 	is StoryNode
 	where self.type == 'roster_add'
 	template: string
+	tags: {string}
 end
 
 local record BattleNode
