@@ -5,6 +5,7 @@ local TurnManager =require("src/tactics/turn_manager").TurnManager
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local TacticsEngine = require("src/tactics/battle/tactics/tactics_engine").TacticsEngine
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
+local BattleObjectiveService = require("src/tactics/battle/battle_objective_service").BattleObjectiveService
 local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
@@ -18,6 +19,7 @@ local record BattleUIContext
 
     battle_map: BattleMap
     battle_menu_manager: BattleMenuManager
+    battle_objective_service: BattleObjectiveService
     turn_manager: TurnManager
     tactics_engine: TacticsEngine
     
@@ -26,6 +28,7 @@ local record BattleUIContext
     acting_unit: BattleUnit
     acting_unit_tiles: Userdata
     destination: Point
+    objective_text: {string}
 end
 
 local battle_ui_context = {
@@ -34,9 +37,10 @@ local battle_ui_context = {
 
 function battle_ui_context.new(
     map: BattleMap,
-    battle_menu_mgr: BattleMenuManager,
+    battle_menu_manager: BattleMenuManager,
     tactics_engine: TacticsEngine,
-    turn_mgr: TurnManager
+    turn_manager: TurnManager,
+    battle_objective_service: BattleObjectiveService
 ): BattleUIContext
     local self: BattleUIContext = setmetatable({
         type = "battle"
@@ -45,10 +49,10 @@ function battle_ui_context.new(
     self.layout = "TACTICS"
     
     self.battle_map = map
-    self.battle_menu_manager = battle_menu_mgr
+    self.battle_menu_manager = battle_menu_manager
     self.tactics_engine = tactics_engine
-    self.turn_manager = turn_mgr
-
+    self.turn_manager = turn_manager
+    self.battle_objective_service = battle_objective_service
     self.last_hovered_unit = nil
     self.hovered_unit = nil
     self.acting_unit = nil
@@ -111,6 +115,9 @@ function BattleUIContext:enrich()
             self.acting_unit = nil
         end
     end
+
+    -- todo: cache
+    self.objective_text = self.battle_objective_service:get_objective_text(self.turn_manager.turn)
 end
 
 return battle_ui_context

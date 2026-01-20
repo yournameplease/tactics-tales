@@ -6,6 +6,7 @@ local lists = require("src/tactics/util/lists")
 
 local interface BattleObjectiveService
     check_objectives: function(self, turn_number: integer): BattleFinishState
+    get_objective_text: function(self, turn_number: integer): {string}
 end
 
 local record BattleFinishState
@@ -21,19 +22,25 @@ local battle_objective_service = {
 local record BattleObjectiveServiceImpl
     is BattleObjectiveService
     battle_map: BattleMap
+    turn_limit: integer
     victory_conditions: { battle_objective.VictoryCondition }
     failure_conditions: { battle_objective.FailureCondition }
 end
 
 function battle_objective_service.new(
     map: BattleMap,
+    turn_limit: integer,
     victory_conditions: { battle_objective_definition.VictoryCondition },
     failure_conditions: { battle_objective_definition.FailureCondition }
 ): BattleObjectiveService 
+    victory_conditions = victory_conditions or {}
+    failure_conditions = failure_conditions or {}
+
     local self: BattleObjectiveServiceImpl = setmetatable({
     }, { __index = BattleObjectiveServiceImpl })
 
     self.battle_map = map
+    self.turn_limit = turn_limit
     self.victory_conditions = lists.map(battle_objective_definition.to_victory_condition)(victory_conditions)
     self.failure_conditions = lists.map(battle_objective_definition.to_failure_condition)(failure_conditions)
     
@@ -44,18 +51,40 @@ end
 -- Called by TurnManager at end of actions
 function BattleObjectiveServiceImpl:check_objectives(turn_number: integer): BattleFinishState
     -- returns "WIN", "LOSS", or nil (continue)
+    local turn_limit_exceeded = self.turn_limit and turn_number > self.turn_limit
+
     for _,f in ipairs(self.failure_conditions) do
-        if f:check(self.battle_map, turn_number) then
+        if f:check(self.battle_map, turn_limit_exceeded) then
             return { finished = true, command = "BATTLE_END_DEFEAT" }
         end
     end
     for _,v in ipairs(self.victory_conditions) do
-        if v:check(self.battle_map, turn_number) then
+        if v:check(self.battle_map, turn_limit_exceeded) then
             return { finished = true, command = "BATTLE_END_VICTORY" }
         end
     end
 
     return { finished = false }    
+end
+
+function BattleObjectiveServiceImpl:get_objective_text(turn_number: integer): {string}
+    local out: {string} = {}
+
+    if self.turn_limit then
+        pt.add(out, "Turn "..turn_number.."/"..self.turn_limit) 
+    end
+    for _,v in ipairs(self.victory_conditions) do
+        if v.text then
+            pt.add(out, v.text)
+        end
+    end
+    for _,f in ipairs(self.failure_conditions) do
+        if f.text then
+            pt.add(out, f.text)
+        end
+    end
+    
+    return out
 end
 
 return battle_objective_service

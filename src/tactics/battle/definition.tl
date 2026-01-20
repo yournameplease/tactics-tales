@@ -6,6 +6,7 @@ local battle_objective = require("src/tactics/battle/definition/objective")
 local record BattleDefinition
     map_id: string
     tile_labels: { types.TileLabel: {integer} }
+    turn_limit: integer
     victory_conditions: { battle_objective.VictoryCondition }
     failure_conditions: { battle_objective.FailureCondition }
     enemies: { unit_spawn_data.UnitSpawnData}
