@@ -128,10 +128,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                         send_command = "END_UNIT_TURN"
                     })
 
-                    pt.add(options, {
-                        text = "Items",
-                        next_state = "SELECT_ITEM"
-                    })
+                    --- currently disabled as items aren't mechanically interesting yet
+                    -- pt.add(options, {
+                    --     text = "Items",
+                    --     next_state = "SELECT_ITEM"
+                    -- })
 
                     return options
                 end
