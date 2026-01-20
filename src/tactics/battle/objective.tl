@@ -22,7 +22,7 @@ end
 
 function DefeatTagged:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
     local enemies = battle_map:get_units(function(unit: BattleUnit): boolean
-		return unit:is_enemy() and unit.labels[self.tag]
+		return unit:is_enemy() and unit.tags[self.tag]
 	end)
     return #enemies == 0
 end
@@ -63,9 +63,14 @@ local record TaggedPlayerDies
 	tag: string
 end
 
--- function TaggedPlayerDies:check(battle_map: BattleMap, turn_limit_exceeded: boolean): boolean
--- 	todo()
--- end
+function TaggedPlayerDies:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+	-- todo: this checks that all tagged players are dead
+	-- move to a script if we need to check any one dies
+    local players = battle_map:get_units(function(unit: BattleUnit): boolean
+		return unit:is_player() and unit.tags[self.tag]
+	end)
+    return #players == 0
+end
 
 local record TurnLimit
 	is FailureCondition

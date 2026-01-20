@@ -9,6 +9,7 @@ local randomizer = require("src/tactics/util/randomizer")
 local ItemInventory  = require("src/tactics/character/items/object/item_inventory")
 local ItemGenerator = require("src/tactics/character/items/item_generator")
 local NAMES = require("src/tactics/corpora/names")
+local maps = require("src/tactics/util/maps")
 
 local character_generator = {}
 
@@ -56,6 +57,7 @@ end
 function character_generator.generate_from_template(
 	id: integer,
 	template_id: string,
+	tags: {string},
 	game_data: GameData
 ): character.Character
 	log.debug("Generating from template ", template_id)
@@ -108,7 +110,9 @@ function character_generator.generate_from_template(
 	if char.appearance.gender == "female" and char.appearance.body_class == "shirtless" then
 		char.appearance.body_class = "sleeveless"
 	end
-	
+
+    char.tags = maps.set(tags)
+
 	return setmetatable(char, { __index = character.Character })
 end
 

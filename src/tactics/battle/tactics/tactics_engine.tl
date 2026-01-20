@@ -156,7 +156,7 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
 
             local character_source = spawn_data.character_source
             if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
-                character = char_man:generate_character(character_source.template)
+                character = char_man:generate_character(character_source.template, {})
                 char_man:persist_player(character)
             elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
                 if player_roster[roster_count] ~= nil then

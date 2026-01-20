@@ -2,6 +2,7 @@ require("src/tactics/character/items/object/weapon")
 require("src/tactics/character/animation_data")
 local animation = require("src/tactics/animation")
 local ItemInventory = require("src/tactics/character/items/object/item_inventory")
+local maps = require("src/tactics/util/maps")
 
 local enum Side
     "player"
@@ -46,6 +47,7 @@ local record Character
     appearance: CharacterAppearance
     stats: CharacterStats
 	inventory: ItemInventory.ItemInventory
+    tags: maps.Set<string>
 end
 
 function Character:get_weapon_range(): integer, integer
