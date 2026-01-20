@@ -30,6 +30,8 @@ local function apply_template_to_parent(parent: CharacterTemplate, child: Charac
 		movement = child.movement or parent.movement, 
 		hp_max = child.hp_max or parent.hp_max, 
 		item_loadout = child.item_loadout or parent.item_loadout, 
+		head_options_m = child.head_options_m or parent.head_options_m, 
+		head_options_f = child.head_options_f or parent.head_options_f, 
 		eyewear_options = child.eyewear_options or parent.eyewear_options, 
 		headwear_options = child.headwear_options or parent.headwear_options, 
 		body_options = child.body_options or parent.body_options, 
@@ -80,11 +82,12 @@ function character_generator.generate_from_template(
         char.appearance.hair_color = to_randomizer(template.hair_color_options):pick_random()
     until sprite_data.COLOR_NAMES[char.appearance.hair_color].color
 		~= sprite_data.SKIN_COLOR[char.appearance.skin].colors[1]
-	char.appearance.head = char.appearance.gender == "male" and "round" or "narrow_chin"
 	if char.appearance.gender == "male" then
+		char.appearance.head = to_randomizer(template.head_options_m):pick_random()
 		char.appearance.hair = to_randomizer(template.hair_options_m):pick_random()
 		char.appearance.beard = to_randomizer(template.beard_options):pick_random()
 	else
+		char.appearance.head = to_randomizer(template.head_options_f):pick_random()
 		char.appearance.hair = to_randomizer(template.hair_options_f):pick_random()
 		char.appearance.beard = "none"
 	end

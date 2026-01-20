@@ -28,10 +28,11 @@ function stories.exit_story()
 	}
 end
 
-function stories.roster_add(template)
+function stories.roster_add(template, tags)
 	return {
 		type = 'roster_add',
-		template = template
+		template = template,
+		tags = tags,
 	}
 end
 
@@ -76,6 +77,7 @@ function stories.chapter_debug(
 	battle_id
 )
 	local intro_node = {}
+	add(intro_node, stories.roster_add('village_hero', {'hero'}))
 	for k,u in ipairs(roster_units) do
 		add(intro_node, stories.roster_add(u))
 	end
@@ -100,15 +102,12 @@ end
 
 local STORIES = {
 	bandit_village = stories.chapter_debug(
-		{
-			"village_hero"
-		},
+		{},
 		"A young hero finds their village under attack by bandits!",
 		"bandit_village"
 	),
 	cultist_cave = stories.chapter_debug(
 		{
-			"village_hero",
 			"militia_spear_captain",
 			"militia_spearman",
 			"militia_armor",
@@ -121,7 +120,6 @@ local STORIES = {
 	),
 	fortress_town = stories.chapter_debug(
 		{
-			"village_hero",
 			"militia_spear_captain",
 			"militia_spearman",
 			"militia_armor",
@@ -134,7 +132,6 @@ local STORIES = {
 	),
 	cliff_crossing = stories.chapter_debug(
 		{
-			"village_hero",
 			"militia_spear_captain",
 			"militia_spearman",
 			"militia_armor",

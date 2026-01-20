@@ -56,6 +56,18 @@ local BASE_UNIT = {
 		"shield"
 	},
 
+	head_options_m = options.list{
+		"round",
+		"strong_chin",
+		"bony_chin",
+		"blocky_chin",
+	},
+	head_options_f = options.list{
+		"narrow_chin",
+		"pointed_chin",
+		"chubby_chin",
+		"small_chin",
+	},
 	headwear_options = options.weighted{
 		["none"] = 8,
 		["wizard_hat"] = 1,	
