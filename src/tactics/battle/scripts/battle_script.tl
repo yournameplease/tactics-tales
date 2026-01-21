@@ -33,19 +33,18 @@ local record UnitDeath
 	unit_label: string 
 end
 
-local enum ScriptType
+local enum ScriptEffectType
 	"spawn_units"
 	"modify_units"
 	"modify_terrain"
 end
 
-local interface BattleScript
-	type: ScriptType
-	trigger: ScriptTrigger
+local interface ScriptEffect
+	type: ScriptEffectType
 end
 
 local record SpawnUnits
-	is BattleScript
+	is ScriptEffect
 	where self.type == "spawn_units"
 	animation: unit_spawn_data.UnitSpawnAnimation
     enemies: { unit_spawn_data.UnitSpawnData}
@@ -54,7 +53,7 @@ local record SpawnUnits
 end
 
 local record ModifyUnits
-	is BattleScript
+	is ScriptEffect
 	where self.type == "modify_units"
 	unit_tag: string
     new_side: character.Side
@@ -62,20 +61,27 @@ local record ModifyUnits
 end
 
 local record ModifyTerrain
-	is BattleScript
+	is ScriptEffect
 	where self.type == "modify_terrain"
 	tile_label: string
 	new_terrain: battle_map.NewTilesMap
 end
 
+local record BattleScript
+	trigger: ScriptTrigger
+	effects: {ScriptEffect}
+end
+
 local battle_script = {
 	BattleScript = BattleScript,
+	ScriptEffect = ScriptEffect,
+	ScriptTrigger = ScriptTrigger,
 	trigger = {
 		Turn = Turn,
 		TurnTriggerPhase = TurnTriggerPhase,
 		UnitDeath = UnitDeath
 	},
-	script = {
+	effect = {
 		SpawnUnits = SpawnUnits,
 		ModifyUnits = ModifyUnits,
 		TerrainLocation = battle_map.TerrainLocation,
