@@ -130,7 +130,10 @@ function scripts.effect.modify_units(
 )
 	return {
 		type = "modify_units",
-		unit_tag = unit_tag,
+		unit_selector = {
+		    type = "tag_lookup",
+		    tag = unit_tag,
+		},
 		new_ai = new_ai,
 		new_side = new_side,
 	}

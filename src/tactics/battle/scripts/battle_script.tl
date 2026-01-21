@@ -3,6 +3,32 @@ local battle_map = require("src/tactics/battle/battle_map")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local character = require("src/tactics/character/object/character")
 
+local enum UnitSelectorMode
+	"trigger_source"
+	"trigger_target"
+	"tag_lookup"	
+end
+
+local interface UnitSelector
+	type: UnitSelectorMode
+end
+
+local record TriggerSourceSelector
+	is UnitSelector
+	where self.type == "trigger_source"
+end
+
+local record TriggerTargetSelector
+	is UnitSelector
+	where self.type == "trigger_target"
+end
+
+local record TagLookupSelector
+	is UnitSelector
+	where self.type == "tag_lookup"
+	tag: string
+end
+
 local enum ScriptTriggerType
 	"turn"
 	"unit_death"
@@ -37,6 +63,8 @@ local enum ScriptEffectType
 	"spawn_units"
 	"modify_units"
 	"modify_terrain"
+	"dialogue"
+	"exit_unit"
 end
 
 local interface ScriptEffect
@@ -55,7 +83,7 @@ end
 local record ModifyUnits
 	is ScriptEffect
 	where self.type == "modify_units"
-	unit_tag: string
+	unit_selector: UnitSelector
     new_side: character.Side
     new_ai: unit_ai.UnitAI
 end
@@ -67,6 +95,13 @@ local record ModifyTerrain
 	new_terrain: battle_map.NewTilesMap
 end
 
+local record Dialogue
+	is ScriptEffect
+	where self.type == "dialogue"
+	speaking_unit: UnitSelector
+	text: {string}
+end
+
 local record BattleScript
 	trigger: ScriptTrigger
 	effects: {ScriptEffect}
@@ -76,6 +111,12 @@ local battle_script = {
 	BattleScript = BattleScript,
 	ScriptEffect = ScriptEffect,
 	ScriptTrigger = ScriptTrigger,
+	UnitSelector = UnitSelector,
+	selector = {
+		TriggerSourceSelector = TriggerSourceSelector,
+		TriggerTargetSelector = TriggerTargetSelector,
+		TagLookupSelector = TagLookupSelector,
+	},
 	trigger = {
 		Turn = Turn,
 		TurnTriggerPhase = TurnTriggerPhase,
