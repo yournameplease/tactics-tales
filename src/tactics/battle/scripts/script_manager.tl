@@ -68,46 +68,52 @@ function ScriptManagerImpl:register_script(
 		unexpected(script.trigger.type)
 	end
 	
-	local effect: function
+	local effects: {function} = {}
 
-	if script is battle_script.script.SpawnUnits then
-		effect = function()
-			log.debug("Handling SpawnUnits event")
-		    self.tactics_engine:spawn_all(
-		        script.players,
-		        script.enemies,
-		        script.neutral,
-				script.animation
-		    )
+	for _,effect in ipairs(script.effects) do
+		local fn: function
+		if effect is battle_script.effect.SpawnUnits then
+			fn = function()
+				log.debug("Handling SpawnUnits event")
+			    self.tactics_engine:spawn_all(
+			        effect.players,
+			        effect.enemies,
+			        effect.neutral,
+					effect.animation
+			    )
+			end
+		elseif effect is battle_script.effect.ModifyUnits then
+			fn = function()
+				log.debug("Handling ModifyUnits event")
+				self.tactics_engine:modify_units(
+					effect.unit_tag,
+					{
+						new_side = effect.new_side,
+						new_ai = effect.new_ai,
+					}
+				)
+			end
+		elseif effect is battle_script.effect.ModifyTerrain then
+			fn = function()
+				log.debug("Handling ModifyTerrain event")
+				self.battle_map:update_terrain(
+					effect.tile_label,
+					effect.new_terrain
+				)
+			end
+		else
+			unexpected(effect.type)
 		end
-	elseif script is battle_script.script.ModifyUnits then
-		effect = function()
-			log.debug("Handling ModifyUnits event")
-			self.tactics_engine:modify_units(
-				script.unit_tag,
-				{
-					new_side = script.new_side,
-					new_ai = script.new_ai,
-				}
-			)
-		end
-	elseif script is battle_script.script.ModifyTerrain then
-		effect = function()
-			log.debug("Handling ModifyTerrain event")
-			self.battle_map:update_terrain(
-				script.tile_label,
-				script.new_terrain
-			)
-		end
-	else
-		unexpected(script.type)
+		pt.add(effects, fn)
 	end
 
 	self.event_listener:on(
 		event,
 		function(args: {string: any})
 			if filter(args) then
-				effect()
+				for _,effect in ipairs(effects) do
+					effect()
+				end
 			end
 		end
 	)
