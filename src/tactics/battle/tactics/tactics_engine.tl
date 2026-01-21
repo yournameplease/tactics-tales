@@ -85,7 +85,7 @@ local record TacticsEngine
     do_combat: function(self, BattleUnit, BattleUnit)
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
-    modify_units: function(self, unit_tag: string, new_unit_properties: NewUnitProperties)
+    modify_units: function(self, units: {BattleUnit}, new_unit_properties: NewUnitProperties)
     
     update: function(self)
 end
@@ -369,9 +369,7 @@ function TacticsEngine:handle_move_and_attack(
     end)
 end
 
-function TacticsEngine:modify_units(unit_tag: string, new_unit_properties: NewUnitProperties)
-    local units = self.battle_map:get_units(battle_unit.has_tag(unit_tag))
-
+function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: NewUnitProperties)
     for _,u in ipairs(units) do
         if new_unit_properties.new_ai ~= nil then
             u.unit_ai = new_unit_properties.new_ai
