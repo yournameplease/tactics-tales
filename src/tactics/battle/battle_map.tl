@@ -7,6 +7,7 @@ local BattleUnit = battle_unit.BattleUnit
 local battle_definition_types = require("src/tactics/battle/definition/types")
 local types = require("src/tactics/battle/battle_map/types")
 local TileDistance = types.TileDistance
+local InteractionHook = types.InteractionHook
 local TileInteractionHook = types.TileInteractionHook
 local UnitInteractionHook = types.UnitInteractionHook
 
@@ -279,6 +280,51 @@ function BattleMap:register_unit_interaction(
     }
 
     self.interactions_by_unit_id[unit.id][script_id] = hook
+end
+
+function BattleMap:get_nearby_interactions(
+    tile: Point
+): { InteractionHook }
+    local adjacent_offsets = {
+        point.of(0, -1),
+        point.of(-1, 0),
+        point.of(1, 0),
+        point.of(0, 1),
+    }
+    local out: {InteractionHook} = {}
+
+    if self.interactions_by_x_y:get_point(tile)["on"] ~= nil then
+        local interactions = self.interactions_by_x_y:get_point(tile)["on"]
+        for _,i in pairs(interactions) do
+            local hook: InteractionHook = {
+                script_id = i.script_id,
+                interaction_text = i.interaction_text,
+                target_tile = point,
+            }
+            pt.add(out, hook)
+        end
+    end
+
+    for _,offset in ipairs(adjacent_offsets) do
+        local p = tile+offset
+        if self.interactions_by_x_y:is_point_in_range(p) then
+            if self.interactions_by_x_y:get_point(p)["on"] ~= nil then
+                local interactions = self.interactions_by_x_y:get_point(p)["on"]
+                for _,i in pairs(interactions) do
+                    local hook: InteractionHook = {
+                        script_id = i.script_id,
+                        interaction_text = i.interaction_text,
+                        target_tile = p,
+                    }
+                    pt.add(out, hook)
+                end
+            end
+        end
+    end
+
+    -- TODO: unit interactions
+
+    return out
 end
 
 return battle_map
