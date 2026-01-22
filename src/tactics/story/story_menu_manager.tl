@@ -33,7 +33,7 @@ local function list_cursor_definition_for_part(
     options: {{ string, sprite_data.NamedSpriteData }}
 ): list_cursor.ListMenuDefinition<StoryMenuContext, string>
     local cursor_options = lists.map(
-		function(option: {string, sprite_data.NamedSpriteData}): list_cursor.ListMenuOption<string>
+		function(option: {string, sprite_data.NamedSpriteData}): list_cursor.ListMenuOption<StoryMenuContext, string>
         	return {
             	text = option[2].name,
             	value = option[1],

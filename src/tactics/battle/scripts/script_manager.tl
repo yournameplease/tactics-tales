@@ -153,11 +153,11 @@ function ScriptManagerImpl:register_script(
 				}
 		end
 	elseif trigger is battle_script.trigger.UnitInteraction then
-		event = "TACTICS_UNIT_INTERACTION"
+		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
 			return
-				todo() as boolean,
+				menu_ctx.selected_script.script_id == script.id,
 				{
 					source_unit = menu_ctx.acting_unit.unit,
 					source_tile = menu_ctx.acting_unit.point,
@@ -166,11 +166,11 @@ function ScriptManagerImpl:register_script(
 				}
 		end
 	elseif trigger is battle_script.trigger.TileInteraction then
-		event = "TACTICS_TILE_INTERACTION"
+		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
 			return
-				todo() as boolean,
+				menu_ctx.selected_script.script_id == script.id,
 				{
 					source_unit = menu_ctx.acting_unit.unit,
 					source_tile = menu_ctx.acting_unit.point,

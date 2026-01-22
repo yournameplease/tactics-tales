@@ -15,18 +15,19 @@ end
 
 -- Value is not needed if no context is stored...
 -- I just use string for default
-local record ListMenuOption<Value>
+local record ListMenuOption<GC, Value>
     text: string
     value: Value
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
+    set_selected_context: function(GC, MenuContext)
 end
 
 local record ListMenuCursor<GC, Value>
     is menu_cursor.MenuCursor<GC>
     where self.type == "list"
     i: integer
-    options: { ListMenuOption<Value> }
+    options: { ListMenuOption<GC, Value> }
 
     -- from definition
     direction: ListDirection
@@ -65,7 +66,7 @@ function list_menu_cursor.static_definition<GC, Value>(
     local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
         return lists.do_map(
             options,
-            function (o: Value): ListMenuOption<Value>
+            function (o: Value): ListMenuOption<GC, Value>
                 return {
                     text = tostring(o),
                     value = o
@@ -93,7 +94,7 @@ function list_menu_cursor.boolean_yes_no<GC>(
     local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
         return lists.do_map(
             options,
-            function (o: boolean): ListMenuOption<boolean>
+            function (o: boolean): ListMenuOption<GC, boolean>
                 return {
                     text = o and "YES" or "NO",
                     value = o
@@ -164,6 +165,9 @@ end
 function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): string, event_bus.GameEvent
     if self.set_selected_context ~= nil then
         self.set_selected_context(self, game_ctx, menu_ctx)
+    end
+    if self.options[self.i].set_selected_context ~= nil then
+        self.options[self.i].set_selected_context(game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state, self.options[self.i].send_command
 end

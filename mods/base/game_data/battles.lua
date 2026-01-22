@@ -329,6 +329,40 @@ local BATTLE_DATA = {
                 "spawn_child_axe",
                 nil
             ),
+            {
+                trigger = {
+                    type = "tile_interaction",
+                    tile_specifier = {
+                        type = "static_point",
+                        point = {x = 2, y = 13},
+                    },
+                    interaction_text = "test on",
+                    interaction_distance = "on",
+
+                },
+                effects = {
+                    scripts.effect.spawn_units({},
+                        { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }
+                        , "from_east"),
+                }       
+            },
+            {
+                trigger = {
+                    type = "tile_interaction",
+                    tile_specifier = {
+                        type = "static_point",
+                        point = {x = 2, y = 13},
+                    },
+                    interaction_text = "test adjacent",
+                    interaction_distance = "adjacent",
+
+                },
+                effects = {
+                    scripts.effect.spawn_units({},
+                        { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }
+                        , "from_east"),
+                }       
+            },
         }
     },
     ["cultist_cave"] = {
