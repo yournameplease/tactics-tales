@@ -102,7 +102,7 @@ function battle_map.new(width: integer, height: integer, labels: { string: {Poin
         units_by_id = {},
         units_by_x_y = array_2d.new(width, height),
         interactions_by_unit_id = {},
-        interactions_by_x_y = array_2d.new(width, height, {}),
+        interactions_by_x_y = array_2d.new(width, height),
     }, { __index = BattleMap })
     self.tile_labels = labels
     self.width = width
@@ -267,11 +267,15 @@ function BattleMap:register_tile_interaction(
     }
 
     local interactions_at_point = self.interactions_by_x_y:get_point(tile)
+    if interactions_at_point == nil then
+        self.interactions_by_x_y:set_point(tile, {})
+        interactions_at_point = self.interactions_by_x_y:get_point(tile)
+    end
 
     if interactions_at_point[interaction_distance] == nil then
         interactions_at_point[interaction_distance] = {}
     end 
-    
+
     interactions_at_point[interaction_distance][script_id] = hook
 end
 
@@ -299,23 +303,27 @@ function BattleMap:get_nearby_interactions(
     }
     local out: {InteractionHook} = {}
 
-    if self.interactions_by_x_y:get_point(tile)["on"] ~= nil then
-        local interactions = self.interactions_by_x_y:get_point(tile)["on"]
-        for _,i in pairs(interactions) do
-            local hook: InteractionHook = {
-                script_id = i.script_id,
-                interaction_text = i.interaction_text,
-                target_tile = point,
-            }
-            pt.add(out, hook)
+    do
+        local tile_interactions = self.interactions_by_x_y:get_point(tile)
+        if tile_interactions ~= nil and tile_interactions["on"] ~= nil then
+            local interactions = tile_interactions["on"]
+            for _,i in pairs(interactions) do
+                local hook: InteractionHook = {
+                    script_id = i.script_id,
+                    interaction_text = i.interaction_text,
+                    target_tile = point,
+                }
+                pt.add(out, hook)
+            end
         end
     end
 
     for _,offset in ipairs(adjacent_offsets) do
         local p = tile+offset
         if self.interactions_by_x_y:is_point_in_range(p) then
-            if self.interactions_by_x_y:get_point(p)["adjacent"] ~= nil then
-                local interactions = self.interactions_by_x_y:get_point(p)["adjacent"]
+            local tile_interactions = self.interactions_by_x_y:get_point(p)
+            if tile_interactions ~= nil and tile_interactions["adjacent"] ~= nil then
+                local interactions = tile_interactions["adjacent"]
                 for _,i in pairs(interactions) do
                     local hook: InteractionHook = {
                         script_id = i.script_id,
