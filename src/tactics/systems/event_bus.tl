@@ -15,6 +15,8 @@ local enum GameEvent
     "TACTICS_BEGIN_BATTLE"
     "TACTICS_UNIT_END_ACTION"
     "TACTICS_UNIT_DEATH"
+    "TACTICS_UNIT_INTERACTION"
+    "TACTICS_TILE_INTERACTION"
 
     -- usually menu actions
     "GAME_BEGIN_STORY"
