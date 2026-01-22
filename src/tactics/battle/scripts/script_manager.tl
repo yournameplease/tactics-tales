@@ -156,8 +156,11 @@ function ScriptManagerImpl:register_script(
 		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
+			if menu_ctx.selected_script.script_id == script.id then
+				return false, nil
+			end
 			return
-				menu_ctx.selected_script.script_id == script.id,
+				true,
 				{
 					source_unit = menu_ctx.acting_unit.unit,
 					source_tile = menu_ctx.acting_unit.point,
@@ -169,12 +172,15 @@ function ScriptManagerImpl:register_script(
 		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
+			if menu_ctx.selected_script.script_id == script.id then
+				return false, nil
+			end
 			return
-				menu_ctx.selected_script.script_id == script.id,
+				true,
 				{
 					source_unit = menu_ctx.acting_unit.unit,
 					source_tile = menu_ctx.acting_unit.point,
-					target_tile = menu_ctx.target_unit.point,
+					target_tile = menu_ctx.selected_script.target_tile,
 				}
 		end
 	else
