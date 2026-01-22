@@ -16,7 +16,17 @@ local TaskManager = require("src/tactics/systems/tasks").TaskManager
 local AnimationManager = require("src/tactics/animation").AnimationManager
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 
-local record BattleManager
+local interface BattleManager
+    teardown: function(self)
+    update: function(self, input: InputContext)
+end
+
+local battle_manager = {
+    BattleManager = BattleManager
+}
+
+local record BattleManagerImpl
+    is BattleManager
 
     battle_map: BattleMap
 
@@ -31,10 +41,6 @@ local record BattleManager
     ui_context: UIContextManager
 end
 
-local battle_manager = {
-    BattleManager = BattleManager
-}
-
 function battle_manager.new(
     battle_id: string,
     game_data: GameData,
@@ -44,7 +50,7 @@ function battle_manager.new(
     event_bus: EventBus,
     ui_context: UIContextManager
 ): BattleManager 
-    local self: BattleManager = setmetatable({}, { __index = BattleManager })
+    local self: BattleManagerImpl = setmetatable({}, { __index = BattleManagerImpl })
 
     self.character_manager = char_man
 
@@ -123,14 +129,14 @@ function battle_manager.new(
     return self
 end
 
-function BattleManager:teardown()
+function BattleManagerImpl:teardown()
     pt.music(-1)
     self.ui_context:unregister_ui_context('battle')
     self.turn_manager:teardown()
     self.script_manager:teardown()
 end
 
-function BattleManager:update(input: InputContext)
+function BattleManagerImpl:update(input: InputContext)
     if not self.tactics_engine.battle_is_blocked then
         self.battle_menu_manager:update(input)
     end
