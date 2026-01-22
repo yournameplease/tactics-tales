@@ -314,8 +314,8 @@ function BattleMap:get_nearby_interactions(
     for _,offset in ipairs(adjacent_offsets) do
         local p = tile+offset
         if self.interactions_by_x_y:is_point_in_range(p) then
-            if self.interactions_by_x_y:get_point(p)["on"] ~= nil then
-                local interactions = self.interactions_by_x_y:get_point(p)["on"]
+            if self.interactions_by_x_y:get_point(p)["adjacent"] ~= nil then
+                local interactions = self.interactions_by_x_y:get_point(p)["adjacent"]
                 for _,i in pairs(interactions) do
                     local hook: InteractionHook = {
                         script_id = i.script_id,
