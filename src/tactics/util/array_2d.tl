@@ -8,8 +8,10 @@ local Point = point.Point
 local interface Array2D<V>
     w: integer
     h: integer
-    
+
+    is_in_range: function(self, x: integer, y: integer): boolean
     get: function(self, x: integer, y: integer): V
+    is_point_in_range: function(self, p: Point): boolean
     get_point: function(self, p: Point): V
     set: function(self, x: integer, y: integer, v: V)
     set_point: function(self, p: Point, v: V)
@@ -45,9 +47,17 @@ function array_2d.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
     return out
 end
 
+function Array2DImpl:is_in_range(x: integer, y: integer): boolean
+    return x >= 0 and y >= 0 and x < self.w and y < self.h
+end
+
 function Array2DImpl:get(x: integer, y: integer): V
-    assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
+    assert(self:is_in_range(x, y))
     return self.data[x+1][y+1]
+end
+
+function Array2DImpl:is_point_in_range(p: Point): boolean
+    return self:is_in_range(p.x, p.y)
 end
 
 function Array2DImpl:get_point(p: Point): V
