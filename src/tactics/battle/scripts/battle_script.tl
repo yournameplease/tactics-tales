@@ -2,6 +2,8 @@ local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local battle_map = require("src/tactics/battle/battle_map")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local character = require("src/tactics/character/object/character")
+local point = require("src/tactics/util/point")
+local PointRecord = point.PointRecord
 
 local enum UnitSelectorMode
 	"trigger_source"
@@ -13,18 +15,39 @@ local interface UnitSelector
 	type: UnitSelectorMode
 end
 
-local record TriggerSourceSelector
+local record TriggerSourceUnitSelector
 	is UnitSelector
 	where self.type == "trigger_source"
 end
 
-local record TriggerTargetSelector
+local record TriggerTargetUnitSelector
 	is UnitSelector
 	where self.type == "trigger_target"
 end
 
-local record TagLookupSelector
+local record TagLookupUnitSelector
 	is UnitSelector
+	where self.type == "tag_lookup"
+	tag: string
+end
+
+local enum TileSelectorMode
+	"static_point"
+	"tag_lookup"	
+end
+
+local interface TileSelector
+	type: TileSelectorMode
+end
+
+local record StaticPointTileSelector
+	is TileSelector
+	where self.type == "static_point"
+	point: PointRecord
+end
+
+local record TagLookupTileSelector
+	is TileSelector
 	where self.type == "tag_lookup"
 	tag: string
 end
@@ -32,6 +55,8 @@ end
 local enum ScriptTriggerType
 	"turn"
 	"unit_death"
+	"unit_interaction"
+	"tile_interaction"
 end
 
 local interface ScriptTrigger
@@ -57,6 +82,26 @@ local record UnitDeath
 	is ScriptTrigger
 	where self.type == "unit_death"
 	unit_label: string 
+end
+
+local enum InterractionDistance
+	"on"
+	"adjacent"
+end
+
+local record UnitInteraction
+	is ScriptTrigger
+	where self.type == "unit_interaction"
+	unit_selector: UnitSelector
+	interraction_text: string
+end
+
+local record TileInteraction
+	is ScriptTrigger
+	where self.type == "tile_interaction"
+	tile_selector: TileSelector
+	interraction_text: string
+	interraction_distance: InterractionDistance
 end
 
 local enum ScriptEffectType
@@ -109,24 +154,32 @@ end
 
 local battle_script = {
 	BattleScript = BattleScript,
-	ScriptEffect = ScriptEffect,
-	ScriptTrigger = ScriptTrigger,
-	UnitSelector = UnitSelector,
 	selector = {
-		TriggerSourceSelector = TriggerSourceSelector,
-		TriggerTargetSelector = TriggerTargetSelector,
-		TagLookupSelector = TagLookupSelector,
+		UnitSelector = UnitSelector,
+		TileSelector = TileSelector,
+
+		TriggerSourceUnitSelector = TriggerSourceUnitSelector,
+		TriggerTargetUnitSelector = TriggerTargetUnitSelector,
+		TagLookupUnitSelector = TagLookupUnitSelector,
+		StaticPointTileSelector = StaticPointTileSelector,
+		TagLookupTileSelector = TagLookupTileSelector,
 	},
 	trigger = {
+		ScriptTrigger = ScriptTrigger,
+
 		Turn = Turn,
 		TurnTriggerPhase = TurnTriggerPhase,
-		UnitDeath = UnitDeath
+		UnitDeath = UnitDeath,
+		UnitInteraction = UnitInteraction,
+		TileInteraction = TileInteraction,
 	},
 	effect = {
+		ScriptEffect = ScriptEffect,
+
 		SpawnUnits = SpawnUnits,
 		ModifyUnits = ModifyUnits,
 		TerrainLocation = battle_map.TerrainLocation,
-		ModifyTerrain = ModifyTerrain
+		ModifyTerrain = ModifyTerrain,
 	}
 }
 

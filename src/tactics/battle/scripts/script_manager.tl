@@ -10,11 +10,13 @@ local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 
 local record ScriptContext
-	initiator: BattleUnit
-	receiver: BattleUnit
-	tile: Point
+	source_unit: BattleUnit
+	target_unit: BattleUnit
+	source_tile: Point
+	target_tile: Point
 	turn_number: integer
 end
 
@@ -33,17 +35,17 @@ local record ScriptManagerImpl
 end
 
 function ScriptManagerImpl:resolve_unit_selector(
-	selector: battle_script.UnitSelector,
+	selector: battle_script.selector.UnitSelector,
 	ctx: ScriptContext
 ): { BattleUnit }
-	if selector is battle_script.selector.TagLookupSelector then
+	if selector is battle_script.selector.TagLookupUnitSelector then
 		return self.battle_map:get_units(battle_unit.has_tag(selector.tag))
-	elseif selector is battle_script.selector.TriggerSourceSelector then
-		assert(ctx.initiator ~= nil)
-		return { ctx.initiator }
-	elseif selector is battle_script.selector.TriggerTargetSelector then
-		assert(ctx.receiver ~= nil)
-		return { ctx.receiver }
+	elseif selector is battle_script.selector.TriggerSourceUnitSelector then
+		assert(ctx.source_unit ~= nil)
+		return { ctx.source_unit }
+	elseif selector is battle_script.selector.TriggerTargetUnitSelector then
+		assert(ctx.target_unit ~= nil)
+		return { ctx.target_unit }
 	else
 		unexpected(selector.type)
 	end
@@ -99,8 +101,35 @@ function ScriptManagerImpl:register_script(
 			return
 				defender.tags[trigger.unit_label],
 				{
-					initiator = attacker,
-					receiver = defender,
+					source_unit = attacker,
+					source_tile = attacker.tile,
+					target_unit = defender,
+					target_tile = defender.tile,
+				}
+		end
+	elseif trigger is battle_script.trigger.UnitInteraction then
+		event = "TACTICS_UNIT_INTERACTION"
+		filter = function(ctx: {string: any}): boolean, ScriptContext
+			local menu_ctx: MenuContext = ctx as MenuContext
+			return
+				todo() as boolean,
+				{
+					source_unit = menu_ctx.acting_unit.unit,
+					source_tile = menu_ctx.acting_unit.point,
+					target_unit = menu_ctx.target_unit.unit,
+					target_tile = menu_ctx.target_unit.point,
+				}
+		end
+	elseif trigger is battle_script.trigger.TileInteraction then
+		event = "TACTICS_TILE_INTERACTION"
+		filter = function(ctx: {string: any}): boolean, ScriptContext
+			local menu_ctx: MenuContext = ctx as MenuContext
+			return
+				todo() as boolean,
+				{
+					source_unit = menu_ctx.acting_unit.unit,
+					source_tile = menu_ctx.acting_unit.point,
+					target_tile = menu_ctx.target_unit.point,
 				}
 		end
 	else
