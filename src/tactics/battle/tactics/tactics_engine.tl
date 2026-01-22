@@ -199,7 +199,9 @@ function TacticsEngine:spawn_all(
     lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy"))
     lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral"))
 
+    log.debug("Spawned "..#spawned.." units.")
     if anim ~= nil and #spawned > 0 then
+        log.debug("Animating spawned units")
         local max_offset = 0
         for _,unit in ipairs(spawned) do
             local offset: integer
@@ -249,6 +251,7 @@ function TacticsEngine:spawn_all(
             for _,unit in ipairs(spawned) do
                 unit.animation_data = idle_animation
             end
+            log.debug("Finished animating spawned units")
         end)
     end
 end

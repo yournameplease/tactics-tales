@@ -342,8 +342,8 @@ local BATTLE_DATA = {
                 },
                 effects = {
                     scripts.effect.spawn_units({},
-                        { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }
-                        , "from_east"),
+                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" }}
+                        , nil),
                 }       
             },
             {
@@ -359,8 +359,8 @@ local BATTLE_DATA = {
                 },
                 effects = {
                     scripts.effect.spawn_units({},
-                        { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }
-                        , "from_east"),
+                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }}
+                        , nil),
                 }       
             },
         }
