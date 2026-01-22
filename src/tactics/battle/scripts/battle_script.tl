@@ -1,9 +1,13 @@
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local battle_map = require("src/tactics/battle/battle_map")
+local TileDistance = require("src/tactics/battle/battle_map/types").TileDistance
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local character = require("src/tactics/character/object/character")
 local point = require("src/tactics/util/point")
 local PointRecord = point.PointRecord
+
+-- selector: may depend on script context.  for effects
+-- specifier: no context.  for triggers
 
 local enum UnitSelectorMode
 	"trigger_source"
@@ -12,6 +16,10 @@ local enum UnitSelectorMode
 end
 
 local interface UnitSelector
+	type: UnitSelectorMode
+end
+
+local interface UnitSpecifier
 	type: UnitSelectorMode
 end
 
@@ -26,7 +34,7 @@ local record TriggerTargetUnitSelector
 end
 
 local record TagLookupUnitSelector
-	is UnitSelector
+	is UnitSelector, UnitSpecifier
 	where self.type == "tag_lookup"
 	tag: string
 end
@@ -34,22 +42,38 @@ end
 local enum TileSelectorMode
 	"static_point"
 	"tag_lookup"	
+	"trigger_source"
+	"trigger_target"
 end
 
 local interface TileSelector
 	type: TileSelectorMode
 end
 
-local record StaticPointTileSelector
-	is TileSelector
+local interface TileSpecifier
+	type: TileSelectorMode
+end
+
+local record StaticPointTileSpecifier
+	is TileSpecifier, TileSelector
 	where self.type == "static_point"
 	point: PointRecord
 end
 
-local record TagLookupTileSelector
-	is TileSelector
+local record TagLookupTileSpecifier
+	is TileSpecifier, TileSelector
 	where self.type == "tag_lookup"
 	tag: string
+end
+
+local record TriggerSourceTileSelector
+	is TileSelector
+	where self.type == "trigger_source"
+end
+
+local record TriggerTargetTileSelector
+	is TileSelector
+	where self.type == "trigger_target"
 end
 
 local enum ScriptTriggerType
@@ -84,24 +108,19 @@ local record UnitDeath
 	unit_label: string 
 end
 
-local enum InterractionDistance
-	"on"
-	"adjacent"
-end
-
 local record UnitInteraction
 	is ScriptTrigger
 	where self.type == "unit_interaction"
-	unit_selector: UnitSelector
-	interraction_text: string
+	unit_specifier: UnitSpecifier
+	interaction_text: string
 end
 
 local record TileInteraction
 	is ScriptTrigger
 	where self.type == "tile_interaction"
-	tile_selector: TileSelector
-	interraction_text: string
-	interraction_distance: InterractionDistance
+	tile_specifier: TileSpecifier
+	interaction_text: string
+	interaction_distance: TileDistance
 end
 
 local enum ScriptEffectType
@@ -148,6 +167,7 @@ local record Dialogue
 end
 
 local record BattleScript
+	id: integer
 	trigger: ScriptTrigger
 	effects: {ScriptEffect}
 end
@@ -157,12 +177,16 @@ local battle_script = {
 	selector = {
 		UnitSelector = UnitSelector,
 		TileSelector = TileSelector,
+		UnitSpecifier = UnitSpecifier,
+		TileSpecifier = TileSpecifier,
 
 		TriggerSourceUnitSelector = TriggerSourceUnitSelector,
 		TriggerTargetUnitSelector = TriggerTargetUnitSelector,
 		TagLookupUnitSelector = TagLookupUnitSelector,
-		StaticPointTileSelector = StaticPointTileSelector,
-		TagLookupTileSelector = TagLookupTileSelector,
+		StaticPointTileSpecifier = StaticPointTileSpecifier,
+		TagLookupTileSpecifier = TagLookupTileSpecifier,
+		TriggerSourceTileSelector = TriggerSourceTileSelector,
+		TriggerTargetTileSelector = TriggerTargetTileSelector,
 	},
 	trigger = {
 		ScriptTrigger = ScriptTrigger,

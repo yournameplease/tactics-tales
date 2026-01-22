@@ -3,6 +3,7 @@
 
 local point = require("src/tactics/util/point")
 local Point = point.Point
+local id_generator = require("src/tactics/util/id_generator")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local event_bus = require("src/tactics/systems/event_bus")
@@ -34,18 +35,62 @@ local record ScriptManagerImpl
 	event_listener: event_listener.EventListener
 end
 
+function ScriptManagerImpl:resolve_unit_specifier(
+	selector: battle_script.selector.UnitSpecifier
+): { BattleUnit }
+	if selector is battle_script.selector.TagLookupUnitSelector then
+		return self.battle_map:get_units(battle_unit.has_tag(selector.tag))
+	else
+		unexpected(selector.type)
+	end
+end
+
 function ScriptManagerImpl:resolve_unit_selector(
 	selector: battle_script.selector.UnitSelector,
 	ctx: ScriptContext
 ): { BattleUnit }
-	if selector is battle_script.selector.TagLookupUnitSelector then
-		return self.battle_map:get_units(battle_unit.has_tag(selector.tag))
+	if
+		selector is battle_script.selector.TagLookupUnitSelector
+	then
+		return self:resolve_unit_specifier(selector)
 	elseif selector is battle_script.selector.TriggerSourceUnitSelector then
 		assert(ctx.source_unit ~= nil)
 		return { ctx.source_unit }
 	elseif selector is battle_script.selector.TriggerTargetUnitSelector then
 		assert(ctx.target_unit ~= nil)
 		return { ctx.target_unit }
+	else
+		unexpected(selector.type)
+	end
+end
+
+function ScriptManagerImpl:resolve_tile_specifier(
+	selector: battle_script.selector.TileSpecifier
+): { Point }
+	if selector is battle_script.selector.TagLookupTileSpecifier then
+		return self.battle_map:get_tiles_by_label(selector.tag)
+	elseif selector is battle_script.selector.StaticPointTileSpecifier then
+		return { point.of_record(selector.point) }
+	else
+		unexpected(selector.type)
+	end
+end
+
+function ScriptManagerImpl:resolve_tile_selector(
+	selector: battle_script.selector.TileSelector,
+	ctx: ScriptContext
+): { Point }
+	if
+		selector is battle_script.selector.StaticPointTileSpecifier
+		or selector is battle_script.selector.TagLookupTileSpecifier
+	then
+		return self:resolve_tile_specifier(selector)
+	elseif selector is battle_script.selector.TriggerSourceTileSelector then
+		assert(ctx.source_tile ~= nil)
+		return { ctx.source_tile }
+	elseif selector is battle_script.selector.TriggerTargetTileSelector then
+		assert(ctx.target_tile ~= nil)
+		return { ctx.target_tile }
 	else
 		unexpected(selector.type)
 	end
@@ -204,7 +249,33 @@ function script_manager.new(
 	self.tactics_engine = tactics
 	self.battle_map = map
 
+	local id_gen = id_generator.new()
+
 	for _,script in ipairs(scripts) do
+		script.id = id_gen:get_id()
+
+		local trigger = script.trigger	
+		if trigger is battle_script.trigger.UnitInteraction then
+			local units = self:resolve_unit_specifier(trigger.unit_specifier)
+			for _,unit in ipairs(units) do
+				self.battle_map:register_unit_interaction(
+					unit,
+					script.id,
+					trigger.interaction_text
+				)
+			end
+		elseif trigger is battle_script.trigger.TileInteraction then
+			local tiles = self:resolve_tile_specifier(trigger.tile_specifier)
+			for _,tile in ipairs(tiles) do
+				self.battle_map:register_tile_interaction(
+					tile,
+					script.id,
+					trigger.interaction_text,
+					trigger.interaction_distance
+				)
+			end
+		end
+		
 		self:register_script(script)
 	end
 

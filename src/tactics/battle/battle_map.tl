@@ -5,6 +5,10 @@ local array_2d = require("src/tactics/util/array_2d")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local battle_definition_types = require("src/tactics/battle/definition/types")
+local types = require("src/tactics/battle/battle_map/types")
+local TileDistance = types.TileDistance
+local TileInteractionHook = types.TileInteractionHook
+local UnitInteractionHook = types.UnitInteractionHook
 
 local enum TerrainLocation
 	"front_wall"
@@ -74,6 +78,11 @@ local record BattleMap
     units_by_id: { integer: battle_unit.BattleUnit }
     units_by_x_y: array_2d.Array2D<battle_unit.BattleUnit>
 
+    -- unit, script
+    interactions_by_unit_id:  {integer: {integer: UnitInteractionHook}}
+    -- point, distance, script
+    interactions_by_x_y: array_2d.Array2D<{ TileDistance: {integer: TileInteractionHook}}>
+
     tile_labels: {battle_definition_types.TileLabel: {Point}}
     
     layers: MapLayers 
@@ -91,6 +100,8 @@ function battle_map.new(width: integer, height: integer, labels: { string: {Poin
     local self: BattleMap = setmetatable({
         units_by_id = {},
         units_by_x_y = array_2d.new(width, height),
+        interactions_by_unit_id = {},
+        interactions_by_x_y = array_2d.new(width, height, {}),
     }, { __index = BattleMap })
     self.tile_labels = labels
     self.width = width
@@ -238,6 +249,36 @@ end
 
 function BattleMap:get_all_units(): { battle_unit.BattleUnit }
     return self:get_units(fp.fn_true)
+end
+
+-- interactions / scripts
+
+function BattleMap:register_tile_interaction(
+    tile: Point,
+    script_id: integer,
+    interaction_text: string,
+    interaction_distance: TileDistance
+)
+    local hook: TileInteractionHook = {
+        script_id = script_id,
+        interaction_text = interaction_text,
+        interaction_distance = interaction_distance,
+    }
+
+    self.interactions_by_x_y:get_point(tile)[interaction_distance][script_id] = hook
+end
+
+function BattleMap:register_unit_interaction(
+    unit: BattleUnit,
+    script_id: integer,
+    interaction_text: string
+)
+    local hook: UnitInteractionHook = {
+        script_id = script_id,
+        interaction_text = interaction_text,
+    }
+
+    self.interactions_by_unit_id[unit.id][script_id] = hook
 end
 
 return battle_map
