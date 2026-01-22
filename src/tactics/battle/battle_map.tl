@@ -266,7 +266,13 @@ function BattleMap:register_tile_interaction(
         interaction_distance = interaction_distance,
     }
 
-    self.interactions_by_x_y:get_point(tile)[interaction_distance][script_id] = hook
+    local interactions_at_point = self.interactions_by_x_y:get_point(tile)
+
+    if interactions_at_point[interaction_distance] == nil then
+        interactions_at_point[interaction_distance] = {}
+    end 
+    
+    interactions_at_point[interaction_distance][script_id] = hook
 end
 
 function BattleMap:register_unit_interaction(

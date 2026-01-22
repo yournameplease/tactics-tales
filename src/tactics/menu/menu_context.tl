@@ -26,6 +26,12 @@ local record ItemSelection
     item: Item.Item 
 end
 
+local record ScriptSelection
+    script_id: integer
+    target_unit: BattleUnit 
+    target_tile: Point 
+end
+
 local enum MenuContextId
     "acting_unit"
     "destination"
@@ -46,6 +52,7 @@ local record MenuContext
     acting_unit: UnitSelection
     destination: TileSelection
     target_unit: UnitSelection
+    selected_script: ScriptSelection 
     selected_item: ItemSelection
     story: StorySelection
     character_customization: CharacterCustomizationSelection 

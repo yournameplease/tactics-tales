@@ -114,12 +114,27 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 previous_state = "SELECT_DESTINATION",
                 back_command = "JUMP_UNIT",
                 get_options = function(msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption<string>} = {}
+                    local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
                     -- if target in range
                     if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
                         pt.add(options, {
                             text = "Attack",
                             next_state = "SELECT_TARGET"
+                        })
+                    end
+
+                    local nearby_interactions = msb.battle_map:get_nearby_interactions(ctx.destination.point)
+                    for _, interaction in ipairs(nearby_interactions) do
+                        pt.add(options, {
+                            text = interaction.interaction_text,
+                            send_command = "TACTICS_INTERACTION",
+                            set_selected_context = function(_: BattleMenuContext, mc: MenuContext)
+                                mc.selected_script = {
+                                    script_id = interaction.script_id,
+                                    target_unit = interaction.target_unit,
+                                    target_tile = interaction.target_tile,
+                                }
+                            end
                         })
                     end
 
@@ -133,7 +148,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     --     text = "Items",
                     --     next_state = "SELECT_ITEM"
                     -- })
-
+                    
                     return options
                 end
             }),
@@ -158,7 +173,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
                     }
                 end,
-                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<string>}
+                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
                         local character = ctx.acting_unit.unit
                         local items = character.character.inventory:get_items()
 
@@ -174,7 +189,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_ITEM_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_ITEM",
-                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<string>}
+                get_options = function(_msb: BattleMenuContext, ctx: MenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
                         local character = ctx.acting_unit.unit
                         local inventory = character.character.inventory
                         local items = inventory:get_items()
