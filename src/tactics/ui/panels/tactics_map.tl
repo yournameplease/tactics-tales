@@ -335,11 +335,15 @@ function TacticsMap:draw(
         end
         local acting_unit = state.battle_context.acting_unit
         local acting_player_tiles = state.battle_context.acting_unit_tiles        
+        local tile_interaction_highlights = state.battle_context.battle_map:get_tile_highlights()
         
         local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
         for x = 0, self.map_width-1 do
             for y = 0, self.map_height-1 do
-                if acting_player_tiles and (acting_player_tiles:get(x, y) & 0x1) ~= 0 then
+                -- would like to move this logic into the ui context
+                if tile_interaction_highlights:get(x, y) then
+                    highlighted_tiles:set(x, y, 15)
+                elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x1) ~= 0 then
                     highlighted_tiles:set(x, y, 10)
                 elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x4) ~= 0 then
                     highlighted_tiles:set(x, y, 11)
