@@ -341,4 +341,18 @@ function BattleMap:get_nearby_interactions(
     return out
 end
 
+function BattleMap:get_tile_highlights(): array_2d.Array2D<boolean>
+
+    return self.interactions_by_x_y:map(
+        function(interactions: { TileDistance: {integer: TileInteractionHook}}): boolean
+            if interactions ~= nil and interactions["on"] ~= nil
+            then
+                for _,_ in pairs(interactions["on"]) do
+                    return true
+                end
+            end
+            return false
+        end)
+end
+
 return battle_map
