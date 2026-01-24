@@ -221,22 +221,21 @@ function TextImpl:get_lines(): {{string}}
     )(self.lines)
 end
 
-function TextImpl:get_text_alignment_offset(
-    row: string,
-    justify: Justify,
-    w: integer
-): integer
-    local line_width = width_of(row)
-    if justify == "left" then
+local get_text_alignment_offset <total>:
+{ Justify: function(row: string, w: integer): integer } = {
+    ["left"] = function(_: string, _: integer): integer
         return 0
-    elseif justify == "center" then
+    end,
+    ["center"] = function(row: string, w: integer): integer
+        local line_width = width_of(row)
         return (w - line_width) // 2
-    elseif justify == "right" then
+    end,
+    ["right"] = function(row: string, w: integer): integer
+        local line_width = width_of(row)
         return w - line_width - 1
-    else
-        unexpected(justify)
-    end
-end
+    end,
+}
+
 
 function TextImpl:draw_justified_text_row(
     row: string,
@@ -247,7 +246,7 @@ function TextImpl:draw_justified_text_row(
     row_number: integer,
     line_count: integer
 )
-	local x_offset = self:get_text_alignment_offset(row, justify, self.width)
+	local x_offset = get_text_alignment_offset[justify](row, self.width)
 	local t_x = x + x_offset
 	local t_y = y + ((row_number-1) * (TEXT_ROW_HEIGHT))
     local out = row
