@@ -4,6 +4,8 @@ local interface Dialogue
 	characters_rendered: integer -- non-whitespace
 	timer: integer
 	timer_limit: integer
+
+	finished: boolean
 end
 
 local dialogue = {

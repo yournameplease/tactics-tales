@@ -128,7 +128,7 @@ local enum ScriptEffectType
 	"modify_units"
 	"modify_terrain"
 	"dialogue"
-	"despawn_unit"
+	"despawn_units"
 end
 
 local interface ScriptEffect
@@ -162,13 +162,13 @@ end
 local record Dialogue
 	is ScriptEffect
 	where self.type == "dialogue"
-	speaking_unit: UnitSelector
+	unit: UnitSelector
 	text: {string}
 end
 
-local record DespawnUnit
+local record DespawnUnits
 	is ScriptEffect
-	where self.type == "despawn_unit"
+	where self.type == "despawn_units"
 	unit: UnitSelector
 	-- todo: direction?
 end
@@ -212,7 +212,7 @@ local battle_script = {
 		TerrainLocation = battle_map.TerrainLocation,
 		ModifyTerrain = ModifyTerrain,
 		Dialogue = Dialogue,
-		DespawnUnit = DespawnUnit,
+		DespawnUnits = DespawnUnits,
 	}
 }
 

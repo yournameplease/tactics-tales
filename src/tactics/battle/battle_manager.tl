@@ -140,7 +140,7 @@ function BattleManagerImpl:update(input: InputContext)
     if not self.tactics_engine.battle_is_blocked then
         self.battle_menu_manager:update(input)
     end
-    self.tactics_engine:update()
+    self.tactics_engine:update(input)
 end
 
 return battle_manager

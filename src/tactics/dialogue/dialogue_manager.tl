@@ -70,6 +70,7 @@ function DialogueManagerImpl:update(_: InputContext)
 			else
 				d.characters_rendered = d.characters_rendered + -mask
 			end
+			d.finished = d.characters_rendered > #d.text
 		end
 	end
 end
