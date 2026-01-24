@@ -215,8 +215,8 @@ function ScriptManagerImpl:register_script(
 		elseif effect is battle_script.effect.DespawnUnit then
 			fn = function(ctx: ScriptContext)
 				log.debug("Handling DespawnUnit event")
-				local unit = self:resolve_unit_selector(effect.unit, ctx)
-				self.tactics_engine:despawn_unit(unit)
+				local units = self:resolve_unit_selector(effect.unit, ctx)
+				self.tactics_engine:despawn_unit(units)
 			end
 		else
 			unexpected(effect.type)
