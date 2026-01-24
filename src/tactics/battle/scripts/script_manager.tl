@@ -212,13 +212,11 @@ function ScriptManagerImpl:register_script(
 					}
 				)
 			end
-		elseif effect is battle_script.effect.ModifyTerrain then
-			fn = function(_: ScriptContext)
-				log.debug("Handling ModifyTerrain event")
-				self.battle_map:update_terrain(
-					effect.tile_label,
-					effect.new_terrain
-				)
+		elseif effect is battle_script.effect.DespawnUnit then
+			fn = function(ctx: ScriptContext)
+				log.debug("Handling DespawnUnit event")
+				local unit = self:resolve_unit_selector(effect.unit, ctx)
+				self.tactics_engine:despawn_unit(unit)
 			end
 		else
 			unexpected(effect.type)
