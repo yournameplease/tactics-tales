@@ -1,0 +1,3 @@
+[*.lua]
+
+keep_indents_on_empty_lines = true
