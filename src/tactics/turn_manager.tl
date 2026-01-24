@@ -228,6 +228,12 @@ function turn_manager.new(
         )
     end)
 
+    self.event_listener:on("TACTICS_INTERACTION", function(ctx: MenuContext)
+        self.tactics_engine:finish_unit_action(
+            ctx.acting_unit.unit
+        )
+    end)
+
     self.event_listener:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
         self.tactics_engine:handle_move_and_attack(
             ctx.acting_unit.unit,

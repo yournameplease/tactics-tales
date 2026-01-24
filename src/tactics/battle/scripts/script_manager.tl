@@ -156,7 +156,7 @@ function ScriptManagerImpl:register_script(
 		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
-			if menu_ctx.selected_script.script_id == script.id then
+			if menu_ctx.selected_script.script_id ~= script.id then
 				return false, nil
 			end
 			return
@@ -172,7 +172,7 @@ function ScriptManagerImpl:register_script(
 		event = "TACTICS_INTERACTION"
 		filter = function(ctx: {string: any}): boolean, ScriptContext
 			local menu_ctx: MenuContext = ctx as MenuContext
-			if menu_ctx.selected_script.script_id == script.id then
+			if menu_ctx.selected_script.script_id ~= script.id then
 				return false, nil
 			end
 			return
@@ -222,7 +222,7 @@ function ScriptManagerImpl:register_script(
 			end
 		elseif effect is battle_script.effect.Dialogue then
 			fn = function(ctx: ScriptContext)
-				log.debug("Handling DespawnUnit event")
+				log.debug("Handling Dialogue event")
 				local units = self:resolve_unit_selector(effect.unit, ctx)
 				assert(#units == 1, "Not implemented.")
 				self.tactics_engine:start_dialogue(units[1], effect.text)
@@ -230,7 +230,7 @@ function ScriptManagerImpl:register_script(
 		elseif effect is battle_script.effect.DespawnUnits then
 			fn = function(ctx: ScriptContext)
 				log.debug("Handling DespawnUnit event")
-				local units = self:resolve_unit_selector(effect.unit, ctx)
+				local units = self:resolve_unit_selector(effect.units, ctx)
 				self.tactics_engine:despawn_unit(units)
 			end
 		else
