@@ -137,6 +137,10 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
     self.battle_map:spawn_unit(unit, spawn_point)
 end
 
+function TacticsEngine:despawn_unit(unit: battle_unit.BattleUnit)
+    self.battle_map:remove_unit(unit.id)
+end
+
 --- Iterates over unit definitions and calls CharacterManager
 function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side: battle_unit.Side): {battle_unit.BattleUnit}
     local spawned_units: {battle_unit.BattleUnit} = {}

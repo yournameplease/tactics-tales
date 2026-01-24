@@ -189,6 +189,13 @@ function BattleMap:spawn_unit(unit: battle_unit.BattleUnit, tile: Point)
     self.units_by_x_y:set_point(tile, unit)
 end
 
+function BattleMap:remove_unit(unit_id: integer)
+    local unit = self.units_by_id[unit_id]
+    assert(unit.id ~= nil)
+    self.units_by_id[unit_id] = nil
+    self.units_by_x_y:set_point(unit.tile, nil)
+end
+
 function BattleMap:tile_is_legal_destination(unit: battle_unit.BattleUnit, tile: Point): boolean
     local unit_id_at_destination = self.units_by_x_y:get_point(tile)
     return (unit_id_at_destination == nil
