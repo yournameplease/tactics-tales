@@ -17,7 +17,11 @@ local lists = require("src/tactics/util/lists")
 local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
 local unit_ai = require("src/tactics/battle/unit/unit_ai")
 local Character = require("src/tactics/character/object/character").Character
+local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
+local DialogueManager = dialogue_manager.DialogueManager
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 
+local InputContext = require("src/tactics/input/input_context").InputContext
 local character_manager = require("src/tactics/character/character_manager")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -45,6 +49,9 @@ local record TacticsEngine
     task_manager: tasks.TaskManager
     animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
+    dialogue_manager: DialogueManager
+    dialogue_queue: {string}
+    active_dialogue: Dialogue
 
     -- queries
     
@@ -87,7 +94,7 @@ local record TacticsEngine
     refresh_units: function(self, function(BattleUnit): boolean)
     modify_units: function(self, units: {BattleUnit}, new_unit_properties: NewUnitProperties)
     
-    update: function(self)
+    update: function(self, InputContext)
 end
 
 local tactics_engine = {
@@ -111,6 +118,8 @@ function tactics_engine.new(
     self.task_manager = task_manager
     self.animation_manager = animation_manager
     self.event_writer = event_writer.new(bus)
+    self.dialogue_manager = dialogue_manager.new()
+    self.dialogue_queue = {}
     
     return self
 end
@@ -128,6 +137,40 @@ local function to_tile_path(path: { Point }): { Point }
         end
     return lists.map(normalize_point)(path)
 end
+
+-- dialogue
+
+function TacticsEngine:start_dialogue(unit: battle_unit.BattleUnit, text: {string})
+    local idle_animation = self.animation_manager:create_idle_animation()
+    unit.animation_data = idle_animation
+    for _,t in ipairs(text) do
+        pt.add(self.dialogue_queue, t)
+    end
+end
+
+-- move into dialogue manager? 
+function TacticsEngine:update_dialogue(input: InputContext)
+    if #self.dialogue_queue > 0 then
+        local active_dialogue = self.active_dialogue
+        if active_dialogue == nil then
+            active_dialogue = self.dialogue_manager:create_dialogue(
+                self.dialogue_queue[1],
+                {
+                    can_skip = true,
+                },
+                {}
+            )
+            self.active_dialogue = active_dialogue
+            log.debug("DIALOGUE: ", self.active_dialogue.text)
+        end
+        self.dialogue_manager:update(input)
+        if active_dialogue.finished then
+            active_dialogue = nil
+            pt.deli(self.dialogue_queue, 1)
+        end
+    end
+end
+
 
 -- unit spawning
 
@@ -465,7 +508,9 @@ function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)
 end
 
 function TacticsEngine:is_blocked(): boolean
-    return self.battle_is_blocked
+    local is_dialogue = #self.dialogue_queue > 0
+
+    return is_dialogue or self.battle_is_blocked
 end
 
 -- legal tile getters
@@ -614,8 +659,8 @@ function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): arr
     return tiles
 end
 
--- this probably is no longer needed?
-function TacticsEngine:update()
+function TacticsEngine:update(input: InputContext)
+    self:update_dialogue(input)
 end
 
 return tactics_engine

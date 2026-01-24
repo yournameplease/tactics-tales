@@ -123,6 +123,15 @@ function scripts.effect.spawn_units(
 	}
 end
 
+function scripts.effect.despawn(
+	units
+)
+	return {
+		type = "despawn_units",
+		units = units
+	}
+end
+
 function scripts.effect.modify_units(
 	unit_tag,
 	new_ai,
@@ -380,6 +389,7 @@ local BATTLE_DATA = {
             ["door_c"] = { 0x34 },
             ["door_d"] = { 0x35 },
             ["door_e"] = { 0x36 },
+            ["escape_point"] = { 0x38 },
             ["cultist_reinforce_a"] = { 0x18 },
             ["cultist_reinforce_b"] = { 0x19 },
             ["jailed_royal"] = { 0x20 },
@@ -435,6 +445,23 @@ local BATTLE_DATA = {
             open_door_front("cultist_door_guard_c","door_c"),
             open_door_front("cultist_door_guard_d","door_d"),
             open_door_front("cultist_door_guard_e","door_e"),
+            {
+                trigger = {
+                    type = "tile_interaction",
+                    tile_specifier = {
+                        type = "tag_lookup",
+                        tag = "escape_point",
+                    },
+                    interaction_text = "Escape",
+                    interaction_distance = "on",
+
+                },
+                effects = {
+                    scripts.effect.despawn({
+                		    type = "trigger_source"
+                		}),
+                },
+            },
         }
     },
     ["fortress_town"] = {
