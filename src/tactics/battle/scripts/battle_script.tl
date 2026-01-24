@@ -169,7 +169,7 @@ end
 local record DespawnUnits
 	is ScriptEffect
 	where self.type == "despawn_units"
-	unit: UnitSelector
+	units: UnitSelector
 	-- todo: direction?
 end
 
