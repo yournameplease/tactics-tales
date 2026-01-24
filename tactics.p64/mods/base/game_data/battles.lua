@@ -85,7 +85,7 @@ end
 
 local scripts = {
     trigger = {},
-    script = {}
+    effect = {},
 }
 
 function scripts.trigger.turn(
@@ -110,60 +110,55 @@ function scripts.trigger.unit_death(
 	}
 end
 
-function scripts.script.spawn_units(
-	trigger,
+function scripts.effect.spawn_units(
 	players,
 	enemies,
 	animation
 )
 	return {
 		type = "spawn_units",
-		trigger = trigger,
 		players = players,
 		enemies = enemies,
 		animation = animation,
 	}
 end
 
-function scripts.script.modify_units(
-	trigger,
+function scripts.effect.modify_units(
 	unit_tag,
 	new_ai,
 	new_side
 )
 	return {
 		type = "modify_units",
-		trigger = trigger,
-		unit_tag = unit_tag,
+		unit_selector = {
+		    type = "tag_lookup",
+		    tag = unit_tag,
+		},
 		new_ai = new_ai,
 		new_side = new_side,
 	}
 end
 
-function scripts.script.change_side(
-    trigger,
+function scripts.effect.change_side(
     unit_tag,
     new_side
 )
-    return scripts.script.modify_units(trigger, unit_tag, nil, new_side)
+    return scripts.effect.modify_units(unit_tag, nil, new_side)
 end
 
-function scripts.script.change_ai(
-    trigger,
+function scripts.effect.change_ai(
     unit_tag,
     new_ai
 )
-    return scripts.script.modify_units(trigger, unit_tag, new_ai, nil)
+    return scripts.effect.modify_units(unit_tag, new_ai, nil)
 end
 
-function scripts.script.modify_terrain(
-	trigger,
+function scripts.effect.modify_terrain(
 	tile_label,
 	new_terrain
 )
 	return {
 		type = "modify_terrain",
-		trigger = trigger,
 		tile_label = tile_label,
 		new_terrain = new_terrain
 	}
@@ -175,12 +170,12 @@ local function spawn_players(
     phase,
     animation
 )
-    return scripts.script.spawn_units(
-        scripts.trigger.turn(turn, nil, phase),
-        players,
-        {},
-        animation
-    )
+    return {
+        trigger = scripts.trigger.turn(turn, nil, phase),
+        effects = {
+            scripts.effect.spawn_units(players, {}, animation),
+        },
+    }
 end
 
 local function free_players(
@@ -188,12 +183,12 @@ local function free_players(
     unit_label,
     animation
 )
-    return scripts.script.spawn_units(
-        scripts.trigger.unit_death(unit_label),
-        players,
-        {},
-        animation
-    )
+    return {
+        trigger = scripts.trigger.unit_death(unit_label),
+        effects = {
+            scripts.effect.spawn_units(players, {}, animation),
+        },
+    }
 end
 
 local function spawn_enemies(
@@ -203,12 +198,12 @@ local function spawn_enemies(
     phase,
     animation
 )
-    return scripts.script.spawn_units(
-        scripts.trigger.turn(turn, repeating, phase),
-        {},
-        enemies,
-        animation
-    )
+    return {
+        trigger = scripts.trigger.turn(turn, repeating, phase),
+        effects = {
+            scripts.effect.spawn_units({}, enemies, animation),
+        },
+    }
 end
 
 local function modify_units(
@@ -218,38 +213,46 @@ local function modify_units(
     new_ai,
     new_side
 )
-    return scripts.script.modify_units(
-        scripts.trigger.turn(turn, nil, phase),
-        unit_tag,
-        new_ai,
-        new_side
-    )
+    return {
+        trigger = scripts.trigger.turn(turn, nil, phase),
+        effects = {
+            scripts.effect.modify_units(unit_tag, new_ai, new_side),
+        },
+    }
 end
 
 local function open_door_front(
     enemy_label,
     tile_label
 )
-    return scripts.script.modify_terrain(
-        scripts.trigger.unit_death(enemy_label),
-        tile_label,
-        {
-            ["front_wall"] = 0
-        }
-    )
+    return {
+        trigger = scripts.trigger.unit_death(enemy_label),
+        effects = {
+            scripts.effect.modify_terrain(
+                tile_label,
+                {
+                    ["front_wall"] = 0
+                }
+            ),
+        },
+    }
 end
 
 local function open_door_mid(
     enemy_label,
     tile_label
 )
-    return scripts.script.modify_terrain(
-        scripts.trigger.unit_death(enemy_label),
-        tile_label,
-        {
-            ["mid_wall"] = 0
-        }
-    )
+    return {
+        trigger = scripts.trigger.unit_death(enemy_label),
+        effects = {
+            scripts.effect.modify_terrain(
+                tile_label,
+                {
+                    ["mid_wall"] = 0
+                }
+            ),
+        },
+    }
 end
 
 
@@ -326,6 +329,40 @@ local BATTLE_DATA = {
                 "spawn_child_axe",
                 nil
             ),
+            {
+                trigger = {
+                    type = "tile_interaction",
+                    tile_specifier = {
+                        type = "static_point",
+                        point = {x = 2, y = 13},
+                    },
+                    interaction_text = "test on",
+                    interaction_distance = "on",
+
+                },
+                effects = {
+                    scripts.effect.spawn_units({},
+                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" }}
+                        , nil),
+                }       
+            },
+            {
+                trigger = {
+                    type = "tile_interaction",
+                    tile_specifier = {
+                        type = "static_point",
+                        point = {x = 2, y = 13},
+                    },
+                    interaction_text = "test adjacent",
+                    interaction_distance = "adjacent",
+
+                },
+                effects = {
+                    scripts.effect.spawn_units({},
+                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }}
+                        , nil),
+                }       
+            },
         }
     },
     ["cultist_cave"] = {
