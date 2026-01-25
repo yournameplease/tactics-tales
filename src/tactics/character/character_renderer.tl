@@ -68,7 +68,14 @@ local SPRITE_PART_ORDER: {string} = {
 	"headwear_front",
 }
 
-local character_renderer = {}
+local enum LookDirection
+	"left"
+	"right"
+end
+
+local character_renderer = {
+	LookDirection = LookDirection,
+}
 
 local function get_anchor_offsets(
 	base: Point,
@@ -137,7 +144,8 @@ end
 
 local function set_palette(
 	drawable_unit: DrawableCharacterInstance,
-	draw_outline: boolean
+	draw_outline: boolean,
+	look_direction: LookDirection
 )
 	local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
@@ -159,10 +167,26 @@ local function set_palette(
 	--eyes
 	-- todo: looking support
 	do
-	    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-	    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-	    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-	    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+		if look_direction ~= nil then
+			if look_direction == "left" and drawable_unit.facing.horizontal == "left"
+				or look_direction == "right" and (drawable_unit.facing.horizontal == "right" or drawable_unit.facing.horizontal == nil)
+			then
+			    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+			    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+			    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
+			    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
+			else
+			    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
+			    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
+			    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+			    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+			end
+		else
+		    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+		    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+		    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+		    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+		end
 	end
 end
 
@@ -280,7 +304,8 @@ function character_renderer.draw(
 	draw_target_manager: DrawTargetManager,
 	set_pal: boolean | colors.PaletteId,
 	apply_animation: boolean,
-	draw_outline: boolean
+	draw_outline: boolean,
+	look_direction: LookDirection
 )
 	local DRAW_TARGET_W = 32
 	local DRAW_TARGET_H = 32
@@ -345,7 +370,7 @@ function character_renderer.draw(
 
     if set_pal is boolean then
 		if set_pal then
-        	set_palette(drawable_unit, draw_outline)
+        	set_palette(drawable_unit, draw_outline, look_direction)
 		end
     elseif set_pal is colors.PaletteId then
 		colors.apply_palette(set_pal)
@@ -404,7 +429,7 @@ function character_renderer.draw_health_bar(
 	end
     
     if set_pal then
-        set_palette(unit, true)
+        set_palette(unit, true, nil)
     end
 	local health_bar_anchor = draw_point + offset + point.of(2, -16)
     draw_health_bar(unit, health_bar_anchor)

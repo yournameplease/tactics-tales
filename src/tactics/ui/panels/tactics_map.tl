@@ -19,7 +19,6 @@ local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
 local CharacterRenderer = require("src/tactics/character/character_renderer")
-local text_node = require("src/tactics/ui/components/text_node")
 local dialogue_node = require("src/tactics/ui/components/dialogue_node")
 
 local record TacticsMap
@@ -62,6 +61,16 @@ local record AnimatedUnitPosition
     point: Point
 end
 
+local function get_cursor_tile(battle_context: BattleUIContext): Point
+    local menu = battle_context.battle_menu_manager
+    local cursor = menu.menu_cursor
+    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+        return cursor.point
+    elseif menu.menu_state.point ~= nil then
+        return menu.menu_state.point
+    end
+end
+
 local function compute_animated_unit_positions(map: battle_map.BattleMap): { AnimatedUnitPosition }
     return lists.map(
             function(unit: BattleUnit): AnimatedUnitPosition
@@ -93,9 +102,24 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
     local draw_shadow = should_draw_shadow(unit, ctx)
 
     local world_point = unit_tile * TILE_SIZE
+    local look_direction: CharacterRenderer.LookDirection = nil
+    local cursor_tile = get_cursor_tile(ctx)
+    -- Disabled looking as it's a bit annoyoing to look at
+    -- if cursor_tile ~= nil then
+    --     if point.taxicab_distance(cursor_tile, unit_tile) <= 2
+    --         or (ctx.acting_unit ~= nil and ctx.acting_unit.id == unit.id)
+    --     then
+    --         local delta = cursor_tile.x - unit_tile.x
+    --         if delta > 0 then
+    --             look_direction = "right"
+    --         elseif delta < 0 then
+    --             look_direction = "left"
+    --         end
+    --     end
+    -- end
 
     CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, draw_shadow)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, draw_shadow, look_direction)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
@@ -207,20 +231,10 @@ function TacticsMap:draw_map_decorations(layers: battle_map.MapLayers, z_0: inte
     end
 end
 
-local function get_cursor_tile(state: UIContextManager): Point
-    local menu = state.battle_context.battle_menu_manager
-    local cursor = menu.menu_cursor
-    if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
-        return cursor.point
-    elseif menu.menu_state.point ~= nil then
-        return menu.menu_state.point
-    end
-end
-
 function TacticsMap:compute_children(state: UIContextManager)
     local menu = state.battle_context.battle_menu_manager
     local cursor = menu.menu_cursor
-    local cursor_tile = get_cursor_tile(state)
+    local cursor_tile = get_cursor_tile(state.battle_context)
 
     local child_object = self.child_object
     if cursor_tile ~= nil then
@@ -317,7 +331,6 @@ function TacticsMap:draw(
     local draw_cursor = state.game_context.input_service.current_input == "joypad"
     
     local map = state.battle_context.battle_map
-    local menu = state.battle_context.battle_menu_manager
 
     local ud_width = self.w - self.internal_margin.l - self.internal_margin.r
     -- to top of screen
@@ -347,7 +360,7 @@ function TacticsMap:draw(
     local layer_path = get_path_layer(state)
     profile("compute_path_layer")
 
-    local cursor_tile = get_cursor_tile(state)
+    local cursor_tile = get_cursor_tile(state.battle_context)
 
     -- draw ground
     profile("draw_ground")
