@@ -28,7 +28,7 @@ local record TextNode
     is box.UIElement, TextUIElement
     func: function(UIContextManager): { string }
     text: { string }
-    dialogue: { Dialogue }
+    dialogue: Dialogue
     rows: integer
 end
 
@@ -43,9 +43,7 @@ function TextNode:compute_children(state: UIContextManager)
     local lines =
         self.text
         or (self.func and self.func(state))
-        or (self.dialogue and lists.map(function(d: Dialogue): string
-            return d.text
-        end)(self.dialogue))
+        or (self.dialogue and self.dialogue.text)
 
     if self.rows then
         assert(
@@ -107,12 +105,18 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
 
     local line_counts: {integer} = nil
     if self.dialogue then
-        line_counts = lists.map(
-            function(d: Dialogue): integer
-                return d.characters_rendered
+        line_counts = {}
+        for i = 1,#self.dialogue.text do
+            local line_count = 0
+            if i < self.dialogue.current_row then
+                line_count = #self.dialogue.text[i]
+            elseif i == self.dialogue.current_row then
+                line_count = self.dialogue.characters_rendered
             end
-        )(self.dialogue)
-    end 
+            
+            pt.add(line_counts, line_count) 
+        end
+    end
 
     local text_obj = self.text_object
     text_obj:draw(

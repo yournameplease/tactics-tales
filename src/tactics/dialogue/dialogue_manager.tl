@@ -1,9 +1,11 @@
+local lists = require("src/tactics/util/lists")
 local dialogue = require("src/tactics/dialogue/dialogue")
 local Dialogue = dialogue.Dialogue
 
 local InputContext = require("src/tactics/input/input_context").InputContext
 
 local record DialogueProps
+	auto_advance: boolean
 	speed: DialogueSpeed
 	can_skip: boolean
 end
@@ -12,7 +14,7 @@ local interface DialogueManager
 	update: function(self, input: InputContext)
 	create_dialogue: function(
 		self,
-		text: string,
+		text: {string},
 		props: DialogueProps,
 		replacement_vars: {string: string}
 	): Dialogue
@@ -20,6 +22,10 @@ end
 
 local record DialogueImpl
 	is Dialogue
+	texts: {string}
+	i: integer
+	
+	auto_advance: boolean
 	speed: DialogueSpeed
 	can_skip: boolean
 	timer_offset: integer
@@ -59,21 +65,6 @@ local SPEED_MASK <total>: {DialogueSpeed: integer} = {
 	instant = -9999,
 }
 
-function DialogueManagerImpl:update(_: InputContext)
-	self.global_timer = self.global_timer + 1
-
-	for _,d in ipairs(self.active_dialogues) do
-		if d.characters_rendered < #d.text and d.timer == 0 then
-			local mask = SPEED_MASK[d.speed]
-			if mask > 0 then
-				d.characters_rendered = d.characters_rendered + 1
-			else
-				d.characters_rendered = d.characters_rendered + -mask
-			end
-		end
-	end
-end
-
 local function time_at_speed(timer: integer, speed: DialogueSpeed): integer
 	local mask = SPEED_MASK[speed]
 	return mask > 0
@@ -81,43 +72,81 @@ local function time_at_speed(timer: integer, speed: DialogueSpeed): integer
 		or 0
 end
 
+function DialogueManagerImpl:update(_: InputContext)
+	self.global_timer = self.global_timer + 1
+
+	for _,d in ipairs(self.active_dialogues) do
+		if d.current_row <= #d.text then
+			local row_len = #d.text[d.current_row]
+			if d.characters_rendered < row_len and d.timer == 0 then
+				local mask = SPEED_MASK[d.speed]
+				if mask > 0 then
+					d.characters_rendered = d.characters_rendered + 1
+				else
+					d.characters_rendered = d.characters_rendered + -mask
+				end
+			end
+			if d.characters_rendered >= row_len and d.current_row <= #d.text then
+				if d.auto_advance then
+					d.current_row = d.current_row + 1
+					d.characters_rendered = 0
+					d.timer_offset = time_at_speed(self.global_timer, d.speed)
+				else
+					-- todo if
+					d.current_row = d.current_row + 1
+					d.characters_rendered = 0
+					d.timer_offset = time_at_speed(self.global_timer, d.speed)
+				end
+		    end
+		end
+	end
+end
+
 function DialogueManagerImpl:create_dialogue(
-	text: string,
+	text: {string},
 	props: DialogueProps,
 	replacement_vars: {string: string}
 ): Dialogue
-	local replaced_text = string.gsub(
-		text,
-		"${([%w_%.]+)}",
-		function(key: string): string
-			local val = replacement_vars[key]
-			if val == nil then
-				return "[MISSING KEY: "..key.."]"
-			end
-			return val
+	assert(#text > 0)
+	local replaced_text = lists.map(function(t: string): string
+		local out = string.gsub(
+			t,
+			"${([%w_%.]+)}",
+			function(key: string): string
+				local val = replacement_vars[key]
+				if val == nil then
+					return "[MISSING KEY: "..key.."]"
+				end
+				return val
+			end)
+		return out
 		end
-	)
+	)(text)
 	
 	local d: DialogueImpl = {
 		text = replaced_text,
+		current_row = 1,
 		characters_rendered = 0,
+		finished = false,
 
+		auto_advance = props.auto_advance, 
 		speed = props.speed,
 		can_skip = props.can_skip,
 	}
 	local dialogue_mt = {
-		__index = function(_t: DialogueImpl, k: string): any
+		__index = function(t: DialogueImpl, k: string): any
 			if k == "speed" then
 				return DYNAMIC_CONFIG.dialogue_speed
 			end
 			if k == "timer" then
-				return time_at_speed(self.global_timer - d.timer_offset, d.speed)
+				return time_at_speed(self.global_timer - t.timer_offset, t.speed)
 			end
 			if k == "timer_limit" then
-				return SPEED_MASK[d.speed] + 1
+				return SPEED_MASK[t.speed] + 1
 			end
 			if k == "finished" then
-				return d.characters_rendered >= #d.text
+				return t.current_row >= #t.text
+					and t.characters_rendered > #t.text[#t.text] 
 			end
 		end
 	}
