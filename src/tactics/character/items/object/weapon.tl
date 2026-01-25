@@ -1,6 +1,9 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 
+global type BattleMap 
+global type BattleUnit 
+
 local enum WeaponType
     "MELEE"
     "RANGED"
@@ -38,6 +41,25 @@ local record ArmorkillerEffect
     where self.type == "armorkiller"
 end
 
+local interface Targeting
+    get_selection_tiles: function(origin: Point, map: BattleMap): {Point}
+    get_targets_for_selection: function(origin: Point, selection: Point, map: BattleMap): {BattleUnit}
+    is_target_valid: function(origin: Point, selection: Point, map: BattleMap): boolean
+end
+
+local none_targeting: Targeting = {
+    get_selection_tiles = function(_origin: Point, _map: BattleMap): {Point}
+        return {}
+    end,
+    get_targets_for_selection = function(_origin: Point, _selection: Point, _map: BattleMap): {BattleUnit}
+        return {}
+    end,
+    is_target_valid = function(_origin: Point, _selection: Point, _map: BattleMap): boolean
+        return false
+    end,
+}
+
+
 local record Weapon
     name: string
     sprite: integer
@@ -46,8 +68,7 @@ local record Weapon
     accuracy: integer
     type: WeaponType
     body_type: WeaponBodyType
-    min_range: integer
-    max_range: integer
+    targeting: Targeting
 
     effects: {WeaponEffect}
 end
@@ -99,6 +120,10 @@ local weapon = {
     Weapon = Weapon,
     WeaponEffect = WeaponEffect,
     EquipmentEffect = EquipmentEffect,
+    targeting = {
+        none = none_targeting,    
+        Targeting = Targeting,
+    },
     effect = {
         DefenseType = DefenseType,
         AvoidType = AvoidType,

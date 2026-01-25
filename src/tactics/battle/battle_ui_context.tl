@@ -95,13 +95,13 @@ function BattleUIContext:enrich()
             self.acting_unit_tiles = self.acting_unit.valid_tiles
         elseif self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
             local tile = self.acting_unit.tile
-            local min_range,max_range = self.acting_unit.character:get_weapon_range()
-            local tiles_in_distance = self.tactics_engine:find_tiles_with_distance_from_tile(tile.x, tile.y, min_range, max_range)
+            local targeting = self.acting_unit.character:get_weapon_targeting()
+            local tiles_in_range = targeting.get_selection_tiles(tile, self.battle_map)
             self.acting_unit_tiles = self.acting_unit.valid_tiles
             self.acting_unit_tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
-            tiles_in_distance:foreach(function(x: integer,y: integer, in_range: boolean)
-                self.acting_unit_tiles:set(x,y,in_range and 0x6 or 0x0)
-            end)
+            for _,t in ipairs(tiles_in_range) do
+                self.acting_unit_tiles:set(t.x,t.y, 0x6)
+            end
         else
             self.acting_unit_tiles = nil
         end

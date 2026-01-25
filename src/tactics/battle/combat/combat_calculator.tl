@@ -7,6 +7,7 @@ local lists = require("src/tactics/util/lists")
 local random = require("src/tactics/util/random")
 local wpn = require("src/tactics/character/items/object/weapon")
 local effect = wpn.effect
+local Targeting = require("src/tactics/character/items/object/weapon").targeting.Targeting
 
 local record CombatResult
     record CombatStep
@@ -42,8 +43,7 @@ local combat_calculator = {
 local record AttackDouble
     damage: integer
     accuracy: integer
-    min_range: integer
-    max_range: integer
+    targeting: Targeting
 
     long_reach: boolean
     shieldsplitter: boolean
@@ -67,8 +67,7 @@ local function build_attack_double(weapon: wpn.Weapon): AttackDouble
     local double: AttackDouble = {
         damage = weapon.damage,
         accuracy = weapon.accuracy,
-        min_range = weapon.min_range,
-        max_range = weapon.max_range,
+        targeting = weapon.targeting,
         long_reach = false,
         ignored_defenses = {},
         ignored_avoids = {},
@@ -159,16 +158,8 @@ local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapo
     return damage
 end
 
-local function is_in_combat_range(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
-    local dist = point.taxicab_distance(attacker.tile, defender.tile)
-
-    log.debug("Checking combat range", attacker.id, attacker.tile, defender.id, defender.tile, attack.min_range, attack.max_range, dist)
-
-    return dist >= attack.min_range and dist <= attack.max_range
-end
-
-local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
-    return is_in_combat_range(attacker, defender, attack)
+local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: BattleMap): boolean
+    return attack.targeting.is_target_valid(attacker.tile, defender.tile, battle_map)
             and attacker.hp_current > 0
             and defender.hp_current > 0
 end
@@ -183,14 +174,14 @@ local function unit_is_long_reach(unit: CombatDouble): boolean
     return true
 end
 
-local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble): boolean
+local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: BattleMap): boolean
     local is_long_reach = unit_is_long_reach(attacker)
     log.debug("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
     if is_long_reach and not attack.long_reach then
         return false
     end
 
-    return can_attack(defender, attacker, attack)
+    return can_attack(defender, attacker, attack, battle_map)
 end
 
 local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: BattleMap): CombatResult.CombatStep
@@ -209,7 +200,7 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
     return nil
 end
 
-function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, map: BattleMap): combat_calculator.CombatResult
+function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): combat_calculator.CombatResult
     local result: combat_calculator.CombatResult = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -219,15 +210,15 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], map)
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
         pt.add(result.steps, step1)
         if step1.is_hit then defender.hp_current = defender.hp_current - step1.dmg end
     end
 
     -- defender counterattack
-    if can_counter_attack(attacker, defender, defender_attacks[1]) and defender.hp_current > 0 then -- Is there a good way to extract this?
-        local step2 = get_combat_step(defender, attacker, defender_attacks[1], map)
+    if can_counter_attack(attacker, defender, defender_attacks[1], battle_map) and defender.hp_current > 0 then -- Is there a good way to extract this?
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
         end
@@ -236,7 +227,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     return result
 end
 
-function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, map: BattleMap): CombatPreviewResult
+function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, battle_map: BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -247,15 +238,15 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
     local defender_attacks = defender.attacks
     
     -- attack
-    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], map)
+    local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
         pt.add(result.steps, step1)
     end
 
     -- defender counterattack
 
-    if can_counter_attack(attacker, defender, defender_attacks[1]) then
-        local step2 = get_combat_step(defender, attacker, defender_attacks[1], map)
+    if can_counter_attack(attacker, defender, defender_attacks[1], battle_map) then
+        local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
             pt.add(result.steps, step2)
         end

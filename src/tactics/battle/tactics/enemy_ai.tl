@@ -31,21 +31,19 @@ local enemy_ai_engine = {
     EnemyAIEngine = EnemyAIEngine,
 }
 
-local record AttackOption
-    destination: Point
-    target: BattleUnit
-end
-
 local record MovementOption
     destination: Point
+    target: BattleUnit -- nillable
 end
 
 function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     local ai = unit.unit_ai
 
     local max_move: integer
+    local shallow_move_limit = unit.character.stats.movement
     if ai.move == "zero" then
         max_move = 0
+        shallow_move_limit = 0
     elseif ai.move == "one" then
         max_move = unit.character.stats.movement
     elseif ai.move == "two" then
@@ -58,32 +56,46 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
     
-    local enemies = self.battle_map:get_units(function(u: BattleUnit): boolean return u:is_player() end)
+    local shallow_actions: {MovementOption} = {}
+    local deep_actions: {MovementOption} = {}
 
-    local potential_attacks: {AttackOption} = {}
-    local deep_moves: {MovementOption} = {}
-
-    for _,e in ipairs(enemies) do
-        local min_range, max_range = unit.character:get_weapon_range()
-        local tiles_in_range = self.tactics_engine:find_tiles_with_distance_from_tile(e.tile.x, e.tile.y, min_range, max_range)
-        tiles_in_range:foreachpoint(function(tile: Point, in_range: boolean)
-            if in_range then
-                local shortest_path_tile = all_tile_costs:get_point(tile) -- if could calculate
-                if shortest_path_tile ~= nil then
-                    if shortest_path_tile.cost <= unit.character.stats.movement then
-                        if self.battle_map:tile_is_legal_destination(unit, tile ) then
-                            pt.add(potential_attacks, { destination = tile, target = e})
-                        end
-                    else
-                        pt.add(deep_moves, { destination = tile })
-                    end
+    local targeting = unit.character:get_weapon_targeting()
+        
+    if shallow_move_limit > 0 then
+        all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
+            if cost ~= nil and cost.cost <= shallow_move_limit then
+                -- one_turn move, can attack
+                local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
+                    return u.is_player and targeting.is_target_valid(p, u.tile, self.battle_map)
+                end)
+                for _,t in ipairs(targets) do
+                    pt.add(shallow_actions, {
+                        tile = p,
+                        target = t,
+                    })
+                end
+            end
+        end)
+    end
+    if #shallow_actions == 0 then
+        all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
+            if cost ~= nil and cost.cost > shallow_move_limit then
+                -- one_turn move, can attack
+                local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
+                    return u.is_player and targeting.is_target_valid(p, u.tile, self.battle_map)
+                end)
+                for _,t in ipairs(targets) do
+                    pt.add(deep_actions, {
+                        tile = p,
+                        target = t,
+                    })
                 end
             end
         end)
     end
 
-    if #potential_attacks > 0 then
-        local choice = potential_attacks[1]
+    if #shallow_actions > 0 then
+        local choice = shallow_actions[1]
 
         local destination = choice.destination
         local path = pathfinding.get_path_to_tile(all_tile_costs, destination)
@@ -95,17 +107,17 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         }
         log.info(unit.id .. " will attack "..choice.target.id)
         self.event_writer:emit("MOVE_AND_ATTACK", action_ctx)
-    elseif #deep_moves > 0 then
-        local min_cost_deep_move = deep_moves[1]
+    elseif #deep_actions > 0 then
+        local min_cost_deep_action = deep_actions[1]
         local min_cost = 999
-        for _,deep_move in ipairs(deep_moves) do
-            if all_tile_costs:get_point(deep_move.destination).cost < min_cost then
-                min_cost = all_tile_costs:get_point(deep_move.destination).cost
-                min_cost_deep_move = deep_move
+        for _,deep_action in ipairs(deep_actions) do
+            if all_tile_costs:get_point(deep_action.destination).cost < min_cost then
+                min_cost = all_tile_costs:get_point(deep_action.destination).cost
+                min_cost_deep_action = deep_action
             end
         end
         -- follow until first tile in range
-        local current_point = min_cost_deep_move.destination
+        local current_point = min_cost_deep_action.destination
         while all_tile_costs:get_point(current_point).cost > unit.character.stats.movement
             or not self.battle_map:tile_is_legal_destination(unit, current_point) do
             current_point = all_tile_costs:get_point(current_point).prev

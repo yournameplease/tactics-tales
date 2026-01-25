@@ -229,15 +229,16 @@ end
 function BattleMap:get_targets_in_range(unit_id: integer, tile: Point): { battle_unit.BattleUnit }
     local targets: { BattleUnit } = {}
     local attacker = self.units_by_id[unit_id]
-    local min_range, max_range = attacker.character:get_weapon_range()
+    local targeting = attacker.character:get_weapon_targeting()
     for _,target in pairs(self.units_by_id) do
         if target.id ~= attacker.id then
             if target.side ~= attacker.side
-                    and self:tile_has_distance_from_tile(
+                and targeting.is_target_valid(
                     tile,
                     target.tile,
-                    min_range, max_range
-            ) then
+                    battle_map
+                )
+            then
                 pt.add(targets, target)
             end
         end
