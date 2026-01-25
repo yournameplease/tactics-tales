@@ -2,6 +2,8 @@ require("src/tactics/character/items/object/weapon")
 require("src/tactics/character/animation_data")
 local animation = require("src/tactics/animation")
 local ItemInventory = require("src/tactics/character/items/object/item_inventory")
+local targeting = require("src/tactics/character/items/object/weapon").targeting
+local Targeting = targeting.Targeting
 local maps = require("src/tactics/util/maps")
 
 local enum Side
@@ -48,17 +50,19 @@ local record Character
     stats: CharacterStats
 	inventory: ItemInventory.ItemInventory
     tags: maps.Set<string>
+	
+	get_weapon_targeting: function(self): Targeting
 end
 
-function Character:get_weapon_range(): integer, integer
+function Character:get_weapon_targeting(): Targeting
 	local weapons = self.inventory:get_equipped_weapons()
 
 	if #weapons == 0 then
-		return 0,0
+		return targeting.none
 	end
 
 	-- TODO: dual weilding
-	return weapons[1].min_range, weapons[1].max_range
+	return weapons[1].targeting 
 end
 
 local enum FacingVertical

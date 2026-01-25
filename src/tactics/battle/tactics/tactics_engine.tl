@@ -56,7 +56,7 @@ local record TacticsEngine
     -- queries
     
     is_blocked: function(self): boolean
-    tiles_with_distance_from_unit_attacks: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    tiles_with_distance_from_unit_attacks: function(self, unit: BattleUnit, point: Point): array_2d.Array2D<MenuTileHighlight>
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
     tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
     
@@ -511,20 +511,16 @@ end
 
 -- legal tile getters
 
-function TacticsEngine:tiles_with_distance_from_unit_attacks(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
-    local unit = ctx.acting_unit.unit
-    local min_range, max_range = unit.character:get_weapon_range()
+function TacticsEngine:tiles_with_distance_from_unit_attacks(unit: BattleUnit, tile: Point): array_2d.Array2D<MenuTileHighlight>
+    local targeting = unit.character:get_weapon_targeting()
 
-    local destination = ctx.destination.point
-    local tiles_in_distance = self:find_tiles_with_distance_from_tile(destination.x, destination.y, min_range, max_range)
+    local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
 
     local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
 
-    tiles_in_distance:foreach(function(x: integer, y: integer, in_range: boolean)
-            if in_range then
-                tiles:set(x, y, { can_attack = true, valid_selection = true })
-            end
-    end)
+    for _,t in ipairs(tiles_in_distance) do
+        tiles:set_point(t, { can_attack = true, valid_selection = true })
+    end
 
     return tiles
 end
@@ -569,8 +565,6 @@ end
 function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
     unit: BattleUnit
 ): Userdata
-    local min_range, max_range = unit.character:get_weapon_range()
-
     local movement = unit.character.stats.movement
     if unit.unit_ai ~= nil and unit.unit_ai.move == "zero" then
         movement = 0
@@ -593,10 +587,10 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
             tile = tile | 0x1
             tile = tile | 0x2
             tiles:set(x, y, tile)
-            local tiles_in_attack_range = self:find_tiles_with_distance_from_tile(x, y, min_range, max_range)
+            local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, point.of(x, y))
 
-            tiles_in_attack_range:foreach(function(ax: integer, ay: integer, can_attack: boolean)
-                    if can_attack then
+            tiles_in_attack_range:foreach(function(ax: integer, ay: integer, can_attack: MenuTileHighlight)
+                    if can_attack.can_attack then
                         local a_tile = tiles:get(ax,ay)
                         if a_tile == nil then a_tile = 0 end
                         a_tile = a_tile | 0x4

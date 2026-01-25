@@ -59,14 +59,13 @@ local function validate_tile_is_in_unit_attack_range(
     unit_position: Point,
     target_point: Point 
 ): boolean
-    local min_range, max_range = unit.character:get_weapon_range()
-
+    local targeting = unit.character:get_weapon_targeting()
     local target_unit = map:get_at_tile(target_point)
     if target_unit == nil then return false end
 
     if target_unit.side == unit.side then return false end
 
-    return map:tile_has_distance_from_tile(target_point, unit_position, min_range, max_range)
+    return targeting.is_target_valid(unit_position, target_point, map)
 end
 
 -- kind
@@ -162,7 +161,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 end,
                 send_command = "ATTACK_UNIT",
                 get_legal_tiles = function (msb: BattleMenuContext, ctx: MenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
-                    return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx)
+                    return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
                 end
             }),
             ["SELECT_ITEM"] = list_cursor.definition({
