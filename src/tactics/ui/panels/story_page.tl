@@ -1,6 +1,7 @@
 
 local box = require("src/tactics/ui/box")
 local text_node = require("src/tactics/ui/components/text_node")
+local dialogue_node = require("src/tactics/ui/components/dialogue_node")
 local portrait_box = require("src/tactics/ui/panels/portrait_box")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
@@ -77,7 +78,7 @@ function StoryPagePanel:compute_children(state: UIContextManager)
                     auto_height = true,
                 } ))
             elseif n is rendered_story_node.Text then
-                child = text_node.new({
+                child = dialogue_node.new({
                     dialogue = n.text,
 					draw_properties = {
 						wrap = "wrap"

@@ -3,6 +3,7 @@ local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selecti
 
 local interface InputContext
 	type: input.InputMethod
+	actions: input.InputActions
 end
 
 local record JoypadContext
@@ -24,19 +25,21 @@ local input_context = {
 	MouseContext = MouseContext,
 }
 
-function input_context.joypad(joypad: input.Joypad): InputContext
+function input_context.joypad(joypad: input.Joypad, actions: input.InputActions): InputContext
 	local self: JoypadContext = {
 		type = "joypad",
 		joypad = joypad,
+		actions = actions,
 	}
 	return self
 end
 
-function input_context.mouse(mouse: input.Mouse, hovered: MenuMouseSelection): InputContext
+function input_context.mouse(mouse: input.Mouse, hovered: MenuMouseSelection, actions: input.InputActions): InputContext
 	local self: MouseContext = {
 		type = "mouse",
 		mouse = mouse,
 		hovered = hovered,
+		actions = actions,
 	}
 	return self
 end
@@ -51,7 +54,7 @@ function input_context.handle_update(
     elseif ctx is input_context.MouseContext then
         update_mouse(ctx.mouse, ctx.hovered)
     else
-        error(ctx.type)
+        unexpected(ctx.type)
     end
 end
 

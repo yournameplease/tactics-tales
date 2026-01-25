@@ -1,9 +1,11 @@
+
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local text = require("src/tactics/util/text")
 local section_divider = require("src/tactics/ui/decoration/section_divider")
 local lists = require("src/tactics/util/lists")
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 
 local enum UITextColor
     "dark"
@@ -22,24 +24,27 @@ local interface TextUIElement
     get_hovered_line: function(self, lx: number, ly: number): integer
 end
 
-local record TextNode
+local enum DialogueMode
+    "all_lines"
+    "active_line"
+end
+
+local record DialogueNode
     is box.UIElement, TextUIElement
-    func: function(UIContextManager): { string }
-    text: { string }
+    dialogue: Dialogue
+    dialogue_mode: DialogueMode
     rows: integer
 end
 
-setmetatable(TextNode, { __index = box.Box })
+setmetatable(DialogueNode, { __index = box.Box })
 
 local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
-function TextNode:compute_children(state: UIContextManager)
+function DialogueNode:compute_children(_: UIContextManager)
     -- compute text as a "child", so it may be measured
     -- in the same frame
-    local lines =
-        self.text
-        or (self.func and self.func(state))
+    local lines = self.dialogue and self.dialogue.text
 
     if self.rows then
         assert(
@@ -55,7 +60,7 @@ function TextNode:compute_children(state: UIContextManager)
     text_obj:calculate_wrapping()
 end
 
-function TextNode:measure(depth: integer)
+function DialogueNode:measure(depth: integer)
     local text_obj = self.text_object
     if text_obj ~= nil then
         self.text_object:calculate_wrapping()
@@ -75,7 +80,7 @@ function TextNode:measure(depth: integer)
     end
 end
 
-function TextNode:get_hovered_line(_lx: number, ly: number): integer
+function DialogueNode:get_hovered_line(_lx: number, ly: number): integer
     local paragraph_heights = lists.map(
         function(p: {string}): integer return #p end
     )(self.text_object:get_lines())
@@ -89,7 +94,7 @@ function TextNode:get_hovered_line(_lx: number, ly: number): integer
     return i
 end
 
-function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+function DialogueNode:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     box.Box._draw(self, state, draw_target_manager, ui_theme)
 
     local colors <total>: {UITextColor: Color} = {
@@ -99,33 +104,50 @@ function TextNode:draw(state: UIContextManager, draw_target_manager: DrawTargetM
         light = ui_theme.COLOR_DECORATION_SHADOW,
     }
 
+
     local text_obj = self.text_object
-    text_obj:draw(
-        self.x+self.internal_margin.l,
-        self.y+self.internal_margin.t,
-        colors[self.text_color],
-        nil
-    )
+	if self.dialogue_mode == "all_lines" then
+	    local line_counts: {integer} = {}
+        for i = 1,#self.dialogue.text do
+            local line_count = 0
+            if i < self.dialogue.current_row then
+                line_count = #self.dialogue.text[i]
+            elseif i == self.dialogue.current_row then
+                line_count = self.dialogue.characters_rendered
+            end
+        
+            pt.add(line_counts, line_count) 
+	    end
+	    text_obj:draw(
+	        self.x+self.internal_margin.l,
+	        self.y+self.internal_margin.t,
+	        colors[self.text_color],
+	        line_counts
+	    )
+	else
+	    text_obj:draw_one(
+			self.dialogue.current_row,
+	        self.x+self.internal_margin.l,
+	        self.y+self.internal_margin.t,
+	        colors[self.text_color],
+	        self.dialogue.characters_rendered
+	    )
+	end
 end
 
 local text_node = {
-    TextNode = TextNode,
+    DialogueNode = DialogueNode,
     TextUIElement = TextUIElement,
 }
 
-function text_node.new(props: TextNode): TextNode
-    local self = box.new(props) as TextNode
-    setmetatable(self, { __index = TextNode })
+function text_node.new(props: DialogueNode): DialogueNode
+    local self = box.new(props) as DialogueNode
+    setmetatable(self, { __index = DialogueNode })
 
     self.padding = props.padding or 0
     self.decoration_padding = 0
-    if props.text then
-        self.text = props.text
-    elseif props.func then
-        self.func = props.func
-    else
-        error("Need either `text` or `func` for text node!")
-    end
+    self.dialogue = props.dialogue
+    self.dialogue_mode = props.dialogue_mode or "all_lines"
     if props.rows then
         self.rows = props.rows
         self.h = (self.rows) * (TEXT_HEIGHT + 2)
@@ -155,7 +177,7 @@ function text_node.new(props: TextNode): TextNode
     return self
 end
 
-function text_node.title(props: TextNode): box.UIElement
+function text_node.title(props: DialogueNode): box.UIElement
     props.auto_height = props.auto_height or true
     props.draw_properties = props.draw_properties or {}
     props.draw_properties.justify = props.draw_properties.justify or "center"

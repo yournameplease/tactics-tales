@@ -72,7 +72,7 @@ local function time_at_speed(timer: integer, speed: DialogueSpeed): integer
 		or 0
 end
 
-function DialogueManagerImpl:update(_: InputContext)
+function DialogueManagerImpl:update(input: InputContext)
 	self.global_timer = self.global_timer + 1
 
 	for _,d in ipairs(self.active_dialogues) do
@@ -87,12 +87,10 @@ function DialogueManagerImpl:update(_: InputContext)
 				end
 			end
 			if d.characters_rendered >= row_len and d.current_row <= #d.text then
-				if d.auto_advance then
-					d.current_row = d.current_row + 1
-					d.characters_rendered = 0
-					d.timer_offset = time_at_speed(self.global_timer, d.speed)
-				else
-					-- todo if
+				if d.auto_advance
+					or input.actions["ADVANCE"].pressed
+				then
+					log.debug("advancing dialogue")
 					d.current_row = d.current_row + 1
 					d.characters_rendered = 0
 					d.timer_offset = time_at_speed(self.global_timer, d.speed)

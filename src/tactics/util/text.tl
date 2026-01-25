@@ -40,6 +40,7 @@ local interface Text
     calculate_wrapping: function(self)
 
     draw: function(self, x: integer, y: integer, color: Color, line_counts: {integer})
+    draw_one: function(self, row_num: integer, x: integer, y: integer, color: Color, line_count: integer)
     
 end
 
@@ -381,6 +382,28 @@ function TextImpl:draw(
                 line_count = line_count - #text_row
             end 
         end
+    end
+	profile("draw_text")
+end
+
+function TextImpl:draw_one(
+    row_number: integer,
+    x: integer,
+    y: integer,
+    color: Color,
+    line_count: integer
+)
+	profile("draw_text")
+
+    self:calculate_wrapping()
+    local row_count = 0
+    local paragraph = self.lines[row_number]
+    for _, text_row in ipairs(paragraph.wrapped_lines) do
+        row_count = row_count + 1
+        self:draw_text_row(text_row, x, y, color, row_count, line_count)
+        if line_count ~= nil then
+            line_count = line_count - #text_row
+        end 
     end
 	profile("draw_text")
 end
