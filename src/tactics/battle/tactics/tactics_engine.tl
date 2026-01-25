@@ -151,23 +151,23 @@ end
 -- move into dialogue manager? 
 function TacticsEngine:update_dialogue(input: InputContext)
     if #self.dialogue_queue > 0 then
-        local active_dialogue = self.active_dialogue
-        if active_dialogue == nil then
-            active_dialogue = self.dialogue_manager:create_dialogue(
+        if self.active_dialogue == nil then
+            local new_dialogue = self.dialogue_manager:create_dialogue(
                 self.dialogue_queue[1],
                 {
                     can_skip = true,
                 },
                 {}
             )
-            self.active_dialogue = active_dialogue
-            log.debug("DIALOGUE: ", self.active_dialogue.text)
-        end
-        self.dialogue_manager:update(input)
-        if active_dialogue.finished then
-            active_dialogue = nil
+            self.active_dialogue = new_dialogue
             pt.deli(self.dialogue_queue, 1)
+            log.debug("adding dialogue", #self.dialogue_queue, self.active_dialogue)
         end
+    end
+    self.dialogue_manager:update(input)
+    if self.active_dialogue ~= nil and self.active_dialogue.finished then
+        log.debug("removing dialogue", #self.dialogue_queue, self.active_dialogue)
+        self.active_dialogue = nil
     end
 end
 
