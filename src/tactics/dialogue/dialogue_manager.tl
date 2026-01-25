@@ -70,7 +70,6 @@ function DialogueManagerImpl:update(_: InputContext)
 			else
 				d.characters_rendered = d.characters_rendered + -mask
 			end
-			d.finished = d.characters_rendered > #d.text
 		end
 	end
 end
@@ -116,6 +115,9 @@ function DialogueManagerImpl:create_dialogue(
 			end
 			if k == "timer_limit" then
 				return SPEED_MASK[d.speed] + 1
+			end
+			if k == "finished" then
+				return d.characters_rendered >= #d.text
 			end
 		end
 	}

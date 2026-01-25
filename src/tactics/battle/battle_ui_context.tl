@@ -9,6 +9,7 @@ local BattleObjectiveService = require("src/tactics/battle/battle_objective_serv
 local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 
 local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
 local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
@@ -29,6 +30,8 @@ local record BattleUIContext
     acting_unit_tiles: Userdata
     destination: Point
     objective_text: {string}
+
+    active_dialogue: Dialogue
 end
 
 local battle_ui_context = {
@@ -115,6 +118,9 @@ function BattleUIContext:enrich()
             self.acting_unit = nil
         end
     end
+
+    self.active_dialogue = self.tactics_engine.active_dialogue
+    -- log.debug("dialogue", self.active_dialogue)
 
     -- todo: cache
     self.objective_text = self.battle_objective_service:get_objective_text(self.turn_manager.turn)
