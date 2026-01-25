@@ -50,7 +50,7 @@ local record TacticsEngine
     animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
     dialogue_manager: DialogueManager
-    dialogue_queue: {string}
+    dialogue_queue: {{string}}
     active_dialogue: Dialogue
 
     -- queries
@@ -140,12 +140,8 @@ end
 
 -- dialogue
 
-function TacticsEngine:start_dialogue(unit: battle_unit.BattleUnit, text: {string})
-    local idle_animation = self.animation_manager:create_idle_animation()
-    unit.animation_data = idle_animation
-    for _,t in ipairs(text) do
-        pt.add(self.dialogue_queue, t)
-    end
+function TacticsEngine:start_dialogue(_unit: battle_unit.BattleUnit, text: {string})
+    pt.add(self.dialogue_queue, text)
 end
 
 -- move into dialogue manager? 

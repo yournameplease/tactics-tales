@@ -241,7 +241,7 @@ function TacticsMap:compute_children(state: UIContextManager)
             
                 local node = text_node.new(
                 	{
-                        dialogue = {state.battle_context.active_dialogue},
+                        dialogue = state.battle_context.active_dialogue,
                         draw_properties = {
                             wrap = "wrap",
                         },

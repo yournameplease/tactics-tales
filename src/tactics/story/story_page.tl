@@ -144,7 +144,7 @@ end
 
 function StoryPageImpl:add_text_line(text: string)
     local dialogue = self.dialogue_manager:create_dialogue(
-        text,
+        {text},
         {
             can_skip = true,
         },
