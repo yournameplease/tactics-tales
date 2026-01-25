@@ -88,4 +88,8 @@ function point.taxicab_distance(p1: Point, p2: Point): integer
     return pt.abs(p1.x-p2.x)+pt.abs(p1.y-p2.y)
 end
 
+function point.norm_squared(p: Point): integer
+    return p.x*p.x+p.y*p.y
+end
+
 return point

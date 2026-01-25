@@ -132,6 +132,17 @@ function scripts.effect.despawn(
 	}
 end
 
+function scripts.effect.dialogue(
+	unit,
+	text
+)
+	return {
+		type = "dialogue",
+		unit = unit,
+		text = text
+	}
+end
+
 function scripts.effect.modify_units(
 	unit_tag,
 	new_ai,
@@ -258,6 +269,41 @@ local function open_door_mid(
                 tile_label,
                 {
                     ["mid_wall"] = 0
+                }
+            ),
+        },
+    }
+end
+
+function escape(tile_tag)
+    return {
+        trigger = {
+            type = "tile_interaction",
+            tile_specifier = {
+                type = "tag_lookup",
+                tag = tile_tag,
+            },
+            interaction_text = "Escape",
+            interaction_distance = "on",
+        },
+        effects = {
+            scripts.effect.dialogue(
+                {
+            		    type = "trigger_source"
+                },
+                {
+                    "I'm retreating!",
+                }
+            ),
+            scripts.effect.despawn({
+        		    type = "trigger_source"
+        		}),
+            scripts.effect.dialogue(
+                {
+            		    type = "trigger_source"
+                },
+                {
+                    "Bye Bye!",
                 }
             ),
         },
@@ -445,23 +491,7 @@ local BATTLE_DATA = {
             open_door_front("cultist_door_guard_c","door_c"),
             open_door_front("cultist_door_guard_d","door_d"),
             open_door_front("cultist_door_guard_e","door_e"),
-            {
-                trigger = {
-                    type = "tile_interaction",
-                    tile_specifier = {
-                        type = "tag_lookup",
-                        tag = "escape_point",
-                    },
-                    interaction_text = "Escape",
-                    interaction_distance = "on",
-
-                },
-                effects = {
-                    scripts.effect.despawn({
-                		    type = "trigger_source"
-                		}),
-                },
-            },
+            escape("escape_point"),
         }
     },
     ["fortress_town"] = {

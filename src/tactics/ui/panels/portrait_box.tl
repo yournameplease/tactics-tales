@@ -46,7 +46,8 @@ function PortraitBox:draw(state: UIContextManager, draw_target_manager: DrawTarg
             draw_target_manager,
             self.palette or true,
             false,
-            true
+            true,
+            nil
         )
         pt.reset_pal()
     end
