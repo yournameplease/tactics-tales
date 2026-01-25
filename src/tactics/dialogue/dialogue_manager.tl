@@ -125,7 +125,6 @@ function DialogueManagerImpl:create_dialogue(
 		text = replaced_text,
 		current_row = 1,
 		characters_rendered = 0,
-		finished = false,
 
 		auto_advance = props.auto_advance, 
 		speed = props.speed,
@@ -143,8 +142,7 @@ function DialogueManagerImpl:create_dialogue(
 				return SPEED_MASK[t.speed] + 1
 			end
 			if k == "finished" then
-				return t.current_row >= #t.text
-					and t.characters_rendered > #t.text[#t.text] 
+				return t.current_row > #t.text
 			end
 		end
 	}
