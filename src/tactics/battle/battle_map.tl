@@ -260,6 +260,11 @@ function BattleMap:get_all_units(): { battle_unit.BattleUnit }
     return self:get_units(fp.fn_true)
 end
 
+function BattleMap:tile_is_in_map(tile: Point): boolean
+    return tile.x >= 0 and tile.x < self.width
+        and tile.y >= 0 and tile.y < self.height
+end
+
 -- interactions / scripts
 
 function BattleMap:register_tile_interaction(
