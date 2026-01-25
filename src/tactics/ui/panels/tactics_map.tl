@@ -20,6 +20,7 @@ local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selec
 local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local text_node = require("src/tactics/ui/components/text_node")
+local dialogue_node = require("src/tactics/ui/components/dialogue_node")
 
 local record TacticsMap
     is box.UIElement
@@ -239,9 +240,10 @@ function TacticsMap:compute_children(state: UIContextManager)
                     decoration = "border",
                 })
             
-                local node = text_node.new(
+                local node = dialogue_node.new(
                 	{
                         dialogue = state.battle_context.active_dialogue,
+                        dialogue_mode = "active_line",
                         draw_properties = {
                             wrap = "wrap",
                         },

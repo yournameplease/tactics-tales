@@ -292,9 +292,9 @@ function escape(tile_tag)
             		    type = "trigger_source"
                 },
                 {
-                    "I'm retreating1!",
-                    "Bye Bye!",
                     "I'm retreating!",
+                    "Bye Bye!",
+                    "I'm retreating2!",
                     -- "Bye Bye!",
                     -- "Bye Bye!",
                 }

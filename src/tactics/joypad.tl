@@ -1,3 +1,15 @@
+local record InputActionState
+    held: boolean
+    pressed: boolean
+    released: boolean
+end
+
+local enum InputAction
+    "ADVANCE"
+end
+
+local type InputActions = {InputAction: InputActionState}
+
 local record Mouse
     mx: number
     my: number
@@ -37,6 +49,8 @@ local record UserInput
     active_method: InputMethod
     method_changed: boolean
 
+    actions: InputActions
+
     joypad: Joypad
     mouse: Mouse
 end
@@ -52,11 +66,15 @@ local input_service = {
     Mouse = Mouse,
     UserInput = UserInput,
     InputService = InputService,
+    InputAction = InputAction,
+    InputActionState = InputActionState,
+    InputActions = InputActions,
 }
 
 local record InputServiceImpl
     is InputService
 
+    actions: {InputAction: InputActionState}
     previous_input: InputMethod
     mouse_prev: Mouse
 end
@@ -130,11 +148,30 @@ function InputServiceImpl:get_user_input(): UserInput
     if any_joy then self.current_input = "joypad" end
     if any_mouse then self.current_input = "mouse" end
 
+    local new_actions: {InputAction: boolean} = nil
+    if self.current_input == "mouse" then
+        local actions <total>: {InputAction: boolean} = {
+            ["ADVANCE"] = mouse.ml
+        }
+        new_actions = actions
+    elseif self.current_input == "joypad" then
+        local actions <total>: {InputAction: boolean} = {
+            ["ADVANCE"] = joy.a
+        }
+        new_actions = actions
+    end
+    for k,held in pairs(new_actions) do
+        self.actions[k].pressed = held and not self.actions[k].held
+        self.actions[k].released = not held and self.actions[k].held
+        self.actions[k].held = held
+    end
+
     local out = {
         joypad = joy,
         mouse = mouse,
         active_method = self.current_input,
-        method_changed = self.current_input ~= self.previous_input
+        method_changed = self.current_input ~= self.previous_input,
+        actions = self.actions,
     }
 
     self.mouse_prev = mouse
@@ -144,10 +181,14 @@ function InputServiceImpl:get_user_input(): UserInput
 end
 
 function input_service.new(): InputService
+    local actions <total>: {InputAction: InputActionState} = {
+        ["ADVANCE"] = {}
+    } 
     local self: InputServiceImpl = setmetatable({
         current_input = "joypad",
         previous_input = nil,
         mouse_prev = nil,
+        actions = actions
     },{
         __index = InputServiceImpl
     })
