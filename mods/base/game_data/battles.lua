@@ -293,15 +293,19 @@ function escape(tile_tag)
                 },
                 {
                     "I'm retreating!",
-                    "Bye Bye!",
-                    "I'm retreating2!",
-                    -- "Bye Bye!",
-                    -- "Bye Bye!",
                 }
             ),
             scripts.effect.despawn({
         		    type = "trigger_source"
         		}),
+            scripts.effect.dialogue(
+                {
+            		    type = "trigger_source"
+                },
+                {
+                    "Bye Bye!",
+                }
+            ),
         },
     }
 end

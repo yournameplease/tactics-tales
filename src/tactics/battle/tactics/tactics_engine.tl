@@ -504,7 +504,7 @@ function TacticsEngine:refresh_units(filter: function(BattleUnit): boolean)
 end
 
 function TacticsEngine:is_blocked(): boolean
-    local is_dialogue = #self.dialogue_queue > 0
+    local is_dialogue = #self.dialogue_queue > 0 or self.active_dialogue ~= nil
 
     return is_dialogue or self.battle_is_blocked
 end
