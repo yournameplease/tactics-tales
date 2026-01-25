@@ -12,6 +12,7 @@ local battle_script = require("src/tactics/battle/scripts/battle_script")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
+local TaskManager = require("src/tactics/systems/tasks").TaskManager
 
 local record ScriptContext
 	source_unit: BattleUnit
@@ -33,6 +34,7 @@ local record ScriptManagerImpl
 	battle_map: BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
 	event_listener: event_listener.EventListener
+    task_manager: TaskManager
 end
 
 function ScriptManagerImpl:resolve_unit_specifier(
@@ -213,7 +215,7 @@ function ScriptManagerImpl:register_script(
 				)
 			end
 		elseif effect is battle_script.effect.ModifyTerrain then
-			fn = function(ctx: ScriptContext)
+			fn = function(_ctx: ScriptContext)
 				log.debug("Handling ModifyTerrain event")
 				self.battle_map:update_terrain(
 					effect.tile_label,
@@ -244,9 +246,14 @@ function ScriptManagerImpl:register_script(
 		function(args: {string: any})
 			local triggered, ctx = filter(args)
 			if triggered then
-				for _,effect in ipairs(effects) do
-					effect(ctx)
-				end
+		        self.task_manager:start_routine(function()
+					for _,effect in ipairs(effects) do
+						effect(ctx)
+						while self.tactics_engine:is_blocked() do
+							pt.yield()
+						end
+					end
+				end)
 			end
 		end
 	)
@@ -256,7 +263,8 @@ function script_manager.new(
 	scripts: { battle_script.BattleScript },
 	bus: event_bus.EventBus,
 	map: BattleMap,
-	tactics: tactics_engine.TacticsEngine
+	tactics: tactics_engine.TacticsEngine,
+    task_manager: TaskManager
 ): ScriptManager
 	scripts = scripts or {}
 
@@ -267,6 +275,7 @@ function script_manager.new(
 	self.event_listener = event_listener.new(bus)
 	self.tactics_engine = tactics
 	self.battle_map = map
+	self.task_manager = task_manager
 
 	local id_gen = id_generator.new()
 

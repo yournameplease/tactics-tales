@@ -70,7 +70,8 @@ function battle_manager.new(
         battle_def.scripts,
         event_bus,
         self.battle_map,
-        self.tactics_engine
+        self.tactics_engine,
+        task_manager
     )
     
     self.tactics_engine:spawn_all(
