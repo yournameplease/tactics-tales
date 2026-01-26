@@ -135,12 +135,11 @@ function DialogueNode:draw(state: UIContextManager, draw_target_manager: DrawTar
 	end
 end
 
-local text_node = {
+local dialogue_node = {
     DialogueNode = DialogueNode,
-    TextUIElement = TextUIElement,
 }
 
-function text_node.new(props: DialogueNode): DialogueNode
+function dialogue_node.new(props: DialogueNode): DialogueNode
     local self = box.new(props) as DialogueNode
     setmetatable(self, { __index = DialogueNode })
 
@@ -177,15 +176,4 @@ function text_node.new(props: DialogueNode): DialogueNode
     return self
 end
 
-function text_node.title(props: DialogueNode): box.UIElement
-    props.auto_height = props.auto_height or true
-    props.draw_properties = props.draw_properties or {}
-    props.draw_properties.justify = props.draw_properties.justify or "center"
-
-    local self = box.col()
-    self:add(text_node.new(props))
-    self:add(section_divider.new(2))
-    return self
-end
-
-return text_node
+return dialogue_node
