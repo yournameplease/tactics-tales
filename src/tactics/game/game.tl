@@ -63,6 +63,7 @@ end
 
 function Game:exit_story()
     self.story:teardown()
+    self.story = nil
 end
 
 function game.new(
