@@ -11,6 +11,9 @@ local InteractionHook = types.InteractionHook
 local TileInteractionHook = types.TileInteractionHook
 local UnitInteractionHook = types.UnitInteractionHook
 
+-- lots of globals needed to be defined here to resolve a circular dependency
+-- within weapon Targeting class
+
 local enum TerrainLocation
 	"front_wall"
 	"mid_wall"
@@ -18,9 +21,9 @@ local enum TerrainLocation
 	"ground"
 end
 
-local type NewTilesMap = {TerrainLocation: integer}
+global type NewTilesMap = {TerrainLocation: integer}
 
-local record TerrainData
+global record TerrainData
     solid: boolean
     movement_cost: integer
     dodge: integer
@@ -61,7 +64,7 @@ local TERRAIN_DATA: { integer: TerrainData } = {
     }
 }
 
-local record MapLayers
+global record MapLayers
     metatiles: Userdata
     -- should be total
     terrain: {TerrainLocation: Userdata}
@@ -72,7 +75,7 @@ local record MapMetadata
     enemy_spawners: { integer: { Point } }
 end
 
-local record BattleMap    
+global record BattleMap    
     width: integer
     height: integer
     

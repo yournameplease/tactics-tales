@@ -1247,6 +1247,10 @@ end
 -- global split: function(str: any, separator: any, convert_numbers: any) 
 -- string.split = split
 
+function pt.type(val)
+	return type(val)
+end
+
 --- Create a string encoding all the information needed to get from str0 to str1.
 --- The delta can be used with apply_delta to produce str1 given only str0.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#create_delta)

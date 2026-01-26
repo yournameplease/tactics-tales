@@ -28,8 +28,8 @@ function weapon.range.single_target(min_range, max_range)
             local out = {}
             for x=-max_range,max_range do
                 for y=-max_range,max_range do
-                    local p = point.of(x, y)
-                    local dist = point.taxicab_distance(origin, p) 
+                    local p = lib.point.of(x, y)
+                    local dist = lib.point.taxicab_distance(origin, p) 
                     if min_range <= distance and distance <= max_range
                         and map:tile_is_in_map(p)
                     then
@@ -44,7 +44,7 @@ function weapon.range.single_target(min_range, max_range)
             return { map:get_at_tile(selection) }
         end,
         is_target_valid = function(origin, selection, map)
-            local distance = point.taxicab_distance(origin, selection) < 
+            local distance = lib.point.taxicab_distance(origin, selection) 
             return min_range <= distance and distance <= max_range
         end,
     }
@@ -53,7 +53,7 @@ end
 local default_weapon = {
     name = "Default Weapon",
     sprite = 104,
-    hand_anchor = point.of(1,8), -- the top left position of the handle
+    hand_anchor = lib.point.of(1,8), -- the top left position of the handle
     damage = 1,
     accuracy = 90,
     type = "MELEE",
@@ -96,7 +96,7 @@ function weapon.melee(
         "MAIN_HAND",
         {
             sprite = sprite,
-            anchor = point.of(1,8)
+            anchor = lib.point.of(1,8)
         },
         {
             name = name,
@@ -115,13 +115,13 @@ function weapon.two_handed(
     slots,
     effects
 )
-    return weapon(
+    return weapon.of(
         name,
         slots,
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = point.of(3,12)
+            anchor = lib.point.of(3,12)
         },
         {
             name = name,
@@ -144,13 +144,13 @@ function weapon.ranged(
     slots,
     effects
 )
-    return weapon
+    return weapon.of(
         name,
         slots,
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = point.of(13,9) 
+            anchor = lib.point.of(13,9) 
         },
         {
             name = name,
