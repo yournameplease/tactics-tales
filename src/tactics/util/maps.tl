@@ -92,4 +92,31 @@ function maps.merge<Key, Value>(...: {Key: Value}): {Key: Value}
     return out
 end
 
+function maps.deep_merge(m1: {string: any}, m2: {string: any}): {string: any}
+    local out: {string: any} = {}
+    for k,v in pairs(m1) do
+        if pt.type(v) == "table" then
+            out[k] = maps.deep_merge({}, v as {string: any})
+        else
+            out[k] = v
+        end
+    end
+    for k,v in pairs(m2) do
+        if pt.type(v) == "table" then
+            local cur = out[k]
+            if cur == nil then
+                out[k] = maps.deep_merge({}, v as {string: any})
+            elseif pt.type(cur) == "table" then
+                out[k] = maps.deep_merge(out[k] as {string: any}, v as {string: any})
+            else
+                log.warn("Overwriting a value with a table")
+                out[k] = maps.deep_merge({}, v as {string: any})
+            end
+        else
+            out[k] = v
+        end
+    end
+    return out
+end
+
 return maps

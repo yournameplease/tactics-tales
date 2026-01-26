@@ -1,6 +1,7 @@
 local fp = require("src/tactics/util/fp")
 local lists = require("src/tactics/util/lists")
 local maps = require("src/tactics/util/maps")
+local point = require("src/tactics/util/point")
 local GameData = require("src/tactics/game_data").GameData
 local story = require("src/tactics/story/types")
 local StoryId = story.StoryId
@@ -130,7 +131,35 @@ local function load_mod_val<Value>(
 	return lists.do_reverse(values)[1] or error()
 end
 
+-- TODO: consider safer approaches?
+function ModLoaderImpl:create_sandbox(): {string: any}
+	local sandbox: {string: any} = {
+		point = point,
+	}
+	lib = sandbox
+
+	log.info("Loading mod libraries")
+	local libs: {string: any} = {}
+	for _,r in ipairs(self.registered) do
+		log.info("Loading libraries for "..r.id)
+		local base_lib_path = "mods/"..r.path.."/lib"
+		local lib_paths = pt.ls(base_lib_path)
+		log.debug("Found "..#lib_paths.." libraries at "..base_lib_path)
+		for _,lib_path in ipairs(lib_paths) do
+			local full_path = base_lib_path.."/"..lib_path
+			log.debug("Loading "..full_path)
+			local l = pt.include(full_path) as {string: any}
+			libs = maps.deep_merge(libs, l)
+		end
+	end
+	log.info("Loaded mod libraries")
+
+	lib.libs = libs
+end
+
 function ModLoaderImpl:load_mod_data(): GameData
+	self:create_sandbox()
+
 	local game_data: GameData = {}
 
 	game_data.maps = load_mod_map(

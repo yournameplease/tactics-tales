@@ -15,6 +15,10 @@ global type Angle = number
 global type Color = integer
 global type Path = string
 
+-- global context for mods
+-- consider a more refined way to sandbox mods
+global lib: {string: any}
+
 --- various global configs that I don't want to import everywhere
 
 global enum DialogueSpeed
@@ -318,6 +322,7 @@ global record Picotron
 	sub: function(str: string, pos0: integer, pos1: integer | boolean): string 
 	-- tostr: function(value: any, as_hex: any) 
 	split: function(str: string, separator: string): {string} 
+	type: function(val: any): string
 	-- split: function(str: string, separator: string, convert_numbers: boolean) 
 	-- create_delta: function(str0: any, str1: any) 
 	-- apply_delta: function(str0: any, delta: any) 
