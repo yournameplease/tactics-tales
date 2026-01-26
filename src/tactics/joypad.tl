@@ -42,7 +42,13 @@ end
 
 local enum InputMethod
     "mouse"
+    "keyboard"
     "joypad"
+end
+
+local enum InputLabel
+    "primary"
+    "secondary"
 end
 
 local record UserInput
@@ -62,6 +68,7 @@ end
 
 local input_service = {
     InputMethod = InputMethod,
+    InputLabel = InputLabel,
     Joypad = Joypad,
     Mouse = Mouse,
     UserInput = UserInput,
@@ -145,7 +152,7 @@ function InputServiceImpl:get_user_input(): UserInput
         or mouse.mr
         or mouse.mm
 
-    if any_joy then self.current_input = "joypad" end
+    if any_joy then self.current_input = "keyboard" end
     if any_mouse then self.current_input = "mouse" end
 
     local new_actions: {InputAction: boolean} = nil
@@ -154,7 +161,7 @@ function InputServiceImpl:get_user_input(): UserInput
             ["ADVANCE"] = mouse.ml
         }
         new_actions = actions
-    elseif self.current_input == "joypad" then
+    elseif self.current_input == "joypad" or self.current_input == "keyboard" then
         local actions <total>: {InputAction: boolean} = {
             ["ADVANCE"] = joy.a
         }
@@ -185,7 +192,7 @@ function input_service.new(): InputService
         ["ADVANCE"] = {}
     } 
     local self: InputServiceImpl = setmetatable({
-        current_input = "joypad",
+        current_input = "mouse",
         previous_input = nil,
         mouse_prev = nil,
         actions = actions

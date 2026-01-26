@@ -2,7 +2,9 @@ local event_bus = require("src/tactics/systems/event_bus")
 local ui_context = require("src/tactics/ui/ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
 local GameMenuManager = require("src/tactics/game/game_menu_manager").GameMenuManager
-local InputService = require("src/tactics/joypad").InputService
+local input_srv = require("src/tactics/joypad")
+local InputService = input_srv.InputService
+local InputMethod = input_srv.InputMethod
 
 local record GameUIContext
     is ui_context.UIContext
@@ -11,6 +13,8 @@ local record GameUIContext
     input_service: InputService
     menu_manager: GameMenuManager
     event_bus: event_bus.EventBus
+
+    input_method: InputMethod
     
     layout: UILayoutId
 end
@@ -32,6 +36,8 @@ function game_ui_context.new(bus: event_bus.EventBus, menu_manager: GameMenuMana
 end
 
 function GameUIContext:enrich()
+    self.input_method = self.input_service.current_input
+    
     self.layout = "TITLE_SCREEN"
 
     if self.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then

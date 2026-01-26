@@ -3,7 +3,7 @@ require("src/tactics/config")
 local box = require("src/tactics/ui/box")
 local tactics_map = require("src/tactics/ui/panels/tactics_map")
 local unit_info = require("src/tactics/ui/panels/unit_info")
-local event_message_log = require("src/tactics/ui/panels/event_message_log")
+local control_hints = require("src/tactics/ui/panels/control_hints")
 
 local SplitPages = require("src/tactics/ui/panels/split_pages")
 local BattleSummary = require("src/tactics/ui/panels/battle_summary")
@@ -21,7 +21,8 @@ local map = tactics_map.new(
 local left = box.new({ dir="col", flex_grow = 1, padding = 2})
 left:add(battle_summary)
 left:add(unit_info.new({ padding = 2 }))
-left:add(event_message_log.new({ padding = 2, flex_grow = 1, }))
+left:add(box.spacer(1))
+left:add(control_hints.new())
 
 local root = SplitPages.new(left, map)
 

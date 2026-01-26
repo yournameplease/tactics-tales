@@ -3,12 +3,15 @@ local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")
 local UILayoutId = require("src/tactics/ui/types").UILayoutId
+local InputLabel = require("src/tactics/joypad").InputLabel
 
 local record UIContextManager
 
     battle_context: battle_ui_context.BattleUIContext
     story_context: story_ui_context.StoryUIContext
     game_context: game_ui_context.GameUIContext
+
+    input_actions: {InputLabel: string}
 
     layout: UILayoutId
     
@@ -52,7 +55,6 @@ end
 
 function UIContextManager:enrich()
     -- TODO: add a "NO_LAYOUT_FOUND"
-    -- TODO: can we simplify the ui context manager into a map of UIContexts?
     self.layout = "TITLE_SCREEN"
 
     -- find and enrich contexts
@@ -76,6 +78,11 @@ function UIContextManager:enrich()
     elseif self.game_context ~= nil then
         self.layout = self.game_context.layout
     end
+
+    self.input_actions = {
+        primary = "Select",
+        secondary = "Back",
+    }
 end
 
 return ui_context_manager
