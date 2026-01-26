@@ -79,7 +79,44 @@ local ITEM_DATA = {
     greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 70, 2),
     bow = lib.libs.weapon.ranged( "Bow", 104, 2, 90, 2, 2, 2 ),
     shield = shield("Shield", 105, 1, 1, -10),
-    armor = armor("Armor", 2, 1, -10)
+    armor = armor("Armor", 2, 1, -10),
+    boulder = lib.libs.weapon.of(
+        "Boulder",
+        1,
+        "TWO_HANDS",
+        {
+            sprite = 108,
+            anchor = lib.point.of(7, 13),
+        },
+        {
+            name = "Boulder",
+            sprite = 108,
+            damage = 3,
+            accuracy = 60,
+            targeting = {
+                get_selection_tiles = function(origin, map)
+                    local out = {}
+                    local height = map.height
+                    for y=origin.y+1,height-1 do
+                        add(out, lib.point.of(origin.x, y))
+                    end
+            
+                    return out
+                end,
+                get_targets_for_selection = function(origin, selection, map)
+                    return map:get_units(function(u)
+                        return u.tile.x == origin.x and u.tile.y > origin.y
+                    end)
+                end,
+                is_target_valid = function(origin, selection, map)
+                    return selection.x == origin.x and selection.y > origin.y
+                end,
+            },
+            type = "RANGED",
+            body_type = "BACK_HAND",
+            effects = {},
+        }
+    ),
 }
 
 return ITEM_DATA

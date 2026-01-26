@@ -224,6 +224,15 @@ local UNIT_TEMPLATES = {
 			"shield"
 		}
     },
+    bandit_boulder = {
+        parent_template = "bandit_base",
+        movement = 3,
+			hp_max = 6,
+        item_loadout = {
+			 "boulder" ,
+			"shield"
+			}
+    },
     bandit_berzerker = {
         parent_template = "bandit_base",
         hp_max = 5,

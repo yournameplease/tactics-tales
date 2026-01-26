@@ -384,40 +384,7 @@ local BATTLE_DATA = {
                 "spawn_child_axe",
                 nil
             ),
-            {
-                trigger = {
-                    type = "tile_interaction",
-                    tile_specifier = {
-                        type = "static_point",
-                        point = {x = 2, y = 13},
-                    },
-                    interaction_text = "test on",
-                    interaction_distance = "on",
 
-                },
-                effects = {
-                    scripts.effect.spawn_units({},
-                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" }}
-                        , nil),
-                }       
-            },
-            {
-                trigger = {
-                    type = "tile_interaction",
-                    tile_specifier = {
-                        type = "static_point",
-                        point = {x = 2, y = 13},
-                    },
-                    interaction_text = "test adjacent",
-                    interaction_distance = "adjacent",
-
-                },
-                effects = {
-                    scripts.effect.spawn_units({},
-                        {{ character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" }}
-                        , nil),
-                }       
-            },
         }
     },
     ["cultist_cave"] = {
@@ -480,7 +447,7 @@ local BATTLE_DATA = {
                 "from_south"
             ),
             spawn_enemies({
-                { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
+                { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
             },
                 6,
                 3,
@@ -581,7 +548,7 @@ local BATTLE_DATA = {
         map_id = "cliff_crossing",
         tile_labels = {
             ["player_deployment"] = { 0x00, 0x01, 0x02 },
-            ["bandit_boss"] = { 0x17 },
+            ["bandit_boulder"] = { 0x17 },
             ["bandit_goon"] = { 0x10 },
             ["cultist_goon"] = { 0x11 },
             ["bandit_guard"] = { 0x12 },
@@ -600,11 +567,11 @@ local BATTLE_DATA = {
             objectives.tagged_unit_dies("hero")
         },
         enemies = {
-            { character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
-            { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
-            { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
-            { character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
+            { character_source = character_source.template("bandit_boulder"), ai = ai.move_infinity, tile = "bandit_boulder", tags = { "boss" } },
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "cultist_goon" },
+            { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_guard" },
+            { character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
         },
         players = {
             { character_source = character_source.player_roster(), tile = "player_deployment" },
@@ -619,7 +586,7 @@ local BATTLE_DATA = {
                 "from_east"
             ),
             spawn_enemies({
-                { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
+                { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
             },
                 3,
                 2,
@@ -635,7 +602,7 @@ local BATTLE_DATA = {
                 "from_east"
             ),
             spawn_enemies({
-                { character_source = character_source.template("cultist_spear"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
+                { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
             },
                 6,
                 2,
