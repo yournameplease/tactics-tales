@@ -328,7 +328,9 @@ function TacticsMap:draw(
     
     box.Box._draw_background(self, ui_theme)
 
-    local draw_cursor = state.game_context.input_service.current_input == "joypad"
+    local draw_cursor =
+        state.game_context.input_service.current_input == "joypad"
+        or state.game_context.input_service.current_input == "keyboard"
     
     local map = state.battle_context.battle_map
 

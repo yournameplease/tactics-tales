@@ -159,11 +159,11 @@ function box.row(): UIElement
 end
 
 function box.flex_col(): UIElement
-    return box.new({ dir = "col", padding = 0, auto_width = true})
+    return box.new({ dir = "col", padding = 0, gap = 0, auto_width = true})
 end
 
 function box.flex_row(): UIElement
-    return box.new({ dir = "row", padding = 0, auto_height = true})
+    return box.new({ dir = "row", padding = 0, gap = 0, auto_height = true})
 end
 
 -- good for lazy justification
