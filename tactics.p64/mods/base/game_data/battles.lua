@@ -557,6 +557,7 @@ local BATTLE_DATA = {
             ["enemy_reinforce_se"] = { 0x19 },
             ["enemy_reinforce_sw_goon"] = { 0x01 },
             ["enemy_reinforce_sw_boss"] = { 0x02 },
+            ["escape_point"] = { 0x38 },
         },
         turn_limit = 10,
         victory_conditions = {
@@ -567,7 +568,7 @@ local BATTLE_DATA = {
             objectives.tagged_unit_dies("hero")
         },
         enemies = {
-            { character_source = character_source.template("bandit_boulder"), ai = ai.move_infinity, tile = "bandit_boulder", tags = { "boss" } },
+            { character_source = character_source.template("bandit_boulder"), ai = ai.move_inf, tile = "bandit_boulder", tags = { "boss" } },
             { character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "bandit_goon" },
             { character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "cultist_goon" },
             { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_guard" },
@@ -625,6 +626,7 @@ local BATTLE_DATA = {
                 "after_enemy",
                 "from_west"
             ),
+            escape("escape_point"),
         }
     }
 }
