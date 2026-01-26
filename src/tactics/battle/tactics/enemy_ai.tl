@@ -63,14 +63,17 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         
     if shallow_move_limit > 0 then
         all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
-            if cost ~= nil and cost.cost <= shallow_move_limit then
+            if cost ~= nil
+                and cost.cost <= shallow_move_limit
+                and self.battle_map:tile_is_legal_destination(unit, p)
+            then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
-                    return u.is_player and targeting.is_target_valid(p, u.tile, self.battle_map)
+                    return u:is_player() and targeting.is_target_valid(p, u.tile, self.battle_map)
                 end)
                 for _,t in ipairs(targets) do
                     pt.add(shallow_actions, {
-                        tile = p,
+                        destination = p,
                         target = t,
                     })
                 end
@@ -79,14 +82,17 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     end
     if #shallow_actions == 0 then
         all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
-            if cost ~= nil and cost.cost > shallow_move_limit then
+            if cost ~= nil
+                and cost.cost > shallow_move_limit
+                and self.battle_map:tile_is_legal_destination(unit, p)
+            then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
-                    return u.is_player and targeting.is_target_valid(p, u.tile, self.battle_map)
+                    return u:is_player() and targeting.is_target_valid(p, u.tile, self.battle_map)
                 end)
                 for _,t in ipairs(targets) do
                     pt.add(deep_actions, {
-                        tile = p,
+                        destination = p,
                         target = t,
                     })
                 end

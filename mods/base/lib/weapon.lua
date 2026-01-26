@@ -28,8 +28,8 @@ function weapon.range.single_target(min_range, max_range)
             local out = {}
             for x=-max_range,max_range do
                 for y=-max_range,max_range do
-                    local p = lib.point.of(x, y)
-                    local dist = lib.point.taxicab_distance(origin, p) 
+                    local p = origin + lib.point.of(x, y)
+                    local distance = lib.point.taxicab_distance(origin, p) 
                     if min_range <= distance and distance <= max_range
                         and map:tile_is_in_map(p)
                     then
@@ -58,8 +58,7 @@ local default_weapon = {
     accuracy = 90,
     type = "MELEE",
     body_type = "BACK_HAND",
-    min_range = 1,
-    max_range = 1
+    targeting = weapon.range.single_target(1,1),
 }
 
 function weapon.of(
@@ -157,8 +156,7 @@ function weapon.ranged(
             sprite = sprite,
             damage = damage,
             accuracy = accuracy,
-            min_range = min_range,
-            max_range = max_range,
+            targeting = weapon.range.single_target(min_range,max_range),
             type = "RANGED",
             body_type = "FRONT_HAND",
             effects = effects or {}
