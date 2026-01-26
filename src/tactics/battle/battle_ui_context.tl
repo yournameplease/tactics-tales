@@ -120,6 +120,22 @@ function BattleUIContext:enrich()
     end
 
     self.active_dialogue = self.tactics_engine.active_dialogue
+    if self.active_dialogue ~= nil then
+        self.input_actions = {
+            primary = "Advance",
+            secondary = "",
+        }
+    elseif self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+        self.input_actions = {
+            primary = "Select",
+            secondary = "Mark unit range",
+        }
+    else
+        self.input_actions = {
+            primary = "Select",
+            secondary = "Back",
+        }
+    end
     -- log.debug("dialogue", self.active_dialogue)
 
     -- todo: cache

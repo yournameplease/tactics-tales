@@ -50,6 +50,11 @@ end
 function ui_context_manager.new(): UIContextManager
     local self: UIContextManager = setmetatable({}, { __index = UIContextManager })
     self.layout = "TACTICS"
+    self.input_actions = {
+        primary = "Select",
+        secondary = "Back",
+    }
+
     return self
 end
 
@@ -69,20 +74,21 @@ function UIContextManager:enrich()
     end
     
 
-    -- pick layout from contexts
-
+    local primary_context: ui_context.UIContext
     if self.battle_context ~= nil then
-        self.layout = self.battle_context.layout
+        primary_context = self.battle_context
     elseif self.story_context ~= nil then
-        self.layout = self.story_context.layout
+        primary_context = self.story_context
     elseif self.game_context ~= nil then
-        self.layout = self.game_context.layout
+        primary_context = self.game_context
     end
 
-    self.input_actions = {
-        primary = "Select",
-        secondary = "Back",
-    }
+    if primary_context ~= nil then
+        self.layout = primary_context.layout
+        if primary_context.input_actions ~= nil then
+            self.input_actions = primary_context.input_actions
+        end
+    end
 end
 
 return ui_context_manager
