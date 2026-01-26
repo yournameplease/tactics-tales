@@ -181,7 +181,7 @@ function StoryImpl:handle_battle_defeat()
     assert(node_definition is story_node.BattleNode)
     
     self.battle_manager:teardown()
-    self:jump_to_node(node_definition.next_node_victory)
+    self:jump_to_node(node_definition.next_node_failure)
 end
 
 function StoryImpl:create_character(ctx: MenuContext)
