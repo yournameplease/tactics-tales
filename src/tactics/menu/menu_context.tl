@@ -49,7 +49,12 @@ end
 
 -- TODO: move contexts closer to usage
 
+local interface MenuContext
+    metadata: {string: any}
+end
+
 local record BattleMainMenuContext
+    is MenuContext
     acting_unit: UnitSelection
     destination: TileSelection
     target_unit: UnitSelection
@@ -59,15 +64,18 @@ local record BattleMainMenuContext
 end
 
 local record StorySelectMenuContext
+    is MenuContext
     character_customization: CharacterCustomizationSelection 
 end
 
 local record StoryMenuContext
+    is MenuContext
     story: StorySelection
     metadata: {string: any}
 end
 
 local record GameMenuContext
+    is MenuContext
     metadata: {string: any}
 end
 
@@ -79,6 +87,7 @@ local menu_context = {
 	StorySelection = StorySelection,
 	CharacterCustomizationSelection = CharacterCustomizationSelection,
 
+    MenuContext = MenuContext,
     BattleMainMenuContext = BattleMainMenuContext,
     StorySelectMenuContext = StorySelectMenuContext,
     StoryMenuContext = StoryMenuContext,

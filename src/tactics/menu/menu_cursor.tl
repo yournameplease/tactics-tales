@@ -1,6 +1,7 @@
 local menu_types = require("src/tactics/menu/types")
 local event_bus = require("src/tactics/systems/event_bus")
 local input_service = require("src/tactics/joypad")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 
@@ -63,20 +64,20 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 	return self
 end
 
-local interface MenuCursor<GC, MenuContext>
+local interface MenuCursor<GameContext>
     type: CursorType
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
 --- @return next state
 --- @return send command
-    handle_select: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string, event_bus.GameEvent
-    handle_back: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): event_bus.GameEvent
+    handle_select: function(self, game_context: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string 
+    handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState) 
 end
 
-local interface MenuStepDefinition<GC, MenuContext>
+local interface MenuStepDefinition<GameContext>
     type: CursorType
     previous_state: menu_types.MenuStep
-    to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor<GC>
+    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor
 end
 
 local menu_cursor = {

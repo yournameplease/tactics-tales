@@ -58,7 +58,7 @@ local record TacticsEngine
     is_blocked: function(self): boolean
     tiles_with_distance_from_unit_attacks: function(self, unit: BattleUnit, point: Point): array_2d.Array2D<MenuTileHighlight>
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
-    tiles_in_movement_and_attack_range: function(self, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    tiles_in_movement_and_attack_range: function(self, unit: BattleUnit): array_2d.Array2D<MenuTileHighlight>
     
     -- mutations
     spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
@@ -626,9 +626,7 @@ function TacticsEngine:compute_unit_valid_tiles()
     end)
 end
 
-function TacticsEngine:tiles_in_movement_and_attack_range(ctx: MenuContext): array_2d.Array2D<MenuTileHighlight>
-    local unit = ctx.acting_unit.unit
-
+function TacticsEngine:tiles_in_movement_and_attack_range(unit: BattleUnit): array_2d.Array2D<MenuTileHighlight>
     if unit.valid_tiles == nil then
         unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
