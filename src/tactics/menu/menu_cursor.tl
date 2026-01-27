@@ -1,5 +1,4 @@
 local menu_types = require("src/tactics/menu/types")
-local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local event_bus = require("src/tactics/systems/event_bus")
 local input_service = require("src/tactics/joypad")
 local Joypad = input_service.Joypad
@@ -64,7 +63,7 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 	return self
 end
 
-local interface MenuCursor<GC>
+local interface MenuCursor<GC, MenuContext>
     type: CursorType
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
@@ -74,23 +73,16 @@ local interface MenuCursor<GC>
     handle_back: function(self, game_context: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): event_bus.GameEvent
 end
 
-local interface MenuStepDefinition<GC>
+local interface MenuStepDefinition<GC, MenuContext>
     type: CursorType
     previous_state: menu_types.MenuStep
     to_cursor: function(self, game_ctx: GC, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor<GC>
-end
-
--- utility record, used by back commands
-local record MenuContextAndCursor<GC>
-    ctx: MenuContext
-	cursor: MenuCursor<GC>
 end
 
 local menu_cursor = {
     CursorType = CursorType,
     MenuCursor = MenuCursor,
     MenuStepDefinition = MenuStepDefinition,
-	MenuContextAndCursor = MenuContextAndCursor,
 
     mouse_selection = mouse_selection,
 }

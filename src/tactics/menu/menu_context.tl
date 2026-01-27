@@ -47,15 +47,27 @@ local record CharacterCustomizationSelection
     appearance: { character.CharacterAppearanceKey: string}
 end
 
--- todo: this should be an interface...?
-local record MenuContext
+-- TODO: move contexts closer to usage
+
+local record BattleMainMenuContext
     acting_unit: UnitSelection
     destination: TileSelection
     target_unit: UnitSelection
     selected_script: ScriptSelection 
     selected_item: ItemSelection
-    story: StorySelection
+    metadata: {string: any}
+end
+
+local record StorySelectMenuContext
     character_customization: CharacterCustomizationSelection 
+end
+
+local record StoryMenuContext
+    story: StorySelection
+    metadata: {string: any}
+end
+
+local record GameMenuContext
     metadata: {string: any}
 end
 
@@ -67,7 +79,10 @@ local menu_context = {
 	StorySelection = StorySelection,
 	CharacterCustomizationSelection = CharacterCustomizationSelection,
 
-	MenuContext = MenuContext,	
+    BattleMainMenuContext = BattleMainMenuContext,
+    StorySelectMenuContext = StorySelectMenuContext,
+    StoryMenuContext = StoryMenuContext,
+    GameMenuContext = GameMenuContext,
 }
 
 return menu_context

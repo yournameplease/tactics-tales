@@ -10,6 +10,9 @@ local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+local menu_context = require("src/tactics/menu/menu_context")
+local MenuContext = menu_context.MenuContext
+local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
 local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
@@ -89,28 +92,33 @@ function BattleUIContext:enrich()
         end
     end
 
-    if self.battle_menu_manager.menu_ctx.acting_unit ~= nil then
-        self.acting_unit = self.battle_menu_manager.menu_ctx.acting_unit.unit
-        if self.battle_menu_manager.menu_state.step == "SELECT_DESTINATION" then
-            self.acting_unit_tiles = self.acting_unit.valid_tiles
-        elseif self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
-            local tile = self.acting_unit.tile
-            local targeting = self.acting_unit.character:get_weapon_targeting()
-            local tiles_in_range = targeting.get_selection_tiles(tile, self.battle_map)
-            self.acting_unit_tiles = self.acting_unit.valid_tiles
-            self.acting_unit_tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
-            for _,t in ipairs(tiles_in_range) do
-                self.acting_unit_tiles:set(t.x,t.y, 0x6)
+    local menu_ctx = self.battle_menu_manager.menu_ctx
+    -- todo
+    if true then
+        assert(menu_ctx is BattleMainMenuContext)
+        if menu_ctx.acting_unit ~= nil then
+            self.acting_unit = menu_ctx.acting_unit.unit
+            if self.battle_menu_manager.menu_state.step == "SELECT_DESTINATION" then
+                self.acting_unit_tiles = self.acting_unit.valid_tiles
+            elseif self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
+                local tile = self.acting_unit.tile
+                local targeting = self.acting_unit.character:get_weapon_targeting()
+                local tiles_in_range = targeting.get_selection_tiles(tile, self.battle_map)
+                self.acting_unit_tiles = self.acting_unit.valid_tiles
+                self.acting_unit_tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+                for _,t in ipairs(tiles_in_range) do
+                    self.acting_unit_tiles:set(t.x,t.y, 0x6)
+                end
+            else
+                self.acting_unit_tiles = nil
             end
         else
             self.acting_unit_tiles = nil
         end
-    else
-        self.acting_unit_tiles = nil
-    end
 
-    if self.battle_menu_manager.menu_ctx.destination ~= nil then
-        self.destination = self.battle_menu_manager.menu_ctx.destination.point
+        if menu_ctx.destination ~= nil then
+            self.destination = menu_ctx.destination.point
+        end
     end
 
     if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then

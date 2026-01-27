@@ -1,6 +1,5 @@
 local point = require("src/tactics/util/point")
 local menu_types = require ("src/tactics/menu/types")
-local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local input_service = require("src/tactics/joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
@@ -18,6 +17,7 @@ end
 
 local record MenuDefinition<GC>
     initial_step: menu_types.MenuStep
+    get_initial_context: function(): MenuContext 
     steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GC> }
 end
 
@@ -88,7 +88,7 @@ end
 function BaseMenuManager:handle_menu_select()
     log.debug("Selecting "..self.menu_state.menu_id .. ":" .. self.menu_state.step)
 
-    local next_state, send_command = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
+    local next_state = self.menu_cursor:handle_select(self.game_ctx, self.menu_ctx, self.menu_state)
     
     pt.add(self.selection_history, {
         step = self.menu_state.step,
@@ -133,9 +133,11 @@ end
 
 
 function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
+    local definition = self.menu_definitions[menu_id]
     self.menu_state.menu_id = menu_id
+    self.menu_ctx = definition.get_initial_context()
     self.selection_history = {}
-    local step = self.menu_definitions[menu_id].initial_step
+    local step = definition.initial_step
     self:populate_menu_state(step)
 end
 
