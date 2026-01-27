@@ -28,6 +28,7 @@ local record Game
 	menu_manager: game_menu_manager.GameMenuManager
 
     mod_loader: ModLoader
+    config_manager: ConfigManager
 
     default_story: StoryId
     story: story.Story
@@ -44,11 +45,8 @@ local game = {
     Game = Game
 }
 
-function Game:begin_story(ctx: MenuContext)
-    local story_id = self.default_story
-    if ctx.story ~= nil then
-        story_id = ctx.story.id
-    end
+function Game:begin_story(story_id: StoryId)
+    story_id = story_id or self.default_story
 
     local game_data = self.mod_loader:load_mod_data()
     self.story = story.new(
@@ -59,6 +57,11 @@ function Game:begin_story(ctx: MenuContext)
         self.story_services_bundle.event_bus,
         self.ui_context
     )
+end
+
+function Game:set_config(config: DynamicConfig)
+    self.config_manager:store_config(config)
+    self.menu_manager:set_menu("MENU_MAIN_MENU")
 end
 
 function Game:exit_story()
@@ -84,12 +87,15 @@ function game.new(
     local self: Game = setmetatable({}, { __index = Game })
     self.default_story = game_data.stories.default_story
     self.mod_loader = mod_loader
+    self.config_manager = config_manager
 
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
 
     local game_menu_ctx = game_menu_context.new(
-        story_ids
+        story_ids,
+        function(config: DynamicConfig) self:set_config(config) end,
+        function(id: StoryId) self:begin_story(id) end
     )
 	self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
@@ -104,16 +110,8 @@ function game.new(
     self.ui_context = ui_context
     self.ui_context:register_ui_context(game_ui_ctx)
 
-    self.event_listener:on("GAME_BEGIN_STORY", function(ctx: MenuContext)
-        self:begin_story(ctx)
-    end)
-    self.event_listener:on("GAME_EXIT_STORY", function(_: MenuContext)
+    self.event_listener:on("GAME_EXIT_STORY", function()
         self:exit_story()
-    end)
-    self.event_listener:on("GAME_SET_OPTIONS", function(ctx: MenuContext)
-        local config: DynamicConfig = ctx.metadata as DynamicConfig
-        config_manager:store_config(config)
-        self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)
 
     return self

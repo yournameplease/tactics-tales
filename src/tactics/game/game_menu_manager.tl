@@ -3,9 +3,9 @@ local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
 local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
+local GameMainMenuContext = require("src/tactics/menu/menu_context").GameMainMenuContext
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
-local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 
 local record GameMenuManager
     is menu_manager.MenuManager<GameMenuContext>
@@ -20,8 +20,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
         initial_step = "TITLE_SCREEN",
         -- initial_step = "MAIN_MENU",
         steps = {
-            ["TITLE_SCREEN"] = button_advance_cursor.definition({
-                next_state = "MAIN_MENU",
+            ["TITLE_SCREEN"] = list_cursor.definition({
+                get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption<GameMenuContext, string>}
+                    return {{
+                        text = "Main Menu",
+                        next_state = "MAIN_MENU",
+                    }}
+                end
             }),
             ["MAIN_MENU"] = list_cursor.definition({
                 get_options = function(_msb: GameMenuContext, _ctx: MenuContext): {list_cursor.ListMenuOption<GameMenuContext, string>}
@@ -44,8 +49,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                 end
             }),
             ["CHAPTER_SELECT"] = list_cursor.definition({
-                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext, string>, _msb: GameMenuContext, ctx: MenuContext)
-                    ctx.story = {
+                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext, string>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                    menu_ctx.story = {
                         id = s.options[s.i].text,
                     }
                 end,
@@ -65,7 +70,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
             ["OPTIONS_MENU"] = multiple_options_cursor.definition({
                 primary_direction = "vertical",
                 wrap = false,
-                send_command = "GAME_SET_OPTIONS",
+                select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                    game_ctx.handle_set_config(
+                        menu_ctx.metadata as DynamicConfig
+                    )
+                end,
                 options = {
                     multiple_options_cursor.option_definition({
                         text = "Log Level",

@@ -30,6 +30,21 @@ local script_manager = {
 	ScriptManager = ScriptManager
 }
 
+local record TileInteractionMessage
+    script_id: integer
+    source_unit: BattleUnit
+    source_tile: Point
+    target_tile: Point
+end
+
+local record UnitInteractionMessage
+    script_id: integer
+    source_unit: BattleUnit
+    source_tile: Point
+    target_unit: BattleUnit
+    target_tile: Point
+end
+
 local record ScriptManagerImpl
 	battle_map: BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
@@ -156,33 +171,31 @@ function ScriptManagerImpl:register_script(
 		end
 	elseif trigger is battle_script.trigger.UnitInteraction then
 		event = "TACTICS_INTERACTION"
-		filter = function(ctx: {string: any}): boolean, ScriptContext
-			local menu_ctx: MenuContext = ctx as MenuContext
-			if menu_ctx.selected_script.script_id ~= script.id then
+		filter = function(msg: UnitInteractionMessage): boolean, ScriptContext
+			if msg.script_id ~= script.id then
 				return false, nil
 			end
 			return
 				true,
 				{
-					source_unit = menu_ctx.acting_unit.unit,
-					source_tile = menu_ctx.acting_unit.point,
-					target_unit = menu_ctx.target_unit.unit,
-					target_tile = menu_ctx.target_unit.point,
+					source_unit = msg.source_unit,
+					source_tile = msg.source_tile,
+					target_unit = msg.target_unit,
+					target_tile = msg.target_tile,
 				}
 		end
 	elseif trigger is battle_script.trigger.TileInteraction then
 		event = "TACTICS_INTERACTION"
-		filter = function(ctx: {string: any}): boolean, ScriptContext
-			local menu_ctx: MenuContext = ctx as MenuContext
-			if menu_ctx.selected_script.script_id ~= script.id then
+		filter = function(msg: TileInteractionMessage): boolean, ScriptContext
+			if msg.script_id ~= script.id then
 				return false, nil
 			end
 			return
 				true,
 				{
-					source_unit = menu_ctx.acting_unit.unit,
-					source_tile = menu_ctx.acting_unit.point,
-					target_tile = menu_ctx.selected_script.target_tile,
+					source_unit = msg.source_unit,
+					source_tile = msg.source_tile,
+					target_tile = msg.target_tile,
 				}
 		end
 	else
