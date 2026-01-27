@@ -87,10 +87,18 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
                     return grid_selection_is_available_player(msb.battle_map, s) end,
                 next_state = "SELECT_DESTINATION",
-                back_command = "MARK_UNIT_RANGE",
+                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                    game_ctx.tactics_engine:handle_mark_unit(self.point)
+                end,
             }),
             ["SELECT_DESTINATION"] = grid_cursor.definition({
-                send_command = "MOVE_UNIT",
+                select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                    game_ctx.tactics_engine:handle_move_unit(
+                        menu_ctx.acting_unit.unit,
+                        menu_ctx.destination.point,
+                        menu_ctx.destination.path
+                    )
+                end,
                 set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
@@ -102,7 +110,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 next_state = "SELECT_ACTION",
                 previous_state = "SELECT_UNIT",
                 get_legal_tiles = function (msb: BattleMenuContext, ctx: BattleMainMenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
-                    return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx)
+                    return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx.acting_unit.unit)
                 end,
                 get_max_path_length = function(_: BattleMenuContext, ctx: BattleMainMenuContext): integer
                     return ctx.acting_unit.unit.character.stats.movement
@@ -113,7 +121,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_DESTINATION",
-                back_command = "JUMP_UNIT",
+                back_handler = function(_: list_cursor.ListMenuCursor<BattleMenuContext, string>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                    game_ctx.tactics_engine:jump_unit_to_point(
+                        menu_ctx.acting_unit.unit,
+                        menu_ctx.acting_unit.point
+                    )
+                end,
                 get_options = function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
                     local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
                     -- if target in range
@@ -128,7 +141,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     for _, interaction in ipairs(nearby_interactions) do
                         pt.add(options, {
                             text = interaction.interaction_text,
-                            send_command = "TACTICS_INTERACTION",
+                            select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                                -- emit "TACTICS_INTERACTION"
+                                game_ctx.tactics_engine:finish_unit_action(
+                                    menu_ctx.acting_unit.unit
+                                )
+                            end,
                             set_selected_context = function(_: BattleMenuContext, mc: BattleMainMenuContext)
                                 mc.selected_script = {
                                     script_id = interaction.script_id,
@@ -141,7 +159,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
 
                     pt.add(options, {
                         text = "Wait",
-                        send_command = "END_UNIT_TURN"
+                        select_handler =  function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                            game_ctx.tactics_engine:finish_unit_action(
+                                menu_ctx.acting_unit.unit
+                            )
+                        end
                     })
 
                     --- currently disabled as items aren't mechanically interesting yet
@@ -161,7 +183,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator =  function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                     return validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, s.point) 
                 end,
-                send_command = "ATTACK_UNIT",
+                select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                    game_ctx.tactics_engine:handle_attack_unit(
+                        menu_ctx.acting_unit.unit,
+                        menu_ctx.target_unit.unit
+                    )
+                end,
                 get_legal_tiles = function (msb: BattleMenuContext, ctx: BattleMainMenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
                     return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
                 end
@@ -188,52 +215,52 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                         return options
                 end
             }),
-            ["SELECT_ITEM_ACTION"] = list_cursor.definition({
-                previous_state = "SELECT_ITEM",
-                get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
-                        local character = ctx.acting_unit.unit
-                        local inventory = character.character.inventory
-                        local items = inventory:get_items()
-                        local item = ctx.selected_item.item
-                        local index = ctx.selected_item.index
+            -- ["SELECT_ITEM_ACTION"] = list_cursor.definition({
+            --     previous_state = "SELECT_ITEM",
+            --     get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
+            --             local character = ctx.acting_unit.unit
+            --             local inventory = character.character.inventory
+            --             local items = inventory:get_items()
+            --             local item = ctx.selected_item.item
+            --             local index = ctx.selected_item.index
 
-                        if inventory:get_items()[index] == nil then
-                            return {}
-                        end
+            --             if inventory:get_items()[index] == nil then
+            --                 return {}
+            --             end
                         
-                        local options = {}
+            --             local options = {}
 
-                        -- TODO: consumables
-                        if item:get_equip_slot() ~= "NONE" then
-                            if inventory:is_equipped(index) then
-                                pt.add(options, {
-                                    text = "Unequip",
-                                    send_command = "INVENTORY_UNEQUIP_ITEM",
-                                    next_state = "SELECT_ITEM_ACTION",
-                                })
-                            else
-                                pt.add(options, {
-                                    text = "Equip",
-                                    send_command = "INVENTORY_EQUIP_ITEM",
-                                    next_state = "SELECT_ITEM_ACTION",
-                                })
-                            end
-                        end
+            --             -- TODO: consumables
+            --             if item:get_equip_slot() ~= "NONE" then
+            --                 if inventory:is_equipped(index) then
+            --                     pt.add(options, {
+            --                         text = "Unequip",
+            --                         select_handler = "INVENTORY_UNEQUIP_ITEM",
+            --                         next_state = "SELECT_ITEM_ACTION",
+            --                     })
+            --                 else
+            --                     pt.add(options, {
+            --                         text = "Equip",
+            --                         select_handler = "INVENTORY_EQUIP_ITEM",
+            --                         next_state = "SELECT_ITEM_ACTION",
+            --                     })
+            --                 end
+            --             end
 
-                        if #items > 0 then
-                            pt.add(options, {
-                                text = "Move",
-                            })
-                        end
-                        pt.add(options, {
-                            text = "Discard",
-                            send_command = "INVENTORY_DISCARD_ITEM",
-                            next_state = "SELECT_ITEM",
-                        })
+            --             if #items > 0 then
+            --                 pt.add(options, {
+            --                     text = "Move",
+            --                 })
+            --             end
+            --             pt.add(options, {
+            --                 text = "Discard",
+            --                 select_handler = "INVENTORY_DISCARD_ITEM",
+            --                 next_state = "SELECT_ITEM",
+            --             })
                         
-                        return options
-                end
-            }),
+            --             return options
+            --     end
+            -- }),
         }
     }
 }

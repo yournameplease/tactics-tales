@@ -6,6 +6,7 @@ local input_service = require("src/tactics/joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
 local event_bus = require("src/tactics/systems/event_bus")
@@ -16,8 +17,8 @@ local record MenuTileHighlight
     can_attack: boolean
 end
 
-local record GridMenuCursor<GameContext, MenuContext>
-    is menu_cursor.MenuCursor<GameContext, MenuContext>
+local record GridMenuCursor<GameContext>
+    is menu_cursor.MenuCursor<GameContext>
     where self.type == "grid"
     point: Point
     x_max: integer
@@ -34,15 +35,15 @@ local record GridMenuCursor<GameContext, MenuContext>
     back_handler: function(self, GameContext, MenuContext)
 end
 
-local record GridMenuDefinition<GameContext, MenuContext>
-    is menu_cursor.MenuStepDefinition<GameContext, MenuContext>
+local record GridMenuDefinition<GameContext>
+    is menu_cursor.MenuStepDefinition<GameContext>
     where self.type == "grid"
 
     set_selected_context: function(GridMenuCursor<GameContext>, GameContext, MenuContext)
     validator: function(GridMenuCursor<GameContext>, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
-    select_handler: function(MenuContext)
-    back_handler: function(MenuContext)
+    select_handler: function(self, GameContext, MenuContext)
+    back_handler: function(self, GameContext, MenuContext)
     get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
     get_path_anchor: function(GameContext, MenuContext): Point
     get_max_path_length: function(GameContext, MenuContext): integer
@@ -54,9 +55,9 @@ local grid_cursor = {
     GridMenuDefinition = GridMenuDefinition,
 }
 
-function grid_cursor.definition<GameContext, MenuContext>(
-    props: GridMenuDefinition<GameContext, MenuContext>
-): GridMenuDefinition<GameContext, MenuContext>
+function grid_cursor.definition<GameContext>(
+    props: GridMenuDefinition<GameContext>
+): GridMenuDefinition<GameContext>
     props.type = "grid"
     return setmetatable(props, { __index = GridMenuDefinition })
 end
@@ -108,7 +109,7 @@ function GridMenuCursor:handle_select(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
-): string, event_bus.GameEvent
+): string 
     local validation = self.validator(self, game_ctx, menu_ctx)
     if not validation then return end
 
@@ -124,8 +125,8 @@ end
 function GridMenuCursor:handle_back(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
-    menu_state: menu_types.MenuState,
-): event_bus.GameEvent
+    menu_state: menu_types.MenuState
+) 
     if self.back_handler then
         self:back_handler(game_ctx, menu_ctx)
     end
@@ -135,8 +136,8 @@ function GridMenuDefinition:to_cursor(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
-): menu_cursor.MenuCursor<GameContext, MenuContext>
-    local cursor: GridMenuCursor<GameContext, MenuContext> = {
+): menu_cursor.MenuCursor<GameContext>
+    local cursor: GridMenuCursor<GameContext> = {
         type = "grid",
         point = menu_state.point, 
         x_max = 16,

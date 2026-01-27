@@ -10,27 +10,27 @@ local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 
-local record SelectionHistory<GC>
+local record SelectionHistory<GameContext>
     step: menu_types.MenuStep
-    selection: menu_cursor.MenuCursor<GC>
+    selection: menu_cursor.MenuCursor<GameContext>
 end
 
-local record MenuDefinition<GC>
+local record MenuDefinition<GameContext>
     initial_step: menu_types.MenuStep
     get_initial_context: function(): MenuContext 
-    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GC> }
+    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GameContext> }
 end
 
-local interface MenuManager<GC>
+local interface MenuManager<GameContext>
     
     menu_definitions: { menu_types.MenuId: MenuDefinition }
 
     menu_state: menu_types.MenuState
     menu_ctx: MenuContext
-    menu_cursor: menu_cursor.MenuCursor<GC>
-    selection_history: { SelectionHistory<GC> }
+    menu_cursor: menu_cursor.MenuCursor<GameContext>
+    selection_history: { SelectionHistory<GameContext> }
 
-    game_ctx: GC
+    game_ctx: GameContext
     event_writer: event_writer.EventWriter
 
     populate_menu_state: function(self, new_step: menu_types.MenuStep)
@@ -40,10 +40,10 @@ local interface MenuManager<GC>
     update: function(self, input: InputContext)
 end
 
-local record BaseMenuManager<GC>
-    is MenuManager<GC>
+local record BaseMenuManager<GameContext>
+    is MenuManager<GameContext>
 
-    menu_definitions: { menu_types.MenuId: MenuDefinition<GC> }
+    menu_definitions: { menu_types.MenuId: MenuDefinition<GameContext> }
 end
 
 local menu_manager = {
@@ -52,12 +52,12 @@ local menu_manager = {
     MenuDefinition = MenuDefinition,
 }
 
-function menu_manager.new<GC>(
+function menu_manager.new<GameContext>(
     menu_definitions: { menu_types.MenuId: MenuDefinition },
     ctx: GC,
     bus: event_bus.EventBus
-): MenuManager<GC>
-    local self: BaseMenuManager<GC> = setmetatable({}, { __index = BaseMenuManager })
+): MenuManager<GameContext>
+    local self: BaseMenuManager<GameContext> = setmetatable({}, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
 
@@ -110,7 +110,7 @@ function BaseMenuManager:handle_menu_back()
 
     if back_command ~= nil then
         log.info("Emitting menu back command ", back_command)
-        local message: menu_cursor.MenuContextAndCursor<GC> = {
+        local message: menu_cursor.MenuContextAndCursor<GameContext> = {
             ctx = self.menu_ctx,
             cursor = self.menu_cursor,
         } 

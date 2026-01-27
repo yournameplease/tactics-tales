@@ -106,13 +106,13 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         local destination = choice.destination
         local path = pathfinding.get_path_to_tile(all_tile_costs, destination)
 
-        local action_ctx: MenuContext = {
-            acting_unit = { unit = unit},
-            destination = { point = destination, path = path},
-            target_unit = { unit = choice.target }
-        }
         log.info(unit.id .. " will attack "..choice.target.id)
-        self.event_writer:emit("MOVE_AND_ATTACK", action_ctx)
+        self.tactics_engine:handle_move_and_attack(
+            unit,
+            destination,
+            path,
+            choice.target
+        )
     elseif #deep_actions > 0 then
         local min_cost_deep_action = deep_actions[1]
         local min_cost = 999
@@ -131,19 +131,19 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
 
         local path = pathfinding.get_path_to_tile(all_tile_costs, current_point)
 
-        local action_ctx = {
-            acting_unit = { unit = unit },
-            destination = { point = current_point, path = path }
-        }
         log.info(unit.id .. " will move to "..current_point.x..","..current_point.y)
-        self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
+        self.tactics_engine:handle_move_and_wait(
+            unit,
+            current_point,
+            path
+        )
     else
         log.info(unit.id.." will not act.")
-        local action_ctx = {
-            acting_unit = { unit = unit },
-            destination = { point = unit.tile, path = {} }
-        }
-        self.event_writer:emit("MOVE_AND_WAIT", action_ctx)
+        self.tactics_engine:handle_move_and_wait(
+            unit,
+            unit.tile,
+            {}
+        )
     end
 end
 

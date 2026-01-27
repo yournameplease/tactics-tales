@@ -7,8 +7,8 @@ local Joypad = require("src/tactics/joypad").Joypad
 local Mouse = input_service.Mouse
 local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
 
-local record ButtonAdvanceCursor<GC>
-    is menu_cursor.MenuCursor<GC>
+local record ButtonAdvanceCursor<GameContext>
+    is menu_cursor.MenuCursor<GameContext>
     where self.type == "button_advance"
 
     -- from definition
@@ -17,8 +17,8 @@ local record ButtonAdvanceCursor<GC>
     back_command: event_bus.GameEvent
 end
 
-local record ButtonAdvanceMenuDefinition<GC>
-    is menu_cursor.MenuStepDefinition<GC>
+local record ButtonAdvanceMenuDefinition<GameContext>
+    is menu_cursor.MenuStepDefinition<GameContext>
     where self.type == "button_advance" 
     next_state: menu_types.MenuStep
     send_command: event_bus.GameEvent
@@ -30,7 +30,7 @@ local button_advance_cursor = {
     ButtonAdvanceMenuDefinition = ButtonAdvanceMenuDefinition,
 }
 
-function button_advance_cursor.definition<GC>(props: ButtonAdvanceMenuDefinition<GC>): ButtonAdvanceMenuDefinition<GC>
+function button_advance_cursor.definition<GameContext>(props: ButtonAdvanceMenuDefinition<GameContext>): ButtonAdvanceMenuDefinition<GameContext>
     props.type = "button_advance"
     return setmetatable(props, { __index = ButtonAdvanceMenuDefinition })
 end
@@ -56,8 +56,8 @@ function ButtonAdvanceCursor:handle_back(
     return self.back_command
 end
 
-function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GC>
-    local cursor: ButtonAdvanceCursor<GC> = {
+function ButtonAdvanceMenuDefinition:to_cursor(_game_context: GC, _menu_ctx: MenuContext, _menu_state: menu_types.MenuState): menu_cursor.MenuCursor<GameContext>
+    local cursor: ButtonAdvanceCursor<GameContext> = {
         type = "button_advance",
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 

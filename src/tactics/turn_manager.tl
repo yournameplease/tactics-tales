@@ -193,64 +193,6 @@ function turn_manager.new(
         })
     end)
     
-    -- menu actions    
-    self.event_listener:on("MARK_UNIT_RANGE", function(ctx: MenuContextAndCursor<BattleMenuContext>)
-        local cursor = ctx.cursor
-        assert(cursor is grid_cursor.GridMenuCursor<BattleMenuContext>) 
-        self.tactics_engine:handle_mark_unit(cursor.point)
-    end)
-    
-    self.event_listener:on("MOVE_UNIT", function(ctx: MenuContext)
-        self.tactics_engine:handle_move_unit(
-            ctx.acting_unit.unit,
-            ctx.destination.point,
-            ctx.destination.path
-        )
-    end)
-
-    self.event_listener:on("JUMP_UNIT", function(ctx: MenuContextAndCursor<BattleMenuContext>)
-        self.tactics_engine:jump_unit_to_point(
-            ctx.ctx.acting_unit.unit,
-            ctx.ctx.acting_unit.point
-        )
-    end)
-
-    self.event_listener:on("ATTACK_UNIT", function(ctx: MenuContext)
-        self.tactics_engine:handle_attack_unit(
-            ctx.acting_unit.unit,
-            ctx.target_unit.unit
-        )
-    end)
-
-    self.event_listener:on("END_UNIT_TURN", function(ctx: MenuContext)
-        self.tactics_engine:finish_unit_action(
-            ctx.acting_unit.unit
-        )
-    end)
-
-    self.event_listener:on("TACTICS_INTERACTION", function(ctx: MenuContext)
-        self.tactics_engine:finish_unit_action(
-            ctx.acting_unit.unit
-        )
-    end)
-
-    self.event_listener:on("MOVE_AND_ATTACK", function(ctx: MenuContext)
-        self.tactics_engine:handle_move_and_attack(
-            ctx.acting_unit.unit,
-            ctx.destination.point,
-            ctx.destination.path,
-            ctx.target_unit.unit
-        )
-    end)
-
-    self.event_listener:on("MOVE_AND_WAIT", function(ctx: MenuContext)
-        self.tactics_engine:handle_move_and_wait(
-            ctx.acting_unit.unit,
-            ctx.destination.point,
-            ctx.destination.path
-        )
-    end)
-
     return self
 end
 

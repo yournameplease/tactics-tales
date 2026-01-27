@@ -15,35 +15,35 @@ end
 
 -- Value is not needed if no context is stored...
 -- I just use string for default
-local record ListMenuOption<GC, Value>
+local record ListMenuOption<GameContext, Value>
     text: string
     value: Value
     next_state: menu_types.MenuStep
-    send_command: event_bus.GameEvent
-    set_selected_context: function(GC, MenuContext)
+    select_handler: function(self, GameContext, MenuContext)
+    set_selected_context: function(GameContext, MenuContext)
 end
 
-local record ListMenuCursor<GC, Value>
-    is menu_cursor.MenuCursor<GC>
+local record ListMenuCursor<GameContext, Value>
+    is menu_cursor.MenuCursor<GameContext>
     where self.type == "list"
     i: integer
-    options: { ListMenuOption<GC, Value> }
+    options: { ListMenuOption<GameContext, Value> }
 
     -- from definition
     direction: ListDirection
     wrap: boolean
-    set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
-    back_command: event_bus.GameEvent
+    set_selected_context: function(ListMenuCursor<GameContext, Value>, GameContext, MenuContext)
+    back_handler: function(self, GameContext, MenuContext)
 end
 
-local record ListMenuDefinition<GC, Value>
-    is menu_cursor.MenuStepDefinition<GC>
+local record ListMenuDefinition<GameContext, Value>
+    is menu_cursor.MenuStepDefinition<GameContext>
     where self.type == "list"
-    set_selected_context: function(ListMenuCursor<GC, Value>, GC, MenuContext)
-    get_options: function(GC, MenuContext): {ListMenuOption<Value>}
+    set_selected_context: function(ListMenuCursor<GameContext, Value>, GameContext, MenuContext)
+    get_options: function(GameContext, MenuContext): {ListMenuOption<Value>}
     wrap: boolean
     direction: ListDirection
-    back_command: event_bus.GameEvent
+    back_handler: function(self, GameContext, MenuContext)
 end
 
 local list_menu_cursor = {
@@ -52,21 +52,21 @@ local list_menu_cursor = {
     ListMenuDefinition = ListMenuDefinition,
 }
 
-function list_menu_cursor.definition<GC, Value>(props: ListMenuDefinition<GC, Value>): ListMenuDefinition<GC, Value>
+function list_menu_cursor.definition<GameContext, Value>(props: ListMenuDefinition<GameContext, Value>): ListMenuDefinition<GameContext, Value>
     props.type = "list"
     props.direction = props.direction or "vertical"
     return setmetatable(props, { __index = ListMenuDefinition })
 end
 
-function list_menu_cursor.static_definition<GC, Value>(
+function list_menu_cursor.static_definition<GameContext, Value>(
     options: {Value},
     set_context_key: string,
     direction: ListDirection
-): ListMenuDefinition<GC, Value>
-    local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
+): ListMenuDefinition<GameContext, Value>
+    local get_options = function(_game_ctx: GameContext, _menu_context: MenuContext): {ListMenuOption}
         return lists.do_map(
             options,
-            function (o: Value): ListMenuOption<GC, Value>
+            function (o: Value): ListMenuOption<GameContext, Value>
                 return {
                     text = tostring(o),
                     value = o
@@ -74,7 +74,7 @@ function list_menu_cursor.static_definition<GC, Value>(
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<GC, Value>, _msb: GC, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuCursor<GameContext, Value>, _msb: GameContext, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return list_menu_cursor.definition({
@@ -85,16 +85,16 @@ function list_menu_cursor.static_definition<GC, Value>(
     })
 end
 
-function list_menu_cursor.boolean_yes_no<GC>(
+function list_menu_cursor.boolean_yes_no<GameContext>(
     set_context_key: string,
     direction: ListDirection
-): ListMenuDefinition<GC, boolean>
+): ListMenuDefinition<GameContext, boolean>
     local options: {boolean} = {false, true}
     
-    local get_options = function(_game_ctx: GC, _menu_context: MenuContext): {ListMenuOption}
+    local get_options = function(_game_ctx: GameContext, _menu_context: MenuContext): {ListMenuOption}
         return lists.do_map(
             options,
-            function (o: boolean): ListMenuOption<GC, boolean>
+            function (o: boolean): ListMenuOption<GameContext, boolean>
                 return {
                     text = o and "YES" or "NO",
                     value = o
@@ -102,7 +102,7 @@ function list_menu_cursor.boolean_yes_no<GC>(
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<GC, boolean>, _msb: GC, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuCursor<GameContext, boolean>, _msb: GameContext, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return list_menu_cursor.definition({
@@ -113,12 +113,12 @@ function list_menu_cursor.boolean_yes_no<GC>(
     })
 end
 
-function list_menu_cursor.integer_range<GC>(
+function list_menu_cursor.integer_range<GameContext>(
     min_value: integer,
     max_value: integer,
     set_context_key: string,
     direction: ListDirection
-): ListMenuDefinition<GC, integer>
+): ListMenuDefinition<GameContext, integer>
     local options = {}
     for i=min_value,max_value do
         pt.add(options, i)
@@ -162,26 +162,35 @@ function ListMenuCursor:update_mouse(
     end
 end
 
-function ListMenuCursor:handle_select(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): string, event_bus.GameEvent
+function ListMenuCursor:handle_select(
+    game_ctx: GameContext,
+    menu_ctx: MenuContext,
+    _: menu_types.MenuState
+): string
     if self.set_selected_context ~= nil then
-        self.set_selected_context(self, game_ctx, menu_ctx)
+        self:set_selected_context(game_ctx, menu_ctx)
     end
     if self.options[self.i].set_selected_context ~= nil then
         self.options[self.i].set_selected_context(game_ctx, menu_ctx)
     end
-    return self.options[self.i].next_state, self.options[self.i].send_command
+    if self.options[self.i].select_handler then
+        self.options[self.i]:select_handler(game_ctx, menu_ctx)
+    end
+    return self.options[self.i].next_state
 end
 
 function ListMenuCursor:handle_back(
-    _game_ctx: GC,
-    _menu_ctx: MenuContext,
-    _menu_state: menu_types.MenuState
-): event_bus.GameEvent
-    return self.back_command
+    game_ctx: GameContext,
+    menu_ctx: MenuContext,
+    menu_state: menu_types.MenuState
+) 
+    if self.back_handler then
+        self:back_handler(game_ctx, menu_ctx)
+    end
 end
 
-function ListMenuDefinition:to_cursor(game_ctx: GC, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor<GC>
-    local cursor: ListMenuCursor<GC, Value> = {
+function ListMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor<GameContext>
+    local cursor: ListMenuCursor<GameContext, Value> = {
         type = "list",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
