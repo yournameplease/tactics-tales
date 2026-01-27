@@ -5,12 +5,8 @@ local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
-local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local MenuContextAndCursor = require("src/tactics/menu/menu_cursor").MenuContextAndCursor
-local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 

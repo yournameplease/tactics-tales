@@ -1,10 +1,5 @@
-local event_bus = require("src/tactics/systems/event_bus")
 local id_generator = require("src/tactics/util/id_generator")
-local event_listener = require("src/tactics/systems/event_bus/event_listener")
-local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local GameData = require("src/tactics/game_data").GameData
--- require("src/tactics/character/animation_data")
--- require("src/tactics/character/items/object/weapon")
 local Character = require("src/tactics/character/object/character").Character
 local character_generator = require("src/tactics/character/character_generator")
 local lists = require("src/tactics/util/lists")
@@ -28,8 +23,6 @@ local record CharacterManagerImpl
     is CharacterManager
 
     game_data: GameData
-
-    event_listener: event_listener.EventListener
     
     id_generator: id_generator.IdGenerator
     characters: { integer: Character }
@@ -68,30 +61,10 @@ end
 
 -- event handlers
 
-function CharacterManagerImpl:handle_equip_item(ctx: MenuContext)
-    local character = ctx.acting_unit.unit.character
-    local item_index = ctx.selected_item.index
-    character.inventory:equip_item(item_index)
-end
-
-function CharacterManagerImpl:handle_unequip_item(ctx: MenuContext)
-    local character = ctx.acting_unit.unit.character
-    local item_index = ctx.selected_item.index
-    character.inventory:unequip_item(item_index)
-end
-
-function CharacterManagerImpl:handle_discard_item(ctx: MenuContext)
-    local character = ctx.acting_unit.unit.character
-    local item_index = ctx.selected_item.index
-    character.inventory:remove_item(item_index)
-end
-
 function character_manager.new(
-    game_data: GameData,
-    bus: event_bus.EventBus
+    game_data: GameData
 ): CharacterManager
     local self: CharacterManagerImpl = setmetatable({
-        event_listener = event_listener.new(bus)
     }, { __index = CharacterManagerImpl})
 
     self.id_generator = id_generator.new()
@@ -99,21 +72,10 @@ function character_manager.new(
     self.characters = {}
     self.player_ids = {}
 
-    self.event_listener:on("INVENTORY_EQUIP_ITEM", function(ctx: MenuContext)
-        self:handle_equip_item(ctx)
-    end)
-    self.event_listener:on("INVENTORY_UNEQUIP_ITEM", function(ctx: MenuContext)
-        self:handle_unequip_item(ctx)
-    end)
-    self.event_listener:on("INVENTORY_DISCARD_ITEM", function(ctx: MenuContext)
-        self:handle_discard_item(ctx)
-    end)
-
     return self
 end
 
 function CharacterManagerImpl:teardown()
-    self.event_listener:teardown()
 end
 
 return character_manager

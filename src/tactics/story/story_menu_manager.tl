@@ -3,11 +3,11 @@ local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
 local sprite_data = require("src/tactics/character/sprite_data")
 local customization_options = sprite_data.customization_options
 local menu_manager = require("src/tactics/menu/menu_manager")
+local menu_context = require("src/tactics/menu/menu_context")
 local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
 local character = require("src/tactics/character/object/character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey
 local event_bus = require("src/tactics/systems/event_bus")
-local button_advance_cursor = require("src/tactics/menu/cursor/button_advance_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
 
@@ -15,8 +15,8 @@ local lists = require("src/tactics/util/lists")
 
 local function set_character_customization_option(
     key: CharacterAppearanceKey
-): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: MenuContext)
-    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: MenuContext)
+): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
 		if mc.character_customization == nil then
 			mc.character_customization = {}
 		end
@@ -77,7 +77,12 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
     return multiple_options_cursor.definition({
         primary_direction = "vertical",
         wrap = false,
-        send_command = "STORY_CREATE_CHARACTER",
+        select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
+            game_ctx.handle_create_character(
+                menu_ctx.character_customization.appearance
+            )
+        end,
+
         options = {
             multiple_option_cursor_for_part("head", "Head", customization_options.HEAD, sprite_data.HEAD),
             multiple_option_cursor_for_part("hair", "Hair", customization_options.HAIR, sprite_data.HAIR),
@@ -98,14 +103,6 @@ local record StoryMenuManager
 end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
-    ["MENU_STORY_TEXT"] = {
-        initial_step = "ADVANCE_TEXT",
-        steps = {
-            ["ADVANCE_TEXT"] = button_advance_cursor.definition({
-                send_command = "STORY_ADVANCE_TEXT"
-            }),
-        }
-    },
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
         steps = {

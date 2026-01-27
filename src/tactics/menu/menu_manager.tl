@@ -8,6 +8,7 @@ local InputContext = input_context.InputContext
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
+local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
 
 local record SelectionHistory<GameContext>
@@ -54,7 +55,7 @@ local menu_manager = {
 
 function menu_manager.new<GameContext>(
     menu_definitions: { menu_types.MenuId: MenuDefinition },
-    ctx: GC,
+    ctx: GameContext,
     bus: event_bus.EventBus
 ): MenuManager<GameContext>
     local self: BaseMenuManager<GameContext> = setmetatable({}, { __index = BaseMenuManager })
@@ -95,27 +96,13 @@ function BaseMenuManager:handle_menu_select()
         selection = self.menu_cursor
     })
 
-    if send_command ~= nil then
-        log.info("Emitting menu command ", send_command)
-        self.event_writer:emit(send_command, self.menu_ctx)
-    end
-
     if next_state ~= nil then
         self:populate_menu_state(next_state)
     end
 end
 
 function BaseMenuManager:handle_menu_back()
-    local back_command = self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx, self.menu_state)
-
-    if back_command ~= nil then
-        log.info("Emitting menu back command ", back_command)
-        local message: menu_cursor.MenuContextAndCursor<GameContext> = {
-            ctx = self.menu_ctx,
-            cursor = self.menu_cursor,
-        } 
-        self.event_writer:emit(back_command, message)
-    end
+    self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx, self.menu_state)
 
     local previous_step = self.menu_definitions[self.menu_state.menu_id].steps[self.menu_state.step]
         .previous_state

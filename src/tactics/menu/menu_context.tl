@@ -65,17 +65,18 @@ end
 
 local record StorySelectMenuContext
     is MenuContext
-    character_customization: CharacterCustomizationSelection 
+    metadata: {string: any}
 end
 
 local record StoryMenuContext
     is MenuContext
-    story: StorySelection
     metadata: {string: any}
+    character_customization: CharacterCustomizationSelection 
 end
 
-local record GameMenuContext
+local record GameMainMenuContext
     is MenuContext
+    story: StorySelection
     metadata: {string: any}
 end
 
@@ -91,7 +92,7 @@ local menu_context = {
     BattleMainMenuContext = BattleMainMenuContext,
     StorySelectMenuContext = StorySelectMenuContext,
     StoryMenuContext = StoryMenuContext,
-    GameMenuContext = GameMenuContext,
+    GameMainMenuContext = GameMainMenuContext,
 }
 
 return menu_context

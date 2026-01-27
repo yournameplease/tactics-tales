@@ -3,6 +3,7 @@ local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local battle_manager = require("src/tactics/battle/battle_manager")
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local character_manager = require("src/tactics/character/character_manager")
+local character = require("src/tactics/character/object/character")
 local story_menu_context = require("src/tactics/story/story_menu_context")
 local story_ui_context = require("src/tactics/story/story_ui_context")
 local story_page = require("src/tactics/story/story_page")
@@ -184,9 +185,7 @@ function StoryImpl:handle_battle_defeat()
     self:jump_to_node(node_definition.next_node_failure)
 end
 
-function StoryImpl:create_character(ctx: MenuContext)
-    local appearance = ctx.character_customization.appearance
-
+function StoryImpl:create_character(appearance: {character.CharacterAppearanceKey: string})
     self.customized_character.appearance = {}
     for k,a in pairs(appearance) do
         log.debug("Setting character appearance", k, a)
@@ -212,8 +211,7 @@ function story.new(
     self.game_data = game_data
 
     self.character_manager = character_manager.new(
-        game_data,
-        event_bus
+        game_data
     )
 
     self.event_listener = event_listener.new(event_bus)
@@ -222,7 +220,9 @@ function story.new(
     self.story_memory = story_memory.new(self.character_manager)
     self.story_page = story_page.story_page(self.story_memory)
     self.menu_manager = story_menu_manager.new(
-        story_menu_context.new(),
+        story_menu_context.new(
+            function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end
+        ),
         event_bus
     )
 
@@ -236,9 +236,6 @@ function story.new(
 
     event_bus:on("STORY_ADVANCE_TEXT", function()
         self:advance_text()
-    end)
-    event_bus:on("STORY_CREATE_CHARACTER", function(ctx: MenuContext)
-        self:create_character(ctx)
     end)
 
     local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)

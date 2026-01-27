@@ -63,6 +63,8 @@ local record TacticsEngine
     -- mutations
     spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
     handle_mark_unit: function(self, Point)
+    handle_tile_interaction: function(self, interaction_id: integer, unit: BattleUnit, tile: Point)
+    handle_unit_interaction: function(self, interaction_id: integer, unit: BattleUnit, target: BattleUnit)
     set_unit_idle: function(self, BattleUnit)
     finish_unit_action: function(self, BattleUnit)
     handle_move_unit: function(self,
@@ -324,6 +326,25 @@ function TacticsEngine:handle_mark_unit(p: Point)
     if unit:is_enemy() then
         unit.marked = not unit.marked
     end
+end
+
+function TacticsEngine:handle_tile_interaction(interaction_id: integer, unit: BattleUnit, tile: Point)
+    self.event_writer:emit("TACTICS_INTERACTION", {
+        script_id = interaction_id,
+        source_unit = unit,
+        source_tile = unit.tile,
+        target_tile = tile,
+    })
+end
+
+function TacticsEngine:handle_unit_interaction(interaction_id: integer, unit: BattleUnit, target: BattleUnit)
+    self.event_writer:emit("TACTICS_INTERACTION", {
+        script_id = interaction_id,
+        source_unit = unit,
+        source_tile = unit.tile,
+        target_unit = target,
+        target_tile = target.tile,
+    })
 end
 
 function TacticsEngine:move_unit(
