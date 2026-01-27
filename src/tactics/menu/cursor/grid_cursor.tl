@@ -2,7 +2,6 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local menu_types = require("src/tactics/menu/types")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local input_service = require("src/tactics/joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
@@ -17,8 +16,8 @@ local record MenuTileHighlight
     can_attack: boolean
 end
 
-local record GridMenuCursor<GC>
-    is menu_cursor.MenuCursor<GC>
+local record GridMenuCursor<GameContext, MenuContext>
+    is menu_cursor.MenuCursor<GameContext, MenuContext>
     where self.type == "grid"
     point: Point
     x_max: integer
@@ -28,25 +27,25 @@ local record GridMenuCursor<GC>
     max_path_length: integer
 
     -- from definition
-    set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
-    validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
+    set_selected_context: function(GridMenuCursor<GameContext>, GameContext, MenuContext)
+    validator: function(GridMenuCursor<GameContext>, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
-    send_command: event_bus.GameEvent
-    back_command: event_bus.GameEvent
+    select_handler: function(self, GameContext, MenuContext)
+    back_handler: function(self, GameContext, MenuContext)
 end
 
-local record GridMenuDefinition<GC>
-    is menu_cursor.MenuStepDefinition<GC>
+local record GridMenuDefinition<GameContext, MenuContext>
+    is menu_cursor.MenuStepDefinition<GameContext, MenuContext>
     where self.type == "grid"
 
-    set_selected_context: function(GridMenuCursor<GC>, GC, MenuContext)
-    validator: function(GridMenuCursor<GC>, GC, MenuContext): boolean
+    set_selected_context: function(GridMenuCursor<GameContext>, GameContext, MenuContext)
+    validator: function(GridMenuCursor<GameContext>, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
-    send_command: event_bus.GameEvent
-    back_command: event_bus.GameEvent
-    get_legal_tiles: function(GC, MenuContext): array_2d.Array2D<MenuTileHighlight>
-    get_path_anchor: function(GC, MenuContext): Point
-    get_max_path_length: function(GC, MenuContext): integer
+    select_handler: function(MenuContext)
+    back_handler: function(MenuContext)
+    get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    get_path_anchor: function(GameContext, MenuContext): Point
+    get_max_path_length: function(GameContext, MenuContext): integer
 end
 
 local grid_cursor = {
@@ -55,9 +54,9 @@ local grid_cursor = {
     GridMenuDefinition = GridMenuDefinition,
 }
 
-function grid_cursor.definition<GC>(
-    props: GridMenuDefinition<GC>
-): GridMenuDefinition<GC>
+function grid_cursor.definition<GameContext, MenuContext>(
+    props: GridMenuDefinition<GameContext, MenuContext>
+): GridMenuDefinition<GameContext, MenuContext>
     props.type = "grid"
     return setmetatable(props, { __index = GridMenuDefinition })
 end
@@ -106,7 +105,7 @@ function GridMenuCursor:update_mouse(
 end
 
 function GridMenuCursor:handle_select(
-    game_ctx: GC,
+    game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
 ): string, event_bus.GameEvent
@@ -115,23 +114,29 @@ function GridMenuCursor:handle_select(
 
     menu_state.point = self.point:copy()
     self.set_selected_context(self, game_ctx, menu_ctx)
-    return self.next_state, self.send_command
+
+    if self.select_handler then
+        self:select_handler(game_ctx, menu_ctx)
+    end
+    return self.next_state 
 end
 
 function GridMenuCursor:handle_back(
-    _game_ctx: GC,
-    _menu_ctx: MenuContext,
-    _menu_state: menu_types.MenuState
+    game_ctx: GameContext,
+    menu_ctx: MenuContext,
+    menu_state: menu_types.MenuState,
 ): event_bus.GameEvent
-    return self.back_command
+    if self.back_handler then
+        self:back_handler(game_ctx, menu_ctx)
+    end
 end
 
 function GridMenuDefinition:to_cursor(
-    game_ctx: GC,
+    game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
-): menu_cursor.MenuCursor<GC>
-    local cursor: GridMenuCursor<GC> = {
+): menu_cursor.MenuCursor<GameContext, MenuContext>
+    local cursor: GridMenuCursor<GameContext, MenuContext> = {
         type = "grid",
         point = menu_state.point, 
         x_max = 16,
