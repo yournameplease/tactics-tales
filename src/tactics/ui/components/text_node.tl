@@ -1,3 +1,4 @@
+local fp = require("src/tactics/util/fp")
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
@@ -68,9 +69,17 @@ function TextNode:measure(depth: integer)
         self.calculated_h = self.h
     end
     if self.auto_width and text_obj ~= nil then
-        self.w = 40
-        -- local rows = text_obj:get_wrapped_rows()
-        -- self.h = rows * TEXT_ROW_HEIGHT + self.internal_margin.t + self.internal_margin.b
+        local paragraphs = text_obj:get_lines()
+
+        local max_width = 0
+        for _,p in ipairs(paragraphs) do
+            for _,l in ipairs(p) do
+                if #l > max_width then
+                    max_width = #l -- todo: expose width in pixels
+                end
+            end
+        end
+        self.w = max_width * 5 + self.internal_margin.l + self.internal_margin.r
         self.calculated_w = self.w
     end
 end

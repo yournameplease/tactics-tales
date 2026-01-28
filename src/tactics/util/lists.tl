@@ -6,6 +6,10 @@ local lists = {
 	MapEntry = MapEntry
 }
 
+function lists.size<Value>(list: {Value}): integer
+	return #list
+end
+
 function lists.add_all<Value>(list: {Value}, elements: {Value})
 	for _,elem in ipairs(elements) do
 		pt.add(list, elem)
@@ -107,6 +111,12 @@ function lists.sum<A>(fn: function(A): number): function({A}): number
 	return function(list: {A}): number 
 		return lists.do_sum(list, fn)
 	end
+end
+
+function lists.max<A>(fn: function(A): integer): function({A}): integer
+	return lists.reduce(0, function(s: integer, a: A): integer
+		return pt.max(s, fn(a))
+	end)
 end
 
 function lists.do_collect_map<K,V>(list: {lists.MapEntry<K,V>}): { K: V }
