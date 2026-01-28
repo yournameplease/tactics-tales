@@ -96,7 +96,9 @@ function battle_manager.new(
     
     local battle_menu_ctx = battle_menu_context.new(
         self.battle_map,
-        self.tactics_engine
+        self.tactics_engine,
+        battle_def.deployment.deployment_tiles_tag,
+        function() event_bus:emit("TACTICS_BEGIN_BATTLE", {}) end
     )
     self.battle_menu_manager = battle_menu_manager.new(
         battle_menu_ctx,
@@ -122,7 +124,17 @@ function battle_manager.new(
     self.ui_context = ui_context
     self.ui_context:register_ui_context(battle_ui_ctx)
 
-    event_bus:emit("TACTICS_BEGIN_BATTLE", {})
+    if battle_def.deployment ~= nil then
+        self.tactics_engine:spawn_all(
+            {{ character_source = {type = "player_roster"}, tile = "player_deployment" }},
+            {},
+            {},
+            nil
+        )
+        self.battle_menu_manager:set_menu("MENU_DEPLOYMENT")
+    else
+        event_bus:emit("TACTICS_BEGIN_BATTLE", {})
+    end
 
     -- todo: re-enable when better or i add a mute button
     -- pt.music(0)

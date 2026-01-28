@@ -6,6 +6,7 @@ local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local battle_definition_types = require("src/tactics/battle/definition/types")
 local types = require("src/tactics/battle/battle_map/types")
+local lists = require("src/tactics/util/lists")
 local TileDistance = types.TileDistance
 local InteractionHook = types.InteractionHook
 local TileInteractionHook = types.TileInteractionHook
@@ -113,6 +114,11 @@ function battle_map.new(width: integer, height: integer, labels: { string: {Poin
     return self
 end
 
+function BattleMap:tile_is_in_map(tile: Point): boolean
+    return tile.x >= 0 and tile.x < self.width
+        and tile.y >= 0 and tile.y < self.height
+end
+
 -- terrain
 function BattleMap:get_tiles_by_label(label: battle_definition_types.TileLabel): {Point}
     if self.tile_labels[label] then
@@ -120,6 +126,23 @@ function BattleMap:get_tiles_by_label(label: battle_definition_types.TileLabel):
     else
         return {}
     end
+end
+
+function BattleMap:tile_has_label(tile: Point, label: battle_definition_types.TileLabel): boolean
+    if self.tile_labels[label] then
+        return lists.contains(self.tile_labels[label], tile)
+    else
+        return false
+    end
+end
+
+function BattleMap:get_tiles_array_by_label(label: battle_definition_types.TileLabel): array_2d.Array2D<boolean>
+    local points = self:get_tiles_by_label(label)
+    local out = array_2d.new(self.width, self.height, false)
+    for _,p in ipairs(points) do
+        out:set_point(p, true)
+    end 
+    return out
 end
 
 function BattleMap:get_terrain(tile: Point): TerrainData
@@ -213,6 +236,23 @@ function BattleMap:move_unit(unit: battle_unit.BattleUnit, tile: Point)
     unit.tile = tile
 end
 
+function BattleMap:swap_tile_units(tile_a: Point, tile_b: Point)
+    assert(self:tile_is_in_map(tile_a))
+    assert(self:tile_is_in_map(tile_b))
+
+    local unit_a = self.units_by_x_y:get_point(tile_a)
+    local unit_b = self.units_by_x_y:get_point(tile_b)
+
+    if unit_a ~= nil then
+        unit_a.tile = tile_b
+    end
+    if unit_b ~= nil then
+        unit_b.tile = tile_a
+    end
+    self.units_by_x_y:set_point(tile_a, unit_b)
+    self.units_by_x_y:set_point(tile_b, unit_a)
+end
+
 function BattleMap:kill_unit(unit: battle_unit.BattleUnit)
     self.units_by_x_y:set_point(unit.tile, nil)
     self.units_by_id[unit.id] = nil
@@ -261,11 +301,6 @@ end
 
 function BattleMap:get_all_units(): { battle_unit.BattleUnit }
     return self:get_units(fp.fn_true)
-end
-
-function BattleMap:tile_is_in_map(tile: Point): boolean
-    return tile.x >= 0 and tile.x < self.width
-        and tile.y >= 0 and tile.y < self.height
 end
 
 -- interactions / scripts

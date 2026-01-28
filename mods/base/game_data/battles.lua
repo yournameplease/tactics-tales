@@ -489,6 +489,9 @@ local BATTLE_DATA = {
             objectives.turn_limit(),
             objectives.tagged_unit_dies("hero")
         },
+        deployment = {
+            deployment_tiles_tag = "player_deployment",
+        },
         enemies = {
             { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
@@ -508,9 +511,7 @@ local BATTLE_DATA = {
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
             -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
         },
-        players = {
-            { character_source = character_source.player_roster(), tile = "player_deployment" },
-        },
+        players = {},
         scripts = {
             spawn_enemies({
                 { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },

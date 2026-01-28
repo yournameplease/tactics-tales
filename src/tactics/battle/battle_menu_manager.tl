@@ -69,10 +69,75 @@ local function validate_tile_is_in_unit_attack_range(
     return targeting.is_target_valid(unit_position, target_point, map)
 end
 
--- kind
--- selected_data_mapper -- returns (success bool, data) to store
--- select_transition
+local record BattlePreparationsContext
+    is menu_context.MenuContext
+    unit: BattleUnit
+    swap_target: Point
+end
+
+local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): array_2d.Array2D<grid_cursor.MenuTileHighlight>
+    return msb.battle_map:get_tiles_array_by_label(msb.deployment_tiles_tag)
+        :map(function(is_deployment: boolean): grid_cursor.MenuTileHighlight
+            return {
+                valid_selection = is_deployment,
+            }
+        end)
+end
+
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
+    ["MENU_DEPLOYMENT"] = {
+        initial_step = "SELECT_UNIT",
+        steps = {
+            ["SELECT_UNIT"] = grid_cursor.definition({
+                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattlePreparationsContext)
+                    ctx.unit = msb.battle_map:get_at_tile(s.point)
+                end,
+                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                    return grid_selection_is_available_player(msb.battle_map, s) end,
+                next_state = "SELECT_SWAP_TARGET",
+                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _: BattlePreparationsContext)
+                    game_ctx.tactics_engine:handle_mark_unit(self.point)
+                end,
+                get_legal_tiles = get_deployment_tiles,
+            }),
+            ["SELECT_SWAP_TARGET"] = grid_cursor.definition({
+                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattlePreparationsContext)
+                    game_ctx.tactics_engine:handle_swap_unit(
+                        menu_ctx.unit,
+                        menu_ctx.swap_target
+                    )
+                end,
+                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: BattlePreparationsContext)
+                    ctx.swap_target = s.point:copy()
+                end,
+                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                    return msb.battle_map:tile_has_label(s.point, msb.deployment_tiles_tag)
+                end,
+                previous_state = "SELECT_UNIT",
+                next_state = "SELECT_UNIT",
+                get_legal_tiles = get_deployment_tiles,
+            }),
+            ["DEPLOYMENT_MENU"] = list_cursor.definition({
+                previous_state = "SELECT_UNIT",
+                get_options = function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
+                    local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
+
+                    pt.add(options, {
+                        text = "Start Battle",
+                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                            game_ctx.handle_start_battle()
+                        end
+                    })
+                    pt.add(options, {
+                        text = "Edit Formation",
+                        next_state = "SELECT_UNIT"
+                    })
+                    
+                    return options
+                end
+            }),
+        }
+    },
     ["MENU_PLAYER_TURN"] = {
         initial_step = "SELECT_UNIT",
         steps = {
