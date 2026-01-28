@@ -34,7 +34,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
 
                     pt.add(options, {
                         text = "Play",
-                        send_command = "GAME_BEGIN_STORY",
+                        select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                            game_ctx.handle_begin_story(nil)
+                        end,
                     })
                     pt.add(options, {
                         text = "Chapter Select",
@@ -65,7 +67,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                     end
 
                     return options
-                end
+                end,
+                select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                    game_ctx.handle_begin_story(menu_ctx.story.id)
+                end,
             }),
             ["OPTIONS_MENU"] = multiple_options_cursor.definition({
                 primary_direction = "vertical",

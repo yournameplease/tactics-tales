@@ -94,6 +94,9 @@ function DialogueManagerImpl:update(input: InputContext)
 					d.current_row = d.current_row + 1
 					d.characters_rendered = 0
 					d.timer_offset = time_at_speed(self.global_timer, d.speed)
+					if d.current_row > #d.text then
+						d.finished = true
+					end
 				end
 		    end
 		end
@@ -105,7 +108,6 @@ function DialogueManagerImpl:create_dialogue(
 	props: DialogueProps,
 	replacement_vars: {string: string}
 ): Dialogue
-	assert(#text > 0)
 	local replaced_text = lists.map(function(t: string): string
 		local out = string.gsub(
 			t,
@@ -130,6 +132,7 @@ function DialogueManagerImpl:create_dialogue(
 		speed = props.speed,
 		can_skip = props.can_skip,
 	}
+	
 	local dialogue_mt = {
 		__index = function(t: DialogueImpl, k: string): any
 			if k == "speed" then
@@ -140,9 +143,6 @@ function DialogueManagerImpl:create_dialogue(
 			end
 			if k == "timer_limit" then
 				return SPEED_MASK[t.speed] + 1
-			end
-			if k == "finished" then
-				return t.current_row > #t.text
 			end
 		end
 	}

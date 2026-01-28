@@ -85,11 +85,10 @@ local interface StoryPage
     chapter_text: string
     chapter_number: integer
     
-    update: function(self, input: InputContext)
     add_chapter_header: function(self, text: string, number: integer)
     clear_chapter_header: function(self)
     finish_text: function(self)
-    add_text_line: function(self, text: string)
+    add_text_line: function(self, dialogue: Dialogue)
     add_character_customization_menu: function(self, base_character: Character, key: string, anim: animation.AnimatedSpriteData)
     clear_page: function(self)
 end
@@ -101,7 +100,6 @@ local story_page = {
 
 local record StoryPageImpl
     is StoryPage
-    dialogue_manager: DialogueManager
     story_memory: story_memory.StoryMemory
 end
 
@@ -109,15 +107,10 @@ function story_page.story_page(
     story_mem: story_memory.StoryMemory
 ): StoryPage
     local self: StoryPageImpl = setmetatable({
-        dialogue_manager = dialogue_manager.new(),
         story_memory = story_mem,
     }, { __index = StoryPageImpl })
     self.nodes = {}
     return self
-end
-
-function StoryPageImpl:update(input: InputContext)
-    self.dialogue_manager:update(input)
 end
 
 -- data access
@@ -127,7 +120,8 @@ function StoryPageImpl:add_chapter_header(text: string, number: integer)
     pt.add(self.nodes, node)
 end
 
--- 
+-- TODO: move all these constructors out of here,
+-- back in to story class?
 function StoryPageImpl:clear_chapter_header()
     local chapter_header_node = self.nodes[#self.nodes]
     assert(chapter_header_node is ChapterHeader)
@@ -142,14 +136,7 @@ function StoryPageImpl:finish_text()
     text_node.text.characters_rendered = #text_node.text.text
 end
 
-function StoryPageImpl:add_text_line(text: string)
-    local dialogue = self.dialogue_manager:create_dialogue(
-        {text},
-        {
-            can_skip = true,
-        },
-        self.story_memory:get_as_map()
-    )
+function StoryPageImpl:add_text_line(dialogue: Dialogue)
     local node = rendered_story_node.text(dialogue)
     pt.add(self.nodes, node)
 end

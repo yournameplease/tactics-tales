@@ -18,7 +18,6 @@ end
 
 local record MenuDefinition<GameContext>
     initial_step: menu_types.MenuStep
-    get_initial_context: function(): MenuContext 
     steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GameContext> }
 end
 
@@ -122,7 +121,9 @@ end
 function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
     local definition = self.menu_definitions[menu_id]
     self.menu_state.menu_id = menu_id
-    self.menu_ctx = definition.get_initial_context()
+    self.menu_ctx = {
+        metadata = {}
+    }
     self.selection_history = {}
     local step = definition.initial_step
     self:populate_menu_state(step)

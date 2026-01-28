@@ -77,7 +77,7 @@ end
 local interface MenuStepDefinition<GameContext>
     type: CursorType
     previous_state: menu_types.MenuStep
-    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor
+    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor<GameContext>
 end
 
 local menu_cursor = {

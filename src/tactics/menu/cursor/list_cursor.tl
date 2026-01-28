@@ -33,6 +33,7 @@ local record ListMenuCursor<GameContext, Value>
     direction: ListDirection
     wrap: boolean
     set_selected_context: function(ListMenuCursor<GameContext, Value>, GameContext, MenuContext)
+    select_handler: function(self, GameContext, MenuContext)
     back_handler: function(self, GameContext, MenuContext)
 end
 
@@ -43,6 +44,7 @@ local record ListMenuDefinition<GameContext, Value>
     get_options: function(GameContext, MenuContext): {ListMenuOption<Value>}
     wrap: boolean
     direction: ListDirection
+    select_handler: function(self, GameContext, MenuContext)
     back_handler: function(self, GameContext, MenuContext)
 end
 
@@ -175,6 +177,9 @@ function ListMenuCursor:handle_select(
     end
     if self.options[self.i].select_handler then
         self.options[self.i]:select_handler(game_ctx, menu_ctx)
+    end
+    if self.select_handler then
+        self:select_handler(game_ctx, menu_ctx)
     end
     return self.options[self.i].next_state
 end

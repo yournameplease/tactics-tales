@@ -21,6 +21,9 @@ local GameData = require("src/tactics/game_data").GameData
 local TaskManager = require("src/tactics/systems/tasks").TaskManager
 local AnimationManager = require("src/tactics/animation").AnimationManager
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
+local DialogueManager = dialogue_manager.DialogueManager
+local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 
 ---@desc
 --- services needed to create a battle
@@ -70,6 +73,8 @@ local record StoryImpl
     handle_new_node: function(self)
     advance_node: function(self)
 
+    dialogue_manager: DialogueManager
+    active_dialogue: Dialogue
     event_listener: event_listener.EventListener
     event_writer: event_writer.EventWriter
 
@@ -99,10 +104,23 @@ function StoryImpl:handle_new_node()
         self:advance_node()
     elseif node_definition is story_node.ChapterHeader then
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
-        self.menu_manager:set_menu("MENU_STORY_TEXT")
+        self.active_dialogue = self.dialogue_manager:create_dialogue(
+            {"test"},
+            {
+                auto_advance = false,
+            },
+            {}
+        )
     elseif node_definition is story_node.StoryTextNode then
-        self.story_page:add_text_line(node_definition.text)
-        self.menu_manager:set_menu("MENU_STORY_TEXT")
+        self.active_dialogue = self.dialogue_manager:create_dialogue(
+            {node_definition.text},
+            {
+                can_skip = true,
+                auto_advance = false,
+            },
+            self.story_memory:get_as_map()
+        )
+        self.story_page:add_text_line(self.active_dialogue)
     elseif node_definition is story_node.BattleNode then
         local battle_id = node_definition.battle_id
         self.battle_manager = battle_manager.new(
@@ -125,7 +143,13 @@ function StoryImpl:handle_new_node()
         self.character_manager:persist_player(character)
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
-        self.story_page:add_text_line("Customize your hero!")
+        self.active_dialogue = self.dialogue_manager:create_dialogue(
+            {"Customize your hero!"},
+            {
+                can_skip = false,
+            },
+            self.story_memory:get_as_map()
+        )
         self.customized_character = self.character_manager:generate_character("village_hero", {"hero"})
         if node_definition.name_key then
             self.customized_character.name = self.story_memory:get(node_definition.name_key).text
@@ -214,6 +238,7 @@ function story.new(
         game_data
     )
 
+    self.dialogue_manager = dialogue_manager.new()
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
     
@@ -233,10 +258,6 @@ function story.new(
         animation_manager = animation_manager,
         event_bus = event_bus,
     }
-
-    event_bus:on("STORY_ADVANCE_TEXT", function()
-        self:advance_text()
-    end)
 
     local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)
 
@@ -258,10 +279,15 @@ end
 function StoryImpl:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
-        or current_node is story_node.CharacterCustomizerNode
         or current_node is story_node.ChapterHeader
     then
-        self.story_page:update(input)
+        self.dialogue_manager:update(input)
+        if self.active_dialogue ~= nil and self.active_dialogue.finished then
+            log.debug("removing dialogue", self.active_dialogue)
+            self.active_dialogue = nil
+            self:advance_node()
+        end
+    elseif current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then
         self.battle_manager:update(input)
