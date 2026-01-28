@@ -141,9 +141,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                         pt.add(options, {
                             text = interaction.interaction_text,
                             select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
-                                -- emit "TACTICS_INTERACTION"
-                                game_ctx.tactics_engine:finish_unit_action(
-                                    menu_ctx.acting_unit.unit
+                                game_ctx.tactics_engine:handle_interaction(
+                                    interaction.script_id,
+                                    menu_ctx.acting_unit.unit,
+                                    interaction.target_unit,
+                                    interaction.target_tile
                                 )
                             end,
                             set_selected_context = function(_: BattleMenuContext, mc: BattleMainMenuContext)

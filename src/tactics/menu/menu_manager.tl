@@ -36,6 +36,7 @@ local interface MenuManager<GameContext>
     populate_menu_state: function(self, new_step: menu_types.MenuStep)
     handle_menu_select: function(self)
     handle_menu_back: function(self)
+    clear_menu: function(self)
     set_menu: function(self, menu_id: menu_types.MenuId)
     update: function(self, input: InputContext)
 end
@@ -117,6 +118,12 @@ function BaseMenuManager:handle_menu_back()
     self.menu_cursor = self.selection_history[#self.selection_history].selection
 end
 
+
+function BaseMenuManager:clear_menu()
+    self.menu_state.menu_id = nil
+    self.menu_ctx = nil
+    self.selection_history = {}
+end
 
 function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
     local definition = self.menu_definitions[menu_id]
