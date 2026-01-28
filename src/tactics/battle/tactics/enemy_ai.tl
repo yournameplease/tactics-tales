@@ -5,8 +5,6 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local pathfinding = require("src/tactics/battle/pathfinding")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local event_bus = require("src/tactics/systems/event_bus")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local tasks = require("src/tactics/systems/tasks")
 local bm = require("src/tactics/battle/battle_map")
 
@@ -22,7 +20,6 @@ AI Mk 1:
 local record EnemyAIEngine
     battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
-    event_writer: event_writer.EventWriter
     task_manager: tasks.TaskManager
 end
 
@@ -166,7 +163,6 @@ end
 function enemy_ai_engine.new(
     map: bm.BattleMap,
     tactics: tactics_engine.TacticsEngine,
-    bus: event_bus.EventBus,
     task_manager: tasks.TaskManager
 ): EnemyAIEngine
     local self: EnemyAIEngine = setmetatable({
@@ -174,7 +170,6 @@ function enemy_ai_engine.new(
 
     self.battle_map = map
     self.tactics_engine = tactics
-    self.event_writer = event_writer.new(bus)
     self.task_manager = task_manager
     return self
 end
