@@ -86,9 +86,9 @@ end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
     ["MENU_DEPLOYMENT"] = {
-        initial_step = "SELECT_UNIT",
+        initial_step = "SELECT_SWAP_UNIT",
         steps = {
-            ["SELECT_UNIT"] = grid_cursor.definition({
+            ["SELECT_SWAP_UNIT"] = grid_cursor.definition({
                 set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattlePreparationsContext)
                     ctx.unit = msb.battle_map:get_at_tile(s.point)
                 end,
@@ -99,6 +99,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     game_ctx.tactics_engine:handle_mark_unit(self.point)
                 end,
                 get_legal_tiles = get_deployment_tiles,
+                previous_state = "DEPLOYMENT_MENU",
             }),
             ["SELECT_SWAP_TARGET"] = grid_cursor.definition({
                 select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattlePreparationsContext)
