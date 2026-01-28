@@ -3,7 +3,7 @@ local Point = point.Point
 local Side = require("src/tactics/character/object/character").Side
 local array_2d = require("src/tactics/util/array_2d")
 local lists = require("src/tactics/util/lists")
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 
 -- tile flags:
 -- 0: empty/solid
@@ -18,7 +18,7 @@ local BattleMap = require("src/tactics/battle/battle_map").BattleMap
 -- 7
 
 -- cost to move onto x,y from any neighbor
-local function movement_cost(map: BattleMap, tile: Point, side: Side): integer
+local function movement_cost(map: bm.BattleMap, tile: Point, side: Side): integer
     local terrain = map:get_terrain(tile)
     if terrain == nil then return 999 end
 
@@ -41,7 +41,7 @@ local record ShortestPathEntry
 end
 
 local type DistanceFunction = function(tile: Point): integer
-local function distance_for_unit(map: BattleMap, side: Side): DistanceFunction
+local function distance_for_unit(map: bm.BattleMap, side: Side): DistanceFunction
     return function(tile: Point): integer
         return movement_cost(map, tile, side)
     end
@@ -140,7 +140,7 @@ local pathfinding = {
 
 --- Calculates the cost and shortest path to ALL reachable tiles.
 -- @return A table where map[x][y] = { cost = number, prev = {x, y} }
-function pathfinding.calculate_all_tile_costs(map: BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
+function pathfinding.calculate_all_tile_costs(map: bm.BattleMap, start_x: integer, start_y: integer, side: Side, max_limit: integer): array_2d.Array2D<ShortestPathEntry>
     local limit = max_limit or 99999
     return _dijkstra_traversal(start_x, start_y, distance_for_unit(map, side), limit, point.of(map.width, map.height))
 end 
@@ -160,7 +160,7 @@ end
 
 --- Finds all tiles reachable from a starting point within a given total cost.
 -- @return A table where reachable[x][y] = true (Compatible with original signature)
-function pathfinding.find_reachable_tiles(map: BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
+function pathfinding.find_reachable_tiles(map: bm.BattleMap, start_x: integer, start_y: integer, side: Side, total_cost: integer): array_2d.Array2D<boolean>
     -- 1. Get the detailed map from the core engine
     local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(map, side), total_cost, point.of(map.width, map.height))
 

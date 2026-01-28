@@ -1,5 +1,4 @@
 local animation = require("src/tactics/animation")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local battle_manager = require("src/tactics/battle/battle_manager")
 local story_menu_manager = require("src/tactics/story/story_menu_manager")
 local character_manager = require("src/tactics/character/character_manager")
@@ -105,7 +104,7 @@ function StoryImpl:handle_new_node()
     elseif node_definition is story_node.ChapterHeader then
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.active_dialogue = self.dialogue_manager:create_dialogue(
-            {"test"},
+            {"test"}, -- todo: make this empty lol
             {
                 auto_advance = false,
             },
@@ -136,11 +135,11 @@ function StoryImpl:handle_new_node()
         self.story_page:clear_page()
         self:advance_node()
     elseif node_definition is story_node.RosterAddNode then
-        local character = self.character_manager:generate_character(
+        local created = self.character_manager:generate_character(
             node_definition.template,
             node_definition.tags or {}
         )
-        self.character_manager:persist_player(character)
+        self.character_manager:persist_player(created)
         self:advance_node()
     elseif node_definition is story_node.CharacterCustomizerNode then
         self.active_dialogue = self.dialogue_manager:create_dialogue(

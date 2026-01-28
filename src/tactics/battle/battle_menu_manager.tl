@@ -1,7 +1,7 @@
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src/tactics/util/point").Point
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local menu_manager = require("src/tactics/menu/menu_manager")
 local event_bus = require("src/tactics/systems/event_bus")
 local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
@@ -10,7 +10,6 @@ local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local menu_types = require("src/tactics/menu/types")
 local menu_context = require("src/tactics/menu/menu_context")
-local MenuContext = menu_context.MenuContext
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local record BattleMenuManager
@@ -19,7 +18,7 @@ end
 
 
 local function grid_selection_is_empty_or_acting_unit(
-    map: BattleMap,
+    map: bm.BattleMap,
     grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>,
     ctx: BattleMainMenuContext
 ): boolean
@@ -32,7 +31,7 @@ local function grid_selection_is_empty_or_acting_unit(
 end
 
 local function grid_selection_is_available_player(
-    map: BattleMap,
+    map: bm.BattleMap,
     grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>
 ): boolean
     local unit = map:get_at_tile(grid_selection.point)
@@ -45,7 +44,7 @@ local function grid_selection_is_available_player(
 end
 
 local function any_target_in_range(
-    map: BattleMap,
+    map: bm.BattleMap,
     ctx: BattleMainMenuContext
 ): boolean
     local unit = ctx.acting_unit.unit
@@ -56,7 +55,7 @@ local function any_target_in_range(
 end
 
 local function validate_tile_is_in_unit_attack_range(
-    map: BattleMap,
+    map: bm.BattleMap,
     unit: BattleUnit,
     unit_position: Point,
     target_point: Point 
@@ -87,12 +86,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
                     return grid_selection_is_available_player(msb.battle_map, s) end,
                 next_state = "SELECT_DESTINATION",
-                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_mark_unit(self.point)
                 end,
             }),
             ["SELECT_DESTINATION"] = grid_cursor.definition({
-                select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_move_unit(
                         menu_ctx.acting_unit.unit,
                         menu_ctx.destination.point,
@@ -141,7 +140,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     for _, interaction in ipairs(nearby_interactions) do
                         pt.add(options, {
                             text = interaction.interaction_text,
-                            select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                            select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                                 -- emit "TACTICS_INTERACTION"
                                 game_ctx.tactics_engine:finish_unit_action(
                                     menu_ctx.acting_unit.unit
@@ -159,7 +158,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
 
                     pt.add(options, {
                         text = "Wait",
-                        select_handler =  function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                             game_ctx.tactics_engine:finish_unit_action(
                                 menu_ctx.acting_unit.unit
                             )
@@ -183,7 +182,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator =  function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                     return validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, s.point) 
                 end,
-                select_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_attack_unit(
                         menu_ctx.acting_unit.unit,
                         menu_ctx.target_unit.unit

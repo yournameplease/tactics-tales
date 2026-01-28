@@ -1,7 +1,6 @@
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local battle_map = require("src/tactics/battle/battle_map")
-local BattleMap = battle_map.BattleMap
 local map_types = require("src/tactics/battle/map/types")
 local battle_definition_types = require("src/tactics/battle/definition/types")
 
@@ -77,7 +76,7 @@ end
 local function load_static(
     definition: map_types.StaticMapDefinition,
     tile_labels: {battle_definition_types.TileLabel: {integer}}
-): BattleMap
+): battle_map.BattleMap
     local map_fetch = pt.fetch(DATP..definition.file) as MapFetchResult
 
     local layers = as_map(map_fetch)
@@ -112,7 +111,7 @@ local function load_static(
         end
     end
     
-    local map: BattleMap = battle_map.new(metatiles_layer:width(), metatiles_layer:height(), labels)
+    local map: battle_map.BattleMap = battle_map.new(metatiles_layer:width(), metatiles_layer:height(), labels)
     map.layers = layers
     map.metadata = {
         player_spawners = {},
@@ -132,8 +131,8 @@ end
 function map_generator.load_map(
     definition: map_types.MapDefinition,
     labels: {battle_definition_types.TileLabel: {integer}}
-): BattleMap
-    local map: BattleMap
+): battle_map.BattleMap
+    local map: battle_map.BattleMap
     if definition is map_types.StaticMapDefinition then
         map = load_static(definition, labels)
     -- elseif definition is ProceduralMapDefinition then

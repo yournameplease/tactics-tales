@@ -172,8 +172,7 @@ end
 
 function MultipleOptionsMenuCursor:handle_back(
     game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    _menu_state: menu_types.MenuState
+    menu_ctx: MenuContext
 )
     if self.back_handler then
         self:back_handler(game_ctx, menu_ctx)

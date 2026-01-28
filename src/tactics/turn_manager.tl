@@ -3,7 +3,7 @@ local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
@@ -29,7 +29,7 @@ local turn_manager = {
 local record TurnManagerImpl
     is TurnManager
 
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
     enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
@@ -54,7 +54,7 @@ function TurnManagerImpl:check_objectives(): boolean
 end
 
 function turn_manager.new(
-    map: BattleMap,
+    map: bm.BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
     enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,

@@ -1,7 +1,6 @@
 require("src/tactics/config")
 
 local MenuTileHighlight = require("src/tactics/menu/cursor/grid_cursor").MenuTileHighlight
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local fp = require("src/tactics/util/fp")
@@ -10,7 +9,7 @@ local pathfinding = require("src/tactics/battle/pathfinding")
 local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local tasks = require("src/tactics/systems/tasks")
 local animation = require("src/tactics/animation")
 local lists = require("src/tactics/util/lists")
@@ -43,7 +42,7 @@ local record TacticsEngine
     battle_is_blocked: boolean
     is_player_turn: boolean
 
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
     character_manager: character_manager.CharacterManager
 
     task_manager: tasks.TaskManager
@@ -104,7 +103,7 @@ local tactics_engine = {
 }
 
 function tactics_engine.new(
-    map: BattleMap,
+    map: bm.BattleMap,
     character_mgr: character_manager.CharacterManager,
     task_manager: tasks.TaskManager,
     animation_manager: animation.AnimationManager,

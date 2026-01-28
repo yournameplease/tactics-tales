@@ -6,7 +6,6 @@ local input_service = require("src/tactics/joypad")
 local Joypad = require("src/tactics/joypad").Joypad
 local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
-local event_bus = require("src/tactics/systems/event_bus")
 
 global enum ListDirection
     "vertical"
@@ -186,8 +185,7 @@ end
 
 function ListMenuCursor:handle_back(
     game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    menu_state: menu_types.MenuState
+    menu_ctx: MenuContext
 ) 
     if self.back_handler then
         self:back_handler(game_ctx, menu_ctx)
