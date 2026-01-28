@@ -20,6 +20,7 @@ local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selec
 local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
 local CharacterRenderer = require("src/tactics/character/character_renderer")
 local dialogue_node = require("src/tactics/ui/components/dialogue_node")
+local array_2d = require("src/tactics/util/array_2d")
 
 local record TacticsMap
     is box.UIElement
@@ -388,15 +389,26 @@ function TacticsMap:draw(
         if hovered_unit ~= nil then
             hovered_unit_tiles = hovered_unit.valid_tiles
         end
+        -- shouldn't acting unit come from menu manager?
         local acting_unit = state.battle_context.acting_unit
         local acting_player_tiles = state.battle_context.acting_unit_tiles        
         local tile_interaction_highlights = state.battle_context.battle_map:get_tile_highlights()
-        
+
+        local cursor = state.battle_context.battle_menu_manager.menu_cursor
+        local cursor_legal_tiles: array_2d.Array2D<grid_cursor.MenuTileHighlight>
+        if cursor is grid_cursor.GridMenuCursor<BattleMenuContext> then
+            cursor_legal_tiles = cursor.legal_tiles
+        end
+
         local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
         for x = 0, self.map_width-1 do
             for y = 0, self.map_height-1 do
                 -- would like to move this logic into the ui context
-                if tile_interaction_highlights:get(x, y) then
+                if cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y).valid_selection then
+                    highlighted_tiles:set(x, y, 10)
+                elseif cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y).can_attack then
+                    highlighted_tiles:set(x, y, 11)
+                elseif tile_interaction_highlights:get(x, y) then
                     highlighted_tiles:set(x, y, 15)
                 elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x1) ~= 0 then
                     highlighted_tiles:set(x, y, 10)
