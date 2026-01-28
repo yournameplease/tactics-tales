@@ -70,6 +70,10 @@ local record TacticsEngine
     )
     set_unit_idle: function(self, BattleUnit)
     finish_unit_action: function(self, BattleUnit)
+    handle_swap_unit: function(self,
+        unit: BattleUnit,
+        swap_target: Point
+    )
     handle_move_unit: function(self,
         unit: BattleUnit,
         destination: Point,
@@ -411,6 +415,19 @@ function TacticsEngine:jump_unit_to_point(
 )
     self.battle_map:move_unit(unit, destination)
     unit.facing.vertical = "down"
+end
+
+function TacticsEngine:handle_swap_unit(
+    unit: BattleUnit,
+    swap_target: Point
+)
+    self.task_manager:start_routine(function()
+        self.battle_is_blocked = true
+
+        -- todo: animate
+        self.battle_map:swap_tile_units(unit.tile, swap_target)
+        self.battle_is_blocked = false
+    end)
 end
 
 function TacticsEngine:handle_move_and_wait(
