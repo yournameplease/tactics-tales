@@ -91,7 +91,6 @@ function battle_manager.new(
     self.enemy_ai_engine = enemy_ai_engine.new(
         self.battle_map,
         self.tactics_engine,
-        event_bus,
         task_manager
     )
     
