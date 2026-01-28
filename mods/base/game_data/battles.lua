@@ -506,7 +506,7 @@ local BATTLE_DATA = {
             { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationairy"}},
             { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
             { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationairy"}}
+            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationairy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
             -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
