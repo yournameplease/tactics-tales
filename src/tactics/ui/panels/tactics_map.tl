@@ -391,7 +391,6 @@ function TacticsMap:draw(
         end
         -- shouldn't acting unit come from menu manager?
         local acting_unit = state.battle_context.acting_unit
-        local acting_player_tiles = state.battle_context.acting_unit_tiles        
         local tile_interaction_highlights = state.battle_context.battle_map:get_tile_highlights()
 
         local cursor = state.battle_context.battle_menu_manager.menu_cursor
@@ -404,16 +403,12 @@ function TacticsMap:draw(
         for x = 0, self.map_width-1 do
             for y = 0, self.map_height-1 do
                 -- would like to move this logic into the ui context
-                if cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y).valid_selection then
+                if cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y) ~= nil and cursor_legal_tiles:get(x, y).valid_selection then
                     highlighted_tiles:set(x, y, 10)
-                elseif cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y).can_attack then
+                elseif cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y) ~= nil and cursor_legal_tiles:get(x, y).can_attack then
                     highlighted_tiles:set(x, y, 11)
                 elseif tile_interaction_highlights:get(x, y) then
                     highlighted_tiles:set(x, y, 15)
-                elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x1) ~= 0 then
-                    highlighted_tiles:set(x, y, 10)
-                elseif acting_player_tiles and (acting_player_tiles:get(x, y) & 0x4) ~= 0 then
-                    highlighted_tiles:set(x, y, 11)
                 elseif acting_unit == nil
                     and hovered_unit_tiles ~= nil
                     and (hovered_unit_tiles:get(x,y) & 0x5) ~= 0
