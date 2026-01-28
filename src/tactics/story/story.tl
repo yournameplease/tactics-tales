@@ -182,6 +182,7 @@ function StoryImpl:advance_node()
             story_memory.character(self.customized_character.id)
         )
         self.customized_character = nil
+        self.menu_manager:clear_menu()
     end
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]

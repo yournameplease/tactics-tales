@@ -36,7 +36,6 @@ local function sprite_function(
 	input_label: InputLabel
 ): function(state: UIContextManager): integer
 	return function(state: UIContextManager): integer
-		log.debug("hi", state.game_context.input_method)
 		return SPRITES[state.game_context.input_method][input_label]
 	end
 end

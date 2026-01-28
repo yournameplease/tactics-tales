@@ -53,7 +53,9 @@ function StoryUIContext:enrich()
             as rendered_story_node.CharacterCustomization -- lazy
 
         local drawable_character = character_customizer_node.character
-        drawable_character.character.appearance = {}
+        if drawable_character ~= nil then
+            drawable_character.character.appearance = {}
+        end
         local any_change = false
         for k,a in pairs(appearance) do
             if drawable_character.character.appearance[k] ~= a then
