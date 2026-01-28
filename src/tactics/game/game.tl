@@ -1,7 +1,6 @@
 local story = require("src/tactics/story/story")
 local story_types = require("src/tactics/story/types")
 local StoryId = story_types.StoryId
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local game_menu_manager = require("src/tactics/game/game_menu_manager")
 local game_menu_context = require("src/tactics/game/game_menu_context")
 local game_ui_context = require("src/tactics/game/game_ui_context")

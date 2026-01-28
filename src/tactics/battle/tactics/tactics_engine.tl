@@ -146,7 +146,6 @@ function TacticsEngine:start_dialogue(_unit: battle_unit.BattleUnit, text: {stri
     pt.add(self.dialogue_queue, text)
 end
 
--- move into dialogue manager? 
 function TacticsEngine:update_dialogue(input: InputContext)
     if #self.dialogue_queue > 0 then
         if self.active_dialogue == nil then
