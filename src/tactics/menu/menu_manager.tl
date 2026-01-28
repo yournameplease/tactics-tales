@@ -111,15 +111,13 @@ function BaseMenuManager:handle_menu_back()
         return
     end
     log.debug("Backing out of "..self.menu_state.menu_id .. " to " .. previous_step)
-    while #self.selection_history > 1 and
+    while #self.selection_history > 0 and
         self.selection_history[#self.selection_history].step ~= previous_step do
         self.selection_history[#self.selection_history] = nil
     end
     self:populate_menu_state(previous_step)
     if #self.selection_history > 0 then
         self.menu_cursor = self.selection_history[#self.selection_history].selection
-    else
-        self:populate_menu_state(previous_step)
     end
 end
 
