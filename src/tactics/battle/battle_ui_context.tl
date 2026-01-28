@@ -29,7 +29,6 @@ local record BattleUIContext
     hovered_unit: BattleUnit
     last_hovered_unit: BattleUnit
     acting_unit: BattleUnit
-    acting_unit_tiles: Userdata
     destination: Point
     objective_text: {string}
 
@@ -89,35 +88,45 @@ function BattleUIContext:enrich()
                 self.last_hovered_unit = unit
             end
         end
+        
+        if self.battle_menu_manager.menu_state.step == "SELECT_SWAP_UNIT" then
+            local selection_point = selection.point
+            local unit = self.battle_map:get_at_tile(selection_point)
+            self.hovered_unit = unit
+            if unit then
+                self.last_hovered_unit = unit
+            end
+            self.acting_unit = nil
+        end
+        
+        if self.battle_menu_manager.menu_state.step == "SELECT_SWAP_TARGET" then
+            local selection_point = selection.point
+            local unit = self.battle_map:get_at_tile(selection_point)
+            self.hovered_unit = unit
+            if unit then
+                self.last_hovered_unit = unit
+            end
+            
+            local ctx = self.battle_menu_manager.menu_ctx as {string: any}
+            if ctx["unit"] ~= nil then
+                self.acting_unit = ctx["unit"] as BattleUnit
+            end
+        end
     end
 
     local menu_ctx = self.battle_menu_manager.menu_ctx
     -- todo
-    if true then
+    if self.turn_manager.phase == "PLAYER" then
         assert(menu_ctx is BattleMainMenuContext)
         if menu_ctx.acting_unit ~= nil then
             self.acting_unit = menu_ctx.acting_unit.unit
-            if self.battle_menu_manager.menu_state.step == "SELECT_DESTINATION" then
-                self.acting_unit_tiles = self.acting_unit.valid_tiles
-            elseif self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
-                local tile = self.acting_unit.tile
-                local targeting = self.acting_unit.character:get_weapon_targeting()
-                local tiles_in_range = targeting.get_selection_tiles(tile, self.battle_map)
-                self.acting_unit_tiles = self.acting_unit.valid_tiles
-                self.acting_unit_tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
-                for _,t in ipairs(tiles_in_range) do
-                    self.acting_unit_tiles:set(t.x,t.y, 0x6)
-                end
-            else
-                self.acting_unit_tiles = nil
-            end
-        else
-            self.acting_unit_tiles = nil
         end
 
         if menu_ctx.destination ~= nil then
             self.destination = menu_ctx.destination.point
         end
+    elseif self.turn_manager.phase == "ENEMY" then
+        self.acting_unit = nil
     end
 
     if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
@@ -126,6 +135,7 @@ function BattleUIContext:enrich()
         end
     end
 
+    -- TODO: these names should live in the menu manager definition
     self.active_dialogue = self.tactics_engine.active_dialogue
     if self.active_dialogue ~= nil then
         self.input_actions = {

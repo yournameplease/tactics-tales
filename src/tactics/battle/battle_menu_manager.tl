@@ -114,12 +114,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                 validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                     return msb.battle_map:tile_has_label(s.point, msb.deployment_tiles_tag)
                 end,
-                previous_state = "SELECT_UNIT",
-                next_state = "SELECT_UNIT",
+                previous_state = "SELECT_SWAP_UNIT",
+                next_state = "SELECT_SWAP_UNIT",
                 get_legal_tiles = get_deployment_tiles,
             }),
             ["DEPLOYMENT_MENU"] = list_cursor.definition({
-                previous_state = "SELECT_UNIT",
+                previous_state = "SELECT_SWAP_UNIT",
                 get_options = function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
                     local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
 
@@ -131,7 +131,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     })
                     pt.add(options, {
                         text = "Edit Formation",
-                        next_state = "SELECT_UNIT"
+                        next_state = "SELECT_SWAP_UNIT",
                     })
                     
                     return options
