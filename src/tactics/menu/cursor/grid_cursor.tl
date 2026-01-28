@@ -9,7 +9,6 @@ local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selec
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local array_2d = require("src/tactics/util/array_2d")
 local pathfinding = require("src/tactics/battle/pathfinding")
-local event_bus = require("src/tactics/systems/event_bus")
 
 local record MenuTileHighlight
     reachable: boolean
@@ -124,8 +123,7 @@ end
 
 function GridMenuCursor:handle_back(
     game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    menu_state: menu_types.MenuState
+    menu_ctx: MenuContext
 ) 
     if self.back_handler then
         self:back_handler(game_ctx, menu_ctx)

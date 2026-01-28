@@ -34,7 +34,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
 
                     pt.add(options, {
                         text = "Play",
-                        select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, _menu_ctx: GameMainMenuContext)
                             game_ctx.handle_begin_story(nil)
                         end,
                     })
@@ -51,7 +51,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                 end
             }),
             ["CHAPTER_SELECT"] = list_cursor.definition({
-                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext, string>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                set_selected_context = function(s: list_cursor.ListMenuCursor<GameMenuContext, string>, _game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
                     menu_ctx.story = {
                         id = s.options[s.i].text,
                     }
@@ -68,14 +68,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
 
                     return options
                 end,
-                select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
                     game_ctx.handle_begin_story(menu_ctx.story.id)
                 end,
             }),
             ["OPTIONS_MENU"] = multiple_options_cursor.definition({
                 primary_direction = "vertical",
                 wrap = false,
-                select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
                     game_ctx.handle_set_config(
                         menu_ctx.metadata as DynamicConfig
                     )

@@ -1,5 +1,5 @@
 local InputContext = require("src/tactics/input/input_context").InputContext
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local map_generator = require("src/tactics/battle/map/map_generator")
 local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
@@ -28,7 +28,7 @@ local battle_manager = {
 local record BattleManagerImpl
     is BattleManager
 
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
 
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService

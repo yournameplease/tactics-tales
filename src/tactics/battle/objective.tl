@@ -1,16 +1,16 @@
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
 
 local interface VictoryCondition
 	text: string
-	check: function(self, battle_map: BattleMap, turn_limit_exceeded: boolean): boolean
+	check: function(self, battle_map: bm.BattleMap, turn_limit_exceeded: boolean): boolean
 end
 
 local record Rout
     is VictoryCondition
 end
 
-function Rout:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+function Rout:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
     local enemies = battle_map:get_units(BattleUnit.is_enemy)
     return #enemies == 0
 end
@@ -20,7 +20,7 @@ local record DefeatTagged
     tag: string 
 end
 
-function DefeatTagged:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+function DefeatTagged:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
     local enemies = battle_map:get_units(function(unit: BattleUnit): boolean
 		return unit:is_enemy() and unit.tags[self.tag]
 	end)
@@ -31,7 +31,7 @@ local record Survive
     is VictoryCondition
 end
 
-function Survive:check(_battle_map: BattleMap, turn_limit_exceeded: boolean): boolean
+function Survive:check(_battle_map: bm.BattleMap, turn_limit_exceeded: boolean): boolean
 	return turn_limit_exceeded
 end
 
@@ -39,21 +39,21 @@ local record Escape
     is VictoryCondition
 end
 
-function Escape:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+function Escape:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
     local players = battle_map:get_units(BattleUnit.is_player)
     return #players == 0
 end
 
 local interface FailureCondition
 	text: string
-	check: function(self, battle_map: BattleMap, turn_limit_exceeded: boolean): boolean
+	check: function(self, battle_map: bm.BattleMap, turn_limit_exceeded: boolean): boolean
 end
 
 local record AllPlayersDie
 	is FailureCondition
 end
 
-function AllPlayersDie:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+function AllPlayersDie:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
     local players = battle_map:get_units(BattleUnit.is_player)
     return #players == 0
 end
@@ -63,7 +63,7 @@ local record TaggedPlayerDies
 	tag: string
 end
 
-function TaggedPlayerDies:check(battle_map: BattleMap, _turn_limit_exceeded: boolean): boolean
+function TaggedPlayerDies:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
 	-- todo: this checks that all tagged players are dead
 	-- move to a script if we need to check any one dies
     local players = battle_map:get_units(function(unit: BattleUnit): boolean
@@ -76,7 +76,7 @@ local record TurnLimit
 	is FailureCondition
 end
 
-function TurnLimit:check(_battle_map: BattleMap, turn_limit_exceeded: boolean): boolean
+function TurnLimit:check(_battle_map: bm.BattleMap, turn_limit_exceeded: boolean): boolean
 	return turn_limit_exceeded
 end
 

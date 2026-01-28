@@ -77,7 +77,7 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
     return multiple_options_cursor.definition({
         primary_direction = "vertical",
         wrap = false,
-        select_handler = function(self: multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
+        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
             game_ctx.handle_create_character(
                 menu_ctx.character_customization.appearance
             )

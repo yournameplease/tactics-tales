@@ -101,7 +101,7 @@ function BaseMenuManager:handle_menu_select()
 end
 
 function BaseMenuManager:handle_menu_back()
-    self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx, self.menu_state)
+    self.menu_cursor:handle_back(self.game_ctx, self.menu_ctx)
 
     local previous_step = self.menu_definitions[self.menu_state.menu_id].steps[self.menu_state.step]
         .previous_state

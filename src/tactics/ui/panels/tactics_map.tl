@@ -5,7 +5,7 @@ local fp = require("src/tactics/util/fp")
 local box = require("src/tactics/ui/box")
 local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
 local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local battle_map = require("src/tactics/battle/battle_map")
+local bm = require("src/tactics/battle/battle_map")
 local menu_cursor = require("src/tactics/menu/menu_cursor")
 local list_cursor = require("src/tactics/menu/cursor/list_cursor")
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
@@ -71,7 +71,7 @@ local function get_cursor_tile(battle_context: BattleUIContext): Point
     end
 end
 
-local function compute_animated_unit_positions(map: battle_map.BattleMap): { AnimatedUnitPosition }
+local function compute_animated_unit_positions(map: bm.BattleMap): { AnimatedUnitPosition }
     return lists.map(
             function(unit: BattleUnit): AnimatedUnitPosition
                 local animation_offset = CharacterRenderer.get_animation_offset(unit)
@@ -103,8 +103,9 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
 
     local world_point = unit_tile * TILE_SIZE
     local look_direction: CharacterRenderer.LookDirection = nil
-    local cursor_tile = get_cursor_tile(ctx)
+    -- local cursor_tile = get_cursor_tile(ctx)
     -- Disabled looking as it's a bit annoyoing to look at
+    -- local cursor_tile = get_cursor_tile(ctx)
     -- if cursor_tile ~= nil then
     --     if point.taxicab_distance(cursor_tile, unit_tile) <= 2
     --         or (ctx.acting_unit ~= nil and ctx.acting_unit.id == unit.id)
@@ -207,7 +208,7 @@ local function get_path_layer(state: UIContextManager): Userdata
     end
 end
 
-function TacticsMap:draw_map_decorations(layers: battle_map.MapLayers, z_0: integer, z_1: integer)
+function TacticsMap:draw_map_decorations(layers: bm.MapLayers, z_0: integer, z_1: integer)
     local layer_wall_back = layers.terrain.back_wall
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall

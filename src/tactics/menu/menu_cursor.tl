@@ -1,5 +1,4 @@
 local menu_types = require("src/tactics/menu/types")
-local event_bus = require("src/tactics/systems/event_bus")
 local input_service = require("src/tactics/joypad")
 local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local Joypad = input_service.Joypad
@@ -69,9 +68,8 @@ local interface MenuCursor<GameContext>
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
 --- @return next state
---- @return send command
     handle_select: function(self, game_context: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string 
-    handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState) 
+    handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext) 
 end
 
 local interface MenuStepDefinition<GameContext>

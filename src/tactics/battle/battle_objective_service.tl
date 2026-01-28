@@ -1,4 +1,4 @@
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local event_bus = require("src/tactics/systems/event_bus")
 local battle_objective_definition = require("src/tactics/battle/definition/objective")
 local battle_objective = require("src/tactics/battle/objective")
@@ -21,14 +21,14 @@ local battle_objective_service = {
 
 local record BattleObjectiveServiceImpl
     is BattleObjectiveService
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
     turn_limit: integer
     victory_conditions: { battle_objective.VictoryCondition }
     failure_conditions: { battle_objective.FailureCondition }
 end
 
 function battle_objective_service.new(
-    map: BattleMap,
+    map: bm.BattleMap,
     turn_limit: integer,
     victory_conditions: { battle_objective_definition.VictoryCondition },
     failure_conditions: { battle_objective_definition.FailureCondition }

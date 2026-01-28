@@ -9,9 +9,8 @@ local BattleUnit = battle_unit.BattleUnit
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local battle_script = require("src/tactics/battle/scripts/battle_script")
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
 local TaskManager = require("src/tactics/systems/tasks").TaskManager
 
 local record ScriptContext
@@ -46,7 +45,7 @@ local record UnitInteractionMessage
 end
 
 local record ScriptManagerImpl
-	battle_map: BattleMap
+	battle_map: bm.BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
 	event_listener: event_listener.EventListener
     task_manager: TaskManager
@@ -275,7 +274,7 @@ end
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
 	bus: event_bus.EventBus,
-	map: BattleMap,
+	map: bm.BattleMap,
 	tactics: tactics_engine.TacticsEngine,
     task_manager: TaskManager
 ): ScriptManager

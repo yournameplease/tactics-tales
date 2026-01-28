@@ -1,6 +1,6 @@
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local lists = require("src/tactics/util/lists")
@@ -122,7 +122,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
     return double
 end
 
-local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: BattleMap): integer
+local function get_hit_chance(_attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: bm.BattleMap): integer
     local accuracy = weapon.accuracy
 
     local terrain = map:get_terrain(defender.tile)
@@ -158,7 +158,7 @@ local function get_damage(_attacker: CombatDouble, defender: CombatDouble, weapo
     return damage
 end
 
-local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: BattleMap): boolean
+local function can_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: bm.BattleMap): boolean
     return attack.targeting.is_target_valid(attacker.tile, defender.tile, battle_map)
             and attacker.hp_current > 0
             and defender.hp_current > 0
@@ -174,7 +174,7 @@ local function unit_is_long_reach(unit: CombatDouble): boolean
     return true
 end
 
-local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: BattleMap): boolean
+local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: bm.BattleMap): boolean
     local is_long_reach = unit_is_long_reach(attacker)
     log.debug("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
     if is_long_reach and not attack.long_reach then
@@ -184,7 +184,7 @@ local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble
     return can_attack(defender, attacker, attack, battle_map)
 end
 
-local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: BattleMap): CombatResult.CombatStep
+local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: bm.BattleMap): CombatResult.CombatStep
     if weapon ~= nil then
         local step: CombatResult.CombatStep = {
             attacker = attacker.unit,
@@ -200,7 +200,7 @@ local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, w
     return nil
 end
 
-function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: BattleMap): combat_calculator.CombatResult
+function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, battle_map: bm.BattleMap): combat_calculator.CombatResult
     local result: combat_calculator.CombatResult = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)
@@ -227,7 +227,7 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
     return result
 end
 
-function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, battle_map: BattleMap): CombatPreviewResult
+function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, battle_map: bm.BattleMap): CombatPreviewResult
     local result = { steps = {} }
 
     local attacker = build_combat_double(attacker_unit)

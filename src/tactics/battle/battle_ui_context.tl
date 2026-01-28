@@ -2,7 +2,7 @@ local point = require("src/tactics/util/point")
 local Point = point.Point
 local UIContext = require("src/tactics/ui/ui_context").UIContext
 local TurnManager =require("src/tactics/turn_manager").TurnManager
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
+local bm = require("src/tactics/battle/battle_map")
 local TacticsEngine = require("src/tactics/battle/tactics/tactics_engine").TacticsEngine
 local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
 local BattleObjectiveService = require("src/tactics/battle/battle_objective_service").BattleObjectiveService
@@ -11,7 +11,6 @@ local BattleMenuContext = require("src/tactics/battle/battle_menu_context").Batt
 local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
 local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 local menu_context = require("src/tactics/menu/menu_context")
-local MenuContext = menu_context.MenuContext
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
@@ -21,7 +20,7 @@ local record BattleUIContext
     is UIContext
     where self.type == "battle"
 
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
     battle_menu_manager: BattleMenuManager
     battle_objective_service: BattleObjectiveService
     turn_manager: TurnManager
@@ -42,7 +41,7 @@ local battle_ui_context = {
 }
 
 function battle_ui_context.new(
-    map: BattleMap,
+    map: bm.BattleMap,
     battle_menu_manager: BattleMenuManager,
     tactics_engine: TacticsEngine,
     turn_manager: TurnManager,

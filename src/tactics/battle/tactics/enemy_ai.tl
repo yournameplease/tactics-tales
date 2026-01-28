@@ -8,8 +8,7 @@ local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
 local tasks = require("src/tactics/systems/tasks")
-local BattleMap = require("src/tactics/battle/battle_map").BattleMap
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
+local bm = require("src/tactics/battle/battle_map")
 
 --[[
 AI Mk 1:
@@ -21,7 +20,7 @@ AI Mk 1:
 ]]
 
 local record EnemyAIEngine
-    battle_map: BattleMap
+    battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     event_writer: event_writer.EventWriter
     task_manager: tasks.TaskManager
@@ -165,7 +164,7 @@ function EnemyAIEngine:handle_one_enemy_action()
 end
 
 function enemy_ai_engine.new(
-    map: BattleMap,
+    map: bm.BattleMap,
     tactics: tactics_engine.TacticsEngine,
     bus: event_bus.EventBus,
     task_manager: tasks.TaskManager
