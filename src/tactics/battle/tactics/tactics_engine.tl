@@ -205,12 +205,14 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
 
         local spawn_points = self.battle_map:get_tiles_by_label(spawn_data.tile)
         for _,spawn_point in ipairs(spawn_points) do
-            local character: Character
+            local character: Character = nil
 
             local character_source = spawn_data.character_source
             if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
                 character = char_man:generate_character(character_source.template, {})
-                char_man:persist_player(character)
+                if side == "player" then
+                    char_man:persist_player(character)
+                end
             elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
                 if player_roster[roster_count] ~= nil then
                     character = player_roster[roster_count]
