@@ -419,6 +419,9 @@ local BATTLE_DATA = {
             objectives.turn_limit(),
             objectives.tagged_unit_dies("hero")
         },
+        deployment = {
+            deployment_tiles_tag = "player_deployment",
+        },
         enemies = {
             { character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
             { character_source = character_source.template("cultist_goon"), ai = ai.stationary, tile = "cultist_goon" },
@@ -435,7 +438,6 @@ local BATTLE_DATA = {
             { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro" },
         },
         players = {
-            { character_source = character_source.player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_enemies({
@@ -568,6 +570,9 @@ local BATTLE_DATA = {
             objectives.turn_limit(),
             objectives.tagged_unit_dies("hero")
         },
+        deployment = {
+            deployment_tiles_tag = "player_deployment",
+        },
         enemies = {
             { character_source = character_source.template("bandit_boulder"), ai = ai.move_inf, tile = "bandit_boulder", tags = { "boss" } },
             { character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "bandit_goon" },
@@ -576,7 +581,6 @@ local BATTLE_DATA = {
             { character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
         },
         players = {
-            { character_source = character_source.player_roster(), tile = "player_deployment" },
         },
         scripts = {
             spawn_enemies({
