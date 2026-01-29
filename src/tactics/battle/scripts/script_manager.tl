@@ -218,6 +218,7 @@ function ScriptManagerImpl:register_script(
 		elseif effect is battle_script.effect.ModifyUnits then
 			fn = function(ctx: ScriptContext)
 				log.debug("Handling ModifyUnits event")
+				local sel = effect.unit_selector
 				self.tactics_engine:modify_units(
 					self:resolve_unit_selector(effect.unit_selector, ctx),
 					{

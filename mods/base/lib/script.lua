@@ -58,10 +58,7 @@ function ScriptBuilder:then_modify_units(
 )
 	add(self.effects, {
 		type = "modify_units",
-		unit_selector = {
-		    type = "tag_lookup",
-		    tag = unit_tag,
-		},
+		unit_selector = unit_selector,
 		new_ai = new_ai,
 		new_side = new_side,
 	})
@@ -83,9 +80,9 @@ function ScriptBuilder:then_change_ai(
 end
 
 function ScriptBuilder:then_recruit_unit(
-    unit_tag
+    unit_selector
 )
-    return self:then_modify_units(script.unit.tagged(unit_tag), nil, "player")
+    return self:then_modify_units(unit_selector, nil, "player")
     -- todo: another script
 end
 
