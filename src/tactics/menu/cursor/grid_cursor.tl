@@ -145,7 +145,6 @@ function GridMenuDefinition:to_cursor(
         cursor.legal_tiles = self.get_legal_tiles(game_ctx, menu_ctx)
         if self.get_max_path_length ~= nil then
             cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
-            log.debug("path_length", cursor.max_path_length)
             if self.get_path_anchor then
                 cursor.path = {self.get_path_anchor(game_ctx, menu_ctx)}
             else
