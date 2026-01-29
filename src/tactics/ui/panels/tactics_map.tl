@@ -455,6 +455,11 @@ function TacticsMap:draw(
     profile("draw_map_rows")
 
     profile("draw_map_post_rows")
+    local layer_ceiling = layers.terrain.ceiling
+    if layer_ceiling ~= nil then
+        pt.map(layer_ceiling, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    end
+
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y

@@ -10,29 +10,28 @@ local map_generator = {
 }
 
 local record __MapFetchResultEntry
+    name: string
     bmp: Userdata
 end
 
 local type MapFetchResult = { __MapFetchResultEntry }
 
-
-
 local BASE_METATILE= 0x400
 
-local METATILES_LAYER = 1
-local FRONT_WALL_LAYER = 2
-local MID_WALL_LAYER = 3
-local BACK_WALL_LAYER = 4
-local GROUND_LAYER = 5
-
 local function as_map(map: MapFetchResult): battle_map.MapLayers
+    local by_layer: {string: __MapFetchResultEntry} = {}
+    for _,v in ipairs(map) do
+        by_layer[v.name] = v
+    end
+
     return {
-        metatiles = map[METATILES_LAYER].bmp,
+        metatiles = by_layer["metatiles"].bmp,
         terrain = {
-            front_wall = map[FRONT_WALL_LAYER].bmp,
-            mid_wall = map[MID_WALL_LAYER].bmp,
-            back_wall = map[BACK_WALL_LAYER].bmp,
-            ground = map[GROUND_LAYER].bmp,
+            ceiling = by_layer["ceiling"] and by_layer["ceiling"].bmp or nil,
+            front_wall = by_layer["front_walls"].bmp,
+            mid_wall = by_layer["mid_walls"].bmp,
+            back_wall = by_layer["back_walls"].bmp,
+            ground = by_layer["floor"].bmp,
         }
     }
 end
