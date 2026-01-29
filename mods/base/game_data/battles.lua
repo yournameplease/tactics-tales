@@ -241,16 +241,16 @@ local BATTLE_DATA = {
             script.when_unit_dies("cultist_door_guard_c")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {"Thank you for freeing me.", "Please, let me join and tend to your wounded."})
-                :then_recruit_unit("jailed_priest"),
+                :then_recruit_unit(script_unit.tagged("jailed_priest")),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_royal"), {"Those cultists worked with bandits to capture me.", "They should hate each other!", "Something dark is looming.",  "Allow me to travel with you to seek the truth."})
-                :then_recruit_unit("jailed_royal"),
+                :then_recruit_unit(script_unit.tagged("jailed_royal")),
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_bro"), {"Aaaaaaargh, I'm gonna kill those cultists!"})
                 :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"})
-                :then_change_ai("bandit", ai.move_inf_allied),
+                :then_change_ai(script_unit.tagged("bandit"), ai.move_inf_allied),
             escape("escape_point"),
         }
     },
