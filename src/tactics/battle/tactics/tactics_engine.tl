@@ -102,6 +102,7 @@ local record TacticsEngine
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
     modify_units: function(self, units: {BattleUnit}, new_unit_properties: NewUnitProperties)
+    tiles_in_movement_and_attack_range_for_unit: function(self, unit): Userdata
     
     update: function(self, InputContext)
 end
@@ -466,6 +467,8 @@ function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: Ne
         if new_unit_properties.new_side ~= nil then
             u.side = new_unit_properties.new_side
         end
+
+        u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
         log.debug("Modified unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target)
     end
 end
