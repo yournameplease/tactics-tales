@@ -248,9 +248,9 @@ function TacticsMap:compute_children(state: UIContextManager)
             local ui_object = state.battle_context.active_dialogue
             if child_object ~= ui_object then
                 menu_box = box.new({
-                    w = 50,
-                    h = 30,
-                    -- auto_height = true,
+                    w = 80,
+                    -- h = 30,
+                    auto_height = true,
                     decoration_padding = 1,
                     padding = 2,
                     decoration = "border",

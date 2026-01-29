@@ -182,6 +182,7 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
     local idle_animation = self.animation_manager:create_idle_animation()
     unit.animation_data = idle_animation
     self.battle_map:spawn_unit(unit, spawn_point)
+    log.debug("Spawned unit: "..tostring(unit))
 end
 
 function TacticsEngine:despawn_unit(units: {battle_unit.BattleUnit})
@@ -458,12 +459,14 @@ end
 
 function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: NewUnitProperties)
     for _,u in ipairs(units) do
+        log.debug("Modifying unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target)
         if new_unit_properties.new_ai ~= nil then
             u.unit_ai = new_unit_properties.new_ai
         end
         if new_unit_properties.new_side ~= nil then
             u.side = new_unit_properties.new_side
         end
+        log.debug("Modified unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target)
     end
 end
 

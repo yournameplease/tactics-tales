@@ -81,7 +81,23 @@ function battle_unit.spawn_unit(
         sprites = {},
     }
 
-    setmetatable(instance, { __index = BattleUnit })
+    setmetatable(instance, {
+        __index = BattleUnit,
+        __tostring = function(u: BattleUnit): string
+            local tags_str: string = nil
+            for tag,_ in pairs(u.tags) do
+                if tags_str == nil then
+                    tags_str = tag
+                else
+                    tags_str = tags_str..", "..tag
+                end
+            end
+            return "Unit "..u.id
+                ..": "..u.character.name
+                .." - "..u.side
+                .." ("..tags_str..")"
+        end
+    })
 
     return instance
 end
