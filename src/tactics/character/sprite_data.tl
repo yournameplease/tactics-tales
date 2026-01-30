@@ -526,6 +526,14 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		sprite = 67,
 		back_sprite = 75,
 	},
+	helmet = {
+		name = 'Helmet',
+		draw_hair = false,
+		draw_beard = false,
+		draw_eyewear = false,
+		sprite = 112,
+		back_sprite = 120,
+	},
 }
 
 --- Ordered options, for character selection

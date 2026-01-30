@@ -51,7 +51,27 @@ local record Character
 	inventory: ItemInventory.ItemInventory
     tags: maps.Set<string>
 	
+	-- may be overridden by inventory
+	get_appearance: function(self): CharacterAppearance
+	
 	get_weapon_targeting: function(self): Targeting
+end
+
+function Character:get_appearance(): CharacterAppearance
+	local items = self.inventory:get_equipped_items()
+
+	local overrides: {string: string}  = {}
+
+	if items["BODY"] ~= nil and items["BODY"].appearance_overrides ~= nil then
+		local item_overrides = items["BODY"].appearance_overrides as CharacterAppearance
+		for k,v in pairs(item_overrides) do
+			overrides[k] = v
+		end
+	end
+
+	return setmetatable(overrides as CharacterAppearance, {
+		__index = self.appearance
+	})
 end
 
 function Character:get_weapon_targeting(): Targeting
@@ -84,7 +104,7 @@ local interface DrawableCharacterInstance
 	side: Side
 	facing: Facing
 	has_acted: boolean -- used for outline color...
-	
+
 	animation_data: animation.AnimatedSpriteData
     -- prerendered sprites by animation frame name
     sprites: { AnimationFrameName: { FacingVertical: Userdata} }

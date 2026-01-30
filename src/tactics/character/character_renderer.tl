@@ -103,7 +103,7 @@ local function get_body_type(
 	end
 
 
-	local body_class_id = drawable_unit.character.appearance.body_class
+	local body_class_id = drawable_unit.character:get_appearance().body_class
 	local body_class_prefix = sprite_data.BODY_CLASS[body_class_id].id_prefix
 
 	-- TODO: type safety
@@ -151,11 +151,11 @@ local function set_palette(
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
     pt.set_pal(COLOR_SIDE_2, side_palette[2])
     pt.set_pal(COLOR_SIDE_3, side_palette[3])
-    local skin = drawable_unit.character.appearance.skin
+    local skin = drawable_unit.character:get_appearance().skin
     pt.set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
     pt.set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
-    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[drawable_unit.character.appearance.hair_color].color)
-    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[drawable_unit.character.appearance.hair_color].color)
+    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[drawable_unit.character:get_appearance().hair_color].color)
+    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[drawable_unit.character:get_appearance().hair_color].color)
 
 	if draw_outline then
 		local outline_color = drawable_unit.has_acted and 21 or side_palette[3]
@@ -216,29 +216,29 @@ local function draw_character(
 		end
 	end
 
-	local headwear = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear]
+	local headwear = sprite_data.HEADWEAR[drawable_unit.character:get_appearance().headwear]
 	local hair = headwear.draw_hair
-		and sprite_data.HAIR[drawable_unit.character.appearance.hair]
+		and sprite_data.HAIR[drawable_unit.character:get_appearance().hair]
 		or nil
 	local eyewear = headwear.draw_eyewear
-		and sprite_data.EYEWEAR[drawable_unit.character.appearance.eyewear]
+		and sprite_data.EYEWEAR[drawable_unit.character:get_appearance().eyewear]
 		or nil
 	local beard = headwear.draw_beard
-		and sprite_data.FACIAL_HAIR[drawable_unit.character.appearance.beard]
+		and sprite_data.FACIAL_HAIR[drawable_unit.character:get_appearance().beard]
 		or nil
 	
 	
 	local skeleton_nodes: {string: SkeletonNodeDefinition} = {
 		head = {
 			parent = "body",
-			sprite = sprite_data.HEAD[drawable_unit.character.appearance.head].sprite,
+			sprite = sprite_data.HEAD[drawable_unit.character:get_appearance().head].sprite,
 			root = NECK_ROOT,
 			scale_x = DYNAMIC_CONFIG.head_scale,
 			scale_y = DYNAMIC_CONFIG.head_scale,
 		},
 		eyes = {
 			parent = "head",
-			sprite = sprite_data.EYES[drawable_unit.character.appearance.eyes].sprite,
+			sprite = sprite_data.EYES[drawable_unit.character:get_appearance().eyes].sprite,
 		},
 		beard = {
 			parent = "head",
@@ -262,11 +262,11 @@ local function draw_character(
 		},
 		headwear_front = {
 			parent = "head",
-			sprite = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].sprite,
+			sprite = sprite_data.HEADWEAR[drawable_unit.character:get_appearance().headwear].sprite,
 		},
 		headwear_back = {
 			parent = "head",
-			sprite = sprite_data.HEADWEAR[drawable_unit.character.appearance.headwear].back_sprite,
+			sprite = sprite_data.HEADWEAR[drawable_unit.character:get_appearance().headwear].back_sprite,
 		},
 		body = body_node,
 		main_hand = equipment_nodes["main_hand"],

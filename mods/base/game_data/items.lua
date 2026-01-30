@@ -50,7 +50,10 @@ local function armor(name, slots, defense, avoid)
         equipment_effects = {
             effect.increase_defense(defense, "ARMOR"),
             effect.increase_avoid(avoid, "ARMOR")
-        }        
+        },
+        appearance_overrides = {
+            headwear = "helmet"
+        }
     }
 end
 
