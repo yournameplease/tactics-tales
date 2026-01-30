@@ -82,7 +82,9 @@ end
 function ScriptBuilder:then_recruit_unit(
     unit_selector
 )
-    return self:then_modify_units(unit_selector, nil, "player")
+    return self:then_modify_units(unit_selector,
+    	{ move = "one", target_sides = {"enemy"}}, -- setting to nil not yet supported.  This is fine though
+    	"player")
     -- todo: another script
 end
 
