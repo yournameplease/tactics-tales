@@ -84,6 +84,12 @@ end
 
 function EventBus:emit(event_name: GameEvent, args: {string: any})
     log.debug("Recieved event", event_name)
+    if args ~= nil then
+        for k,v in pairs(args) do
+            log.debug("arg: "..k..tostring(v))
+        end
+    end
+    log.debug("Recieved event", event_name)
     if #self.event_history > MAX_EVENT_HISTORY then
         pt.deli(self.event_history, 1)
     end

@@ -67,14 +67,12 @@ function GridMenuCursor:update_joy(joy: Joypad)
     self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
 
     if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-        log.debug(prev_point, self.point, #self.path)
         if self.legal_tiles:get_point(self.point) then
             
             local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
                 return h ~= nil and h.reachable
             end)
             self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-            log.debug(#self.path, self.path[1],self.path[#self.path])
         end
     end 
 end
@@ -91,14 +89,12 @@ function GridMenuCursor:update_mouse(
         self.point.y = pt.mid(0, hovered.y, self.y_max - 1)
 
         if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-            log.debug(prev_point, self.point, #self.path)
             if self.legal_tiles:get_point(self.point) then
             
                 local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
                     return h ~= nil and h.reachable
                 end)
                 self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-                log.debug(#self.path, self.path[1],self.path[#self.path])
             end
         end
     end

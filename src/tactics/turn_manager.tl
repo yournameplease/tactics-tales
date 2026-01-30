@@ -1,4 +1,3 @@
-local fp = require("src/tactics/util/fp")
 local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
@@ -81,9 +80,10 @@ function TurnManagerImpl:advance_turn()
 end 
 
 function TurnManagerImpl:advance_phase()
+    self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
     self.event_writer:emit("TACTICS_END_PHASE", {
         turn = self.turn,
-        side = PHASE_ORDER[self.phase]
+        side = self:acting_side(),
     })
     local next_phase = self.phase + 1
     if next_phase > #PHASE_ORDER then
@@ -93,8 +93,11 @@ function TurnManagerImpl:advance_phase()
     end
     self.event_writer:emit("TACTICS_BEGIN_PHASE", {
         turn = self.turn,
-        side = PHASE_ORDER[self.phase]
+        side = self:acting_side(),
     })
+    if self:acting_side() ~= "player" then
+        self.enemy_ai_engine:handle_one_enemy_action()
+    end
 end 
 
 function turn_manager.new(

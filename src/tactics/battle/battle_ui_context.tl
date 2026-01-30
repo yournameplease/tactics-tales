@@ -13,9 +13,6 @@ local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
 local menu_context = require("src/tactics/menu/menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
-local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
-local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
-
 local record BattleUIContext
     is UIContext
     where self.type == "battle"
