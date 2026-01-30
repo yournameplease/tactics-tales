@@ -9,6 +9,7 @@ function script_builder.new(trigger)
   local self = setmetatable({
     trigger = trigger,
     effects = {},
+    one_shot = false,
   }, ScriptBuilder)
 
   return self
@@ -100,6 +101,10 @@ function ScriptBuilder:then_modify_terrain(
 	return self
 end
 
+function ScriptBuilder:one_shot()
+	self.one_shot = true
+	return self
+end
 
 -- script triggers
 

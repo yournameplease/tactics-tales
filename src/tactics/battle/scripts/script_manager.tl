@@ -50,6 +50,7 @@ local record ScriptManagerImpl
 	tactics_engine: tactics_engine.TacticsEngine
 	event_listener: event_listener.EventListener
     task_manager: TaskManager
+	script_listeners: {integer: integer}
 end
 
 function ScriptManagerImpl:resolve_unit_specifier(
@@ -260,11 +261,14 @@ function ScriptManagerImpl:register_script(
 		pt.add(effects, fn)
 	end
 
-	self.event_listener:on(
+	local listener_id = self.event_listener:on(
 		event,
 		function(args: {string: any})
 			local triggered, ctx = filter(args)
 			if triggered then
+				if script.one_shot then
+					self.event_listener:remove(self.script_listeners[script.id])
+				end
 		        self.task_manager:start_routine(function()
 					for _,effect in ipairs(effects) do
 						effect(ctx)
@@ -276,6 +280,7 @@ function ScriptManagerImpl:register_script(
 			end
 		end
 	)
+	self.script_listeners[script.id] = listener_id
 end
 
 function script_manager.new(
@@ -295,6 +300,7 @@ function script_manager.new(
 	self.tactics_engine = tactics
 	self.battle_map = map
 	self.task_manager = task_manager
+	self.script_listeners = {}
 
 	local id_gen = id_generator.new()
 
