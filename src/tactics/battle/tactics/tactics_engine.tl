@@ -459,7 +459,6 @@ end
 
 function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: NewUnitProperties)
     for _,u in ipairs(units) do
-        log.debug("Modifying unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target)
         if new_unit_properties.new_ai ~= nil then
             u.unit_ai = new_unit_properties.new_ai
         end
@@ -468,7 +467,7 @@ function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: Ne
         end
 
         u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
-        log.debug("Modified unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target)
+        log.debug("Modified unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target_side)
     end
 end
 

@@ -1,3 +1,4 @@
+local Side = require("src/tactics/character/object/character").Side
 
 local enum MoveAI
     "infinity"
@@ -6,18 +7,13 @@ local enum MoveAI
     "zero"
 end
 
-local enum TargetAI
-    "player"
-end
-
 local record UnitAI
     move: MoveAI
-    target: TargetAI
+    target_side: Side
 end
 
 local unit_ai = {
     MoveAI = MoveAI,
-    TargetAI = TargetAI,
     UnitAI = UnitAI,
 }
 
