@@ -272,7 +272,8 @@ local UNIT_TEMPLATES = {
         hp_max = 5,
         item_loadout = {
 			"sword" ,
-			"shield" 
+			"shield", 
+			"armor" 
 		}
 	}, 
 	militia_spearman = {

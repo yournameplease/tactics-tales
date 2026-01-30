@@ -98,7 +98,8 @@ function character_generator.generate_from_template(
 		and random.choose_random_from_list(NAMES.MALE)
 		or random.choose_random_from_list(NAMES.FEMALE)
 
-	char.inventory = ItemInventory.new(4)
+	-- reduce size if inventory becomes meaningful
+	char.inventory = ItemInventory.new(8)
 	local item_ids = template.item_loadout
 	for i, item_id in ipairs(item_ids) do
 		local item = ItemGenerator.generate(item_id, game_data.items)

@@ -2,14 +2,21 @@ local script = lib.libs.script
 local script_unit = script.unit
 
 local ai <const> = {
-    default = { move = "two", target = "player"},
-    move_one = { move = "one", target = "player"},
-    move_two = { move = "two", target = "player"},
-    move_inf = { move = "infinity", target = "player"},
-    stationary = { move = "zero", target = "player"},
-    stationary_allied = { move = "zero", target = "enemy"},
-    move_inf_allied = { move = "infinity", target = "enemy"},
-    stationary_neutral = { move = "zero", target = nil }
+    default = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_one = { move = "one", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_two = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_inf = { move = "infinity", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    stationary = { move = "zero", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    stationary_allied = { move = "zero", target_sides = {"enemy"}},
+    move_inf_allied = { move = "infinity", target_sides = {"enemy"}},
+    stationary_neutral = { move = "zero", target_sides = {} }
+}
+
+local phase <const> = {
+    before_player = { offset = "before", side = "player"},
+    after_player = { offset = "after", side = "player"},
+    before_enemy = { offset = "before", side = "enemy"},
+    after_enemy = { offset = "after", side = "enemy"},
 }
 
 local character_source = {}
@@ -139,7 +146,7 @@ local BATTLE_DATA = {
             { character_source = character_source.player_roster(), tile = "player_deployment" },
         },
         scripts = {
-            script.on_turn(2, "before_player")
+            script.on_turn(2, phase.before_player)
                 :then_spawn_players({
                     { character_source = character_source.template("militia_spear_captain"), tile = "player_captain" },
                     { character_source = character_source.template("militia_spearman"), tile = "player_spearman" },
@@ -148,13 +155,13 @@ local BATTLE_DATA = {
                 },
                 "from_east"
             ),
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
                 },
                 "from_west"
             ),
-            script.on_turn(6, "after_enemy", 3)
+            script.on_turn(6, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
                 },
@@ -214,21 +221,21 @@ local BATTLE_DATA = {
             { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
         },
         neutral = {
-            { character_source = character_source.template("old_fart"), ai = ai.stationary, tile = "jailed_priest", tags = {"room_c"}  },
-            { character_source = character_source.template("village_hero"), ai = ai.stationary, tile = "jailed_royal", tags = {"room_d"}  },
-            { character_source = character_source.template("bandit_guard"), ai = ai.move_inf, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
-            { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
+            { character_source = character_source.template("old_fart"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
+            { character_source = character_source.template("village_hero"), ai = ai.stationary_neutral, tile = "jailed_royal", tags = {"room_d"}  },
+            { character_source = character_source.template("bandit_guard"), ai = ai.move_inf_allied, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
+            { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf_allied, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
         },
         players = {
         },
         scripts = {
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
                 },
                 "from_south"
             ),
-            script.on_turn(6, "after_enemy", 3)
+            script.on_turn(6, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
                 },
@@ -249,8 +256,7 @@ local BATTLE_DATA = {
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_bro"), {"Aaaaaaargh, I'm gonna kill those cultists!"})
-                :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"})
-                :then_change_ai(script_unit.tagged("bandit"), ai.move_inf_allied),
+                :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"}),
             escape("escape_point"),
         }
     },
@@ -293,33 +299,33 @@ local BATTLE_DATA = {
         neutral = {
             -- civilians
             { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("child_greatsword"), ai = ai.stationary, tile = "civilian_sword", tags = {"civilian"} },
-            { character_source = character_source.template("village_axe"), ai = ai.stationary, tile = "civilian_axe", tags = {"civilian"} },
+            { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
-            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary"}},
-            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "boss"}}
+            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
+            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie", "neutral_enemy"}},
+            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie", "neutral_enemy"}},
+            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
             -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
         },
         players = {},
         scripts = {
-            script.on_turn(6, "after_enemy")
+            script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
                 },
                 "from_west"
             ),
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
                 },
-                "after_enemy",
+                phase.after_enemy,
                 "from_west"
             ),
-            script.on_turn(3, "after_enemy")
+            script.on_turn(3, phase.after_enemy)
                 :then_dialogue(script_unit.tagged("militia_boss"),{"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     "enemy_militia_stationary",
@@ -369,31 +375,31 @@ local BATTLE_DATA = {
         players = {
         },
         scripts = {
-            script.on_turn(2, "after_enemy", 2)
+            script.on_turn(2, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
                 },
                 "from_east"
             ),
-            script.on_turn(3, "after_enemy", 2)
+            script.on_turn(3, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
                 },
                 "from_east"
             ),
-            script.on_turn(5, "after_enemy", 2)
+            script.on_turn(5, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
                 },
                 "from_east"
             ),
-            script.on_turn(6, "after_enemy", 2)
+            script.on_turn(6, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
                 },
                 "from_east"
             ),
-            script.on_turn(6, "after_enemy")
+            script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "enemy_reinforce_sw_boss" },
                 },

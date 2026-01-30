@@ -27,6 +27,7 @@ function item_generator.generate(
 		data.equip_slot,
 		data.sprite_data,
 		data.equipment_effects,
+		data.appearance_overrides,
 		generate_weapon(data.weapon_definition)
 	)
 end

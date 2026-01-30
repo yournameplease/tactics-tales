@@ -153,7 +153,7 @@ function ItemInventoryImpl:equip_item(index: integer)
 	elseif slot_to_equip == "TWO_HANDS" then
 		slots_to_unequip = {"MAIN_HAND", "OFF_HAND", "TWO_HANDS"}
 	elseif slot_to_equip == "BODY" then
-		slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
+		slots_to_unequip = {}
 	else
 		unexpected(slot_to_equip)
 	end

@@ -2,6 +2,7 @@ local item_types = require("src/tactics/character/items/types")
 local wpn = require("src/tactics/character/items/object/weapon")
 
 local interface Item
+	-- getters are not needed, just interface the field
 	get_name: function(self): string
 	get_slots: function(self): integer
 	get_type: function(self): item_types.ItemType
@@ -12,6 +13,7 @@ local interface Item
 	get_weapon_data: function(self): wpn.Weapon
 
 	get_equipment_effects: function(self): { wpn.EquipmentEffect } 
+	appearance_overrides: any
 end
 
 local item = {
@@ -30,6 +32,7 @@ local record ItemImpl
 	sprite_data: item_types.ItemSpriteData
 	weapon: wpn.Weapon
 	equipment_effects: { wpn.EquipmentEffect }
+	appearance_overrides: any
 end
 
 
@@ -69,6 +72,7 @@ function item.new(
 	equip_slot: item_types.EquipSlot,
 	sprite_data: item_types.ItemSpriteData,
 	equipment_effects: {wpn.EquipmentEffect},
+	appearance_overrides: any,
 	weapon: wpn.Weapon
 ): Item
 	local self: ItemImpl = {
@@ -79,6 +83,7 @@ function item.new(
 		equip_slot = equip_slot,
 		sprite_data = sprite_data,
 		equipment_effects = equipment_effects, -- note: copied by reference
+		appearance_overrides = appearance_overrides, -- note: copied by reference
 		weapon = weapon
 	}
 	return setmetatable(self, { __index = ItemImpl })

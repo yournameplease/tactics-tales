@@ -26,6 +26,7 @@ local record ItemDefinition
 	sprite_data: item_types.ItemSpriteData
 	weapon_definition: WeaponDefinition
 	equipment_effects: { wpn.EquipmentEffect }
+	appearance_overrides: any --CharacterAppearance
 
 	-- Consumables
 	

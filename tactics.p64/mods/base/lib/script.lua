@@ -82,7 +82,9 @@ end
 function ScriptBuilder:then_recruit_unit(
     unit_selector
 )
-    return self:then_modify_units(unit_selector, nil, "player")
+    return self:then_modify_units(unit_selector,
+    	{ move = "one", target_sides = {"enemy"}}, -- setting to nil not yet supported.  This is fine though
+    	"player")
     -- todo: another script
 end
 
@@ -101,13 +103,6 @@ end
 
 -- script triggers
 
-
-function script.when_unit_dies()
-  return script_builder.new({
-    
-  })
-end
-
 function script.on_turn(turn, phase, repeating)
 	return script_builder.new({
 		type = "turn",
@@ -122,6 +117,24 @@ function script.when_unit_dies(unit_label)
 		type = "unit_death",
 		unit_label = unit_label,
 	})
+end
+
+function script.on_unit_interaction(unit_specifier, text)
+  return script_builder.new({
+      type = "unit_interaction",
+      unit_specifier = unit_specifier,
+      interaction_text = text,
+  })
+end
+
+function script.on_talk(unit_tag)
+  return script_builder.on_unit_interaction(
+      {
+          type = "tag_lookup",
+          tag = unit_tag,
+      },
+      "Talk"
+  )
 end
 
 function script.on_tile_interaction(tile_tag, text)
