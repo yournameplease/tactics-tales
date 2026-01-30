@@ -221,10 +221,10 @@ local BATTLE_DATA = {
             { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
         },
         neutral = {
-            { character_source = character_source.template("old_fart"), ai = ai.stationary, tile = "jailed_priest", tags = {"room_c"}  },
-            { character_source = character_source.template("village_hero"), ai = ai.stationary, tile = "jailed_royal", tags = {"room_d"}  },
-            { character_source = character_source.template("bandit_guard"), ai = ai.move_inf, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
-            { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
+            { character_source = character_source.template("old_fart"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
+            { character_source = character_source.template("village_hero"), ai = ai.stationary_neutral, tile = "jailed_royal", tags = {"room_d"}  },
+            { character_source = character_source.template("bandit_guard"), ai = ai.move_inf_allied, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
+            { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf_allied, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
         },
         players = {
         },
@@ -256,8 +256,7 @@ local BATTLE_DATA = {
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_bro"), {"Aaaaaaargh, I'm gonna kill those cultists!"})
-                :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"})
-                :then_change_ai(script_unit.tagged("bandit"), ai.move_inf_allied),
+                :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"}),
             escape("escape_point"),
         }
     },
