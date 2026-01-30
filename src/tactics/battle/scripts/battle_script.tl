@@ -180,6 +180,7 @@ local record BattleScript
 	id: integer
 	trigger: ScriptTrigger
 	effects: {ScriptEffect}
+	one_shot: boolean -- should remove after firing
 end
 
 local battle_script = {
