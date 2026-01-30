@@ -125,7 +125,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
 
                     pt.add(options, {
                         text = "Start Battle",
-                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _menu_ctx: BattleMainMenuContext)
                             game_ctx.handle_start_battle()
                         end
                     })

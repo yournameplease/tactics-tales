@@ -39,7 +39,7 @@ local record TurnManagerImpl
     battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
-    enemy_ai_engine: ai_engine.AIEngine
+    ai_engine: ai_engine.AIEngine
     battle_menu_manager : BattleMenuManager
 
     event_listener: event_listener.EventListener
@@ -95,8 +95,17 @@ function TurnManagerImpl:advance_phase()
         turn = self.turn,
         side = self:acting_side(),
     })
-    if self:acting_side() ~= "player" then
-        self.enemy_ai_engine:handle_one_unit_action(self:acting_side())
+
+    local side_units = self.battle_map:get_units(function(u: BattleUnit): boolean
+        return u.side == self:acting_side()
+    end)
+    -- skip phases for empty sides
+    if #side_units > 0 then
+        if self:acting_side() ~= "player" then
+            self.ai_engine:handle_one_unit_action(self:acting_side())
+        end
+    else
+        self:advance_phase()
     end
 end 
 
@@ -104,7 +113,7 @@ function turn_manager.new(
     map: bm.BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
-    enemy_ai_eng: ai_engine.AIEngine,
+    ai_eng: ai_engine.AIEngine,
     bus: event_bus.EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
@@ -117,7 +126,7 @@ function turn_manager.new(
     self.battle_map = map 
     self.tactics_engine = tactics_eng
     self.battle_objective_service = battle_objective_srv
-    self.enemy_ai_engine = enemy_ai_eng
+    self.ai_engine = ai_eng
     self.battle_menu_manager = battle_menu_manager
 
     self.event_listener = event_listener.new(bus)
@@ -145,7 +154,7 @@ function turn_manager.new(
                 if acting_side == "player" then
                     self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
                 else
-                    self.enemy_ai_engine:handle_one_unit_action(self:acting_side())
+                    self.ai_engine:handle_one_unit_action(acting_side)
                 end
             else
                 self:advance_phase()

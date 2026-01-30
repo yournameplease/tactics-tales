@@ -1,5 +1,6 @@
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local lists = require("src/tactics/util/lists")
 local character = require("src/tactics/character/object/character")
 local point = require("src/tactics/util/point")
 local Point = point.Point
@@ -51,7 +52,12 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
     end
 
     local should_target = function(u: BattleUnit): boolean
-        return u.side == ai.target_side
+        if ai.exclude_tags ~= nil then
+            for _,t in ipairs(ai.exclude_tags) do
+                if u:has_tag(t) then return false end
+            end
+        end
+        return lists.contains(ai.target_sides, u.side)
     end
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
