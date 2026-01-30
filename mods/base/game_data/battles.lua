@@ -12,6 +12,13 @@ local ai <const> = {
     stationary_neutral = { move = "zero", target = nil }
 }
 
+local phase <const> = {
+    before_player = { offset = "before", phase = "player"},
+    after_player = { offset = "after", phase = "player"},
+    before_enemy = { offset = "before", phase = "enemy"},
+    after_enemy = { offset = "after", phase = "enemy"},
+}
+
 local character_source = {}
 
 function character_source.template(template)
@@ -139,7 +146,7 @@ local BATTLE_DATA = {
             { character_source = character_source.player_roster(), tile = "player_deployment" },
         },
         scripts = {
-            script.on_turn(2, "before_player")
+            script.on_turn(2, phase.before_player)
                 :then_spawn_players({
                     { character_source = character_source.template("militia_spear_captain"), tile = "player_captain" },
                     { character_source = character_source.template("militia_spearman"), tile = "player_spearman" },
@@ -148,13 +155,13 @@ local BATTLE_DATA = {
                 },
                 "from_east"
             ),
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
                 },
                 "from_west"
             ),
-            script.on_turn(6, "after_enemy", 3)
+            script.on_turn(6, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_r" },
                 },
@@ -222,13 +229,13 @@ local BATTLE_DATA = {
         players = {
         },
         scripts = {
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
                 },
                 "from_south"
             ),
-            script.on_turn(6, "after_enemy", 3)
+            script.on_turn(6, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
                 },
@@ -306,20 +313,20 @@ local BATTLE_DATA = {
         },
         players = {},
         scripts = {
-            script.on_turn(6, "after_enemy")
+            script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
                 },
                 "from_west"
             ),
-            script.on_turn(3, "after_enemy", 3)
+            script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
                 },
-                "after_enemy",
+                phase.after_enemy,
                 "from_west"
             ),
-            script.on_turn(3, "after_enemy")
+            script.on_turn(3, phase.after_enemy)
                 :then_dialogue(script_unit.tagged("militia_boss"),{"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     "enemy_militia_stationary",
@@ -369,31 +376,31 @@ local BATTLE_DATA = {
         players = {
         },
         scripts = {
-            script.on_turn(2, "after_enemy", 2)
+            script.on_turn(2, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
                 },
                 "from_east"
             ),
-            script.on_turn(3, "after_enemy", 2)
+            script.on_turn(3, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_se" },
                 },
                 "from_east"
             ),
-            script.on_turn(5, "after_enemy", 2)
+            script.on_turn(5, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
                 },
                 "from_east"
             ),
-            script.on_turn(6, "after_enemy", 2)
+            script.on_turn(6, phase.after_enemy, 2)
                 :then_spawn_enemies({
                     { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "enemy_reinforce_e" },
                 },
                 "from_east"
             ),
-            script.on_turn(6, "after_enemy")
+            script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf, tile = "enemy_reinforce_sw_boss" },
                 },

@@ -158,7 +158,7 @@ function BaseMenuManager:update(input: InputContext)
 
     if btn_skip_turn then
         -- DEBUG Only for now.  consider where to put
-        self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
+        self.event_writer:emit("TACTICS_FINISH_SIDE_ACTIONS", {})
     elseif btn_back then
         self:handle_menu_back()
     elseif btn_select then

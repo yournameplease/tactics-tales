@@ -87,11 +87,14 @@ local interface ScriptTrigger
 	type: ScriptTriggerType
 end
 
-local enum TurnTriggerPhase
-	"before_player"
-	"after_player"
-	"before_enemy"
-	"after_enemy"
+local enum TurnTriggerTimeOffset
+	"before"
+	"after"
+end
+
+local record TurnTriggerTime
+	offset: TurnTriggerTimeOffset
+	side: character.Side
 end
 
 local record Turn
@@ -99,7 +102,7 @@ local record Turn
 	where self.type == "turn"
 	turn: integer
 	repeating: integer
-	phase: TurnTriggerPhase
+	phase: TurnTriggerTime
 end
 
 local record UnitDeath
@@ -199,7 +202,8 @@ local battle_script = {
 		ScriptTrigger = ScriptTrigger,
 
 		Turn = Turn,
-		TurnTriggerPhase = TurnTriggerPhase,
+		TurnTriggerTimeOffset = TurnTriggerTimeOffset,
+		TurnTriggerTime = TurnTriggerTime,
 		UnitDeath = UnitDeath,
 		UnitInteraction = UnitInteraction,
 		TileInteraction = TileInteraction,

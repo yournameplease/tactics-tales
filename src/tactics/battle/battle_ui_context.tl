@@ -116,7 +116,7 @@ function BattleUIContext:enrich()
 
     local menu_ctx = self.battle_menu_manager.menu_ctx
     -- todo
-    if self.turn_manager.phase == "PLAYER" then
+    if self.turn_manager:acting_side() == "player" then
         assert(menu_ctx is BattleMainMenuContext)
         if menu_ctx.acting_unit ~= nil then
             self.acting_unit = menu_ctx.acting_unit.unit
@@ -125,7 +125,7 @@ function BattleUIContext:enrich()
         if menu_ctx.destination ~= nil then
             self.destination = menu_ctx.destination.point
         end
-    elseif self.turn_manager.phase == "ENEMY" then
+    else
         self.acting_unit = nil
     end
 
