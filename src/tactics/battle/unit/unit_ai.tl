@@ -9,7 +9,8 @@ end
 
 local record UnitAI
     move: MoveAI
-    target_side: Side
+    target_sides: {Side}
+    exclude_tags: {string}
 end
 
 local unit_ai = {

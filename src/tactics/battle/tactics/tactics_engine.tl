@@ -467,7 +467,6 @@ function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: Ne
         end
 
         u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
-        log.debug("Modified unit: ", u, u.side, u.unit_ai.move, u.unit_ai.target_side)
     end
 end
 

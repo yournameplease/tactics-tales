@@ -2,14 +2,14 @@ local script = lib.libs.script
 local script_unit = script.unit
 
 local ai <const> = {
-    default = { move = "two", target_side = "player"},
-    move_one = { move = "one", target_side = "player"},
-    move_two = { move = "two", target_side = "player"},
-    move_inf = { move = "infinity", target_side = "player"},
-    stationary = { move = "zero", target_side = "player"},
-    stationary_allied = { move = "zero", target_side = "enemy"},
-    move_inf_allied = { move = "infinity", target_side = "enemy"},
-    stationary_neutral = { move = "zero", target_side = nil }
+    default = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_one = { move = "one", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_two = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    move_inf = { move = "infinity", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    stationary = { move = "zero", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
+    stationary_allied = { move = "zero", target_sides = {"enemy"}},
+    move_inf_allied = { move = "infinity", target_sides = {"enemy"}},
+    stationary_neutral = { move = "zero", target_sides = {} }
 }
 
 local phase <const> = {
@@ -300,13 +300,13 @@ local BATTLE_DATA = {
         neutral = {
             -- civilians
             { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("child_greatsword"), ai = ai.move_inf_allied, tile = "civilian_sword", tags = {"civilian"} },
-            { character_source = character_source.template("village_axe"), ai = ai.move_inf_allied, tile = "civilian_axe", tags = {"civilian"} },
+            { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
-            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary"}},
-            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie"}},
-            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "boss"}}
+            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
+            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie", "neutral_enemy"}},
+            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie", "neutral_enemy"}},
+            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
             -- { character_source = character_source.template("counselor"), ai = ai.stationary_neutral, tile = "counselor" }
