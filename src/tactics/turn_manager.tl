@@ -1,4 +1,4 @@
-local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
+local ai_engine = require("src/tactics/battle/tactics/ai_engine")
 local event_bus = require("src/tactics/systems/event_bus")
 local event_listener = require("src/tactics/systems/event_bus/event_listener")
 local event_writer = require("src/tactics/systems/event_bus/event_writer")
@@ -39,7 +39,7 @@ local record TurnManagerImpl
     battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
-    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
+    enemy_ai_engine: ai_engine.AIEngine
     battle_menu_manager : BattleMenuManager
 
     event_listener: event_listener.EventListener
@@ -96,7 +96,7 @@ function TurnManagerImpl:advance_phase()
         side = self:acting_side(),
     })
     if self:acting_side() ~= "player" then
-        self.enemy_ai_engine:handle_one_enemy_action()
+        self.enemy_ai_engine:handle_one_unit_action(self:acting_side())
     end
 end 
 
@@ -104,7 +104,7 @@ function turn_manager.new(
     map: bm.BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
-    enemy_ai_eng: enemy_ai_engine.EnemyAIEngine,
+    enemy_ai_eng: ai_engine.AIEngine,
     bus: event_bus.EventBus,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
@@ -145,7 +145,7 @@ function turn_manager.new(
                 if acting_side == "player" then
                     self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
                 else
-                    self.enemy_ai_engine:handle_one_enemy_action()
+                    self.enemy_ai_engine:handle_one_unit_action(self:acting_side())
                 end
             else
                 self:advance_phase()

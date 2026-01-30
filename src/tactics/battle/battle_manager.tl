@@ -5,7 +5,7 @@ local map_generator = require("src/tactics/battle/map/map_generator")
 local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
 local battle_ui_context = require("src/tactics/battle/battle_ui_context")
 local turn_manager = require("src/tactics/turn_manager")
-local enemy_ai_engine = require("src/tactics/battle/tactics/enemy_ai")
+local ai_engine = require("src/tactics/battle/tactics/ai_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_menu_context = require("src/tactics/battle/battle_menu_context")
 local script_manager = require("src/tactics/battle/scripts/script_manager")
@@ -32,7 +32,7 @@ local record BattleManagerImpl
 
     tactics_engine: tactics_engine.TacticsEngine
     battle_objective_service: battle_objective_service.BattleObjectiveService
-    enemy_ai_engine: enemy_ai_engine.EnemyAIEngine
+    enemy_ai_engine: ai_engine.AIEngine
     battle_menu_manager: battle_menu_manager.BattleMenuManager
     turn_manager: turn_manager.TurnManager
     script_manager: script_manager.ScriptManager
@@ -88,7 +88,7 @@ function battle_manager.new(
         battle_def.failure_conditions
     )
 
-    self.enemy_ai_engine = enemy_ai_engine.new(
+    self.enemy_ai_engine = ai_engine.new(
         self.battle_map,
         self.tactics_engine,
         task_manager

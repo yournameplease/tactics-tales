@@ -1,6 +1,6 @@
-local fp = require("src/tactics/util/fp")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local character = require("src/tactics/character/object/character")
 local point = require("src/tactics/util/point")
 local Point = point.Point
 local pathfinding = require("src/tactics/battle/pathfinding")
@@ -17,14 +17,14 @@ AI Mk 1:
 - - pick nearest  enemy, move as close as possible
 ]]
 
-local record EnemyAIEngine
+local record AIEngine
     battle_map: bm.BattleMap
     tactics_engine: tactics_engine.TacticsEngine
     task_manager: tasks.TaskManager
 end
 
-local enemy_ai_engine = {
-    EnemyAIEngine = EnemyAIEngine,
+local ai_engine = {
+    AIEngine = AIEngine,
 }
 
 local record MovementOption
@@ -32,7 +32,7 @@ local record MovementOption
     target: BattleUnit -- nillable
 end
 
-function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
+function AIEngine:compute_unit_ai(unit: BattleUnit)
     local ai = unit.unit_ai
 
     local max_move: integer
@@ -48,6 +48,10 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
         max_move = 999
     else
         unexpected(ai.move)
+    end
+
+    local should_target = function(u: BattleUnit): boolean
+        return u.side == ai.target_side
     end
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
@@ -65,7 +69,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
-                    return u:is_player() and targeting.is_target_valid(p, u.tile, self.battle_map)
+                    return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
                 end)
                 for _,t in ipairs(targets) do
                     pt.add(shallow_actions, {
@@ -84,7 +88,7 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
             then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
-                    return u:is_player() and targeting.is_target_valid(p, u.tile, self.battle_map)
+                    return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
                 end)
                 for _,t in ipairs(targets) do
                     pt.add(deep_actions, {
@@ -143,16 +147,16 @@ function EnemyAIEngine:compute_enemy_ai(unit: BattleUnit)
     end
 end
 
-function EnemyAIEngine:handle_one_enemy_action()
+function AIEngine:handle_one_unit_action(side: character.Side)
     self.task_manager:start_routine(function()
         local to_act = function(u: BattleUnit): boolean
-            return not u.has_acted
+            return u.side == side and not u.has_acted
         end
         local enemies_to_act = self.battle_map
-            :get_units(fp.fn_and(BattleUnit.is_enemy, to_act))
+            :get_units(to_act)
         assert(#enemies_to_act > 0)
 
-        self:compute_enemy_ai(enemies_to_act[1])
+        self:compute_unit_ai(enemies_to_act[1])
         while self.tactics_engine:is_blocked() do
             pt.yield()
         end
@@ -160,13 +164,13 @@ function EnemyAIEngine:handle_one_enemy_action()
     end)
 end
 
-function enemy_ai_engine.new(
+function ai_engine.new(
     map: bm.BattleMap,
     tactics: tactics_engine.TacticsEngine,
     task_manager: tasks.TaskManager
-): EnemyAIEngine
-    local self: EnemyAIEngine = setmetatable({
-    }, { __index = EnemyAIEngine })
+): AIEngine
+    local self: AIEngine = setmetatable({
+    }, { __index = AIEngine })
 
     self.battle_map = map
     self.tactics_engine = tactics
@@ -174,4 +178,4 @@ function enemy_ai_engine.new(
     return self
 end
 
-return enemy_ai_engine
+return ai_engine
