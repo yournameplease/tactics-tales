@@ -13,10 +13,10 @@ local ai <const> = {
 }
 
 local phase <const> = {
-    before_player = { offset = "before", phase = "player"},
-    after_player = { offset = "after", phase = "player"},
-    before_enemy = { offset = "before", phase = "enemy"},
-    after_enemy = { offset = "after", phase = "enemy"},
+    before_player = { offset = "before", side = "player"},
+    after_player = { offset = "after", side = "player"},
+    before_enemy = { offset = "before", side = "enemy"},
+    after_enemy = { offset = "after", side = "enemy"},
 }
 
 local character_source = {}

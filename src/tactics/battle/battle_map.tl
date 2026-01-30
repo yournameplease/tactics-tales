@@ -148,7 +148,6 @@ end
 
 function BattleMap:get_terrain(tile: Point): TerrainData
     local ground = self.layers.terrain.ground
-    local ceiling = self.layers.terrain.ceiling
     local back_wall = self.layers.terrain.back_wall
     local mid_wall = self.layers.terrain.mid_wall
     local front_wall = self.layers.terrain.front_wall

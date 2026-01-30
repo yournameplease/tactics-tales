@@ -120,7 +120,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["DEPLOYMENT_MENU"] = list_cursor.definition({
                 previous_state = "SELECT_SWAP_UNIT",
-                get_options = function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
+                get_options = function(_msb: BattleMenuContext, _ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
                     local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
 
                     pt.add(options, {
