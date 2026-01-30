@@ -40,7 +40,6 @@ end
 local record TacticsEngine
     
     battle_is_blocked: boolean
-    is_player_turn: boolean
 
     battle_map: bm.BattleMap
     character_manager: character_manager.CharacterManager

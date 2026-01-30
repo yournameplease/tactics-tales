@@ -3,6 +3,7 @@
 
 local point = require("src/tactics/util/point")
 local Point = point.Point
+local character = require("src/tactics/character/object/character")
 local id_generator = require("src/tactics/util/id_generator")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -122,36 +123,42 @@ function ScriptManagerImpl:register_script(
 	local trigger = script.trigger
 
 	if trigger is battle_script.trigger.Turn then
-		if trigger.phase == "before_player" then
-			event = "TACTICS_BEGIN_PLAYER_TURN"
-		elseif trigger.phase == "after_player" then
-			event = "TACTICS_END_PLAYER_TURN"
-		elseif trigger.phase == "before_enemy" then
-			event = "TACTICS_BEGIN_ENEMY_TURN"
-		elseif trigger.phase == "after_enemy" then
-			event = "TACTICS_END_ENEMY_TURN"
-		else
-			unexpected(trigger.phase)	
-		end
+		local event_by_offset <total>: {battle_script.trigger.TurnTriggerTimeOffset: event_bus.GameEvent} = {
+			["before"] = "TACTICS_BEGIN_PHASE",
+			["after"] = "TACTICS_END_PHASE",
+		}
+		event = event_by_offset[trigger.phase.offset]
 
 		if trigger.repeating == nil then
 			filter = function(ctx: {string: any}): boolean, ScriptContext
 				local turn = ctx.turn as integer
-				return turn == trigger.turn,
-					{
-						turn_number = turn
-					}
+				local side = ctx.side as character.Side
+
+				if side == trigger.phase.side and turn == trigger.turn then
+					return true,
+						{
+							turn_number = turn
+						}
+				end
+				return false, nil
 			end
 		else
 			-- this assert is unnessary, but the LSP complains without it
 			assert(trigger is battle_script.trigger.Turn)
 			filter = function(ctx: {string: any}): boolean, ScriptContext
 				local turn = ctx.turn as integer
-				return turn >= trigger.turn
-					and (turn - trigger.turn) % trigger.repeating == 0,
-					{
-						turn_number = turn
-					}
+				local side = ctx.side as character.Side
+
+				if side == trigger.phase.side
+					and turn >= trigger.turn
+					and (turn - trigger.turn) % trigger.repeating == 0
+				then
+					return true,
+						{
+							turn_number = turn
+						}
+				end
+				return false, nil
 			end
 		end
 	elseif trigger is battle_script.trigger.UnitDeath then
@@ -218,7 +225,6 @@ function ScriptManagerImpl:register_script(
 		elseif effect is battle_script.effect.ModifyUnits then
 			fn = function(ctx: ScriptContext)
 				log.debug("Handling ModifyUnits event")
-				local sel = effect.unit_selector
 				self.tactics_engine:modify_units(
 					self:resolve_unit_selector(effect.unit_selector, ctx),
 					{

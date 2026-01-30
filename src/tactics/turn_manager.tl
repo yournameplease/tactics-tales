@@ -9,15 +9,23 @@ local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
 local battle_objective_service = require("src/tactics/battle/battle_objective_service")
 local battle_unit = require("src/tactics/battle/tactics/battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local character = require("src/tactics/character/object/character")
 
-local enum Phase
-    "PLAYER"
-    "ENEMY"
+local record Phase
+    side: character.Side
 end
+
+local PHASE_ORDER: {Phase} = {
+    { side = "player" },
+    { side = "neutral" },
+    { side = "enemy" },
+} 
 
 local interface TurnManager
     turn: integer
-    phase: Phase
+    phase: integer
+
+    acting_side: function(self): character.Side
 
     teardown: function(self)
 end
@@ -53,6 +61,42 @@ function TurnManagerImpl:check_objectives(): boolean
     end
 end
 
+function TurnManagerImpl:acting_side(): character.Side
+    return PHASE_ORDER[self.phase].side
+end 
+
+function TurnManagerImpl:advance_turn()
+    self.event_writer:emit("TACTICS_END_TURN", {
+        turn = self.turn
+    })
+    if not self:check_objectives() then
+        self.phase = 1
+        self.turn = self.turn + 1
+        self.tactics_engine:refresh_all_units()
+        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+        self.event_writer:emit("TACTICS_BEGIN_TURN", {
+            turn = self.turn
+        })
+    end
+end 
+
+function TurnManagerImpl:advance_phase()
+    self.event_writer:emit("TACTICS_END_PHASE", {
+        turn = self.turn,
+        side = PHASE_ORDER[self.phase]
+    })
+    local next_phase = self.phase + 1
+    if next_phase > #PHASE_ORDER then
+        self:advance_turn()
+    else
+        self.phase = next_phase
+    end
+    self.event_writer:emit("TACTICS_BEGIN_PHASE", {
+        turn = self.turn,
+        side = PHASE_ORDER[self.phase]
+    })
+end 
+
 function turn_manager.new(
     map: bm.BattleMap,
     tactics_eng: tactics_engine.TacticsEngine,
@@ -65,7 +109,7 @@ function turn_manager.new(
     }, { __index = TurnManagerImpl })
 
     self.turn = 1
-    self.phase = "PLAYER"
+    self.phase = 1
 
     self.battle_map = map 
     self.tactics_engine = tactics_eng
@@ -79,81 +123,36 @@ function turn_manager.new(
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: event_bus.EventArgs)
         self.tactics_engine:compute_unit_valid_tiles()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-        self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
-            turn = self.turn
+        self.event_writer:emit("TACTICS_BEGIN_TURN", {
+            turn = self.turn,
+            side = PHASE_ORDER[1].side,
         })
-    end)
-
-    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
-        log.info("Begin player turn!")
-        self.phase = "PLAYER"
-        self.tactics_engine:refresh_all_units()
-        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-    end)
-
-    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: event_bus.EventArgs)
-        if self.phase ~= "PLAYER" then
-            log.warn("Got message 'TACTICS_END_PLAYER_TURN', but phase was "..self.phase..".  Ignoring message.")
-            return
-        end
-
-        log.info("End player turn!")
-
-        self.event_writer:emit("TACTICS_BEGIN_ENEMY_TURN", {
-            turn = self.turn
-        })
-    end)
-
-    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
-        self.phase = "ENEMY"
-        log.info("Begin enemy turn!")
-    end)
-
-    self.event_listener:on("TACTICS_END_ENEMY_TURN", function(_: event_bus.EventArgs)
-        if self.phase ~= "ENEMY" then
-            log.warn("Got message 'TACTICS_END_ENEMY_TURN', but phase was "..self.phase..".  Ignoring message.")
-            return
-        end
-        log.info("End enemy turn!")
-
-        self.turn = self.turn + 1
-
-        if not self:check_objectives() then
-            self.event_writer:emit("TACTICS_BEGIN_PLAYER_TURN", {
-                turn = self.turn
-            })
-        end
     end)
 
     self.event_listener:on("TACTICS_UNIT_END_ACTION", function()
-        local to_act = function(u: BattleUnit): boolean
-            return not u.has_acted
-        end
-
         self.tactics_engine:compute_unit_valid_tiles()
         
         if not self:check_objectives() then
-            if self.phase == "PLAYER" then
-                self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-                local players_to_act = self.battle_map
-                    :get_units(fp.fn_and(BattleUnit.is_player, to_act))
-                if #players_to_act > 0 then
-                    log.debug("Setting to player turn menu")
-                else
-                    log.debug("Finishing player action")
-                    self.event_writer:emit("TACTICS_FINISH_PLAYER_ACTIONS", {})
-                end
-            elseif self.phase == "ENEMY" then
-                local enemies_to_act = self.battle_map
-                    :get_units(fp.fn_and(BattleUnit.is_enemy, to_act))
-                if #enemies_to_act > 0 then
-                    log.debug("Enemy turn still ongoing, handling next enemy action.")
-                    self.enemy_ai_engine:handle_one_enemy_action()
-                else
-                    log.debug("Finishing enemy action")
-                    self.event_writer:emit("TACTICS_FINISH_ENEMY_ACTIONS", {})
-                end
+            local acting_side = self:acting_side()
+            local to_act = function(u: BattleUnit): boolean
+                return u.side == acting_side and not u.has_acted
             end
+            local units_to_act = self.battle_map:get_units(to_act)
+            if #units_to_act > 0 then
+                if acting_side == "player" then
+                    self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+                else
+                    self.enemy_ai_engine:handle_one_enemy_action()
+                end
+            else
+                self:advance_phase()
+            end
+        end
+    end)
+
+    self.event_listener:on("TACTICS_FINISH_SIDE_ACTIONS", function()
+        if not self:check_objectives() then
+            self:advance_phase()
         end
     end)
 
@@ -163,30 +162,6 @@ function turn_manager.new(
 
     self.event_listener:on("BATTLE_END_DEFEAT", function()
         log.info("You lose!")
-    end)
-
-    self.event_listener:on("TACTICS_BEGIN_PLAYER_TURN", function(_: event_bus.EventArgs)
-        self.tactics_engine.is_player_turn = true
-    end)
-
-    self.event_listener:on("TACTICS_END_PLAYER_TURN", function(_: event_bus.EventArgs)
-        self.tactics_engine.is_player_turn = false
-    end)
-
-    self.event_listener:on("TACTICS_BEGIN_ENEMY_TURN", function(_: event_bus.EventArgs)
-        self.enemy_ai_engine:handle_one_enemy_action()
-    end)
-
-    self.event_listener:on("TACTICS_FINISH_ENEMY_ACTIONS", function()
-        self.event_writer:emit("TACTICS_END_ENEMY_TURN", {
-            turn = self.turn
-        })
-    end)
-
-    self.event_listener:on("TACTICS_FINISH_PLAYER_ACTIONS", function()
-        self.event_writer:emit("TACTICS_END_PLAYER_TURN", {
-            turn = self.turn
-        })
     end)
     
     return self
