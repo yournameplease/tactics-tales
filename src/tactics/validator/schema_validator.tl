@@ -59,7 +59,34 @@ local function validate(
 					end
 				end
 			elseif schema is s.DictionarySchemaDefinition then
-
+				if pt.type(data) ~= "table" then
+					is_valid = false
+					add_local_errors({
+						"Field expected "..schema.type.." but received a "..pt.type(data)
+					})
+				else
+					local key_schema = schema.key
+					local value_schema = schema.value
+					local data_table: {any: any} = data as {any: any}
+					for key,value in pairs(data_table) do
+						local key_path = lists.merge(path, {tostring(key)})
+						local key_valid, key_errors = validate(
+							key,
+							key_schema,
+							memory,
+							key_path
+						)
+						local value_valid, value_errors = validate(
+							value,
+							value_schema,
+							memory,
+							key_path
+						)
+						is_valid = is_valid and key_valid and value_valid
+						add_deep_errors(key_errors)
+						add_deep_errors(value_errors)
+					end
+				end
 			elseif schema is s.RecordSchemaDefinition then
 				if pt.type(data) ~= "table" then
 					is_valid = false
