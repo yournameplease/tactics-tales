@@ -1,0 +1,7 @@
+
+
+# Gemini doesn't seem to commit by itself by default
+# For now, use this within my project repository using gemini to indicate the commit used Gemini CLI
+# To set, use `git config commit.template .gemini_cli_commit.txt`  (Not --global!)
+
+Co-authored-by: Gemini CLI <>
