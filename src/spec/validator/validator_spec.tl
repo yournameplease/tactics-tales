@@ -243,6 +243,24 @@ describe("validator", function()
             luassert.is_false(is_valid)
 			luassert.is_equal(1, #errors)
         end)
+        it("required record with bad field value is invalid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = {
+				string_field = nil,
+				int_field = 42,
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
 
         it("required record with nil value is invalid", function()
             -- Given
@@ -282,10 +300,10 @@ describe("validator", function()
 
 		it("optional record with record value is valid", function()
             -- Given
-			local schema = s.record({
+			local schema = s.optional(s.record({
 				string_field = s.string(),
 				int_field = s.integer(),
-			})
+			}))
 			local data = "value"
 
             -- When
@@ -297,10 +315,10 @@ describe("validator", function()
         end)
         it("optional record with nil value is valid", function()
             -- Given
-			local schema = s.record({
+			local schema = s.optional(s.record({
 				string_field = s.string(),
 				int_field = s.integer(),
-			})
+			}))
 			local data = nil
 
             -- When
@@ -315,10 +333,10 @@ describe("validator", function()
 			if k ~= "record" then
 		        it("optional record with "..k.." value is invalid", function()
 		            -- Given
-					local schema = s.record({
+					local schema = s.optional(s.record({
 						string_field = s.string(),
 						int_field = s.integer(),
-					})
+					}))
 					local data = v
 
 		            -- When
