@@ -164,16 +164,19 @@ function ModLoaderImpl:load_mod_data(): GameData
 
 	local game_data: GameData = {}
 
+	log.debug("Loading maps...")
 	game_data.maps = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.maps end,
 		nil
 	)
+	log.debug("Loading battles...")
 	game_data.battles = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.battles end,
 		nil
 	)
+	log.debug("Loading stories...")
 	game_data.stories = {
 		data = load_mod_map(
 			self.registered,
@@ -197,16 +200,19 @@ function ModLoaderImpl:load_mod_data(): GameData
 			end
 		)
 	}
+	log.debug("Loading characters...")
 	game_data.characters = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.characters end,
 		nil
 	)
+	log.debug("Loading items...")
 	game_data.items = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.items end,
 		nil
 	)
+	log.debug("Finished loading mods.")
 
 	return game_data
 end

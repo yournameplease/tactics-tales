@@ -10,7 +10,7 @@ local type MockDirectory = { string: MockDirectory | any }
 local record MockFilesystem
     files: MockDirectory
     
-    add_file: function(self, path: string, data: any)
+    put_file: function(self, path: string, data: any)
 end
 
 local mock_filesystem = {}
@@ -62,7 +62,7 @@ function mock_filesystem.new(): MockFilesystem
     return self
 end
 
-function MockFilesystem:add_file(path: string, data: any)
+function MockFilesystem:put_file(path: string, data: any)
     local dir = self.files
     for word in string.gmatch(path, "[%a%.]+/") do
         local next_dir = dir[word]
@@ -86,15 +86,41 @@ end
 
 describe("mod_loader", function()
     describe("validate_mods", function()
-        it("should be valid for a mod with no content", function()
+        it("should be valid for a mod with content", function()
             -- Given
             local fs = mock_filesystem.new()
-            fs:add_file("mods/test_mod/mod.lua", {
+            fs:put_file("mods/test_mod/mod.lua", {
                 id = "test_mod",
                 name = "Test Mod",
                 version = "1.0.0",
                 dependencies = {},
-                content = {},
+                content = {
+                    maps = "game_data/maps",
+                    battles = "game_data/battles",
+                    stories = "game_data/stories",
+                    characters = "game_data/characters",
+                    items = "game_data/items",
+                }
+            })
+            fs:put_file("mods/test_mod/game_data/maps.lua", {
+            })
+            fs:put_file("mods/test_mod/game_data/battles.lua", {
+            })
+            fs:put_file("mods/test_mod/game_data/stories.lua", {
+                data = {
+                    test_story = {
+                        starting_node = 'node_1',
+                        nodes = {
+                            node_1 = {type = 'exit_story'}
+                        }
+                    }
+                },
+                default_story = "test_story",
+                story_select = {"test_story"},
+            })
+            fs:put_file("mods/test_mod/game_data/characters.lua", {
+            })
+            fs:put_file("mods/test_mod/game_data/items.lua", {
             })
             
             local loader = mod_loader.new()
