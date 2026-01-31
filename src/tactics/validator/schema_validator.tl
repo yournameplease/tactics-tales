@@ -75,7 +75,7 @@ local function validate(
 							memory,
 							lists.merge(path, {field})
 						)
-						is_valid = is_valid and not field_valid
+						is_valid = is_valid and field_valid
 						add_deep_errors(field_errors)
 					end
 				end

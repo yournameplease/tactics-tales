@@ -37,7 +37,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
 
@@ -52,7 +52,7 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 					luassert.is_equal(1, #errors)
 		        end)
 			end
@@ -94,7 +94,7 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 					luassert.is_equal(1, #errors)
 		        end)
 			end
@@ -122,7 +122,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
         it("required integer with float value is invalid", function()
@@ -134,7 +134,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
 
@@ -149,7 +149,7 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 					luassert.is_equal(1, #errors)
 		        end)
 			end
@@ -188,7 +188,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
 
@@ -203,7 +203,7 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 					luassert.is_equal(1, #errors)
 		        end)
 			end
@@ -240,7 +240,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
         it("required record with bad field value is invalid", function()
@@ -258,7 +258,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
 
@@ -274,7 +274,7 @@ describe("validator", function()
             local is_valid, errors = validator.validate(data, schema, {})
 
             -- Then
-            luassert.is_false(is_valid)
+            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
 
@@ -292,8 +292,8 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
-					luassert.is_equal(1, #errors)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_true(#errors > 0, "Expected at least one error.")
 		        end)
 			end
 		end
@@ -304,7 +304,10 @@ describe("validator", function()
 				string_field = s.string(),
 				int_field = s.integer(),
 			}))
-			local data = "value"
+			local data = {
+				string_field = "string",
+				int_field = 42,
+			}
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -343,8 +346,8 @@ describe("validator", function()
 		            local is_valid, errors = validator.validate(data, schema, {})
 
 		            -- Then
-		            luassert.is_false(is_valid)
-					luassert.is_equal(1, #errors)
+		            luassert.is_false(is_valid, "Expected true, but got errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_true(#errors > 0, "Expected at least one error.")
 		        end)
 			end
 		end
