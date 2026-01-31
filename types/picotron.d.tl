@@ -117,7 +117,7 @@ end
 --- @operator sub(userdata|number):userdata
 --- @operator mul(userdata|number):userdata
 --- @operator div(userdata|number):userdata
-global record Userdata
+global interface Userdata
 	x: number
 	y: number
 	z: number

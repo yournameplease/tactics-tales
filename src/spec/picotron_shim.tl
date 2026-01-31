@@ -1,6 +1,5 @@
--- AI generated.  I disabled/fixed broken things but have not looked closely
-
 -- This file shims the Picotron API for testing in a standard Lua environment.
+-- require("types.picotron") -- ensures the global types are loaded
 
 -- utility error messages
 -- _G.todo = function(message: string | nil): any
@@ -46,6 +45,124 @@ _G.DATP = ""
 -- _G._init = function() end
 -- _G._update = function() end
 -- _G._draw = function() end
+
+
+-- Mock Userdata implementation
+local MockUserdata_mt: metatable<Userdata>
+local internal_data = setmetatable({}, {__mode = "k"})
+
+local function create_mock_userdata(width: integer, height: integer): Userdata
+    local data: {{number}} = {}
+    for y = 0, height - 1 do
+        data[y] = {}
+        for x = 0, width - 1 do
+            data[y][x] = 0
+        end
+    end
+
+    local ud: Userdata = setmetatable({x=0,y=0,z=0}, MockUserdata_mt)
+    internal_data[ud] = {
+        width = width,
+        height = height,
+        data = data,
+    }
+    
+    return ud
+end
+
+local function elementwise_op(a: Userdata, b: Userdata | number, op: function(number, number):number): Userdata
+    local state_a = internal_data[a]
+    local w = state_a.width
+    local h = state_a.height
+    local result_ud = create_mock_userdata(w, h)
+    local state_res = internal_data[result_ud]
+
+    if type(b) == "table" then -- Userdata
+        local state_b = internal_data[b as Userdata]
+        for y = 0, h - 1 do
+            for x = 0, w - 1 do
+                state_res.data[y][x] = op(state_a.data[y][x], state_b.data[y][x])
+            end
+        end
+    else -- number
+        local num = b as number
+        for y = 0, h - 1 do
+            for x = 0, w - 1 do
+                state_res.data[y][x] = op(state_a.data[y][x], num)
+            end
+        end
+    end
+    return result_ud
+end
+
+MockUserdata_mt = {
+    __add = function(a: Userdata, b: Userdata | number): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return x + y end)
+    end,
+    __sub = function(a: Userdata, b: Userdata | number): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return x - y end)
+    end,
+    __band = function(a: Userdata, b: Userdata | integer): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return (x as integer) & (y as integer) end)
+    end,
+    __bor = function(a: Userdata, b: Userdata | integer): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return (x as integer) | (y as integer) end)
+    end,
+    __bxor = function(a: Userdata, b: Userdata | integer): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return (x as integer) ~ (y as integer) end)
+    end,
+    __bnot = function(a: Userdata): Userdata
+        local state = internal_data[a]
+        local w = state.width
+        local h = state.height
+        local result_ud = create_mock_userdata(w, h)
+        local state_res = internal_data[result_ud]
+        for y = 0, h - 1 do
+            for x = 0, w - 1 do
+                state_res.data[y][x] = ~(state.data[y][x])
+            end
+        end
+        return result_ud
+    end,
+    __shl = function(a: Userdata, b: integer): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return (x as integer) << (y as integer) end)
+    end,
+    __shr = function(a: Userdata, b: integer): Userdata
+        return elementwise_op(a, b, function(x: number, y: number): number return (x as integer) >> (y as integer) end)
+    end,
+    __index = {
+        width = function(self: Userdata): integer
+            return internal_data[self].width
+        end,
+        height = function(self: Userdata): integer
+            return internal_data[self].height
+        end,
+        get = function(self: Userdata, x: integer, y: integer): integer
+            return math.floor(internal_data[self].data[y][x])
+        end,
+        set = function(self: Userdata, x: integer, ...)
+            local state = internal_data[self]
+            local args = {...}
+            for y = 0, math.min(state.height - 1, #args - 1) do
+                state.data[y][x] = args[y + 1] as number
+            end
+        end,
+        sort = function(self: Userdata)
+            local state = internal_data[self]
+            for x = 0, state.width - 1 do
+                local column: {number} = {}
+                for y = 0, state.height - 1 do
+                    table.insert(column, state.data[y][x])
+                end
+                table.sort(column)
+                for y = 0, state.height - 1 do
+                    state.data[y][x] = column[y + 1]
+                end
+            end
+        end,
+    }
+}
+
 
 local pt_shim: Picotron = {
     menuitem = function(id_or_item: integer | __MenuItem, label: any, action: any) end,
@@ -103,7 +220,7 @@ local pt_shim: Picotron = {
     spr = function(s: integer | Userdata, x: number, y: number, flip_x: boolean, flip_y: boolean) end,
     sspr = function(s: integer | Userdata, sx: integer, sy: integer, sw: integer, sh: integer, dx: integer, dy: integer, dw: integer, dh: integer, flip_x: boolean, flip_y: boolean) end,
     fillp = function(...) end,
-    get_spr = function(index: integer): Userdata return nil end,
+    get_spr = function(index: integer): Userdata return create_mock_userdata(8, 8) end, -- Return a default 8x8 userdata
     set_spr = function(index: integer, ud: Userdata) end,
     flip = function(flags: integer) end,
     btn = function(button: integer, player: integer): boolean return false end,
@@ -132,11 +249,8 @@ local pt_shim: Picotron = {
     ceil = math.ceil,
     rnd = function(limit: any): any
         if type(limit) == "table" then
-            local tab: {string: any} = limit as {string: any}
-            for _,v in pairs(tab) do
-                return v
-            end
-            return nil
+            local tbl = limit as {any}
+            return tbl[math.random(#tbl)]
         else
             return math.random() * (limit as number)
         end
@@ -172,7 +286,7 @@ local pt_shim: Picotron = {
     chr = string.char,
     sub = string.sub,
     split = function(str: string, separator: string): {string}
-        local result = {}
+        local result: {string} = {}
         if #separator == 0 then
             for i = 1, #str do table.insert(result, str:sub(i, i)) end
             return result
@@ -207,7 +321,13 @@ local pt_shim: Picotron = {
     stat = function(id: integer, addr: integer) end,
     theme = function(which: string) end,
     open = function(file: string) end,
-    add = function<V>(t: {V}, v: V, i: integer) table.insert(t, i, v) end,
+    add = function<V>(t: {V}, v: V, i: integer | nil)
+		if i then
+			table.insert(t, i, v)
+		else
+			table.insert(t, v)
+		end
+	end,
     del = function<V>(t: {V}, v: V): V | nil
         for i = #t, 1, -1 do
             if t[i] == v then
@@ -219,9 +339,10 @@ local pt_shim: Picotron = {
     deli = table.remove,
     pop = function<V>(t: {V}): V | nil return table.remove(t) end,
     count = function(t: any, v: any): integer
-        if v == nil then return #(t as {any}) end
+        local tbl = t as {any}
+        if v == nil then return #tbl end
         local c = 0
-        for _, val in ipairs(t as {any}) do
+        for _, val in ipairs(tbl) do
             if val == v then
                 c = c + 1
             end
@@ -230,23 +351,32 @@ local pt_shim: Picotron = {
     end,
     all = function(t: any): function():any
         local i = 0
+        local tbl = t as {any}
         return function(): any
             i = i + 1
-            return (t as {any})[i]
+            return tbl[i]
         end
     end,
-    -- foreach = function(t: any, f: function())
-    --     for _, v in ipairs(t as {any}) do
-    --         f(v)
-    --     end
-    -- end,
-    -- pack = table.pack,
+    foreach = function(t: any, f: function(any))
+        for _, v in ipairs(t as {any}) do
+            f(v)
+        end
+    end,
+    pack = function(...: any): any return table.pack(...) end,
     unpack = table.unpack,
-    userdata = function(data_type: userdata_type, width: integer, height: integer, data: string): Userdata return {} as Userdata end,
-    vec = function(...: number): Userdata return {...} as Userdata end,
-    get_display = function(): Userdata return nil end,
+    userdata = function(data_type: userdata_type, width: integer, height: integer, data: string): Userdata return create_mock_userdata(width, height) end,
+    vec = function(...: number): Userdata
+        local args = {...}
+        local ud = create_mock_userdata(1, #args)
+        local state = internal_data[ud]
+        for i, v in ipairs(args) do
+            state.data[i-1][0] = v
+        end
+        return ud
+    end,
+    get_display = function(): Userdata return create_mock_userdata(240, 136) end,
     set_draw_target = function(ud: Userdata) end,
-    get_draw_target = function(): Userdata return nil end,
+    get_draw_target = function(): Userdata return create_mock_userdata(240, 136) end,
     set_window_attributes = function(attribs: __WindowAttribs) end,
     set_window_size = function(width: integer, height: integer, attribs: __WindowAttribs) end,
     wrangle_working_file = function(save_state: any, load_state: any, untitled_filename: string, get_hlocation: any, set_hlocation: any) end,
