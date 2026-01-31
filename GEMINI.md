@@ -3,14 +3,13 @@
 ## General Instructions
 
 - When you generate new Teal code, follow the existing coding style.
-- Before starting any work, create a new git branch via `git checkout -b bot/<feature-name>`
-- Commit often. When committing, include the flag `--author=ynp's Gemini CLI <pokefanjack@proton.me>`
 
 ## Testing
 
 - Run tests via `make test`
-- Tests should be in Teal wherever possible.
+- Follow the pattern, including the leading imports, defined in `src/spec/util/lists_spec.tl`
+- Tests should be in Teal.
+- Avoid using mocks and spies.  Prefer integration tests.
+  - Picotron library mocks are acceptable, but prefer the ones defined in `src/spec/picotron_shim.tl`.
 - New tests files should be named as `<path>/<to>/<tested>/<file>_spec.tl`
-- Only test public interfaces, and any functions returned by modules.
-
-
+- Only test public interfaces of the tested file.
