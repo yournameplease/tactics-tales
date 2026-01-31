@@ -1,10 +1,10 @@
-require("src/tactics/character/animation_data")
-require("src/tactics/animation")
-local point = require("src/tactics/util/point")
+require("src.tactics.character.animation_data")
+require("src.tactics.animation")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local character = require("src/tactics/character/object/character")
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
-local maps = require("src/tactics/util/maps")
+local character = require("src.tactics.character.object.character")
+local unit_ai = require("src.tactics.battle.unit.unit_ai")
+local maps = require("src.tactics.util.maps")
 
 
 local record BattleUnit

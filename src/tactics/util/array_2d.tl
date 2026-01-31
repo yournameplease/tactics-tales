@@ -2,7 +2,7 @@
 --- Data structure with a 0-indexed 2d array
 --- with utilities for point access
 
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
 
 local interface Array2D<V>

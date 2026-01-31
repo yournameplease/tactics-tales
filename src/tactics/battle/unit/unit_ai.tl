@@ -1,4 +1,4 @@
-local Side = require("src/tactics/character/object/character").Side
+local Side = require("src.tactics.character.object.character").Side
 
 local enum MoveAI
     "infinity"

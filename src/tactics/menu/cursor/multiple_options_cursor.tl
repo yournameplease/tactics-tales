@@ -1,12 +1,12 @@
-local menu_cursor = require("src/tactics/menu/menu_cursor")
-local menu_types = require("src/tactics/menu/types")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local lists = require("src/tactics/util/lists")
-local event_bus = require("src/tactics/systems/event_bus")
-local input_service = require("src/tactics/joypad")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_types = require("src.tactics.menu.types")
+local MenuContext = require("src.tactics.menu.menu_context").MenuContext
+local lists = require("src.tactics.util.lists")
+local event_bus = require("src.tactics.systems.event_bus")
+local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
-local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
 local record MenuMultipleOptionCursor<GameContext>
     text: string -- label

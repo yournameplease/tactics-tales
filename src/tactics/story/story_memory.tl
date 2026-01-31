@@ -1,4 +1,4 @@
-local CharacterManager = require("src/tactics/character/character_manager").CharacterManager
+local CharacterManager = require("src.tactics.character.character_manager").CharacterManager
 
 local type StoryMemoryMap = { string: string
 --| StoryMemoryMap

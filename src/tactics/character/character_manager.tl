@@ -1,9 +1,9 @@
-local id_generator = require("src/tactics/util/id_generator")
-local GameData = require("src/tactics/game_data").GameData
-local Character = require("src/tactics/character/object/character").Character
-local character_generator = require("src/tactics/character/character_generator")
-local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
+local id_generator = require("src.tactics.util.id_generator")
+local GameData = require("src.tactics.game_data").GameData
+local Character = require("src.tactics.character.object.character").Character
+local character_generator = require("src.tactics.character.character_generator")
+local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
 
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.

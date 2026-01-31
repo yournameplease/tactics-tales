@@ -1,5 +1,5 @@
-local bm = require("src/tactics/battle/battle_map")
-local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
+local bm = require("src.tactics.battle.battle_map")
+local BattleUnit = require("src.tactics.battle.tactics.battle_unit").BattleUnit
 
 local interface VictoryCondition
 	text: string

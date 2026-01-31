@@ -1,28 +1,28 @@
-require("src/tactics/config")
+require("src.tactics.config")
 
-local MenuTileHighlight = require("src/tactics/menu/cursor/grid_cursor").MenuTileHighlight
-local point = require("src/tactics/util/point")
+local MenuTileHighlight = require("src.tactics.menu.cursor.grid_cursor").MenuTileHighlight
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local fp = require("src/tactics/util/fp")
-local array_2d = require("src/tactics/util/array_2d")
-local pathfinding = require("src/tactics/battle/pathfinding")
-local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
-local event_bus = require("src/tactics/systems/event_bus")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local bm = require("src/tactics/battle/battle_map")
-local tasks = require("src/tactics/systems/tasks")
-local animation = require("src/tactics/animation")
-local lists = require("src/tactics/util/lists")
-local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
-local Character = require("src/tactics/character/object/character").Character
-local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
+local fp = require("src.tactics.util.fp")
+local array_2d = require("src.tactics.util.array_2d")
+local pathfinding = require("src.tactics.battle.pathfinding")
+local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
+local event_bus = require("src.tactics.systems.event_bus")
+local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local bm = require("src.tactics.battle.battle_map")
+local tasks = require("src.tactics.systems.tasks")
+local animation = require("src.tactics.animation")
+local lists = require("src.tactics.util.lists")
+local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
+local unit_ai = require("src.tactics.battle.unit.unit_ai")
+local Character = require("src.tactics.character.object.character").Character
+local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
-local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 
-local InputContext = require("src/tactics/input/input_context").InputContext
-local character_manager = require("src/tactics/character/character_manager")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local InputContext = require("src.tactics.input.input_context").InputContext
+local character_manager = require("src.tactics.character.character_manager")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH

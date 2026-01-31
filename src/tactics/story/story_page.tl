@@ -1,8 +1,8 @@
-local animation = require("src/tactics/animation")
-local drawable_character = require("src/tactics/story/drawable_character")
-local story_memory = require("src/tactics/story/story_memory")
-local Character = require("src/tactics/character/object/character").Character
-local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+local animation = require("src.tactics.animation")
+local drawable_character = require("src.tactics.story.drawable_character")
+local story_memory = require("src.tactics.story.story_memory")
+local Character = require("src.tactics.character.object.character").Character
+local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 
 local enum RenderedStoryNodeType
     "text"

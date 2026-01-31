@@ -1,17 +1,17 @@
 
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-local dialogue_node = require("src/tactics/ui/components/dialogue_node")
-local portrait_box = require("src/tactics/ui/panels/portrait_box")
-local section_divider = require("src/tactics/ui/decoration/section_divider")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
-local story_page = require("src/tactics/story/story_page")
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+local dialogue_node = require("src.tactics.ui.components.dialogue_node")
+local portrait_box = require("src.tactics.ui.panels.portrait_box")
+local section_divider = require("src.tactics.ui.decoration.section_divider")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMenuContext
+local story_page = require("src.tactics.story.story_page")
 local rendered_story_node = story_page.rendered_story_node
 local RenderedStoryNode = rendered_story_node.RenderedStoryNode
-local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
-local VerticalMultiSelectMenu = require("src/tactics/ui/panels/vertical_list_multi_select")
-local DrawableCharacter = require("src/tactics/story/drawable_character").DrawableCharacter
+local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
+local VerticalMultiSelectMenu = require("src.tactics.ui.panels.vertical_list_multi_select")
+local DrawableCharacter = require("src.tactics.story.drawable_character").DrawableCharacter
 
 local record StoryPagePanel
     is box.UIElement

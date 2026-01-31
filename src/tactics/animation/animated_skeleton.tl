@@ -1,6 +1,6 @@
-local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
-local point = require("src/tactics/util/point")
+local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
+local point = require("src.tactics.util.point")
 local Point = point.Point
 local PointRecord = point.PointRecord
 

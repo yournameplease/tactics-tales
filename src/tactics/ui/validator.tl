@@ -1,4 +1,4 @@
-local box = require("src/tactics/ui/box")
+local box = require("src.tactics.ui.box")
 
 local menu_validator = {}
 

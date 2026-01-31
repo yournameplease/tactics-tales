@@ -1,4 +1,4 @@
-local character = require("src/tactics/character/object/character")
+local character = require("src.tactics.character.object.character")
 
 local record DrawableCharacter
     is character.DrawableCharacterInstance

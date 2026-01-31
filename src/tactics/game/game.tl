@@ -1,19 +1,19 @@
-local story = require("src/tactics/story/story")
-local story_types = require("src/tactics/story/types")
+local story = require("src.tactics.story.story")
+local story_types = require("src.tactics.story.types")
 local StoryId = story_types.StoryId
-local game_menu_manager = require("src/tactics/game/game_menu_manager")
-local game_menu_context = require("src/tactics/game/game_menu_context")
-local game_ui_context = require("src/tactics/game/game_ui_context")
-local event_listener = require("src/tactics/systems/event_bus/event_listener")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local InputContext = require("src/tactics/input/input_context").InputContext
-local ConfigManager = require("src/tactics/config/config_manager").ConfigManager
-local ModLoader = require("src/tactics/mods/mod_loader").ModLoader
-local EventBus = require("src/tactics/systems/event_bus").EventBus
-local InputService = require("src/tactics/joypad").InputService
-local TaskManager = require("src/tactics/systems/tasks").TaskManager
-local AnimationManager = require("src/tactics/animation").AnimationManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+local game_menu_manager = require("src.tactics.game.game_menu_manager")
+local game_menu_context = require("src.tactics.game.game_menu_context")
+local game_ui_context = require("src.tactics.game.game_ui_context")
+local event_listener = require("src.tactics.systems.event_bus.event_listener")
+local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local InputContext = require("src.tactics.input.input_context").InputContext
+local ConfigManager = require("src.tactics.config.config_manager").ConfigManager
+local ModLoader = require("src.tactics.mods.mod_loader").ModLoader
+local EventBus = require("src.tactics.systems.event_bus").EventBus
+local InputService = require("src.tactics.joypad").InputService
+local TaskManager = require("src.tactics.systems.tasks").TaskManager
+local AnimationManager = require("src.tactics.animation").AnimationManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 
 ---@desc
 --- services needed to create a story

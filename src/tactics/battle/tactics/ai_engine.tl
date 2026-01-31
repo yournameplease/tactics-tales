@@ -1,13 +1,13 @@
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local lists = require("src/tactics/util/lists")
-local character = require("src/tactics/character/object/character")
-local point = require("src/tactics/util/point")
+local lists = require("src.tactics.util.lists")
+local character = require("src.tactics.character.object.character")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local pathfinding = require("src/tactics/battle/pathfinding")
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local tasks = require("src/tactics/systems/tasks")
-local bm = require("src/tactics/battle/battle_map")
+local pathfinding = require("src.tactics.battle.pathfinding")
+local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
+local tasks = require("src.tactics.systems.tasks")
+local bm = require("src.tactics.battle.battle_map")
 
 --[[
 AI Mk 1:

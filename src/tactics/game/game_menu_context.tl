@@ -1,4 +1,4 @@
-local story_types = require("src/tactics/story/types")
+local story_types = require("src.tactics.story.types")
 local StoryId = story_types.StoryId
 
 local record GameMenuContext

@@ -1,4 +1,4 @@
-local character = require("src/tactics/character/object/character")
+local character = require("src.tactics.character.object.character")
 
 local record StoryMenuContext
 	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string})

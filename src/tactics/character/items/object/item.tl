@@ -1,5 +1,5 @@
-local item_types = require("src/tactics/character/items/types")
-local wpn = require("src/tactics/character/items/object/weapon")
+local item_types = require("src.tactics.character.items.types")
+local wpn = require("src.tactics.character.items.object.weapon")
 
 local interface Item
 	-- getters are not needed, just interface the field

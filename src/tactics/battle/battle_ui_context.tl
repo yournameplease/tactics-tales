@@ -1,16 +1,16 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local UIContext = require("src/tactics/ui/ui_context").UIContext
-local TurnManager =require("src/tactics/turn_manager").TurnManager
-local bm = require("src/tactics/battle/battle_map")
-local TacticsEngine = require("src/tactics/battle/tactics/tactics_engine").TacticsEngine
-local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
-local BattleObjectiveService = require("src/tactics/battle/battle_objective_service").BattleObjectiveService
-local BattleUnit = require("src/tactics/battle/tactics/battle_unit").BattleUnit
-local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
-local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
-local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
-local menu_context = require("src/tactics/menu/menu_context")
+local UIContext = require("src.tactics.ui.ui_context").UIContext
+local TurnManager =require("src.tactics.turn_manager").TurnManager
+local bm = require("src.tactics.battle.battle_map")
+local TacticsEngine = require("src.tactics.battle.tactics.tactics_engine").TacticsEngine
+local BattleMenuManager = require("src.tactics.battle.battle_menu_manager").BattleMenuManager
+local BattleObjectiveService = require("src.tactics.battle.battle_objective_service").BattleObjectiveService
+local BattleUnit = require("src.tactics.battle.tactics.battle_unit").BattleUnit
+local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
+local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
+local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
+local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local record BattleUIContext

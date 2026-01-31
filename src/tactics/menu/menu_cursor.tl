@@ -1,6 +1,6 @@
-local menu_types = require("src/tactics/menu/types")
-local input_service = require("src/tactics/joypad")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
+local menu_types = require("src.tactics.menu.types")
+local input_service = require("src.tactics.joypad")
+local MenuContext = require("src.tactics.menu.menu_context").MenuContext
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 

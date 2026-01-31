@@ -1,6 +1,6 @@
-require("src/tactics/ui/types")
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
-local InputLabel = require("src/tactics/joypad").InputLabel
+require("src.tactics.ui.types")
+local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local InputLabel = require("src.tactics.joypad").InputLabel
 
 local enum UIContextType
 	"battle"

@@ -1,8 +1,8 @@
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-require("src/tactics/ui/theme")
-local colors = require("src/tactics/colors")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+require("src.tactics.ui.theme")
+local colors = require("src.tactics.colors")
+local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 
 -- Note: this class is a bit of a mess with inheritence
 -- as I wrote it before fully understanding how to do classes well.

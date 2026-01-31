@@ -1,9 +1,9 @@
-local box = require("src/tactics/ui/box")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local text_node = require("src/tactics/ui/components/text_node")
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
-local String = require("src/tactics/util/string")
+local box = require("src.tactics.ui.box")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local text_node = require("src.tactics.ui.components.text_node")
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
+local String = require("src.tactics.util.string")
 
 local record VerticalMultiSelectMenu<T>
     is box.UIElement, text_node.TextUIElement

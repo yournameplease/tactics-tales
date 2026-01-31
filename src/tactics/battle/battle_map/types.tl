@@ -1,6 +1,6 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 -- used by interaction scripts

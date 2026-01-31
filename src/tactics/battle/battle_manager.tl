@@ -1,20 +1,20 @@
-local InputContext = require("src/tactics/input/input_context").InputContext
-local bm = require("src/tactics/battle/battle_map")
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local map_generator = require("src/tactics/battle/map/map_generator")
-local battle_menu_manager = require("src/tactics/battle/battle_menu_manager")
-local battle_ui_context = require("src/tactics/battle/battle_ui_context")
-local turn_manager = require("src/tactics/turn_manager")
-local ai_engine = require("src/tactics/battle/tactics/ai_engine")
-local battle_objective_service = require("src/tactics/battle/battle_objective_service")
-local battle_menu_context = require("src/tactics/battle/battle_menu_context")
-local script_manager = require("src/tactics/battle/scripts/script_manager")
-local CharacterManager = require("src/tactics/character/character_manager").CharacterManager
-local EventBus = require("src/tactics/systems/event_bus").EventBus
-local GameData = require("src/tactics/game_data").GameData
-local TaskManager = require("src/tactics/systems/tasks").TaskManager
-local AnimationManager = require("src/tactics/animation").AnimationManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+local InputContext = require("src.tactics.input.input_context").InputContext
+local bm = require("src.tactics.battle.battle_map")
+local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
+local map_generator = require("src.tactics.battle.map.map_generator")
+local battle_menu_manager = require("src.tactics.battle.battle_menu_manager")
+local battle_ui_context = require("src.tactics.battle.battle_ui_context")
+local turn_manager = require("src.tactics.turn_manager")
+local ai_engine = require("src.tactics.battle.tactics.ai_engine")
+local battle_objective_service = require("src.tactics.battle.battle_objective_service")
+local battle_menu_context = require("src.tactics.battle.battle_menu_context")
+local script_manager = require("src.tactics.battle.scripts.script_manager")
+local CharacterManager = require("src.tactics.character.character_manager").CharacterManager
+local EventBus = require("src.tactics.systems.event_bus").EventBus
+local GameData = require("src.tactics.game_data").GameData
+local TaskManager = require("src.tactics.systems.tasks").TaskManager
+local AnimationManager = require("src.tactics.animation").AnimationManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 
 local interface BattleManager
     teardown: function(self)

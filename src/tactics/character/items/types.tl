@@ -1,4 +1,4 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local PointRecord = point.PointRecord
 
 local type ItemId = string

@@ -1,12 +1,12 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local Side = require("src/tactics/character/object/character").Side
-local array_2d = require("src/tactics/util/array_2d")
-local lists = require("src/tactics/util/lists")
-local bm = require("src/tactics/battle/battle_map")
+local Side = require("src.tactics.character.object.character").Side
+local array_2d = require("src.tactics.util.array_2d")
+local lists = require("src.tactics.util.lists")
+local bm = require("src.tactics.battle.battle_map")
 
 -- tile flags:
--- 0: empty/solid
+-- 0: empty.solid
 -- 1-3: terrain type
 -- 0 default
 -- 1 forest

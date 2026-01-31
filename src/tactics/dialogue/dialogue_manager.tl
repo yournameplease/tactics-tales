@@ -1,8 +1,8 @@
-local lists = require("src/tactics/util/lists")
-local dialogue = require("src/tactics/dialogue/dialogue")
+local lists = require("src.tactics.util.lists")
+local dialogue = require("src.tactics.dialogue.dialogue")
 local Dialogue = dialogue.Dialogue
 
-local InputContext = require("src/tactics/input/input_context").InputContext
+local InputContext = require("src.tactics.input.input_context").InputContext
 
 local record DialogueProps
 	auto_advance: boolean

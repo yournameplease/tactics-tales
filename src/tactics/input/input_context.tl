@@ -1,5 +1,5 @@
-local input = require("src/tactics/joypad")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
+local input = require("src.tactics.joypad")
+local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
 
 local interface InputContext
 	type: input.InputMethod

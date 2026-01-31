@@ -1,14 +1,14 @@
-local ai_engine = require("src/tactics/battle/tactics/ai_engine")
-local event_bus = require("src/tactics/systems/event_bus")
-local event_listener = require("src/tactics/systems/event_bus/event_listener")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local bm = require("src/tactics/battle/battle_map")
-local BattleMenuManager = require("src/tactics/battle/battle_menu_manager").BattleMenuManager
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local battle_objective_service = require("src/tactics/battle/battle_objective_service")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local ai_engine = require("src.tactics.battle.tactics.ai_engine")
+local event_bus = require("src.tactics.systems.event_bus")
+local event_listener = require("src.tactics.systems.event_bus.event_listener")
+local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local bm = require("src.tactics.battle.battle_map")
+local BattleMenuManager = require("src.tactics.battle.battle_menu_manager").BattleMenuManager
+local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
+local battle_objective_service = require("src.tactics.battle.battle_objective_service")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local character = require("src/tactics/character/object/character")
+local character = require("src.tactics.character.object.character")
 
 local record Phase
     side: character.Side

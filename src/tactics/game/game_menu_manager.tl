@@ -1,11 +1,11 @@
-local menu_types = require("src/tactics/menu/types")
-local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
-local menu_manager = require("src/tactics/menu/menu_manager")
-local event_bus = require("src/tactics/systems/event_bus")
-local GameMenuContext = require("src/tactics/game/game_menu_context").GameMenuContext
-local GameMainMenuContext = require("src/tactics/menu/menu_context").GameMainMenuContext
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
+local menu_types = require("src.tactics.menu.types")
+local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
+local menu_manager = require("src.tactics.menu.menu_manager")
+local event_bus = require("src.tactics.systems.event_bus")
+local GameMenuContext = require("src.tactics.game.game_menu_context").GameMenuContext
+local GameMainMenuContext = require("src.tactics.menu.menu_context").GameMainMenuContext
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
 
 local record GameMenuManager
     is menu_manager.MenuManager<GameMenuContext>

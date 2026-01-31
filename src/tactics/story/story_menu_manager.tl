@@ -1,17 +1,17 @@
-local menu_types = require("src/tactics/menu/types")
-local MenuContext = require ("src/tactics/menu/menu_context").MenuContext
-local sprite_data = require("src/tactics/character/sprite_data")
+local menu_types = require("src.tactics.menu.types")
+local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
+local sprite_data = require("src.tactics.character.sprite_data")
 local customization_options = sprite_data.customization_options
-local menu_manager = require("src/tactics/menu/menu_manager")
-local menu_context = require("src/tactics/menu/menu_context")
-local StoryMenuContext = require("src/tactics/story/story_menu_context").StoryMenuContext
-local character = require("src/tactics/character/object/character")
+local menu_manager = require("src.tactics.menu.menu_manager")
+local menu_context = require("src.tactics.menu.menu_context")
+local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMenuContext
+local character = require("src.tactics.character.object.character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey
-local event_bus = require("src/tactics/systems/event_bus")
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local multiple_options_cursor = require("src/tactics/menu/cursor/multiple_options_cursor")
+local event_bus = require("src.tactics.systems.event_bus")
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
 
-local lists = require("src/tactics/util/lists")
+local lists = require("src.tactics.util.lists")
 
 local function set_character_customization_option(
     key: CharacterAppearanceKey

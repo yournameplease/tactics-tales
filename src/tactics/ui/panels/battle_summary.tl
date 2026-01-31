@@ -1,9 +1,9 @@
 
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-require("src/tactics/character/items/object/item")
-require("src/tactics/character/items/object/item_inventory")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+require("src.tactics.character.items.object.item")
+require("src.tactics.character.items.object.item_inventory")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 
 local record BattleSummary
     is box.UIElement
