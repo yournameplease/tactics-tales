@@ -14,13 +14,13 @@
 -- _G.lib = {}
 
 -- various global configs
--- _G.DYNAMIC_CONFIG = {
---     log_level = "DEBUG",
---     draw_flexbox_debug = false,
---     draw_target_debug = false,
---     head_scale = 1,
---     dialogue_speed = "normal",
--- }
+_G.DYNAMIC_CONFIG = {
+    log_level = "DEBUG",
+    draw_flexbox_debug = false,
+    draw_target_debug = false,
+    head_scale = 1,
+    dialogue_speed = "normal",
+}
 -- _G.STATIC_CONFIG = {
 --     SCREEN_WIDTH = 240,
 --     SCREEN_HEIGHT = 136,
@@ -32,6 +32,9 @@
 -- }
 
 -- logger
+require("tactics/debug")
+require("tactics/config")
+
 -- _G.log = {
 --     error = function(...) print("ERROR:", ...) end,
 --     warn = function(...) print("WARN:", ...) end,

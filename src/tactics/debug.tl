@@ -1,5 +1,3 @@
-
-
 local function should_print (level: LogLevel): boolean
     local log_level = DYNAMIC_CONFIG.log_level
     if log_level == "ERROR" then
