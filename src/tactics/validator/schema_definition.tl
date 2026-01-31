@@ -1,0 +1,89 @@
+
+local enum SchemaDefinitionType
+	"string"
+	"integer"
+	"dictionary"
+	"record"
+end
+
+local interface SchemaDefinition
+	type: SchemaDefinitionType
+
+	optional: boolean
+end
+
+local record StringSchemaDefinition
+	is SchemaDefinition
+	where self.type == "string"
+end
+
+local record IntegerSchemaDefinition
+	is SchemaDefinition
+	where self.type == "integer"
+end
+
+local record DictionarySchemaDefinition
+	is SchemaDefinition
+	where self.type == "dictionary"
+	key: SchemaDefinition
+	value: SchemaDefinition
+end
+
+local record RecordSchemaDefinition
+	is SchemaDefinition
+	where self.type == "record"
+	definition: {string: SchemaDefinition}
+end
+
+local schema_definition = {
+	SchemaDefinitionType = SchemaDefinitionType,
+	SchemaDefinition = SchemaDefinition,	
+
+	StringSchemaDefinition = StringSchemaDefinition,
+	IntegerSchemaDefinition = IntegerSchemaDefinition,
+	DictionarySchemaDefinition = DictionarySchemaDefinition,
+	RecordSchemaDefinition = RecordSchemaDefinition,
+}
+
+function schema_definition.string(): SchemaDefinition
+	return {
+		type = "string",
+		optional = false,
+	}
+end
+
+function schema_definition.integer(): SchemaDefinition
+	return {
+		type = "integer",
+		optional = false,
+	}
+end
+
+function schema_definition.optional(s: SchemaDefinition): SchemaDefinition
+	s.optional = true
+	return s
+end
+
+function schema_definition.record(def: {string: SchemaDefinition}): SchemaDefinition
+	local self: RecordSchemaDefinition = {
+		type = "record",
+		optional = false,
+		definition = def,
+	}
+	return self
+end
+
+function schema_definition.dictionary(
+	key: SchemaDefinition,
+	value: SchemaDefinition
+): SchemaDefinition
+	local self: DictionarySchemaDefinition = {
+		type = "dictionary",
+		optional = false,
+		key = key,
+		value = value,
+	}
+	return self
+end
+
+return schema_definition
