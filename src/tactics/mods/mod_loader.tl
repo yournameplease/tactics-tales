@@ -7,6 +7,7 @@ local story = require("src/tactics/story/types")
 local StoryId = story.StoryId
 local StoryDefinition = story.StoryDefinition
 local mods = require("src/tactics/mods")
+local mod_validator = require("src/tactics/mods/validator")
 local ModId = mods.ModId
 local ModSpec = mods.ModSpec
 
@@ -21,6 +22,8 @@ end
 local interface ModLoader
 	register_mod: function(self, path: string)
 	load_mod_data: function(self): GameData
+	-- returns is_valid, {errors}
+	validate_mods: function(self): boolean, {string}
 end
 
 local mod_loader = {
@@ -61,7 +64,6 @@ end
 
 function ModLoaderImpl:validate_mod(id: ModId)
 	local data = self:load_mod_data()
-
 	
 end
 
@@ -207,6 +209,13 @@ function ModLoaderImpl:load_mod_data(): GameData
 	)
 
 	return game_data
+end
+
+
+function ModLoaderImpl:validate_mods(): boolean, {string}
+	local game_data = self:load_mod_data()	
+
+	return mod_validator.validate_game_data(game_data)
 end
 
 return mod_loader
