@@ -145,7 +145,7 @@ function ModLoaderImpl:create_sandbox(): {string: any}
 	for _,r in ipairs(self.registered) do
 		log.info("Loading libraries for "..r.id)
 		local base_lib_path = "mods/"..r.path.."/lib"
-		local lib_paths = pt.ls(base_lib_path)
+		local lib_paths = pt.ls(base_lib_path) or {}
 		log.debug("Found "..#lib_paths.." libraries at "..base_lib_path)
 		for _,lib_path in ipairs(lib_paths) do
 			local full_path = base_lib_path.."/"..lib_path
