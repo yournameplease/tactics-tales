@@ -60,7 +60,7 @@ describe("validator", function()
 
 		it("optional string with string value is valid", function()
             -- Given
-			local schema = s.string()
+			local schema = s.optional(s.string())
 			local data = "value"
 
             -- When
@@ -72,7 +72,7 @@ describe("validator", function()
         end)
         it("optional string with nil value is valid", function()
             -- Given
-			local schema = s.string()
+			local schema = s.optional(s.string())
 			local data = nil
 
             -- When
@@ -87,7 +87,7 @@ describe("validator", function()
 			if k ~= "string" then
 		        it("optional string with "..k.." value is invalid", function()
 		            -- Given
-					local schema = s.string()
+					local schema = s.optional(s.string())
 					local data = v
 
 		            -- When
