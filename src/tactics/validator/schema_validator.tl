@@ -31,11 +31,18 @@ local function validate(
 					)
 				end
 			elseif schema is s.IntegerSchemaDefinition then
-				if pt.type(data) ~= "integer" then
+				if pt.type(data) ~= "number" then
 					is_valid = false
 					pt.add(errors, 
 						"Field expected "..schema.type.." but received a "..pt.type(data)
 					)
+				else
+					if math.type(data) ~= "integer" then
+						is_valid = false
+						pt.add(errors, 
+							"Field expected "..schema.type.." but received a "..math.type(data)
+					)
+					end
 				end
 			elseif schema is s.DictionarySchemaDefinition then
 

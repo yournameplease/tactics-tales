@@ -100,5 +100,114 @@ describe("validator", function()
 			end
 		end
     end)
+    describe("integer schema", function()
+		it("required integer with integer value is valid", function()
+            -- Given
+			local schema = s.integer()
+			local data = 42
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+        it("required integer with nil value is invalid", function()
+            -- Given
+			local schema = s.integer()
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
+        it("required integer with float value is invalid", function()
+            -- Given
+			local schema = s.integer()
+			local data = 0.5
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "integer" then
+		        it("required integer with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.integer()
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid)
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+
+		it("optional integer with integer value is valid", function()
+            -- Given
+			local schema = s.optional(s.integer())
+			local data = 42
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional integer with nil value is valid", function()
+            -- Given
+			local schema = s.optional(s.integer())
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional integer with float value is invalid", function()
+            -- Given
+			local schema = s.optional(s.integer())
+			local data = 0.5
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "integer" then
+		        it("optional integer with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.optional(s.integer())
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid)
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+    end)
 end)
 
