@@ -1,6 +1,10 @@
 local type _ = require("busted")
 local luassert = require("luassert")
-local mod_loader = require("tactics.mods.mod_loader")
+require("spec.picotron_shim")
+require("spec.require_trimmer")
+local mod_loader = require("src.tactics.mods.mod_loader")
+
+
 
 describe("mod_loader", function()
     local pt_include_orig: function(string): any
