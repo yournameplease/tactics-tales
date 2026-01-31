@@ -1,7 +1,7 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local PointRecord = point.PointRecord
-local maps = require("src/tactics/util/maps")
-local animated_skeleton = require("src/tactics/animation/animated_skeleton")
+local maps = require("src.tactics.util.maps")
+local animated_skeleton = require("src.tactics.animation.animated_skeleton")
 local SkeletonNodeDefinition = animated_skeleton.SkeletonNodeDefinition
 -- possible future work
 -- z-ordering for hair, beards, shield, weapon, etc

@@ -1,4 +1,4 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
 
 local type MenuId = string

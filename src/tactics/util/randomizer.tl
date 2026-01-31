@@ -1,5 +1,5 @@
-local random = require("src/tactics/util/random")
-local lists = require("src/tactics/util/lists")
+local random = require("src.tactics.util.random")
+local lists = require("src.tactics.util.lists")
 
 local interface Randomizer<V>
 	pick_random: function(self): V

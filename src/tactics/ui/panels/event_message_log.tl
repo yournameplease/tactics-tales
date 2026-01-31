@@ -1,9 +1,9 @@
-local box = require("src/tactics/ui/box")
-local event_bus = require("src/tactics/systems/event_bus")
-local text_node = require("src/tactics/ui/components/text_node")
-local message_log = require("src/tactics/ui/components/message_log")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local lists = require("src/tactics/util/lists")
+local box = require("src.tactics.ui.box")
+local event_bus = require("src.tactics.systems.event_bus")
+local text_node = require("src.tactics.ui.components.text_node")
+local message_log = require("src.tactics.ui.components.message_log")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local lists = require("src.tactics.util.lists")
 
 local record EventMessageLog
     is box.UIElement, text_node.TextUIElement

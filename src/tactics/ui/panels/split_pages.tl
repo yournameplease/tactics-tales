@@ -1,5 +1,5 @@
-local box = require("src/tactics/ui/box")
-local PageDivider = require("src/tactics/ui/decoration/page_divider")
+local box = require("src.tactics.ui.box")
+local PageDivider = require("src.tactics.ui.decoration.page_divider")
 
 local record SplitPages
     is box.UIElement 

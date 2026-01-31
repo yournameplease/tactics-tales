@@ -1,5 +1,5 @@
 require("profiler")
-local lists = require("src/tactics/util/lists")
+local lists = require("src.tactics.util.lists")
 
 -- TODO: allow different metric fonts
 

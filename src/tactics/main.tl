@@ -2,21 +2,21 @@
 -- ynp
 
 -- static global imports
-require("src/tactics/config")
-require("src/tactics/debug")
+require("src.tactics.config")
+require("src.tactics.debug")
 
-local config_manager = require("src/tactics/config/config_manager")
+local config_manager = require("src.tactics.config.config_manager")
 
-local tasks = require("src/tactics/systems/tasks")
-local event_bus = require("src/tactics/systems/event_bus")
-local animation = require("src/tactics/animation")
-local ui_mgr = require("src/tactics/ui/ui_manager")
-local mod_ldr = require("src/tactics/mods/mod_loader")
-local game = require("src/tactics/game/game")
-local ui_context_manager = require("src/tactics/ui/ui_context_manager")
-local input_service = require("src/tactics/joypad")
-local input_context = require("src/tactics/input/input_context")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
+local tasks = require("src.tactics.systems.tasks")
+local event_bus = require("src.tactics.systems.event_bus")
+local animation = require("src.tactics.animation")
+local ui_mgr = require("src.tactics.ui.ui_manager")
+local mod_ldr = require("src.tactics.mods.mod_loader")
+local game = require("src.tactics.game.game")
+local ui_context_manager = require("src.tactics.ui.ui_context_manager")
+local input_service = require("src.tactics.joypad")
+local input_context = require("src.tactics.input.input_context")
+local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
 
 require("profiler")
 

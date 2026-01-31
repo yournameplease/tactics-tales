@@ -1,12 +1,12 @@
-require("src/tactics/config")
+require("src.tactics.config")
 
-local tactics_map = require("src/tactics/ui/panels/tactics_map")
-local box = require("src/tactics/ui/box")
-local combat_preview = require("src/tactics/ui/panels/combat_preview")
-local control_hints = require("src/tactics/ui/panels/control_hints")
+local tactics_map = require("src.tactics.ui.panels.tactics_map")
+local box = require("src.tactics.ui.box")
+local combat_preview = require("src.tactics.ui.panels.combat_preview")
+local control_hints = require("src.tactics.ui.panels.control_hints")
 
-local SplitPages = require("src/tactics/ui/panels/split_pages")
-local BattleSummary = require("src/tactics/ui/panels/battle_summary")
+local SplitPages = require("src.tactics.ui.panels.split_pages")
+local BattleSummary = require("src.tactics.ui.panels.battle_summary")
 
 local battle_summary = BattleSummary.new()
 local map = tactics_map.new(

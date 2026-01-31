@@ -1,8 +1,8 @@
-local bm = require("src/tactics/battle/battle_map")
-local event_bus = require("src/tactics/systems/event_bus")
-local battle_objective_definition = require("src/tactics/battle/definition/objective")
-local battle_objective = require("src/tactics/battle/objective")
-local lists = require("src/tactics/util/lists")
+local bm = require("src.tactics.battle.battle_map")
+local event_bus = require("src.tactics.systems.event_bus")
+local battle_objective_definition = require("src.tactics.battle.definition.objective")
+local battle_objective = require("src.tactics.battle.objective")
+local lists = require("src.tactics.util.lists")
 
 local interface BattleObjectiveService
     check_objectives: function(self, turn_number: integer): BattleFinishState

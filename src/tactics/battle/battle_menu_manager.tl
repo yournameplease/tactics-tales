@@ -1,15 +1,15 @@
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local Point = require("src/tactics/util/point").Point
-local bm = require("src/tactics/battle/battle_map")
-local menu_manager = require("src/tactics/menu/menu_manager")
-local event_bus = require("src/tactics/systems/event_bus")
-local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
-local array_2d = require("src/tactics/util/array_2d")
-local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local menu_types = require("src/tactics/menu/types")
-local menu_context = require("src/tactics/menu/menu_context")
+local Point = require("src.tactics.util.point").Point
+local bm = require("src.tactics.battle.battle_map")
+local menu_manager = require("src.tactics.menu.menu_manager")
+local event_bus = require("src.tactics.systems.event_bus")
+local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
+local array_2d = require("src.tactics.util.array_2d")
+local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local menu_types = require("src.tactics.menu.types")
+local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local record BattleMenuManager

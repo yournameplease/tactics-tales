@@ -1,9 +1,9 @@
-local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
-local battle_map = require("src/tactics/battle/battle_map")
-local TileDistance = require("src/tactics/battle/battle_map/types").TileDistance
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
-local character = require("src/tactics/character/object/character")
-local point = require("src/tactics/util/point")
+local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
+local battle_map = require("src.tactics.battle.battle_map")
+local TileDistance = require("src.tactics.battle.battle_map.types").TileDistance
+local unit_ai = require("src.tactics.battle.unit.unit_ai")
+local character = require("src.tactics.character.object.character")
+local point = require("src.tactics.util.point")
 local PointRecord = point.PointRecord
 
 -- selector: may depend on script context.  for effects

@@ -1,4 +1,4 @@
-local id_generator = require("src/tactics/util/id_generator")
+local id_generator = require("src.tactics.util.id_generator")
 
 local type EventArgs = { string: any }
 

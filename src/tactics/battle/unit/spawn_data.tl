@@ -1,5 +1,5 @@
-local battle_definition_types = require("src/tactics/battle/definition/types")
-local unit_ai = require("src/tactics/battle/unit/unit_ai")
+local battle_definition_types = require("src.tactics.battle.definition.types")
+local unit_ai = require("src.tactics.battle.unit.unit_ai")
 
 local enum UnitSpawnAnimation
     "from_north"

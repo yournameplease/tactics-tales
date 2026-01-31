@@ -1,7 +1,7 @@
-local battle_script = require("src/tactics/battle/scripts/battle_script")
-local unit_spawn_data = require("src/tactics/battle/unit/spawn_data")
-local types = require("src/tactics/battle/definition/types")
-local battle_objective = require("src/tactics/battle/definition/objective")
+local battle_script = require("src.tactics.battle.scripts.battle_script")
+local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
+local types = require("src.tactics.battle.definition.types")
+local battle_objective = require("src.tactics.battle.definition.objective")
 
 local record BattleDeploymentDefinition
     deployment_tiles_tag: string

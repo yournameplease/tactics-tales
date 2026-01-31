@@ -1,22 +1,22 @@
 require("profiler")
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
 
-local draw = require("src/tactics/draw")
-local colors = require("src/tactics/colors")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local draw = require("src.tactics.draw")
+local colors = require("src.tactics.colors")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local character = require("src/tactics/character/object/character")
+local character = require("src.tactics.character.object.character")
 local Side = character.Side
 local DrawableCharacterInstance = character.DrawableCharacterInstance
-local sprite_data = require("src/tactics/character/sprite_data")
-local wpn = require("src/tactics/character/items/object/weapon")
+local sprite_data = require("src.tactics.character.sprite_data")
+local wpn = require("src.tactics.character.items.object.weapon")
 
-local animated_skeleton = require("src/tactics/animation/animated_skeleton")
+local animated_skeleton = require("src.tactics.animation.animated_skeleton")
 local SkeletonNodeDefinition = animated_skeleton.SkeletonNodeDefinition
 
-local ANIMATION_DATA = require("src/tactics/character/animation_data")
+local ANIMATION_DATA = require("src.tactics.character.animation_data")
 
 local COLOR_SIDE_1 = 16
 local COLOR_SIDE_2 = 19

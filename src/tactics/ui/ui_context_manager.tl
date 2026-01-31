@@ -1,9 +1,9 @@
-local ui_context = require("src/tactics/ui/ui_context")
-local battle_ui_context = require("src/tactics/battle/battle_ui_context")
-local story_ui_context = require("src/tactics/story/story_ui_context")
-local game_ui_context = require("src/tactics/game/game_ui_context")
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
-local InputLabel = require("src/tactics/joypad").InputLabel
+local ui_context = require("src.tactics.ui.ui_context")
+local battle_ui_context = require("src.tactics.battle.battle_ui_context")
+local story_ui_context = require("src.tactics.story.story_ui_context")
+local game_ui_context = require("src.tactics.game.game_ui_context")
+local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local InputLabel = require("src.tactics.joypad").InputLabel
 
 local record UIContextManager
 

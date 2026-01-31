@@ -1,4 +1,4 @@
-local battle_objectives = require("src/tactics/battle/objective")
+local battle_objectives = require("src.tactics.battle.objective")
 
 
 local enum VictoryConditionType

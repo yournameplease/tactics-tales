@@ -1,5 +1,5 @@
 require("profiler")
-local colors = require("src/tactics/colors")
+local colors = require("src.tactics.colors")
 
 local interface DrawTargetManager
 	push_target: function(self, w: integer, h: integer, d_x: integer, d_y: integer)

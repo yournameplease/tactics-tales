@@ -1,4 +1,4 @@
-local GameData = require("src/tactics/game_data").GameData
+local GameData = require("src.tactics.game_data").GameData
 
 local mod_validator = {
 	

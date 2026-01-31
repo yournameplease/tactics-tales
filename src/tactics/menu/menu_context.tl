@@ -1,12 +1,12 @@
 
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-require("src/tactics/joypad")
-local character = require("src/tactics/character/object/character")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+require("src.tactics.joypad")
+local character = require("src.tactics.character.object.character")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local Item = require("src/tactics/character/items/object/item")
-local story_types = require("src/tactics/story/types")
+local Item = require("src.tactics.character.items.object.item")
+local story_types = require("src.tactics.story.types")
 
 -- Note: some of these extracted types could be kept in menu_manager if tactics_engine and menu_manager didn't require each other
 -- Probably, there would be a menu_action_listener or similar to delegate menu commands to the tactics_engine

@@ -1,7 +1,7 @@
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local item_types = require("src/tactics/character/items/types")
-local wpn = require("src/tactics/character/items/object/weapon")
+local item_types = require("src.tactics.character.items.types")
+local wpn = require("src.tactics.character.items.object.weapon")
 
 local record WeaponDefinition
     name: string

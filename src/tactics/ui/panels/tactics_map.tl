@@ -1,26 +1,26 @@
 require("profiler")
-require("src/tactics/config")
+require("src.tactics.config")
 
-local fp = require("src/tactics/util/fp")
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local bm = require("src/tactics/battle/battle_map")
-local menu_cursor = require("src/tactics/menu/menu_cursor")
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
-local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
-local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
-local lists = require("src/tactics/util/lists")
-local point = require("src/tactics/util/point")
+local fp = require("src.tactics.util.fp")
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local bm = require("src.tactics.battle.battle_map")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
+local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
+local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUIContext
+local lists = require("src.tactics.util.lists")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
-local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
-local CharacterRenderer = require("src/tactics/character/character_renderer")
-local dialogue_node = require("src/tactics/ui/components/dialogue_node")
-local array_2d = require("src/tactics/util/array_2d")
+local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
+local vertical_list_menu = require("src.tactics.ui.panels.vertical_list_menu")
+local CharacterRenderer = require("src.tactics.character.character_renderer")
+local dialogue_node = require("src.tactics.ui.components.dialogue_node")
+local array_2d = require("src.tactics.util.array_2d")
 
 local record TacticsMap
     is box.UIElement
