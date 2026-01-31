@@ -5,30 +5,97 @@ require("spec.require_trimmer")
 
 local mod_loader = require("src.tactics.mods.mod_loader")
 
-describe("mod_loader", function()
-    local pt_include_orig: function(string): any
+local type MockDirectory = { string: MockDirectory | any }
 
-    before_each(function()
-        pt_include_orig = pt.include
-    end)
+local record MockFilesystem
+    files: MockDirectory
+    
+    add_file: function(self, path: string, data: any)
+end
 
-    after_each(function()
-        pt.include = pt_include_orig
-    end)
+local mock_filesystem = {}
 
-    describe("validate_mods", function()
-        it("should return true for a valid mod", function()
-            -- Given
-            pt.include = function(path: string): any
-                if path == "mods/test_mod/mod.lua" then
-                    return {
-                        id = "test_mod",
-                        name = "Test Mod",
-                        dependencies = { "base" },
-                    }
-                end
-                return {}
+function mock_filesystem.new(): MockFilesystem
+    local self: MockFilesystem = setmetatable({
+        files = {},
+    },{
+        __index = MockFilesystem
+    })
+    pt.include = function(path: string): any
+        local dir = self.files
+        for word in string.gmatch(path, "[%a%.]+/") do
+            local next_dir = dir[word]
+            if next_dir == nil then
+                -- mock the picotron error?
+                return nil
+            elseif next_dir is MockDirectory then
+                dir = next_dir
+            else
+                -- error, found a file instead of directory
+                return nil
             end
+        end
+        local file_name = string.gmatch(path, "[%a%.]+$")()
+        return dir[file_name]
+    end
+    pt.ls = function(path: string): any
+        local dir = self.files
+        for word in string.gmatch(path, "[%a%.]+") do
+            local next_dir = dir[word]
+            if next_dir == nil then
+                -- mock the picotron error?
+                return nil
+            elseif next_dir is MockDirectory then
+                dir = next_dir
+            else
+                -- error, found a file instead of directory
+                return nil
+            end
+        end
+
+        local names = {}
+        for name,_ in pairs(dir) do
+            table.insert(names,name)
+        end
+        return names
+    end
+    return self
+end
+
+function MockFilesystem:add_file(path: string, data: any)
+    local dir = self.files
+    for word in string.gmatch(path, "[%a%.]+/") do
+        local next_dir = dir[word]
+        if next_dir == nil then
+            -- mock the picotron error?
+            dir[word] = {}
+            next_dir = dir[word]
+            assert(next_dir is MockDirectory)
+            dir = next_dir
+        elseif next_dir is MockDirectory then
+            dir = next_dir
+        else
+            -- error, found a file instead of directory
+            return
+        end
+    end
+    local file_name = string.gmatch(path, "[%a%.]+$")()
+    dir[file_name] = data
+end
+
+
+describe("mod_loader", function()
+    describe("validate_mods", function()
+        it("should be valid for a mod with no content", function()
+            -- Given
+            local fs = mock_filesystem.new()
+            fs:add_file("mods/test_mod/mod.lua", {
+                id = "test_mod",
+                name = "Test Mod",
+                version = "1.0.0",
+                dependencies = {},
+                content = {},
+            })
             
             local loader = mod_loader.new()
             loader:register_mod("test_mod")
