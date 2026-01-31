@@ -209,5 +209,127 @@ describe("validator", function()
 			end
 		end
     end)
+    describe("record schema", function()
+		it("required record with record value is valid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = {
+				string_field = "value",
+				int_field = 123,
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+        it("required record with nil value is invalid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
+
+        it("required record with nil value is invalid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "record" then
+		        it("required record with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.record({
+						string_field = s.string(),
+						int_field = s.integer(),
+					})
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid)
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+
+		it("optional record with record value is valid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = "value"
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional record with nil value is valid", function()
+            -- Given
+			local schema = s.record({
+				string_field = s.string(),
+				int_field = s.integer(),
+			})
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.is_equal(0, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "record" then
+		        it("optional record with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.record({
+						string_field = s.string(),
+						int_field = s.integer(),
+					})
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid)
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+    end)
 end)
 
