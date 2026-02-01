@@ -6,6 +6,7 @@ local DEFAULT_CONFIG: DynamicConfig = {
 	log_level = "WARN",
 	draw_flexbox_debug = false,
 	draw_target_debug = false,
+	profile = false,
 	head_scale = 1,
 	dialogue_speed = "normal",
 }
