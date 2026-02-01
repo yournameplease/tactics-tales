@@ -1,4 +1,4 @@
----@desc utility class to validate a SchemaDef against arbitrary data
+---@brief utility class to validate a SchemaDef against arbitrary data
 --- Used for modloader validation
 local s <const> = require("src.tactics.validator.schema_definition")
 local lists <const> = require("src.tactics.util.lists")

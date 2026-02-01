@@ -1,5 +1,5 @@
----@desc
---- static configuration.  Global variable
+---@brief
+--- Static configuration.  Global variable
 
 STATIC_CONFIG = {
 	SCREEN_WIDTH = 480,

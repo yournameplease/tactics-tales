@@ -1,7 +1,7 @@
 ---@brief
---- collection of static data for unit sprites
---- contains ids, names, sprites, and other information
---- has ordered lists for use in character customization menus
+--- A collection of static data for unit sprites.
+--- Contains ids, names, sprites, and other information.
+--- Has ordered lists for use in character customization menus.
 
 local interface NamedSpriteData
 	name: string
