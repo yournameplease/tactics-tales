@@ -98,6 +98,9 @@ function schema_definition.reference(
 	path: string
 ): SchemaDefinition
 	local path_string = {}
+	for word in string.gmatch(path, "[%a_]+") do
+		pt.add(path_string, word)
+	end
 	
 	local self: ReferenceSchemaDefinition = {
 		type = "reference",
