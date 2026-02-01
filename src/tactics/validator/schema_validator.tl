@@ -153,7 +153,7 @@ local function validate(
 					})
 				else
 					local current_path: string = nil
-					local expected_path = lists.merge(schema.path, {data as string})
+					local expected_path = lists.merge(schema.path, {tostring(data)})
 					local expected_path_string = table.concat(expected_path, ".")
 
 					local memory_cursor: {string: any} = memory as {string: any} -- type should be or any, but this is easier for the if/else

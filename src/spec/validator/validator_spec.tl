@@ -9,6 +9,7 @@ local validator = require("src.tactics.validator.schema_validator")
 describe("validator", function()
     describe("string schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["integer"] = 42,
 			["function"] = function(_: any): any end,
 			["dictionary"] = {["key"] = "value"},
@@ -98,6 +99,7 @@ describe("validator", function()
     end)
     describe("integer schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["float"] = 1.1,
 			["function"] = function(_: any): any end,
@@ -188,6 +190,7 @@ describe("validator", function()
     end)
     describe("function schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["integer"] = 42,
 			["dictionary"] = {["key"] = "value"},
@@ -277,6 +280,7 @@ describe("validator", function()
     end)
     describe("record schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["integer"] = 42,
 			["function"] = function(_: any): any end,
@@ -424,6 +428,7 @@ describe("validator", function()
     end)
 	describe("dictionary schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["integer"] = 42,
 			["function"] = function(_: any): any end,
@@ -589,6 +594,7 @@ describe("validator", function()
     end)
 	describe("list schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["integer"] = 42,
 			["function"] = function(_: any): any end,
@@ -744,6 +750,7 @@ describe("validator", function()
     end)
     describe("reference schema", function()
 		local other_types: {string: any} = {
+			["boolean"] = false,
 			["string"] = "string-value",
 			["integer"] = 42,
 			["function"] = function(_: any): any end,
