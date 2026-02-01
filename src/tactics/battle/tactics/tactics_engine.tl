@@ -225,7 +225,7 @@ function TacticsEngine:spawn_units(
             local existing_unit = self.battle_map:get_at_tile(spawn_point)
             local should_spawn = true
 
-            if existing_unit == nil then
+            if existing_unit ~= nil then
                 if blocked_behavior == "prevent" then
                     should_spawn = false
                 elseif blocked_behavior == "spawn_nearby" then
