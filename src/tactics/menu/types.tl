@@ -1,3 +1,6 @@
+---@brief
+--- Contains basic type definitions for the menu system.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 

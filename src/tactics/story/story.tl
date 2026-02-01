@@ -1,3 +1,7 @@
+---@brief
+--- The main manager for a story instance. It processes story nodes,
+--- handles transitions between story and battle, and manages story state.
+
 local animation = require("src.tactics.animation")
 local battle_manager = require("src.tactics.battle.battle_manager")
 local story_menu_manager = require("src.tactics.story.story_menu_manager")

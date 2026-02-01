@@ -1,3 +1,6 @@
+---@brief
+--- A utility for creating complex, weighted randomizers.
+
 local random = require("src.tactics.util.random")
 local lists = require("src.tactics.util.lists")
 

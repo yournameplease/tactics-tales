@@ -1,3 +1,7 @@
+---@brief
+--- Implements a menu cursor for navigating a 2D grid, used for
+--- selecting tiles on the battle map.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local menu_cursor = require("src.tactics.menu.menu_cursor")

@@ -1,3 +1,6 @@
+---@brief
+--- Defines the main UI layout for the tactical battle screen.
+
 require("src.tactics.config")
 
 local box = require("src.tactics.ui.box")

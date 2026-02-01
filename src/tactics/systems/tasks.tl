@@ -1,3 +1,6 @@
+---@brief
+--- A simple task manager that runs routines as coroutines.
+
 local record TaskManager
     tasks: { any }
 end

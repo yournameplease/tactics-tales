@@ -1,3 +1,7 @@
+---@brief
+--- Manages the rendering of complex, multi-part sprites using a skeleton hierarchy.
+--- Calculates the position of each node and draws the complete character.
+
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
 local point = require("src.tactics.util.point")

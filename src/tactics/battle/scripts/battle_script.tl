@@ -1,3 +1,8 @@
+---@brief
+--- Defines the data structures for the battle scripting system.
+--- Specifies the shape of triggers and their corresponding effects,
+--- forming the basis for event-driven scenarios in battles.
+
 local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
 local battle_map = require("src.tactics.battle.battle_map")
 local TileDistance = require("src.tactics.battle.battle_map.types").TileDistance

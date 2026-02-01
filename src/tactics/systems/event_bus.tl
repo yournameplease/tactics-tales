@@ -1,3 +1,7 @@
+---@brief
+--- A simple event bus for decoupled communication between systems.
+--- Allows services to subscribe to and emit global game events.
+
 local id_generator = require("src.tactics.util.id_generator")
 
 local type EventArgs = { string: any }

@@ -1,3 +1,7 @@
+---@brief
+--- Defines the data structure for item definitions, which are
+--- used by the item generator.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local item_types = require("src.tactics.character.items.types")

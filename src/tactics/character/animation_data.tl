@@ -1,3 +1,8 @@
+---@brief
+--- Contains static data definitions for character animations.
+--- Defines anchor points, sprite offsets, and frame data for different
+--- body types and animation states.
+
 local point = require("src.tactics.util.point")
 local PointRecord = point.PointRecord
 local maps = require("src.tactics.util.maps")

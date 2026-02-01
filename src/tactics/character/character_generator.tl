@@ -1,3 +1,8 @@
+---@brief
+--- A factory for creating new character instances from templates.
+--- It handles the randomization of appearance attributes and the
+--- initial setup of a character's inventory.
+
 local character = require("src.tactics.character.object.character")
 local character_definition = require("src.tactics.character.definition")
 local CharacterTemplate = character_definition.CharacterTemplate

@@ -1,3 +1,8 @@
+---@brief
+--- Manages the lifecycle and storage of all character instances.
+--- It holds the player roster and is responsible for generating new
+--- characters for battles.
+
 local id_generator = require("src.tactics.util.id_generator")
 local GameData = require("src.tactics.game_data").GameData
 local Character = require("src.tactics.character.object.character").Character

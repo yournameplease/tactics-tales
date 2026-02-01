@@ -1,3 +1,8 @@
+---@brief
+--- Handles the rendering of character sprites to the screen.
+--- Manages palette swaps, skeletal animation, and composing different
+--- character parts and equipment into a final sprite.
+
 require("profiler")
 local point = require("src.tactics.util.point")
 local Point = point.Point

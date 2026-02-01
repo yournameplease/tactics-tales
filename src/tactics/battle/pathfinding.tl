@@ -1,3 +1,8 @@
+---@brief
+--- Provides pathfinding capabilities for units on the battle map.
+--- Uses Dijkstra's algorithm to find reachable tiles and calculate shortest paths
+--- based on movement costs.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local Side = require("src.tactics.character.object.character").Side

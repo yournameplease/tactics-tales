@@ -1,3 +1,7 @@
+---@brief
+--- Implements a cursor that manages a list of sub-cursors,
+--- for menus with multiple, independent options like an options screen.
+
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require("src.tactics.menu.menu_context").MenuContext

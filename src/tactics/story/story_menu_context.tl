@@ -1,3 +1,6 @@
+---@brief
+--- Defines the context object for menus used within story scenes.
+
 local character = require("src.tactics.character.object.character")
 
 local record StoryMenuContext

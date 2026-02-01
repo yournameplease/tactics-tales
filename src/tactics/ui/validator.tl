@@ -1,3 +1,7 @@
+---@brief
+--- A utility to validate the structural integrity of UI layouts at startup,
+--- checking for invalid property combinations.
+
 local box = require("src.tactics.ui.box")
 
 local menu_validator = {}

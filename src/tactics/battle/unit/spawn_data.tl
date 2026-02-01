@@ -1,3 +1,7 @@
+---@brief
+--- Defines the data structures for spawning units in a battle.
+--- This includes the character source, AI behavior, and initial tile placement.
+
 local battle_definition_types = require("src.tactics.battle.definition.types")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
 

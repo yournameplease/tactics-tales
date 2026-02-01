@@ -1,3 +1,8 @@
+---@brief
+--- The core engine for handling actions within a battle.
+--- This service manages unit spawning, movement, combat, and interactions,
+--- coordinating tasks, animations, and events.
+
 require("src.tactics.config")
 
 local MenuTileHighlight = require("src.tactics.menu.cursor.grid_cursor").MenuTileHighlight

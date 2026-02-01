@@ -1,3 +1,8 @@
+---@brief
+--- Defines the data structures for character templates.
+--- Specifies how character attributes and their randomization
+--- options are structured.
+
 local enum AttributeDefinitionType
 	"list"
 	"weighted"

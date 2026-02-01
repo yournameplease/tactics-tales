@@ -1,3 +1,6 @@
+---@brief
+--- Defines the main GameData record that aggregates all loaded mod data.
+
 local MapDefinition = require("src.tactics.battle.map.types").MapDefinition
 local BattleDefinition = require("src.tactics.battle.definition").BattleDefinition
 local story = require("src.tactics.story.types")

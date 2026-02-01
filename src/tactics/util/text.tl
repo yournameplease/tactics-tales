@@ -1,3 +1,7 @@
+---@brief
+--- A utility for handling text layout, including wrapping, justification,
+--- and alignment for UI rendering.
+
 require("profiler")
 local lists = require("src.tactics.util.lists")
 

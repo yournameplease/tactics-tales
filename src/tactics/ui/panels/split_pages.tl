@@ -1,3 +1,6 @@
+---@brief
+--- A container panel that creates a two-page/split-screen layout.
+
 local box = require("src.tactics.ui.box")
 local PageDivider = require("src.tactics.ui.decoration.page_divider")
 

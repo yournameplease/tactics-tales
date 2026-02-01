@@ -1,3 +1,6 @@
+---@brief
+--- Defines the UI layout for the combat preview screen.
+
 require("src.tactics.config")
 
 local tactics_map = require("src.tactics.ui.panels.tactics_map")

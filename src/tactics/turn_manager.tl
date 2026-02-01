@@ -1,3 +1,7 @@
+---@brief
+--- Manages the turn and phase sequence in a battle, coordinating between
+--- player, enemy, and neutral turns.
+
 local ai_engine = require("src.tactics.battle.tactics.ai_engine")
 local event_bus = require("src.tactics.systems.event_bus")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")

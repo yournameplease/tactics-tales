@@ -1,3 +1,7 @@
+---@brief
+--- The main entry point for the game, responsible for initializing all
+--- systems and running the main game loop.
+
 -- tactics game
 -- ynp
 

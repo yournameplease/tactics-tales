@@ -1,3 +1,6 @@
+---@brief
+--- Defines the UI layout for the chapter select screen.
+
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")
 local list_cursor = require("src.tactics.menu.cursor.list_cursor")

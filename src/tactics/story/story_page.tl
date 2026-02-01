@@ -1,3 +1,7 @@
+---@brief
+--- Represents the current visible state of a story scene.
+--- It holds the collection of nodes (text, menus) to be rendered.
+
 local animation = require("src.tactics.animation")
 local drawable_character = require("src.tactics.story.drawable_character")
 local story_memory = require("src.tactics.story.story_memory")

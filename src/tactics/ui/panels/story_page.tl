@@ -1,3 +1,5 @@
+---@brief
+--- The main panel for rendering the content of a story page.
 
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")

@@ -1,3 +1,7 @@
+---@brief
+--- A small collection of functional programming helper functions,
+--- primarily for creating function pipelines.
+
 local fp = {}
 
 function fp.fn_and<Arg>(...: function(Arg): boolean): function(Arg): boolean

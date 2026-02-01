@@ -1,3 +1,6 @@
+---@brief
+--- Defines the data structures for mod specifications.
+
 local type ModId = string
 
 local record ModContent

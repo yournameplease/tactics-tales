@@ -1,3 +1,8 @@
+---@brief
+--- Represents the state of the battlefield, including terrain and unit positions.
+--- Provides an API for querying and manipulating the map and the
+--- units residing on it.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local fp = require("src.tactics.util.fp")

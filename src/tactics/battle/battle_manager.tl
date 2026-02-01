@@ -1,3 +1,8 @@
+---@brief
+--- The main manager for a battle instance.
+--- It initializes and coordinates all battle-related services,
+--- including the tactics engine, UI, menus, and AI.
+
 local InputContext = require("src.tactics.input.input_context").InputContext
 local bm = require("src.tactics.battle.battle_map")
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")

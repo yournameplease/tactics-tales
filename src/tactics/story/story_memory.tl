@@ -1,3 +1,7 @@
+---@brief
+--- A key-value store for story variables, allowing data to be
+--- persisted and used across different story nodes.
+
 local CharacterManager = require("src.tactics.character.character_manager").CharacterManager
 
 local type StoryMemoryMap = { string: string

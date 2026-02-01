@@ -1,3 +1,6 @@
+---@brief
+--- A service to validate loaded game data against the mod schemas.
+
 local GameData = require("src.tactics.game_data").GameData
 
 local mod_validator = {

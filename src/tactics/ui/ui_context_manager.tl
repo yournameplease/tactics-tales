@@ -1,3 +1,7 @@
+---@brief
+--- Manages the different UI contexts (battle, story, game) and provides
+--- the correct, enriched context to the UI system.
+
 local ui_context = require("src.tactics.ui.ui_context")
 local battle_ui_context = require("src.tactics.battle.battle_ui_context")
 local story_ui_context = require("src.tactics.story.story_ui_context")

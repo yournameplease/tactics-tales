@@ -1,3 +1,5 @@
+---@brief
+--- Contains string manipulation utility functions.
 
 local str <const> = {}
 

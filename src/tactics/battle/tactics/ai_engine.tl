@@ -1,3 +1,8 @@
+---@brief
+--- The AI engine for controlling non-player units in battle.
+--- It analyzes the game state to determine and execute optimal actions,
+--- such as moving and attacking targets.
+
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local lists = require("src.tactics.util.lists")

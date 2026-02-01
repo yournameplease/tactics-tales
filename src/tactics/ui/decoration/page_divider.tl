@@ -1,3 +1,7 @@
+---@brief
+--- A decorative UI element that creates a visual divider
+--- resembling the edge of a book's page.
+
 local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager

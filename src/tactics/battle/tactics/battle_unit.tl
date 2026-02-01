@@ -1,3 +1,8 @@
+---@brief
+--- Defines the BattleUnit, which represents a character on the battlefield.
+--- It holds transient data like HP, position, and action status,
+--- linking to the persistent Character data.
+
 require("src.tactics.character.animation_data")
 require("src.tactics.animation")
 local point = require("src.tactics.util.point")

@@ -1,3 +1,6 @@
+---@brief
+--- A UI panel that shows a preview of a potential combat encounter.
+
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")
 local portrait_box = require("src.tactics.ui.panels.portrait_box")

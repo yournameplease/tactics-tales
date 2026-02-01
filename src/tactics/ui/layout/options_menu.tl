@@ -1,3 +1,6 @@
+---@brief
+--- Defines the UI layout for the options menu screen.
+
 local text_node = require("src.tactics.ui.components.text_node")
 local box = require("src.tactics.ui.box")
 local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
