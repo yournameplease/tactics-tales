@@ -237,6 +237,10 @@ function TacticsMap:draw_map_decorations(layers: bm.MapLayers, z_0: integer, z_1
     end
 end
 
+---@desc
+--- Dynamically adds or removes a floating menu as a child of the map.
+--- The menu appears next to the cursor when the menu state requires it
+--- (e.g., for action selection), and is removed otherwise.
 function TacticsMap:compute_children(state: UIContextManager)
     local menu = state.battle_context.battle_menu_manager
     local cursor = menu.menu_cursor
@@ -324,6 +328,10 @@ function TacticsMap:compute_children(state: UIContextManager)
     end
 end
 
+---@desc
+--- The main rendering function for the entire battle map panel.
+--- Draws ground, walls and Z-sorted units, and ceilings from the tile map, as well as UI cursor tiles
+--- Prerender to a draw target to handle clipping at the edges.
 function TacticsMap:draw(
     state: UIContextManager,
     draw_target_manager: DrawTargetManager,

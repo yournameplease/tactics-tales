@@ -38,6 +38,12 @@ local record MovementOption
     target: BattleUnit -- nillable
 end
 
+---@desc
+--- Computes and executes the best action for a given AI-controlled unit.
+--- The AI first checks for targets it can attack within a single move.
+--- If none are found, it identifies the closest target it could attack
+--- with extended movement and moves as close as possible to it.
+--- If no actions are possible, the unit will wait.
 function AIEngine:compute_unit_ai(unit: BattleUnit)
     local ai = unit.unit_ai
 
