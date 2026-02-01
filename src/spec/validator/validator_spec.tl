@@ -515,13 +515,32 @@ describe("validator", function()
 		end
     end)
     describe("reference schema", function()
-		it("required reference with reference value in memory is valid", function()
+		it("required reference key in memory is valid", function()
             -- Given
 			local schema = s.reference("memory_table")
 			local data = "memory_key"
 			local memory = {
 				["memory_table"] = {
 					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+		it("required reference with key in nested memory is valid", function()
+            -- Given
+			local schema = s.reference("memory_table_a.memory_table_b")
+			local data = "memory_key"
+			local memory = {
+				["memory_table_a"] = {
+					["memory_table_b"] = {
+						["memory_key"] = "memory_value",
+					},
 				},
 			}
 
@@ -566,6 +585,21 @@ describe("validator", function()
             luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
 			luassert.is_equal(1, #errors)
         end)
+        it("required reference with non-table value in memory path is invalid", function()
+            -- Given
+			local schema = s.reference("memory_table_a.memory_table_b")
+			local data = "memory_table_a"
+			local memory = {
+				["memory_table_a"] = "not_a_table",
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
 
 		for k,v in pairs(sample_values) do
 			if k ~= "reference" and v ~= nil then
@@ -589,9 +623,9 @@ describe("validator", function()
 			end
 		end
 
-		it("optional reference with reference value is valid", function()
+		it("optional reference with key in memory is valid", function()
             -- Given
-			local schema = s.optional(s.reference("memory_value"))
+			local schema = s.optional(s.reference("memory_table"))
 			local data = "memory_key"
 			local memory = {
 				["memory_table"] = {
@@ -608,11 +642,13 @@ describe("validator", function()
         end)
         it("optional reference with nil value is valid", function()
             -- Given
-			local schema = s.optional(s.reference("memory_value"))
+			local schema = s.optional(s.reference("memory_table_a.memory_table_b"))
 			local data = nil
 			local memory = {
-				["memory_table"] = {
-					["memory_key"] = "memory_value",
+				["memory_table_a"] = {
+					["memory_table_b"] = {
+						["memory_key"] = "memory_value",
+					},
 				},
 			}
 
@@ -623,7 +659,7 @@ describe("validator", function()
             luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
             luassert.is_equal(0, #errors)
         end)
-        it("required reference with value not in memory is invalid", function()
+        it("optional reference with value not in memory is invalid", function()
             -- Given
 			local schema = s.optional(s.reference("memory_table"))
 			local data = "bad_memory_key"
@@ -645,8 +681,8 @@ describe("validator", function()
 			if k ~= "reference" and v ~= nil then
 		        it("optional reference with "..k.." value is invalid", function()
 		            -- Given
-					local schema = s.optional(s.reference("memory_value"))
-					local data = nil
+					local schema = s.optional(s.reference("memory_table"))
+					local data = v
 					local memory = {
 						["memory_table"] = {
 							["memory_key"] = "memory_value",

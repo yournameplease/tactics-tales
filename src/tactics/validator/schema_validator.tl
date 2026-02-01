@@ -106,6 +106,69 @@ local function validate(
 						add_deep_errors(field_errors)
 					end
 				end
+			elseif schema is s.ReferenceSchemaDefinition then
+				if pt.type(data) == "table" then
+					is_valid = false
+					add_local_errors({
+						"Field expected "..schema.type.." but received a "..pt.type(data)
+					})
+				else
+					local current_path: string = nil
+					local expected_path = lists.merge(schema.path, {data as string})
+					local expected_path_string = table.concat(expected_path, ".")
+
+					local memory_cursor: {string: any} = memory as {string: any} -- type should be or any, but this is easier for the if/else
+
+					if memory_cursor == nil then
+						is_valid = false
+						add_local_errors({
+							"Field expected to find data at `"
+								..expected_path_string
+								.."` but found nil data at root memory."
+						})
+					elseif pt.type(memory_cursor) ~= "table" then
+						is_valid = false
+						add_local_errors({
+							"Field expected to find data at `"
+								..expected_path_string
+								.."` but root memory was not a table."
+						})
+					else
+						for i,p in ipairs(expected_path) do
+							current_path = current_path == nil
+								and p
+								or current_path .. "." .. p
+
+							if memory_cursor[p] == nil then
+								is_valid = false
+								add_local_errors({
+									"Field expected to find data at `"
+										..expected_path_string
+										.."` but found nil data at `"
+										..current_path
+										.."`."
+								})
+								break
+							elseif type(memory_cursor[p]) ~= "table" then
+								if i < #expected_path then
+									is_valid = false
+									add_local_errors({
+										"Field expected to find data at `"
+											..expected_path_string
+											.."` but found data "
+											..tostring(memory_cursor)
+											.." at `"
+											..current_path
+											.."` which was not a table."
+									})
+									break
+								end
+							else
+								memory_cursor = memory_cursor[p] as {string: any}
+							end
+						end
+					end
+				end
 			else
 				unexpected(schema.type)
 			end
