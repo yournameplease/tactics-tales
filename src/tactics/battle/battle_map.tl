@@ -390,6 +390,26 @@ function BattleMap:get_nearby_interactions(
 
     -- TODO: unit interactions
 
+    for _,offset in ipairs(adjacent_offsets) do
+        local p = tile+offset
+        local unit = self:get_at_tile(p)
+        if unit ~= nil then
+            local unit_interactions = self.interactions_by_unit_id[unit.id]
+            if unit_interactions ~= nil then
+                local interactions = unit_interactions
+                for _,i in pairs(interactions) do
+                    local hook: InteractionHook = {
+                        script_id = i.script_id,
+                        interaction_text = i.interaction_text,
+                        target_tile = p,
+                        target_unit = unit,
+                    }
+                    pt.add(out, hook)
+                end
+            end
+        end
+    end
+
     return out
 end
 

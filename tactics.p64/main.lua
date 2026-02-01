@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-13 02:20:43",revision=99,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-31 15:22:00",revision=104,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
