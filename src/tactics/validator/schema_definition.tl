@@ -2,6 +2,7 @@
 local enum SchemaDefinitionType
 	"string"
 	"integer"
+	"function"
 	"dictionary"
 	"list"
 	"record"
@@ -22,6 +23,11 @@ end
 local record IntegerSchemaDefinition
 	is SchemaDefinition
 	where self.type == "integer"
+end
+
+local record FunctionSchemaDefinition
+	is SchemaDefinition
+	where self.type == "function"
 end
 
 local record DictionarySchemaDefinition
@@ -55,6 +61,7 @@ local schema_definition = {
 
 	StringSchemaDefinition = StringSchemaDefinition,
 	IntegerSchemaDefinition = IntegerSchemaDefinition,
+	FunctionSchemaDefinition = FunctionSchemaDefinition,
 	DictionarySchemaDefinition = DictionarySchemaDefinition,
 	ListSchemaDefinition =ListSchemaDefinition,
 	RecordSchemaDefinition = RecordSchemaDefinition,
@@ -71,6 +78,13 @@ end
 function schema_definition.integer(): SchemaDefinition
 	return {
 		type = "integer",
+		optional = false,
+	}
+end
+
+function schema_definition.func(): SchemaDefinition
+	return {
+		type = "function",
 		optional = false,
 	}
 end

@@ -58,6 +58,13 @@ local function validate(
 						})
 					end
 				end
+			elseif schema is s.FunctionSchemaDefinition then
+				if pt.type(data) ~= "function" then
+					is_valid = false
+					add_local_errors({
+						"Field expected "..schema.type.." but received a "..pt.type(data)
+					})
+				end
 			elseif schema is s.DictionarySchemaDefinition then
 				if pt.type(data) ~= "table" then
 					is_valid = false
@@ -151,7 +158,7 @@ local function validate(
 					end
 				end
 			elseif schema is s.ReferenceSchemaDefinition then
-				if pt.type(data) == "table" then
+				if pt.type(data) == "table" or pt.type(data) == "function" then
 					is_valid = false
 					add_local_errors({
 						"Field expected "..schema.type.." but received a "..pt.type(data)

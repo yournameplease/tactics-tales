@@ -9,6 +9,7 @@ local validator = require("src.tactics.validator.schema_validator")
 local sample_values <total>: {s.SchemaDefinitionType: any} = {
 	["string"] = "string-value",
 	["integer"] = 42,
+	["function"] = function(_: any): any end,
 	["dictionary"] = {["key"] = "value"},
 	["list"] = {"foo", "bar", "baz"},
 	["record"] = { int = 1, string = "string"},
@@ -199,6 +200,91 @@ describe("validator", function()
 		        it("optional integer with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.integer())
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+    end)
+    describe("function schema", function()
+		it("required function with function value is valid", function()
+            -- Given
+			local schema = s.func()
+			local data = function(_: string): string end
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("required function with nil value is invalid", function()
+            -- Given
+			local schema = s.func()
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "function" and v ~= nil then
+		        it("required function with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.func()
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+
+		it("optional function with function value is valid", function()
+            -- Given
+			local schema = s.optional(s.func())
+			local data = function(_: string): string end
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional function with nil value is valid", function()
+            -- Given
+			local schema = s.optional(s.func())
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "function" and v ~= nil then
+		        it("optional function with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.optional(s.func())
 					local data = v
 
 		            -- When
