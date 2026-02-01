@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-01-31 15:22:00",revision=104,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-02-01 20:26:13",revision=105,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -6,7 +6,7 @@
 local _modules = {}
 
 function require(name)
-	if split(name,'/')[1] ~= 'src' then
+	if split(name,'.')[1] ~= 'src' then
 		return
 	elseif _modules[name] == nil then
 		local build_name = name:gsub('%.', '/') .. '.lua'
