@@ -1,6 +1,10 @@
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
+---@brief
+--- A decorative UI element for creating a horizontal divider
+--- between sections.
+
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 
 local record SectionDivider
     is box.UIElement

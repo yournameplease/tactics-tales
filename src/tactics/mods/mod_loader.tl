@@ -1,12 +1,16 @@
-local fp = require("src/tactics/util/fp")
-local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
-local point = require("src/tactics/util/point")
-local GameData = require("src/tactics/game_data").GameData
-local story = require("src/tactics/story/types")
+---@brief
+--- Handles loading, sandboxing, and merging of mod data.
+
+local fp = require("src.tactics.util.fp")
+local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
+local point = require("src.tactics.util.point")
+local GameData = require("src.tactics.game_data").GameData
+local story = require("src.tactics.story.types")
 local StoryId = story.StoryId
 local StoryDefinition = story.StoryDefinition
-local mods = require("src/tactics/mods")
+local mods = require("src.tactics.mods")
+local mod_validator = require("src.tactics.mods.validator")
 local ModId = mods.ModId
 local ModSpec = mods.ModSpec
 
@@ -21,6 +25,8 @@ end
 local interface ModLoader
 	register_mod: function(self, path: string)
 	load_mod_data: function(self): GameData
+	-- returns is_valid, {errors}
+	validate_mods: function(self): boolean, {string}
 end
 
 local mod_loader = {
@@ -61,7 +67,6 @@ end
 
 function ModLoaderImpl:validate_mod(id: ModId)
 	local data = self:load_mod_data()
-
 	
 end
 
@@ -143,7 +148,7 @@ function ModLoaderImpl:create_sandbox(): {string: any}
 	for _,r in ipairs(self.registered) do
 		log.info("Loading libraries for "..r.id)
 		local base_lib_path = "mods/"..r.path.."/lib"
-		local lib_paths = pt.ls(base_lib_path)
+		local lib_paths = pt.ls(base_lib_path) or {}
 		log.debug("Found "..#lib_paths.." libraries at "..base_lib_path)
 		for _,lib_path in ipairs(lib_paths) do
 			local full_path = base_lib_path.."/"..lib_path
@@ -162,16 +167,19 @@ function ModLoaderImpl:load_mod_data(): GameData
 
 	local game_data: GameData = {}
 
+	log.debug("Loading maps...")
 	game_data.maps = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.maps end,
 		nil
 	)
+	log.debug("Loading battles...")
 	game_data.battles = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.battles end,
 		nil
 	)
+	log.debug("Loading stories...")
 	game_data.stories = {
 		data = load_mod_map(
 			self.registered,
@@ -195,18 +203,28 @@ function ModLoaderImpl:load_mod_data(): GameData
 			end
 		)
 	}
+	log.debug("Loading characters...")
 	game_data.characters = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.characters end,
 		nil
 	)
+	log.debug("Loading items...")
 	game_data.items = load_mod_map(
 		self.registered,
 		function(mod: RegisteredMod): Path return mod.spec.content.items end,
 		nil
 	)
+	log.debug("Finished loading mods.")
 
 	return game_data
+end
+
+
+function ModLoaderImpl:validate_mods(): boolean, {string}
+	local game_data = self:load_mod_data()	
+
+	return mod_validator.validate_game_data(game_data)
 end
 
 return mod_loader

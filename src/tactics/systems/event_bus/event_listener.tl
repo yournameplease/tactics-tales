@@ -1,7 +1,8 @@
 ---@brief
---- manages ids of event bus `on` events
---- to allow easy teardown 
-local event_bus = require("src/tactics/systems/event_bus")
+--- A helper class to manage event subscriptions for a service,
+--- simplifying the teardown of listeners.
+ 
+local event_bus = require("src.tactics.systems.event_bus")
 
 
 local interface EventListener

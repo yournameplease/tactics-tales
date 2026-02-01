@@ -1,11 +1,14 @@
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-local portrait_box = require("src/tactics/ui/panels/portrait_box")
-require("src/tactics/character/items/object/item")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-require("src/tactics/character/items/object/item_inventory")
-local wpn = require("src/tactics/character/items/object/weapon")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+---@brief
+--- A UI panel that displays detailed information about a selected unit.
+
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+local portrait_box = require("src.tactics.ui.panels.portrait_box")
+require("src.tactics.character.items.object.item")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+require("src.tactics.character.items.object.item_inventory")
+local wpn = require("src.tactics.character.items.object.weapon")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 local record UnitInfo

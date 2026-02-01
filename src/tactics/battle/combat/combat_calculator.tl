@@ -1,13 +1,18 @@
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+---@brief
+--- Calculates the outcome of combat between units.
+--- It determines hit chance, damage, and the results of attacks
+--- and counter-attacks based on unit stats and equipment.
+
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local bm = require("src/tactics/battle/battle_map")
-local point = require("src/tactics/util/point")
+local bm = require("src.tactics.battle.battle_map")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local lists = require("src/tactics/util/lists")
-local random = require("src/tactics/util/random")
-local wpn = require("src/tactics/character/items/object/weapon")
+local lists = require("src.tactics.util.lists")
+local random = require("src.tactics.util.random")
+local wpn = require("src.tactics.character.items.object.weapon")
 local effect = wpn.effect
-local Targeting = require("src/tactics/character/items/object/weapon").targeting.Targeting
+local Targeting = require("src.tactics.character.items.object.weapon").targeting.Targeting
 
 local record CombatResult
     record CombatStep

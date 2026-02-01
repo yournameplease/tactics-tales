@@ -1,4 +1,8 @@
 
+---@brief
+--- Defines the data structures for map definitions, such as
+--- statically defined maps from a file.
+
 local enum MapGenerationType
     "static"
     "procgen"

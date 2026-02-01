@@ -1,3 +1,7 @@
+---@brief
+--- Manages the game's dynamic configuration.
+--- Loads user settings and provides default values.
+
 local DEFAULT_CONFIG: DynamicConfig = {
 	log_level = "WARN",
 	draw_flexbox_debug = false,

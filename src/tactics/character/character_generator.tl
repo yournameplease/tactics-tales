@@ -1,15 +1,20 @@
-local character = require("src/tactics/character/object/character")
-local character_definition = require("src/tactics/character/definition")
+---@brief
+--- A factory for creating new character instances from templates.
+--- It handles the randomization of appearance attributes and the
+--- initial setup of a character's inventory.
+
+local character = require("src.tactics.character.object.character")
+local character_definition = require("src.tactics.character.definition")
 local CharacterTemplate = character_definition.CharacterTemplate
-local GameData = require("src/tactics/game_data").GameData
-require("src/tactics/character/items/object/weapon")
-local sprite_data = require("src/tactics/character/sprite_data")
-local random = require("src/tactics/util/random")
-local randomizer = require("src/tactics/util/randomizer")
-local ItemInventory  = require("src/tactics/character/items/object/item_inventory")
-local ItemGenerator = require("src/tactics/character/items/item_generator")
-local NAMES = require("src/tactics/corpora/names")
-local maps = require("src/tactics/util/maps")
+local GameData = require("src.tactics.game_data").GameData
+require("src.tactics.character.items.object.weapon")
+local sprite_data = require("src.tactics.character.sprite_data")
+local random = require("src.tactics.util.random")
+local randomizer = require("src.tactics.util.randomizer")
+local ItemInventory  = require("src.tactics.character.items.object.item_inventory")
+local ItemGenerator = require("src.tactics.character.items.item_generator")
+local NAMES = require("src.tactics.corpora.names")
+local maps = require("src.tactics.util.maps")
 
 local character_generator = {}
 

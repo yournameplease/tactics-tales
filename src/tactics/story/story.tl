@@ -1,28 +1,32 @@
-local animation = require("src/tactics/animation")
-local battle_manager = require("src/tactics/battle/battle_manager")
-local story_menu_manager = require("src/tactics/story/story_menu_manager")
-local character_manager = require("src/tactics/character/character_manager")
-local character = require("src/tactics/character/object/character")
-local story_menu_context = require("src/tactics/story/story_menu_context")
-local story_ui_context = require("src/tactics/story/story_ui_context")
-local story_page = require("src/tactics/story/story_page")
-local story_memory = require("src/tactics/story/story_memory")
-local InputContext = require("src/tactics/input/input_context").InputContext
-local story_types = require("src/tactics/story/types")
+---@brief
+--- The main manager for a story instance. It processes story nodes,
+--- handles transitions between story and battle, and manages story state.
+
+local animation = require("src.tactics.animation")
+local battle_manager = require("src.tactics.battle.battle_manager")
+local story_menu_manager = require("src.tactics.story.story_menu_manager")
+local character_manager = require("src.tactics.character.character_manager")
+local character = require("src.tactics.character.object.character")
+local story_menu_context = require("src.tactics.story.story_menu_context")
+local story_ui_context = require("src.tactics.story.story_ui_context")
+local story_page = require("src.tactics.story.story_page")
+local story_memory = require("src.tactics.story.story_memory")
+local InputContext = require("src.tactics.input.input_context").InputContext
+local story_types = require("src.tactics.story.types")
 local story_node = story_types.story_node
 local StoryId = story_types.StoryId
 local StoryDefinition = story_types.StoryDefinition
-local event_listener = require("src/tactics/systems/event_bus/event_listener")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local Character = require("src/tactics/character/object/character").Character
-local EventBus = require("src/tactics/systems/event_bus").EventBus
-local GameData = require("src/tactics/game_data").GameData
-local TaskManager = require("src/tactics/systems/tasks").TaskManager
-local AnimationManager = require("src/tactics/animation").AnimationManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local dialogue_manager = require("src/tactics/dialogue/dialogue_manager")
+local event_listener = require("src.tactics.systems.event_bus.event_listener")
+local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local Character = require("src.tactics.character.object.character").Character
+local EventBus = require("src.tactics.systems.event_bus").EventBus
+local GameData = require("src.tactics.game_data").GameData
+local TaskManager = require("src.tactics.systems.tasks").TaskManager
+local AnimationManager = require("src.tactics.animation").AnimationManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
-local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 
 ---@desc
 --- services needed to create a battle
@@ -93,6 +97,11 @@ function StoryImpl:jump_to_node(node_id: string)
     self:handle_new_node()
 end
 
+---@desc
+--- The core of the story progression logic. This function acts as a state
+--- machine that interprets the current story node and triggers the
+--- corresponding action, such as showing dialogue, starting a battle,
+--- or modifying story memory.
 function StoryImpl:handle_new_node()
     local node_definition = self.current_node.definition
     log.debug("Handling new node: ", node_definition.type)
@@ -166,6 +175,10 @@ function StoryImpl:handle_new_node()
     end
 end
 
+---@desc
+--- Advances the story to the next node in the sequence. It performs
+--- any necessary cleanup from the previous node, increments the node
+--- counter, and then calls `handle_new_node` to process the new active node.
 function StoryImpl:advance_node()
     local node_definition = self.current_node.definition
     -- these probably belong in the story page itself

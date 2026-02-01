@@ -1,6 +1,9 @@
-local Item = require("src/tactics/character/items/object/item")
-local wpn = require("src/tactics/character/items/object/weapon")
-local item_definition = require("src/tactics/types/item_definition")
+---@brief
+--- A factory for creating item instances from item definitions.
+
+local Item = require("src.tactics.character.items.object.item")
+local wpn = require("src.tactics.character.items.object.weapon")
+local item_definition = require("src.tactics.types.item_definition")
 
 local item_generator = {}
 

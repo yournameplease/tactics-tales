@@ -1,4 +1,6 @@
-
+---@brief
+--- Contains a simple logging utility for printing debug messages
+--- based on log levels.
 
 local function should_print (level: LogLevel): boolean
     local log_level = DYNAMIC_CONFIG.log_level

@@ -1,9 +1,12 @@
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-local portrait_box = require("src/tactics/ui/panels/portrait_box")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local combat_calculator = require("src/tactics/battle/combat/combat_calculator")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+---@brief
+--- A UI panel that shows a preview of a potential combat encounter.
+
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+local portrait_box = require("src.tactics.ui.panels.portrait_box")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
 local record CombatPreview

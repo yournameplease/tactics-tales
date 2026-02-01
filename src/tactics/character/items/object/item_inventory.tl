@@ -1,8 +1,13 @@
-local Item = require("src/tactics/character/items/object/item")
-local item_types = require("src/tactics/character/items/types")
-local wpn = require("src/tactics/character/items/object/weapon")
-local lists = require("src/tactics/util/lists")
-local maps = require("src/tactics/util/maps")
+---@brief
+--- Manages a character's inventory.
+--- Handles adding, removing, equipping, and unequipping items,
+--- enforcing slot and equipment rules.
+
+local Item = require("src.tactics.character.items.object.item")
+local item_types = require("src.tactics.character.items.types")
+local wpn = require("src.tactics.character.items.object.weapon")
+local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
 
 local interface ItemInventory
 

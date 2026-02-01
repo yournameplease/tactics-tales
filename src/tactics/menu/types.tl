@@ -1,4 +1,7 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- Contains basic type definitions for the menu system.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
 
 local type MenuId = string

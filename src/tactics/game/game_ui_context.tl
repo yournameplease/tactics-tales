@@ -1,8 +1,11 @@
-local event_bus = require("src/tactics/systems/event_bus")
-local ui_context = require("src/tactics/ui/ui_context")
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
-local GameMenuManager = require("src/tactics/game/game_menu_manager").GameMenuManager
-local input_srv = require("src/tactics/joypad")
+---@brief
+--- Provides the UI context for the main game menus.
+
+local event_bus = require("src.tactics.systems.event_bus")
+local ui_context = require("src.tactics.ui.ui_context")
+local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local GameMenuManager = require("src.tactics.game.game_menu_manager").GameMenuManager
+local input_srv = require("src.tactics.joypad")
 local InputService = input_srv.InputService
 local InputMethod = input_srv.InputMethod
 

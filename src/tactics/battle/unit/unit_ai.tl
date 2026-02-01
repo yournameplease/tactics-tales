@@ -1,4 +1,8 @@
-local Side = require("src/tactics/character/object/character").Side
+---@brief
+--- Data structures for defining the behavior of an AI-controlled unit.
+--- Includes movement style and targeting preferences.
+
+local Side = require("src.tactics.character.object.character").Side
 
 local enum MoveAI
     "infinity"

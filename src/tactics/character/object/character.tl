@@ -1,10 +1,15 @@
-require("src/tactics/character/items/object/weapon")
-require("src/tactics/character/animation_data")
-local animation = require("src/tactics/animation")
-local ItemInventory = require("src/tactics/character/items/object/item_inventory")
-local targeting = require("src/tactics/character/items/object/weapon").targeting
+---@brief
+--- Defines the core data structure for a persistent character.
+--- This includes a character's stats, appearance, inventory,
+--- and other permanent attributes.
+
+require("src.tactics.character.items.object.weapon")
+require("src.tactics.character.animation_data")
+local animation = require("src.tactics.animation")
+local ItemInventory = require("src.tactics.character.items.object.item_inventory")
+local targeting = require("src.tactics.character.items.object.weapon").targeting
 local Targeting = targeting.Targeting
-local maps = require("src/tactics/util/maps")
+local maps = require("src.tactics.util.maps")
 
 local enum Side
     "player"

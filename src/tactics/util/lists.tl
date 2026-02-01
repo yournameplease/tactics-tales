@@ -1,3 +1,6 @@
+---@brief
+--- A collection of functional-style utility functions for list manipulation.
+
 -- Utility functions for functional programming on lists
 
 local type MapEntry<Key,Value> = { Key, Value }

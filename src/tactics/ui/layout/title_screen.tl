@@ -1,6 +1,9 @@
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-local book_box = require("src/tactics/ui/decoration/book_box")
+---@brief
+--- Defines the UI layout for the title screen.
+
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+local book_box = require("src.tactics.ui.decoration.book_box")
 
 local root = box.new({
     x=0, y=0,

@@ -1,12 +1,17 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- Represents the state of the battlefield, including terrain and unit positions.
+--- Provides an API for querying and manipulating the map and the
+--- units residing on it.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local fp = require("src/tactics/util/fp")
-local array_2d = require("src/tactics/util/array_2d")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local fp = require("src.tactics.util.fp")
+local array_2d = require("src.tactics.util.array_2d")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local battle_definition_types = require("src/tactics/battle/definition/types")
-local types = require("src/tactics/battle/battle_map/types")
-local lists = require("src/tactics/util/lists")
+local battle_definition_types = require("src.tactics.battle.definition.types")
+local types = require("src.tactics.battle.battle_map.types")
+local lists = require("src.tactics.util.lists")
 local TileDistance = types.TileDistance
 local InteractionHook = types.InteractionHook
 local TileInteractionHook = types.TileInteractionHook

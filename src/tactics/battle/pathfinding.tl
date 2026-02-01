@@ -1,12 +1,17 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- Provides pathfinding capabilities for units on the battle map.
+--- Uses Dijkstra's algorithm to find reachable tiles and calculate shortest paths
+--- based on movement costs.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local Side = require("src/tactics/character/object/character").Side
-local array_2d = require("src/tactics/util/array_2d")
-local lists = require("src/tactics/util/lists")
-local bm = require("src/tactics/battle/battle_map")
+local Side = require("src.tactics.character.object.character").Side
+local array_2d = require("src.tactics.util.array_2d")
+local lists = require("src.tactics.util.lists")
+local bm = require("src.tactics.battle.battle_map")
 
 -- tile flags:
--- 0: empty/solid
+-- 0: empty.solid
 -- 1-3: terrain type
 -- 0 default
 -- 1 forest
@@ -47,10 +52,9 @@ local function distance_for_unit(map: bm.BattleMap, side: Side): DistanceFunctio
     end
 end
 
--- --------------------------------------------------------------------------
--- Core Logic: Shared Dijkstra Engine
--- --------------------------------------------------------------------------
--- Returns a 2D map where map[x][y] = { cost = number, prev = {x, y} }
+---@desc
+--- Returns the shortest path to all reachable tiles, up to a maximum cost.
+--- Each tile will also contain a field for the previous tile in the shortest path.
 local function _dijkstra_traversal(start_x: integer, start_y: integer, distance_function: DistanceFunction, max_cost: integer, max_point: Point): array_2d.Array2D<ShortestPathEntry>
     -- The output map containing cost and parent info for every visited node
     log.trace("doing Dijkstra: ", start_x, start_y, max_point)
@@ -182,8 +186,10 @@ function pathfinding.find_reachable_tiles(map: bm.BattleMap, start_x: integer, s
 end
 
 ---@desc
---- extend a path to a point, shortening the path until the point is reachable within max_length.
---- return current path if not possible
+--- Extends an existing path towards a new target tile.
+--- If the target is not immediately reachable, this function will backtrack
+--- along the given path until the target is within movement range,
+--- then calculate and append the new segment to create a valid path.
 function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {Point}
     if not legal_tiles:get_point(target) then
         return path

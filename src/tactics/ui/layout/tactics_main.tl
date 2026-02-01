@@ -1,12 +1,15 @@
-require("src/tactics/config")
+---@brief
+--- Defines the main UI layout for the tactical battle screen.
 
-local box = require("src/tactics/ui/box")
-local tactics_map = require("src/tactics/ui/panels/tactics_map")
-local unit_info = require("src/tactics/ui/panels/unit_info")
-local control_hints = require("src/tactics/ui/panels/control_hints")
+require("src.tactics.config")
 
-local SplitPages = require("src/tactics/ui/panels/split_pages")
-local BattleSummary = require("src/tactics/ui/panels/battle_summary")
+local box = require("src.tactics.ui.box")
+local tactics_map = require("src.tactics.ui.panels.tactics_map")
+local unit_info = require("src.tactics.ui.panels.unit_info")
+local control_hints = require("src.tactics.ui.panels.control_hints")
+
+local SplitPages = require("src.tactics.ui.panels.split_pages")
+local BattleSummary = require("src.tactics.ui.panels.battle_summary")
 
 local battle_summary = BattleSummary.new()
 local map = tactics_map.new(
