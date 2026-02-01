@@ -101,7 +101,7 @@ function ScriptBuilder:then_modify_terrain(
 	return self
 end
 
-function ScriptBuilder:one_shot()
+function ScriptBuilder:as_one_shot()
 	self.one_shot = true
 	return self
 end
@@ -133,7 +133,7 @@ function script.on_unit_interaction(unit_specifier, text)
 end
 
 function script.on_talk(unit_tag)
-  return script_builder.on_unit_interaction(
+  return script.on_unit_interaction(
       {
           type = "tag_lookup",
           tag = unit_tag,
