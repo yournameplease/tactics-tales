@@ -222,7 +222,8 @@ function ScriptManagerImpl:register_script(
 			        effect.players,
 			        effect.enemies,
 			        effect.neutral,
-					effect.animation
+					effect.animation,
+					effect.blocked_behavior
 			    )
 			end
 		elseif effect is battle_script.effect.ModifyUnits then

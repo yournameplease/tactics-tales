@@ -23,6 +23,7 @@ function ScriptBuilder:then_spawn_units(players, enemies, animation)
 		players = players,
 		enemies = enemies,
 		animation = animation,
+		blocked_behavior = "prevent"
 	})
 	return self
 end

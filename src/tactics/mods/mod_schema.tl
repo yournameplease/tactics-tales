@@ -1,6 +1,9 @@
 ---@brief Specification for game mods.
 --- Note that reference fields may be provided by dependent mods as well
 --- Used for mod validation
+
+--- TODO: this was mostly AI generated, some cleanup is still needed
+
 local s = require("src.tactics.validator.schema_definition")
 
 local base_spec = s.record({
@@ -44,7 +47,7 @@ local item_spec_record = s.record({
 		anchor = s.record({ x = s.integer(), y = s.integer() }),
 	})),
 
-	attacks = s.optional(s.list(s.record({
+	weapon_definition = s.optional(s.record({
 		name = s.string(),
 		sprite = s.integer(),
 		damage = s.integer(),
@@ -59,8 +62,7 @@ local item_spec_record = s.record({
 		type = s.string(),
 		body_type = s.string(),
 		effects = s.optional(s.list(s.record({type = s.string()}))),
-	}))),
-	weapon_effects = s.optional(s.list(s.record({type = s.string()}))),
+	})),
 })
 local items_spec = s.dictionary(s.string(), item_spec_record)
 
