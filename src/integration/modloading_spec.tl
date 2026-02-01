@@ -16,7 +16,7 @@ describe("included mods #it", function()
             local is_valid, errors = loader:validate_mods()
 
             -- Then
-            luassert.is_true(is_valid)
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
             luassert.is_equal(0, #errors)
         end)
     end)

@@ -13,6 +13,8 @@ local function validate(
 	memory: any,
 	path: {string}
 ): boolean, {string}
+	log.debug("validating schema "..schema.type.." for data "..tostring(data))
+	
 	local is_valid: boolean = true
 	local errors: {string} = {}
 

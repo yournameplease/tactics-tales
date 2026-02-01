@@ -13,6 +13,8 @@ local mods = require("src.tactics.mods")
 local mod_validator = require("src.tactics.mods.validator")
 local ModId = mods.ModId
 local ModSpec = mods.ModSpec
+local mod_schema = require("src.tactics.mods.mod_schema")
+local schema_validator = require("src.tactics.validator.schema_validator")
 
 local record RegisteredMod
 	id: ModId
@@ -222,9 +224,13 @@ end
 
 
 function ModLoaderImpl:validate_mods(): boolean, {string}
-	local game_data = self:load_mod_data()	
-
-	return mod_validator.validate_game_data(game_data)
+	local game_data = self:load_mod_data()
+	
+	return schema_validator.validate(
+		game_data,
+		mod_schema,
+		game_data
+	)
 end
 
 return mod_loader
