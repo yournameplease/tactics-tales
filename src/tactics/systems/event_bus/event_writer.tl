@@ -1,6 +1,6 @@
-
 ---@brief
---- abstracts event bus to make clear whether a service writes
+--- A write-only wrapper around the EventBus interface.
+
 local event_bus = require("src.tactics.systems.event_bus")
 
 

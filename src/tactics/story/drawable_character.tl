@@ -1,3 +1,6 @@
+---@brief
+--- Defines a drawable character instance for use in story scenes.
+
 local character = require("src.tactics.character.object.character")
 
 local record DrawableCharacter

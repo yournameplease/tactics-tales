@@ -1,3 +1,8 @@
+---@brief
+--- Manages the UI context for the main battle screen.
+--- It aggregates data from various battle systems to be displayed by the UI,
+--- such as unit information, menu states, and objective text.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local UIContext = require("src.tactics.ui.ui_context").UIContext

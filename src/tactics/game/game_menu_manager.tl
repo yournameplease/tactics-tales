@@ -1,3 +1,7 @@
+---@brief
+--- Manages the main game menu, including the title screen,
+--- chapter select, and options menus.
+
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
 local menu_manager = require("src.tactics.menu.menu_manager")

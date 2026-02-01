@@ -1,3 +1,7 @@
+---@brief
+--- The main UI manager, responsible for calculating layouts and drawing
+--- the current UI based on the active layout and context.
+
 require("src.tactics.config")
 require("profiler")
 

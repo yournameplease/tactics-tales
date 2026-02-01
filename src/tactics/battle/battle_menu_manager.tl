@@ -1,3 +1,8 @@
+---@brief
+--- Manages the menu system used during a battle.
+--- Defines the structure and flow of in-battle menus, such as the
+--- unit action menu and deployment screen.
+
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src.tactics.util.point").Point

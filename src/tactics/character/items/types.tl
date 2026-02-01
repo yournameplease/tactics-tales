@@ -1,3 +1,7 @@
+---@brief
+--- Contains basic, shared type definitions related to items,
+--- such as item IDs, types, and equipment slots.
+
 local point = require("src.tactics.util.point")
 local PointRecord = point.PointRecord
 

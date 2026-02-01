@@ -1,3 +1,6 @@
+---@brief
+--- A UI panel that displays a log of game events.
+
 local box = require("src.tactics.ui.box")
 local event_bus = require("src.tactics.systems.event_bus")
 local text_node = require("src.tactics.ui.components.text_node")

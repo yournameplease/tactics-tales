@@ -1,3 +1,7 @@
+---@brief
+--- The UI panel responsible for rendering the entire battle map,
+--- including tiles, units, and cursors.
+
 require("profiler")
 require("src.tactics.config")
 

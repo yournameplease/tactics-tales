@@ -1,3 +1,5 @@
+---@brief
+--- A collection of functional-style utility functions for map/table manipulation.
 
 local type Set<Value> = {Value: boolean}
 

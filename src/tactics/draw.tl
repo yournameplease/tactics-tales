@@ -1,3 +1,6 @@
+---@brief
+--- Contains generic drawing utility functions, like drawing a shadow.
+
 local function draw_shadow(c: integer, draw: function(x: number, y: number), x: number, y: number)
     for i=1,31 do
         pt.set_pal(i, c)

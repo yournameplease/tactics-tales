@@ -1,3 +1,7 @@
+---@brief
+--- Provides an input service for handling joypad and mouse input and
+--- mapping them to game actions.
+
 local record InputActionState
     held: boolean
     pressed: boolean

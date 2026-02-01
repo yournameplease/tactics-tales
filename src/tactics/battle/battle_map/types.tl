@@ -1,3 +1,7 @@
+---@brief
+--- Contains miscellaneous type definitions used for battle map interactions,
+--- particularly for scripting purposes.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")

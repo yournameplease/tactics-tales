@@ -1,3 +1,8 @@
+---@brief
+--- Manages a character's inventory.
+--- Handles adding, removing, equipping, and unequipping items,
+--- enforcing slot and equipment rules.
+
 local Item = require("src.tactics.character.items.object.item")
 local item_types = require("src.tactics.character.items.types")
 local wpn = require("src.tactics.character.items.object.weapon")

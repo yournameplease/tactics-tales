@@ -1,3 +1,6 @@
+---@brief
+--- Defines the UI layout for the main menu screen.
+
 require("src.tactics.config")
 
 local box = require("src.tactics.ui.box")

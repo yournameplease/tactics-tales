@@ -1,3 +1,6 @@
+---@brief
+--- Defines the UITheme record, which contains color definitions for the UI.
+
 global record UITheme
     COLOR_DECORATION_PRIMARY: Color
     COLOR_DECORATION_HIGHLIGHT: Color

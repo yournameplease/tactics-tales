@@ -1,3 +1,6 @@
+---@brief
+--- Defines the functions and data structures used to build
+--- validation schemas.
 
 local enum SchemaDefinitionType
 	"string"

@@ -1,3 +1,6 @@
+---@brief
+--- A UI component for displaying a scrolling log of messages.
+
 local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local text_node = require("src.tactics.ui.components.text_node")

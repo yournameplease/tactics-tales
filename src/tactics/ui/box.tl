@@ -1,3 +1,7 @@
+---@brief
+--- The core UI element, implementing a flexbox-like layout system for arranging
+--- child elements in rows or columns.
+
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.ui.theme")
 local colors = require("src.tactics.colors")

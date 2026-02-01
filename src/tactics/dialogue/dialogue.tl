@@ -1,3 +1,6 @@
+---@brief
+--- Defines the interface for an active dialogue instance.
+
 -- wrapping is separate.  This only gives the raw string
 local interface Dialogue
 	text: {string}

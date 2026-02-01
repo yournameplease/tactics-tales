@@ -1,3 +1,7 @@
+---@brief
+--- A reusable UI panel for displaying a vertical menu with
+--- multiple independent options.
+
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local text_node = require("src.tactics.ui.components.text_node")

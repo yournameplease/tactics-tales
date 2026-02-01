@@ -1,3 +1,8 @@
+---@brief
+--- Defines the main data structure for a battle.
+--- The BattleDefinition record aggregates all components of a battle,
+--- including the map, unit spawns, objectives, and scripts.
+
 local battle_script = require("src.tactics.battle.scripts.battle_script")
 local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
 local types = require("src.tactics.battle.definition.types")

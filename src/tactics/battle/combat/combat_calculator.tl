@@ -1,3 +1,8 @@
+---@brief
+--- Calculates the outcome of combat between units.
+--- It determines hit chance, damage, and the results of attacks
+--- and counter-attacks based on unit stats and equipment.
+
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local bm = require("src.tactics.battle.battle_map")

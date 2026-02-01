@@ -1,3 +1,6 @@
+---@brief
+--- Defines a 2D Point object and related vector math utilities.
+
 local record Point
     x: integer
     y: integer

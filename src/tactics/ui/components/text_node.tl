@@ -1,3 +1,7 @@
+---@brief
+--- A general-purpose UI component for rendering text with
+--- various layout and wrapping options.
+
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager

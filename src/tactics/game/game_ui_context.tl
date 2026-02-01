@@ -1,3 +1,6 @@
+---@brief
+--- Provides the UI context for the main game menus.
+
 local event_bus = require("src.tactics.systems.event_bus")
 local ui_context = require("src.tactics.ui.ui_context")
 local UILayoutId = require("src.tactics.ui.types").UILayoutId

@@ -1,3 +1,8 @@
+---@brief
+--- Defines the context object for the battle menu system.
+--- It provides the menu manager with necessary access to the battle state,
+--- such as the battle map and tactics engine.
+
 local bm = require("src.tactics.battle.battle_map")
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
 

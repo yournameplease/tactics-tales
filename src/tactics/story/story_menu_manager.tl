@@ -1,3 +1,7 @@
+---@brief
+--- Manages menus that appear during story sequences, such as
+--- the character customization screen.
+
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
 local sprite_data = require("src.tactics.character.sprite_data")

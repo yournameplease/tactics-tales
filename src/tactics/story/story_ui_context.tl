@@ -1,3 +1,7 @@
+---@brief
+--- Provides the UI context for story scenes, giving the UI rendering
+--- system access to the current story state.
+
 local ui_context = require("src.tactics.ui.ui_context")
 local story_page = require("src.tactics.story.story_page")
 local rendered_story_node = story_page.rendered_story_node

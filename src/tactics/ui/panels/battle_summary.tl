@@ -1,3 +1,5 @@
+---@brief
+--- A UI panel that displays a summary of the current battle's objectives.
 
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")

@@ -1,3 +1,7 @@
+---@brief
+--- Manages off-screen drawing targets (render textures).
+--- Allows for pre-rendering sprites to improve performance.
+
 require("profiler")
 local colors = require("src.tactics.colors")
 

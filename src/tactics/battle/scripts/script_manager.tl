@@ -1,5 +1,7 @@
----@brief service to listen for script triggers
---- and apply the battle events
+---@brief
+--- Manages the execution of event-driven battle scripts.
+--- Listens for triggers and applies corresponding script effects,
+--- such as spawning units, modifying terrain, or initiating dialogue.
 
 local point = require("src.tactics.util.point")
 local Point = point.Point

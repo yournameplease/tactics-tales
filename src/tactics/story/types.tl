@@ -1,3 +1,6 @@
+---@brief
+--- Defines the data structures for stories and their component nodes,
+--- such as text, battles, and jumps.
 
 local type StoryId = string
 local type NodeId = string

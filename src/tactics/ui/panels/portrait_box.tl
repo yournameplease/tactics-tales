@@ -1,3 +1,6 @@
+---@brief
+--- A UI panel for displaying a character's portrait.
+
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager

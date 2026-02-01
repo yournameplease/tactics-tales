@@ -1,3 +1,7 @@
+---@brief
+--- Implements a menu cursor for navigating a 1D list of options,
+--- supporting both horizontal and vertical lists.
+
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require("src.tactics.menu.menu_context").MenuContext

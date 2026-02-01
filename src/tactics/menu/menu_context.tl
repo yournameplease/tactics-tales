@@ -1,3 +1,6 @@
+---@brief
+--- Defines the data structures used to hold the transient state
+--- for various menu systems.
 
 local point = require("src.tactics.util.point")
 local Point = point.Point

@@ -1,3 +1,6 @@
+---@brief
+--- A UI panel that displays detailed information about a selected unit.
+
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")
 local portrait_box = require("src.tactics.ui.panels.portrait_box")

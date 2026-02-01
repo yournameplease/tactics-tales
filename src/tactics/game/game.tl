@@ -1,3 +1,7 @@
+---@brief
+--- The top-level manager for the overall game state.
+--- It manages the main menu and transitions into stories.
+
 local story = require("src.tactics.story.story")
 local story_types = require("src.tactics.story.types")
 local StoryId = story_types.StoryId

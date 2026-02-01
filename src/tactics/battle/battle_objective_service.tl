@@ -1,3 +1,8 @@
+---@brief
+--- A service that manages and checks battle objectives.
+--- It holds the victory and failure conditions for the current battle and
+--- determines when the battle should end.
+
 local bm = require("src.tactics.battle.battle_map")
 local event_bus = require("src.tactics.systems.event_bus")
 local battle_objective_definition = require("src.tactics.battle.definition.objective")

@@ -1,3 +1,6 @@
+---@brief
+--- Handles loading, sandboxing, and merging of mod data.
+
 local fp = require("src.tactics.util.fp")
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")

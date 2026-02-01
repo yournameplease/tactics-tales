@@ -1,3 +1,8 @@
+---@brief
+--- Defines the core data structure for a persistent character.
+--- This includes a character's stats, appearance, inventory,
+--- and other permanent attributes.
+
 require("src.tactics.character.items.object.weapon")
 require("src.tactics.character.animation_data")
 local animation = require("src.tactics.animation")

@@ -1,5 +1,5 @@
 ---@brief
---- Utility functions dealing with RNG
+--- A collection of utility functions for random number generation.
 
 local random = {}
 

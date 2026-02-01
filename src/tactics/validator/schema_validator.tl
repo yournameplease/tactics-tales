@@ -1,5 +1,7 @@
----@brief utility class to validate a SchemaDef against arbitrary data
---- Used for modloader validation
+---@brief
+--- The core implementation of the schema validator.
+--- Traverses a data structure and checks it against a schema definition.
+
 local s <const> = require("src.tactics.validator.schema_definition")
 local lists <const> = require("src.tactics.util.lists")
 

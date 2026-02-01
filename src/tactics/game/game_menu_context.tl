@@ -1,3 +1,6 @@
+---@brief
+--- Defines the context object for the main game menu system.
+
 local story_types = require("src.tactics.story.types")
 local StoryId = story_types.StoryId
 

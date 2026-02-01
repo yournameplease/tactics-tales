@@ -1,3 +1,7 @@
+---@brief
+--- A generic manager for menu systems. It handles state transitions,
+--- history, and dispatches input to the active menu cursor.
+
 local point = require("src.tactics.util.point")
 local menu_types = require ("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
