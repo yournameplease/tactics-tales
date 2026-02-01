@@ -11,6 +11,7 @@ local sample_values <total>: {s.SchemaDefinitionType: any} = {
 	["integer"] = 42,
 	["dictionary"] = {["key"] = "value"},
 	["record"] = { int = 1, string = "string"},
+	["reference"] = nil, -- this would collide with string or integer
 } 
 
 
@@ -42,7 +43,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "string" then
+			if k ~= "string" and v ~= nil then
 		        it("required string with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.string()
@@ -84,7 +85,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "string" then
+			if k ~= "string" and v ~= nil then
 		        it("optional string with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.string())
@@ -139,7 +140,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "integer" then
+			if k ~= "integer" and v ~= nil then
 		        it("required integer with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.integer()
@@ -193,7 +194,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "integer" then
+			if k ~= "integer" and v ~= nil then
 		        it("optional integer with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.integer())
@@ -279,7 +280,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "record" then
+			if k ~= "record" and v ~= nil then
 		        it("required record with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.record({
@@ -333,7 +334,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "record" then
+			if k ~= "record" and v ~= nil then
 		        it("optional record with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.record({
@@ -440,7 +441,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "dictionary" then
+			if k ~= "dictionary" and v ~= nil then
 		        it("required dictionary with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.dictionary(
@@ -494,7 +495,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "dictionary" then
+			if k ~= "dictionary" and v ~= nil then
 		        it("optional dictionary with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.dictionary(
@@ -509,6 +510,155 @@ describe("validator", function()
 		            -- Then
 		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
 					luassert.is_true(#errors > 0, "Expected at least one error.")
+		        end)
+			end
+		end
+    end)
+    describe("reference schema", function()
+		it("required reference with reference value in memory is valid", function()
+            -- Given
+			local schema = s.reference("memory_table")
+			local data = "memory_key"
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("required reference with nil value is invalid", function()
+            -- Given
+			local schema = s.reference("memory_table")
+			local data = nil
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+        it("required reference with value not in memory is invalid", function()
+            -- Given
+			local schema = s.reference("memory_table")
+			local data = "bad_memory_key"
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "reference" and v ~= nil then
+		        it("required reference with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.reference("memory_table")
+					local data = v
+					local memory = {
+						["memory_table"] = {
+							["memory_key"] = "memory_value",
+						},
+					}
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, memory)
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_equal(1, #errors)
+		        end)
+			end
+		end
+
+		it("optional reference with reference value is valid", function()
+            -- Given
+			local schema = s.optional(s.reference("memory_value"))
+			local data = "memory_key"
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional reference with nil value is valid", function()
+            -- Given
+			local schema = s.optional(s.reference("memory_value"))
+			local data = nil
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("required reference with value not in memory is invalid", function()
+            -- Given
+			local schema = s.optional(s.reference("memory_table"))
+			local data = "bad_memory_key"
+			local memory = {
+				["memory_table"] = {
+					["memory_key"] = "memory_value",
+				},
+			}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, memory)
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "reference" and v ~= nil then
+		        it("optional reference with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.optional(s.reference("memory_value"))
+					local data = nil
+					local memory = {
+						["memory_table"] = {
+							["memory_key"] = "memory_value",
+						},
+					}
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, memory)
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_equal(1, #errors)
 		        end)
 			end
 		end

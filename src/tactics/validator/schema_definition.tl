@@ -4,6 +4,7 @@ local enum SchemaDefinitionType
 	"integer"
 	"dictionary"
 	"record"
+	"reference"
 end
 
 local interface SchemaDefinition
@@ -35,6 +36,12 @@ local record RecordSchemaDefinition
 	definition: {string: SchemaDefinition}
 end
 
+local record ReferenceSchemaDefinition
+	is SchemaDefinition
+	where self.type == "reference"
+	path: {string}
+end
+
 local schema_definition = {
 	SchemaDefinitionType = SchemaDefinitionType,
 	SchemaDefinition = SchemaDefinition,	
@@ -43,6 +50,7 @@ local schema_definition = {
 	IntegerSchemaDefinition = IntegerSchemaDefinition,
 	DictionarySchemaDefinition = DictionarySchemaDefinition,
 	RecordSchemaDefinition = RecordSchemaDefinition,
+	ReferenceSchemaDefinition = ReferenceSchemaDefinition,
 }
 
 function schema_definition.string(): SchemaDefinition
@@ -82,6 +90,18 @@ function schema_definition.dictionary(
 		optional = false,
 		key = key,
 		value = value,
+	}
+	return self
+end
+
+function schema_definition.reference(
+	path: string
+): SchemaDefinition
+	local path_string = {}
+	
+	local self: ReferenceSchemaDefinition = {
+		type = "reference",
+		path = path_string,
 	}
 	return self
 end
