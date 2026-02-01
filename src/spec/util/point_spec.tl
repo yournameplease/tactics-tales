@@ -1,8 +1,9 @@
 local type _ = require("busted")
 local luassert <const> = require("luassert")
 require("spec.picotron_shim")
+require("spec.require_trimmer")
 
-local point = require("tactics.util.point")
+local point = require("src.tactics.util.point")
 
 describe("tactics.util.point", function()
     describe("metamethods", function()

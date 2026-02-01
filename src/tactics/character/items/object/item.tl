@@ -1,5 +1,9 @@
-local item_types = require("src/tactics/character/items/types")
-local wpn = require("src/tactics/character/items/object/weapon")
+---@brief
+--- Defines the core Item object, representing an individual item in the game.
+--- Provides a common interface for all items, such as weapons and armor.
+
+local item_types = require("src.tactics.character.items.types")
+local wpn = require("src.tactics.character.items.object.weapon")
 
 local interface Item
 	-- getters are not needed, just interface the field

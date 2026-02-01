@@ -1,4 +1,9 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- Defines data structures for weapons and equipment effects.
+--- Includes weapon targeting, special properties, and passive effects
+--- granted by equipped items.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
 
 global type BattleMap 

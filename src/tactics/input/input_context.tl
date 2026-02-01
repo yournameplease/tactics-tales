@@ -1,5 +1,9 @@
-local input = require("src/tactics/joypad")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
+---@brief
+--- Defines a unified context for handling both joypad and mouse input,
+--- abstracting the specific input method from the systems that use it.
+
+local input = require("src.tactics.joypad")
+local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
 
 local interface InputContext
 	type: input.InputMethod

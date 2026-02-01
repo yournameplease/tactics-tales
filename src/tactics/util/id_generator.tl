@@ -1,3 +1,6 @@
+---@brief
+--- A simple utility for generating unique integer IDs.
+
 local record IdGenerator
     id_count: integer
 end

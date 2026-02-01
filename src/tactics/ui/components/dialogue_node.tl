@@ -1,10 +1,14 @@
 
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local text = require("src/tactics/util/text")
-local lists = require("src/tactics/util/lists")
-local Dialogue = require("src/tactics/dialogue/dialogue").Dialogue
+---@brief
+--- A UI component for displaying dialogue text, with support for
+--- revealing text character by character.
+
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local text = require("src.tactics.util.text")
+local lists = require("src.tactics.util.lists")
+local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 
 local enum UITextColor
     "dark"

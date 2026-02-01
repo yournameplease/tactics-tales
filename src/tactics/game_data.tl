@@ -1,10 +1,13 @@
-local MapDefinition = require("src/tactics/battle/map/types").MapDefinition
-local BattleDefinition = require("src/tactics/battle/definition").BattleDefinition
-local story = require("src/tactics/story/types")
+---@brief
+--- Defines the main GameData record that aggregates all loaded mod data.
+
+local MapDefinition = require("src.tactics.battle.map.types").MapDefinition
+local BattleDefinition = require("src.tactics.battle.definition").BattleDefinition
+local story = require("src.tactics.story.types")
 local StoryId = story.StoryId
 local StoryDefinition = story.StoryDefinition
-local CharacterTemplate = require("src/tactics/character/definition").CharacterTemplate
-local ItemDefinition = require("src/tactics/types/item_definition").ItemDefinition
+local CharacterTemplate = require("src.tactics.character.definition").CharacterTemplate
+local ItemDefinition = require("src.tactics.types.item_definition").ItemDefinition
 
 local record StoryData
 	data: { StoryId: StoryDefinition }
@@ -13,6 +16,7 @@ local record StoryData
 end
 
 local record GameData
+	loaded_mods: { string: boolean }
 	maps: { string: MapDefinition }
 	battles: { string: BattleDefinition }
 	stories: StoryData

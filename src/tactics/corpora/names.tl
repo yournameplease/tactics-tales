@@ -1,3 +1,6 @@
+---@brief
+--- A corpus of names for character generation.
+
 -- TODO: find a better source, including non-gendered
 -- https://www.ssa.gov/oact/babynames/decades/century.html
 

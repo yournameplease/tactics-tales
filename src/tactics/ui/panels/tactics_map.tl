@@ -1,26 +1,30 @@
-require("profiler")
-require("src/tactics/config")
+---@brief
+--- The UI panel responsible for rendering the entire battle map,
+--- including tiles, units, and cursors.
 
-local fp = require("src/tactics/util/fp")
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local bm = require("src/tactics/battle/battle_map")
-local menu_cursor = require("src/tactics/menu/menu_cursor")
-local list_cursor = require("src/tactics/menu/cursor/list_cursor")
-local grid_cursor = require("src/tactics/menu/cursor/grid_cursor")
-local BattleMenuContext = require("src/tactics/battle/battle_menu_context").BattleMenuContext
-local BattleUIContext = require("src/tactics/battle/battle_ui_context").BattleUIContext
-local lists = require("src/tactics/util/lists")
-local point = require("src/tactics/util/point")
+require("profiler")
+require("src.tactics.config")
+
+local fp = require("src.tactics.util.fp")
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local bm = require("src.tactics.battle.battle_map")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
+local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
+local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUIContext
+local lists = require("src.tactics.util.lists")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
-local vertical_list_menu = require("src/tactics/ui/panels/vertical_list_menu")
-local CharacterRenderer = require("src/tactics/character/character_renderer")
-local dialogue_node = require("src/tactics/ui/components/dialogue_node")
-local array_2d = require("src/tactics/util/array_2d")
+local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
+local vertical_list_menu = require("src.tactics.ui.panels.vertical_list_menu")
+local CharacterRenderer = require("src.tactics.character.character_renderer")
+local dialogue_node = require("src.tactics.ui.components.dialogue_node")
+local array_2d = require("src.tactics.util.array_2d")
 
 local record TacticsMap
     is box.UIElement
@@ -233,6 +237,10 @@ function TacticsMap:draw_map_decorations(layers: bm.MapLayers, z_0: integer, z_1
     end
 end
 
+---@desc
+--- Dynamically adds or removes a floating menu as a child of the map.
+--- The menu appears next to the cursor when the menu state requires it
+--- (e.g., for action selection), and is removed otherwise.
 function TacticsMap:compute_children(state: UIContextManager)
     local menu = state.battle_context.battle_menu_manager
     local cursor = menu.menu_cursor
@@ -320,6 +328,10 @@ function TacticsMap:compute_children(state: UIContextManager)
     end
 end
 
+---@desc
+--- The main rendering function for the entire battle map panel.
+--- Draws ground, walls and Z-sorted units, and ceilings from the tile map, as well as UI cursor tiles
+--- Prerender to a draw target to handle clipping at the edges.
 function TacticsMap:draw(
     state: UIContextManager,
     draw_target_manager: DrawTargetManager,

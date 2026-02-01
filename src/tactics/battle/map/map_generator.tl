@@ -1,8 +1,12 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- A utility for loading and preparing battle maps from map files.
+--- It processes map layers and generates the final BattleMap object.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local battle_map = require("src/tactics/battle/battle_map")
-local map_types = require("src/tactics/battle/map/types")
-local battle_definition_types = require("src/tactics/battle/definition/types")
+local battle_map = require("src.tactics.battle.battle_map")
+local map_types = require("src.tactics.battle.map.types")
+local battle_definition_types = require("src.tactics.battle.definition.types")
 
 
 local map_generator = {

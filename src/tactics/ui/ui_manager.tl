@@ -1,19 +1,23 @@
-require("src/tactics/config")
+---@brief
+--- The main UI manager, responsible for calculating layouts and drawing
+--- the current UI based on the active layout and context.
+
+require("src.tactics.config")
 require("profiler")
 
-local UILayoutId = require("src/tactics/ui/types").UILayoutId
-local draw_target_manager = require("src/tactics/draw/draw_target_manager")
-local box = require("src/tactics/ui/box")
-local menu_validator = require("src/tactics/ui/validator")
-local MenuMouseSelection = require("src/tactics/menu/menu_cursor").mouse_selection.MenuMouseSelection
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local tactics_main = require("src/tactics/ui/layout/tactics_main")
-local combat_preview = require("src/tactics/ui/layout/combat_preview")
-local story_page = require("src/tactics/ui/layout/story_page")
-local title_screen = require("src/tactics/ui/layout/title_screen")
-local main_menu = require("src/tactics/ui/layout/main_menu")
-local chapter_select = require("src/tactics/ui/layout/chapter_select")
-local options_menu = require("src/tactics/ui/layout/options_menu")
+local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local draw_target_manager = require("src.tactics.draw.draw_target_manager")
+local box = require("src.tactics.ui.box")
+local menu_validator = require("src.tactics.ui.validator")
+local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local tactics_main = require("src.tactics.ui.layout.tactics_main")
+local combat_preview = require("src.tactics.ui.layout.combat_preview")
+local story_page = require("src.tactics.ui.layout.story_page")
+local title_screen = require("src.tactics.ui.layout.title_screen")
+local main_menu = require("src.tactics.ui.layout.main_menu")
+local chapter_select = require("src.tactics.ui.layout.chapter_select")
+local options_menu = require("src.tactics.ui.layout.options_menu")
 
 local record UILayout
     root: box.UIElement

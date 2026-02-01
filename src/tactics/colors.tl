@@ -1,3 +1,7 @@
+---@brief
+--- Provides color-related utilities, including palettes and functions
+--- to apply them.
+
 --https://www.lexaloffle.com/bbs/?tid=149249
 
 local RAINBOW: {{Color, Color}} = {

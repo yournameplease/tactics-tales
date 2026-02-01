@@ -1,9 +1,11 @@
+---@brief
+--- A UI panel that displays contextual control hints (e.g., "Select", "Back").
 
-local box = require("src/tactics/ui/box")
-local text_node = require("src/tactics/ui/components/text_node")
-local sprite_node = require("src/tactics/ui/components/sprite_node")
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local input_service = require("src/tactics/joypad")
+local box = require("src.tactics.ui.box")
+local text_node = require("src.tactics.ui.components.text_node")
+local sprite_node = require("src.tactics.ui.components.sprite_node")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local input_service = require("src.tactics.joypad")
 local InputMethod = input_service.InputMethod
 local InputLabel = input_service.InputLabel
 

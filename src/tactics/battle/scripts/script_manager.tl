@@ -1,18 +1,20 @@
----@brief service to listen for script triggers
---- and apply the battle events
+---@brief
+--- Manages the execution of event-driven battle scripts.
+--- Listens for triggers and applies corresponding script effects,
+--- such as spawning units, modifying terrain, or initiating dialogue.
 
-local point = require("src/tactics/util/point")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local character = require("src/tactics/character/object/character")
-local id_generator = require("src/tactics/util/id_generator")
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+local character = require("src.tactics.character.object.character")
+local id_generator = require("src.tactics.util.id_generator")
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local event_bus = require("src/tactics/systems/event_bus")
-local event_listener = require("src/tactics/systems/event_bus/event_listener")
-local battle_script = require("src/tactics/battle/scripts/battle_script")
-local bm = require("src/tactics/battle/battle_map")
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local TaskManager = require("src/tactics/systems/tasks").TaskManager
+local event_bus = require("src.tactics.systems.event_bus")
+local event_listener = require("src.tactics.systems.event_bus.event_listener")
+local battle_script = require("src.tactics.battle.scripts.battle_script")
+local bm = require("src.tactics.battle.battle_map")
+local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
+local TaskManager = require("src.tactics.systems.tasks").TaskManager
 
 local record ScriptContext
 	source_unit: BattleUnit

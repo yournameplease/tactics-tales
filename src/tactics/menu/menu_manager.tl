@@ -1,15 +1,19 @@
-local point = require("src/tactics/util/point")
-local menu_types = require ("src/tactics/menu/types")
-local input_service = require("src/tactics/joypad")
+---@brief
+--- A generic manager for menu systems. It handles state transitions,
+--- history, and dispatches input to the active menu cursor.
+
+local point = require("src.tactics.util.point")
+local menu_types = require ("src.tactics.menu.types")
+local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
-local input_context = require("src/tactics/input/input_context")
+local input_context = require("src.tactics.input.input_context")
 local InputContext = input_context.InputContext
-local event_bus = require("src/tactics/systems/event_bus")
-local event_writer = require("src/tactics/systems/event_bus/event_writer")
-local menu_cursor = require("src/tactics/menu/menu_cursor")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local event_bus = require("src.tactics.systems.event_bus")
+local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuContext = require("src.tactics.menu.menu_context").MenuContext
+local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
 local record SelectionHistory<GameContext>
     step: menu_types.MenuStep

@@ -1,4 +1,9 @@
-local battle_objectives = require("src/tactics/battle/objective")
+---@brief
+--- Defines the data structures for battle objectives.
+--- These definitions are used in battle data files and are converted
+--- into active objective instances by a factory function.
+
+local battle_objectives = require("src.tactics.battle.objective")
 
 
 local enum VictoryConditionType

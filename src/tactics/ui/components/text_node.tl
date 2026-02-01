@@ -1,9 +1,13 @@
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local text = require("src/tactics/util/text")
-local section_divider = require("src/tactics/ui/decoration/section_divider")
-local lists = require("src/tactics/util/lists")
+---@brief
+--- A general-purpose UI component for rendering text with
+--- various layout and wrapping options.
+
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local text = require("src.tactics.util.text")
+local section_divider = require("src.tactics.ui.decoration.section_divider")
+local lists = require("src.tactics.util.lists")
 
 local enum UITextColor
     "dark"

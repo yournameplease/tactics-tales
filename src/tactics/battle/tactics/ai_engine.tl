@@ -1,13 +1,18 @@
-local battle_unit = require("src/tactics/battle/tactics/battle_unit")
+---@brief
+--- The AI engine for controlling non-player units in battle.
+--- It analyzes the game state to determine and execute optimal actions,
+--- such as moving and attacking targets.
+
+local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
-local lists = require("src/tactics/util/lists")
-local character = require("src/tactics/character/object/character")
-local point = require("src/tactics/util/point")
+local lists = require("src.tactics.util.lists")
+local character = require("src.tactics.character.object.character")
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local pathfinding = require("src/tactics/battle/pathfinding")
-local tactics_engine = require("src/tactics/battle/tactics/tactics_engine")
-local tasks = require("src/tactics/systems/tasks")
-local bm = require("src/tactics/battle/battle_map")
+local pathfinding = require("src.tactics.battle.pathfinding")
+local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
+local tasks = require("src.tactics.systems.tasks")
+local bm = require("src.tactics.battle.battle_map")
 
 --[[
 AI Mk 1:
@@ -33,6 +38,12 @@ local record MovementOption
     target: BattleUnit -- nillable
 end
 
+---@desc
+--- Computes and executes the best action for a given AI-controlled unit.
+--- The AI first checks for targets it can attack within a single move.
+--- If none are found, it identifies the closest target it could attack
+--- with extended movement and moves as close as possible to it.
+--- If no actions are possible, the unit will wait.
 function AIEngine:compute_unit_ai(unit: BattleUnit)
     local ai = unit.unit_ai
 

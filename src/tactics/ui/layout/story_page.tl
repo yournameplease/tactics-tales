@@ -1,6 +1,9 @@
-local box = require("src/tactics/ui/box")
-local split_pages = require("src/tactics/ui/panels/split_pages")
-local story_page_panel = require("src/tactics/ui/panels/story_page")
+---@brief
+--- Defines the UI layout for a story page.
+
+local box = require("src.tactics.ui.box")
+local split_pages = require("src.tactics.ui.panels.split_pages")
+local story_page_panel = require("src.tactics.ui.panels.story_page")
 
 local left = box.new({ dir="col", flex_grow = 1, padding = 2})
 

@@ -1,11 +1,15 @@
-local menu_cursor = require("src/tactics/menu/menu_cursor")
-local menu_types = require("src/tactics/menu/types")
-local MenuContext = require("src/tactics/menu/menu_context").MenuContext
-local lists = require("src/tactics/util/lists")
-local input_service = require("src/tactics/joypad")
-local Joypad = require("src/tactics/joypad").Joypad
+---@brief
+--- Implements a menu cursor for navigating a 1D list of options,
+--- supporting both horizontal and vertical lists.
+
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_types = require("src.tactics.menu.types")
+local MenuContext = require("src.tactics.menu.menu_context").MenuContext
+local lists = require("src.tactics.util.lists")
+local input_service = require("src.tactics.joypad")
+local Joypad = require("src.tactics.joypad").Joypad
 local Mouse = input_service.Mouse
-local mouse_menu_selection = require("src/tactics/menu/menu_cursor").mouse_selection
+local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
 global enum ListDirection
     "vertical"

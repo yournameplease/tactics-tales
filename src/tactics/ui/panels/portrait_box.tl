@@ -1,11 +1,14 @@
-local point = require("src/tactics/util/point")
+---@brief
+--- A UI panel for displaying a character's portrait.
+
+local point = require("src.tactics.util.point")
 local Point = point.Point
-local UIContextManager = require("src/tactics/ui/ui_context_manager").UIContextManager
-local box = require("src/tactics/ui/box")
-local DrawTargetManager = require("src/tactics/draw/draw_target_manager").DrawTargetManager
-local CharacterRenderer = require("src/tactics/character/character_renderer")
-local Colors = require("src/tactics/colors")
-local DrawableCharacterInstance = require("src/tactics/character/object/character").DrawableCharacterInstance
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local box = require("src.tactics.ui.box")
+local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
+local CharacterRenderer = require("src.tactics.character.character_renderer")
+local Colors = require("src.tactics.colors")
+local DrawableCharacterInstance = require("src.tactics.character.object.character").DrawableCharacterInstance
 
 local record PortraitBox
     is box.UIElement
