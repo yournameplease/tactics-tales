@@ -169,6 +169,16 @@ function ModLoaderImpl:load_mod_data(): GameData
 
 	local game_data: GameData = {}
 
+	game_data.loaded_mods = maps.collect(
+		self.registered,
+		function(mod: RegisteredMod): string
+			return mod.id
+		end,
+		function(_: RegisteredMod): boolean
+			return true
+		end
+	)
+
 	log.debug("Loading maps...")
 	game_data.maps = load_mod_map(
 		self.registered,
@@ -225,10 +235,11 @@ end
 
 function ModLoaderImpl:validate_mods(): boolean, {string}
 	local game_data = self:load_mod_data()
-	
+
+	-- final validation, for all loaded data	
 	return schema_validator.validate(
 		game_data,
-		mod_schema,
+		mod_schema.final_schema,
 		game_data
 	)
 end
