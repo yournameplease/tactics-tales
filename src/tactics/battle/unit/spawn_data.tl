@@ -5,6 +5,11 @@
 local battle_definition_types = require("src.tactics.battle.definition.types")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
 
+local enum UnitSpawnBlockedBehavior
+    "prevent"
+    "spawn_nearby"
+end
+
 local enum UnitSpawnAnimation
     "from_north"
     "from_south"
@@ -41,6 +46,7 @@ local record UnitSpawnData
 end
 
 local unit_spawn_data = {
+	UnitSpawnBlockedBehavior = UnitSpawnBlockedBehavior,
 	UnitSpawnAnimation = UnitSpawnAnimation,
 	UnitSpawnData = UnitSpawnData,
 	character_source = {

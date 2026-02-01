@@ -111,7 +111,7 @@ describe("mod_loader", function()
                     test_story = {
                         starting_node = 'node_1',
                         nodes = {
-                            node_1 = {type = 'exit_story'}
+                            node_1 = {{type = 'exit_story'}}
                         }
                     }
                 },
@@ -131,7 +131,7 @@ describe("mod_loader", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.is_equal(0, #errors)
+            luassert.is_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
         end)
     end)
 end)

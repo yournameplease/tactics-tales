@@ -64,7 +64,14 @@ local record TacticsEngine
     tiles_in_movement_and_attack_range: function(self, unit: BattleUnit): array_2d.Array2D<MenuTileHighlight>
     
     -- mutations
-    spawn_all: function(self, players: {unit_spawn_data.UnitSpawnData}, enemies: {unit_spawn_data.UnitSpawnData}, neutrals: {unit_spawn_data.UnitSpawnData}, animation: unit_spawn_data.UnitSpawnAnimation)
+    spawn_all: function(
+        self,
+        players: {unit_spawn_data.UnitSpawnData},
+        enemies: {unit_spawn_data.UnitSpawnData},
+        neutrals: {unit_spawn_data.UnitSpawnData},
+        animation: unit_spawn_data.UnitSpawnAnimation,
+        blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
+    )
     handle_mark_unit: function(self, Point)
     handle_interaction: function(self,
         interaction_id: integer,
@@ -197,7 +204,11 @@ function TacticsEngine:despawn_unit(units: {battle_unit.BattleUnit})
 end
 
 --- Iterates over unit definitions and calls CharacterManager
-function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side: battle_unit.Side): {battle_unit.BattleUnit}
+function TacticsEngine:spawn_units(
+    units: {unit_spawn_data.UnitSpawnData},
+    side: battle_unit.Side,
+    blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
+): {battle_unit.BattleUnit}
     local spawned_units: {battle_unit.BattleUnit} = {}
     local char_man = self.character_manager
     local player_roster = char_man:get_player_roster()
@@ -211,38 +222,53 @@ function TacticsEngine:spawn_units(units: {unit_spawn_data.UnitSpawnData}, side:
 
         local spawn_points = self.battle_map:get_tiles_by_label(spawn_data.tile)
         for _,spawn_point in ipairs(spawn_points) do
-            local character: Character = nil
+            local existing_unit = self.battle_map:get_at_tile(spawn_point)
+            local should_spawn = true
 
-            local character_source = spawn_data.character_source
-            if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
-                character = char_man:generate_character(character_source.template, {})
-                if side == "player" then
-                    char_man:persist_player(character)
+            if existing_unit == nil then
+                if blocked_behavior == "prevent" then
+                    should_spawn = false
+                elseif blocked_behavior == "spawn_nearby" then
+                    -- todo
+                else
+                    unexpected(blocked_behavior)
                 end
-            elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
-                if player_roster[roster_count] ~= nil then
-                    character = player_roster[roster_count]
-                    roster_count = roster_count + 1
-                end
-            else
-                unexpected(character_source.type)
             end
-            if character ~= nil then
-                local facing_r = spawn_point.x <= (MAP_WIDTH >> 1)
-                local unit = battle_unit.spawn_unit(
-                    character,
-                    spawn_point,
-                    labels,
-                    side,
-                    {
-                        vertical = "down",
-                        horizontal = facing_r and "right" or "left",
-                    },
-                    spawn_data.ai
-                )
+
+            if should_spawn then
+                local character: Character = nil
+
+                local character_source = spawn_data.character_source
+                if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
+                    character = char_man:generate_character(character_source.template, {})
+                    if side == "player" then
+                        char_man:persist_player(character)
+                    end
+                elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
+                    if player_roster[roster_count] ~= nil then
+                        character = player_roster[roster_count]
+                        roster_count = roster_count + 1
+                    end
+                else
+                    unexpected(character_source.type)
+                end
+                if character ~= nil then
+                    local facing_r = spawn_point.x <= (MAP_WIDTH >> 1)
+                    local unit = battle_unit.spawn_unit(
+                        character,
+                        spawn_point,
+                        labels,
+                        side,
+                        {
+                            vertical = "down",
+                            horizontal = facing_r and "right" or "left",
+                        },
+                        spawn_data.ai
+                    )
             
-                self:spawn_unit(unit, spawn_point)
-                pt.add(spawned_units, unit)
+                    self:spawn_unit(unit, spawn_point)
+                    pt.add(spawned_units, unit)
+                end
             end
         end
     end
@@ -253,12 +279,13 @@ function TacticsEngine:spawn_all(
     players: {unit_spawn_data.UnitSpawnData},
     enemies: {unit_spawn_data.UnitSpawnData},
     neutral: {unit_spawn_data.UnitSpawnData},
-    anim: unit_spawn_data.UnitSpawnAnimation
+    anim: unit_spawn_data.UnitSpawnAnimation,
+    blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
 )
     local spawned: {battle_unit.BattleUnit} = {}
-    lists.add_all(spawned, self:spawn_units(players or {}, "player"))
-    lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy"))
-    lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral"))
+    lists.add_all(spawned, self:spawn_units(players or {}, "player", blocked_behavior))
+    lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy", blocked_behavior))
+    lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral", blocked_behavior))
 
     log.debug("Spawned "..#spawned.." units.")
     if anim ~= nil and #spawned > 0 then

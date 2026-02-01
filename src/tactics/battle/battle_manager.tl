@@ -83,7 +83,8 @@ function battle_manager.new(
         battle_def.players,
         battle_def.enemies,
         battle_def.neutral,
-        nil
+        nil,
+        "prevent"
     )
 
     self.battle_objective_service = battle_objective_service.new(
@@ -134,7 +135,8 @@ function battle_manager.new(
             {{ character_source = {type = "player_roster"}, tile = "player_deployment" }},
             {},
             {},
-            nil
+            nil,
+            "prevent"
         )
         self.battle_menu_manager:set_menu("MENU_DEPLOYMENT")
     else

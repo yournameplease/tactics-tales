@@ -146,6 +146,7 @@ end
 local record SpawnUnits
 	is ScriptEffect
 	where self.type == "spawn_units"
+	blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
 	animation: unit_spawn_data.UnitSpawnAnimation
     enemies: { unit_spawn_data.UnitSpawnData}
     neutral: { unit_spawn_data.UnitSpawnData}
