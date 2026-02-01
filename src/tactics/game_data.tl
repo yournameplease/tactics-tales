@@ -13,6 +13,7 @@ local record StoryData
 end
 
 local record GameData
+	loaded_mods: { string: boolean }
 	maps: { string: MapDefinition }
 	battles: { string: BattleDefinition }
 	stories: StoryData
