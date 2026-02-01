@@ -190,7 +190,10 @@ local pt_shim: Picotron = {
     store_metadata = function(_filename: any, _metadata: __FileMetadata) end,
     mkdir = function(_name: any) end,
     mount = function(_target: string, _origin: string) end,
-    include = require,
+    include = function(path: string): any
+        local trimmed_path = string.gsub(path, "%.lua", "")
+        return require(trimmed_path)
+    end,
     vid = function(_mode: integer) end,
     cls = function(_col: Color) end,
     print = function(value: string | integer, x: integer, y: integer, _col: Color): (integer, integer)
