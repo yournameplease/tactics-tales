@@ -69,6 +69,15 @@ function schema_definition.boolean(): SchemaDefinition
 	return self
 end
 
+function schema_definition.boolean(): SchemaDefinition
+	local self: TypeSchemaDefinition = {
+		type = "type",
+		optional = false,
+		pt_type = "boolean",
+	}
+	return self
+end
+
 function schema_definition.string(): SchemaDefinition
 	local self: TypeSchemaDefinition = {
 		type = "type",

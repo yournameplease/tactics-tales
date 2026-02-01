@@ -7,6 +7,96 @@ local s = require("src.tactics.validator.schema_definition")
 local validator = require("src.tactics.validator.schema_validator")
 
 describe("validator", function()
+    describe("boolean schema", function()
+		local other_types: {string: any} = {
+			["string"] = "string-value",
+			["integer"] = 42,
+			["function"] = function(_: any): any end,
+			["dictionary"] = {["key"] = "value"},
+			["list"] = {"foo", "bar", "baz"},
+			["record"] = { int = 1, boolean = "boolean"},
+		} 
+
+		it("required boolean with boolean value is valid", function()
+            -- Given
+			local schema = s.boolean()
+			local data = true
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("required boolean with nil value is invalid", function()
+            -- Given
+			local schema = s.boolean()
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(other_types) do
+	        it("required boolean with "..k.." value is invalid", function()
+	            -- Given
+				local schema = s.boolean()
+				local data = v
+
+	            -- When
+	            local is_valid, errors = validator.validate(data, schema, {})
+
+	            -- Then
+	            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+				luassert.is_equal(1, #errors)
+	        end)
+		end
+
+		it("optional boolean with boolean value is valid", function()
+            -- Given
+			local schema = s.optional(s.boolean())
+			local data = true
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional boolean with nil value is valid", function()
+            -- Given
+			local schema = s.optional(s.boolean())
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+
+		for k,v in pairs(other_types) do
+	        it("optional boolean with "..k.." value is invalid", function()
+	            -- Given
+				local schema = s.optional(s.boolean())
+				local data = v
+
+	            -- When
+	            local is_valid, errors = validator.validate(data, schema, {})
+
+	            -- Then
+	            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+				luassert.is_equal(1, #errors)
+	        end)
+		end
+    end)
     describe("string schema", function()
 		local other_types: {string: any} = {
 			["boolean"] = false,
