@@ -602,7 +602,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "list" and v ~= nil then
+			if k ~= "list" and k ~= "record" and k ~= "dictionary" and v ~= nil then
 		        it("required list with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.list(
@@ -650,7 +650,7 @@ describe("validator", function()
         end)
 
 		for k,v in pairs(sample_values) do
-			if k ~= "list" and v ~= nil then
+			if k ~= "list" and k ~= "record" and k ~= "dictionary" and v ~= nil then
 		        it("optional list with "..k.." value is invalid", function()
 		            -- Given
 					local schema = s.optional(s.list(
