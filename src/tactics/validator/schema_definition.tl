@@ -3,6 +3,7 @@ local enum SchemaDefinitionType
 	"string"
 	"integer"
 	"dictionary"
+	"list"
 	"record"
 	"reference"
 end
@@ -30,6 +31,12 @@ local record DictionarySchemaDefinition
 	value: SchemaDefinition
 end
 
+local record ListSchemaDefinition
+	is SchemaDefinition
+	where self.type == "list"
+	element: SchemaDefinition
+end
+
 local record RecordSchemaDefinition
 	is SchemaDefinition
 	where self.type == "record"
@@ -49,6 +56,7 @@ local schema_definition = {
 	StringSchemaDefinition = StringSchemaDefinition,
 	IntegerSchemaDefinition = IntegerSchemaDefinition,
 	DictionarySchemaDefinition = DictionarySchemaDefinition,
+	ListSchemaDefinition =ListSchemaDefinition,
 	RecordSchemaDefinition = RecordSchemaDefinition,
 	ReferenceSchemaDefinition = ReferenceSchemaDefinition,
 }
@@ -90,6 +98,17 @@ function schema_definition.dictionary(
 		optional = false,
 		key = key,
 		value = value,
+	}
+	return self
+end
+
+function schema_definition.list(
+	element: SchemaDefinition
+): SchemaDefinition
+	local self: ListSchemaDefinition = {
+		type = "list",
+		optional = false,
+		element = element,
 	}
 	return self
 end

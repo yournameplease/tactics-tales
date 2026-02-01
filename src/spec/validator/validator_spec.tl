@@ -10,6 +10,7 @@ local sample_values <total>: {s.SchemaDefinitionType: any} = {
 	["string"] = "string-value",
 	["integer"] = 42,
 	["dictionary"] = {["key"] = "value"},
+	["list"] = {"foo", "bar", "baz"},
 	["record"] = { int = 1, string = "string"},
 	["reference"] = nil, -- this would collide with string or integer
 } 
@@ -501,6 +502,159 @@ describe("validator", function()
 					local schema = s.optional(s.dictionary(
 						s.string(),
 						s.integer()
+					))
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_true(#errors > 0, "Expected at least one error.")
+		        end)
+			end
+		end
+    end)
+	describe("list schema", function()
+		it("required list with list value is valid", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = {"foo", "bar", "baz"}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("required list with nil value is invalid", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+        it("required list with bad entry is invalid", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = {"foo", "bar", 123}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+        it("required list with list gap is warning", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = {"foo", "bar", [100] = "baz"}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+        it("required list with entry before list is warning", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = { [0] = "foo", "bar", "baz"}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+        it("required list with non-integer entry is warning", function()
+            -- Given
+			local schema = s.list(
+				s.string()
+			)
+			local data = { "foo", "bar", ["key"] = "baz"}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+			luassert.is_equal(1, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "list" and v ~= nil then
+		        it("required list with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.list(
+						s.string()
+					)
+					local data = v
+
+		            -- When
+		            local is_valid, errors = validator.validate(data, schema, {})
+
+		            -- Then
+		            luassert.is_false(is_valid, "Expected invalid, but got valid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+					luassert.is_true(#errors > 0, "Expected at least one error.")
+		        end)
+			end
+		end
+
+		it("optional list with list value is valid", function()
+            -- Given
+			local schema = s.optional(s.list(
+				s.string()
+			))
+			local data = {"foo", "bar", "baz"}
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+        it("optional list with nil value is valid", function()
+            -- Given
+			local schema = s.optional(s.list(
+				s.string()
+			))
+			local data = nil
+
+            -- When
+            local is_valid, errors = validator.validate(data, schema, {})
+
+            -- Then
+            luassert.is_true(is_valid, "Expected valid, but got invalid.  Errors: \n\t"..table.concat(errors,"\n\t"))
+            luassert.is_equal(0, #errors)
+        end)
+
+		for k,v in pairs(sample_values) do
+			if k ~= "list" and v ~= nil then
+		        it("optional list with "..k.." value is invalid", function()
+		            -- Given
+					local schema = s.optional(s.list(
+						s.string()
 					))
 					local data = v
 

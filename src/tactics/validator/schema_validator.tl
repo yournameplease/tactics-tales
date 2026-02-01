@@ -87,6 +87,50 @@ local function validate(
 						add_deep_errors(value_errors)
 					end
 				end
+			elseif schema is s.ListSchemaDefinition then
+				if pt.type(data) ~= "table" then
+					is_valid = false
+					add_local_errors({
+						"Field expected "..schema.type.." but received a "..pt.type(data)
+					})
+				else
+					local element_schema = schema.element
+					local data_list: {any} = data as {any}
+					for i,value in ipairs(data_list) do
+						local element_path = lists.merge(path, {"["..i.."]"})
+						local element_valid, element_errors = validate(
+							value,
+							element_schema,
+							memory,
+							element_path
+						)
+						is_valid = is_valid and element_valid 
+						add_deep_errors(element_errors)
+					end
+					local data_table: {any: any} = data as {any: any}
+					for k,_ in pairs(data_table) do
+						if pt.type(k) ~= "number"
+							or math.type(k) ~= "integer"
+						then
+							add_local_errors({
+								"Field expected "..schema.type
+								.." but found a non-integer key "
+								..tostring(k)
+							})
+						else
+							local int: integer = k as integer
+							if int > #data_list or int <= 0 then
+								add_local_errors({
+									"Field expected "..schema.type
+									.." but found an integer "
+									..int
+									.." not in the list's range."
+								})
+							end
+						end
+
+					end
+				end
 			elseif schema is s.RecordSchemaDefinition then
 				if pt.type(data) ~= "table" then
 					is_valid = false
