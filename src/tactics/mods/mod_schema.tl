@@ -165,11 +165,16 @@ local stories_spec = s.record({
     story_select = s.list(s.reference("stories.data")),
 })
 
-return {
-	base = base_spec,
+local game_data_schema = s.record({
+	loaded_mods = s.dictionary(
+		s.string(),
+		s.boolean()
+	),
 	maps = maps_spec,
-	items = items_spec,
-	characters = characters_spec,
 	battles = battles_spec,
 	stories = stories_spec,
-}
+	characters = characters_spec,
+	items = items_spec,
+})
+
+return game_data_schema
