@@ -39,33 +39,19 @@ local function validate(
 			end
 		else
 
-			if schema is s.StringSchemaDefinition then
-				if pt.type(data) ~= "string" then
-					is_valid = false
-					add_local_errors({
-						"Field expected "..schema.type.." but received a "..pt.type(data)
-					})
-				end
-			elseif schema is s.IntegerSchemaDefinition then
-				if pt.type(data) ~= "number" then
+			if schema is s.TypeSchemaDefinition then
+				if pt.type(data) ~= schema.pt_type then
 					is_valid = false
 					add_local_errors({
 						"Field expected "..schema.type.." but received a "..pt.type(data)
 					})
 				else
-					if math.type(data) ~= "integer" then
+					if schema.math_type and math.type(data) ~= schema.math_type then
 						is_valid = false
 						add_local_errors({
 							"Field expected "..schema.type.." but received a "..math.type(data)
 						})
 					end
-				end
-			elseif schema is s.FunctionSchemaDefinition then
-				if pt.type(data) ~= "function" then
-					is_valid = false
-					add_local_errors({
-						"Field expected "..schema.type.." but received a "..pt.type(data)
-					})
 				end
 			elseif schema is s.DictionarySchemaDefinition then
 				if pt.type(data) ~= "table" then

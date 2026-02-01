@@ -3,9 +3,7 @@
 --- validation schemas.
 
 local enum SchemaDefinitionType
-	"string"
-	"integer"
-	"function"
+	"type"
 	"dictionary"
 	"list"
 	"record"
@@ -18,19 +16,12 @@ local interface SchemaDefinition
 	optional: boolean
 end
 
-local record StringSchemaDefinition
+-- for types which only need simply type checks
+local record TypeSchemaDefinition
 	is SchemaDefinition
-	where self.type == "string"
-end
-
-local record IntegerSchemaDefinition
-	is SchemaDefinition
-	where self.type == "integer"
-end
-
-local record FunctionSchemaDefinition
-	is SchemaDefinition
-	where self.type == "function"
+	where self.type == "type"
+	pt_type: string
+	math_type: string
 end
 
 local record DictionarySchemaDefinition
@@ -62,34 +53,48 @@ local schema_definition = {
 	SchemaDefinitionType = SchemaDefinitionType,
 	SchemaDefinition = SchemaDefinition,	
 
-	StringSchemaDefinition = StringSchemaDefinition,
-	IntegerSchemaDefinition = IntegerSchemaDefinition,
-	FunctionSchemaDefinition = FunctionSchemaDefinition,
+	TypeSchemaDefinition = TypeSchemaDefinition,
 	DictionarySchemaDefinition = DictionarySchemaDefinition,
 	ListSchemaDefinition =ListSchemaDefinition,
 	RecordSchemaDefinition = RecordSchemaDefinition,
 	ReferenceSchemaDefinition = ReferenceSchemaDefinition,
 }
 
-function schema_definition.string(): SchemaDefinition
-	return {
-		type = "string",
+function schema_definition.boolean(): SchemaDefinition
+	local self: TypeSchemaDefinition = {
+		type = "type",
 		optional = false,
+		pt_type = "string",
 	}
+	return self
+end
+
+function schema_definition.string(): SchemaDefinition
+	local self: TypeSchemaDefinition = {
+		type = "type",
+		optional = false,
+		pt_type = "string",
+	}
+	return self
 end
 
 function schema_definition.integer(): SchemaDefinition
-	return {
-		type = "integer",
+	local self: TypeSchemaDefinition = {
+		type = "type",
 		optional = false,
+		pt_type = "number",
+		math_type = "integer",
 	}
+	return self
 end
 
 function schema_definition.func(): SchemaDefinition
-	return {
-		type = "function",
+	local self: TypeSchemaDefinition = {
+		type = "type",
 		optional = false,
+		pt_type = "function",
 	}
+	return self
 end
 
 function schema_definition.optional(s: SchemaDefinition): SchemaDefinition
