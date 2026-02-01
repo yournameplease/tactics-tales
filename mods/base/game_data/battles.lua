@@ -94,15 +94,6 @@ function objectives.turn_limit()
     return self
 end
 
-
-local function open_door_mid(
-    enemy_label,
-    tile_label
-)
-    return script.when_unit_dies(enemy_label)
-        :then_modify_terrain(tile_label, {["mid_wall"] = 0})
-end
-
 function escape(tile_tag)
     return script.on_tile_interaction(tile_tag)
         :then_dialogue(script_unit.source(), "I'm retreating")
@@ -303,8 +294,8 @@ local BATTLE_DATA = {
             { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
             { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
-            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_moblie", "neutral_enemy"}},
-            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_moblie", "neutral_enemy"}},
+            { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
+            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
             { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
@@ -328,12 +319,12 @@ local BATTLE_DATA = {
             script.on_turn(3, phase.after_enemy)
                 :then_dialogue(script_unit.tagged("militia_boss"),{"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
-                    "enemy_militia_stationary",
+                    script_unit.tagged("enemy_militia_stationary"),
                     ai.move_zero,
                     "enemy"
                 )
                 :then_modify_units(
-                    "enemy_militia_mobile",
+                    script_unit.tagged("enemy_militia_mobile"),
                     ai.move_inf,
                     "enemy"
             ),
