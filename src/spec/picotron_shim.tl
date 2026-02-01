@@ -1,6 +1,9 @@
 -- This file shims the Picotron API for testing in a standard Lua environment.
 -- require("types.picotron") -- ensures the global types are loaded
 
+local lfs = require("lfs")
+
+
 -- utility error messages
 -- _G.todo = function(message: string | nil): any
 --     print("TODO: " .. (message or ""))
@@ -179,7 +182,17 @@ local pt_shim: Picotron = {
     cd = function(_path: any) end,
     fstat = function(_path: any): (string | nil, number | nil, string | nil) return nil, nil, nil end,
     fullpath = function(filename: any): string return "/mock/" .. tostring(filename) end,
-    ls = function(_path: any): {string} return {} end,
+    ls = function(path: string): {string}
+        local files: {string} = {}
+        for file in lfs.dir(path) do
+            if file ~= "." and file ~= ".." then
+                local f = path..'/'..file
+                print("FOUND FILE: "..f.." "..file)
+                table.insert(files, file)
+            end
+        end
+        return files
+    end,
     cp = function(_src: any, _dest: any) end,
     mv = function(_src: any, _dest: any) end,
     rm = function(_filename: any) end,
@@ -389,4 +402,14 @@ local pt_shim: Picotron = {
     pwf = function(): string | nil return nil end,
 }
 
+-- for calls within the engine
 _G.pt = pt_shim
+
+-- usable within mods.  Somewhat regrettably
+local pt_map: {string: any} = pt_shim as {string: any}
+for k,v in pairs(pt_map) do
+    local _G_map: {string: any} = _G as {string: any} 
+    if _G_map[k] == nil then
+        _G_map[k] = v
+    end
+end

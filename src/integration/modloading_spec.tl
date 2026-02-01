@@ -5,7 +5,7 @@ require("spec.picotron_shim")
 
 local mod_loader = require("src.tactics.mods.mod_loader")
 
-describe("mod_loader", function()
+describe("included mods #it", function()
     describe("base mod", function()
         it("should be valid", function()
             -- Given
