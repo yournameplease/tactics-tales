@@ -180,10 +180,10 @@ function Box:add(child: UIElement): UIElement
     return child -- Return child for chaining
 end
 
--- =========================================================
--- PASS 1: MEASURE (Bottom-Up)
--- Calculate intrinsic size of children, then self
--- =========================================================
+---@desc
+--- The first pass of the layout system. It calculates the
+--- intrinsic size of this element. If the element's size is set to 'auto',
+--- it will first measure its children to determine its own content-based size.
 function Box._measure(self: UIElement, depth: integer)
     local element = self as Box -- Cast!  All classes inherit from box though
     self.depth = depth
@@ -229,10 +229,10 @@ function Box:measure(depth: integer)
     Box._measure(self, depth)
 end
 
--- =========================================================
--- PASS 2: ARRANGE (Top-Down)
--- Distribute space and set final X/Y
--- =========================================================
+---@desc
+--- The second pass of the layout system. It arranges the
+--- element's children within its own bounds, distributing available space
+--- according to each child's flex properties and alignment settings.
 function Box:layout(parent_x: integer, parent_y: integer)
     -- Use calculated sizes if available, otherwise fixed
     local my_w = (self.calculated_w or self.w) - self.internal_margin.l - self.internal_margin.r

@@ -195,6 +195,11 @@ local function set_palette(
 	end
 end
 
+---@desc
+--- Assembles and draws a multi-part character sprite. It gathers all the
+--- individual sprite parts for a character (body, head, hair, equipment),
+--- constructs a skeleton to position them correctly relative to each other,
+--- and then renders the complete skeleton to the screen.
 local function draw_character(
 	drawable_unit: DrawableCharacterInstance,
 	draw_point: Point
@@ -303,6 +308,11 @@ local function draw_character(
 	end
 end
 
+---@desc
+--- The main public rendering function for a character. It manages a cache of
+--- pre-baked sprites for each animation frame and facing direction.
+--- If a valid sprite is not in the cache, it calls `draw_character` to render it
+--- to a draw target, then stores it for future frames.
 function character_renderer.draw(
 	drawable_unit: DrawableCharacterInstance,
 	draw_point: Point,

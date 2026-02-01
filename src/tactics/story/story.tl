@@ -97,6 +97,11 @@ function StoryImpl:jump_to_node(node_id: string)
     self:handle_new_node()
 end
 
+---@desc
+--- The core of the story progression logic. This function acts as a state
+--- machine that interprets the current story node and triggers the
+--- corresponding action, such as showing dialogue, starting a battle,
+--- or modifying story memory.
 function StoryImpl:handle_new_node()
     local node_definition = self.current_node.definition
     log.debug("Handling new node: ", node_definition.type)
@@ -170,6 +175,10 @@ function StoryImpl:handle_new_node()
     end
 end
 
+---@desc
+--- Advances the story to the next node in the sequence. It performs
+--- any necessary cleanup from the previous node, increments the node
+--- counter, and then calls `handle_new_node` to process the new active node.
 function StoryImpl:advance_node()
     local node_definition = self.current_node.definition
     -- these probably belong in the story page itself

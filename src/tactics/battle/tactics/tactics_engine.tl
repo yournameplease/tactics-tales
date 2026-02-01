@@ -477,6 +477,10 @@ end
 
 -- Combat
 
+---@desc
+--- Handles the visual and state-related consequences of a single combat step.
+--- This includes playing attack and dodge animations, applying damage and
+--- equipment effects, and checking if the defending unit has died.
 function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.CombatStep)
     local attacker = step.attacker
     local defender = step.defender
