@@ -55,6 +55,9 @@ function _init()
         mod_loader,
         input
     )
+
+    local should_profile = DYNAMIC_CONFIG.profile
+    profile.enabled(should_profile, should_profile)
 end
 
 function _update()

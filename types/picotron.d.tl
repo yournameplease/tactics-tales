@@ -33,6 +33,7 @@ global record DynamicConfig
 	log_level: LogLevel
 	draw_flexbox_debug: boolean
 	draw_target_debug: boolean
+	profile: boolean
 	head_scale: integer
 	dialogue_speed: DialogueSpeed
 end

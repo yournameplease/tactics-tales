@@ -453,14 +453,20 @@ function TacticsMap:draw(
     profile("draw_map_rows")
     local prev_z = 0
     for i=0,#unit_positions-1 do
+        profile("draw_map_rows_units")
         local unit_id = sorted_units:get(1, i)
         local unit = map:get_unit_by_id(unit_id)
         local next_z = sorted_units:get(0, i)
+        profile("draw_map_rows_units")
+        profile("draw_map_rows_decorations")
         if next_z > prev_z then
             self:draw_map_decorations(layers, prev_z, next_z)
             prev_z = next_z
         end
+        profile("draw_map_rows_decorations")
+        profile("draw_map_rows_units")
         draw_unit(unit, draw_target_manager, state.battle_context)
+        profile("draw_map_rows_units")
     end
     self:draw_map_decorations(layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
     

@@ -108,6 +108,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<GameMenuContex
                         )
                     }),
                     multiple_options_cursor.option_definition({
+                        text = "Profiler",
+                        definition = list_cursor.boolean_yes_no(
+                            "profile",
+                            "horizontal"
+                        )
+                    }),
+                    multiple_options_cursor.option_definition({
                         text = "Head Scale",
                         definition = list_cursor.static_definition(
                             {1, 2, 3, 4},
