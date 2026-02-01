@@ -177,4 +177,11 @@ local game_data_schema = s.record({
 	items = items_spec,
 })
 
-return game_data_schema
+return {
+	maps = maps_spec,
+	battles = battles_spec,
+	stories = stories_spec,
+	characters = characters_spec,
+	items = items_spec,
+	final_schema = game_data_schema,
+}
