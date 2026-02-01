@@ -1,4 +1,4 @@
----@desc Specification for game mods.
+---@brief Specification for game mods.
 --- Note that reference fields may be provided by dependent mods as well
 --- Used for mod validation
 local s = require("src.tactics.validator.schema_definition")
@@ -65,7 +65,7 @@ local item_spec_record = s.record({
 local items_spec = s.dictionary(s.string(), item_spec_record)
 
 -- Schemas for `characters`
-local option_spec = s.record({
+local randomizer_options_spec = s.record({
 	type = s.string(),
 	-- `options` is a table that can be a list of strings or a dictionary of string to number.
 	-- We are validating it as a generic table, as the schema system does not support unions.
@@ -77,18 +77,18 @@ local character_template_spec = s.record({
 	movement = s.optional(s.integer()),
 	hp_max = s.optional(s.integer()),
 	item_loadout = s.optional(s.list(s.reference("items"))),
-	head_options_m = s.optional(option_spec),
-	head_options_f = s.optional(option_spec),
-	headwear_options = s.optional(option_spec),
-	eyewear_options = s.optional(option_spec),
-	body_options = s.optional(option_spec),
-	gender_options = s.optional(option_spec),
-	skin_color_options = s.optional(option_spec),
-	hair_color_options = s.optional(option_spec),
-	beard_options = s.optional(option_spec),
-	eye_options = s.optional(option_spec),
-	hair_options_m = s.optional(option_spec),
-	hair_options_f = s.optional(option_spec),
+	head_options_m = s.optional(randomizer_options_spec),
+	head_options_f = s.optional(randomizer_options_spec),
+	headwear_options = s.optional(randomizer_options_spec),
+	eyewear_options = s.optional(randomizer_options_spec),
+	body_options = s.optional(randomizer_options_spec),
+	gender_options = s.optional(randomizer_options_spec),
+	skin_color_options = s.optional(randomizer_options_spec),
+	hair_color_options = s.optional(randomizer_options_spec),
+	beard_options = s.optional(randomizer_options_spec),
+	eye_options = s.optional(randomizer_options_spec),
+	hair_options_m = s.optional(randomizer_options_spec),
+	hair_options_f = s.optional(randomizer_options_spec),
 })
 local characters_spec = s.dictionary(s.string(), character_template_spec)
 
