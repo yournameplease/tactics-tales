@@ -24,6 +24,12 @@ all: clean test
 clean:
 	rm -rf build
 	
+ut: tactics
+	busted build/ --exclude-tags='it'
+	
+it: tactics
+	busted build/ --tags='it'
+
 test: tactics
 	busted build/
 
