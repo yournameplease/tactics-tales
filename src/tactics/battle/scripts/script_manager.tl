@@ -217,7 +217,7 @@ function ScriptManagerImpl:register_script(
 		local fn: function(ScriptContext)
 		if effect is battle_script.effect.SpawnUnits then
 			fn = function(_: ScriptContext)
-				log.debug("Handling SpawnUnits event")
+				log.debug("Handling SpawnUnits effect.")
 			    self.tactics_engine:spawn_all(
 			        effect.players,
 			        effect.enemies,
@@ -228,7 +228,7 @@ function ScriptManagerImpl:register_script(
 			end
 		elseif effect is battle_script.effect.ModifyUnits then
 			fn = function(ctx: ScriptContext)
-				log.debug("Handling ModifyUnits event")
+				log.debug("Handling ModifyUnits effect.")
 				self.tactics_engine:modify_units(
 					self:resolve_unit_selector(effect.unit_selector, ctx),
 					{
@@ -239,7 +239,7 @@ function ScriptManagerImpl:register_script(
 			end
 		elseif effect is battle_script.effect.ModifyTerrain then
 			fn = function(_ctx: ScriptContext)
-				log.debug("Handling ModifyTerrain event")
+				log.debug("Handling ModifyTerrain effect.")
 				self.battle_map:update_terrain(
 					effect.tile_label,
 					effect.new_terrain
@@ -247,14 +247,14 @@ function ScriptManagerImpl:register_script(
 			end
 		elseif effect is battle_script.effect.Dialogue then
 			fn = function(ctx: ScriptContext)
-				log.debug("Handling Dialogue event")
+				log.debug("Handling Dialogue effect.")
 				local units = self:resolve_unit_selector(effect.unit, ctx)
 				assert(#units == 1, "Not implemented.")
 				self.tactics_engine:start_dialogue(units[1], effect.text)
 			end
 		elseif effect is battle_script.effect.DespawnUnits then
 			fn = function(ctx: ScriptContext)
-				log.debug("Handling DespawnUnit event")
+				log.debug("Handling DespawnUnit effect.")
 				local units = self:resolve_unit_selector(effect.units, ctx)
 				self.tactics_engine:despawn_unit(units)
 			end
@@ -278,6 +278,7 @@ function ScriptManagerImpl:register_script(
 						while self.tactics_engine:is_blocked() do
 							pt.yield()
 						end
+						log.debug("Handled script effect.")
 					end
 				end)
 			end
