@@ -12,8 +12,8 @@ describe("tactics.util.text", function()
 
     before_each(function()
         old_print = pt.print
-        print_spy = spy.new(function(str: string, _x: number, _y: number, _color: number): number, number
-            return #str * 4, 8
+        print_spy = spy.new(function(str: string, x: number, y: number, _color: number): number, number
+            return x+#str * 4, y+8
         end)
         pt.print = print_spy
     end)
