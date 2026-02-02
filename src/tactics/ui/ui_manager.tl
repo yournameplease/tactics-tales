@@ -96,6 +96,8 @@ function UIManager:calculate(ui_ctx: UIContextManager)
     box.compute_children(root, ui_ctx)
     root:measure(1)
     root:layout(root.x, root.y)
+    -- lazy fix for text sizing. Double calculate everything.
+    -- Consider something else if performance matters
     box.compute_children(root, ui_ctx)
     root:measure(1)
     root:layout(root.x, root.y)
