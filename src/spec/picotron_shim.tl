@@ -303,7 +303,14 @@ local pt_shim: Picotron = {
     pod = function(val: any | string | Userdata | boolean | number, _flags: integer, _metadata: any): string | nil return tostring(val) end,
     unpod = function(val: string): (any | string | Userdata | boolean | number | nil, any) return val, nil end,
     chr = string.char,
-    sub = string.sub,
+    sub = function(s: string, start: integer, pos: integer | boolean): string
+        local one_char = pos ~= nil and type(pos) ~= "number"
+        if one_char then
+            return string.sub(s, start, start)
+        else
+            return string.sub(s, start, pos as integer)
+        end
+    end,
     split = function(str: string, separator: string): {string}
         local result: {string} = {}
         if #separator == 0 then
