@@ -78,25 +78,23 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
 
     local targeting = unit.character:get_weapon_targeting()
         
-    if shallow_move_limit > 0 then
-        all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
-            if cost ~= nil
-                and cost.cost <= shallow_move_limit
-                and self.battle_map:tile_is_legal_destination(unit, p)
-            then
-                -- one_turn move, can attack
-                local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
-                    return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
-                end)
-                for _,t in ipairs(targets) do
-                    pt.add(shallow_actions, {
-                        destination = p,
-                        target = t,
-                    })
-                end
+    all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
+        if cost ~= nil
+            and cost.cost <= shallow_move_limit
+            and self.battle_map:tile_is_legal_destination(unit, p)
+        then
+            -- one_turn move, can attack
+            local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
+                return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
+            end)
+            for _,t in ipairs(targets) do
+                pt.add(shallow_actions, {
+                    destination = p,
+                    target = t,
+                })
             end
-        end)
-    end
+        end
+    end)
     if #shallow_actions == 0 then
         all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
             if cost ~= nil
