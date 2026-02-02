@@ -4,6 +4,13 @@
 
 - When you generate new Teal code, follow the existing coding style.
 
+## Dealing with Teal's type system
+
+- If you encounter difficulty with writing Teal code that compiles, stop attempting changes after multiple compilation attempts have failed.
+- Instead, ask me to take over and get the code to compile.
+- If the typed code is isolated enough (such as in a test case), you may comment the code until you are done with other work.
+- Do not use casts `as Type` or overly generic types like `any` unless you are given permission or interfacing with code using those types.
+
 ## Testing
 
 - Run tests via `make test`
