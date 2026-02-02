@@ -113,6 +113,7 @@ local interface DrawableCharacterInstance
 	animation_data: animation.AnimatedSpriteData
     -- prerendered sprites by animation frame name
     sprites: { AnimationFrameName: { FacingVertical: Userdata} }
+    palette: { AnimationFrameName: { FacingVertical: Userdata} }
 
 	character: Character
 end

@@ -171,6 +171,8 @@ local function set_palette(
 
 	--eyes
 	-- todo: looking support
+	-- NOTE: this will not work with prebaking the whole unit color palette.
+	-- consider organizing colors into continuous segments?
 	do
 		if look_direction ~= nil then
 			if look_direction == "left" and drawable_unit.facing.horizontal == "left"
@@ -327,6 +329,7 @@ function character_renderer.draw(
 	local DRAW_TARGET_D = point.of(15, 31)
 
 	profile("draw_character")
+	profile("draw_character_setup")
 	local current_frame = drawable_unit.animation_data.current_frame
 
 	-- update facing
@@ -353,6 +356,8 @@ function character_renderer.draw(
 	if drawable_unit.sprites[frame_name] == nil then
 		drawable_unit.sprites[frame_name] = {}
 	end
+	profile("draw_character_setup")
+	profile("draw_character_baking")
 	if drawable_unit.sprites[frame_name][facing_v] == nil then
 		draw_target_manager:push_target(DRAW_TARGET_W, DRAW_TARGET_H, DRAW_TARGET_D.x, DRAW_TARGET_D.y)
 
@@ -372,7 +377,8 @@ function character_renderer.draw(
 
 		drawable_unit.sprites[frame_name][facing_v] = draw_target_manager:pop_sprite()
 	end
-
+	profile("draw_character_baking")
+	profile("draw_character_get_offset")
 	local sprite = drawable_unit.sprites[frame_name][facing_v]
 
 	local animation_frame = get_animation_frame(drawable_unit)
@@ -382,7 +388,8 @@ function character_renderer.draw(
 	end
 
 	local sprite_draw_point = draw_point + offset - DRAW_TARGET_D
-
+	profile("draw_character_get_offset")
+	profile("draw_character_set_pal")
     if set_pal is boolean then
 		if set_pal then
         	set_palette(drawable_unit, draw_outline, look_direction)
@@ -390,13 +397,18 @@ function character_renderer.draw(
     elseif set_pal is colors.PaletteId then
 		colors.apply_palette(set_pal)
 	end
+	profile("draw_character_set_pal")
 
+	profile("draw_character_spr_to_screen")
 	local flip_h = facing_h == "left"
 	pt.spr(sprite,sprite_draw_point.x,sprite_draw_point.y, flip_h)
+	profile("draw_character_spr_to_screen")
 
+	profile("draw_character_reset_pal")
     if set_pal then
         pt.reset_pal()
     end
+	profile("draw_character_reset_pal")
 	profile("draw_character")
 end
 
