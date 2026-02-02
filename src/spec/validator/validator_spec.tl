@@ -1,7 +1,5 @@
 local type _ = require("busted")
 local luassert = require("luassert")
-require("spec.picotron_shim")
-require("spec.require_trimmer")
 
 local s = require("src.tactics.validator.schema_definition")
 local validator = require("src.tactics.validator.schema_validator")
