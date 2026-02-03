@@ -63,14 +63,14 @@ local SPRITE_PART_ORDER: {string} = {
 	"hair_back",
 	"eyewear_back",
 	"body",
-	"off_hand",
-	"main_hand",
 	"head",
 	"eyes",
 	"beard",
 	"eyewear_front",
 	"hair_front",
 	"headwear_front",
+	"off_hand",
+	"main_hand",
 }
 
 local enum LookDirection
