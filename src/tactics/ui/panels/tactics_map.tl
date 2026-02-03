@@ -272,6 +272,7 @@ function TacticsMap:compute_children(state: UIContextManager)
                             wrap = "wrap",
                         },
                         flex_grow = 1,
+                    rows = 3,
                         -- internal_margin = { t = y, l = x}
                     }
                 )

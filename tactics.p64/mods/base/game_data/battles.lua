@@ -145,7 +145,14 @@ local BATTLE_DATA = {
                     { character_source = character_source.template("militia_armor"), tile = "player_armor" },
                 },
                 "from_east"
-            ),
+            )
+            :then_dialogue(script_unit.tagged("player_captain"), {
+                "Just like I told you all.  Bandits!",
+                "Remember your training!",
+                "Spears and bows can soften enemies while avoiding counterattacks.",
+                "Shields can be shattered by axes.",
+                "Defeat their leader and we can reclaim this village!"
+            }),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
@@ -161,9 +168,17 @@ local BATTLE_DATA = {
             script.when_unit_dies("bandit_miniboss_gate")
                 :then_modify_terrain("bandit_miniboss_gate", {["mid_wall"] = 0}),
             script.when_unit_dies("spawn_child_bow")
-                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }}, nil),
+                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }}, nil)
+                :then_dialogue(script_unit.tagged("child_bow"), {
+                    "Thank you!",
+                    "Let me fight, I'm good with a bow!",
+                }),
             script.when_unit_dies("spawn_child_axe")
-                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }}, nil),
+                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }}, nil)
+                :then_dialogue(script_unit.tagged("child_axe"), {
+                    "Gah, I'm free!",
+                    "Those bandits will taste my axe!",
+                }),
         }
     },
     ["cultist_cave"] = {
