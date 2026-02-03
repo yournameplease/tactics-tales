@@ -247,39 +247,48 @@ function TacticsMap:compute_children(state: UIContextManager)
     local cursor_tile = get_cursor_tile(state.battle_context)
 
     local child_object = self.child_object
-    if cursor_tile ~= nil then
-        local x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
-        local y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
+    local x: integer = 0
+    local y: integer = 0
+    local menu_box: box.UIElement = nil
+    if state.battle_context.active_dialogue ~= nil then
+        local unit = state.battle_context.active_dialogue.speaking_unit
 
-        local menu_box: box.UIElement = nil
-        if state.battle_context.active_dialogue ~= nil then
-            local ui_object = state.battle_context.active_dialogue
-            if child_object ~= ui_object then
-                menu_box = box.new({
-                    w = 80,
-                    -- h = 30,
-                    auto_height = true,
-                    decoration_padding = 1,
-                    padding = 2,
-                    decoration = "border",
-                })
-            
-                local node = dialogue_node.new(
-                	{
-                        dialogue = state.battle_context.active_dialogue,
-                        dialogue_mode = "active_line",
-                        draw_properties = {
-                            wrap = "wrap",
-                        },
-                        flex_grow = 1,
+        local x_step = unit.facing.horizontal == "left" and -4.5 or 1.5
+
+        x = pt.flr((unit.tile.x + x_step) * TILE_SIZE.x)
+        y = pt.flr((unit.tile.y - 0.5) * TILE_SIZE.y)
+
+        local ui_object = state.battle_context.active_dialogue
+        if child_object ~= ui_object then
+            menu_box = box.new({
+                w = 80,
+                -- h = 30,
+                auto_height = true,
+                decoration_padding = 1,
+                padding = 2,
+                decoration = "border",
+            })
+        
+            local node = dialogue_node.new(
+            	{
+                    dialogue = state.battle_context.active_dialogue.dialogue,
+                    dialogue_mode = "active_line",
+                    draw_properties = {
+                        wrap = "wrap",
+                    },
+                    flex_grow = 1,
                     rows = 3,
-                        -- internal_margin = { t = y, l = x}
-                    }
-                )
-                menu_box:add(node)
-                self.child_object = ui_object
-            end
-        elseif cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
+                    -- internal_margin = { t = y, l = x}
+                }
+            )
+            menu_box:add(node)
+            self.child_object = ui_object
+        end
+    elseif cursor_tile ~= nil then
+        x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
+        y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
+
+        if cursor is list_cursor.ListMenuCursor<BattleMenuContext, string> then
             if child_object ~= cursor then
                 menu_box = box.new({
                     auto_height = true,
@@ -316,16 +325,16 @@ function TacticsMap:compute_children(state: UIContextManager)
                 self.child_object = nil
             end
         end
-
-        if menu_box ~= nil then
-            self.children = { box.floating(menu_box, x, y) }
-        end
     else
         if #self.children ~= 0 then
             log.info("removing list child")
             self.children = {}
             self.child_object = nil
         end
+    end
+
+    if menu_box ~= nil then
+        self.children = { box.floating(menu_box, x, y) }
     end
 end
 
