@@ -146,6 +146,7 @@ local BATTLE_DATA = {
                 },
                 "from_east"
             )
+            :then_play_music("recruit")
             :then_dialogue(script_unit.tagged("player_captain"), {
                 "Just like I told you all, bandits!",
                 "Remember your training!",

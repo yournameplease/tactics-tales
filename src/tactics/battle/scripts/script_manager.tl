@@ -258,6 +258,29 @@ function ScriptManagerImpl:register_script(
 				local units = self:resolve_unit_selector(effect.units, ctx)
 				self.tactics_engine:despawn_unit(units)
 			end
+		elseif effect is battle_script.effect.PlaySound then
+			fn = function(_ctx: ScriptContext)
+				log.debug("Handling PlaySound effect.")
+				local SFX_MAP: {string: integer} = {
+					["death"] = 0
+				}
+				local sound = SFX_MAP[effect.sound_id]
+				if sound ~= nil then
+					pt.sfx(sound)
+				end
+			end
+		elseif effect is battle_script.effect.PlayMusic then
+			fn = function(_ctx: ScriptContext)
+				log.debug("Handling PlayMusic effect.")
+				local MUSIC_MAP: {string: integer} = {
+					["recruit"] = 8,
+					["death"] = 9,
+				}
+				local music = MUSIC_MAP[effect.music_id]
+				if music ~= nil then
+					pt.music(music)
+				end
+			end
 		else
 			unexpected(effect.type)
 		end
