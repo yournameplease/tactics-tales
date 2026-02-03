@@ -153,62 +153,95 @@ local STORIES = {
 				stories.set_memory("hero_village", "Herovillageton"),
 				stories.set_memory("bandit_clan", "Tidnab"),
 				stories.character_customizer("hero", "hero_name"),
-				stories.new_page(),
 				stories.jump('ch_1_intro'),
 			},
 			ch_1_intro = {
+				stories.new_page(),
 				stories.chapter_header("Homecoming", 1),
 
 				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
 				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were the ${bandit_clan} Bandits!"),
-				stories.story_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat on their own."),
+				stories.story_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
 				stories.story_text("Prepare for battle!"),
 
 				stories.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
 			},
 			ch_1_v = {
-				stories.story_text("You Win!"),
+				stories.new_page(),
+				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
 				stories.jump('ch_2_intro'),
 			},
 			ch_1_f = {
-				stories.story_text(''),
-				stories.jump('ch_2_intro'),
+				stories.new_page(),
+				stories.story_text("${hero.name} and the visiting militia were no match for the bandits."),
+				stories.story_text("${hero_village} would find itself under bandit rule for years to come."),
+				stories.jump('game_over'),
 			},
 			ch_2_intro = {
+				stories.new_page(),
 				stories.chapter_header("Those Who Act in the Shadows", 2),
 
 				stories.story_text("En route to ${town}, ${hero.name}'s party learned of a local cult."),
 				stories.story_text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
-				stories.story_text("Though the leader is powerful, the party could at least attemt to free some prisoners before making an escape."),
+				stories.story_text("Though the leader is powerful, the party could at least attempt to free some prisoners before making an escape."),
 				stories.story_text("Prepare for battle!"),
 
 				stories.battle('cultist_cave', 'ch_2_v', 'ch_2_f'),
 			},
 			ch_2_v = {
+				stories.new_page(),
 				stories.story_text("You Win!"),
 				stories.jump('ch_3_intro'),
 			},
 			ch_2_f = {
+				stories.new_page(),
 				stories.story_text('Defeat!'),
 				stories.jump('ch_3_intro'),
 			},
 			ch_3_intro = {
-				stories.chapter_header("Homecoming", 3),
+				stories.new_page(),
+				stories.chapter_header("", 3),
 
-				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
-				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were the ${bandit_clan} Bandits!"),
-				stories.story_text("The ${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat on their own."),
+				stories.story_text("As their journey continued, the party reached a fortress town, a final bastion of safety before they could cross bandit-infested cliffs to reach the capitol."),
+				stories.story_text("There would be no time for rest, however.  Bandits were laying siege to the fortress."),
+				stories.story_text("It made no sense.  The fortress was well guarded."),
+				stories.story_text("Why wouldn't the army put up a fight?"),
 				stories.story_text("Prepare for battle!"),
 
-				stories.battle('bandit_village', 'ch_3_v', 'ch_3_f'),
+				stories.battle('fortress_town', 'ch_3_v', 'ch_3_f'),
 			},
 			ch_3_v = {
-				stories.story_text("You Win!"),
+				stories.new_page(),
+
+				stories.story_text("Clearly, bandit influence ran deep here."),
+				stories.story_text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
+
 				stories.jump('ch_4_intro'),
 			},
 			ch_3_f = {
+				stories.new_page(),
 				stories.story_text(''),
 				stories.jump('ch_4_intro'),
+			},
+			ch_4_intro = {
+				stories.new_page(),
+				stories.chapter_header("Unlikely Alliance", 4),
+
+				stories.story_text("${hero.name} was prepared for bandits when they approached the cliffs."),
+				stories.story_text("To their surprise, though, the bandits were not alone this time."),
+				stories.story_text("Cultists should hate bandits!  Why were they working together?"),
+
+				stories.story_text("Prepare for battle!"),
+				stories.story_text("And watch for rolling rocks!"),
+
+				stories.battle('cliff_crossing', 'ch_4_v', 'ch_4_f'),
+			},
+			game_over = {
+				stories.new_page(),
+				stories.chapter_header("Game Over"),
+				stories.story_text("Try again.  I believe in you!  <3"),
+				stories.exit_story(),
 			},
 		}
 	}
