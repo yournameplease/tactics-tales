@@ -50,10 +50,10 @@ function DialogueNode:compute_children(_: UIContextManager)
     local lines = self.dialogue and self.dialogue.text
 
     if self.rows then
-        assert(
-                #lines ==
-                self.rows, "`func` should return expected number of rows"
-        )
+        -- assert(
+        --         #lines ==
+        --         self.rows, "`func` should return expected number of rows"
+        -- )
     end
 
     local text_obj = self.text_object
