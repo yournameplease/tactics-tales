@@ -343,6 +343,7 @@ function TacticsEngine:spawn_all(
         local path = { offset_point * TILE_SIZE, point.of(0,0) }
 
         self.task_manager:start_routine(function()
+            self.battle_is_blocked = true
             local spawn_animation = self.animation_manager:create_walk_animation(path, max_offset)
 
             for _,unit in ipairs(spawned) do
@@ -358,6 +359,7 @@ function TacticsEngine:spawn_all(
                 unit.animation_data = idle_animation
             end
             log.debug("Finished animating spawned units")
+            self.battle_is_blocked = false
         end)
     end
 end
