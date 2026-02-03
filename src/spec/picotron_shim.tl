@@ -18,7 +18,7 @@ local lfs = require("lfs")
 
 -- various global configs
 _G.DYNAMIC_CONFIG = {
-    log_level = "INFO",
+    log_level = "ERROR",
     draw_flexbox_debug = false,
     draw_target_debug = false,
     head_scale = 1,
@@ -186,8 +186,6 @@ local pt_shim: Picotron = {
         local files: {string} = {}
         for file in lfs.dir(path) do
             if file ~= "." and file ~= ".." then
-                local f = path..'/'..file
-                print("FOUND FILE: "..f.." "..file)
                 table.insert(files, file)
             end
         end
