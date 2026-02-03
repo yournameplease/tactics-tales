@@ -147,11 +147,12 @@ local BATTLE_DATA = {
                 "from_east"
             )
             :then_dialogue(script_unit.tagged("player_captain"), {
-                "Just like I told you all.  Bandits!",
+                "Just like I told you all, bandits!",
                 "Remember your training!",
-                "Spears and bows can soften enemies while avoiding counterattacks.",
+                "Spears and bows can soften enemies",
+                "while avoiding counterattacks.",
                 "Shields can be shattered by axes.",
-                "Defeat their leader and we can reclaim this village!"
+                "Defeat their leader to save this village!"
             }),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
@@ -168,14 +169,14 @@ local BATTLE_DATA = {
             script.when_unit_dies("bandit_miniboss_gate")
                 :then_modify_terrain("bandit_miniboss_gate", {["mid_wall"] = 0}),
             script.when_unit_dies("spawn_child_bow")
-                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }}, nil)
-                :then_dialogue(script_unit.tagged("child_bow"), {
+                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l", tags = {"child_bow_player"} }}, nil)
+                :then_dialogue(script_unit.tagged("child_bow_player"), {
                     "Thank you!",
                     "Let me fight, I'm good with a bow!",
                 }),
             script.when_unit_dies("spawn_child_axe")
-                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }}, nil)
-                :then_dialogue(script_unit.tagged("child_axe"), {
+                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r", tags = {"child_axe_player"} }}, nil)
+                :then_dialogue(script_unit.tagged("child_axe_player"), {
                     "Gah, I'm free!",
                     "Those bandits will taste my axe!",
                 }),
@@ -253,11 +254,19 @@ local BATTLE_DATA = {
                 :then_dialogue(script_unit.tagged("cultist_boss"), {"Intruders?", "Attack!", "Don't let them escape!"}),
             script.when_unit_dies("cultist_door_guard_c")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
-                :then_dialogue(script_unit.tagged("jailed_priest"), {"Thank you for freeing me.", "Please, let me join and tend to your wounded."})
+                :then_dialogue(script_unit.tagged("jailed_priest"), {
+                    "Thank you for freeing me.",
+                    "Please, let me join and tend to your wounded."
+                })
                 :then_recruit_unit(script_unit.tagged("jailed_priest")),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
-                :then_dialogue(script_unit.tagged("jailed_royal"), {"Those cultists worked with bandits to capture me.", "They should hate each other!", "Something dark is looming.",  "Allow me to travel with you to seek the truth."})
+                :then_dialogue(script_unit.tagged("jailed_royal"), {
+                    "Those cultists worked with bandits to capture me.",
+                    "They should hate each other!",
+                    "Something dark is looming.",
+                    "Allow me to travel with you to seek the truth."
+                })
                 :then_recruit_unit(script_unit.tagged("jailed_royal")),
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
