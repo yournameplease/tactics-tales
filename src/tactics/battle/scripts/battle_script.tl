@@ -137,6 +137,8 @@ local enum ScriptEffectType
 	"modify_terrain"
 	"dialogue"
 	"despawn_units"
+	"play_sound"
+	"play_music"
 end
 
 local interface ScriptEffect
@@ -182,6 +184,18 @@ local record DespawnUnits
 	-- todo: direction?
 end
 
+local record PlaySound
+	is ScriptEffect
+	where self.type == "play_sound"
+	sound_id: string 
+end
+
+local record PlayMusic
+	is ScriptEffect
+	where self.type == "play_music"
+	music_id: string 
+end
+
 local record BattleScript
 	id: integer
 	trigger: ScriptTrigger
@@ -224,6 +238,8 @@ local battle_script = {
 		ModifyTerrain = ModifyTerrain,
 		Dialogue = Dialogue,
 		DespawnUnits = DespawnUnits,
+		PlaySound = PlaySound,
+		PlayMusic = PlayMusic,
 	}
 }
 

@@ -102,6 +102,26 @@ function ScriptBuilder:then_modify_terrain(
 	return self
 end
 
+function ScriptBuilder:then_play_sound(
+	sound_id
+)
+	add(self.effects, {
+		type = "play_sound",
+		sound_id = sound_id,
+	})
+	return self
+end
+
+function ScriptBuilder:then_play_music(
+	music_id
+)
+	add(self.effects, {
+		type = "play_music",
+		music_id = music_id,
+	})
+	return self
+end
+
 function ScriptBuilder:as_one_shot()
 	self.one_shot = true
 	return self

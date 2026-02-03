@@ -146,6 +146,7 @@ local BATTLE_DATA = {
                 },
                 "from_east"
             )
+            :then_play_music("recruit")
             :then_dialogue(script_unit.tagged("player_captain"), {
                 "Just like I told you all, bandits!",
                 "Remember your training!",
@@ -169,12 +170,14 @@ local BATTLE_DATA = {
             script.when_unit_dies("bandit_miniboss_gate")
                 :then_modify_terrain("bandit_miniboss_gate", {["mid_wall"] = 0}),
             script.when_unit_dies("spawn_child_bow")
+                :then_play_music("recruit")
                 :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l", tags = {"child_bow_player"} }}, nil)
                 :then_dialogue(script_unit.tagged("child_bow_player"), {
                     "Thank you!",
                     "Let me fight, I'm good with a bow!",
                 }),
             script.when_unit_dies("spawn_child_axe")
+                :then_play_music("recruit")
                 :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r", tags = {"child_axe_player"} }}, nil)
                 :then_dialogue(script_unit.tagged("child_axe_player"), {
                     "Gah, I'm free!",
@@ -253,6 +256,7 @@ local BATTLE_DATA = {
                 :then_modify_terrain("door_b_ceiling", {["ceiling"] = 0})
                 :then_dialogue(script_unit.tagged("cultist_boss"), {"Intruders?", "Attack!", "Don't let them escape!"}),
             script.when_unit_dies("cultist_door_guard_c")
+                :then_play_music("recruit")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {
                     "Thank you for freeing me.",
@@ -261,6 +265,7 @@ local BATTLE_DATA = {
                 :then_recruit_unit(script_unit.tagged("jailed_priest")),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
+                :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("jailed_royal"), {
                     "Those cultists worked with bandits to capture me.",
                     "They should hate each other!",
@@ -353,11 +358,13 @@ local BATTLE_DATA = {
                     "enemy"
             ),
             script.on_talk("civilian_sword")
+                :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life to stand up to the crooked militia.", "Let us join you!"})
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :as_one_shot(),
             script.on_talk("civilian_axe")
+                :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_axe"), {"So there is still good in this world.", "I will join your cause.",  "I only ask, protect the civilians."})
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
