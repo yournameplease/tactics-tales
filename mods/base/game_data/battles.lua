@@ -152,7 +152,7 @@ local BATTLE_DATA = {
                 "Spears and bows can soften enemies",
                 "while avoiding counterattacks.",
                 "Shields can be shattered by axes.",
-                "Defeat their leader and we can reclaim this village!"
+                "Defeat their leader to save this village!"
             }),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
@@ -169,14 +169,14 @@ local BATTLE_DATA = {
             script.when_unit_dies("bandit_miniboss_gate")
                 :then_modify_terrain("bandit_miniboss_gate", {["mid_wall"] = 0}),
             script.when_unit_dies("spawn_child_bow")
-                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l" }}, nil)
-                :then_dialogue(script_unit.tagged("child_bow"), {
+                :then_spawn_players({{ character_source = character_source.template("child_bow"), tile = "bandit_miniboss_l", tags = {"child_bow_player"} }}, nil)
+                :then_dialogue(script_unit.tagged("child_bow_player"), {
                     "Thank you!",
                     "Let me fight, I'm good with a bow!",
                 }),
             script.when_unit_dies("spawn_child_axe")
-                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r" }}, nil)
-                :then_dialogue(script_unit.tagged("child_axe"), {
+                :then_spawn_players({{ character_source = character_source.template("child_axe"), tile = "bandit_miniboss_r", tags = {"child_axe_player"} }}, nil)
+                :then_dialogue(script_unit.tagged("child_axe_player"), {
                     "Gah, I'm free!",
                     "Those bandits will taste my axe!",
                 }),

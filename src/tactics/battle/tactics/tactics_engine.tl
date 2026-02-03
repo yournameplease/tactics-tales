@@ -42,6 +42,16 @@ local record NewUnitProperties
     new_ai: unit_ai.UnitAI
 end
 
+local record QueuedBattleDialogue
+    speaking_unit: BattleUnit
+    text: {string}
+end
+
+local record ActiveBattleDialogue
+    speaking_unit: BattleUnit
+    dialogue: Dialogue
+end
+
 local record TacticsEngine
     
     battle_is_blocked: boolean
@@ -53,8 +63,8 @@ local record TacticsEngine
     animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
     dialogue_manager: DialogueManager
-    dialogue_queue: {{string}}
-    active_dialogue: Dialogue
+    dialogue_queue: {QueuedBattleDialogue}
+    active_dialogue: ActiveBattleDialogue
 
     -- queries
     
@@ -119,6 +129,7 @@ local record TacticsEngine
 end
 
 local tactics_engine = {
+    ActiveBattleDialogue = ActiveBattleDialogue,
     TacticsEngine = TacticsEngine
 }
 
@@ -161,27 +172,34 @@ end
 
 -- dialogue
 
-function TacticsEngine:start_dialogue(_unit: battle_unit.BattleUnit, text: {string})
-    pt.add(self.dialogue_queue, text)
+function TacticsEngine:start_dialogue(unit: battle_unit.BattleUnit, text: {string})
+    pt.add(self.dialogue_queue, {
+        speaking_unit = unit,
+        text = text,
+    })
 end
 
 function TacticsEngine:update_dialogue(input: InputContext)
     if #self.dialogue_queue > 0 then
         if self.active_dialogue == nil then
+            local queued_dialogue = self.dialogue_queue[1]
             local new_dialogue = self.dialogue_manager:create_dialogue(
-                self.dialogue_queue[1],
+                queued_dialogue.text,
                 {
                     can_skip = true,
                 },
                 {}
             )
-            self.active_dialogue = new_dialogue
+            self.active_dialogue = {
+                speaking_unit = queued_dialogue.speaking_unit,
+                dialogue = new_dialogue,
+            }
             pt.deli(self.dialogue_queue, 1)
             log.debug("adding dialogue", #self.dialogue_queue, self.active_dialogue)
         end
     end
     self.dialogue_manager:update(input)
-    if self.active_dialogue ~= nil and self.active_dialogue.finished then
+    if self.active_dialogue ~= nil and self.active_dialogue.dialogue.finished then
         log.debug("removing dialogue", #self.dialogue_queue, self.active_dialogue)
         self.active_dialogue = nil
     end
