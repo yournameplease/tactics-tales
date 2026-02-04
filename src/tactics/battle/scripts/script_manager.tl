@@ -272,13 +272,25 @@ function ScriptManagerImpl:register_script(
 		elseif effect is battle_script.effect.PlayMusic then
 			fn = function(_ctx: ScriptContext)
 				log.debug("Handling PlayMusic effect.")
-				local MUSIC_MAP: {string: integer} = {
-					["recruit"] = 8,
-					["death"] = 9,
+				local record Music
+					id: integer
+					offset: integer
+				end
+				local MUSIC_MAP: {string: Music} = {
+					["recruit"] = {
+						id = 8,
+					},
+					["recruit_short"] = {
+						id = 8,
+						offset = 50 * 16,
+					},
+					["death"] = {
+						id = 9,
+					},
 				}
 				local music = MUSIC_MAP[effect.music_id]
 				if music ~= nil then
-					pt.music(music)
+					pt.music(music.id, nil, nil, nil, music.offset)
 				end
 			end
 		else

@@ -69,8 +69,8 @@ end
 --- @param n integer
 --- @param fade_len? integer
 --- @param channel_mask? integer
-function pt.music(n, fade_len, channel_mask) 
-	music(n, fade_len, channel_mask)
+function pt.music(n, fade_len, channel_mask, base_addr, tick_offset)
+	music(n, fade_len, channel_mask, base_addr, tick_offset)
 end
 
 --- This provides low level control over a channel. It is useful in more niche situations, like audio authoring tools and size-coding.
