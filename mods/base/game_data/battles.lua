@@ -94,7 +94,7 @@ function objectives.turn_limit()
     return self
 end
 
-function escape(tile_tag)
+local function escape(tile_tag)
     return script.on_tile_interaction(tile_tag)
         :then_dialogue(script_unit.source(), "I'm retreating")
         :then_despawn_units(script_unit.source())
@@ -442,6 +442,49 @@ local BATTLE_DATA = {
                 },
                 "from_west"
             ),
+            escape("escape_point"),
+        }
+    },
+    ["playground"] = {
+        map_id = "playground",
+        tile_labels = {
+            ["player_0"] = { 0x00 },
+            ["player_1"] = { 0x01 },
+            ["player_2"] = { 0x02 },
+            ["player_3"] = { 0x03 },
+            ["player_4"] = { 0x04 },
+            ["player_5"] = { 0x05 },
+            ["player_6"] = { 0x06 },
+            ["player_7"] = { 0x07 },
+            ["enemy_0"] = { 0x10 },
+            ["enemy_1"] = { 0x11 },
+            ["enemy_2"] = { 0x12 },
+            ["enemy_3"] = { 0x13 },
+            ["escape_point"] = { 0x38 },
+        },
+        turn_limit = 1000,
+        victory_conditions = {
+            objectives.escape()
+        },
+        failure_conditions = {
+        },
+        enemies = {
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "enemy_0" },
+            { character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "enemy_1" },
+            { character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "enemy_2" },
+            { character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "enemy_3" },
+        },
+        players = {
+            { character_source = character_source.template("militia_spear_captain"), tile = "player_0" },
+            { character_source = character_source.template("militia_archer"), tile = "player_1" },
+            { character_source = character_source.template("village_hero"), tile = "player_2" },
+            { character_source = character_source.template("child_greatsword"), tile = "player_3" },
+            { character_source = character_source.template("bandit_axe"), tile = "player_4" },
+            { character_source = character_source.template("bandit_guard"), tile = "player_5" },
+            { character_source = character_source.template("child_axe"), tile = "player_6" },
+            { character_source = character_source.template("bandit_axe"), tile = "player_7" },
+        },
+        scripts = {
             escape("escape_point"),
         }
     }
