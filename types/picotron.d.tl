@@ -199,7 +199,13 @@ global record Picotron
 	-- menuitem: function(m?: __MenuItem) 
 	menuitem: function(id?: integer | __MenuItem, label?: any, action?: any) 
 	sfx: function (n: integer, channel?: integer, offset?: integer, length?: integer, pan?: integer, mix_volume?: integer) 
-	music: function(n: integer, fade_len?: integer, channel_mask?: integer) 
+	music: function(
+		n: integer,
+		fade_len?: integer,
+		channel_mask?: integer,
+		base_addr?: integer,
+		tick_offset?: integer
+	) 
 	note: function(pitch: integer, inst: integer, vol: integer, effect: integer, effect_p: integer, channel: integer, retrig: boolean, panning: integer) 
 	_init: function()
 	_update: function()
