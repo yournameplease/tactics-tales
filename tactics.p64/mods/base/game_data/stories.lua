@@ -144,6 +144,11 @@ local STORIES = {
 		"Corrupt local militia have allied with bandits!",
 		"cliff_crossing"
 	),
+	demo_playground = stories.chapter_debug(
+		{},
+		"Playground",
+		"playground"
+	),
 	demo_story = {
 		starting_node = 'prologue',
 		nodes = {
@@ -257,5 +262,6 @@ return {
 		"cultist_cave",
 		"fortress_town",
 		"cliff_crossing",
+		"demo_playground",
 	}
 }
