@@ -50,6 +50,9 @@ local record CharacterCustomizationSelection
     appearance: { character.CharacterAppearanceKey: string}
 end
 
+local interface GameContext
+end
+
 -- TODO: move contexts closer to usage
 
 local interface MenuContext
@@ -90,6 +93,8 @@ local menu_context = {
 	MenuContextId = MenuContextId,
 	StorySelection = StorySelection,
 	CharacterCustomizationSelection = CharacterCustomizationSelection,
+
+	GameContext = GameContext,
 
     MenuContext = MenuContext,
     BattleMainMenuContext = BattleMainMenuContext,

@@ -281,7 +281,7 @@ global record Picotron
 	keyp: function(k: string, raw?: boolean): boolean 
 	clear_key: function(k: string) 
 	peektext: function(): boolean
-	readtext: function(clear?: boolean) 
+	readtext: function(clear?: boolean): string
 	get_mouse: function(): number, number, integer, number, number 
 	set_mouse: function(new_mx: number, new_my: number)  
 	mouselock: function(lock: boolean, event_sensitivity: number, move_sensitivity: number): number, number 

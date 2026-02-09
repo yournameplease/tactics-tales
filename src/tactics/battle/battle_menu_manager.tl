@@ -15,16 +15,17 @@ local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
 local list_cursor = require("src.tactics.menu.cursor.list_cursor")
 local menu_types = require("src.tactics.menu.types")
 local menu_context = require("src.tactics.menu.menu_context")
+local GameContext = menu_context.GameContext
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
 local record BattleMenuManager
-    is menu_manager.MenuManager<BattleMenuContext>
+    is menu_manager.MenuManager
 end
 
 
 local function grid_selection_is_empty_or_acting_unit(
     map: bm.BattleMap,
-    grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>,
+    grid_selection: grid_cursor.GridMenuCursor,
     ctx: BattleMainMenuContext
 ): boolean
     local destination_unit = map:get_at_tile(grid_selection.point)
@@ -37,7 +38,7 @@ end
 
 local function grid_selection_is_available_player(
     map: bm.BattleMap,
-    grid_selection: grid_cursor.GridMenuCursor<BattleMenuContext>
+    grid_selection: grid_cursor.GridMenuCursor
 ): boolean
     local unit = map:get_at_tile(grid_selection.point)
 
@@ -89,34 +90,34 @@ local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenu
         end)
 end
 
-local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuContext> } = {
+local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
     ["MENU_DEPLOYMENT"] = {
         initial_step = "SELECT_SWAP_UNIT",
         steps = {
             ["SELECT_SWAP_UNIT"] = grid_cursor.definition({
-                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattlePreparationsContext)
+                set_selected_context = function(s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, ctx: BattlePreparationsContext)
                     ctx.unit = msb.battle_map:get_at_tile(s.point)
                 end,
-                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                validator = function (s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                     return grid_selection_is_available_player(msb.battle_map, s) end,
                 next_state = "SELECT_SWAP_TARGET",
-                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _: BattlePreparationsContext)
+                back_handler = function(self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, _: BattlePreparationsContext)
                     game_ctx.tactics_engine:handle_mark_unit(self.point)
                 end,
                 get_legal_tiles = get_deployment_tiles,
                 previous_state = "DEPLOYMENT_MENU",
             }),
             ["SELECT_SWAP_TARGET"] = grid_cursor.definition({
-                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattlePreparationsContext)
+                select_handler = function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, menu_ctx: BattlePreparationsContext)
                     game_ctx.tactics_engine:handle_swap_unit(
                         menu_ctx.unit,
                         menu_ctx.swap_target
                     )
                 end,
-                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: BattlePreparationsContext)
+                set_selected_context = function(s: grid_cursor.GridMenuCursor, _msb: BattleMenuContext, ctx: BattlePreparationsContext)
                     ctx.swap_target = s.point:copy()
                 end,
-                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                validator = function (s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                     return msb.battle_map:tile_has_label(s.point, msb.deployment_tiles_tag)
                 end,
                 previous_state = "SELECT_SWAP_UNIT",
@@ -126,11 +127,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             ["DEPLOYMENT_MENU"] = list_cursor.definition({
                 previous_state = "SELECT_SWAP_UNIT",
                 get_options = function(_msb: BattleMenuContext, _ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
+                    local options: {list_cursor.ListMenuOption<string>} = {}
 
                     pt.add(options, {
                         text = "Start Battle",
-                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _menu_ctx: BattleMainMenuContext)
+                        select_handler =  function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, _menu_ctx: BattleMainMenuContext)
                             game_ctx.handle_start_battle()
                         end
                     })
@@ -148,31 +149,31 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = grid_cursor.definition({
-                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext)
+                set_selected_context = function(s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, ctx: BattleMainMenuContext)
                     ctx.acting_unit = {
                         unit = msb.battle_map:get_at_tile(s.point),
                         point = s.point:copy()
                     }
                 end,
-                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
+                validator = function (s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
                     return grid_selection_is_available_player(msb.battle_map, s) end,
                 next_state = "SELECT_DESTINATION",
-                back_handler = function(self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, _: BattleMainMenuContext)
+                back_handler = function(self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, _: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_mark_unit(self.point)
                 end,
             }),
             ["SELECT_DESTINATION"] = grid_cursor.definition({
-                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                select_handler = function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_move_unit(
                         menu_ctx.acting_unit.unit,
                         menu_ctx.destination.point,
                         menu_ctx.destination.path
                     )
                 end,
-                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
+                set_selected_context = function(s: grid_cursor.GridMenuCursor, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
                     ctx.destination = { point = s.point:copy(), path = s.path }
                 end,
-                validator = function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
+                validator = function (s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                      return grid_selection_is_empty_or_acting_unit(msb.battle_map, s, ctx)
                         and s.legal_tiles:get_point(s.point) ~= nil
                         and s.legal_tiles:get_point(s.point).valid_selection
@@ -191,14 +192,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_ACTION"] = list_cursor.definition({
                 previous_state = "SELECT_DESTINATION",
-                back_handler = function(_: list_cursor.ListMenuCursor<BattleMenuContext, string>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                back_handler = function(_: list_cursor.ListMenuCursor<string>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                     game_ctx.tactics_engine:jump_unit_to_point(
                         menu_ctx.acting_unit.unit,
                         menu_ctx.acting_unit.point
                     )
                 end,
                 get_options = function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption}
-                    local options: {list_cursor.ListMenuOption<BattleMenuContext, string>} = {}
+                    local options: {list_cursor.ListMenuOption<string>} = {}
                     -- if target in range
                     if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
                         pt.add(options, {
@@ -211,7 +212,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
                     for _, interaction in ipairs(nearby_interactions) do
                         pt.add(options, {
                             text = interaction.interaction_text,
-                            select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                            select_handler = function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                                 game_ctx.tactics_engine:handle_interaction(
                                     interaction.script_id,
                                     menu_ctx.acting_unit.unit,
@@ -231,7 +232,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
 
                     pt.add(options, {
                         text = "Wait",
-                        select_handler =  function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                        select_handler =  function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                             game_ctx.tactics_engine:finish_unit_action(
                                 menu_ctx.acting_unit.unit
                             )
@@ -249,13 +250,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_TARGET"] = grid_cursor.definition({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext)
+                set_selected_context = function(s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, ctx: BattleMainMenuContext)
                     ctx.target_unit = { unit = msb.battle_map:get_at_tile(s.point)}
                 end,
-                validator =  function (s: grid_cursor.GridMenuCursor<BattleMenuContext>, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
+                validator =  function (s: grid_cursor.GridMenuCursor, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                     return validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, s.point) 
                 end,
-                select_handler = function(_self: grid_cursor.GridMenuCursor<BattleMenuContext>, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
+                select_handler = function(_self: grid_cursor.GridMenuCursor, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
                     game_ctx.tactics_engine:handle_attack_unit(
                         menu_ctx.acting_unit.unit,
                         menu_ctx.target_unit.unit
@@ -267,13 +268,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             ["SELECT_ITEM"] = list_cursor.definition({
                 previous_state = "SELECT_ACTION",
-                set_selected_context = function(s: list_cursor.ListMenuCursor<BattleMenuContext, string>, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
+                set_selected_context = function(s: list_cursor.ListMenuCursor<string>, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
                     ctx.selected_item = {
                         index = s.i,
                         item = ctx.acting_unit.unit.character.inventory:get_items()[s.i]
                     }
                 end,
-                get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
+                get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<string>}
                         local character = ctx.acting_unit.unit
                         local items = character.character.inventory:get_items()
 
@@ -289,7 +290,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<BattleMenuCont
             }),
             -- ["SELECT_ITEM_ACTION"] = list_cursor.definition({
             --     previous_state = "SELECT_ITEM",
-            --     get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<BattleMenuContext, string>}
+            --     get_options = function(_msb: BattleMenuContext, ctx: BattleMainMenuContext): {list_cursor.ListMenuOption<string>}
             --             local character = ctx.acting_unit.unit
             --             local inventory = character.character.inventory
             --             local items = inventory:get_items()

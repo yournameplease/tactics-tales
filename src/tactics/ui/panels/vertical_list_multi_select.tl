@@ -25,12 +25,12 @@ function VerticalMultiSelectMenu.new(
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
-		local cursor: multiple_options_cursor.MultipleOptionsMenuCursor<T> = menu_cursor_func(state)
+		local cursor: multiple_options_cursor.MultipleOptionsMenuCursor = menu_cursor_func(state)
 		local selected = cursor.i
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
 			local subcursor = opt.cursor
-			assert(subcursor is list_cursor.ListMenuCursor<T, string|integer>, "Only list cursor is implemented!") 
+			assert(subcursor is list_cursor.ListMenuCursor<string|integer>, "Only list cursor is implemented!") 
 			local out_line = String.format(
 				template,
 				{

@@ -3,8 +3,11 @@
 
 local story_types = require("src.tactics.story.types")
 local StoryId = story_types.StoryId
+local menu_context = require("src.tactics.menu.menu_context")
+local GameContext = menu_context.GameContext
 
 local record GameMenuContext
+	is GameContext
     story_ids: {StoryId}
 	handle_set_config: function(DynamicConfig)
 	handle_begin_story: function(StoryId)

@@ -747,7 +747,7 @@ end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#readtext)
 --- @param clear? boolean
 function pt.readtext(clear) 
-	readtext(clear)
+	return readtext(clear)
 end
 
 --- Gets the current location and state of the mouse
