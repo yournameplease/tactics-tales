@@ -22,7 +22,7 @@ local record MenuTileHighlight
 end
 
 local record ButtonCursor
-    is menu_cursor.MenuCursor
+    is menu_cursor.MenuNode
     where self.type == "button"
     -- from definition
 
@@ -36,7 +36,7 @@ local record ButtonCursor
 end
 
 local record ButtonDefinition
-    is menu_cursor.MenuStepDefinition
+    is menu_cursor.MenuNodeDefinition
     where self.type == "button"
 
 	text: string
@@ -75,10 +75,10 @@ function ButtonCursor:handle_select(
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
 ): string 
-    local validation = self:validator(game_ctx, menu_ctx)
-    if not validation then return end
+    -- local validation = self:validator(game_ctx, menu_ctx)
+    -- if not validation then return end
 
-    self:set_selected_context(game_ctx, menu_ctx)
+    -- self:set_selected_context(game_ctx, menu_ctx)
 
     if self.select_handler then
         self:select_handler(game_ctx, menu_ctx)
@@ -99,7 +99,7 @@ function ButtonDefinition:to_cursor(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
-): menu_cursor.MenuCursor
+): menu_cursor.MenuNode
     local cursor: ButtonCursor = {
         type = "button",
     }

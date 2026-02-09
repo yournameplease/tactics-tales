@@ -18,9 +18,9 @@ right:add(text_node.title( { text = {"Main Menu"} } ))
 right:add(VerticalListMenu.new(
 	"{text}",
 	">{text}<",
-	function (state: UIContextManager): list_cursor.ListMenuCursor<GameMenuContext, string>
+	function (state: UIContextManager): list_cursor.ListMenuNode<GameMenuContext, string>
 		local cursor = state.game_context.menu_manager.menu_cursor
-		assert(cursor is list_cursor.ListMenuCursor<GameMenuContext, string>) 
+		assert(cursor is list_cursor.ListMenuNode<GameMenuContext, string>) 
 		return cursor
 	end,
 	{flex_grow = 1}

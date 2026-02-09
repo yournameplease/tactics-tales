@@ -22,8 +22,8 @@ local record MenuTileHighlight
     can_attack: boolean
 end
 
-local record GridMenuCursor
-    is menu_cursor.MenuCursor
+local record GridMenuNode
+    is menu_cursor.MenuNode
     where self.type == "grid"
     point: Point
     x_max: integer
@@ -33,19 +33,19 @@ local record GridMenuCursor
     max_path_length: integer
 
     -- from definition
-    set_selected_context: function(GridMenuCursor, GameContext, MenuContext)
-    validator: function(GridMenuCursor, GameContext, MenuContext): boolean
+    set_selected_context: function(GridMenuNode, GameContext, MenuContext)
+    validator: function(GridMenuNode, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
     select_handler: function(self, GameContext, MenuContext)
     back_handler: function(self, GameContext, MenuContext)
 end
 
 local record GridMenuDefinition
-    is menu_cursor.MenuStepDefinition
+    is menu_cursor.MenuNodeDefinition
     where self.type == "grid"
 
-    set_selected_context: function(GridMenuCursor, GameContext, MenuContext)
-    validator: function(GridMenuCursor, GameContext, MenuContext): boolean
+    set_selected_context: function(GridMenuNode, GameContext, MenuContext)
+    validator: function(GridMenuNode, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
     select_handler: function(self, GameContext, MenuContext)
     back_handler: function(self, GameContext, MenuContext)
@@ -56,7 +56,7 @@ end
 
 local grid_cursor = {
     MenuTileHighlight = MenuTileHighlight,
-    GridMenuCursor = GridMenuCursor,
+    GridMenuNode = GridMenuNode,
     GridMenuDefinition = GridMenuDefinition,
 }
 
@@ -67,7 +67,7 @@ function grid_cursor.definition(
     return setmetatable(props, { __index = GridMenuDefinition })
 end
 
-function GridMenuCursor:update_joy(joy: Joypad)
+function GridMenuNode:update_joy(joy: Joypad)
     local prev_point = self.point:copy()
     self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
     self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
@@ -83,7 +83,7 @@ function GridMenuCursor:update_joy(joy: Joypad)
     end 
 end
 
-function GridMenuCursor:update_mouse(
+function GridMenuNode:update_mouse(
     _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
@@ -106,7 +106,7 @@ function GridMenuCursor:update_mouse(
     end
 end
 
-function GridMenuCursor:handle_select(
+function GridMenuNode:handle_select(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
@@ -123,7 +123,7 @@ function GridMenuCursor:handle_select(
     return self.next_state 
 end
 
-function GridMenuCursor:handle_back(
+function GridMenuNode:handle_back(
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ) 
@@ -136,8 +136,8 @@ function GridMenuDefinition:to_cursor(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
-): menu_cursor.MenuCursor
-    local cursor: GridMenuCursor = {
+): menu_cursor.MenuNode
+    local cursor: GridMenuNode = {
         type = "grid",
         point = menu_state.point, 
         x_max = 16,
@@ -160,8 +160,8 @@ function GridMenuDefinition:to_cursor(
         cursor.legal_tiles = nil
     end
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
-            if (GridMenuCursor as {string: any})[k] then
-                return (GridMenuCursor as {string: any})[k]
+            if (GridMenuNode as {string: any})[k] then
+                return (GridMenuNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end

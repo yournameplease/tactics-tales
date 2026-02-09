@@ -16,9 +16,9 @@ right:add(text_node.title( { text = {"Main Menu"} } ))
 right:add(VerticalMultiSelectMenu.new(
 	"{label}: {value}",
 	"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-	function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>
+	function (state: UIContextManager): multiple_options_cursor.MultipleOptionsMenuNode<GameMenuContext>
 		local cursor = state.game_context.menu_manager.menu_cursor
-		assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<GameMenuContext>) 
+		assert(cursor is multiple_options_cursor.MultipleOptionsMenuNode<GameMenuContext>) 
 		return cursor
 	end,
 	{flex_grow = 1} ))

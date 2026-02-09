@@ -42,11 +42,11 @@ function StoryUIContext:enrich()
 
     if self.menu_manager.menu_state.menu_id == "MENU_CUSTOMIZE_CHARACTER" then
         local cursor = self.menu_manager.menu_cursor
-        assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor)
+        assert(cursor is multiple_options_cursor.MultipleOptionsMenuNode)
         local appearance: { character.CharacterAppearanceKey: string} = {}
         for _,o in ipairs(cursor.options) do
             local option_cursor = o.cursor
-            assert(option_cursor is list_cursor.ListMenuCursor<string>)
+            assert(option_cursor is list_cursor.ListMenuNode<string>)
 
             local key = o.key 
             assert(key is character.CharacterAppearanceKey)

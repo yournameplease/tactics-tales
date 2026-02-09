@@ -69,7 +69,7 @@ end
 local function get_cursor_tile(battle_context: BattleUIContext): Point
     local menu = battle_context.battle_menu_manager
     local cursor = menu.menu_cursor
-    if cursor is grid_cursor.GridMenuCursor then
+    if cursor is grid_cursor.GridMenuNode then
         return cursor.point
     elseif menu.menu_state.point ~= nil then
         return menu.menu_state.point
@@ -134,10 +134,10 @@ end
 
 local function get_path_layer(state: UIContextManager): Userdata
     local menu = state.battle_context.battle_menu_manager
-    local cursor: menu_cursor.MenuCursor = menu.menu_cursor
+    local cursor: menu_cursor.MenuNode = menu.menu_cursor
 
     local path_layer = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
-    if cursor is grid_cursor.GridMenuCursor then
+    if cursor is grid_cursor.GridMenuNode then
         local path = cursor.path
         if path ~= nil then
             local len = #path
@@ -288,7 +288,7 @@ function TacticsMap:compute_children(state: UIContextManager)
         x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
         y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
 
-        if cursor is list_cursor.ListMenuCursor<string> then
+        if cursor is list_cursor.ListMenuNode<string> then
             if child_object ~= cursor then
                 menu_box = box.new({
                     auto_height = true,
@@ -301,9 +301,9 @@ function TacticsMap:compute_children(state: UIContextManager)
                 local node = vertical_list_menu.new(
                     " {text}",
                     ">{text}",
-                	function (s: UIContextManager): list_cursor.ListMenuCursor<string>
+                	function (s: UIContextManager): list_cursor.ListMenuNode<string>
                 		local c = s.battle_context.battle_menu_manager.menu_cursor
-                		assert(c is list_cursor.ListMenuCursor<string>)
+                		assert(c is list_cursor.ListMenuNode<string>)
                 		return c
                 	end,
                 	{
@@ -417,7 +417,7 @@ function TacticsMap:draw(
 
         local cursor = state.battle_context.battle_menu_manager.menu_cursor
         local cursor_legal_tiles: array_2d.Array2D<grid_cursor.MenuTileHighlight>
-        if cursor is grid_cursor.GridMenuCursor then
+        if cursor is grid_cursor.GridMenuNode then
             cursor_legal_tiles = cursor.legal_tiles
         end
 
@@ -495,7 +495,7 @@ function TacticsMap:draw(
             pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
         end
 
-        -- if cursor is list_cursor.ListMenuCursor<string> then
+        -- if cursor is list_cursor.ListMenuNode<string> then
         --     draw_floating_menu(x, y, cursor)
         -- end
     end

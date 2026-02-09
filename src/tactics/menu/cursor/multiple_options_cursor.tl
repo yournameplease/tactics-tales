@@ -17,14 +17,14 @@ local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selec
 local record MenuMultipleOptionCursor
     text: string -- label
     key: string --ugh.  here for ui context
-    cursor: menu_cursor.MenuCursor
+    cursor: menu_cursor.MenuNode
     must_select: boolean -- true if must be picked before using.  Default to false
 end
 
 local record MenuMultipleOptionDefinition
     text: string -- label
     key: string --ugh.  here for ui context
-    definition: menu_cursor.MenuStepDefinition
+    definition: menu_cursor.MenuNodeDefinition
     must_select: boolean -- true if must be picked before using.  Default to false
     back_command: event_bus.GameEvent
 end
@@ -35,8 +35,8 @@ global enum MultipleOptionsDirection
     "select"
 end
 
-local record MultipleOptionsMenuCursor
-    is menu_cursor.MenuCursor
+local record MultipleOptionsMenuNode
+    is menu_cursor.MenuNode
     where self.type == "multiple_options"
     i: integer
     primary_direction: MultipleOptionsDirection
@@ -58,7 +58,7 @@ function MenuMultipleOptionDefinition:to_cursor(game_context: GameContext, menu_
 end
 
 local record MultipleOptionsMenuDefinition
-    is menu_cursor.MenuStepDefinition
+    is menu_cursor.MenuNodeDefinition
     where self.type == "multiple_options"
     primary_direction: MultipleOptionsDirection
     wrap: boolean
@@ -71,7 +71,7 @@ end
 local multiple_options_cursor = {
     MenuMultipleOptionCursor = MenuMultipleOptionCursor,    
     MenuMultipleOptionDefinition = MenuMultipleOptionDefinition,    
-    MultipleOptionsMenuCursor = MultipleOptionsMenuCursor,
+    MultipleOptionsMenuNode = MultipleOptionsMenuNode,
     MultipleOptionsMenuDefinition = MultipleOptionsMenuDefinition,
 }
 
@@ -84,9 +84,9 @@ function multiple_options_cursor.definition(props: MultipleOptionsMenuDefinition
     return setmetatable(props, { __index = MultipleOptionsMenuDefinition })
 end
 
--- function MultipleOptionsMenuCursor.new(step_definition: any, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuCursor
+-- function MultipleOptionsMenuNode.new(step_definition: any, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: MenuState): MultipleOptionsMenuNode
 --     assert(step_definition is MultipleOptionsMenuDefinition)
---     local self: MultipleOptionsMenuCursor = {
+--     local self: MultipleOptionsMenuNode = {
 --         type = "CURSOR_MULTIPLE_OPTIONS",
 --         i = 1,
 --         options = lists.do_map(
@@ -102,22 +102,22 @@ end
 --         ),
 --     }
 --     return setmetatable(self, { __index = function(t: any, k: string): any 
---             if (MultipleOptionsMenuCursor as {string: any})[k] then
---                 return (MultipleOptionsMenuCursor as {string: any})[k]
+--             if (MultipleOptionsMenuNode as {string: any})[k] then
+--                 return (MultipleOptionsMenuNode as {string: any})[k]
 --             end
 --             return (step_definition as {string: any})[k]
 --         end
 --         })
 -- end
 
-function MultipleOptionsMenuCursor:update_option_joy(joy: Joypad)
+function MultipleOptionsMenuNode:update_option_joy(joy: Joypad)
     local current_selection = self.options[self.i]
     if self.is_option_selected or not current_selection.must_select then
         current_selection.cursor:update_joy(joy)
     end
 end
 
-function MultipleOptionsMenuCursor:update_option_mouse(
+function MultipleOptionsMenuNode:update_option_mouse(
     mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
@@ -127,7 +127,7 @@ function MultipleOptionsMenuCursor:update_option_mouse(
     end
 end
 
-function MultipleOptionsMenuCursor:update_joy(joy: Joypad)
+function MultipleOptionsMenuNode:update_joy(joy: Joypad)
     local new_i = self.i
     if self.primary_direction == "vertical" then
         if joy.dyp ~= 0 then
@@ -155,13 +155,13 @@ function MultipleOptionsMenuCursor:update_joy(joy: Joypad)
     end
 end
 
-function MultipleOptionsMenuCursor:update_mouse(
+function MultipleOptionsMenuNode:update_mouse(
     mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
 end
 
-function MultipleOptionsMenuCursor:handle_select(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string 
+function MultipleOptionsMenuNode:handle_select(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string 
     if self.primary_direction == "select" and self.i ~= #self.options then
         self.i = self.i + 1
         return nil 
@@ -176,7 +176,7 @@ function MultipleOptionsMenuCursor:handle_select(game_ctx: GameContext, menu_ctx
     end
 end
 
-function MultipleOptionsMenuCursor:handle_back(
+function MultipleOptionsMenuNode:handle_back(
     game_ctx: GameContext,
     menu_ctx: MenuContext
 )
@@ -185,8 +185,8 @@ function MultipleOptionsMenuCursor:handle_back(
     end
 end
 
-function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuCursor
-    local cursor: MultipleOptionsMenuCursor = {
+function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuNode
+    local cursor: MultipleOptionsMenuNode = {
         type = "multiple_options",
         i = 1,
         options = lists.do_map(
@@ -202,8 +202,8 @@ function MultipleOptionsMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx
         ),
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
-            if (MultipleOptionsMenuCursor as {string: any})[k] then
-                return (MultipleOptionsMenuCursor as {string: any})[k]
+            if (MultipleOptionsMenuNode as {string: any})[k] then
+                return (MultipleOptionsMenuNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end

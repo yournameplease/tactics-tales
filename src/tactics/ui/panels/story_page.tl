@@ -91,12 +91,12 @@ function StoryPagePanel:compute_children(state: UIContextManager)
 				child = box.flex_row()
 
 				local cursor = state.story_context.menu_manager.menu_cursor
-                if cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext> then
+                if cursor is multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext> then
     				child:add(VerticalMultiSelectMenu.new(
     					"{label}: {value}",
     					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-    					function (_: UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>
-    						assert(cursor is multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>) 
+    					function (_: UIContextManager): multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext>
+    						assert(cursor is multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext>) 
     						return cursor
     					end,
                         {auto_height = true, flex_grow = 1}

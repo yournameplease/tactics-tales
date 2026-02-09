@@ -12,7 +12,7 @@ local record VerticalListMenu<Value>
     is text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<Value>
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuNode<Value>
 end
 setmetatable(VerticalListMenu, { __index = text_node.TextNode })
 
@@ -27,13 +27,13 @@ end
 function vertical_list_menu.new<Value>(
 	unselected_template: string,
 	selected_template: string,
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<Value>,
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuNode<Value>,
 	props: text_node.TextNode
 ): box.UIElement
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
-		local cursor: list_cursor.ListMenuCursor<Value> = menu_cursor_func(state)
+		local cursor: list_cursor.ListMenuNode<Value> = menu_cursor_func(state)
 		local selected = cursor.i
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
