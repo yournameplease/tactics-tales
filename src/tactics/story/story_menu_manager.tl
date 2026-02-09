@@ -13,31 +13,36 @@ local character = require("src.tactics.character.object.character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey
 local event_bus = require("src.tactics.systems.event_bus")
 local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
+local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
+local selection = require("src.tactics.menu.cursor.selection")
+local SelectionMenuDefinition = selection.SelectionMenuDefinition
+local SelectionOption = selection.SelectionMenuOption
 
 local lists = require("src.tactics.util.lists")
 
-local function set_character_customization_option(
-    key: CharacterAppearanceKey
-): function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
-    return function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
-		if mc.character_customization == nil then
-			mc.character_customization = {}
-		end
-		if mc.character_customization.appearance == nil then
-			mc.character_customization.appearance = {}
-		end
-		log.debug("storing context", key, cursor.options[cursor.i].value)
-		mc.character_customization.appearance[key] = cursor.options[cursor.i].value
-	end
-end
+-- local function set_character_customization_option(
+--     key: CharacterAppearanceKey
+-- ): function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+--     return function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+-- 		if mc.character_customization == nil then
+-- 			mc.character_customization = {}
+-- 		end
+-- 		if mc.character_customization.appearance == nil then
+-- 			mc.character_customization.appearance = {}
+-- 		end
+-- 		log.debug("storing context", key, cursor.options[cursor.i].value)
+-- 		mc.character_customization.appearance[key] = cursor.options[cursor.i].value
+-- 	end
+-- end
 
-local function list_cursor_definition_for_part(
-    key: CharacterAppearanceKey,
+local function list_cursor_options_for_part(
     options: {{ string, sprite_data.NamedSpriteData }}
-): list_cursor.ListMenuDefinition<string>
+): {SelectionOption}
     local cursor_options = lists.map(
-		function(option: {string, sprite_data.NamedSpriteData}): list_cursor.ListMenuOption<string>
+		function(option: {string, sprite_data.NamedSpriteData}): SelectionOption
         	return {
             	text = option[2].name,
             	value = option[1],
@@ -45,16 +50,7 @@ local function list_cursor_definition_for_part(
     	end
 	)(options)
     
-    return list_cursor.definition({
-        set_selected_context = set_character_customization_option(key),
-
-        get_options = function(_: StoryMenuContext, _: MenuContext): {list_cursor.ListMenuOption<string>}
-            return cursor_options
-        end,
-        
-        wrap = true,
-        direction = "horizontal",
-    })
+    return cursor_options
 end
 
 local function multiple_option_cursor_for_part(
@@ -62,43 +58,44 @@ local function multiple_option_cursor_for_part(
     text: string,
 	options: { string },
     data: { string: sprite_data.NamedSpriteData }
-): multiple_options_cursor.MenuMultipleOptionDefinition
+): SelectionMenuDefinition
 	local data_list = lists.map(
 		function(id: string): {string, sprite_data.NamedSpriteData}
 			return { id, data[id]}
 		end
 	)(options)
 
-    return multiple_options_cursor.option_definition({
-            text = text,
-			key = key,
-            definition = list_cursor_definition_for_part(key, data_list),
-            must_select = false,
-        })
+    return selection.row()
+            :with_label(text)
+			:with_key(key)
+			:with_precomputed_options(list_cursor_options_for_part(data_list))
 end
 
-local function menu_definition_for_character_select(): multiple_options_cursor.MultipleOptionsMenuDefinition
-    return multiple_options_cursor.definition({
-        primary_direction = "vertical",
-        wrap = false,
-        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
-            game_ctx.handle_create_character(
-                menu_ctx.character_customization.appearance
-            )
-        end,
+local function menu_definition_for_character_select(): MenuNodeDefinition
+    return nested_cursor.column(
+        -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
+        --     game_ctx.handle_create_character(
+        --         menu_ctx.character_customization.appearance
+        --     )
+        -- end,
+        
+        function(_msb: StoryMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+            local children: {MenuNodeDefinition} = {}
+            children = {
+                multiple_option_cursor_for_part("head", "Head", customization_options.HEAD, sprite_data.HEAD),
+                multiple_option_cursor_for_part("hair", "Hair", customization_options.HAIR, sprite_data.HAIR),
+                multiple_option_cursor_for_part("skin", "Skin Color", customization_options.SKIN_COLOR, sprite_data.SKIN_COLOR),
+                multiple_option_cursor_for_part("hair_color", "Hair Color", customization_options.HAIR_COLOR, sprite_data.COLOR_NAMES),
+                multiple_option_cursor_for_part("body_class", "Body", customization_options.BODY_CLASS, sprite_data.BODY_CLASS),
+                multiple_option_cursor_for_part("beard", "Facial Hair", customization_options.FACIAL_HAIR, sprite_data.FACIAL_HAIR),
+                multiple_option_cursor_for_part("eyes", "Eyes", customization_options.EYES, sprite_data.EYES),
+                multiple_option_cursor_for_part("eyewear", "Eyewear", customization_options.EYEWEAR, sprite_data.EYEWEAR),
+                multiple_option_cursor_for_part("headwear", "Headwear", customization_options.HEADWEAR, sprite_data.HEADWEAR),
+            }
 
-        options = {
-            multiple_option_cursor_for_part("head", "Head", customization_options.HEAD, sprite_data.HEAD),
-            multiple_option_cursor_for_part("hair", "Hair", customization_options.HAIR, sprite_data.HAIR),
-            multiple_option_cursor_for_part("skin", "Skin Color", customization_options.SKIN_COLOR, sprite_data.SKIN_COLOR),
-            multiple_option_cursor_for_part("hair_color", "Hair Color", customization_options.HAIR_COLOR, sprite_data.COLOR_NAMES),
-            multiple_option_cursor_for_part("body_class", "Body", customization_options.BODY_CLASS, sprite_data.BODY_CLASS),
-            multiple_option_cursor_for_part("beard", "Facial Hair", customization_options.FACIAL_HAIR, sprite_data.FACIAL_HAIR),
-            multiple_option_cursor_for_part("eyes", "Eyes", customization_options.EYES, sprite_data.EYES),
-            multiple_option_cursor_for_part("eyewear", "Eyewear", customization_options.EYEWEAR, sprite_data.EYEWEAR),
-            multiple_option_cursor_for_part("headwear", "Headwear", customization_options.HEADWEAR, sprite_data.HEADWEAR),
-        }
-    })
+            -- pt.add(children, )
+            return children
+        end)
 end
 
 

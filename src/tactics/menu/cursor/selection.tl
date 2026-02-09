@@ -53,13 +53,6 @@ local selection_cursor = {
     SelectionMenuDefinition = SelectionMenuDefinition,
 }
 
-function selection_cursor.definition<Value>(props: SelectionMenuDefinition<Value>): SelectionMenuDefinition<Value>
-    props.type = "selection"
-    props.direction = props.direction or "vertical"
-    return setmetatable(props, { __index = SelectionMenuDefinition })
-end
-
-
 function selection_cursor.row(): SelectionMenuDefinition
 	return setmetatable({
 		direction = "horizontal"
@@ -108,12 +101,21 @@ function SelectionMenuDefinition:with_static_options(
 	options: {any}
 ): SelectionMenuDefinition
 	self.get_options = function(_game_ctx: GameContext, _menu_context: MenuContext): {SelectionMenuOption}
-		return lists.map(function(o: string): SelectionMenuOption
+		return lists.map(function(o: any): SelectionMenuOption
 			return {
 				text = tostring(o),
 				value = o,
 			}
 		end)(options)
+	end
+	return self
+end
+
+function SelectionMenuDefinition:with_precomputed_options(
+	options: {SelectionMenuOption}
+): SelectionMenuDefinition
+	self.get_options = function(_game_ctx: GameContext, _menu_context: MenuContext): {SelectionMenuOption}
+		return options
 	end
 	return self
 end
@@ -165,7 +167,7 @@ function SelectionMenuNode:handle_back(
 end
 
 function SelectionMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
-    local cursor: SelectionMenuNode<Value> = {
+    local cursor: SelectionMenuNode = {
         type = "selection",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
