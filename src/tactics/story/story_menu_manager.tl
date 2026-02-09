@@ -19,8 +19,8 @@ local lists = require("src.tactics.util.lists")
 
 local function set_character_customization_option(
     key: CharacterAppearanceKey
-): function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
-    return function(cursor: list_cursor.ListMenuCursor<StoryMenuContext, string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+): function(cursor: list_cursor.ListMenuCursor<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+    return function(cursor: list_cursor.ListMenuCursor<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
 		if mc.character_customization == nil then
 			mc.character_customization = {}
 		end
@@ -35,9 +35,9 @@ end
 local function list_cursor_definition_for_part(
     key: CharacterAppearanceKey,
     options: {{ string, sprite_data.NamedSpriteData }}
-): list_cursor.ListMenuDefinition<StoryMenuContext, string>
+): list_cursor.ListMenuDefinition<string>
     local cursor_options = lists.map(
-		function(option: {string, sprite_data.NamedSpriteData}): list_cursor.ListMenuOption<StoryMenuContext, string>
+		function(option: {string, sprite_data.NamedSpriteData}): list_cursor.ListMenuOption<string>
         	return {
             	text = option[2].name,
             	value = option[1],
@@ -62,7 +62,7 @@ local function multiple_option_cursor_for_part(
     text: string,
 	options: { string },
     data: { string: sprite_data.NamedSpriteData }
-): multiple_options_cursor.MenuMultipleOptionDefinition<StoryMenuContext>
+): multiple_options_cursor.MenuMultipleOptionDefinition
 	local data_list = lists.map(
 		function(id: string): {string, sprite_data.NamedSpriteData}
 			return { id, data[id]}
@@ -77,11 +77,11 @@ local function multiple_option_cursor_for_part(
         })
 end
 
-local function menu_definition_for_character_select(): multiple_options_cursor.MultipleOptionsMenuDefinition<StoryMenuContext>
+local function menu_definition_for_character_select(): multiple_options_cursor.MultipleOptionsMenuDefinition
     return multiple_options_cursor.definition({
         primary_direction = "vertical",
         wrap = false,
-        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor<StoryMenuContext>, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
+        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
             game_ctx.handle_create_character(
                 menu_ctx.character_customization.appearance
             )
@@ -103,10 +103,10 @@ end
 
 
 local record StoryMenuManager
-    is menu_manager.MenuManager<StoryMenuContext>
+    is menu_manager.MenuManager
 end
 
-local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition<StoryMenuContext> } = {
+local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
         steps = {

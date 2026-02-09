@@ -71,7 +71,7 @@ function BattleUIContext:enrich()
     self.hovered_unit = nil
     local selection = self.battle_menu_manager.menu_cursor
 
-    if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
+    if selection is grid_cursor.GridMenuCursor then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             local selection_point = selection.point
             local unit = self.battle_map:get_at_tile(selection_point)
@@ -131,7 +131,7 @@ function BattleUIContext:enrich()
         self.acting_unit = nil
     end
 
-    if selection is grid_cursor.GridMenuCursor<BattleMenuContext> then
+    if selection is grid_cursor.GridMenuCursor then
         if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
             self.acting_unit = nil
         end

@@ -2,8 +2,11 @@
 --- Defines the context object for menus used within story scenes.
 
 local character = require("src.tactics.character.object.character")
+local menu_context = require("src.tactics.menu.menu_context")
+local GameContext = menu_context.GameContext
 
 local record StoryMenuContext
+	is GameContext
 	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string})
 end
 

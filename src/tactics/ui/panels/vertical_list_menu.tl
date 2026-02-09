@@ -8,11 +8,11 @@ local list_cursor = require("src.tactics.menu.cursor.list_cursor")
 local String = require("src.tactics.util.string")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
-local record VerticalListMenu<GC, Value>
+local record VerticalListMenu<Value>
     is text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<Value>
 end
 setmetatable(VerticalListMenu, { __index = text_node.TextNode })
 
@@ -24,16 +24,16 @@ function VerticalListMenu:get_selection_at(lx: number, ly: number): menu_mouse_s
 	return menu_mouse_selection.list(line)
 end
 
-function vertical_list_menu.new<GC, Value>(
+function vertical_list_menu.new<Value>(
 	unselected_template: string,
 	selected_template: string,
-	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<GC, Value>,
+	menu_cursor_func: function(UIContextManager): list_cursor.ListMenuCursor<Value>,
 	props: text_node.TextNode
 ): box.UIElement
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
-		local cursor: list_cursor.ListMenuCursor<GC, Value> = menu_cursor_func(state)
+		local cursor: list_cursor.ListMenuCursor<Value> = menu_cursor_func(state)
 		local selected = cursor.i
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template

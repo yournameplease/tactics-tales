@@ -4,16 +4,26 @@
 
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
-local MenuContext = require("src.tactics.menu.menu_context").MenuContext
+local menu_context = require("src.tactics.menu.menu_context")
+local MenuContext = menu_context.MenuContext
+local GameContext = menu_context.GameContext
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 
 local enum CursorType
-    "grid"
-    "list"
-    "button_advance"
+    "selection"
+    "button"
     "multiple_options"
+    "nested"
 end
+
+local enum NestedCursorType
+	"row"
+	"col"
+	"grid"
+end
+
+local type MenuHandler = function(self, GameContext, MenuContext)
 
 local interface MenuMouseSelection
 	type: CursorType
@@ -26,9 +36,9 @@ local record Grid
 	y: integer
 end
 
-local record ButtonAdvance
+local record Button
 	is MenuMouseSelection
-	where self.type == "button_advance"
+	where self.type == "button"
 end
 
 local record List
@@ -45,7 +55,7 @@ end
 local mouse_selection = {
 	MenuMouseSelection = MenuMouseSelection,
 	Grid = Grid,
-	ButtonAdvance = ButtonAdvance,
+	Button = Button,
 	List = List,
 	MultipleOptions = MultipleOptions,
 }
@@ -61,13 +71,13 @@ end
 
 function mouse_selection.list(i: integer): MenuMouseSelection
 	local self: List =  {
-		type = "list",
+		type = "selection",
 		i = i,
 	}
 	return self
 end
 
-local interface MenuCursor<GameContext>
+local interface MenuCursor
     type: CursorType
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
@@ -76,13 +86,14 @@ local interface MenuCursor<GameContext>
     handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext) 
 end
 
-local interface MenuStepDefinition<GameContext>
+local interface MenuStepDefinition
     type: CursorType
     previous_state: menu_types.MenuStep
-    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor<GameContext>
+    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor
 end
 
 local menu_cursor = {
+	MenuHandler = MenuHandler,
     CursorType = CursorType,
     MenuCursor = MenuCursor,
     MenuStepDefinition = MenuStepDefinition,

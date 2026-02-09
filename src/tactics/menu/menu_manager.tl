@@ -12,27 +12,29 @@ local InputContext = input_context.InputContext
 local event_bus = require("src.tactics.systems.event_bus")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
-local MenuContext = require("src.tactics.menu.menu_context").MenuContext
+local menu_context = require("src.tactics.menu.menu_context")
+local MenuContext = menu_context.MenuContext
+local GameContext = menu_context.GameContext
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
-local record SelectionHistory<GameContext>
+local record SelectionHistory
     step: menu_types.MenuStep
-    selection: menu_cursor.MenuCursor<GameContext>
+    selection: menu_cursor.MenuCursor
 end
 
-local record MenuDefinition<GameContext>
+local record MenuDefinition
     initial_step: menu_types.MenuStep
-    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition<GameContext> }
+    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition }
 end
 
-local interface MenuManager<GameContext>
+local interface MenuManager
     
     menu_definitions: { menu_types.MenuId: MenuDefinition }
 
     menu_state: menu_types.MenuState
     menu_ctx: MenuContext
-    menu_cursor: menu_cursor.MenuCursor<GameContext>
-    selection_history: { SelectionHistory<GameContext> }
+    menu_cursor: menu_cursor.MenuCursor
+    selection_history: { SelectionHistory }
 
     game_ctx: GameContext
     event_writer: event_writer.EventWriter
@@ -45,10 +47,10 @@ local interface MenuManager<GameContext>
     update: function(self, input: InputContext)
 end
 
-local record BaseMenuManager<GameContext>
-    is MenuManager<GameContext>
+local record BaseMenuManager
+    is MenuManager
 
-    menu_definitions: { menu_types.MenuId: MenuDefinition<GameContext> }
+    menu_definitions: { menu_types.MenuId: MenuDefinition }
 end
 
 local menu_manager = {
@@ -57,12 +59,12 @@ local menu_manager = {
     MenuDefinition = MenuDefinition,
 }
 
-function menu_manager.new<GameContext>(
+function menu_manager.new(
     menu_definitions: { menu_types.MenuId: MenuDefinition },
     ctx: GameContext,
     bus: event_bus.EventBus
-): MenuManager<GameContext>
-    local self: BaseMenuManager<GameContext> = setmetatable({}, { __index = BaseMenuManager })
+): MenuManager
+    local self: BaseMenuManager = setmetatable({}, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
 
