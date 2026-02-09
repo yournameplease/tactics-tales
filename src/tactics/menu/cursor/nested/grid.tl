@@ -27,7 +27,7 @@ end
 
 -- TODO: this is not ideal for memory.  ignoring for now though
 local record NestedGridNode
-    is menu_cursor.MenuNode
+    is menu_cursor.MenuContainer
     where self.type == "grid"
     point: Point
     x_max: integer
@@ -39,7 +39,7 @@ local record NestedGridNode
 end
 
 local record NestedGridDefinition
-    is menu_cursor.MenuNodeDefinition
+    is menu_cursor.MenuContainerDefinition
     where self.type == "grid"
 
 	get_child: function(point: Point): MenuNodeDefinition

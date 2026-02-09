@@ -24,7 +24,7 @@ local record SelectionMenuOption
 end
 
 local record SelectionMenuNode
-    is menu_cursor.MenuNode
+    is menu_cursor.MenuLeaf
     where self.type == "selection"
     i: integer
     options: { SelectionMenuOption }
@@ -37,7 +37,7 @@ local record SelectionMenuNode
 end
 
 local record SelectionMenuDefinition
-    is menu_cursor.MenuNodeDefinition
+    is menu_cursor.MenuLeafDefinition
     where self.type == "selection"
 
     label: string
@@ -139,18 +139,18 @@ function SelectionMenuNode:update_joy(joy: Joypad)
     end
 end
 
-function SelectionMenuNode:update_mouse(
-    _mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection
-)
-    if hovered == nil then return end
+-- function SelectionMenuNode:update_mouse(
+--     _mouse: Mouse,
+--     hovered: mouse_menu_selection.MenuMouseSelection
+-- )
+--     if hovered == nil then return end
 
-    if hovered is mouse_menu_selection.Selection then
-        if hovered.i > 0 and hovered.i <= #self.options then
-            self.i = hovered.i
-        end
-    end
-end
+--     if hovered is mouse_menu_selection.Selection then
+--         if hovered.i > 0 and hovered.i <= #self.options then
+--             self.i = hovered.i
+--         end
+--     end
+-- end
 
 function SelectionMenuNode:handle_select(
     game_ctx: GameContext,

@@ -22,7 +22,7 @@ local record MenuTileHighlight
 end
 
 local record ButtonCursor
-    is menu_cursor.MenuNode
+    is menu_cursor.MenuLeaf
     where self.type == "button"
     -- from definition
 
@@ -36,7 +36,7 @@ local record ButtonCursor
 end
 
 local record ButtonDefinition
-    is menu_cursor.MenuNodeDefinition
+    is menu_cursor.MenuLeafDefinition
     where self.type == "button"
 
 	text: string
