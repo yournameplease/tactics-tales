@@ -27,7 +27,7 @@ local record ButtonCursor
     -- from definition
 
 	text: string
-	value: string
+	value: any
     -- set_selected_context: function(ButtonCursor, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
@@ -40,7 +40,7 @@ local record ButtonDefinition
     where self.type == "button"
 
 	text: string
-	value: string
+	value: any
     -- set_selected_context: function(self, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
@@ -149,7 +149,7 @@ function ButtonDefinition:with_text(
 end
 
 function ButtonDefinition:with_value(
-	value: string
+	value: any
 ): ButtonDefinition
 	self.value = value
 	return self

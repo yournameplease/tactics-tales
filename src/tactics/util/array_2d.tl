@@ -17,6 +17,7 @@ local interface Array2D<V>
     foreach: function(self, fn: function(x: integer, y: integer, v: V))
     foreachpoint: function(self, fn: function(point: Point, v: V))
     map: function<NewType>(self, fn: function(v: V): NewType): Array2D<NewType>
+    map_points: function<NewType>(self, fn: function(p: Point): NewType): Array2D<NewType>
 end
 
 local array_2d = {
@@ -92,6 +93,14 @@ function Array2DImpl:map<NewType>(fn: function(v: V): NewType): Array2D<NewType>
     local out: Array2D<NewType> = array_2d.new(self.w, self.h)
     self:foreachpoint(function(p: Point, v: V)
         out:set_point(p, fn(v))
+    end)
+    return out
+end
+
+function Array2DImpl:map_points<NewType>(fn: function(p: Point): NewType): Array2D<NewType>
+    local out: Array2D<NewType> = array_2d.new(self.w, self.h)
+    self:foreachpoint(function(p: Point, _: V)
+        out:set_point(p, fn(p))
     end)
     return out
 end

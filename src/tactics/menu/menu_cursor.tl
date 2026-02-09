@@ -13,7 +13,6 @@ local Mouse = input_service.Mouse
 local enum CursorType
     "selection"
     "button"
-    "multiple_options"
     "nested"
 end
 
