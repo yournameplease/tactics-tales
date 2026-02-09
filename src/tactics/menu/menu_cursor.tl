@@ -77,7 +77,7 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 	return self
 end
 
-local interface MenuCursor
+local interface MenuNode
     type: CursorType
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
@@ -86,17 +86,17 @@ local interface MenuCursor
     handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext) 
 end
 
-local interface MenuStepDefinition
+local interface MenuNodeDefinition
     type: CursorType
     previous_state: menu_types.MenuStep
-    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuCursor
+    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuNode
 end
 
 local menu_cursor = {
 	MenuHandler = MenuHandler,
     CursorType = CursorType,
-    MenuCursor = MenuCursor,
-    MenuStepDefinition = MenuStepDefinition,
+    MenuNode = MenuNode,
+    MenuNodeDefinition = MenuNodeDefinition,
 
     mouse_selection = mouse_selection,
 }

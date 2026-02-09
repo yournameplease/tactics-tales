@@ -19,8 +19,8 @@ local lists = require("src.tactics.util.lists")
 
 local function set_character_customization_option(
     key: CharacterAppearanceKey
-): function(cursor: list_cursor.ListMenuCursor<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
-    return function(cursor: list_cursor.ListMenuCursor<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+): function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
+    return function(cursor: list_cursor.ListMenuNode<string>, _: StoryMenuContext, mc: menu_context.StoryMenuContext)
 		if mc.character_customization == nil then
 			mc.character_customization = {}
 		end
@@ -81,7 +81,7 @@ local function menu_definition_for_character_select(): multiple_options_cursor.M
     return multiple_options_cursor.definition({
         primary_direction = "vertical",
         wrap = false,
-        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
+        select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
             game_ctx.handle_create_character(
                 menu_ctx.character_customization.appearance
             )

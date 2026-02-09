@@ -14,11 +14,11 @@ local Joypad = require("src.tactics.joypad").Joypad
 local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
-local record NestedMenuCursor
-    is menu_cursor.MenuCursor
+local record NestedMenuNode
+    is menu_cursor.MenuNode
     where self.type == "nested"
     i: integer
-    children: { menu_cursor.MenuCursor }
+    children: { menu_cursor.MenuNode }
 
     -- from definition
     direction: MenuDirection
@@ -26,15 +26,15 @@ local record NestedMenuCursor
 end
 
 local record NestedMenuDefinition<Value>
-    is menu_cursor.MenuStepDefinition
+    is menu_cursor.MenuNodeDefinition
     where self.type == "nested"
-    get_children: function(GameContext, MenuContext): {menu_cursor.MenuStepDefinition}
+    get_children: function(GameContext, MenuContext): {menu_cursor.MenuNodeDefinition}
     wrap: boolean
     direction: MenuDirection
 end
 
 local nested_menu = {
-    NestedMenuCursor = NestedMenuCursor,
+    NestedMenuNode = NestedMenuNode,
     NestedMenuDefinition = NestedMenuDefinition,
 }
 
@@ -44,7 +44,7 @@ function nested_menu.definition<Value>(props: NestedMenuDefinition<Value>): Nest
     return setmetatable(props, { __index = NestedMenuDefinition })
 end
 
-function NestedMenuCursor:update_joy(joy: Joypad)
+function NestedMenuNode:update_joy(joy: Joypad)
     local new_i = self.i
     if self.direction == "vertical" then
         new_i = new_i + joy.dyp
@@ -63,7 +63,7 @@ function NestedMenuCursor:update_joy(joy: Joypad)
     end
 end
 
-function NestedMenuCursor:update_mouse(
+function NestedMenuNode:update_mouse(
     _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
@@ -76,15 +76,15 @@ function NestedMenuCursor:update_mouse(
     end
 end
 
-function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor
-    local cursor: NestedMenuCursor<Value> = {
+function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
+    local cursor: NestedMenuNode<Value> = {
         type = "nested",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
-            if (NestedMenuCursor as {string: any})[k] then
-                return (NestedMenuCursor as {string: any})[k]
+            if (NestedMenuNode as {string: any})[k] then
+                return (NestedMenuNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end
@@ -94,7 +94,7 @@ end
 --- builders
 
 function nested_menu.column(
-	get_children: function(game_ctx: GameContext, menu_ctx: MenuContext): MenuCursorDefinition
+	get_children: function(game_ctx: GameContext, menu_ctx: MenuContext): MenuNodeDefinition
 ): NestedMenuDefinition
 	
 end

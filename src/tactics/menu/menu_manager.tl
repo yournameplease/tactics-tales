@@ -19,12 +19,12 @@ local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selec
 
 local record SelectionHistory
     step: menu_types.MenuStep
-    selection: menu_cursor.MenuCursor
+    selection: menu_cursor.MenuNode
 end
 
 local record MenuDefinition
     initial_step: menu_types.MenuStep
-    steps: { menu_types.MenuStep: menu_cursor.MenuStepDefinition }
+    steps: { menu_types.MenuStep: menu_cursor.MenuNodeDefinition }
 end
 
 local interface MenuManager
@@ -33,7 +33,7 @@ local interface MenuManager
 
     menu_state: menu_types.MenuState
     menu_ctx: MenuContext
-    menu_cursor: menu_cursor.MenuCursor
+    menu_cursor: menu_cursor.MenuNode
     selection_history: { SelectionHistory }
 
     game_ctx: GameContext

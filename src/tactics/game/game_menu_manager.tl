@@ -13,7 +13,9 @@ local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local button = require("src.tactics.menu.cursor.button")
 local ButtonDefinition = button.ButtonDefinition
 local ButtonCursor = button.ButtonCursor
-local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
+local selection = require("src.tactics.menu.cursor.selection")
+local SelectionDefinition = selection.SelectionMenuDefinition
+local SelectionCursor = selection.SelectionMenuNode
 
 local record GameMenuManager
     is menu_manager.MenuManager
@@ -56,79 +58,63 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 function(msb: GameMenuContext, _ctx: MenuContext): {ButtonDefinition}
                     local options: {ButtonDefinition} = {}
 
-                    for _, id in ipairs(msb.story_ids) do
+                    for _,story_id in ipairs(msb.story_ids) do
                         pt.add(options, button.builder()
-                            :with_text(id)
-                            :with_value(id)
+                            :with_text(story_id)
+                            :with_value(story_id)
                             :handle_select(handle_begin_story))
                     end
 
                     return options
                 end
             ),
-            -- ["OPTIONS_MENU"] = multiple_options_cursor.definition({
-            --     primary_direction = "vertical",
-            --     wrap = false,
-            --     select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuCursor, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
-            --         game_ctx.handle_set_config(
-            --             menu_ctx.metadata as DynamicConfig
-            --         )
-            --     end,
-            --     options = {
-            --         multiple_options_cursor.option_definition({
-            --             text = "Log Level",
-            --             definition = list_cursor.static_definition(
-            --                 {"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"},
-            --                 "log_level",
-            --                 "horizontal"
-            --             ),
-            --         }),
-            --         multiple_options_cursor.option_definition({
-            --             text = "Draw Flexbox Debug",
-            --             definition = list_cursor.boolean_yes_no(
-            --                 "draw_flexbox_debug",
-            --                 "horizontal"
-            --             )
-            --         }),
-            --         multiple_options_cursor.option_definition({
-            --             text = "Draw Target Debug",
-            --             definition = list_cursor.boolean_yes_no(
-            --                 "draw_target_debug",
-            --                 "horizontal"
-            --             )
-            --         }),
-            --         multiple_options_cursor.option_definition({
-            --             text = "Profiler",
-            --             definition = list_cursor.boolean_yes_no(
-            --                 "profile",
-            --                 "horizontal"
-            --             )
-            --         }),
-            --         multiple_options_cursor.option_definition({
-            --             text = "Head Scale",
-            --             definition = list_cursor.static_definition(
-            --                 {1, 2, 3, 4},
-            --                 "head_scale",
-            --                 "horizontal"
-            --             )
-            --         }),
-            --         multiple_options_cursor.option_definition({
-            --             text = "Text Speed",
-            --             definition = list_cursor.static_definition(
-            --                 {
-            --                 	"very_slow",
-            --                 	"slow",
-            --                 	"normal",
-            --                 	"fast",
-            --                 	"very_fast",
-            --                 	"instant",
-            --                 },
-            --                 "dialogue_speed",
-            --                 "horizontal"
-            --             )
-            --         }),
-            --     },
-            -- }),
+            ["OPTIONS_MENU"] = nested_cursor.column(
+                function(_msb: GameMenuContext, _ctx: MenuContext): {ButtonDefinition}
+                    local options: {MenuNodeDefinition} = {}
+
+                    pt.add(options, selection.row()
+                        :with_label("Log Level")
+                        :with_key("log_level")
+                        :with_static_options({"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"}))
+                    pt.add(options, selection.row()
+                        :with_label("Draw Flexbox Debug")
+                        :with_key("draw_flexbox_debug")
+                        :with_yes_no_options())
+                    pt.add(options, selection.row()
+                        :with_label("Draw Target Debug")
+                        :with_key("draw_target_debug")
+                        :with_yes_no_options())
+                    pt.add(options, selection.row()
+                        :with_label("Profiler")
+                        :with_key("profile")
+                        :with_yes_no_options())
+                    pt.add(options, selection.row()
+                        :with_label("Head Scale")
+                        :with_key("head_scale")
+                        :with_static_options({1, 2, 3, 4}))
+                    pt.add(options, selection.row()
+                        :with_label("Text Speed")
+                        :with_key("dialogue_speed")
+                        :with_static_options({
+                            	"very_slow",
+                            	"slow",
+                            	"normal",
+                            	"fast",
+                            	"very_fast",
+                            	"instant",
+                            }))
+
+                    -- TODO: back/reset/save
+                    -- pt.add(options, nested_cursor.row()
+                    -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+                    --     game_ctx.handle_set_config(
+                    --         menu_ctx.metadata as DynamicConfig
+                    --     )
+                    -- end,
+
+                    return options
+                end
+            ),
         }
     }
 

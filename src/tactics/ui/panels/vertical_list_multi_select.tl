@@ -13,24 +13,24 @@ local record VerticalMultiSelectMenu<T>
     is box.UIElement, text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
-	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<T>
+	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuNode<T>
 end
  
 function VerticalMultiSelectMenu.new(
 	unselected_template: string,
 	selected_template: string,
-	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuCursor<T>,
+	menu_cursor_func: function(UIContextManager): multiple_options_cursor.MultipleOptionsMenuNode<T>,
 	props: text_node.TextNode
 ): VerticalMultiSelectMenu<T>
 	
     props.func = function(state: UIContextManager): { string }
         local out = {}
-		local cursor: multiple_options_cursor.MultipleOptionsMenuCursor = menu_cursor_func(state)
+		local cursor: multiple_options_cursor.MultipleOptionsMenuNode = menu_cursor_func(state)
 		local selected = cursor.i
 		for i,opt in ipairs(cursor.options) do
 			local template = i == selected and selected_template or unselected_template
 			local subcursor = opt.cursor
-			assert(subcursor is list_cursor.ListMenuCursor<string|integer>, "Only list cursor is implemented!") 
+			assert(subcursor is list_cursor.ListMenuNode<string|integer>, "Only list cursor is implemented!") 
 			local out_line = String.format(
 				template,
 				{

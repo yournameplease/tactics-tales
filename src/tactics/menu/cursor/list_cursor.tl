@@ -28,8 +28,8 @@ local record ListMenuOption<Value>
     set_selected_context: function(GameContext, MenuContext)
 end
 
-local record ListMenuCursor<Value>
-    is menu_cursor.MenuCursor
+local record ListMenuNode<Value>
+    is menu_cursor.MenuNode
     where self.type == "list"
     i: integer
     options: { ListMenuOption<Value> }
@@ -37,15 +37,15 @@ local record ListMenuCursor<Value>
     -- from definition
     direction: ListDirection
     wrap: boolean
-    set_selected_context: function(ListMenuCursor<Value>, GameContext, MenuContext)
+    set_selected_context: function(ListMenuNode<Value>, GameContext, MenuContext)
     select_handler: function(self, GameContext, MenuContext)
     back_handler: function(self, GameContext, MenuContext)
 end
 
 local record ListMenuDefinition<Value>
-    is menu_cursor.MenuStepDefinition
+    is menu_cursor.MenuNodeDefinition
     where self.type == "list"
-    set_selected_context: function(ListMenuCursor<Value>, GameContext, MenuContext)
+    set_selected_context: function(ListMenuNode<Value>, GameContext, MenuContext)
     get_options: function(GameContext, MenuContext): {ListMenuOption<Value>}
     wrap: boolean
     direction: ListDirection
@@ -55,7 +55,7 @@ end
 
 local list_menu_cursor = {
     ListMenuOption = ListMenuOption,
-    ListMenuCursor = ListMenuCursor,
+    ListMenuNode = ListMenuNode,
     ListMenuDefinition = ListMenuDefinition,
 }
 
@@ -81,7 +81,7 @@ function list_menu_cursor.static_definition<Value>(
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<Value>, _msb: GameContext, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuNode<Value>, _msb: GameContext, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return list_menu_cursor.definition({
@@ -109,7 +109,7 @@ function list_menu_cursor.boolean_yes_no(
             end
         )
     end
-    local set_selected_context = function(s: ListMenuCursor<boolean>, _msb: GameContext, ctx: MenuContext)
+    local set_selected_context = function(s: ListMenuNode<boolean>, _msb: GameContext, ctx: MenuContext)
         ctx.metadata[set_context_key] = options[s.i]
     end
     return list_menu_cursor.definition({
@@ -137,7 +137,7 @@ function list_menu_cursor.integer_range(
     )
 end
 
-function ListMenuCursor:update_joy(joy: Joypad)
+function ListMenuNode:update_joy(joy: Joypad)
     local new_i = self.i
     if self.direction == "vertical" then
         new_i = new_i + joy.dyp
@@ -156,7 +156,7 @@ function ListMenuCursor:update_joy(joy: Joypad)
     end
 end
 
-function ListMenuCursor:update_mouse(
+function ListMenuNode:update_mouse(
     _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
@@ -169,7 +169,7 @@ function ListMenuCursor:update_mouse(
     end
 end
 
-function ListMenuCursor:handle_select(
+function ListMenuNode:handle_select(
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     _: menu_types.MenuState
@@ -189,7 +189,7 @@ function ListMenuCursor:handle_select(
     return self.options[self.i].next_state
 end
 
-function ListMenuCursor:handle_back(
+function ListMenuNode:handle_back(
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ) 
@@ -198,15 +198,15 @@ function ListMenuCursor:handle_back(
     end
 end
 
-function ListMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuCursor
-    local cursor: ListMenuCursor<Value> = {
+function ListMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
+    local cursor: ListMenuNode<Value> = {
         type = "list",
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
-            if (ListMenuCursor as {string: any})[k] then
-                return (ListMenuCursor as {string: any})[k]
+            if (ListMenuNode as {string: any})[k] then
+                return (ListMenuNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end

@@ -27,7 +27,7 @@ local MENU_DATA: menu_manager.MenuDefinition = {
 	initial_step = "KEYBOARD_LOWER",
 	steps = {
 	    ["KEYBOARD_LOWER"] = grid_cursor.definition({
-			select_handler = function(_self: grid_cursor.GridMenuCursor, game_ctx: MenuContext, menu_ctx: MenuContext)
+			select_handler = function(_self: grid_cursor.GridMenuNode, game_ctx: MenuContext, menu_ctx: MenuContext)
 	                end
 		}),
 	    ["KEYBOARD_UPPER"] = grid_cursor.definition({
