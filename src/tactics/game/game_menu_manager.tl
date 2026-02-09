@@ -8,6 +8,8 @@ local menu_manager = require("src.tactics.menu.menu_manager")
 local event_bus = require("src.tactics.systems.event_bus")
 local GameMenuContext = require("src.tactics.game.game_menu_context").GameMenuContext
 local GameMainMenuContext = require("src.tactics.menu.menu_context").GameMainMenuContext
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local list_cursor = require("src.tactics.menu.cursor.list_cursor")
 local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local button = require("src.tactics.menu.cursor.button")
@@ -38,7 +40,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU"),
             ["MAIN_MENU"] = nested_cursor.column(
-                function(_msb: GameMenuContext, _ctx: MenuContext): {ButtonDefinition}
+                function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                     local options: {ButtonDefinition} = {}
 
                     pt.add(options, button.builder()
@@ -55,7 +57,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 end
             ),
             ["CHAPTER_SELECT"] = nested_cursor.column(
-                function(msb: GameMenuContext, _ctx: MenuContext): {ButtonDefinition}
+                function(msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                     local options: {ButtonDefinition} = {}
 
                     for _,story_id in ipairs(msb.story_ids) do
@@ -69,7 +71,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 end
             ),
             ["OPTIONS_MENU"] = nested_cursor.column(
-                function(_msb: GameMenuContext, _ctx: MenuContext): {ButtonDefinition}
+                function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                     local options: {MenuNodeDefinition} = {}
 
                     pt.add(options, selection.row()
