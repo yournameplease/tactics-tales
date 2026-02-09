@@ -19,12 +19,11 @@ local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selec
 local enum NestedMenuType
     "row"
     "column"
-    "grid"
 end
 
 local record NestedMenuNode
-    is menu_cursor.MenuNode
-    where self.type == "nested"
+    is menu_cursor.MenuContainer
+    where self.type == "list"
     i: integer
     children: { menu_cursor.MenuNode }
 
@@ -34,8 +33,8 @@ local record NestedMenuNode
 end
 
 local record NestedMenuDefinition
-    is menu_cursor.MenuNodeDefinition
-    where self.type == "nested"
+    is menu_cursor.MenuContainerDefinition
+    where self.type == "list"
     get_children: function(GameContext, MenuContext): {menu_cursor.MenuNodeDefinition}
     wrap: boolean
     direction: NestedMenuType
@@ -45,12 +44,6 @@ local nested_menu = {
     NestedMenuNode = NestedMenuNode,
     NestedMenuDefinition = NestedMenuDefinition,
 }
-
-function nested_menu.definition(props: NestedMenuDefinition): NestedMenuDefinition
-    props.type = "nested"
-    props.direction = props.direction or "column"
-    return setmetatable(props, { __index = NestedMenuDefinition })
-end
 
 function NestedMenuNode:update_joy(joy: Joypad)
     local new_i = self.i
@@ -86,7 +79,7 @@ end
 
 function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuNode
     local cursor: NestedMenuNode = {
-        type = "nested",
+        type = "list",
         i = 1,
         children = lists.map(function(def: MenuNodeDefinition): MenuNode
             return def:to_cursor(game_ctx, menu_ctx, menu_state)

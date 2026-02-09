@@ -10,15 +10,21 @@ local GameContext = menu_context.GameContext
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 
+local enum MenuLeafType
+    "selection"
+    "button"
+end
+
+local enum MenuContainerType
+	"list"
+	"grid"
+end
+
 local enum CursorType
     "selection"
     "button"
-    "nested"
-end
-
-local enum NestedCursorType
 	"row"
-	"col"
+	"column"
 	"grid"
 end
 
@@ -42,13 +48,8 @@ end
 
 local record List
 	is MenuMouseSelection
-	where self.type == "list"
+	where self.type == "selection"
 	i: integer
-end
-
-local record MultipleOptions
-	is MenuMouseSelection
-	where self.type == "multiple_options"
 end
 
 local mouse_selection = {
@@ -56,7 +57,6 @@ local mouse_selection = {
 	Grid = Grid,
 	Button = Button,
 	List = List,
-	MultipleOptions = MultipleOptions,
 }
 
 function mouse_selection.grid(x: integer, y: integer): MenuMouseSelection
@@ -77,25 +77,45 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 end
 
 local interface MenuNode
-    type: CursorType
     update_joy: function(self, Joypad) 
     update_mouse: function(self, Mouse, MenuMouseSelection) 
+end
+
+local interface MenuLeaf
+	is MenuNode
+    type: MenuLeafType
 --- @return next state
     handle_select: function(self, game_context: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): string 
     handle_back: function(self, game_context: GameContext, menu_ctx: MenuContext) 
 end
 
+local interface MenuContainer
+	is MenuNode
+    type: MenuContainerType
+end
+
 local interface MenuNodeDefinition
-    type: CursorType
-    previous_state: menu_types.MenuStep
     to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuNode
+end
+
+local interface MenuLeafDefinition
+	is MenuNodeDefinition
+    type: MenuLeafType
+end
+
+local interface MenuContainerDefinition
+	is MenuNodeDefinition
+    type: MenuContainerType
 end
 
 local menu_cursor = {
 	MenuHandler = MenuHandler,
-    CursorType = CursorType,
     MenuNode = MenuNode,
+    MenuLeaf = MenuLeaf,
+    MenuContainer = MenuContainer,
     MenuNodeDefinition = MenuNodeDefinition,
+    MenuLeafDefinition = MenuLeafDefinition,
+    MenuContainerDefinition = MenuContainerDefinition,
 
     mouse_selection = mouse_selection,
 }
