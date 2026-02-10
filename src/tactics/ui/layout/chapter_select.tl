@@ -3,9 +3,8 @@
 
 local box = require("src.tactics.ui.box")
 local text_node = require("src.tactics.ui.components.text_node")
-local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
+local nested_list = require("src.tactics.menu.cursor.nested.list")
 local VerticalButtonList = require("src.tactics.ui.panels.vertical_list_menu")
-local GameMenuContext = require("src.tactics.game.game_menu_context").GameMenuContext
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 
 local SplitPages = require("src.tactics.ui.panels.split_pages")
@@ -16,10 +15,11 @@ right:add(text_node.title( { text = {"Chapters"} } ))
 right:add(VerticalButtonList.new(
 	"{text}",
 	">{text}<",
-	function (state: UIContextManager): list_cursor.ListMenuNode<GameMenuContext, string>
-		local cursor = state.game_context.menu_manager.menu_cursor
-		assert(cursor is list_cursor.ListMenuNode<GameMenuContext, string>) 
-		return cursor
+	function (state: UIContextManager): nested_list.NestedMenuNode
+		local root_node = state.game_context.menu_manager.menu_step.node
+		local node = root_node
+		assert(node is nested_list.NestedMenuNode) 
+		return node
 	end,
 	{flex_grow = 1} ))
 

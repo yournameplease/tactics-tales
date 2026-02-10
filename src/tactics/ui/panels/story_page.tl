@@ -7,11 +7,10 @@ local dialogue_node = require("src.tactics.ui.components.dialogue_node")
 local portrait_box = require("src.tactics.ui.panels.portrait_box")
 local section_divider = require("src.tactics.ui.decoration.section_divider")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
-local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMenuContext
+local nested_list = require("src.tactics.menu.cursor.nested.list")
 local story_page = require("src.tactics.story.story_page")
 local rendered_story_node = story_page.rendered_story_node
 local RenderedStoryNode = rendered_story_node.RenderedStoryNode
-local multiple_options_cursor = require("src.tactics.menu.cursor.multiple_options_cursor")
 local VerticalMultiSelectMenu = require("src.tactics.ui.panels.vertical_list_multi_select")
 local DrawableCharacter = require("src.tactics.story.drawable_character").DrawableCharacter
 
@@ -90,14 +89,15 @@ function StoryPagePanel:compute_children(state: UIContextManager)
             elseif n is rendered_story_node.CharacterCustomization then
 				child = box.flex_row()
 
-				local cursor = state.story_context.menu_manager.menu_cursor
-                if cursor is multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext> then
+				local root_node = state.story_context.menu_manager.menu_step.node
+                if root_node is nested_list.NestedMenuNode then
     				child:add(VerticalMultiSelectMenu.new(
     					"{label}: {value}",
     					"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-    					function (_: UIContextManager): multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext>
-    						assert(cursor is multiple_options_cursor.MultipleOptionsMenuNode<StoryMenuContext>) 
-    						return cursor
+    					function (_: UIContextManager): nested_list.NestedMenuNode
+                    		local node = root_node
+                    		assert(node is nested_list.NestedMenuNode) 
+                    		return node
     					end,
                         {auto_height = true, flex_grow = 1}
     					))
