@@ -8,6 +8,7 @@ local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
 local MenuSignal = menu_signal.MenuSignal
 local MenuHandler = menu_cursor.MenuHandler
+local SerializedMenu = menu_cursor.SerializedMenu
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
@@ -114,6 +115,13 @@ function ButtonCursor:update_mouse(
 		end
 	end
 	return menu_signal.ignored()
+end
+
+function ButtonCursor:serialize(): SerializedMenu
+	return {
+		state = nil,
+		data = {},
+	}
 end
 
 function ButtonDefinition:to_cursor(

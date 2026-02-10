@@ -4,6 +4,7 @@
 
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
+local SerializedMenu = menu_cursor.SerializedMenu
 local MenuSignal = menu_signal.MenuSignal
 local menu_types = require("src.tactics.menu.types")
 local menu_context = require("src.tactics.menu.menu_context")
@@ -36,6 +37,14 @@ local record SelectionMenuNode
     key: string
     direction: SelectionDirection
     wrap: boolean
+end
+
+function SelectionMenuNode:get_selected_value(): any
+	return self.options[self.i].value
+end
+
+function SelectionMenuNode:get_selected_text(): string
+	return self.options[self.i].text
 end
 
 local record SelectionMenuDefinition
@@ -183,6 +192,15 @@ function SelectionMenuNode:update_mouse(
 		self:decrement_selection()
 		return menu_signal.consumed()
 	end
+end
+
+function SelectionMenuNode:serialize(): SerializedMenu
+	return {
+		state = nil,
+		data = {
+			[self.key] = self:get_selected_value()
+		},
+	}
 end
 
 function SelectionMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode

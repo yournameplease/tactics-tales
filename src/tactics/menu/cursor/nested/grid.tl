@@ -3,9 +3,12 @@
 --- selecting tiles on the battle map.
 
 local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
 local MenuSignal = menu_signal.MenuSignal
+local SerializedMenu = menu_cursor.SerializedMenu
+local SerializedMenuState = menu_cursor.SerializedMenuState
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
 local point = require("src.tactics.util.point")
@@ -140,6 +143,37 @@ function NestedGridNode:update_mouse(
         end
     end
     return menu_signal.ignored()
+end
+
+local record SerializedNestedGridState
+	is SerializedMenuState
+	where self.type == "list"
+	point: Point
+end
+
+function NestedGridNode:serialize(): SerializedMenu
+	local state: SerializedNestedGridState = {
+		point = self.point:copy(),
+		children = {},
+	}
+	local out: SerializedMenu = {
+		state = state,
+		data = {},
+	}
+
+	for _,child in ipairs(self.children) do
+		local child_out = child.child:serialize()
+
+		if child_out.data then
+			maps.merge(out.data, child_out.data)
+		end
+
+		if child_out.state and child.child.id then
+			out.state.children[child.child.id] = child_out.state
+		end
+	end
+
+	return out
 end
 
 function NestedGridDefinition:to_cursor(

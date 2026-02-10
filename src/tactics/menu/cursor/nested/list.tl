@@ -6,6 +6,8 @@
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
 local MenuSignal = menu_signal.MenuSignal
+local SerializedMenu = menu_cursor.SerializedMenu
+local SerializedMenuState = menu_cursor.SerializedMenuState
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
 local menu_types = require("src.tactics.menu.types")
@@ -13,6 +15,7 @@ local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local lists = require("src.tactics.util.lists")
+local maps = require("src.tactics.util.maps")
 local input_service = require("src.tactics.joypad")
 local Joypad = require("src.tactics.joypad").Joypad
 local Mouse = input_service.Mouse
@@ -112,6 +115,37 @@ function NestedMenuNode:update_mouse(
         end
     end
     return menu_signal.ignored()
+end
+
+local record SerializedNestedMenuNodeState
+	is SerializedMenuState
+	where self.type == "list"
+	i: integer
+end
+
+function NestedMenuNode:serialize(): SerializedMenu
+	local state: SerializedNestedMenuNodeState = {
+		i = self.i,
+		children = {},
+	}
+	local out: SerializedMenu = {
+		state = state,
+		data = {},
+	}
+
+	for _,child in ipairs(self.children) do
+		local child_out = child:serialize()
+
+		if child_out.data then
+			maps.merge(out.data, child_out.data)
+		end
+
+		if child_out.state and child.id then
+			out.state.children[child.id] = child_out.state
+		end
+	end
+
+	return out
 end
 
 function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuNode
