@@ -142,8 +142,8 @@ end
 
 function SelectionMenuNode:update_joy(
 	joy: Joypad,
-    _game_ctx: GameContext,
-    _menu_ctx: MenuContext
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
 ): MenuSignal
     if self.direction == "vertical" then
 		if joy.dyp == 1 then
@@ -167,18 +167,23 @@ function SelectionMenuNode:update_joy(
 	return menu_signal.ignored()
 end
 
--- function SelectionMenuNode:update_mouse(
---     _mouse: Mouse,
---     hovered: mouse_menu_selection.MenuMouseSelection
--- )
---     if hovered == nil then return end
+function SelectionMenuNode:update_mouse(
+    _mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection,
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext
+): MenuSignal
+    if hovered == nil then return menu_signal.ignored() end
 
---     if hovered is mouse_menu_selection.Selection then
---         if hovered.i > 0 and hovered.i <= #self.options then
---             self.i = hovered.i
---         end
---     end
--- end
+	if hovered.command == "increment_selection" then
+		self:increment_selection()
+		return menu_signal.consumed()
+	end
+	if hovered.command == "decrement_selection" then
+		self:decrement_selection()
+		return menu_signal.consumed()
+	end
+end
 
 function SelectionMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
     local cursor: SelectionMenuNode = {
