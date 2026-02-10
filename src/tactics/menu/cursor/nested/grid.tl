@@ -2,6 +2,7 @@
 --- Implements a menu cursor for navigating a 2D grid, used for
 --- selecting tiles on the battle map.
 
+local lists = require("src.tactics.util.lists")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
@@ -25,6 +26,11 @@ local record MenuTileHighlight
     can_attack: boolean
 end
 
+local record NestedGridChild
+	filter: function(Point, GameContext, MenuContext): boolean
+	child: MenuNode
+end
+
 -- TODO: this is not ideal for memory.  ignoring for now though
 local record NestedGridNode
     is menu_cursor.MenuContainer
@@ -35,14 +41,31 @@ local record NestedGridNode
     path: { Point }
     legal_tiles: array_2d.Array2D<MenuTileHighlight>
     max_path_length: integer
-    children: array_2d.Array2D<MenuNode>
+    children: {NestedGridChild}
+end
+
+local record NestedGridChildDefinition
+	filter: function(Point, GameContext, MenuContext): boolean
+	child: MenuNodeDefinition
+end
+
+function NestedGridChildDefinition:to_cursor(
+    game_ctx: GameContext,
+    menu_ctx: MenuContext,
+    menu_state: menu_types.MenuState
+): NestedGridChild
+	return setmetatable({
+		child = self.child:to_cursor(game_ctx, menu_ctx, menu_state)	
+	},{
+		__index = self
+	})
 end
 
 local record NestedGridDefinition
     is menu_cursor.MenuContainerDefinition
     where self.type == "grid"
 
-	get_child: function(point: Point): MenuNodeDefinition
+    children: {NestedGridChildDefinition}
     get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
     get_path_anchor: function(GameContext, MenuContext): Point
     get_max_path_length: function(GameContext, MenuContext): integer
@@ -127,11 +150,11 @@ function NestedGridDefinition:to_cursor(
     else
         cursor.legal_tiles = nil
     end
-    if self.get_child ~= nil then
-		cursor.children = array_2d.new(cursor.x_max, cursor.y_max)
-			:map_points(function(p: Point): MenuNode
-				return self.get_child(p):to_cursor(game_ctx, menu_ctx, menu_state)
-			end)
+    if self.children ~= nil then
+		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
+				return c:to_cursor(game_ctx, menu_ctx, menu_state)
+
+			end)(self.children)
 	end
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (NestedGridNode as {string: any})[k] then
@@ -142,31 +165,43 @@ function NestedGridDefinition:to_cursor(
         })
 end
 
-function nested_grid.grid(): NestedMenuDefinition
+function nested_grid.grid(): NestedGridDefinition
 	return setmetatable({
-	    get_children = get_children,
-	    direction = "column",
+	    type = "grid",
+	    children = {},
 	},{
-	    __index = NestedMenuDefinition
+	    __index = NestedGridDefinition
 	})
 end
 
-function NestedGridDefinition:with_children(
-	get_child: function(point: Point): MenuNodeDefinition
+function NestedGridDefinition:with_child(
+	filter: function(Point, GameContext, MenuContext): boolean,
+	child_definition: MenuNodeDefinition
 ): NestedGridDefinition
-	self.get_child = get_child
+	pt.add(self.children, setmetatable({
+		filter = filter,
+		child = child_definition,
+	},{
+		__index = NestedGridChildDefinition,
+	}))
 end
 
 function NestedGridDefinition:with_path_length(
-	get_max_path_length: function(GameContext, MenuContext): Point
+	get_max_path_length: function(GameContext, MenuContext): integer
 ): NestedGridDefinition
 	self.get_max_path_length = get_max_path_length
 end
 
 function NestedGridDefinition:with_path_anchor(
-	get_path_anchor: function(GameContext, MenuContext): integer
+	get_path_anchor: function(GameContext, MenuContext): Point
 ): NestedGridDefinition
 	self.get_path_anchor = get_path_anchor
+end
+
+function NestedGridDefinition:with_tile_highlights(
+    get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
+): NestedGridDefinition
+	self.get_legal_tiles = get_legal_tiles
 end
 
 return nested_grid

@@ -4,7 +4,7 @@
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local text_node = require("src.tactics.ui.components.text_node")
-local list_cursor = require("src.tactics.menu.cursor.list_cursor")
+local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local String = require("src.tactics.util.string")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
