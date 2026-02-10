@@ -95,18 +95,18 @@ function NestedMenuNode:update_joy(
     return menu_signal.ignored()
 end
 
-function NestedMenuNode:update_mouse(
-    _mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection
-)
-    if hovered == nil then return end
+-- function NestedMenuNode:update_mouse(
+--     _mouse: Mouse,
+--     hovered: mouse_menu_selection.MenuMouseSelection
+-- )
+--     if hovered == nil then return end
 
-    if hovered is mouse_menu_selection.List then
-        if hovered.i > 0 and hovered.i <= #self.children then
-            self.i = hovered.i
-        end
-    end
-end
+--     if hovered is mouse_menu_selection.List then
+--         if hovered.i > 0 and hovered.i <= #self.children then
+--             self.i = hovered.i
+--         end
+--     end
+-- end
 
 function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuNode
     local cursor: NestedMenuNode = {
