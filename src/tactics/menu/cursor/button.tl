@@ -5,6 +5,8 @@
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_signal = menu_cursor.menu_signal
+local MenuSignal = menu_signal.MenuSignal
 local MenuHandler = menu_cursor.MenuHandler
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
@@ -61,38 +63,35 @@ function button.definition(
     return setmetatable(props, { __index = ButtonDefinition })
 end
 
-function ButtonCursor:update_joy(joy: Joypad)
+function ButtonCursor:update_joy(
+	joy: Joypad,
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+): MenuSignal
+	if self.select_handler ~= nil or self.next_state ~= nil then
+		if joy.ap then
+			if self.select_handler ~= nil then
+				self:select_handler(game_ctx, menu_ctx)	
+			end
+			if self.next_state ~= nil then
+				return menu_signal.navigate(self.next_state)
+			end
+			return menu_signal.consumed()
+		end
+	end
+	if self.back_handler ~= nil then
+		if joy.bp then
+	        self:back_handler(game_ctx, menu_ctx)
+			return menu_signal.consumed()
+		end
+	end
+	return menu_signal.ignored()
 end
 
 function ButtonCursor:update_mouse(
     _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
 )
-end
-
-function ButtonCursor:handle_select(
-    game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    menu_state: menu_types.MenuState
-): string 
-    -- local validation = self:validator(game_ctx, menu_ctx)
-    -- if not validation then return end
-
-    -- self:set_selected_context(game_ctx, menu_ctx)
-
-    if self.select_handler then
-        self:select_handler(game_ctx, menu_ctx)
-    end
-    return self.next_state 
-end
-
-function ButtonCursor:handle_back(
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
-) 
-    if self.back_handler then
-        self:back_handler(game_ctx, menu_ctx)
-    end
 end
 
 function ButtonDefinition:to_cursor(

@@ -3,6 +3,8 @@
 --- supporting both horizontal and vertical lists.
 
 local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_signal = menu_cursor.menu_signal
+local MenuSignal = menu_signal.MenuSignal
 local menu_types = require("src.tactics.menu.types")
 local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
@@ -120,23 +122,49 @@ function SelectionMenuDefinition:with_precomputed_options(
 	return self
 end
 
-function SelectionMenuNode:update_joy(joy: Joypad)
-    local new_i = self.i
+function SelectionMenuNode:increment_selection()
+    local new_i = self.i + 1
+    if self.wrap then
+        self.i = (new_i - 1) % #self.options + 1
+    else
+        self.i = pt.mid(1, new_i, #self.options)
+    end
+end
+
+function SelectionMenuNode:decrement_selection()
+    local new_i = self.i - 1
+    if self.wrap then
+        self.i = (new_i - 1) % #self.options + 1
+    else
+        self.i = pt.mid(1, new_i, #self.options)
+    end
+end
+
+function SelectionMenuNode:update_joy(
+	joy: Joypad,
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext
+): MenuSignal
     if self.direction == "vertical" then
-        new_i = new_i + joy.dyp
+		if joy.dyp == 1 then
+			self:increment_selection()
+			return menu_signal.consumed()
+		elseif joy.dyp == -1 then
+			self:decrement_selection()
+			return menu_signal.consumed()
+		end
     elseif self.direction == "horizontal" then
-        new_i = new_i + joy.dxp
+		if joy.dxp == 1 then
+			self:increment_selection()
+			return menu_signal.consumed()
+		elseif joy.dxp == -1 then
+			self:decrement_selection()
+			return menu_signal.consumed()
+		end
     else
         unexpected(self.direction)
     end
-
-    if new_i ~= self.i then
-        if self.wrap then
-            self.i = (new_i - 1) % #self.options + 1
-        else
-            self.i = pt.mid(1, new_i, #self.options)
-        end
-    end
+	return menu_signal.ignored()
 end
 
 -- function SelectionMenuNode:update_mouse(
@@ -151,20 +179,6 @@ end
 --         end
 --     end
 -- end
-
-function SelectionMenuNode:handle_select(
-    game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    _: menu_types.MenuState
-): string
-    return nil
-end
-
-function SelectionMenuNode:handle_back(
-    _game_ctx: GameContext,
-    _menu_ctx: MenuContext
-) 
-end
 
 function SelectionMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
     local cursor: SelectionMenuNode = {
