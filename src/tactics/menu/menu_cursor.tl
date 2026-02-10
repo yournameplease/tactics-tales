@@ -143,10 +143,25 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 	return self
 end
 
+local interface SerializedMenuState
+	type: MenuContainerType
+	children: {string: SerializedMenuState}
+end
+
+local type SerializedMenuData = {string: any}
+
+local interface SerializedMenu
+	state: SerializedMenuState
+	data: SerializedMenuData
+end
+
 local interface MenuNode
+	id: string
 	-- note: passing contexts are only really needed for event handlers.  consider moving the handling to menu_manager level with a signal
     update_joy: function(self, Joypad, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
     update_mouse: function(self, Mouse, MenuMouseSelection, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
+    serialize: function(self): SerializedMenu
+    deserialize: function(self, state: SerializedMenuState, data: SerializedMenuData)
 end
 
 local interface MenuLeaf
@@ -183,6 +198,10 @@ local menu_cursor = {
     MenuNodeDefinition = MenuNodeDefinition,
     MenuLeafDefinition = MenuLeafDefinition,
     MenuContainerDefinition = MenuContainerDefinition,
+	SerializedMenu = SerializedMenu,
+	SerializedMenuState = SerializedMenuState,
+	SerializedMenuData = SerializedMenuData,
+	
 
     mouse_selection = mouse_selection,
 
