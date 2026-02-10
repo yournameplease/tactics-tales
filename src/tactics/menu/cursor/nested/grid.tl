@@ -10,7 +10,6 @@ local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
 local point = require("src.tactics.util.point")
 local Point = point.Point
-local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
@@ -122,7 +121,7 @@ function NestedGridNode:update_mouse(
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
-	local signal = self:get_focused_leaf():update_joy(mouse, hovered, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf():update_mouse(mouse, hovered, game_ctx, menu_ctx)
     if signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.Grid then
