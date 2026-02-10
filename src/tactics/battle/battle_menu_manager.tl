@@ -18,7 +18,7 @@ local GameContext = menu_context.GameContext
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
-local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
+local list = require("src.tactics.menu.cursor.nested.list")
 local grid = require("src.tactics.menu.cursor.nested.grid")
 local button = require("src.tactics.menu.cursor.button")
 local ButtonDefinition = button.ButtonDefinition
@@ -167,7 +167,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("SELECT_SWAP_UNIT"),
             ["DEPLOYMENT_MENU"] = step_definition.of_node(
-                nested_cursor.column(
+                list.column(
                     function(_msb: BattleMenuContext, _ctx: BattleMainMenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
 
@@ -252,7 +252,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("SELECT_UNIT"),
             ["SELECT_ACTION"] = step_definition.of_node(
-                nested_cursor.column(
+                list.column(
                     function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
                         -- if target in range

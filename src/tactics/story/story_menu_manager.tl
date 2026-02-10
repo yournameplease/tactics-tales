@@ -13,7 +13,7 @@ local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMe
 local character = require("src.tactics.character.object.character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey
 local event_bus = require("src.tactics.systems.event_bus")
-local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
+local list = require("src.tactics.menu.cursor.nested.list")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local selection = require("src.tactics.menu.cursor.selection")
@@ -72,7 +72,7 @@ end
 
 local function menu_definition_for_character_select(): menu_manager.MenuStepDefinition
     return step_definition.of_node(
-        nested_cursor.column(
+        list.column(
             -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
             --     game_ctx.handle_create_character(
             --         menu_ctx.character_customization.appearance
