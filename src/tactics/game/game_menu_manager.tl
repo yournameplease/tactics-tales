@@ -11,7 +11,7 @@ local GameMenuContext = require("src.tactics.game.game_menu_context").GameMenuCo
 local GameMainMenuContext = require("src.tactics.menu.menu_context").GameMainMenuContext
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
-local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
+local list = require("src.tactics.menu.cursor.nested.list")
 local button = require("src.tactics.menu.cursor.button")
 local ButtonDefinition = button.ButtonDefinition
 local ButtonCursor = button.ButtonCursor
@@ -45,7 +45,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :advance_to("MAIN_MENU")
             ),
             ["MAIN_MENU"] = step_definition.of_node(
-                nested_cursor.column(
+                list.column(
                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {ButtonDefinition} = {}
 
@@ -64,7 +64,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             ),
             ["CHAPTER_SELECT"] = step_definition.of_node(
-                nested_cursor.column(
+                list.column(
                     function(msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {ButtonDefinition} = {}
 
@@ -80,7 +80,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             ),
             ["OPTIONS_MENU"] = step_definition.of_node(
-                nested_cursor.column(
+                list.column(
                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
 
@@ -117,7 +117,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                 }))
 
                         -- TODO: back/reset/save
-                        -- pt.add(options, nested_cursor.row()
+                        -- pt.add(options, list.row()
                         -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
                         --     game_ctx.handle_set_config(
                         --         menu_ctx.metadata as DynamicConfig
