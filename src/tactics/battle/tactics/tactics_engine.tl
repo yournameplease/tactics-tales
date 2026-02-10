@@ -5,7 +5,7 @@
 
 require("src.tactics.config")
 
-local MenuTileHighlight = require("src.tactics.menu.cursor.grid_cursor").MenuTileHighlight
+local MenuTileHighlight = require("src.tactics.menu.cursor.nested.grid").MenuTileHighlight
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local fp = require("src.tactics.util.fp")

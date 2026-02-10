@@ -22,9 +22,39 @@ local record SelectionHistory
     selection: menu_cursor.MenuNode
 end
 
+local record MenuStepDefinition
+	previous_step: string
+	back_handler: function(GameContext, MenuContext)
+	node: menu_cursor.MenuNodeDefinition
+end
+
+local menu_step_definition = {}
+
+function menu_step_definition.of_node(
+	node_definition: menu_cursor.MenuNodeDefinition
+): MenuStepDefinition
+	return setmetatable({
+		node = node_definition,
+	}, {
+		__index = MenuStepDefinition
+	})
+end
+
+function MenuStepDefinition:with_previous_step(step_id: string): MenuStepDefinition
+    self.previous_step = step_id
+    return self
+end
+
+function MenuStepDefinition:handle_back(
+	back_handler: function(GameContext, MenuContext)
+): MenuStepDefinition
+	self.back_handler = back_handler
+	return self
+end
+
 local record MenuDefinition
     initial_step: menu_types.MenuStep
-    steps: { menu_types.MenuStep: menu_cursor.MenuNodeDefinition }
+    steps: { menu_types.MenuStep: MenuStepDefinition }
 end
 
 local interface MenuManager
@@ -57,6 +87,11 @@ local menu_manager = {
     MenuManager = MenuManager,
     SelectionHistory = SelectionHistory,
     MenuDefinition = MenuDefinition,
+    MenuStepDefinition = MenuStepDefinition,
+
+    definition = {
+        step = menu_step_definition,
+    },
 }
 
 function menu_manager.new(
@@ -145,6 +180,16 @@ function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
     self:populate_menu_state(step)
 end
 
+local enum MenuCommand
+    "move_cursor_down"
+    "move_cursor_up"
+    "move_cursor_left"
+    "move_cursor_right"
+    "button_primary"
+    "button_secondary"
+    "increment_selection"
+    "decrement_selection"
+end
 
 function BaseMenuManager:update(input: InputContext)
     local btn_skip_turn = false
