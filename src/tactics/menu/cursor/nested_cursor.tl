@@ -4,6 +4,8 @@
 --- supporting both horizontal and vertical lists.
 
 local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_signal = menu_cursor.menu_signal
+local MenuSignal = menu_signal.MenuSignal
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
 local menu_types = require("src.tactics.menu.types")
@@ -45,23 +47,52 @@ local nested_menu = {
     NestedMenuDefinition = NestedMenuDefinition,
 }
 
-function NestedMenuNode:update_joy(joy: Joypad)
-    local new_i = self.i
+function NestedMenuNode:increment_focus_index()
+    local new_i = self.i + 1
+    if self.wrap then
+        self.i = (new_i - 1) % #self.children + 1
+    else
+        self.i = pt.mid(1, new_i, #self.children)
+    end
+end
+
+function NestedMenuNode:decrement_focus_index()
+    local new_i = self.i - 1
+    if self.wrap then
+        self.i = (new_i - 1) % #self.children + 1
+    else
+        self.i = pt.mid(1, new_i, #self.children)
+    end
+end
+
+function NestedMenuNode:update_joy(
+	joy: Joypad,
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+): MenuSignal
+	local signal = self:get_focused_leaf():update_joy(joy, game_ctx, menu_ctx)
+    if signal.type ~= "ignored" then return signal end
+
     if self.direction == "column" then
-        new_i = new_i + joy.dyp
+		if joy.dyp == 1 then
+			self:increment_focus_index()
+			return menu_signal.consumed()
+		elseif joy.dyp == -1 then
+			self:decrement_focus_index()
+			return menu_signal.consumed()
+		end
     elseif self.direction == "row" then
-        new_i = new_i + joy.dxp
+		if joy.dxp == 1 then
+			self:increment_focus_index()
+			return menu_signal.consumed()
+		elseif joy.dxp == -1 then
+			self:decrement_focus_index()
+			return menu_signal.consumed()
+		end
     else
         unexpected(self.direction)
     end
-
-    if new_i ~= self.i then
-        if self.wrap then
-            self.i = (new_i - 1) % #self.children + 1
-        else
-            self.i = pt.mid(1, new_i, #self.children)
-        end
-    end
+    return menu_signal.ignored()
 end
 
 function NestedMenuNode:update_mouse(

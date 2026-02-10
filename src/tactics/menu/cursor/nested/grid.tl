@@ -4,6 +4,8 @@
 
 local lists = require("src.tactics.util.lists")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_signal = menu_cursor.menu_signal
+local MenuSignal = menu_signal.MenuSignal
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local MenuNode = menu_cursor.MenuNode
 local point = require("src.tactics.util.point")
@@ -84,22 +86,33 @@ function nested_grid.definition(
     return setmetatable(props, { __index = NestedGridDefinition })
 end
 
-function NestedGridNode:update_joy(joy: Joypad)
-    local prev_point = self.point:copy()
-    self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
-    self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
+function NestedGridNode:update_joy(
+	joy: Joypad,
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+): MenuSignal
+	local signal = self:get_focused_leaf():update_joy(joy, game_ctx, menu_ctx)
 
-    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-        if self.legal_tiles:get_point(self.point) then
+	if signal is menu_signal.Ignored then
+	    local prev_point = self.point:copy()
+	    self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
+	    self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
+
+	    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
+	        if self.legal_tiles:get_point(self.point) then
             
-            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
-                return h ~= nil and h.reachable
-            end)
-            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-        end
-    end 
+	            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
+	                return h ~= nil and h.reachable
+	            end)
+	            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
+	        end
+	        return menu_signal.consumed()
+	    end
+	else
+		return signal
+	end
+    return menu_signal.ignored()
 end
-
 function NestedGridNode:update_mouse(
     _mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection
