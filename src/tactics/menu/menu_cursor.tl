@@ -104,6 +104,7 @@ local type MenuHandler = function(self, GameContext, MenuContext)
 
 local interface MenuMouseSelection
 	type: CursorType
+	command: menu_types.MenuCommand
 end
 
 local record Grid
@@ -149,6 +150,7 @@ function mouse_selection.list(i: integer): MenuMouseSelection
 end
 
 local interface MenuNode
+	-- note: passing contexts are only really needed for event handlers.  consider moving the handling to menu_manager level with a signal
     update_joy: function(self, Joypad, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
     update_mouse: function(self, Mouse, MenuMouseSelection, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
 end

@@ -195,17 +195,6 @@ function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
     self:populate_menu_state(step)
 end
 
-local enum MenuCommand
-    "move_cursor_down"
-    "move_cursor_up"
-    "move_cursor_left"
-    "move_cursor_right"
-    "button_primary"
-    "button_secondary"
-    "increment_selection"
-    "decrement_selection"
-end
-
 function BaseMenuManager:update(input: InputContext)
     local btn_skip_turn = false
     
@@ -231,7 +220,7 @@ function BaseMenuManager:update(input: InputContext)
             mouse: Mouse,
             hovered: mouse_menu_selection.MenuMouseSelection
         ): MenuSignal
-            -- self.menu_cursor:update_mouse(mouse, hovered, self.game_ctx, self.menu_ctx)
+            self.menu_step.node:update_mouse(mouse, hovered, self.game_ctx, self.menu_ctx)
             return nil
         end
     )

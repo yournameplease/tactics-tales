@@ -113,11 +113,17 @@ function NestedGridNode:update_joy(
 	end
     return menu_signal.ignored()
 end
+
 function NestedGridNode:update_mouse(
-    _mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection
-)
-    if hovered == nil then return end
+    mouse: Mouse,
+    hovered: mouse_menu_selection.MenuMouseSelection,
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+): MenuSignal
+    if hovered == nil then return menu_signal.ignored() end
+
+	local signal = self:get_focused_leaf():update_joy(mouse, hovered, game_ctx, menu_ctx)
+    if signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.Grid then
         local prev_point = self.point:copy()
@@ -134,6 +140,7 @@ function NestedGridNode:update_mouse(
             end
         end
     end
+    return menu_signal.ignored()
 end
 
 function NestedGridDefinition:to_cursor(
@@ -143,7 +150,6 @@ function NestedGridDefinition:to_cursor(
 ): menu_cursor.MenuNode
     local cursor: NestedGridNode = {
         type = "grid",
-        point = menu_state.point, 
         x_max = 16,
         y_max = 16
     }
@@ -154,7 +160,7 @@ function NestedGridDefinition:to_cursor(
             if self.get_path_anchor then
                 cursor.path = {self.get_path_anchor(game_ctx, menu_ctx)}
             else
-                cursor.path = {menu_state.point:copy()}
+            	error("need path anchor!")
             end
         else
             cursor.path = nil
