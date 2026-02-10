@@ -76,12 +76,6 @@ function menu_signal.navigate(target: string): MenuSignal
 	return out
 end
 
-local record MenuSignalNavigate
-	is MenuSignal
-	where self.type == "navigate"
-	target: string
-end
-
 local enum MenuLeafType
     "selection"
     "button"

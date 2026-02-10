@@ -16,7 +16,6 @@ local event_bus = require("src.tactics.systems.event_bus")
 local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
-local nested_cursor = require("src.tactics.menu.cursor.nested_cursor")
 local selection = require("src.tactics.menu.cursor.selection")
 local SelectionMenuDefinition = selection.SelectionMenuDefinition
 local SelectionOption = selection.SelectionMenuOption
