@@ -48,17 +48,18 @@ function input_context.mouse(mouse: input.Mouse, hovered: MenuMouseSelection, ac
 	return self
 end
 
-function input_context.handle_update(
+function input_context.handle_update<Return>(
 	ctx: InputContext,
-	update_joy: (function(joy: input.Joypad)),
-    update_mouse: (function(input.Mouse, MenuMouseSelection)) 
-)
+	update_joy: (function(joy: input.Joypad): Return),
+    update_mouse: (function(input.Mouse, MenuMouseSelection): Return) 
+): Return
     if ctx is input_context.JoypadContext then
-        update_joy(ctx.joypad)
+        return update_joy(ctx.joypad)
     elseif ctx is input_context.MouseContext then
-        update_mouse(ctx.mouse, ctx.hovered)
+        return update_mouse(ctx.mouse, ctx.hovered)
     else
         unexpected(ctx.type)
+        return nil
     end
 end
 
