@@ -173,7 +173,7 @@ end
 local interface MenuContainer
 	is MenuNode
     type: MenuContainerType
-    get_focused_leaf: function(self): MenuLeaf
+    get_focused_leaf: function(self, game_context: GameContext, menu_ctx: MenuContext): MenuLeaf
 end
 
 local interface MenuNodeDefinition

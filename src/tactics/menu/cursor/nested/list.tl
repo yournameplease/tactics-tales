@@ -68,12 +68,25 @@ function NestedMenuNode:decrement_focus_index()
     end
 end
 
+function NestedMenuNode:get_selected_child(): menu_cursor.MenuNode
+	return self.children[self.i]
+end
+
+function NestedMenuNode:get_focused_leaf(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuLeaf
+	local child = self:get_selected_child()
+	if child is menu_cursor.MenuLeaf then
+		return child
+	elseif child is menu_cursor.MenuContainer then
+		return child:get_focused_leaf(game_context, menu_ctx)
+	end
+end
+
 function NestedMenuNode:update_joy(
 	joy: Joypad,
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ): MenuSignal
-	local signal = self:get_focused_leaf():update_joy(joy, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_joy(joy, game_ctx, menu_ctx)
     if signal.type ~= "ignored" then return signal end
 
     if self.direction == "column" then
@@ -106,7 +119,7 @@ function NestedMenuNode:update_mouse(
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
-	local signal = self:get_focused_leaf():update_mouse(mouse, hovered, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_mouse(mouse, hovered, game_ctx, menu_ctx)
     if signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.List then

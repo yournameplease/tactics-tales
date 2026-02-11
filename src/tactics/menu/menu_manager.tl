@@ -226,8 +226,7 @@ function BaseMenuManager:update(input: InputContext)
             mouse: Mouse,
             hovered: mouse_menu_selection.MenuMouseSelection
         ): MenuSignal
-            self.menu_step.node:update_mouse(mouse, hovered, self.game_ctx, self.menu_ctx)
-            return nil
+            return self.menu_step.node:update_mouse(mouse, hovered, self.game_ctx, self.menu_ctx)
         end
     )
 
