@@ -54,7 +54,8 @@ end
 function GenericMenuBox:compute_children(state: UIContextManager)
 	local node = self.menu_cursor_func(state)
 
-	-- todo: caching
+	-- todo: real caching
+	if self.children ~= nil and #self.children ~= 0 then return end
 	local children: {box.UIElement} = {}
 	
 	if node is nested_list.NestedMenuNode then
@@ -71,7 +72,7 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 				function(_: UIContextManager): MenuNode
 					return child
 				end,
-				self
+				{ flex_grow = 1 }
 			)
 			child_box:compute_children(state)
 			pt.add(children, child_box)
@@ -83,7 +84,10 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 			function(_: UIContextManager): MenuNode
 				return node
 			end,
-			{}
+			{
+				flex_grow = 1,
+				auto_height = true,
+			}
 		)
 		pt.add(children, child_box)
 	elseif node is SelectionMenuNode then
@@ -91,7 +95,7 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 		if node.direction == "vertical" then
 			-- child_box = flex_col
 		elseif node.direction == "horizontal" then
-			child_box = box.row()
+			child_box = box.flex_row()
 			if node.label then
 				child_box:add(text_node.new{
 					text = {node.label}
@@ -99,7 +103,9 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 			end
 			sprite_node.static(22, {})
 			child_box:add(text_node.new{
-				text = {node:get_selected_text()}
+				text = {node:get_selected_text()},
+				flex_grow = 1,
+				auto_height = true,
 			})
 			sprite_node.static(23, {})
 		end
