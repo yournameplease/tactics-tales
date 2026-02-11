@@ -18,6 +18,7 @@ local grid = require("src.tactics.menu.cursor.nested.grid")
 local SerializedNestedGridState = grid.SerializedNestedGridState
 local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
+local array_2d = require("src.tactics.util.array_2d")
 
 local record BattleUIContext
     is UIContext
@@ -29,7 +30,11 @@ local record BattleUIContext
     turn_manager: TurnManager
     tactics_engine: TacticsEngine
     
+    hovered_point: Point
+    hovered_path: {Point}
     hovered_unit: BattleUnit
+	tile_highlights: array_2d.Array2D<grid.MenuTileHighlight>
+
     last_hovered_unit: BattleUnit
     acting_unit: BattleUnit
     destination: Point
@@ -75,6 +80,10 @@ function BattleUIContext:enrich()
     self.hovered_unit = nil
 
     if root_node is SerializedNestedGridState then
+        self.hovered_point = root_node.state.point
+        self.hovered_path = root_node.state.path
+        self.tile_highlights = root_node.state.tile_highlights
+
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node.point
             local unit = self.battle_map:get_at_tile(selection_point)
