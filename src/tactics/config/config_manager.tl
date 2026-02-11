@@ -13,6 +13,7 @@ local DEFAULT_CONFIG: DynamicConfig = {
 
 local interface ConfigManager
 	store_config: function(self, DynamicConfig)
+	reset_config: function(self)
 	config: DynamicConfig
 end
 
@@ -28,6 +29,11 @@ end
 function ConfigManagerImpl:store_config(new_config: DynamicConfig)
 	self.user_config = new_config
 	pt.store("/appdata/tactics_tales/config.pod", new_config, nil)
+end
+
+function ConfigManagerImpl:reset_config()
+	self.user_config = {}
+	pt.store("/appdata/tactics_tales/config.pod", {}, nil)
 end
 
 function config_manager.new(): ConfigManager

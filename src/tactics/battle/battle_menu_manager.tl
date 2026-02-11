@@ -12,6 +12,8 @@ local step_definition = menu_manager.definition.step
 local event_bus = require("src.tactics.systems.event_bus")
 local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
 local array_2d = require("src.tactics.util.array_2d")
+local battle_map_types = require("src.tactics.battle.battle_map.types")
+local InteractionHook = battle_map_types.InteractionHook
 local menu_types = require("src.tactics.menu.types")
 local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
@@ -117,6 +119,130 @@ local function get_tile_highlights_in_move_and_attack_range(msb: BattleMenuConte
     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx.acting_unit.unit)
 end
 
+local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
+
+HANDLERS["select_swap_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattlePreparationsContext,
+    value: grid.NestedGridValue
+)
+    session_context.unit = services.battle_map:get_at_tile(value.point)
+end
+
+HANDLERS["swap_units"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattlePreparationsContext,
+    value: grid.NestedGridValue
+)
+    services.tactics_engine:handle_swap_unit(
+        session_context.unit,
+        value.point
+    )
+end
+
+HANDLERS["start_battle"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattlePreparationsContext,
+    _value: grid.NestedGridValue
+)
+    services.handle_start_battle()
+end
+
+HANDLERS["select_acting_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+)
+    local unit = services.battle_map:get_at_tile(value.point)
+    session_context.acting_unit = {
+        unit = unit,
+        point = unit.tile:copy(),
+    }
+end
+
+HANDLERS["mark_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+)
+    services.tactics_engine:handle_mark_unit(value.point)
+end
+
+HANDLERS["wait_acting_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    _value: grid.NestedGridValue
+)
+    services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
+end
+
+HANDLERS["move_acting_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+)
+    session_context.destination = {
+        point = value.point,
+        path = value.path,
+    }
+    services.tactics_engine:handle_move_unit(
+        session_context.acting_unit.unit,
+        session_context.destination.point,
+        session_context.destination.path
+    )
+end
+
+HANDLERS["unmove_acting_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+)
+    services.tactics_engine:jump_unit_to_point(
+        session_context.acting_unit.unit,
+        session_context.acting_unit.point
+    )
+end
+
+HANDLERS["attack_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+)
+    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point)}
+    services.tactics_engine:handle_attack_unit(
+        session_context.acting_unit.unit,
+        session_context.target_unit.unit
+    )
+end
+
+HANDLERS["handle_interaction"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    interaction: InteractionHook
+)
+    session_context.selected_script = {
+        script_id = interaction.script_id,
+        target_unit = interaction.target_unit,
+        target_tile = interaction.target_tile,
+    }
+    services.tactics_engine:handle_interaction(
+        interaction.script_id,
+        session_context.acting_unit.unit,
+        interaction.target_unit,
+        interaction.target_tile
+    )
+end
+
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
     ["MENU_DEPLOYMENT"] = {
         initial_step = "SELECT_SWAP_UNIT",
@@ -128,14 +254,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder()
-                            :handle_select(function(self: ButtonCursor, game_ctx: BattleMenuContext, ctx: BattlePreparationsContext)
-                                local value = self.value as grid.NestedGridValue
-                                ctx.unit = game_ctx.battle_map:get_at_tile(value.point)
-                                game_ctx.tactics_engine:handle_swap_unit(
-                                    ctx.unit,
-                                    ctx.swap_target
-                                )
-                            end)
+                            :handle_select("select_swap_unit")
                             :advance_to("SELECT_SWAP_TARGET")
                     )
                     :with_tile_highlights(get_deployment_tiles)
@@ -148,14 +267,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
                         end,
                         button.builder()
-                            :handle_select(function(self: ButtonCursor, game_ctx: BattleMenuContext, ctx: BattlePreparationsContext)
-                                local value = self.value as grid.NestedGridValue
-                                ctx.swap_target = value.point:copy()
-                                game_ctx.tactics_engine:handle_swap_unit(
-                                    ctx.unit,
-                                    ctx.swap_target
-                                )
-                            end)
+                            :handle_select("swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
                     )
                     :with_tile_highlights(get_deployment_tiles)
@@ -168,9 +280,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 
                         pt.add(options, button.builder()
                             :with_text("Start Battle")
-                            :handle_select(function(_self: ButtonCursor, game_ctx: BattleMenuContext, _menu_ctx: BattleMainMenuContext)
-                                game_ctx.handle_start_battle()
-                            end))
+                            :handle_select("start_battle"))
                         pt.add(options, button.builder()
                             :with_text("Edit Formation")
                             :advance_to("SELECT_SWAP_UNIT"))
@@ -191,17 +301,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder()
-                            :handle_select(function(self: ButtonCursor, game_ctx: BattleMenuContext, ctx: BattleMainMenuContext)
-                                local value = self.value as grid.NestedGridValue
-                                ctx.acting_unit = {
-                                    unit = game_ctx.battle_map:get_at_tile(value.point),
-                                    point = value.point:copy()
-                                }
-                            end)
-                            :handle_back(function(self: ButtonCursor, game_ctx: BattleMenuContext, _ctx: BattleMainMenuContext)
-                                local value = self.value as grid.NestedGridValue
-                                game_ctx.tactics_engine:handle_mark_unit(value.point)
-                            end)
+                            :handle_select("select_acting_unit")
+                            :handle_back("mark_unit")
                             :advance_to("SELECT_DESTINATION")
                     )
                     :with_child( -- marking for non-actable units
@@ -209,10 +310,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder()
-                            :handle_back(function(self: ButtonCursor, game_ctx: BattleMenuContext, _ctx: BattleMainMenuContext)
-                                local value = self.value as grid.NestedGridValue
-                                game_ctx.tactics_engine:handle_mark_unit(value.point)
-                            end)
+                            :handle_back("mark_unit")
                             :advance_to("SELECT_DESTINATION")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
@@ -226,15 +324,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                                     and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) & 0x1 ~= 0
                         end,
                         button.builder()
-                            :handle_select(function(self: ButtonCursor, game_ctx: BattleMenuContext, ctx: BattleMainMenuContext)
-                                local value = self.value as grid.NestedGridValue
-                                ctx.destination = { point = value.point:copy(), path = value.path }
-                                game_ctx.tactics_engine:handle_move_unit(
-                                    ctx.acting_unit.unit,
-                                    ctx.destination.point,
-                                    ctx.destination.path
-                                )
-                            end)
+                            :handle_select("move_acting_unit")
                             :advance_to("SELECT_ACTION")
                     )
                     :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
@@ -261,28 +351,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         for _, interaction in ipairs(nearby_interactions) do
                             pt.add(options, button.builder()
                                 :with_text(interaction.interaction_text)
-                                :handle_select(function(_self: ButtonCursor, game_ctx: BattleMenuContext, _menu_ctx: BattleMainMenuContext)
-                                    ctx.selected_script = {
-                                        script_id = interaction.script_id,
-                                        target_unit = interaction.target_unit,
-                                        target_tile = interaction.target_tile,
-                                    }
-                                    game_ctx.tactics_engine:handle_interaction(
-                                        interaction.script_id,
-                                        ctx.acting_unit.unit,
-                                        interaction.target_unit,
-                                        interaction.target_tile
-                                    )
-                                end))
+                                :with_value(interaction)
+                                :handle_select("handle_interaction"))
                         end
 
                         pt.add(options, button.builder()
                             :with_text("Wait")
-                            :handle_select(function(_self: ButtonCursor, game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
-                                game_ctx.tactics_engine:finish_unit_action(
-                                    menu_ctx.acting_unit.unit
-                                )
-                            end))
+                            :handle_select("wait_acting_unit"))
 
                         --- currently disabled as items aren't mechanically interesting yet
                         -- pt.add(options, {
@@ -294,12 +369,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_DESTINATION")
-                :handle_back(function(game_ctx: BattleMenuContext, menu_ctx: BattleMainMenuContext)
-                    game_ctx.tactics_engine:jump_unit_to_point(
-                        menu_ctx.acting_unit.unit,
-                        menu_ctx.acting_unit.point
-                    )
-                end),
+                :handle_back("unmove_acting_unit"),
              ["SELECT_TARGET"] = step_definition.of_node(
                 grid.grid()
                     :with_child(
@@ -307,14 +377,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, point)
                         end,
                         button.builder()
-                            :handle_select(function(self: ButtonCursor, game_ctx: BattleMenuContext, ctx: BattleMainMenuContext)
-                                local value = self.value as grid.NestedGridValue
-                                ctx.target_unit = { unit = game_ctx.battle_map:get_at_tile(value.point)}
-                                game_ctx.tactics_engine:handle_attack_unit(
-                                    ctx.acting_unit.unit,
-                                    ctx.target_unit.unit
-                                )
-                            end)
+                            :handle_select("attack_unit")
                             :advance_to("SELECT_ACTION")
                     )
                     :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): array_2d.Array2D<grid.MenuTileHighlight>
@@ -410,6 +473,7 @@ function battle_menu_manager.new(
 ): BattleMenuManager
     return menu_manager.new(
         MENU_DATA,
+        HANDLERS,
         ctx,
         bus
     ) as BattleMenuManager

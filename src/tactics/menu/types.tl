@@ -2,6 +2,7 @@
 --- Contains basic type definitions for the menu system.
 
 local type MenuId = string
+local type MenuHandlerId = string
 local type MenuStep = string
 
 local record MenuState
@@ -18,6 +19,7 @@ end
 
 local menu_types = {
     MenuId = MenuId,
+    MenuHandlerId = MenuHandlerId,
     MenuStep = MenuStep,
     MenuState = MenuState,
     MenuCommand = MenuCommand,

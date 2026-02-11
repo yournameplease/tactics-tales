@@ -27,10 +27,33 @@ local game_menu_manager = {
     GameMenuManager = GameMenuManager
 }
 
+local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
 
-local function handle_begin_story(self: ButtonCursor, game_ctx: GameMenuContext, _menu_ctx: GameMainMenuContext)
-    local story_id = self.value as StoryId
-    game_ctx.handle_begin_story(story_id)
+HANDLERS["begin_story"] = function(
+    services: GameMenuContext,
+    _menu_data: {string: any},
+    _session_context: GameMainMenuContext,
+    story_id: StoryId
+)
+    services.handle_begin_story(story_id)
+end
+
+HANDLERS["set_options"] = function(
+    services: GameMenuContext,
+    menu_data: DynamicConfig,
+    _session_context: GameMainMenuContext,
+    _value: any
+)
+    services.config_manager:store_config(menu_data)
+end
+
+HANDLERS["reset_options"] = function(
+    services: GameMenuContext,
+    _menu_data: DynamicConfig,
+    _session_context: GameMainMenuContext,
+    _value: any
+)
+    services.config_manager:reset_config()
 end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
@@ -49,7 +72,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 
                         pt.add(options, button.builder()
                             :with_text("Play")
-                            :handle_select(handle_begin_story))
+                            :handle_select("begin_story"))
                         pt.add(options, button.builder()
                             :with_text("Chapter Select")
                             :advance_to("CHAPTER_SELECT"))
@@ -70,7 +93,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             pt.add(options, button.builder()
                                 :with_text(story_id)
                                 :with_value(story_id)
-                                :handle_select(handle_begin_story))
+                                :handle_select("begin_story"))
                         end
 
                         return options
@@ -80,49 +103,63 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
             ["OPTIONS_MENU"] = step_definition.of_node(
                 list.column(
                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
-                        local options: {MenuNodeDefinition} = {}
+                        local children: {MenuNodeDefinition} = {}
 
-                        pt.add(options, selection.row()
-                            :with_label("Log Level")
-                            :with_key("log_level")
-                            :with_static_options({"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"}))
-                        pt.add(options, selection.row()
-                            :with_label("Draw Flexbox Debug")
-                            :with_key("draw_flexbox_debug")
-                            :with_yes_no_options())
-                        pt.add(options, selection.row()
-                            :with_label("Draw Target Debug")
-                            :with_key("draw_target_debug")
-                            :with_yes_no_options())
-                        pt.add(options, selection.row()
-                            :with_label("Profiler")
-                            :with_key("profile")
-                            :with_yes_no_options())
-                        pt.add(options, selection.row()
-                            :with_label("Head Scale")
-                            :with_key("head_scale")
-                            :with_static_options({1, 2, 3, 4}))
-                        pt.add(options, selection.row()
-                            :with_label("Text Speed")
-                            :with_key("dialogue_speed")
-                            :with_static_options({
-                                	"very_slow",
-                                	"slow",
-                                	"normal",
-                                	"fast",
-                                	"very_fast",
-                                	"instant",
-                                }))
+                        pt.add(children, list.column(
+                            function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+                                local options: {MenuNodeDefinition} = {}
+                                pt.add(options, selection.row()
+                                    :with_label("Log Level")
+                                    :with_key("log_level")
+                                    :with_static_options({"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"}))
+                                pt.add(options, selection.row()
+                                    :with_label("Draw Flexbox Debug")
+                                    :with_key("draw_flexbox_debug")
+                                    :with_yes_no_options())
+                                pt.add(options, selection.row()
+                                    :with_label("Draw Target Debug")
+                                    :with_key("draw_target_debug")
+                                    :with_yes_no_options())
+                                pt.add(options, selection.row()
+                                    :with_label("Profiler")
+                                    :with_key("profile")
+                                    :with_yes_no_options())
+                                pt.add(options, selection.row()
+                                    :with_label("Head Scale")
+                                    :with_key("head_scale")
+                                    :with_static_options({1, 2, 3, 4}))
+                                pt.add(options, selection.row()
+                                    :with_label("Text Speed")
+                                    :with_key("dialogue_speed")
+                                    :with_static_options({
+                                        	"very_slow",
+                                        	"slow",
+                                        	"normal",
+                                        	"fast",
+                                        	"very_fast",
+                                        	"instant",
+                                        }))
+                                return options
+                            end))
+                            
+                        pt.add(children, list.column(
+                            function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+                                local options: {MenuNodeDefinition} = {}
+                                pt.add(options, button.builder()
+                                    :with_text("Back")
+                                    :advance_to("MAIN_MENU"))
+                                pt.add(options, button.builder()
+                                    :with_text("Defaults")
+                                    :handle_select("reset_options")
+                                    :advance_to("MAIN_MENU"))
+                                pt.add(options, button.builder()
+                                    :with_text("Save")
+                                    :handle_select("set_options")
+                                    :advance_to("MAIN_MENU"))
+                                return options
+                            end))
 
-                        -- TODO: back/reset/save
-                        -- pt.add(options, list.row()
-                        -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
-                        --     game_ctx.handle_set_config(
-                        --         menu_ctx.metadata as DynamicConfig
-                        --     )
-                        -- end,
-
-                        return options
+                        return children
                     end
                 )
             ),
@@ -134,6 +171,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 function game_menu_manager.new(ctx: GameMenuContext, bus: event_bus.EventBus): GameMenuManager
     return menu_manager.new(
         MENU_DATA,
+        HANDLERS,
         ctx,
         bus
     ) as GameMenuManager

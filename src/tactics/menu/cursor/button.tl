@@ -31,8 +31,8 @@ local record ButtonCursor
     -- set_selected_context: function(ButtonCursor, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
-    select_handler: function(self, GameContext, MenuContext)
-    back_handler: function(self, GameContext, MenuContext)
+    select_handler: menu_types.MenuHandlerId
+    back_handler: menu_types.MenuHandlerId
 end
 
 local record ButtonDefinition
@@ -44,8 +44,8 @@ local record ButtonDefinition
     -- set_selected_context: function(self, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
-    select_handler: function(ButtonCursor, GameContext, MenuContext)
-    back_handler: function(ButtonCursor, GameContext, MenuContext)
+    select_handler: menu_types.MenuHandlerId
+    back_handler: menu_types.MenuHandlerId
 end
 
 local button = {
@@ -69,7 +69,11 @@ function ButtonCursor:update_joy(
 	if self.select_handler ~= nil or self.next_state ~= nil then
 		if joy.ap then
 			if self.select_handler ~= nil then
-				self:select_handler(game_ctx, menu_ctx)	
+				local signal = menu_signal.call_handler(self.select_handler, self.value)
+				if self.next_state ~= nil then
+					signal.then_navigate_to = self.next_state
+				end
+				return signal
 			end
 			if self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
@@ -79,8 +83,7 @@ function ButtonCursor:update_joy(
 	end
 	if self.back_handler ~= nil then
 		if joy.bp then
-	        self:back_handler(game_ctx, menu_ctx)
-			return menu_signal.consumed()
+			return menu_signal.call_handler(self.back_handler, self.value)
 		end
 	end
 	return menu_signal.ignored()
@@ -104,7 +107,11 @@ function ButtonCursor:update_mouse(
 	if self.select_handler ~= nil or self.next_state ~= nil then
 		if command == "button_primary" then
 			if self.select_handler ~= nil then
-				self:select_handler(game_ctx, menu_ctx)	
+				local signal = menu_signal.call_handler(self.select_handler, self.value)
+				if self.next_state ~= nil then
+					signal.then_navigate_to = self.next_state
+				end
+				return signal
 			end
 			if self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
@@ -114,8 +121,7 @@ function ButtonCursor:update_mouse(
 	end
 	if self.back_handler ~= nil then
 		if command == "button_secondary" then
-	        self:back_handler(game_ctx, menu_ctx)
-			return menu_signal.consumed()
+			return menu_signal.call_handler(self.back_handler, self.value)
 		end
 	end
 	return menu_signal.ignored()
@@ -161,14 +167,14 @@ function ButtonDefinition:advance_to(
 end
 
 function ButtonDefinition:handle_select(
-	select_handler: function(ButtonCursor, GameContext, MenuContext)
+	select_handler: menu_types.MenuHandlerId
 ): ButtonDefinition
 	self.select_handler = select_handler
 	return self
 end
 
 function ButtonDefinition:handle_back(
-	back_handler: function(ButtonCursor, GameContext, MenuContext)
+	back_handler: menu_types.MenuHandlerId
 ): ButtonDefinition
 	self.back_handler = back_handler
 	return self
