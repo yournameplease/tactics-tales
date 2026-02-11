@@ -104,12 +104,29 @@ function nested_grid.definition(
     return setmetatable(props, { __index = NestedGridDefinition })
 end
 
+function NestedGridNode:get_selected_child(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuNode
+	for _,child in ipairs(self.children) do
+		if child.filter(self.point, game_context, menu_ctx) then
+			return child.child
+		end
+	end
+end
+
+function NestedGridNode:get_focused_leaf(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuLeaf
+	local child = self:get_selected_child(game_context, menu_ctx)
+	if child is menu_cursor.MenuLeaf then
+		return child
+	elseif child is menu_cursor.MenuContainer then
+		return child:get_focused_leaf(game_context, menu_ctx)
+	end
+end
+
 function NestedGridNode:update_joy(
 	joy: Joypad,
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ): MenuSignal
-	local signal = self:get_focused_leaf():update_joy(joy, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_joy(joy, game_ctx, menu_ctx)
 
 	if signal is menu_signal.Ignored then
 	    local prev_point = self.point:copy()
@@ -140,7 +157,7 @@ function NestedGridNode:update_mouse(
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
-	local signal = self:get_focused_leaf():update_mouse(mouse, hovered, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_mouse(mouse, hovered, game_ctx, menu_ctx)
     if signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.Grid then
