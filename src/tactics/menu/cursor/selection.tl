@@ -177,18 +177,25 @@ function SelectionMenuNode:update_joy(
 end
 
 function SelectionMenuNode:update_mouse(
-    _mouse: Mouse,
+    mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection,
     _game_ctx: GameContext,
     _menu_ctx: MenuContext
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
-	if hovered.command == "increment_selection" then
+	local command: menu_types.MenuCommand
+	if hovered.on_lmb_command and mouse.mlp then
+		command = hovered.on_lmb_command
+	elseif hovered.on_lmb_command and mouse.mlp then
+		command = hovered.on_lmb_command
+	end
+
+	if command == "increment_selection" then
 		self:increment_selection()
 		return menu_signal.consumed()
 	end
-	if hovered.command == "decrement_selection" then
+	if command == "decrement_selection" then
 		self:decrement_selection()
 		return menu_signal.consumed()
 	end

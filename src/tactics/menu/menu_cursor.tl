@@ -98,7 +98,8 @@ local type MenuHandler = function(self, GameContext, MenuContext)
 
 local interface MenuMouseSelection
 	type: CursorType
-	command: menu_types.MenuCommand
+	on_lmb_command: menu_types.MenuCommand
+	on_rmb_command: menu_types.MenuCommand
 end
 
 local record Grid
@@ -106,11 +107,6 @@ local record Grid
 	where self.type == "grid"
 	x: integer
 	y: integer
-end
-
-local record Button
-	is MenuMouseSelection
-	where self.type == "button"
 end
 
 local record List
@@ -122,23 +118,35 @@ end
 local mouse_selection = {
 	MenuMouseSelection = MenuMouseSelection,
 	Grid = Grid,
-	Button = Button,
 	List = List,
 }
 
-function mouse_selection.grid(x: integer, y: integer): MenuMouseSelection
+function mouse_selection.grid(
+	x: integer,
+	y: integer,
+	on_lmb_command: menu_types.MenuCommand,
+	on_rmb_command: menu_types.MenuCommand
+): MenuMouseSelection
 	local self: Grid =  {
 		type = "grid",
 		x = x,
 		y = y,
+		on_lmb_command = on_lmb_command,
+		on_rmb_command = on_rmb_command,
 	}
 	return self
 end
 
-function mouse_selection.list(i: integer): MenuMouseSelection
+function mouse_selection.list(
+	i: integer,
+	on_lmb_command: menu_types.MenuCommand,
+	on_rmb_command: menu_types.MenuCommand
+): MenuMouseSelection
 	local self: List =  {
 		type = "selection",
 		i = i,
+		on_lmb_command = on_lmb_command,
+		on_rmb_command = on_rmb_command,
 	}
 	return self
 end

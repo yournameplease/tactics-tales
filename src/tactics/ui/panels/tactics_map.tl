@@ -499,7 +499,7 @@ function TacticsMap:get_selection_at(
     if tx >= 0 and tx < MAP_WIDTH
         and ty >= 0 and ty < MAP_HEIGHT
     then
-        return mouse_menu_selection.grid(tx, ty)
+        return mouse_menu_selection.grid(tx, ty, "button_primary", "button_secondary")
     end
     return nil
 end

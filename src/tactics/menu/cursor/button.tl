@@ -87,15 +87,22 @@ function ButtonCursor:update_joy(
 end
 
 function ButtonCursor:update_mouse(
-    _mouse: Mouse,
+    mouse: Mouse,
     hovered: mouse_menu_selection.MenuMouseSelection,
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
+	local command: menu_types.MenuCommand
+	if hovered.on_lmb_command and mouse.mlp then
+		command = hovered.on_lmb_command
+	elseif hovered.on_lmb_command and mouse.mlp then
+		command = hovered.on_lmb_command
+	end
+	    
 	if self.select_handler ~= nil or self.next_state ~= nil then
-		if hovered.command == "button_primary" then
+		if command == "button_primary" then
 			if self.select_handler ~= nil then
 				self:select_handler(game_ctx, menu_ctx)	
 			end
@@ -106,7 +113,7 @@ function ButtonCursor:update_mouse(
 		end
 	end
 	if self.back_handler ~= nil then
-		if hovered.command == "button_secondary" then
+		if command == "button_secondary" then
 	        self:back_handler(game_ctx, menu_ctx)
 			return menu_signal.consumed()
 		end
