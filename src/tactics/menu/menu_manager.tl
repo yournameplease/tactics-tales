@@ -245,6 +245,35 @@ function BaseMenuManager:update(input: InputContext)
         return
     elseif signal is menu_signal.Ignored then
         -- TODO: joy/mouse step-level back
+        if self.menu_step.back_handler or self.menu_step.previous_step then
+            local should_back = input_context.handle_update(
+                input,
+                function(joy: Joypad): boolean
+                    return joy.bp
+                end,
+                function(
+                    mouse: Mouse,
+                    hovered: mouse_menu_selection.MenuMouseSelection
+                ): boolean
+                    return mouse.mrp
+                end
+            )
+            if should_back then
+                if self.menu_step.back_handler then
+                    local handler = self.menu_handlers[self.menu_step.back_handler]
+                    assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                    handler(
+                        self.game_ctx,
+                        self:serialize().node.data,
+                        self.menu_ctx,
+                        nil
+                    )
+                end
+                if self.menu_step.previous_step then
+                    self:handle_menu_advance(self.menu_step.previous_step)
+                end
+            end
+        end
         -- if joy.bp then
 
         -- end 
