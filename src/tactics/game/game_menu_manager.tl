@@ -61,22 +61,23 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
         initial_step = "TITLE_SCREEN",
         steps = {
             ["TITLE_SCREEN"] = step_definition.of_node(
-                button.builder()
+                button.builder("to_main_menu")
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU")
             ),
             ["MAIN_MENU"] = step_definition.of_node(
                 list.column(
+                    "main_menu",
                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {ButtonDefinition} = {}
 
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("begin_story")
                             :with_text("Play")
                             :handle_select("begin_story"))
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("to_chapter_select")
                             :with_text("Chapter Select")
                             :advance_to("CHAPTER_SELECT"))
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("to_options")
                             :with_text("Options")
                             :advance_to("OPTIONS_MENU"))
 
@@ -86,11 +87,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
             ),
             ["CHAPTER_SELECT"] = step_definition.of_node(
                 list.column(
+                    "chapter_select",
                     function(msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {ButtonDefinition} = {}
 
                         for _,story_id in ipairs(msb.story_ids) do
-                            pt.add(options, button.builder()
+                            pt.add(options, button.builder("begin_story_"..story_id)
                                 :with_text(story_id)
                                 :with_value(story_id)
                                 :handle_select("begin_story"))
@@ -102,33 +104,35 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
             ),
             ["OPTIONS_MENU"] = step_definition.of_node(
                 list.column(
+                    "options_menu",
                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local children: {MenuNodeDefinition} = {}
 
                         pt.add(children, list.column(
+                            "options_selections",
                             function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                                 local options: {MenuNodeDefinition} = {}
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("log_level")
                                     :with_label("Log Level")
                                     :with_key("log_level")
                                     :with_static_options({"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"}))
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("draw_flexbox_debug")
                                     :with_label("Draw Flexbox Debug")
                                     :with_key("draw_flexbox_debug")
                                     :with_yes_no_options())
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("draw_target_debug")
                                     :with_label("Draw Target Debug")
                                     :with_key("draw_target_debug")
                                     :with_yes_no_options())
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("profile")
                                     :with_label("Profiler")
                                     :with_key("profile")
                                     :with_yes_no_options())
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("head_scale")
                                     :with_label("Head Scale")
                                     :with_key("head_scale")
                                     :with_static_options({1, 2, 3, 4}))
-                                pt.add(options, selection.row()
+                                pt.add(options, selection.row("dialogue_speed")
                                     :with_label("Text Speed")
                                     :with_key("dialogue_speed")
                                     :with_static_options({
@@ -143,16 +147,17 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             end))
                             
                         pt.add(children, list.column(
+                            "options_navigation",
                             function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                                 local options: {MenuNodeDefinition} = {}
-                                pt.add(options, button.builder()
+                                pt.add(options, button.builder("back")
                                     :with_text("Back")
                                     :advance_to("MAIN_MENU"))
-                                pt.add(options, button.builder()
+                                pt.add(options, button.builder("reset")
                                     :with_text("Defaults")
                                     :handle_select("reset_options")
                                     :advance_to("MAIN_MENU"))
-                                pt.add(options, button.builder()
+                                pt.add(options, button.builder("save")
                                     :with_text("Save")
                                     :handle_select("set_options")
                                     :advance_to("MAIN_MENU"))

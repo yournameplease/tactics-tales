@@ -63,7 +63,7 @@ local function multiple_option_cursor_for_part(
 		end
 	)(options)
 
-    return selection.row()
+    return selection.row(key.."_selection")
             :with_label(text)
 			:with_key(key)
 			:with_precomputed_options(list_cursor_options_for_part(data_list))
@@ -72,6 +72,7 @@ end
 local function menu_definition_for_character_select(): menu_manager.MenuStepDefinition
     return step_definition.of_node(
         list.column(
+            "appearance_selections",
       
             function(_msb: StoryMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                 local children: {MenuNodeDefinition} = {}
