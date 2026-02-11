@@ -5,9 +5,7 @@
 local ui_context = require("src.tactics.ui.ui_context")
 local story_page = require("src.tactics.story.story_page")
 local rendered_story_node = story_page.rendered_story_node
-local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMenuContext
 local story_menu_manager = require("src.tactics.story.story_menu_manager")
-local nested_list = require("src.tactics.menu.cursor.nested.list")
 local character = require("src.tactics.character.object.character")
 
 local record StoryUIContext
@@ -39,18 +37,11 @@ end
 function StoryUIContext:enrich()
     self.layout = "STORY_PAGE"
 
-    if self.menu_manager.menu_state.menu_id == "MENU_CUSTOMIZE_CHARACTER" then
-        local cursor = self.menu_manager.menu_cursor
-        assert(cursor is multiple_options_cursor.MultipleOptionsMenuNode)
-        local appearance: { character.CharacterAppearanceKey: string} = {}
-        for _,o in ipairs(cursor.options) do
-            local option_cursor = o.cursor
-            assert(option_cursor is list_cursor.ListMenuNode<string>)
+    local menu = self.menu_manager:serialize()
 
-            local key = o.key 
-            assert(key is character.CharacterAppearanceKey)
-            appearance[key] = option_cursor.options[option_cursor.i].value
-        end
+    if menu.menu_id == "MENU_CUSTOMIZE_CHARACTER" then
+        local appearance: { character.CharacterAppearanceKey: string}
+            = menu.node.data as { character.CharacterAppearanceKey: string}
 
         local character_customizer_node = self.story_page.nodes[#self.story_page.nodes]
             as rendered_story_node.CharacterCustomization -- lazy

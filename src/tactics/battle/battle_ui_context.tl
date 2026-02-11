@@ -14,7 +14,8 @@ local BattleMenuManager = require("src.tactics.battle.battle_menu_manager").Batt
 local BattleObjectiveService = require("src.tactics.battle.battle_objective_service").BattleObjectiveService
 local BattleUnit = require("src.tactics.battle.tactics.battle_unit").BattleUnit
 local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
-local grid_cursor = require("src.tactics.menu.cursor.grid_cursor")
+local grid = require("src.tactics.menu.cursor.nested.grid")
+local SerializedNestedGridState = grid.SerializedNestedGridState
 local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
 
@@ -68,12 +69,14 @@ end
 function BattleUIContext:enrich()
     self.layout = "TACTICS"
 
-    self.hovered_unit = nil
-    local selection = self.battle_menu_manager.menu_cursor
+    local menu = self.battle_menu_manager:serialize()
+    local root_node = menu.node
 
-    if selection is grid_cursor.GridMenuNode then
-        if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
-            local selection_point = selection.point
+    self.hovered_unit = nil
+
+    if root_node is SerializedNestedGridState then
+        if menu.step == "SELECT_UNIT" then
+            local selection_point = root_node.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
@@ -81,8 +84,8 @@ function BattleUIContext:enrich()
             end
         end
 
-        if self.battle_menu_manager.menu_state.step == "SELECT_TARGET" then
-            local selection_point = selection.point
+        if menu.step == "SELECT_TARGET" then
+            local selection_point = root_node.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
@@ -91,8 +94,8 @@ function BattleUIContext:enrich()
             end
         end
         
-        if self.battle_menu_manager.menu_state.step == "SELECT_SWAP_UNIT" then
-            local selection_point = selection.point
+        if menu.step == "SELECT_SWAP_UNIT" then
+            local selection_point = root_node.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
@@ -101,8 +104,8 @@ function BattleUIContext:enrich()
             self.acting_unit = nil
         end
         
-        if self.battle_menu_manager.menu_state.step == "SELECT_SWAP_TARGET" then
-            local selection_point = selection.point
+        if menu.step == "SELECT_SWAP_TARGET" then
+            local selection_point = root_node.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
             if unit then
@@ -131,8 +134,8 @@ function BattleUIContext:enrich()
         self.acting_unit = nil
     end
 
-    if selection is grid_cursor.GridMenuNode then
-        if self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+    if root_node is SerializedNestedGridState then
+        if menu.step == "SELECT_UNIT" then
             self.acting_unit = nil
         end
     end
@@ -144,7 +147,7 @@ function BattleUIContext:enrich()
             primary = "Advance",
             secondary = "",
         }
-    elseif self.battle_menu_manager.menu_state.step == "SELECT_UNIT" then
+    elseif menu.step == "SELECT_UNIT" then
         self.input_actions = {
             primary = "Select",
             secondary = "Mark unit range",

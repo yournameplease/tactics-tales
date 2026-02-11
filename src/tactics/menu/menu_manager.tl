@@ -2,7 +2,6 @@
 --- A generic manager for menu systems. It handles state transitions,
 --- history, and dispatches input to the active menu cursor.
 
-local point = require("src.tactics.util.point")
 local menu_types = require ("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
@@ -81,6 +80,12 @@ local record MenuDefinition
     steps: { menu_types.MenuStep: MenuStepDefinition }
 end
 
+local record SerializedMenu
+    menu_id: menu_types.MenuId
+    step: menu_types.MenuStep
+    node: menu_cursor.SerializedMenu
+end
+
 local interface MenuManager
     
     menu_definitions: { menu_types.MenuId: MenuDefinition }
@@ -99,6 +104,7 @@ local interface MenuManager
     clear_menu: function(self)
     set_menu: function(self, menu_id: menu_types.MenuId)
     update: function(self, input: InputContext)
+    serialize: function(self): SerializedMenu
 end
 
 local record BaseMenuManager
@@ -239,6 +245,14 @@ function BaseMenuManager:update(input: InputContext)
     else
         unexpected(signal.type)
     end
+end
+
+function BaseMenuManager:serialize(): SerializedMenu
+    return {
+        menu_id = self.menu_state.menu_id,
+        step = self.menu_state.step,
+        node = self.menu_step.node:serialize()
+    }
 end
 
 return menu_manager

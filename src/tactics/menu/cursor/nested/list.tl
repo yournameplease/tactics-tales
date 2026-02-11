@@ -125,6 +125,7 @@ end
 
 function NestedMenuNode:serialize(): SerializedMenu
 	local state: SerializedNestedMenuNodeState = {
+		type = "list",
 		i = self.i,
 		children = {},
 	}
