@@ -24,7 +24,7 @@ right:add(generic_menu_box.new(
 		return node
 	end,
 	{flex_grow = 1} ))
-
+right:add(box.spacer(1))
 
 
 local root = SplitPages.new(left, right)
