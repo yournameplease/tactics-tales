@@ -69,7 +69,7 @@ function Character:get_appearance(): CharacterAppearance
 
 	if items["BODY"] ~= nil and items["BODY"].appearance_overrides ~= nil then
 		local item_overrides = items["BODY"].appearance_overrides as CharacterAppearance
-		for k,v in pairs(item_overrides) do
+		for k,v in pairs(item_overrides as {string: string}) do
 			overrides[k] = v
 		end
 	end
