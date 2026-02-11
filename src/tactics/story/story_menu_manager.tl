@@ -8,7 +8,6 @@ local sprite_data = require("src.tactics.character.sprite_data")
 local customization_options = sprite_data.customization_options
 local menu_manager = require("src.tactics.menu.menu_manager")
 local step_definition = menu_manager.definition.step
-local menu_context = require("src.tactics.menu.menu_context")
 local StoryMenuContext = require("src.tactics.story.story_menu_context").StoryMenuContext
 local character = require("src.tactics.character.object.character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey

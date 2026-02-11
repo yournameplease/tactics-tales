@@ -253,24 +253,28 @@ function NestedGridDefinition:with_child(
 	},{
 		__index = NestedGridChildDefinition,
 	}))
+	return self
 end
 
 function NestedGridDefinition:with_path_length(
 	get_max_path_length: function(GameContext, MenuContext): integer
 ): NestedGridDefinition
 	self.get_max_path_length = get_max_path_length
+	return self
 end
 
 function NestedGridDefinition:with_path_anchor(
 	get_path_anchor: function(GameContext, MenuContext): Point
 ): NestedGridDefinition
 	self.get_path_anchor = get_path_anchor
+	return self
 end
 
 function NestedGridDefinition:with_tile_highlights(
     get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
 ): NestedGridDefinition
 	self.get_legal_tiles = get_legal_tiles
+	return self
 end
 
 return nested_grid
