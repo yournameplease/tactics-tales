@@ -23,7 +23,7 @@ local vertical_list_menu = {}
 function VerticalButtonList:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
 	local line = self:get_hovered_line(lx, ly)
 
-	return menu_mouse_selection.list(line)
+	return menu_mouse_selection.list(line, "button_primary", "button_secondary")
 end
 
 function vertical_list_menu.new(

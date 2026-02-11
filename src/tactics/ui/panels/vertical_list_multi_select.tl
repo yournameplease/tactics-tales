@@ -6,6 +6,7 @@ local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local text_node = require("src.tactics.ui.components.text_node")
 local nested_list = require("src.tactics.menu.cursor.nested.list")
+local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local String = require("src.tactics.util.string")
 local SelectionMenuNode = require("src.tactics.menu.cursor.selection").SelectionMenuNode
 
@@ -14,6 +15,13 @@ local record VerticalSelectionList
 	unselected_template: string
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): nested_list.NestedMenuNode
+end
+
+function VerticalSelectionList:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
+	local line = self:get_hovered_line(lx, ly)
+
+	-- todo: button hovers
+	return menu_mouse_selection.list(line, "increment_selection", nil)
 end
  
 function VerticalSelectionList.new(
