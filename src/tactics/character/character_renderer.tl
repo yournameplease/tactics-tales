@@ -324,12 +324,12 @@ function character_renderer.draw(
 	draw_outline: boolean,
 	look_direction: LookDirection
 )
+	profile("draw_character")
+	profile("draw_character_setup")
 	local DRAW_TARGET_W = 32
 	local DRAW_TARGET_H = 32
 	local DRAW_TARGET_D = point.of(15, 31)
 
-	profile("draw_character")
-	profile("draw_character_setup")
 	local current_frame = drawable_unit.animation_data.current_frame
 
 	-- update facing
