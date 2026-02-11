@@ -23,6 +23,8 @@ local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local array_2d = require("src.tactics.util.array_2d")
 local pathfinding = require("src.tactics.battle.pathfinding")
+local button = require("src.tactics.menu.cursor.button")
+local ButtonCursor = button.ButtonCursor
 
 local record MenuTileHighlight
     reachable: boolean
@@ -121,6 +123,13 @@ function NestedGridNode:get_focused_leaf(game_context: GameContext, menu_ctx: Me
 	end
 end
 
+function NestedGridNode:get_nested_grid_value(): NestedGridValue
+	return {
+		point = self.point,
+		path = self.path
+	}
+end
+
 function NestedGridNode:update_joy(
 	joy: Joypad,
     game_ctx: GameContext,
@@ -130,6 +139,9 @@ function NestedGridNode:update_joy(
 
 	local signal = menu_signal.ignored()
 	if focused_leaf ~= nil then
+		if focused_leaf is ButtonCursor then
+			focused_leaf.value = self:get_nested_grid_value()
+		end
 		signal = focused_leaf:update_joy(joy, game_ctx, menu_ctx)
 	end
 
@@ -165,6 +177,9 @@ function NestedGridNode:update_mouse(
 
 	local signal = menu_signal.ignored()
 	if focused_leaf ~= nil then
+		if focused_leaf is ButtonCursor then
+			focused_leaf.value = self:get_nested_grid_value()
+		end
 		signal = focused_leaf:update_mouse(mouse, hovered, game_ctx, menu_ctx)
 	end
     if signal.type ~= "ignored" then return signal end
