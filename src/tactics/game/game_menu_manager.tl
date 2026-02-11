@@ -16,8 +16,6 @@ local button = require("src.tactics.menu.cursor.button")
 local ButtonDefinition = button.ButtonDefinition
 local ButtonCursor = button.ButtonCursor
 local selection = require("src.tactics.menu.cursor.selection")
-local SelectionDefinition = selection.SelectionMenuDefinition
-local SelectionCursor = selection.SelectionMenuNode
 local story = require("src.tactics.story.types")
 local StoryId = story.StoryId
 

@@ -30,6 +30,12 @@ local record MenuTileHighlight
     can_attack: boolean
 end
 
+-- to be passed to button children
+local record NestedGridValue
+    point: Point
+    path: { Point }
+end
+
 local record NestedGridChild
 	filter: function(Point, GameContext, MenuContext): boolean
 	child: MenuNode
@@ -75,10 +81,19 @@ local record NestedGridDefinition
     get_max_path_length: function(GameContext, MenuContext): integer
 end
 
+local record SerializedNestedGridState
+	is SerializedMenuState
+	where self.type == "grid"
+	point: Point
+	path: {Point}
+end
+
 local nested_grid = {
     MenuTileHighlight = MenuTileHighlight,
     NestedGridNode = NestedGridNode,
     NestedGridDefinition = NestedGridDefinition,
+    SerializedNestedGridState = SerializedNestedGridState,
+	NestedGridValue = NestedGridValue,
 }
 
 function nested_grid.definition(
@@ -145,17 +160,17 @@ function NestedGridNode:update_mouse(
     return menu_signal.ignored()
 end
 
-local record SerializedNestedGridState
-	is SerializedMenuState
-	where self.type == "list"
-	point: Point
-end
-
 function NestedGridNode:serialize(): SerializedMenu
 	local state: SerializedNestedGridState = {
+		type = "grid",
 		point = self.point:copy(),
 		children = {},
 	}
+	if self.path ~= nil then
+		state.path = lists.map(function(p: Point): Point
+			p:copy()
+		end)(self.path)
+	end
 	local out: SerializedMenu = {
 		state = state,
 		data = {},

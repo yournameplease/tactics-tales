@@ -2,12 +2,9 @@
 --- Implements a menu cursor for buttons, used for event handlers
 --- and menu advances
 
-local point = require("src.tactics.util.point")
-local Point = point.Point
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
 local MenuSignal = menu_signal.MenuSignal
-local MenuHandler = menu_cursor.MenuHandler
 local SerializedMenu = menu_cursor.SerializedMenu
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
@@ -125,9 +122,9 @@ function ButtonCursor:serialize(): SerializedMenu
 end
 
 function ButtonDefinition:to_cursor(
-    game_ctx: GameContext,
-    menu_ctx: MenuContext,
-    menu_state: menu_types.MenuState
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext,
+    _menu_state: menu_types.MenuState
 ): menu_cursor.MenuNode
     local cursor: ButtonCursor = {
         type = "button",
