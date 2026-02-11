@@ -10,7 +10,6 @@ local story = require("src.tactics.story.types")
 local StoryId = story.StoryId
 local StoryDefinition = story.StoryDefinition
 local mods = require("src.tactics.mods")
-local mod_validator = require("src.tactics.mods.validator")
 local ModId = mods.ModId
 local ModSpec = mods.ModSpec
 local mod_schema = require("src.tactics.mods.mod_schema")
