@@ -277,8 +277,11 @@ function NestedGridDefinition:to_cursor(
         })
 end
 
-function nested_grid.grid(): NestedGridDefinition
+function nested_grid.grid(
+	id: string
+): NestedGridDefinition
 	return setmetatable({
+		id = id,
 	    type = "grid",
 	    children = {},
 	},{

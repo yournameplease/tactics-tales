@@ -210,6 +210,7 @@ local interface MenuContainer
 end
 
 local interface MenuNodeDefinition
+	id: string
     to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuNode
 end
 

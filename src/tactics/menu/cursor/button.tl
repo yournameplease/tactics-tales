@@ -153,8 +153,10 @@ end
 
 -- definition builder
 
-function button.builder(): ButtonDefinition
-	return setmetatable({},{
+function button.builder(id: string): ButtonDefinition
+	return setmetatable({
+		id = id,
+	},{
 		__index = ButtonDefinition
 	})
 end
