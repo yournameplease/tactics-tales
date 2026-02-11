@@ -126,26 +126,30 @@ function NestedGridNode:update_joy(
     game_ctx: GameContext,
     menu_ctx: MenuContext
 ): MenuSignal
-	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_joy(joy, game_ctx, menu_ctx)
+	local focused_leaf = self:get_focused_leaf(game_ctx, menu_ctx)
 
-	if signal is menu_signal.Ignored then
-	    local prev_point = self.point:copy()
-	    self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
-	    self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
-
-	    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-	        if self.legal_tiles:get_point(self.point) then
-            
-	            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
-	                return h ~= nil and h.reachable
-	            end)
-	            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-	        end
-	        return menu_signal.consumed()
-	    end
-	else
-		return signal
+	local signal = menu_signal.ignored()
+	if focused_leaf ~= nil then
+		signal = focused_leaf:update_joy(joy, game_ctx, menu_ctx)
 	end
+
+    if signal.type ~= "ignored" then return signal end
+    
+    local prev_point = self.point:copy()
+    self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
+    self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
+
+    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
+        if self.legal_tiles:get_point(self.point) then
+        
+            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
+                return h ~= nil and h.reachable
+            end)
+            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
+        end
+        return menu_signal.consumed()
+    end
+
     return menu_signal.ignored()
 end
 
@@ -157,7 +161,12 @@ function NestedGridNode:update_mouse(
 ): MenuSignal
     if hovered == nil then return menu_signal.ignored() end
 
-	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_mouse(mouse, hovered, game_ctx, menu_ctx)
+	local focused_leaf = self:get_focused_leaf(game_ctx, menu_ctx)
+
+	local signal = menu_signal.ignored()
+	if focused_leaf ~= nil then
+		signal = focused_leaf:update_mouse(mouse, hovered, game_ctx, menu_ctx)
+	end
     if signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.Grid then
@@ -175,6 +184,7 @@ function NestedGridNode:update_mouse(
             end
         end
     end
+
     return menu_signal.ignored()
 end
 
@@ -218,7 +228,8 @@ function NestedGridDefinition:to_cursor(
     local cursor: NestedGridNode = {
         type = "grid",
         x_max = 16,
-        y_max = 16
+        y_max = 16,
+		point = point.of(0, 0),
     }
     if self.get_legal_tiles ~= nil then
         cursor.legal_tiles = self.get_legal_tiles(game_ctx, menu_ctx)

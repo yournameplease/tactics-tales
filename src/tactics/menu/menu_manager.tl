@@ -250,7 +250,7 @@ function BaseMenuManager:serialize(): SerializedMenu
     return {
         menu_id = self.menu_state.menu_id,
         step = self.menu_state.step,
-        node = self.menu_step.node:serialize()
+        node = self.menu_step and self.menu_step.node:serialize()
     }
 end
 
