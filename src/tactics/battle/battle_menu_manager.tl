@@ -248,12 +248,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
         initial_step = "SELECT_SWAP_UNIT",
         steps = {
             ["SELECT_SWAP_UNIT"] = step_definition.of_node(
-                grid.grid()
+                grid.grid("select_swap_unit")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return point_is_available_player(point, msb.battle_map)
                         end,
-                        button.builder()
+                        button.builder("select_swap_unit")
                             :handle_select("select_swap_unit")
                             :advance_to("SELECT_SWAP_TARGET")
                     )
@@ -261,12 +261,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("DEPLOYMENT_MENU"),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
-                grid.grid()
+                grid.grid("select_swap_target")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
                         end,
-                        button.builder()
+                        button.builder("swap_units")
                             :handle_select("swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
                     )
@@ -275,13 +275,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_previous_step("SELECT_SWAP_UNIT"),
             ["DEPLOYMENT_MENU"] = step_definition.of_node(
                 list.column(
+                    "deployment_menu",
                     function(_msb: BattleMenuContext, _ctx: BattleMainMenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
 
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("start_battle")
                             :with_text("Start Battle")
                             :handle_select("start_battle"))
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("edit_formation")
                             :with_text("Edit Formation")
                             :advance_to("SELECT_SWAP_UNIT"))
                     
@@ -295,12 +296,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = step_definition.of_node(
-                grid.grid()
+                grid.grid("select_acting_unit")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
                             return point_is_available_player(point, msb.battle_map)
                         end,
-                        button.builder()
+                        button.builder("available_player")
                             :handle_select("select_acting_unit")
                             :handle_back("mark_unit")
                             :advance_to("SELECT_DESTINATION")
@@ -309,21 +310,21 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return point_is_any_unit(point, msb.battle_map)
                         end,
-                        button.builder()
+                        button.builder("non_available_unit")
                             :handle_back("mark_unit")
                             :advance_to("SELECT_DESTINATION")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
                 ),
              ["SELECT_DESTINATION"] = step_definition.of_node(
-                grid.grid()
+                grid.grid("select_destination")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                             return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
                                                     and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) ~= nil
                                                     and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) & 0x1 ~= 0
                         end,
-                        button.builder()
+                        button.builder("move_unit")
                             :handle_select("move_acting_unit")
                             :advance_to("SELECT_ACTION")
                     )
@@ -338,24 +339,32 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_previous_step("SELECT_UNIT"),
             ["SELECT_ACTION"] = step_definition.of_node(
                 list.column(
+                    "select_action",
                     function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
                         -- if target in range
                         if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
-                            pt.add(options, button.builder()
+                            pt.add(options, button.builder("attack")
                                 :with_text("Attack")
                                 :advance_to("SELECT_TARGET"))
                         end
 
                         local nearby_interactions = msb.battle_map:get_nearby_interactions(ctx.destination.point)
                         for _, interaction in ipairs(nearby_interactions) do
-                            pt.add(options, button.builder()
+                            local id = "interaction_"..interaction.script_id
+                            if interaction.target_tile then
+                                id = id.."_"..tostring(interaction.target_tile)
+                            end
+                            if interaction.target_unit then
+                                id = id.."_"..interaction.target_unit.id
+                            end
+                            pt.add(options, button.builder(id)
                                 :with_text(interaction.interaction_text)
                                 :with_value(interaction)
                                 :handle_select("handle_interaction"))
                         end
 
-                        pt.add(options, button.builder()
+                        pt.add(options, button.builder("wait")
                             :with_text("Wait")
                             :handle_select("wait_acting_unit"))
 
@@ -371,12 +380,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_previous_step("SELECT_DESTINATION")
                 :handle_back("unmove_acting_unit"),
              ["SELECT_TARGET"] = step_definition.of_node(
-                grid.grid()
+                grid.grid("select_target")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                             validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, point)
                         end,
-                        button.builder()
+                        button.builder("attack_unit")
                             :handle_select("attack_unit")
                             :advance_to("SELECT_ACTION")
                     )

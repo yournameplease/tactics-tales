@@ -87,12 +87,12 @@ function UIManager:get_mouse_selection(mx: number, my: number): MenuMouseSelecti
 end
 
 function UIManager:calculate(ui_ctx: UIContextManager)
+    profile("ui_manager_calculate")
     self.current_layout = self.layouts[ui_ctx.layout]
 
     local root = self.current_layout.root
     
     -- Recalculate size and positions
-    profile("ui_manager_calculate")
     box.compute_children(root, ui_ctx)
     root:measure(1)
     root:layout(root.x, root.y)

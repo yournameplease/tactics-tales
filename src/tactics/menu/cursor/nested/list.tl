@@ -182,9 +182,11 @@ end
 --- builders
 
 function nested_menu.column(
+	id: string,
 	get_children: function(game_ctx: GameContext, menu_ctx: MenuContext): {MenuNodeDefinition}
 ): NestedMenuDefinition
 	return setmetatable({
+		id = id,
 	    get_children = get_children,
 	    direction = "column",
 	},{

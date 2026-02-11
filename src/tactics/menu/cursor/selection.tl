@@ -64,9 +64,12 @@ local selection_cursor = {
     SelectionMenuDefinition = SelectionMenuDefinition,
 }
 
-function selection_cursor.row(): SelectionMenuDefinition
+function selection_cursor.row(
+	id: string
+): SelectionMenuDefinition
 	return setmetatable({
-		direction = "horizontal"
+		id = id,
+		direction = "horizontal",
 	},{
 		__index = SelectionMenuDefinition
 	})
