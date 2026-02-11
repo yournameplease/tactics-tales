@@ -151,8 +151,8 @@ end
 
 function SelectionMenuNode:update_joy(
 	joy: Joypad,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext
 ): MenuSignal
     if self.direction == "vertical" then
 		if joy.dyp == 1 then

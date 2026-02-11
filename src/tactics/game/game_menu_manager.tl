@@ -28,7 +28,7 @@ local game_menu_manager = {
 }
 
 
-local function handle_begin_story(self: ButtonCursor, game_ctx: GameMenuContext, menu_ctx: GameMainMenuContext)
+local function handle_begin_story(self: ButtonCursor, game_ctx: GameMenuContext, _menu_ctx: GameMainMenuContext)
     local story_id = self.value as StoryId
     game_ctx.handle_begin_story(story_id)
 end

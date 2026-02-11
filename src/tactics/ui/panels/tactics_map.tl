@@ -15,14 +15,12 @@ local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUI
 local lists = require("src.tactics.util.lists")
 local point = require("src.tactics.util.point")
 local Point = point.Point
-local grid = require("src.tactics.menu.cursor.nested.grid")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local vertical_list_menu = require("src.tactics.ui.panels.vertical_list_menu")
 local CharacterRenderer = require("src.tactics.character.character_renderer")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")
-local array_2d = require("src.tactics.util.array_2d")
 
 local record TacticsMap
     is box.UIElement
