@@ -10,11 +10,12 @@ local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local bm = require("src.tactics.battle.battle_map")
-local menu_cursor = require("src.tactics.menu.menu_cursor")
+local nested_list = require("src.tactics.menu.cursor.nested.list")
 local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUIContext
 local lists = require("src.tactics.util.lists")
 local point = require("src.tactics.util.point")
 local Point = point.Point
+local grid = require("src.tactics.menu.cursor.nested.grid")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
@@ -64,13 +65,7 @@ local record AnimatedUnitPosition
 end
 
 local function get_cursor_tile(battle_context: BattleUIContext): Point
-    local menu = battle_context.battle_menu_manager
-    local cursor = menu.menu_cursor
-    if cursor is grid_cursor.GridMenuNode then
-        return cursor.point
-    elseif menu.menu_state.point ~= nil then
-        return menu.menu_state.point
-    end
+    return battle_context.hovered_point
 end
 
 local function compute_animated_unit_positions(map: bm.BattleMap): { AnimatedUnitPosition }
@@ -130,80 +125,75 @@ local function set_ud_tile(ud: Userdata, t: Point, s: integer)
 end
 
 local function get_path_layer(state: UIContextManager): Userdata
-    local menu = state.battle_context.battle_menu_manager
-    local cursor: menu_cursor.MenuNode = menu.menu_cursor
-
     local path_layer = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
-    if cursor is grid_cursor.GridMenuNode then
-        local path = cursor.path
-        if path ~= nil then
-            local len = #path
-            if len > 1 then
-                do
-                    local step_offset = path[2] - path[1]
-                    local s = 0
-                    if step_offset.x == 0 then
-                        if step_offset.y == 1 then
-                            s = 205
-                        elseif step_offset.y == -1 then
-                            s = 203
+    local path = state.battle_context.hovered_path
+    if path ~= nil then
+        local len = #path
+        if len > 1 then
+            do
+                local step_offset = path[2] - path[1]
+                local s = 0
+                if step_offset.x == 0 then
+                    if step_offset.y == 1 then
+                        s = 205
+                    elseif step_offset.y == -1 then
+                        s = 203
+                    end
+                elseif step_offset.y == 0 then
+                    if step_offset.x == 1 then
+                        s = 204
+                    elseif step_offset.x == -1 then
+                        s = 202
+                    end
+                end
+                assert(s ~= 0)
+                set_ud_tile(path_layer, path[1], s)
+            end
+            for i = 2, #path-1 do
+                local step_offset = path[i+1] - path[i-1]
+                local one_step_offset = path[i] - path[i-1]
+                local s = 0
+                if step_offset.x == 0 then
+                    s = 193
+                elseif step_offset.y == 0 then
+                    s = 192
+                else
+                    local dir = step_offset.x * step_offset.y -- +/- 1
+                    if dir == 1 then -- 45 deg down
+                        if one_step_offset.x == 1 or one_step_offset.y == -1 then
+                            s = 196
+                        else
+                            s = 195
                         end
-                    elseif step_offset.y == 0 then
-                        if step_offset.x == 1 then
-                            s = 204
-                        elseif step_offset.x == -1 then
-                            s = 202
+                    else -- 45 deg up
+                        if one_step_offset.x == 1 or one_step_offset.y == 1 then
+                            s = 194
+                        else
+                            s = 197
                         end
                     end
-                    assert(s ~= 0)
-                    set_ud_tile(path_layer, path[1], s)
                 end
-                for i = 2, #path-1 do
-                    local step_offset = path[i+1] - path[i-1]
-                    local one_step_offset = path[i] - path[i-1]
-                    local s = 0
-                    if step_offset.x == 0 then
-                        s = 193
-                    elseif step_offset.y == 0 then
-                        s = 192
-                    else
-                        local dir = step_offset.x * step_offset.y -- +/- 1
-                        if dir == 1 then -- 45 deg down
-                            if one_step_offset.x == 1 or one_step_offset.y == -1 then
-                                s = 196
-                            else
-                                s = 195
-                            end
-                        else -- 45 deg up
-                            if one_step_offset.x == 1 or one_step_offset.y == 1 then
-                                s = 194
-                            else
-                                s = 197
-                            end
-                        end
+                assert(s ~= 0)
+                set_ud_tile(path_layer, path[i], s)
+            end
+            do
+                local step_offset = path[#path] - path[#path-1]
+                local s = 0
+                if step_offset.x == 0 then
+                    if step_offset.y == -1 then
+                        s = 201
+                    elseif step_offset.y == 1 then
+                        s = 199
                     end
-                    assert(s ~= 0)
-                    set_ud_tile(path_layer, path[i], s)
-                end
-                do
-                    local step_offset = path[#path] - path[#path-1]
-                    local s = 0
-                    if step_offset.x == 0 then
-                        if step_offset.y == -1 then
-                            s = 201
-                        elseif step_offset.y == 1 then
-                            s = 199
-                        end
-                    elseif step_offset.y == 0 then
-                        if step_offset.x == -1 then
-                            s = 200
-                        elseif step_offset.x == 1 then
-                            s = 198
-                        end
+                elseif step_offset.y == 0 then
+                    if step_offset.x == -1 then
+                        s = 200
+                    elseif step_offset.x == 1 then
+                        s = 198
                     end
-                    assert(s ~= 0)
-                    set_ud_tile(path_layer, path[#path], s)
                 end
+                assert(s ~= 0)
+                set_ud_tile(path_layer, path[#path], s)
             end
         end
         return path_layer
@@ -240,7 +230,7 @@ end
 --- (e.g., for action selection), and is removed otherwise.
 function TacticsMap:compute_children(state: UIContextManager)
     local menu = state.battle_context.battle_menu_manager
-    local cursor = menu.menu_cursor
+    local cursor = menu.menu_step.node
     local cursor_tile = get_cursor_tile(state.battle_context)
 
     local child_object = self.child_object
@@ -285,7 +275,7 @@ function TacticsMap:compute_children(state: UIContextManager)
         x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
         y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
 
-        if cursor is list_cursor.ListMenuNode<string> then
+        if cursor is nested_list.NestedMenuNode then
             if child_object ~= cursor then
                 menu_box = box.new({
                     auto_height = true,
@@ -298,9 +288,9 @@ function TacticsMap:compute_children(state: UIContextManager)
                 local node = vertical_list_menu.new(
                     " {text}",
                     ">{text}",
-                	function (s: UIContextManager): list_cursor.ListMenuNode<string>
-                		local c = s.battle_context.battle_menu_manager.menu_cursor
-                		assert(c is list_cursor.ListMenuNode<string>)
+                	function (s: UIContextManager): nested_list.NestedMenuNode
+                		local c = s.battle_context.battle_menu_manager.menu_step.node
+                		assert(c is nested_list.NestedMenuNode)
                 		return c
                 	end,
                 	{
@@ -412,11 +402,7 @@ function TacticsMap:draw(
         local acting_unit = state.battle_context.acting_unit
         local tile_interaction_highlights = state.battle_context.battle_map:get_tile_highlights()
 
-        local cursor = state.battle_context.battle_menu_manager.menu_cursor
-        local cursor_legal_tiles: array_2d.Array2D<grid_cursor.MenuTileHighlight>
-        if cursor is grid_cursor.GridMenuNode then
-            cursor_legal_tiles = cursor.legal_tiles
-        end
+        local cursor_legal_tiles = state.battle_context.tile_highlights
 
         local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
         for x = 0, self.map_width-1 do

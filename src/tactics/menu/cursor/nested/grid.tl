@@ -86,6 +86,7 @@ local record SerializedNestedGridState
 	where self.type == "grid"
 	point: Point
 	path: {Point}
+	tile_highlights: array_2d.Array2D<MenuTileHighlight>
 end
 
 local nested_grid = {
@@ -164,6 +165,7 @@ function NestedGridNode:serialize(): SerializedMenu
 	local state: SerializedNestedGridState = {
 		type = "grid",
 		point = self.point:copy(),
+		tile_highlights = self.legal_tiles,
 		children = {},
 	}
 	if self.path ~= nil then
