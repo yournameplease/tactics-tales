@@ -22,15 +22,22 @@ local record SelectionHistory
     step: menu_types.MenuStep
 end
 
+local type MenuHandler = function(
+    services: GameContext,
+    menu_data: {string: any},
+    session_context: MenuContext,
+    value: any
+)
+
 local record MenuStep
 	previous_step: string
-	back_handler: function(GameContext, MenuContext)
+	back_handler: menu_types.MenuHandlerId
 	node: menu_cursor.MenuNode
 end
 
 local record MenuStepDefinition
 	previous_step: string
-	back_handler: function(GameContext, MenuContext)
+	back_handler: menu_types.MenuHandlerId
 	node: menu_cursor.MenuNodeDefinition
 end
 
@@ -52,7 +59,7 @@ function MenuStepDefinition:with_previous_step(step_id: string): MenuStepDefinit
 end
 
 function MenuStepDefinition:handle_back(
-	back_handler: function(GameContext, MenuContext)
+	back_handler: menu_types.MenuHandlerId
 ): MenuStepDefinition
 	self.back_handler = back_handler
 	return self
@@ -89,6 +96,7 @@ end
 local interface MenuManager
     
     menu_definitions: { menu_types.MenuId: MenuDefinition }
+    menu_handlers: { menu_types.MenuHandlerId: MenuHandler }
 
     menu_state: menu_types.MenuState
     menu_ctx: MenuContext
@@ -115,6 +123,7 @@ end
 
 local menu_manager = {
     MenuManager = MenuManager,
+    MenuHandler = MenuHandler,
     SelectionHistory = SelectionHistory,
     MenuDefinition = MenuDefinition,
     MenuStepDefinition = MenuStepDefinition,
@@ -126,12 +135,14 @@ local menu_manager = {
 
 function menu_manager.new(
     menu_definitions: { menu_types.MenuId: MenuDefinition },
+    menu_handlers: { menu_types.MenuHandlerId: MenuHandler },
     ctx: GameContext,
     bus: event_bus.EventBus
 ): MenuManager
     local self: BaseMenuManager = setmetatable({}, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
+    self.menu_handlers = menu_handlers
 
     self.menu_state = {}
     self.menu_ctx = {
@@ -241,6 +252,18 @@ function BaseMenuManager:update(input: InputContext)
         self:handle_menu_back()
     elseif signal is menu_signal.Navigate then
         self:handle_menu_advance(signal.target)
+    elseif signal is menu_signal.CallHandler then
+        local handler = self.menu_handlers[signal.handler]
+        assert(handler ~= nil, "Bad handler for id "..signal.handler)
+        handler(
+            self.game_ctx,
+            self:serialize().node.data,
+            self.menu_ctx,
+            signal.value
+        )
+        if signal.then_navigate_to ~= nil then
+            self:handle_menu_advance(signal.then_navigate_to)
+        end
     else
         unexpected(signal.type)
     end

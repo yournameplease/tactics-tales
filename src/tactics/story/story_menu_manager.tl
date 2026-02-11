@@ -72,12 +72,7 @@ end
 local function menu_definition_for_character_select(): menu_manager.MenuStepDefinition
     return step_definition.of_node(
         list.column(
-            -- select_handler = function(_self: multiple_options_cursor.MultipleOptionsMenuNode, game_ctx: StoryMenuContext, menu_ctx: menu_context.StoryMenuContext)
-            --     game_ctx.handle_create_character(
-            --         menu_ctx.character_customization.appearance
-            --     )
-            -- end,
-        
+      
             function(_msb: StoryMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                 local children: {MenuNodeDefinition} = {}
                 children = {
@@ -103,6 +98,18 @@ local record StoryMenuManager
     is menu_manager.MenuManager
 end
 
+local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
+
+HANDLERS["create_character"] = function(
+    services: StoryMenuContext,
+    menu_data: {string: any},
+    _session_context: MenuContext,
+    _value: any
+)
+    local appearance = menu_data as {character.CharacterAppearanceKey: string}
+    services.handle_create_character(appearance)
+end
+
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
@@ -119,6 +126,7 @@ local story_menu_manager = {
 function story_menu_manager.new(ctx: StoryMenuContext, bus: event_bus.EventBus): StoryMenuManager
     return menu_manager.new(
         MENU_DATA,
+        HANDLERS,
         ctx,
         bus
     ) as StoryMenuManager

@@ -97,8 +97,8 @@ function game.new(
 
     local game_menu_ctx = game_menu_context.new(
         story_ids,
-        function(config: DynamicConfig) self:set_config(config) end,
-        function(id: StoryId) self:begin_story(id) end
+        function(id: StoryId) self:begin_story(id) end,
+        self.config_manager
     )
 	self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")

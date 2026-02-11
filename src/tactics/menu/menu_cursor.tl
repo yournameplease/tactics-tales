@@ -12,6 +12,7 @@ local Mouse = input_service.Mouse
 
 local enum MenuSignalType
     "navigate"
+    "call_handler"
     "ignored" -- input was not used; should bubble up to parent
 	"consumed" -- input was used, but no actions
     "back"
@@ -39,7 +40,17 @@ end
 local record MenuSignalNavigate
 	is MenuSignal
 	where self.type == "navigate"
-	target: string
+	target: menu_types.MenuStep
+end
+
+local record MenuSignalCallHandler
+	is MenuSignal
+	where self.type == "call_handler"
+	handler: menu_types.MenuHandlerId
+	value: any -- typically the value of a button
+
+	-- nillable
+	then_navigate_to: menu_types.MenuStep
 end
 
 local menu_signal = {
@@ -48,6 +59,7 @@ local menu_signal = {
 	Consumed = MenuSignalConsumed,
 	Ignored = MenuSignalIgnored,
 	Navigate = MenuSignalNavigate,
+	CallHandler = MenuSignalCallHandler
 }
 
 function menu_signal.back(): MenuSignal
@@ -68,13 +80,26 @@ function menu_signal.ignored(): MenuSignal
 	}
 end
 
-function menu_signal.navigate(target: string): MenuSignal
+function menu_signal.navigate(target: menu_types.MenuStep): MenuSignal
 	local out: MenuSignalNavigate = {
 		type = "navigate",
 		target = target,
 	}
 	return out
 end
+
+function menu_signal.call_handler(
+	handler: menu_types.MenuHandlerId,
+	value: any
+): MenuSignalCallHandler
+	local out: MenuSignalCallHandler = {
+		type = "call_handler",
+		handler = handler,
+		value = value,
+	}
+	return out
+end
+
 
 local enum MenuLeafType
     "selection"
