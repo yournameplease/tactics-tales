@@ -87,7 +87,7 @@ function NestedMenuNode:update_joy(
     menu_ctx: MenuContext
 ): MenuSignal
 	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_joy(joy, game_ctx, menu_ctx)
-    if signal.type ~= "ignored" then return signal end
+    if signal ~= nil and signal.type ~= "ignored" then return signal end
 
     if self.direction == "column" then
 		if joy.dyp == 1 then
@@ -120,7 +120,7 @@ function NestedMenuNode:update_mouse(
     if hovered == nil then return menu_signal.ignored() end
 
 	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_mouse(mouse, hovered, game_ctx, menu_ctx)
-    if signal.type ~= "ignored" then return signal end
+    if signal ~= nil and signal.type ~= "ignored" then return signal end
 
     if hovered is mouse_menu_selection.List then
         if hovered.i > 0 and hovered.i <= #self.children then
