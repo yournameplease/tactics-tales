@@ -131,17 +131,14 @@ local interface SerializedMenu
 	data: SerializedMenuData
 end
 
-local interface MenuMouseSelection
-	type: CursorType
-	on_lmb_command: menu_types.MenuCommand
-	on_rmb_command: menu_types.MenuCommand
-end
-
 local interface MenuNode
 	id: string
-	-- note: passing contexts are only really needed for event handlers.  consider moving the handling to menu_manager level with a signal
-    update_joy: function(self, Joypad, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
-    update_mouse: function(self, Mouse, MenuMouseSelection, game_context: GameContext, menu_ctx: MenuContext): MenuSignal
+	parent: MenuNode
+	
+	-- note: passing contexts are only really needed for grid nonsense.
+    update_joy: function(self, Joypad): MenuSignal
+    handle_command: function(self, menu_types.MenuCommand): MenuSignal
+    claim_focus: function(self, MenuMouseSelection, child: MenuNode)
     serialize: function(self): SerializedMenu
     deserialize: function(self, state: SerializedMenuState, data: SerializedMenuData)
 end
@@ -155,12 +152,12 @@ end
 local interface MenuContainer
 	is MenuNode
     type: MenuContainerType
-    get_focused_leaf: function(self, game_context: GameContext, menu_ctx: MenuContext): MenuLeaf
+    get_focused_leaf: function(self): MenuLeaf
 end
 
 local interface MenuNodeDefinition
 	id: string
-    to_cursor: function(self, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuNode
+    to_cursor: function(self, parent: MenuNode, game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): MenuNode
 end
 
 local interface MenuLeafDefinition
@@ -173,10 +170,16 @@ local interface MenuContainerDefinition
     type: MenuContainerType
 end
 
+local interface MenuMouseSelection
+	type: CursorType
+	node: MenuNode
+	on_lmb_command: menu_types.MenuCommand
+	on_rmb_command: menu_types.MenuCommand
+end
+
 local record Grid
 	is MenuMouseSelection
 	where self.type == "grid"
-	node: MenuNode
 	x: integer
 	y: integer
 end
