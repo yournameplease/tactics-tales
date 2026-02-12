@@ -225,6 +225,16 @@ function NestedGridNode:serialize(): SerializedMenu
 	return out
 end
 
+function NestedGridNode:deserialize(state: menu_cursor.SerializedMenuState, data: {string: any}) 
+	if state ~= nil and state is SerializedNestedGridState then
+		self.point = state.point:copy()
+		self.path = state.path
+	end
+	for _,child in ipairs(self.children) do
+		child.child:deserialize(state and state.children[child.child.id] or nil, data)
+	end
+end
+
 function NestedGridDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
     game_ctx: GameContext,

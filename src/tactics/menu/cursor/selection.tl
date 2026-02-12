@@ -210,6 +210,17 @@ function SelectionMenuNode:serialize(): SerializedMenu
 	}
 end
 
+function SelectionMenuNode:deserialize(_state: menu_cursor.SerializedMenuState, data: {string: any}) 
+	local value = data[self.key]
+	if value then
+		for i,opt in ipairs(self.options) do
+			if opt.value == value then
+				self.i = i
+			end
+		end
+	end
+end
+
 function SelectionMenuDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
 	game_ctx: GameContext,
