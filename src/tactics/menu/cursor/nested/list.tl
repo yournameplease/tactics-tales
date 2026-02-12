@@ -152,7 +152,7 @@ function NestedMenuNode:serialize(): SerializedMenu
 		local child_out = child:serialize()
 
 		if child_out.data then
-			maps.merge(out.data, child_out.data)
+			maps.add_all(out.data, child_out.data)
 		end
 
 		if child_out.state and child.id then

@@ -60,6 +60,14 @@ function maps.get_at<K,V>(m: {K: V}): function(k: K): V
     end
 end
 
+function maps.size<Key, Value>(m: {Key: Value}): integer
+    local count = 0
+    for _,v in pairs(m) do
+        count = count + 1
+    end
+    return count
+end
+
 function maps.to_list<Key, Value>(m: {Key: Value}): {Value}
     --todo: add a sort function
     local out: {Value} = {}
@@ -81,15 +89,19 @@ function maps.collect<Key,Value,ListValue>(
     return out
 end
 
+function maps.add_all<Key, Value>(m1: {Key: Value}, m2: {Key: Value}) 
+    for k,v in pairs(m2) do
+        if m1[k] == nil then
+            m1[k] = v
+        end
+    end
+end
+
 function maps.merge<Key, Value>(...: {Key: Value}): {Key: Value}
     local ms = {...}
     local out: {Key: Value} = {}
     for _,m in ipairs(ms) do
-        for k,v in pairs(m) do
-            if out[k] == nil then
-                out[k] = v
-            end
-        end
+        maps.add_all(out, m)
     end
     return out
 end
