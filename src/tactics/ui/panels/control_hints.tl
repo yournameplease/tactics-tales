@@ -53,7 +53,7 @@ local function control_hint_row(input_label: InputLabel): box.UIElement
 		h = 9
 	}))
 	row:add(text_node.new({
-		func = function(state: UIContextManager): {string}
+		func = function(_self, state: UIContextManager): {string}
 			return { state.input_actions[input_label] }
 		end,
 		flex_grow = 1,

@@ -106,6 +106,7 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 					}
 				})
 			end
+			child_box:add(box.spacer(1))
 			child_box:add(sprite_node.static(22, {h = 9, w = 9}))
 			child_box:add(text_node.new{
 				text = {node:get_selected_text()},
