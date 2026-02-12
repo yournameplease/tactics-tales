@@ -110,6 +110,7 @@ end
 function NestedGridNode:get_first_child(p: Point, game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuNode
 	for _,child in ipairs(self.children) do
 		if child.filter(p, game_context, menu_ctx) then
+			log.debug("Got child "..child.child.id.." for "..tostring(p))
 			return child.child
 		end
 	end
@@ -190,6 +191,7 @@ function NestedGridNode:handle_command(
 		end
 		return focused_leaf:handle_command(command)
 	end
+	log.debug("No focused leaf: "..tostring(self.point).." for "..self.id)
 	return menu_signal.ignored()
 end
 
@@ -271,15 +273,18 @@ function NestedGridDefinition:to_cursor(
             return (self as {string: any})[k]
         end
         })
-	cursor.child_array = array_2d.new(cursor.x_max, cursor.y_max)
+        
     if self.children ~= nil then
 		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
 			return c:to_cursor(cursor, game_ctx, menu_ctx, menu_state)
 		end)(self.children)
-		cursor.child_array = cursor.child_array:map_points(function(p: Point): MenuNode
+		cursor.child_array = array_2d.new_from_function(cursor.x_max, cursor.y_max, function(p: Point): MenuNode
 			return cursor:get_first_child(p, game_ctx, menu_ctx)
 		end)
+	else
+		cursor.child_array = array_2d.new(cursor.x_max, cursor.y_max)
 	end
+
 	return cursor
 end
 
