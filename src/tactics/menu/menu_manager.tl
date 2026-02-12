@@ -33,12 +33,16 @@ local record MenuStep
 	previous_step: string
 	back_handler: menu_types.MenuHandlerId
 	node: menu_cursor.MenuNode
+	default_lmb: menu_types.MenuCommand
+	default_rmb: menu_types.MenuCommand
 end
 
 local record MenuStepDefinition
 	previous_step: string
 	back_handler: menu_types.MenuHandlerId
 	node: menu_cursor.MenuNodeDefinition
+	default_lmb: menu_types.MenuCommand
+	default_rmb: menu_types.MenuCommand
 	initial_data: function(GameContext, MenuContext): {string: any}
 end
 
@@ -70,6 +74,20 @@ function MenuStepDefinition:with_initial_data(
 	initial_data: function(GameContext, MenuContext): {string: any}
 ): MenuStepDefinition
 	self.initial_data = initial_data
+	return self
+end
+
+function MenuStepDefinition:with_default_lmb(
+	default_lmb: menu_types.MenuCommand
+): MenuStepDefinition
+	self.default_lmb = default_lmb
+	return self
+end
+
+function MenuStepDefinition:with_default_rmb(
+	default_rmb: menu_types.MenuCommand
+): MenuStepDefinition
+	self.default_rmb = default_rmb
 	return self
 end
 
@@ -256,15 +274,27 @@ function BaseMenuManager:update(input: InputContext)
             mouse: Mouse,
             hovered: mouse_menu_selection.MenuMouseSelection
         ): MenuSignal
-            if hovered == nil then return menu_signal.ignored() end
-            
-            hovered.node:claim_focus(hovered, nil)
+            if hovered == nil then hovered = {} end
+
+            if hovered.node then
+                hovered.node:claim_focus(hovered, nil)
+            end
             
         	local command: menu_types.MenuCommand
-        	if hovered.on_lmb_command and mouse.mlp then
-        		command = hovered.on_lmb_command
-        	elseif hovered.on_lmb_command and mouse.mlp then
-        		command = hovered.on_lmb_command
+        	if (hovered.on_lmb_command or self.menu_step.default_lmb) and mouse.mlp then
+        	    if hovered.on_lmb_command then
+            		command = hovered.on_lmb_command
+            	else
+                    command = self.menu_step.default_lmb
+                    hovered.node = self.menu_step.node
+            	end
+        	elseif (hovered.on_lmb_command or self.menu_step.default_rmb) and mouse.mlp then
+        	    if hovered.on_rmb_command then
+            		command = hovered.on_rmb_command
+            	else
+                    command = self.menu_step.default_rmb
+                    hovered.node = self.menu_step.node
+            	end
         	end
         	if command then
         	    log.debug("Got mouse command: "..command.." for "..hovered.node.id)

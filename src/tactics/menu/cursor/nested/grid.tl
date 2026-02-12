@@ -131,6 +131,23 @@ function NestedGridNode:get_nested_grid_value(): NestedGridValue
 	}
 end
 
+function NestedGridNode:move_cursor(p: Point): boolean
+    local prev_point = self.point:copy()
+    self.point = p
+
+    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
+        if self.legal_tiles:get_point(self.point) then
+        
+            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
+                return h ~= nil and h.reachable
+            end)
+            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
+        end
+    end
+
+    return self.point ~= prev_point
+end
+
 function NestedGridNode:update_joy(
 	joy: Joypad
 ): MenuSignal
@@ -145,23 +162,18 @@ function NestedGridNode:update_joy(
 	end
 
     if signal.type ~= "ignored" then return signal end
-    
-    local prev_point = self.point:copy()
-    self.point.x = pt.mid(0, self.point.x + joy.dxp, self.x_max - 1)
-    self.point.y = pt.mid(0, self.point.y + joy.dyp, self.y_max - 1)
+	local moved = false
 
-    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-        if self.legal_tiles:get_point(self.point) then
-        
-            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
-                return h ~= nil and h.reachable
-            end)
-            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-        end
+	if joy.dxp ~= 0 or joy.dyp ~= 0 then
+		local next_p = self.point + point.of(joy.dxp, joy.dyp)
+		moved = self:move_cursor(next_p)
+	end    
+
+	if moved then
         return menu_signal.consumed()
-    end
-
-    return menu_signal.ignored()
+    else
+	    return menu_signal.ignored()
+	end
 end
 
 function NestedGridNode:claim_focus(
@@ -170,8 +182,7 @@ function NestedGridNode:claim_focus(
 )
 	if selection ~= nil then
 		if selection is mouse_menu_selection.Grid then
-			self.point.x = selection.x
-			self.point.y = selection.y
+			self:move_cursor(point.of(selection.x, selection.y))
 		end
 	end
 	if self.parent then

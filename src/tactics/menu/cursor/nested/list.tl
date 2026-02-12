@@ -84,27 +84,29 @@ function NestedMenuNode:update_joy(
 ): MenuSignal
 	local signal = self:get_focused_leaf():update_joy(joy)
     if signal ~= nil and signal.type ~= "ignored" then return signal end
+    local old_i = self.i
 
     if self.direction == "column" then
 		if joy.dyp == 1 then
 			self:increment_focus_index()
-			return menu_signal.consumed()
 		elseif joy.dyp == -1 then
 			self:decrement_focus_index()
-			return menu_signal.consumed()
 		end
     elseif self.direction == "row" then
 		if joy.dxp == 1 then
 			self:increment_focus_index()
-			return menu_signal.consumed()
 		elseif joy.dxp == -1 then
 			self:decrement_focus_index()
-			return menu_signal.consumed()
 		end
     else
         unexpected(self.direction)
     end
-    return menu_signal.ignored()
+
+	if self.i == old_i then
+	    return menu_signal.ignored()
+	else
+		return menu_signal.consumed()
+	end
 end
 
 function NestedMenuNode:claim_focus(
@@ -204,6 +206,19 @@ function nested_menu.column(
 		id = id,
 	    get_children = get_children,
 	    direction = "column",
+	},{
+	    __index = NestedMenuDefinition
+	})
+end
+
+function nested_menu.row(
+	id: string,
+	get_children: function(game_ctx: GameContext, menu_ctx: MenuContext): {MenuNodeDefinition}
+): NestedMenuDefinition
+	return setmetatable({
+		id = id,
+	    get_children = get_children,
+	    direction = "row",
 	},{
 	    __index = NestedMenuDefinition
 	})

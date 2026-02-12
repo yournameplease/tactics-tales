@@ -35,8 +35,6 @@ function GenericMenuBox:get_selection_at(lx: number, ly: number): menu_mouse_sel
 end
 
 function generic_menu_box.new(
-	unselected_template: string,
-	selected_template: string,
 	menu_cursor_func: function(UIContextManager): MenuNode,
 	props: box.UIElement
 ): GenericMenuBox
@@ -44,8 +42,6 @@ function generic_menu_box.new(
     local self = box.new(props) as GenericMenuBox
 	setmetatable(self, { __index = GenericMenuBox })
 
-	self.unselected_template = unselected_template
-	self.selected_template = selected_template
 	self.menu_cursor_func = menu_cursor_func
 	return self
 end
@@ -70,8 +66,6 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 
 		for _,child in ipairs(node.children) do
 			local child_box = generic_menu_box.new(
-				self.unselected_template,
-				self.selected_template,
 				function(_: UIContextManager): MenuNode
 					return child
 				end,
