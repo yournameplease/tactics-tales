@@ -22,7 +22,7 @@ local record GenericMenuBox
 	selected_template: string
 	menu_cursor_func: function(UIContextManager): MenuNode
 
-	
+	menu_revision: integer
 end
 setmetatable(GenericMenuBox, { __index = box.Box })
 
@@ -52,10 +52,14 @@ function generic_menu_box.new(
 end
 
 function GenericMenuBox:compute_children(state: UIContextManager)
+	local is_dirty = self.menu_revision ~= state.game_context.menu_manager.revision_count
+
+	if not is_dirty then
+		return
+	end
+	
 	local node = self.menu_cursor_func(state)
 
-	-- todo: real caching
-	if self.children ~= nil and #self.children ~= 0 then return end
 	local children: {box.UIElement} = {}
 	
 	if node is nested_list.NestedMenuNode then
@@ -131,6 +135,7 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 		pt.add(children, child_box)
 	end
 	self.children = children
+	self.menu_revision = state.game_context.menu_manager.revision_count
 end
 
 return generic_menu_box

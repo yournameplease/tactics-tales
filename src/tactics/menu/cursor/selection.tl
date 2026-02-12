@@ -212,7 +212,7 @@ end
 
 function SelectionMenuNode:deserialize(_state: menu_cursor.SerializedMenuState, data: {string: any}) 
 	local value = data[self.key]
-	if value then
+	if value ~= nil then
 		for i,opt in ipairs(self.options) do
 			if opt.value == value then
 				self.i = i
