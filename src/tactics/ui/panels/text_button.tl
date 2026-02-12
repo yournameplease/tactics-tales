@@ -35,8 +35,8 @@ function text_button.new(
 	props: text_node.TextNode
 ): box.UIElement
 	
-    props.func = function(state: UIContextManager): { string }
-		local cursor: ButtonCursor = menu_cursor_func(state)
+    props.func = function(self: TextButton, state: UIContextManager): { string }
+		local cursor: ButtonCursor = self.menu_node
 		-- todo: hover
 		local template = true and selected_template or unselected_template
 		local out_line = String.format(template, { ["text"] = cursor.text })

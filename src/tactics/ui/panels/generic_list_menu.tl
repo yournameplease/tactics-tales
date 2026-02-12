@@ -79,8 +79,8 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 		end
 	elseif node is ButtonCursor then
 		local child_box = text_button.new(
-			self.unselected_template,
-			self.selected_template,
+			" {text} ",
+			">{text}<",
 			function(_: UIContextManager): MenuNode
 				return node
 			end,
@@ -98,17 +98,26 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 			child_box = box.flex_row()
 			if node.label then
 				child_box:add(text_node.new{
-					text = {node.label}
+					text = {node.label},
+					auto_height = true,
+					auto_width = true,
+					draw_properties = {
+						wrap = "no_wrap",
+					}
 				})
 			end
-			sprite_node.static(22, {})
+			child_box:add(sprite_node.static(22, {h = 9, w = 9}))
 			child_box:add(text_node.new{
 				text = {node:get_selected_text()},
-				flex_grow = 1,
 				auto_height = true,
+				auto_width = true,
+				draw_properties = {
+					wrap = "no_wrap",
+				}
 			})
-			sprite_node.static(23, {})
+			child_box:add(sprite_node.static(23, {h = 9, w = 9}))
 		end
+		pt.add(children, child_box)
 	end
 	self.children = children
 end

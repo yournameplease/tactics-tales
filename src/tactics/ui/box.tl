@@ -92,7 +92,7 @@ function box.new(props: UIElement): UIElement
         }
         self.decoration_padding = props.decoration_padding or 0
     else
-        self.padding = props.padding or 2
+        self.padding = props.padding or 0
         self.internal_margin = {
             t = self.padding,
             b = self.padding,
