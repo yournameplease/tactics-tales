@@ -14,8 +14,6 @@ local left = box.new({ dir="col", flex_grow = 1, padding = 2})
 local right = box.new({ dir = "col", flex_grow = 1, padding = 2})
 right:add(text_node.title( { text = {"Options"} } ))
 right:add(generic_menu_box.new(
-	"{label}: {value}",
-	"{label}: >{value}<",
 	function (state: UIContextManager): MenuNode
 		local root_node = state.game_context.menu_manager.menu_step.node
 		local node = root_node

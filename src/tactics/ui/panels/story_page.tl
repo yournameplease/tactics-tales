@@ -11,6 +11,9 @@ local nested_list = require("src.tactics.menu.cursor.nested.list")
 local story_page = require("src.tactics.story.story_page")
 local rendered_story_node = story_page.rendered_story_node
 local RenderedStoryNode = rendered_story_node.RenderedStoryNode
+local generic_menu_box = require("src.tactics.ui.panels.generic_list_menu")
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuNode = menu_cursor.MenuNode
 local DrawableCharacter = require("src.tactics.story.drawable_character").DrawableCharacter
 
 local record StoryPagePanel
@@ -90,16 +93,16 @@ function StoryPagePanel:compute_children(state: UIContextManager)
 
 				local root_node = state.story_context.menu_manager.menu_step.node
                 if root_node is nested_list.NestedMenuNode then
-    				-- child:add(VerticalMultiSelectMenu.new(
-    				-- 	"{label}: {value}",
-    				-- 	"{label}: "..pt.chr(139).."{value}"..pt.chr(145),
-    				-- 	function (_: UIContextManager): nested_list.NestedMenuNode
-        --             		local node = root_node
-        --             		assert(node is nested_list.NestedMenuNode) 
-        --             		return node
-    				-- 	end,
-        --                 {auto_height = true, flex_grow = 1}
-    				-- 	))
+                    child:add(generic_menu_box.new(
+                    	function (_: UIContextManager): MenuNode
+                    		local node = root_node
+                    		return node
+                    	end,
+                    	{
+                    	    flex_grow = 1,
+                    	    h = 200, -- todo
+                    	}
+                    ))
                 end
                 child:add(portrait_box.new(function(_: UIContextManager): DrawableCharacter
                     return n.character

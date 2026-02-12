@@ -63,7 +63,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 button.builder("to_main_menu")
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU")
-            ),
+            ):with_default_lmb("button_primary"),
             ["MAIN_MENU"] = step_definition.of_node(
                 list.column(
                     "main_menu",
@@ -145,7 +145,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                 return options
                             end))
                             
-                        pt.add(children, list.column(
+                        pt.add(children, list.row(
                             "options_navigation",
                             function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                                 local options: {MenuNodeDefinition} = {}
