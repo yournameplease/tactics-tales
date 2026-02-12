@@ -286,7 +286,7 @@ function BaseMenuManager:update(input: InputContext)
                 end,
                 function(
                     mouse: Mouse,
-                    hovered: mouse_menu_selection.MenuMouseSelection
+                    _hovered: mouse_menu_selection.MenuMouseSelection
                 ): boolean
                     return mouse.mrp
                 end

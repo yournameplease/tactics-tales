@@ -7,7 +7,6 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 local text_node = require("src.tactics.ui.components.text_node")
 local text_button = require("src.tactics.ui.panels.text_button")
 local nested_list = require("src.tactics.menu.cursor.nested.list")
-local String = require("src.tactics.util.string")
 local sprite_node = require("src.tactics.ui.components.sprite_node")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local menu_cursor = require("src.tactics.menu.menu_cursor")

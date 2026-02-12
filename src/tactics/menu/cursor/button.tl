@@ -9,7 +9,6 @@ local SerializedMenu = menu_cursor.SerializedMenu
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
-local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext

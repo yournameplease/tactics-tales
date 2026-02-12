@@ -8,7 +8,6 @@ local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local Joypad = input_service.Joypad
-local Mouse = input_service.Mouse
 
 local enum MenuSignalType
     "navigate"

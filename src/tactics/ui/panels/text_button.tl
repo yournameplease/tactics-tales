@@ -4,13 +4,10 @@
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local text_node = require("src.tactics.ui.components.text_node")
-local nested_list = require("src.tactics.menu.cursor.nested.list")
 local String = require("src.tactics.util.string")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local button = require("src.tactics.menu.cursor.button")
 local ButtonCursor = button.ButtonCursor
-local menu_cursor = require("src.tactics.menu.menu_cursor")
-local MenuNode = menu_cursor.MenuNode
 
 local record TextButton
     is text_node.TextUIElement
@@ -35,7 +32,7 @@ function text_button.new(
 	props: text_node.TextNode
 ): box.UIElement
 	
-    props.func = function(self: TextButton, state: UIContextManager): { string }
+    props.func = function(self: TextButton, _state: UIContextManager): { string }
 		local cursor: ButtonCursor = self.menu_node
 		-- todo: hover
 		local template = true and selected_template or unselected_template

@@ -9,8 +9,6 @@ local String = require("src.tactics.util.string")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local button = require("src.tactics.menu.cursor.button")
 local ButtonCursor = button.ButtonCursor
-local menu_cursor = require("src.tactics.menu.menu_cursor")
-local MenuNode = menu_cursor.MenuNode
 
 local record VerticalButtonList
     is text_node.TextUIElement
@@ -39,7 +37,7 @@ function vertical_list_menu.new(
 	props: text_node.TextNode
 ): box.UIElement
 	
-    props.func = function(self: VerticalButtonList, state: UIContextManager): { string }
+    props.func = function(self: VerticalButtonList, _state: UIContextManager): { string }
         local out: {string} = {}
 		local cursor: nested_list.NestedMenuNode = self.menu_node
 		local selected = cursor.i

@@ -62,7 +62,7 @@ end
 
 function maps.size<Key, Value>(m: {Key: Value}): integer
     local count = 0
-    for _,v in pairs(m) do
+    for _,_ in pairs(m) do
         count = count + 1
     end
     return count
