@@ -112,69 +112,12 @@ local enum MenuContainerType
 end
 
 local enum CursorType
-    "selection"
-    "button"
-	"row"
-	"column"
+    "leaf"
+	"list"
 	"grid"
 end
 
 local type MenuHandler = function(self, GameContext, MenuContext)
-
-local interface MenuMouseSelection
-	type: CursorType
-	on_lmb_command: menu_types.MenuCommand
-	on_rmb_command: menu_types.MenuCommand
-end
-
-local record Grid
-	is MenuMouseSelection
-	where self.type == "grid"
-	x: integer
-	y: integer
-end
-
-local record List
-	is MenuMouseSelection
-	where self.type == "selection"
-	i: integer
-end
-
-local mouse_selection = {
-	MenuMouseSelection = MenuMouseSelection,
-	Grid = Grid,
-	List = List,
-}
-
-function mouse_selection.grid(
-	x: integer,
-	y: integer,
-	on_lmb_command: menu_types.MenuCommand,
-	on_rmb_command: menu_types.MenuCommand
-): MenuMouseSelection
-	local self: Grid =  {
-		type = "grid",
-		x = x,
-		y = y,
-		on_lmb_command = on_lmb_command,
-		on_rmb_command = on_rmb_command,
-	}
-	return self
-end
-
-function mouse_selection.list(
-	i: integer,
-	on_lmb_command: menu_types.MenuCommand,
-	on_rmb_command: menu_types.MenuCommand
-): MenuMouseSelection
-	local self: List =  {
-		type = "selection",
-		i = i,
-		on_lmb_command = on_lmb_command,
-		on_rmb_command = on_rmb_command,
-	}
-	return self
-end
 
 local interface SerializedMenuState
 	type: MenuContainerType
@@ -186,6 +129,12 @@ local type SerializedMenuData = {string: any}
 local interface SerializedMenu
 	state: SerializedMenuState
 	data: SerializedMenuData
+end
+
+local interface MenuMouseSelection
+	type: CursorType
+	on_lmb_command: menu_types.MenuCommand
+	on_rmb_command: menu_types.MenuCommand
 end
 
 local interface MenuNode
@@ -222,6 +171,82 @@ end
 local interface MenuContainerDefinition
 	is MenuNodeDefinition
     type: MenuContainerType
+end
+
+local record Grid
+	is MenuMouseSelection
+	where self.type == "grid"
+	node: MenuNode
+	x: integer
+	y: integer
+end
+
+local record List
+	is MenuMouseSelection
+	where self.type == "list"
+	node: MenuNode
+	i: integer
+end
+
+local record Leaf
+	is MenuMouseSelection
+	where self.type == "leaf"
+	node: MenuNode
+	i: integer
+end
+
+local mouse_selection = {
+	MenuMouseSelection = MenuMouseSelection,
+	Grid = Grid,
+	List = List,
+}
+
+function mouse_selection.grid(
+	x: integer,
+	y: integer,
+	node: MenuNode,
+	on_lmb_command: menu_types.MenuCommand,
+	on_rmb_command: menu_types.MenuCommand
+): MenuMouseSelection
+	local self: Grid =  {
+		type = "grid",
+		x = x,
+		y = y,
+		node = node,
+		on_lmb_command = on_lmb_command,
+		on_rmb_command = on_rmb_command,
+	}
+	return self
+end
+
+function mouse_selection.list(
+	i: integer,
+	node: MenuNode,
+	on_lmb_command: menu_types.MenuCommand,
+	on_rmb_command: menu_types.MenuCommand
+): MenuMouseSelection
+	local self: List =  {
+		type = "list",
+		i = i,
+		node = node,
+		on_lmb_command = on_lmb_command,
+		on_rmb_command = on_rmb_command,
+	}
+	return self
+end
+
+function mouse_selection.leaf(
+	node: MenuNode,
+	on_lmb_command: menu_types.MenuCommand,
+	on_rmb_command: menu_types.MenuCommand
+): MenuMouseSelection
+	local self: Leaf =  {
+		type = "leaf",
+		node = node,
+		on_lmb_command = on_lmb_command,
+		on_rmb_command = on_rmb_command,
+	}
+	return self
 end
 
 local menu_cursor = {

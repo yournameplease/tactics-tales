@@ -72,7 +72,7 @@ function unit_info.new(props: UnitInfo): UnitInfo
     
     info_col:add(text_node.new({
         rows = 5,
-        func = function(state: UIContextManager): {string}
+        func = function(_self, state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
             if not u then return { "", "", "", "", "" } end
 

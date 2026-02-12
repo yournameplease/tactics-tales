@@ -9,21 +9,23 @@ local String = require("src.tactics.util.string")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local button = require("src.tactics.menu.cursor.button")
 local ButtonCursor = button.ButtonCursor
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuNode = menu_cursor.MenuNode
 
 local record TextButton
     is text_node.TextUIElement
 	unselected_template: string
 	selected_template: string
-	menu_cursor_func: function(UIContextManager): nested_list.NestedMenuNode
+	menu_cursor_func: function(UIContextManager): ButtonCursor
+
+    menu_node: ButtonCursor
 end
 setmetatable(TextButton, { __index = text_node.TextNode })
 
 local text_button = {}
 
-function TextButton:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
-	local line = self:get_hovered_line(lx, ly)
-
-	return menu_mouse_selection.list(line, "button_primary", "button_secondary")
+function TextButton:get_selection_at(_lx: number, _ly: number): menu_mouse_selection.MenuMouseSelection
+	return menu_mouse_selection.leaf(self.menu_node, "button_primary", "button_secondary")
 end
 
 function text_button.new(
@@ -45,10 +47,20 @@ function text_button.new(
     props.draw_properties.direction = props.draw_properties.direction or 'down'
 	props.get_selection_at = TextButton.get_selection_at
 
-    local self = text_node.new(props)
+    local self = text_node.new(props) as TextButton
 	setmetatable(self, { __index = TextButton })
 
+	self.menu_cursor_func = menu_cursor_func
 	return self
+end
+
+function TextButton:compute_children(state: UIContextManager)
+	if self.menu_node == nil then
+		-- todo: or if dirty?
+	    self.menu_node = self.menu_cursor_func(state)
+	end
+	
+	text_node._compute_children(self as text_node.TextNode, state)
 end
 
 return text_button
