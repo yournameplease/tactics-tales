@@ -129,6 +129,9 @@ function ButtonCursor:serialize(): SerializedMenu
 	}
 end
 
+function ButtonCursor:deserialize(_state: menu_cursor.SerializedMenuState, _data: {string: any}) 
+end
+
 function ButtonDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
     _game_ctx: GameContext,

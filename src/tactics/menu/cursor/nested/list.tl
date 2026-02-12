@@ -163,6 +163,15 @@ function NestedMenuNode:serialize(): SerializedMenu
 	return out
 end
 
+function NestedMenuNode:deserialize(state: menu_cursor.SerializedMenuState, data: {string: any}) 
+	if state ~= nil and state is SerializedNestedMenuNodeState then
+		self.i = state.i
+	end
+	for _,child in ipairs(self.children) do
+		child:deserialize(state and state.children[child.id] or nil, data)
+	end
+end
+
 function NestedMenuDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
 	game_ctx: GameContext,

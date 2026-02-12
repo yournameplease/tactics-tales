@@ -39,6 +39,7 @@ local record MenuStepDefinition
 	previous_step: string
 	back_handler: menu_types.MenuHandlerId
 	node: menu_cursor.MenuNodeDefinition
+	initial_data: function(GameContext, MenuContext): {string: any}
 end
 
 local menu_step_definition = {}
@@ -62,6 +63,13 @@ function MenuStepDefinition:handle_back(
 	back_handler: menu_types.MenuHandlerId
 ): MenuStepDefinition
 	self.back_handler = back_handler
+	return self
+end
+
+function MenuStepDefinition:with_initial_data(
+	initial_data: function(GameContext, MenuContext): {string: any}
+): MenuStepDefinition
+	self.initial_data = initial_data
 	return self
 end
 
@@ -163,6 +171,12 @@ function BaseMenuManager:populate_menu_state(new_step: menu_types.MenuStep)
     local new_step_data = menu_data.steps[self.menu_state.step]
     
     self.menu_step = new_step_data:build(self.game_ctx, self.menu_ctx, self.menu_state)
+    if new_step_data.initial_data then
+        self.menu_step.node:deserialize(
+            nil,
+            new_step_data.initial_data(self.game_ctx, self.menu_ctx)
+        )
+    end
 end
 
 function BaseMenuManager:handle_menu_advance(next_state: string)

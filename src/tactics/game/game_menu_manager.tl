@@ -167,7 +167,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         return children
                     end
                 )
-            ),
+            ):with_initial_data(function(services: GameMenuContext, _session_data: MenuContext): {string: any}
+                return services.config_manager.config or {}
+            end),
         }
     }
 
