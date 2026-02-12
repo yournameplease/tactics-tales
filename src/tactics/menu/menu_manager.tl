@@ -110,6 +110,8 @@ local interface MenuManager
     menu_ctx: MenuContext
     menu_step: MenuStep
     selection_history: { SelectionHistory }
+    -- used to track dirty state for ui
+    revision_count: integer
 
     game_ctx: GameContext
     event_writer: event_writer.EventWriter
@@ -160,6 +162,7 @@ function menu_manager.new(
 
     self.game_ctx = ctx
     self.event_writer = event_writer.new(bus)
+    self.revision_count = 0
 
     return self
 end
@@ -177,6 +180,8 @@ function BaseMenuManager:populate_menu_state(new_step: menu_types.MenuStep)
             new_step_data.initial_data(self.game_ctx, self.menu_ctx)
         )
     end
+
+    self.revision_count = self.revision_count + 1
 end
 
 function BaseMenuManager:handle_menu_advance(next_state: string)

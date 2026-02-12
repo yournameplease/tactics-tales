@@ -167,8 +167,15 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         return children
                     end
                 )
-            ):with_initial_data(function(services: GameMenuContext, _session_data: MenuContext): {string: any}
-                return services.config_manager.config or {}
+            ):with_initial_data(function(_services: GameMenuContext, _session_data: MenuContext): {string: any}
+                return {
+                    log_level = DYNAMIC_CONFIG.log_level,
+                    draw_flexbox_debug = DYNAMIC_CONFIG.draw_flexbox_debug,
+                    draw_target_debug = DYNAMIC_CONFIG.draw_target_debug,
+                    profile = DYNAMIC_CONFIG.profile,
+                    head_scale = DYNAMIC_CONFIG.head_scale,
+                    dialogue_speed = DYNAMIC_CONFIG.dialogue_speed,
+                }
             end),
         }
     }
