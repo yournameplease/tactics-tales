@@ -22,7 +22,6 @@ local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local list = require("src.tactics.menu.cursor.nested.list")
 local grid = require("src.tactics.menu.cursor.nested.grid")
 local button = require("src.tactics.menu.cursor.button")
-local ButtonCursor = button.ButtonCursor
 
 local record BattleMenuManager
     is menu_manager.MenuManager
@@ -203,7 +202,7 @@ HANDLERS["unmove_acting_unit"] = function(
     services: BattleMenuContext,
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
-    value: grid.NestedGridValue
+    _value: grid.NestedGridValue
 )
     services.tactics_engine:jump_unit_to_point(
         session_context.acting_unit.unit,

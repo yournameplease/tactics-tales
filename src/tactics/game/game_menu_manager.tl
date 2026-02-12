@@ -14,7 +14,6 @@ local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local list = require("src.tactics.menu.cursor.nested.list")
 local button = require("src.tactics.menu.cursor.button")
 local ButtonDefinition = button.ButtonDefinition
-local ButtonCursor = button.ButtonCursor
 local selection = require("src.tactics.menu.cursor.selection")
 local story = require("src.tactics.story.types")
 local StoryId = story.StoryId
