@@ -47,6 +47,22 @@ function array_2d.new<V>(w: integer, h: integer, initial?: V): Array2D<V>
     return out
 end
 
+function array_2d.new_from_function<V>(w: integer, h: integer, initial: function(Point): V): Array2D<V>
+    local out: Array2DImpl<V> = {
+        w = w,
+        h = h,
+        data = {}
+    }
+    for x=1, w do
+        out.data[x] = {}
+        for y=1,h do
+            out.data[x][y] = initial(point.of(x-1,y-1))
+        end 
+    end
+    setmetatable(out, { __index = Array2DImpl })
+    return out
+end
+
 function Array2DImpl:is_in_range(x: integer, y: integer): boolean
     return x >= 0 and y >= 0 and x < self.w and y < self.h
 end
