@@ -41,7 +41,7 @@ function unit_info.new(props: UnitInfo): UnitInfo
     -- ROW 1: Name and Level
     info_col:add(text_node.new({
         rows = 1,
-        func = function(state: UIContextManager): {string}
+        func = function(_self, state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
             if not u then return { "No Unit Selected" } end
             return { u.character.name }
@@ -51,7 +51,7 @@ function unit_info.new(props: UnitInfo): UnitInfo
     -- ROW 2-4: HP, Weapon
     info_col:add(text_node.new({
         rows = 3,
-        func = function(state: UIContextManager): {string}
+        func = function(_self, state: UIContextManager): {string}
             local u = state.battle_context.last_hovered_unit
             if not u then return { "", "", "" } end
 
