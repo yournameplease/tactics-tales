@@ -107,16 +107,26 @@ function GenericMenuBox:compute_children(state: UIContextManager)
 				})
 			end
 			child_box:add(box.spacer(1))
-			child_box:add(sprite_node.static(22, {h = 9, w = 9}))
+			child_box:add(sprite_node.static(22, {
+				h = 9,
+				w = 9,
+				hover_event = menu_mouse_selection.leaf(node, "decrement_selection", nil),
+			}))
 			child_box:add(text_node.new{
-				text = {node:get_selected_text()},
+				func = function(_self, _state): {string}
+					return {node:get_selected_text()}
+				end,
 				auto_height = true,
 				auto_width = true,
 				draw_properties = {
 					wrap = "no_wrap",
 				}
 			})
-			child_box:add(sprite_node.static(23, {h = 9, w = 9}))
+			child_box:add(sprite_node.static(23, {
+				h = 9,
+				w = 9,
+				hover_event = menu_mouse_selection.leaf(node, "increment_selection", nil),
+			}))
 		end
 		pt.add(children, child_box)
 	end

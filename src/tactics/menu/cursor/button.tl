@@ -62,9 +62,7 @@ function button.definition(
 end
 
 function ButtonCursor:update_joy(
-	joy: Joypad,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+	joy: Joypad
 ): MenuSignal
 	if self.select_handler ~= nil or self.next_state ~= nil then
 		if joy.ap then
@@ -89,21 +87,18 @@ function ButtonCursor:update_joy(
 	return menu_signal.ignored()
 end
 
-function ButtonCursor:update_mouse(
-    mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
-): MenuSignal
-    if hovered == nil then return menu_signal.ignored() end
-
-	local command: menu_types.MenuCommand
-	if hovered.on_lmb_command and mouse.mlp then
-		command = hovered.on_lmb_command
-	elseif hovered.on_lmb_command and mouse.mlp then
-		command = hovered.on_lmb_command
+function ButtonCursor:claim_focus(
+    _selection: mouse_menu_selection.MenuMouseSelection,
+    _child: menu_cursor.MenuNode
+)
+	if self.parent then
+		self.parent:claim_focus(nil, self)
 	end
-	    
+end
+
+function ButtonCursor:handle_command(
+    command: menu_types.MenuCommand
+): MenuSignal
 	if self.select_handler ~= nil or self.next_state ~= nil then
 		if command == "button_primary" then
 			if self.select_handler ~= nil then
@@ -135,12 +130,14 @@ function ButtonCursor:serialize(): SerializedMenu
 end
 
 function ButtonDefinition:to_cursor(
+	parent: menu_cursor.MenuNode,
     _game_ctx: GameContext,
     _menu_ctx: MenuContext,
     _menu_state: menu_types.MenuState
 ): menu_cursor.MenuNode
     local cursor: ButtonCursor = {
         type = "button",
+        parent = parent,
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (ButtonCursor as {string: any})[k] then

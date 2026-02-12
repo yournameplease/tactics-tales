@@ -71,7 +71,7 @@ function MenuStepDefinition:build(
     menu_state: menu_types.MenuState
 ): MenuStep
     local out: MenuStep = {
-        node = self.node:to_cursor(game_ctx, menu_ctx, menu_state),
+        node = self.node:to_cursor(nil, game_ctx, menu_ctx, menu_state),
     }
     return setmetatable(out, { __index = function(_: any, k: string): any 
             if (MenuStep as {string: any})[k] then
@@ -231,13 +231,27 @@ function BaseMenuManager:update(input: InputContext)
     local signal = input_context.handle_update(
         input,
         function(joy: Joypad): MenuSignal
-            return self.menu_step.node:update_joy(joy, self.game_ctx, self.menu_ctx)
+            return self.menu_step.node:update_joy(joy)
         end,
         function(
             mouse: Mouse,
             hovered: mouse_menu_selection.MenuMouseSelection
         ): MenuSignal
-            return self.menu_step.node:update_mouse(mouse, hovered, self.game_ctx, self.menu_ctx)
+            if hovered == nil then return menu_signal.ignored() end
+            
+            hovered.node:claim_focus(hovered, nil)
+            
+        	local command: menu_types.MenuCommand
+        	if hovered.on_lmb_command and mouse.mlp then
+        		command = hovered.on_lmb_command
+        	elseif hovered.on_lmb_command and mouse.mlp then
+        		command = hovered.on_lmb_command
+        	end
+        	if command then
+        	    log.debug("Got mouse command: "..command.." for "..hovered.node.id)
+                return hovered.node:handle_command(command)
+        	end
+        	return menu_signal.ignored()
         end
     )
 

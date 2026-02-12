@@ -43,7 +43,6 @@ local record NestedGridChild
 	child: MenuNode
 end
 
--- TODO: this is not ideal for memory.  ignoring for now though
 local record NestedGridNode
     is menu_cursor.MenuContainer
     where self.type == "grid"
@@ -54,6 +53,7 @@ local record NestedGridNode
     legal_tiles: array_2d.Array2D<MenuTileHighlight>
     max_path_length: integer
     children: {NestedGridChild}
+    child_array: array_2d.Array2D<MenuNode>
 end
 
 local record NestedGridChildDefinition
@@ -62,12 +62,13 @@ local record NestedGridChildDefinition
 end
 
 function NestedGridChildDefinition:to_cursor(
+	parent: NestedGridNode,
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
 ): NestedGridChild
 	return setmetatable({
-		child = self.child:to_cursor(game_ctx, menu_ctx, menu_state)	
+		child = self.child:to_cursor(parent, game_ctx, menu_ctx, menu_state)	
 	},{
 		__index = self
 	})
@@ -106,20 +107,20 @@ function nested_grid.definition(
     return setmetatable(props, { __index = NestedGridDefinition })
 end
 
-function NestedGridNode:get_selected_child(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuNode
+function NestedGridNode:get_first_child(p: Point, game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuNode
 	for _,child in ipairs(self.children) do
-		if child.filter(self.point, game_context, menu_ctx) then
+		if child.filter(p, game_context, menu_ctx) then
 			return child.child
 		end
 	end
 end
 
-function NestedGridNode:get_focused_leaf(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuLeaf
-	local child = self:get_selected_child(game_context, menu_ctx)
+function NestedGridNode:get_focused_leaf(): menu_cursor.MenuLeaf
+	local child = self.child_array:get_point(self.point)
 	if child is menu_cursor.MenuLeaf then
 		return child
 	elseif child is menu_cursor.MenuContainer then
-		return child:get_focused_leaf(game_context, menu_ctx)
+		return child:get_focused_leaf()
 	end
 end
 
@@ -131,18 +132,16 @@ function NestedGridNode:get_nested_grid_value(): NestedGridValue
 end
 
 function NestedGridNode:update_joy(
-	joy: Joypad,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+	joy: Joypad
 ): MenuSignal
-	local focused_leaf = self:get_focused_leaf(game_ctx, menu_ctx)
+	local focused_leaf = self:get_focused_leaf()
 
 	local signal = menu_signal.ignored()
 	if focused_leaf ~= nil then
 		if focused_leaf is ButtonCursor then
 			focused_leaf.value = self:get_nested_grid_value()
 		end
-		signal = focused_leaf:update_joy(joy, game_ctx, menu_ctx)
+		signal = focused_leaf:update_joy(joy)
 	end
 
     if signal.type ~= "ignored" then return signal end
@@ -165,42 +164,32 @@ function NestedGridNode:update_joy(
     return menu_signal.ignored()
 end
 
-function NestedGridNode:update_mouse(
-    mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+function NestedGridNode:claim_focus(
+    selection: mouse_menu_selection.MenuMouseSelection,
+    _child: menu_cursor.MenuNode
+)
+	if selection ~= nil then
+		if selection is mouse_menu_selection.Grid then
+			self.point.x = selection.x
+			self.point.y = selection.y
+		end
+	end
+	if self.parent then
+		self.parent:claim_focus(nil, self)
+	end
+end
+
+function NestedGridNode:handle_command(
+    command: menu_types.MenuCommand
 ): MenuSignal
-    if hovered == nil then return menu_signal.ignored() end
+	local focused_leaf = self:get_focused_leaf()
 
-	local focused_leaf = self:get_focused_leaf(game_ctx, menu_ctx)
-
-	local signal = menu_signal.ignored()
 	if focused_leaf ~= nil then
 		if focused_leaf is ButtonCursor then
 			focused_leaf.value = self:get_nested_grid_value()
 		end
-		signal = focused_leaf:update_mouse(mouse, hovered, game_ctx, menu_ctx)
+		return focused_leaf:handle_command(command)
 	end
-    if signal.type ~= "ignored" then return signal end
-
-    if hovered is mouse_menu_selection.Grid then
-        local prev_point = self.point:copy()
-        self.point.x = pt.mid(0, hovered.x, self.x_max - 1)
-        self.point.y = pt.mid(0, hovered.y, self.y_max - 1)
-
-        if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
-            if self.legal_tiles:get_point(self.point) then
-            
-                local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
-                    return h ~= nil and h.reachable
-                end)
-                self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-            end
-        end
-    end
-
-    return menu_signal.ignored()
 end
 
 function NestedGridNode:serialize(): SerializedMenu
@@ -236,12 +225,14 @@ function NestedGridNode:serialize(): SerializedMenu
 end
 
 function NestedGridDefinition:to_cursor(
+	parent: menu_cursor.MenuNode,
     game_ctx: GameContext,
     menu_ctx: MenuContext,
     menu_state: menu_types.MenuState
 ): menu_cursor.MenuNode
     local cursor: NestedGridNode = {
         type = "grid",
+        parent = parent,
         x_max = 16,
         y_max = 16,
 		point = point.of(0, 0),
@@ -262,19 +253,23 @@ function NestedGridDefinition:to_cursor(
     else
         cursor.legal_tiles = nil
     end
-    if self.children ~= nil then
-		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
-				return c:to_cursor(game_ctx, menu_ctx, menu_state)
-
-			end)(self.children)
-	end
-    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+	setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (NestedGridNode as {string: any})[k] then
                 return (NestedGridNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end
         })
+	cursor.child_array = array_2d.new(cursor.x_max, cursor.y_max)
+    if self.children ~= nil then
+		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
+			return c:to_cursor(cursor, game_ctx, menu_ctx, menu_state)
+		end)(self.children)
+		cursor.child_array = cursor.child_array:map_points(function(p: Point): MenuNode
+			return cursor:get_first_child(p, game_ctx, menu_ctx)
+		end)
+	end
+	return cursor
 end
 
 function nested_grid.grid(

@@ -72,21 +72,19 @@ function NestedMenuNode:get_selected_child(): menu_cursor.MenuNode
 	return self.children[self.i]
 end
 
-function NestedMenuNode:get_focused_leaf(game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuLeaf
+function NestedMenuNode:get_focused_leaf(): menu_cursor.MenuLeaf
 	local child = self:get_selected_child()
 	if child is menu_cursor.MenuLeaf then
 		return child
 	elseif child is menu_cursor.MenuContainer then
-		return child:get_focused_leaf(game_context, menu_ctx)
+		return child:get_focused_leaf()
 	end
 end
 
 function NestedMenuNode:update_joy(
-	joy: Joypad,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+	joy: Joypad
 ): MenuSignal
-	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_joy(joy, game_ctx, menu_ctx)
+	local signal = self:get_focused_leaf():update_joy(joy)
     if signal ~= nil and signal.type ~= "ignored" then return signal end
 
     if self.direction == "column" then
@@ -111,22 +109,25 @@ function NestedMenuNode:update_joy(
     return menu_signal.ignored()
 end
 
-function NestedMenuNode:update_mouse(
-    mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection,
-    game_ctx: GameContext,
-    menu_ctx: MenuContext
+function NestedMenuNode:claim_focus(
+    _selection: mouse_menu_selection.MenuMouseSelection,
+    child: menu_cursor.MenuNode
+)
+	if child ~= nil then
+		for i,c in ipairs(self.children) do
+			if c == child then
+				self.i = i
+			end
+		end
+	end
+	if self.parent then
+		self.parent:claim_focus(nil, self)
+	end
+end
+
+function NestedMenuNode:handle_command(
+    _command: menu_types.MenuCommand
 ): MenuSignal
-    if hovered == nil then return menu_signal.ignored() end
-
-	local signal = self:get_focused_leaf(game_ctx, menu_ctx):update_mouse(mouse, hovered, game_ctx, menu_ctx)
-    if signal ~= nil and signal.type ~= "ignored" then return signal end
-
-    if hovered is mouse_menu_selection.List then
-        if hovered.i > 0 and hovered.i <= #self.children then
-            self.i = hovered.i
-        end
-    end
     return menu_signal.ignored()
 end
 
@@ -162,21 +163,28 @@ function NestedMenuNode:serialize(): SerializedMenu
 	return out
 end
 
-function NestedMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, menu_state: menu_types.MenuState): menu_cursor.MenuNode
+function NestedMenuDefinition:to_cursor(
+	parent: menu_cursor.MenuNode,
+	game_ctx: GameContext,
+	menu_ctx: MenuContext,
+	menu_state: menu_types.MenuState
+): menu_cursor.MenuNode
     local cursor: NestedMenuNode = {
         type = "list",
+        parent = parent,
         i = 1,
-        children = lists.map(function(def: MenuNodeDefinition): MenuNode
-            return def:to_cursor(game_ctx, menu_ctx, menu_state)
-        end)(self.get_children(game_ctx, menu_ctx)),
     }
-    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+    setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (NestedMenuNode as {string: any})[k] then
                 return (NestedMenuNode as {string: any})[k]
             end
             return (self as {string: any})[k]
         end
         })
+	cursor.children = lists.map(function(def: MenuNodeDefinition): MenuNode
+            return def:to_cursor(cursor, game_ctx, menu_ctx, menu_state)
+        end)(self.get_children(game_ctx, menu_ctx))
+    return cursor
 end
 
 --- builders

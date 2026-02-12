@@ -153,9 +153,7 @@ function SelectionMenuNode:decrement_selection()
 end
 
 function SelectionMenuNode:update_joy(
-	joy: Joypad,
-    _game_ctx: GameContext,
-    _menu_ctx: MenuContext
+	joy: Joypad
 ): MenuSignal
     if self.direction == "vertical" then
 		if joy.dyp == 1 then
@@ -179,21 +177,18 @@ function SelectionMenuNode:update_joy(
 	return menu_signal.ignored()
 end
 
-function SelectionMenuNode:update_mouse(
-    mouse: Mouse,
-    hovered: mouse_menu_selection.MenuMouseSelection,
-    _game_ctx: GameContext,
-    _menu_ctx: MenuContext
-): MenuSignal
-    if hovered == nil then return menu_signal.ignored() end
-
-	local command: menu_types.MenuCommand
-	if hovered.on_lmb_command and mouse.mlp then
-		command = hovered.on_lmb_command
-	elseif hovered.on_lmb_command and mouse.mlp then
-		command = hovered.on_lmb_command
+function SelectionMenuNode:claim_focus(
+    _selection: mouse_menu_selection.MenuMouseSelection,
+    _child: menu_cursor.MenuNode
+)
+	if self.parent then
+		self.parent:claim_focus(nil, self)
 	end
+end
 
+function SelectionMenuNode:handle_command(
+    command: menu_types.MenuCommand
+): MenuSignal
 	if command == "increment_selection" then
 		self:increment_selection()
 		return menu_signal.consumed()
@@ -202,6 +197,8 @@ function SelectionMenuNode:update_mouse(
 		self:decrement_selection()
 		return menu_signal.consumed()
 	end
+
+    return menu_signal.ignored()
 end
 
 function SelectionMenuNode:serialize(): SerializedMenu
@@ -213,9 +210,15 @@ function SelectionMenuNode:serialize(): SerializedMenu
 	}
 end
 
-function SelectionMenuDefinition:to_cursor(game_ctx: GameContext, menu_ctx: MenuContext, _: menu_types.MenuState): menu_cursor.MenuNode
+function SelectionMenuDefinition:to_cursor(
+	parent: menu_cursor.MenuNode,
+	game_ctx: GameContext,
+	menu_ctx: MenuContext,
+	_: menu_types.MenuState
+): menu_cursor.MenuNode
     local cursor: SelectionMenuNode = {
         type = "selection",
+        parent = parent,
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
     }

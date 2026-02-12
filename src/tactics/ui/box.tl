@@ -50,6 +50,9 @@ local interface UIElement
     decoration: DecorationStyle
     transparent: boolean
 
+    -- if present, return this instead of calling the handler
+    hover_event: MenuMouseSelection
+    
     children: { UIElement }
 
     add: function(self, UIElement): UIElement
@@ -123,6 +126,8 @@ function box.new(props: UIElement): UIElement
     if props.get_selection_at ~= nil then
         self.get_selection_at = props.get_selection_at
     end
+
+    self.hover_event = props.hover_event
 
     assert(not (self.flex_grow > 0  and (self.auto_width and self.auto_height)), "Cannot flex grow with auto_width and auto_height")
     assert(
@@ -554,7 +559,9 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
             end
         end
     end
-    if elem.get_selection_at ~= nil then
+    if elem.hover_event then
+        return elem.hover_event
+    elseif elem.get_selection_at ~= nil then
         log.trace("checking box for selection", elem.x, elem.y)
         return elem:get_selection_at(mx - elem.x, my - elem.y)
     end
