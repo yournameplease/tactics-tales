@@ -185,6 +185,7 @@ global record __WindowAttribs
 	video_mode: integer
 	wallpaper: boolean
 	width: integer
+	hide_cursor: string
 	x: integer
 	y: integer
 	z: integer
