@@ -124,11 +124,9 @@ local interface SerializedMenuState
 	children: {string: SerializedMenuState}
 end
 
-local type SerializedMenuData = {string: any}
-
-local interface SerializedMenu
+local record SerializedMenu
 	state: SerializedMenuState
-	data: SerializedMenuData
+	data: {string: any}
 end
 
 local interface MenuNode
@@ -140,7 +138,7 @@ local interface MenuNode
     handle_command: function(self, menu_types.MenuCommand): MenuSignal
     claim_focus: function(self, MenuMouseSelection, child: MenuNode)
     serialize: function(self): SerializedMenu
-    deserialize: function(self, state: SerializedMenuState, data: SerializedMenuData)
+    deserialize: function(self, state: SerializedMenuState, data: {string: any})
 end
 
 local interface MenuLeaf
@@ -262,7 +260,6 @@ local menu_cursor = {
     MenuContainerDefinition = MenuContainerDefinition,
 	SerializedMenu = SerializedMenu,
 	SerializedMenuState = SerializedMenuState,
-	SerializedMenuData = SerializedMenuData,
 	
 
     mouse_selection = mouse_selection,

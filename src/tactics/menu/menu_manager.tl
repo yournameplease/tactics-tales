@@ -274,8 +274,10 @@ function BaseMenuManager:update(input: InputContext)
             )
             if should_back then
                 if self.menu_step.back_handler then
-                    local handler = self.menu_handlers[self.menu_step.back_handler]
+                    local handler_id = self.menu_step.back_handler
+                    local handler = self.menu_handlers[handler_id]
                     assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                    log.debug("Calling menu handler: "..handler_id)
                     handler(
                         self.game_ctx,
                         self:serialize().node.data,
@@ -298,6 +300,11 @@ function BaseMenuManager:update(input: InputContext)
     elseif signal is menu_signal.CallHandler then
         local handler = self.menu_handlers[signal.handler]
         assert(handler ~= nil, "Bad handler for id "..signal.handler)
+        log.debug("Calling menu handler: "..signal.handler)
+        local ser = self:serialize()
+        log.debug(ser.menu_id)
+        log.debug(ser.step)
+        log.debug(ser.node)
         handler(
             self.game_ctx,
             self:serialize().node.data,

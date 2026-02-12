@@ -190,6 +190,7 @@ function NestedGridNode:handle_command(
 		end
 		return focused_leaf:handle_command(command)
 	end
+	return menu_signal.ignored()
 end
 
 function NestedGridNode:serialize(): SerializedMenu
@@ -213,7 +214,7 @@ function NestedGridNode:serialize(): SerializedMenu
 		local child_out = child.child:serialize()
 
 		if child_out.data then
-			maps.merge(out.data, child_out.data)
+			maps.add_all(out.data, child_out.data)
 		end
 
 		if child_out.state and child.child.id then

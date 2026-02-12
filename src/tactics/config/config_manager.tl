@@ -2,8 +2,10 @@
 --- Manages the game's dynamic configuration.
 --- Loads user settings and provides default values.
 
+require("profiler")
+
 local DEFAULT_CONFIG: DynamicConfig = {
-	log_level = "WARN",
+	log_level = "DEBUG",
 	draw_flexbox_debug = false,
 	draw_target_debug = false,
 	profile = false,
@@ -29,11 +31,13 @@ end
 function ConfigManagerImpl:store_config(new_config: DynamicConfig)
 	self.user_config = new_config
 	pt.store("/appdata/tactics_tales/config.pod", new_config, nil)
+	
+    local should_profile = DYNAMIC_CONFIG.profile
+    profile.enabled(should_profile, should_profile)
 end
 
 function ConfigManagerImpl:reset_config()
-	self.user_config = {}
-	pt.store("/appdata/tactics_tales/config.pod", {}, nil)
+	self:store_config({})
 end
 
 function config_manager.new(): ConfigManager
