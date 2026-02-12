@@ -12,6 +12,8 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 local bm = require("src.tactics.battle.battle_map")
 local nested_list = require("src.tactics.menu.cursor.nested.list")
 local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUIContext
+local menu_cursor = require("src.tactics.menu.menu_cursor")
+local MenuNode = menu_cursor.MenuNode
 local lists = require("src.tactics.util.lists")
 local point = require("src.tactics.util.point")
 local Point = point.Point
@@ -27,6 +29,7 @@ local record TacticsMap
     map_width: integer
     map_height: integer
     child_object: any
+    menu_node: MenuNode
 end
 setmetatable(TacticsMap, { __index = box.Box})
 
@@ -228,6 +231,8 @@ end
 --- (e.g., for action selection), and is removed otherwise.
 function TacticsMap:compute_children(state: UIContextManager)
     local menu = state.battle_context.battle_menu_manager
+    self.menu_node = menu.menu_step.node
+    
     local cursor = menu.menu_step.node
     local cursor_tile = get_cursor_tile(state.battle_context)
 
@@ -499,7 +504,10 @@ function TacticsMap:get_selection_at(
     if tx >= 0 and tx < MAP_WIDTH
         and ty >= 0 and ty < MAP_HEIGHT
     then
-        return mouse_menu_selection.grid(tx, ty, "button_primary", "button_secondary")
+        return mouse_menu_selection.grid(
+            tx, ty,
+            self.menu_node,
+            "button_primary", "button_secondary")
     end
     return nil
 end

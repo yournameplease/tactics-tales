@@ -14,7 +14,7 @@ local record CombatPreview
 end
 setmetatable(CombatPreview, { __index = box.Box })
 
-local function get_preview_text(state: UIContextManager): {string}
+local function get_preview_text(_self, state: UIContextManager): {string}
     local attacker = state.battle_context.acting_unit
     local defender = state.battle_context.last_hovered_unit
     local attacker_tile = state.battle_context.destination

@@ -18,7 +18,7 @@ function BattleSummary.new(): BattleSummary
     self:add(text_node.title({ func = function(_state: UIContextManager): { string } return { "BATTLE" }  end }))
     self:add(text_node.new({
         auto_height = true,
-        func = function(state: UIContextManager): { string }
+        func = function(_self, state: UIContextManager): { string }
             return state.battle_context.objective_text
         end,
         draw_properties = {

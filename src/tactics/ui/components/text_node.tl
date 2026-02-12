@@ -28,7 +28,7 @@ end
 
 local record TextNode
     is box.UIElement, TextUIElement
-    func: function(UIContextManager): { string }
+    func: function(self, UIContextManager): { string }
     text: { string }
     rows: integer
 end
@@ -37,27 +37,6 @@ setmetatable(TextNode, { __index = box.Box })
 
 local TEXT_HEIGHT = 8
 local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
-
-function TextNode:compute_children(state: UIContextManager)
-    -- compute text as a "child", so it may be measured
-    -- in the same frame
-    local lines =
-        self.text
-        or (self.func and self.func(state))
-
-    if self.rows then
-        assert(
-                #lines ==
-                self.rows, "`func` should return expected number of rows"
-        )
-    end
-
-    local text_obj = self.text_object
-    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
-    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
-    text_obj:set_lines(lines)
-    text_obj:calculate_wrapping()
-end
 
 function TextNode:measure(depth: integer)
     local text_obj = self.text_object
@@ -124,6 +103,31 @@ local text_node = {
     TextNode = TextNode,
     TextUIElement = TextUIElement,
 }
+
+function text_node._compute_children(self: TextNode, state: UIContextManager)
+    -- compute text as a "child", so it may be measured
+    -- in the same frame
+    local lines =
+        self.text
+        or (self.func and self:func(state))
+
+    if self.rows then
+        assert(
+                #lines ==
+                self.rows, "`func` should return expected number of rows"
+        )
+    end
+
+    local text_obj = self.text_object
+    text_obj:set_width(self.w-self.internal_margin.l-self.internal_margin.r)
+    text_obj:set_height(self.h-self.internal_margin.t-self.internal_margin.b)
+    text_obj:set_lines(lines)
+    text_obj:calculate_wrapping()
+end
+
+function TextNode:compute_children(state: UIContextManager)
+    text_node._compute_children(self, state)
+end
 
 function text_node.new(props: TextNode): TextNode
     local self = box.new(props) as TextNode
