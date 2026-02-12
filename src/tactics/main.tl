@@ -93,9 +93,8 @@ function _draw()
             user_input.active_method == "joypad"
             or user_input.active_method == "keyboard"
         then
-            pt.set_window_attributes({cursor = 0})
+            pt.set_window_attributes({hide_cursor = "until_move"})
         elseif user_input.active_method == "mouse" then
-            pt.set_window_attributes({cursor = 1})
         end
     end
 
