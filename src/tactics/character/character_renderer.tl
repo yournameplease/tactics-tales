@@ -150,7 +150,7 @@ end
 local function set_palette(
 	drawable_unit: DrawableCharacterInstance,
 	draw_outline: boolean,
-	look_direction: LookDirection
+	_look_direction: LookDirection
 )
 	local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
@@ -173,28 +173,28 @@ local function set_palette(
 	-- todo: looking support
 	-- NOTE: this will not work with prebaking the whole unit color palette.
 	-- consider organizing colors into continuous segments?
-	do
-		if look_direction ~= nil then
-			if look_direction == "left" and drawable_unit.facing.horizontal == "left"
-				or look_direction == "right" and (drawable_unit.facing.horizontal == "right" or drawable_unit.facing.horizontal == nil)
-			then
-			    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-			    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-			    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
-			    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
-			else
-			    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
-			    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
-			    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-			    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
-			end
-		else
-		    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-		    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-		    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-		    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
-		end
-	end
+	-- do
+	-- 	if look_direction ~= nil then
+	-- 		if look_direction == "left" and drawable_unit.facing.horizontal == "left"
+	-- 			or look_direction == "right" and (drawable_unit.facing.horizontal == "right" or drawable_unit.facing.horizontal == nil)
+	-- 		then
+	-- 		    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+	-- 		    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+	-- 		    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
+	-- 		    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
+	-- 		else
+	-- 		    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
+	-- 		    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
+	-- 		    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+	-- 		    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+	-- 		end
+	-- 	else
+	-- 	    pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+	-- 	    pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+	-- 	    pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+	-- 	    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+	-- 	end
+	-- end
 end
 
 ---@desc
