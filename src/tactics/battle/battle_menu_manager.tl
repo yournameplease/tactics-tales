@@ -3,6 +3,7 @@
 --- Defines the structure and flow of in-battle menus, such as the
 --- unit action menu and deployment screen.
 
+local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local Point = require("src.tactics.util.point").Point
@@ -95,26 +96,28 @@ local record BattlePreparationsContext
     swap_target: Point
 end
 
-local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): array_2d.Array2D<grid.MenuTileHighlight>
-    return msb.battle_map:get_tiles_array_by_label(msb.deployment_tiles_tag)
-        :map(function(is_deployment: boolean): grid.MenuTileHighlight
-            return {
-                valid_selection = is_deployment,
-            }
+local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): Userdata
+    return msb.battle_map:get_tiles_userdata_by(
+        "u8",
+        function(p: Point): integer
+            return msb.battle_map:tile_has_label(p, msb.deployment_tiles_tag)
+                and HIGHLIGHT.IS_VALID
+                or 0
         end)
 end
 
-local function get_players_to_act_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): array_2d.Array2D<grid.MenuTileHighlight>
-    --todo
-    return msb.battle_map:get_tiles_array_by_label(msb.deployment_tiles_tag)
-        :map(function(is_deployment: boolean): grid.MenuTileHighlight
-            return {
-                valid_selection = is_deployment,
-            }
+local function get_players_to_act_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): Userdata
+    return msb.battle_map:get_tiles_userdata_by(
+        "u8",
+        function(p: Point): integer
+            local unit = msb.battle_map:get_at_tile(p)
+            return (unit and not unit.has_acted)
+                and HIGHLIGHT.IS_VALID
+                or 0
         end)
 end
 
-local function get_tile_highlights_in_move_and_attack_range(msb: BattleMenuContext, ctx: BattleMainMenuContext): array_2d.Array2D<grid.MenuTileHighlight>
+local function get_tile_highlights_in_move_and_attack_range(msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
     return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx.acting_unit.unit)
 end
 
@@ -400,7 +403,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("attack_unit")
                             :advance_to("SELECT_ACTION")
                     )
-                    :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): array_2d.Array2D<grid.MenuTileHighlight>
+                    :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
                         return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
                     end)
                     :with_path_length(function(_: BattleMenuContext, ctx: BattleMainMenuContext): integer

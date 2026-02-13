@@ -190,8 +190,9 @@ end
 --- If the target is not immediately reachable, this function will backtrack
 --- along the given path until the target is within movement range,
 --- then calculate and append the new segment to create a valid path.
-function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_length: integer, legal_tiles: array_2d.Array2D<boolean>): {Point}
-    if not legal_tiles:get_point(target) then
+--- legal_tiles should be 1 for reachable tiles and 0 otherwise
+function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_length: integer, legal_tiles: Userdata): {Point}
+    if legal_tiles:get(target.x, target.y) == 1 then
         return path
     end
     if path[#path] == target then
@@ -202,7 +203,7 @@ function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_leng
     log.trace("Extend path", #path, target, max_length)
 
     local distance = function(tile: Point): integer
-        return legal_tiles:get_point(tile) and 1 or 999
+        return (legal_tiles:get(tile.x, tile.y) == 1) and 1 or 999
     end
     local extend_path = function(current_path: {Point}, t: Point, full_map: array_2d.Array2D<ShortestPathEntry>): {Point}
         local new_points = { t }
