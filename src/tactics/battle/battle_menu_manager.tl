@@ -103,7 +103,7 @@ local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenu
         function(p: Point): integer
             return msb.battle_map:tile_has_label(p, msb.deployment_tiles_tag)
                 and HIGHLIGHT.IS_VALID
-                or 0x4
+                or 0
         end)
 end
 
