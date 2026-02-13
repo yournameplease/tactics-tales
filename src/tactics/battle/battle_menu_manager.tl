@@ -257,6 +257,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :advance_to("SELECT_SWAP_TARGET")
                     )
                     :with_tile_highlights(get_deployment_tiles)
+                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                        return services.tactics_engine.active_point
+                    end)
                 )
                 :with_previous_step("DEPLOYMENT_MENU"),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
@@ -270,6 +273,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :advance_to("SELECT_SWAP_UNIT")
                     )
                     :with_tile_highlights(get_deployment_tiles)
+                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                        return services.tactics_engine.active_point
+                    end)
                 )
                 :with_previous_step("SELECT_SWAP_UNIT"),
             ["DEPLOYMENT_MENU"] = step_definition.of_node(
@@ -314,6 +320,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :advance_to("SELECT_DESTINATION")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
+                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                        return services.tactics_engine.active_point
+                    end)
                 ),
              ["SELECT_DESTINATION"] = step_definition.of_node(
                 grid.grid("select_destination")
@@ -333,6 +342,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                     :with_path_anchor(function(_: BattleMenuContext, ctx: BattleMainMenuContext): Point
                         return ctx.acting_unit.point:copy()
+                    end)
+                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                        return services.tactics_engine.active_point
                     end)
                 )
                 :with_previous_step("SELECT_UNIT"),
@@ -396,6 +408,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                     :with_path_anchor(function(_: BattleMenuContext, ctx: BattleMainMenuContext): Point
                         return ctx.acting_unit.point:copy()
+                    end)
+                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                        return services.tactics_engine.active_point
                     end)
                 )
                 :with_previous_step("SELECT_ACTION"),

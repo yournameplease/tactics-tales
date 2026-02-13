@@ -81,6 +81,7 @@ local record NestedGridDefinition
     get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
     get_path_anchor: function(GameContext, MenuContext): Point
     get_max_path_length: function(GameContext, MenuContext): integer
+    get_initial_point: function(GameContext, MenuContext): Point
 end
 
 local record SerializedNestedGridState
@@ -133,11 +134,11 @@ end
 
 function NestedGridNode:move_cursor(p: Point): boolean
     local prev_point = self.point:copy()
-    self.point = p
+    self.point.x = pt.mid(0, p.x, self.x_max)
+    self.point.y = pt.mid(0, p.y, self.y_max)
 
-    if self.legal_tiles ~= nil and self.path ~= nil and self.point ~= prev_point then
+    if self.legal_tiles and self.path and self.point ~= prev_point then
         if self.legal_tiles:get_point(self.point) then
-        
             local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
                 return h ~= nil and h.reachable
             end)
@@ -209,14 +210,10 @@ function NestedGridNode:serialize(): SerializedMenu
 	local state: SerializedNestedGridState = {
 		type = "grid",
 		point = self.point:copy(),
+		path = self.path,
 		tile_highlights = self.legal_tiles,
 		children = {},
 	}
-	if self.path ~= nil then
-		state.path = lists.map(function(p: Point): Point
-			p:copy()
-		end)(self.path)
-	end
 	local out: SerializedMenu = {
 		state = state,
 		data = {},
@@ -260,6 +257,7 @@ function NestedGridDefinition:to_cursor(
         y_max = 16,
 		point = point.of(0, 0),
     }
+    
     if self.get_legal_tiles ~= nil then
         cursor.legal_tiles = self.get_legal_tiles(game_ctx, menu_ctx)
         if self.get_max_path_length ~= nil then
@@ -283,6 +281,12 @@ function NestedGridDefinition:to_cursor(
             return (self as {string: any})[k]
         end
         })
+	if self.get_initial_point then
+		local initial_point = self.get_initial_point(game_ctx, menu_ctx)
+		if initial_point ~= nil then
+			cursor:move_cursor(initial_point)
+		end
+	end
         
     if self.children ~= nil then
 		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
@@ -341,6 +345,13 @@ function NestedGridDefinition:with_tile_highlights(
     get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
 ): NestedGridDefinition
 	self.get_legal_tiles = get_legal_tiles
+	return self
+end
+
+function NestedGridDefinition:with_initial_point(
+    get_initial_point: function(GameContext, MenuContext): Point
+): NestedGridDefinition
+	self.get_initial_point = get_initial_point
 	return self
 end
 

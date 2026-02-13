@@ -55,6 +55,7 @@ end
 local record TacticsEngine
     
     battle_is_blocked: boolean
+    active_point: Point
 
     battle_map: bm.BattleMap
     character_manager: character_manager.CharacterManager
