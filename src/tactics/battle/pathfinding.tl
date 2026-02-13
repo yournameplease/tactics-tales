@@ -192,7 +192,7 @@ end
 --- then calculate and append the new segment to create a valid path.
 --- legal_tiles should be 1 for reachable tiles and 0 otherwise
 function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_length: integer, legal_tiles: Userdata): {Point}
-    if legal_tiles:get(target.x, target.y) == 1 then
+    if legal_tiles:get(target.x, target.y) == 0 then
         return path
     end
     if path[#path] == target then
@@ -203,7 +203,7 @@ function pathfinding.extend_path_to_point(path: {Point}, target: Point, max_leng
     log.trace("Extend path", #path, target, max_length)
 
     local distance = function(tile: Point): integer
-        return (legal_tiles:get(tile.x, tile.y) == 1) and 1 or 999
+        return (legal_tiles:get(tile.x, tile.y) & 1 ~= 0) and 1 or 999
     end
     local extend_path = function(current_path: {Point}, t: Point, full_map: array_2d.Array2D<ShortestPathEntry>): {Point}
         local new_points = { t }

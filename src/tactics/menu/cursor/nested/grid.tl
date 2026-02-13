@@ -140,7 +140,7 @@ function NestedGridNode:move_cursor(p: Point): boolean
 
     if self.legal_tiles and self.path and self.point ~= prev_point then
         if self.legal_tiles:get(self.point.x, self.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
-            local tiles = self.legal_tiles & HIGHLIGHT.IS_REACHABLE
+            local tiles = self.legal_tiles & HIGHLIGHT.IS_VALID >> 1
             self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
         end
     end
@@ -196,6 +196,7 @@ function NestedGridNode:handle_command(
 	local focused_leaf = self:get_focused_leaf()
 
 	if focused_leaf ~= nil then
+		log.debug("Focused leaf: "..focused_leaf.id.." at "..tostring(self.point).." for "..self.id)
 		if focused_leaf is ButtonCursor then
 			focused_leaf.value = self:get_nested_grid_value()
 		end
@@ -261,6 +262,7 @@ function NestedGridDefinition:to_cursor(
         cursor.legal_tiles = self.get_tile_highlights(game_ctx, menu_ctx)
         if self.get_max_path_length ~= nil then
             cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
+            log.debug("Max Path Length: "..cursor.max_path_length)
             if self.get_path_anchor then
                 cursor.path = {self.get_path_anchor(game_ctx, menu_ctx)}
             else

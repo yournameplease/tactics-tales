@@ -373,6 +373,7 @@ function TacticsMap:draw(
     local layers = state.battle_context.battle_map.layers
     local layer_ground = layers.terrain.ground
     profile("compute_path_layer")
+    -- todo: move to ui context
     local layer_path = get_path_layer(state)
     profile("compute_path_layer")
 
