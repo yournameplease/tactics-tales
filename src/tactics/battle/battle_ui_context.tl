@@ -94,6 +94,7 @@ function BattleUIContext:enrich()
             should_recalculate_highlights = true
         end
 
+        log.debug("setting menu tile highlights")
         self.menu_revision = self.battle_menu_manager.revision_count
     end
     if self.marked_units_revision ~= self.tactics_engine.marked_unit_revision then
@@ -188,6 +189,7 @@ function BattleUIContext:enrich()
     end
 
     if should_recalculate_highlights then
+        log.debug("Recalculating tile highlights")
         local hover_unit_highlights: Userdata
         if should_highlight_hovered_unit then
             hover_unit_highlights = self.hovered_unit and self.hovered_unit.valid_tiles
@@ -203,8 +205,8 @@ function BattleUIContext:enrich()
             | hover_unit_highlights
             | tile_interaction_highlights
         
-        for x=0,tile_highlights:width() do
-            for y=0,tile_highlights:height() do
+        for x=0,tile_highlights:width()-1 do
+            for y=0,tile_highlights:height()-1 do
                 local t = tile_highlights:get(x, y)
 
                 local spr = 0
@@ -216,6 +218,8 @@ function BattleUIContext:enrich()
                     spr = 11
                 elseif t & HIGHLIGHT.IS_MARKED ~= 0 then
                     spr = 13
+                elseif t & HIGHLIGHT.IS_VALID ~= 0 then
+                    spr = 10 -- generic menu
                 end
                 self.highlighted_tiles:set(x, y, spr)
             end

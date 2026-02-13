@@ -157,6 +157,8 @@ function tactics_engine.new(
     self.event_writer = event_writer.new(bus)
     self.dialogue_manager = dialogue_manager.new()
     self.dialogue_queue = {}
+
+    self.marked_unit_revision = 0
     self.marked_unit_tiles = pt.userdata("u8", self.battle_map.width, self.battle_map.height)
     
     return self
@@ -389,9 +391,10 @@ end
 function TacticsEngine:recompute_marked_unit_tiles()
     local marked_units = self.battle_map:get_units(BattleUnit.is_marked)
 
-    self.marked_unit_tiles = self.marked_unit_tiles & 0
-    for _,u in ipairs(marked_units) do
-        self.marked_unit_tiles = self.marked_unit_tiles | u.valid_tiles
+    self.marked_unit_tiles = self.marked_unit_tiles - self.marked_unit_tiles
+    for _,unit in ipairs(marked_units) do
+        self.marked_unit_tiles = self.marked_unit_tiles
+            | ((unit.valid_tiles & HIGHLIGHT.CAN_ATTACK) << 1)
     end
 end
 
@@ -403,13 +406,12 @@ function TacticsEngine:handle_mark_unit(p: Point)
         self.marked_unit_revision = self.marked_unit_revision + 1
         if unit.marked then
             unit.marked = false
-            self:recompute_marked_unit_tiles()        
+            self:recompute_marked_unit_tiles()
         else
             unit.marked = true
             self.marked_unit_tiles = self.marked_unit_tiles
                 | ((unit.valid_tiles & HIGHLIGHT.CAN_ATTACK) << 1)
         end
-        unit.marked = not unit.marked
     end
 end
 
