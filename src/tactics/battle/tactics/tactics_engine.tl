@@ -705,7 +705,6 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
     reachable_tiles:foreach(function(x: integer, y: integer, reachable: boolean)
         if reachable then
             local tile = tiles:get(x, y)
-            if tile == nil then tile = 0 end
             tile = tile | HIGHLIGHT.IS_VALID
             tile = tile | HIGHLIGHT.IS_REACHABLE
             tiles:set(x, y, tile)

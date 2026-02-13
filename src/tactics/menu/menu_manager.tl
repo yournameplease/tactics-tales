@@ -288,7 +288,7 @@ function BaseMenuManager:update(input: InputContext)
                     command = self.menu_step.default_lmb
                     hovered.node = self.menu_step.node
             	end
-        	elseif (hovered.on_lmb_command or self.menu_step.default_rmb) and mouse.mlp then
+        	elseif (hovered.on_rmb_command or self.menu_step.default_rmb) and mouse.mlp then
         	    if hovered.on_rmb_command then
             		command = hovered.on_rmb_command
             	else

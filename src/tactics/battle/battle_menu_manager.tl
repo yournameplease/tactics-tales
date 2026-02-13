@@ -320,7 +320,6 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         end,
                         button.builder("non_available_unit")
                             :handle_back("mark_unit")
-                            :advance_to("SELECT_DESTINATION")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
                     :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
