@@ -61,10 +61,7 @@ function _init()
 end
 
 function _update()
-    profile("animation_tick")
     animation_manager:tick()
-    profile("animation_tick")
-    profile("get_user_input")
     user_input = input:get_user_input()
     local input_ctx: input_context.InputContext = nil
     if user_input.active_method == "joypad" or user_input.active_method == "keyboard" then
@@ -78,7 +75,6 @@ function _update()
     else
         unexpected(user_input.active_method)
     end
-    profile("get_user_input")
     profile("game_update")
     game_manager:update(input_ctx)
     profile("game_update")
@@ -98,12 +94,8 @@ function _draw()
         end
     end
 
-    profile("generate_frame_data")
     animation_manager:generate_frame_data()
-    profile("generate_frame_data")
-    profile("enrich_ui_context")
     ui_context:enrich()
-    profile("enrich_ui_context")
     profile("draw")
     ui_manager:calculate(ui_context)
     ui_manager:draw(ui_context)
