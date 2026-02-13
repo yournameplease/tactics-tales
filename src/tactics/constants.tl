@@ -1,0 +1,14 @@
+
+local HIGHLIGHT = {
+	IS_REACHABLE = 0x1,
+	IS_VALID = 0x2,
+	CAN_ATTACK = 0x4,
+	IS_MARKED = 0x8,
+	IS_INTERACTION = 0x10,
+}
+
+local CONSTANTS = {
+	HIGHLIGHT = HIGHLIGHT,
+}
+
+return CONSTANTS

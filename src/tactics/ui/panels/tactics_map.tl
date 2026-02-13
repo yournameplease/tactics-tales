@@ -383,58 +383,7 @@ function TacticsMap:draw(
     
     pt.map(layer_ground, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    do
-        -- todo: this should be precomputed on mark
-        local marked_units = map:get_units(BattleUnit.is_marked)
-        local marked_attack_tiles = fp.pipeline_2(
-            lists.map(function(u: BattleUnit): Userdata return u.valid_tiles end),
-            lists.reduce(
-                pt.userdata("u8", state.battle_context.battle_map.width, state.battle_context.battle_map.height),
-                function(acc: Userdata, elem: Userdata): Userdata
-                    return acc | (elem & 0x4)
-            end)
-        )(marked_units)
-
-        local hovered_unit = state.battle_context.hovered_unit
-
-        local hovered_unit_tiles: Userdata
-        if hovered_unit ~= nil then
-            hovered_unit_tiles = hovered_unit.valid_tiles
-        end
-        -- shouldn't acting unit come from menu manager?
-        local acting_unit = state.battle_context.acting_unit
-        local tile_interaction_highlights = state.battle_context.battle_map:get_tile_highlights()
-
-        local cursor_legal_tiles = state.battle_context.tile_highlights
-
-        local highlighted_tiles = pt.userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
-        for x = 0, self.map_width-1 do
-            for y = 0, self.map_height-1 do
-                -- would like to move this logic into the ui context
-                if cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y) ~= nil and cursor_legal_tiles:get(x, y).valid_selection then
-                    highlighted_tiles:set(x, y, 10)
-                elseif cursor_legal_tiles ~= nil and cursor_legal_tiles:get(x, y) ~= nil and cursor_legal_tiles:get(x, y).can_attack then
-                    highlighted_tiles:set(x, y, 11)
-                elseif tile_interaction_highlights:get(x, y) then
-                    highlighted_tiles:set(x, y, 15)
-                elseif acting_unit == nil
-                    and hovered_unit_tiles ~= nil
-                    and (hovered_unit_tiles:get(x,y) & 0x5) ~= 0
-                then
-                    if (hovered_unit_tiles:get(x, y) & 0x1) ~= 0 then
-                        highlighted_tiles:set(x, y, 10)
-                    elseif (hovered_unit_tiles:get(x, y) & 0x4) ~= 0 then
-                        highlighted_tiles:set(x, y, 11)
-                    end
-                elseif (marked_attack_tiles:get(x, y) & 0x4) ~= 0 then
-                    highlighted_tiles:set(x, y, 13)
-                end
-                
-            end
-        end
-
-        pt.map(highlighted_tiles, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
-    end
+    pt.map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     
     pt.map(layer_path, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency

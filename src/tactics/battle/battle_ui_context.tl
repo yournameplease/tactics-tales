@@ -3,6 +3,7 @@
 --- It aggregates data from various battle systems to be displayed by the UI,
 --- such as unit information, menu states, and objective text.
 
+local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local UIContext = require("src.tactics.ui.ui_context").UIContext
@@ -32,7 +33,7 @@ local record BattleUIContext
     hovered_point: Point
     hovered_path: {Point}
     hovered_unit: BattleUnit
-	tile_highlights: array_2d.Array2D<grid.MenuTileHighlight>
+	menu_tile_highlights: Userdata
 
     last_hovered_unit: BattleUnit
     acting_unit: BattleUnit
@@ -40,6 +41,13 @@ local record BattleUIContext
     objective_text: {string}
 
     active_dialogue: ActiveBattleDialogue
+
+    -- internal stuff
+    
+	menu_revision: integer
+	marked_units_revision: integer
+    tile_highlighted_unit: BattleUnit
+    highlighted_tiles: Userdata
 end
 
 local battle_ui_context = {
@@ -67,20 +75,36 @@ function battle_ui_context.new(
     self.last_hovered_unit = nil
     self.hovered_unit = nil
     self.acting_unit = nil
+
+    self.highlighted_tiles = pt.userdata("i16", self.battle_map.width, self.battle_map.height)
     return self
 end
 
 function BattleUIContext:enrich()
     self.layout = "TACTICS"
+    local should_recalculate_highlights = false
+    local should_highlight_hovered_unit = true
 
     local menu = self.battle_menu_manager:serialize()
     local root_node_state = menu.node.state
+
+    if self.menu_revision ~= self.battle_menu_manager.revision_count then
+        if root_node_state is SerializedNestedGridState then
+            self.menu_tile_highlights = root_node_state.tile_highlights
+            should_recalculate_highlights = true
+        end
+
+        self.menu_revision = self.battle_menu_manager.revision_count
+    end
+    if self.marked_units_revision ~= self.tactics_engine.marked_unit_revision then
+        should_recalculate_highlights = true
+        self.marked_units_revision = self.tactics_engine.marked_unit_revision
+    end
 
     self.hovered_unit = nil
 
     if root_node_state is SerializedNestedGridState then
         self.hovered_point = root_node_state.point
-        self.tile_highlights = root_node_state.tile_highlights
 
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node_state.point
@@ -93,6 +117,7 @@ function BattleUIContext:enrich()
 
         if menu.step == "SELECT_DESTINATION" then
             self.hovered_path = root_node_state.path
+            should_highlight_hovered_unit = false
         else
             self.hovered_path = nil
         end
@@ -150,6 +175,50 @@ function BattleUIContext:enrich()
     if root_node_state is SerializedNestedGridState then
         if menu.step == "SELECT_UNIT" then
             self.acting_unit = nil
+        end
+    end
+
+    local unit_to_highlight: BattleUnit
+    if should_highlight_hovered_unit then
+        unit_to_highlight = self.hovered_unit
+    end
+    if unit_to_highlight ~= self.tile_highlighted_unit then
+        should_recalculate_highlights = true
+        self.tile_highlighted_unit = unit_to_highlight
+    end
+
+    if should_recalculate_highlights then
+        local hover_unit_highlights: Userdata
+        if should_highlight_hovered_unit then
+            hover_unit_highlights = self.hovered_unit and self.hovered_unit.valid_tiles
+        else
+            hover_unit_highlights = self.menu_tile_highlights
+        end
+
+        local marked_unit_highlights = self.tactics_engine.marked_unit_tiles
+
+        local tile_interaction_highlights = self.battle_map:get_tile_highlights()
+
+        local tile_highlights = marked_unit_highlights
+            | hover_unit_highlights
+            | tile_interaction_highlights
+        
+        for x=0,tile_highlights:width() do
+            for y=0,tile_highlights:height() do
+                local t = tile_highlights:get(x, y)
+
+                local spr = 0
+                if t & HIGHLIGHT.IS_REACHABLE ~= 0 then
+                    spr = 10
+                elseif t & HIGHLIGHT.IS_INTERACTION ~= 0 then
+                    spr = 15
+                elseif t & HIGHLIGHT.CAN_ATTACK ~= 0 then
+                    spr = 11
+                elseif t & HIGHLIGHT.IS_MARKED ~= 0 then
+                    spr = 13
+                end
+                self.highlighted_tiles:set(x, y, spr)
+            end
         end
     end
 

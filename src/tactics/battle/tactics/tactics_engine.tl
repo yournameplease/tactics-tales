@@ -5,6 +5,7 @@
 
 require("src.tactics.config")
 
+local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local MenuTileHighlight = require("src.tactics.menu.cursor.nested.grid").MenuTileHighlight
 local point = require("src.tactics.util.point")
 local Point = point.Point
@@ -70,9 +71,9 @@ local record TacticsEngine
     -- queries
     
     is_blocked: function(self): boolean
-    tiles_with_distance_from_unit_attacks: function(self, unit: BattleUnit, point: Point): array_2d.Array2D<MenuTileHighlight>
+    tiles_with_distance_from_unit_attacks: function(self, unit: BattleUnit, point: Point): Userdata
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
-    tiles_in_movement_and_attack_range: function(self, unit: BattleUnit): array_2d.Array2D<MenuTileHighlight>
+    tiles_in_movement_and_attack_range: function(self, unit: BattleUnit): Userdata
     
     -- mutations
     spawn_all: function(
@@ -127,6 +128,9 @@ local record TacticsEngine
     tiles_in_movement_and_attack_range_for_unit: function(self, unit): Userdata
     
     update: function(self, InputContext)
+
+    marked_unit_tiles: Userdata
+    marked_unit_revision: integer
 end
 
 local tactics_engine = {
@@ -153,6 +157,7 @@ function tactics_engine.new(
     self.event_writer = event_writer.new(bus)
     self.dialogue_manager = dialogue_manager.new()
     self.dialogue_queue = {}
+    self.marked_unit_tiles = pt.userdata("u8", self.battle_map.width, self.battle_map.height)
     
     return self
 end
@@ -381,11 +386,29 @@ function TacticsEngine:finish_unit_action(unit: BattleUnit)
     self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
 end
 
+function TacticsEngine:recompute_marked_unit_tiles()
+    local marked_units = self.battle_map:get_units(BattleUnit.is_marked)
+
+    self.marked_unit_tiles = self.marked_unit_tiles & 0
+    for _,u in ipairs(marked_units) do
+        self.marked_unit_tiles = self.marked_unit_tiles | u.valid_tiles
+    end
+end
+
 function TacticsEngine:handle_mark_unit(p: Point)
     local unit = self.battle_map:get_at_tile(p)
     if unit == nil then return end
 
     if unit:is_enemy() then
+        self.marked_unit_revision = self.marked_unit_revision + 1
+        if unit.marked then
+            unit.marked = false
+            self:recompute_marked_unit_tiles()        
+        else
+            unit.marked = true
+            self.marked_unit_tiles = self.marked_unit_tiles
+                | ((unit.valid_tiles & HIGHLIGHT.CAN_ATTACK) << 1)
+        end
         unit.marked = not unit.marked
     end
 end
@@ -610,15 +633,15 @@ end
 
 -- legal tile getters
 
-function TacticsEngine:tiles_with_distance_from_unit_attacks(unit: BattleUnit, tile: Point): array_2d.Array2D<MenuTileHighlight>
+function TacticsEngine:tiles_with_distance_from_unit_attacks(unit: BattleUnit, tile: Point): Userdata
     local targeting = unit.character:get_weapon_targeting()
 
     local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
 
-    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
+    local tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
 
     for _,t in ipairs(tiles_in_distance) do
-        tiles:set_point(t, { can_attack = true, valid_selection = true })
+        tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
     end
 
     return tiles
@@ -683,19 +706,12 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
         if reachable then
             local tile = tiles:get(x, y)
             if tile == nil then tile = 0 end
-            tile = tile | 0x1
-            tile = tile | 0x2
+            tile = tile | HIGHLIGHT.IS_VALID
+            tile = tile | HIGHLIGHT.IS_REACHABLE
             tiles:set(x, y, tile)
+            
             local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, point.of(x, y))
-
-            tiles_in_attack_range:foreach(function(ax: integer, ay: integer, can_attack: MenuTileHighlight)
-                    if can_attack.can_attack then
-                        local a_tile = tiles:get(ax,ay)
-                        if a_tile == nil then a_tile = 0 end
-                        a_tile = a_tile | 0x4
-                        tiles:set(ax, ay, a_tile)
-                    end
-            end)
+            tiles = tiles | ((tiles_in_attack_range & HIGHLIGHT.IS_VALID) << 1)
         end
     end)
 
@@ -713,6 +729,8 @@ function TacticsEngine:compute_unit_valid_tiles()
     for _,unit in ipairs(marked_units) do
         unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
+    self:recompute_marked_unit_tiles()
+
     -- these are less urgent
     -- this could probably be parallelized further
     self.task_manager:start_routine(function()
@@ -725,25 +743,11 @@ function TacticsEngine:compute_unit_valid_tiles()
     end)
 end
 
-function TacticsEngine:tiles_in_movement_and_attack_range(unit: BattleUnit): array_2d.Array2D<MenuTileHighlight>
+function TacticsEngine:tiles_in_movement_and_attack_range(unit: BattleUnit): Userdata
     if unit.valid_tiles == nil then
         unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
-    local tiles_ud = unit.valid_tiles
-    local tiles: array_2d.Array2D<MenuTileHighlight> = array_2d.new(MAP_WIDTH, MAP_HEIGHT)
-
-    for x=0,MAP_WIDTH-1 do
-        for y=0,MAP_HEIGHT-1 do
-            local tile = tiles_ud:get(x, y)
-            tiles:set(x, y, {
-                reachable = (tile & 0x1) ~= 0,
-                valid_selection = (tile & 0x2) ~= 0,
-                can_attack = (tile & 0x4) ~= 0,
-            })
-        end
-    end
-
-    return tiles
+    return unit.valid_tiles
 end
 
 function TacticsEngine:update(input: InputContext)

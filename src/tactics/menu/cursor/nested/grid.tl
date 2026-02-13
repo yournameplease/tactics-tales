@@ -2,6 +2,7 @@
 --- Implements a menu cursor for navigating a 2D grid, used for
 --- selecting tiles on the battle map.
 
+local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
@@ -49,7 +50,7 @@ local record NestedGridNode
     x_max: integer
     y_max: integer
     path: { Point }
-    legal_tiles: array_2d.Array2D<MenuTileHighlight>
+    legal_tiles: Userdata
     max_path_length: integer
     children: {NestedGridChild}
     child_array: array_2d.Array2D<MenuNode>
@@ -78,7 +79,7 @@ local record NestedGridDefinition
     where self.type == "grid"
 
     children: {NestedGridChildDefinition}
-    get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    get_tile_highlights: function(GameContext, MenuContext): Userdata
     get_path_anchor: function(GameContext, MenuContext): Point
     get_max_path_length: function(GameContext, MenuContext): integer
     get_initial_point: function(GameContext, MenuContext): Point
@@ -89,7 +90,7 @@ local record SerializedNestedGridState
 	where self.type == "grid"
 	point: Point
 	path: {Point}
-	tile_highlights: array_2d.Array2D<MenuTileHighlight>
+	tile_highlights: Userdata
 end
 
 local nested_grid = {
@@ -138,10 +139,8 @@ function NestedGridNode:move_cursor(p: Point): boolean
     self.point.y = pt.mid(0, p.y, self.y_max)
 
     if self.legal_tiles and self.path and self.point ~= prev_point then
-        if self.legal_tiles:get_point(self.point) then
-            local tiles = self.legal_tiles:map(function(h: MenuTileHighlight): boolean
-                return h ~= nil and h.reachable
-            end)
+        if self.legal_tiles:get(self.point.x, self.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
+            local tiles = self.legal_tiles & HIGHLIGHT.IS_REACHABLE
             self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
         end
     end
@@ -258,8 +257,8 @@ function NestedGridDefinition:to_cursor(
 		point = point.of(0, 0),
     }
     
-    if self.get_legal_tiles ~= nil then
-        cursor.legal_tiles = self.get_legal_tiles(game_ctx, menu_ctx)
+    if self.get_tile_highlights ~= nil then
+        cursor.legal_tiles = self.get_tile_highlights(game_ctx, menu_ctx)
         if self.get_max_path_length ~= nil then
             cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
             if self.get_path_anchor then
@@ -342,9 +341,9 @@ function NestedGridDefinition:with_path_anchor(
 end
 
 function NestedGridDefinition:with_tile_highlights(
-    get_legal_tiles: function(GameContext, MenuContext): array_2d.Array2D<MenuTileHighlight>
+    get_tile_highlights: function(GameContext, MenuContext): Userdata
 ): NestedGridDefinition
-	self.get_legal_tiles = get_legal_tiles
+	self.get_tile_highlights = get_tile_highlights
 	return self
 end
 

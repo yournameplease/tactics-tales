@@ -122,8 +122,8 @@ global interface Userdata
 	x: number
 	y: number
 	z: number
-	width: function(self): integer | nil
-	height: function(self): integer | nil
+	width: function(self): integer
+	height: function(self): integer
 	get: function(self, integer, integer): integer
 	set: function(self, integer, ...: integer)
 	sort: function(self)

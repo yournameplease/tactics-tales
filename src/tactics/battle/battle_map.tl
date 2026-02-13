@@ -3,6 +3,7 @@
 --- Provides an API for querying and manipulating the map and the
 --- units residing on it.
 
+local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local fp = require("src.tactics.util.fp")
@@ -123,6 +124,21 @@ end
 function BattleMap:tile_is_in_map(tile: Point): boolean
     return tile.x >= 0 and tile.x < self.width
         and tile.y >= 0 and tile.y < self.height
+end
+
+-- userdata
+function BattleMap:get_tiles_userdata_by(
+    ud_type: userdata_type,
+    func: function(point: Point): integer
+): Userdata
+    local ud = pt.userdata(ud_type, self.width, self.height)
+
+    for x=0,self.width-1 do
+        for y=0,self.height-1 do
+            ud:set(x, y, func(point.of(x, y)))
+        end
+    end
+    return ud
 end
 
 -- terrain
@@ -418,18 +434,19 @@ function BattleMap:get_nearby_interactions(
     return out
 end
 
-function BattleMap:get_tile_highlights(): array_2d.Array2D<boolean>
-
-    return self.interactions_by_x_y:map(
-        function(interactions: { TileDistance: {integer: TileInteractionHook}}): boolean
-            if interactions ~= nil and interactions["on"] ~= nil
-            then
+function BattleMap:get_tile_highlights(): Userdata
+    local ud = pt.userdata("u8", self.width, self.height)
+    for x=0,self.width-1 do
+        for y=0,self.height-1 do
+            local interactions = self.interactions_by_x_y:get(x, y)
+            if interactions ~= nil and interactions["on"] ~= nil then
                 for _,_ in pairs(interactions["on"]) do
-                    return true
+                    ud:set(x, y, HIGHLIGHT.IS_INTERACTION)
+                    break
                 end
             end
-            return false
-        end)
+        end
+    end
 end
 
 return battle_map
