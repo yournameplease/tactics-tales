@@ -80,7 +80,6 @@ function BattleUIContext:enrich()
 
     if root_node_state is SerializedNestedGridState then
         self.hovered_point = root_node_state.point
-        self.hovered_path = root_node_state.path
         self.tile_highlights = root_node_state.tile_highlights
 
         if menu.step == "SELECT_UNIT" then
@@ -90,6 +89,12 @@ function BattleUIContext:enrich()
             if unit then
                 self.last_hovered_unit = unit
             end
+        end
+
+        if menu.step == "SELECT_DESTINATION" then
+            self.hovered_path = root_node_state.path
+        else
+            self.hovered_path = nil
         end
 
         if menu.step == "SELECT_TARGET" then
