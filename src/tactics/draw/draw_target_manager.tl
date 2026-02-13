@@ -41,7 +41,6 @@ function DrawTargetManagerImpl:apply_current_target()
 end
 
 function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer, d_y: integer)
-	profile("draw_target_manager_push")
 	local ud = pt.userdata("u8",w,h)
 	local new_target =  {
 		ud = ud,
@@ -60,7 +59,6 @@ function DrawTargetManagerImpl:push_target(w: integer, h: integer, d_x: integer,
 		local color = colors.rainbow(#self.targets)	
 		pt.rrectfill(d_x, d_y, w, h, 0, color[2])
 	end
-	profile("draw_target_manager_push")
 end
 
 function DrawTargetManagerImpl:duplicate_target()
@@ -74,7 +72,6 @@ function DrawTargetManagerImpl:duplicate_target()
 end
 
 function DrawTargetManagerImpl:draw(x: integer, y: integer)
-	profile("draw_target_manager_draw")
 	assert(self.current_target ~= nil)
 	local prev_target = self.current_target
 	self.current_target = pt.pop(self.targets)
@@ -86,7 +83,6 @@ function DrawTargetManagerImpl:draw(x: integer, y: integer)
 		local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
 		pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
 	end
-	profile("draw_target_manager_draw")
 end
 
 function DrawTargetManagerImpl:pop_sprite(): Userdata

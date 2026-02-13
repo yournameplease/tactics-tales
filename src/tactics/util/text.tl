@@ -370,7 +370,7 @@ function TextImpl:draw(
     color: Color,
     line_counts: {integer}
 )
-	profile("draw_text")
+	-- profile("draw_text")
 
     self:calculate_wrapping()
     local row_count = 0
@@ -387,7 +387,7 @@ function TextImpl:draw(
             end 
         end
     end
-	profile("draw_text")
+	-- profile("draw_text")
 end
 
 function TextImpl:draw_one(
@@ -397,7 +397,7 @@ function TextImpl:draw_one(
     color: Color,
     line_count: integer
 )
-	profile("draw_text")
+	-- profile("draw_text")
 
     self:calculate_wrapping()
     local row_count = 0
@@ -409,7 +409,7 @@ function TextImpl:draw_one(
             line_count = line_count - #text_row
         end 
     end
-	profile("draw_text")
+	-- profile("draw_text")
 end
 
 return text

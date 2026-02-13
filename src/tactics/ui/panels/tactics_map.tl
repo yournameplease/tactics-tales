@@ -338,7 +338,7 @@ function TacticsMap:draw(
     ui_theme: UITheme
 )
     profile("tactics_map_draw")
-    profile("draw_map_pre_rows")
+    -- profile("draw_map_pre_rows")
     
     box.Box._draw_background(self, ui_theme)
 
@@ -360,27 +360,23 @@ function TacticsMap:draw(
     -- pre-compute actor animations for z-ordering
     local unit_positions = compute_animated_unit_positions(state.battle_context.battle_map)
 
-    profile("sort_units_z")
     local sorted_units = pt.userdata("i16", 2, #unit_positions) as Userdata
     for i,u in ipairs(unit_positions) do
         sorted_units:set(0,i-1, u.point.y)
         sorted_units:set(1,i-1, u.id)
     end
     sorted_units:sort()
-    profile("sort_units_z")
 
     -- TODO: preload layers
     local layers = state.battle_context.battle_map.layers
     local layer_ground = layers.terrain.ground
-    profile("compute_path_layer")
     -- todo: move to ui context
     local layer_path = get_path_layer(state)
-    profile("compute_path_layer")
 
     local cursor_tile = get_cursor_tile(state.battle_context)
 
     -- draw ground
-    profile("draw_ground")
+    -- profile("draw_ground")
     
     pt.map(layer_ground, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
@@ -393,32 +389,32 @@ function TacticsMap:draw(
         local c_y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, c_x, c_y)
     end
-    profile("draw_ground")
-    profile("draw_map_pre_rows")
+    -- profile("draw_ground")
+    -- profile("draw_map_pre_rows")
     
-    profile("draw_map_rows")
+    -- profile("draw_map_rows")
     local prev_z = 0
     for i=0,#unit_positions-1 do
-        profile("draw_map_rows_get_unit")
+        -- profile("draw_map_rows_get_unit")
         local unit_id = sorted_units:get(1, i)
         local unit = map:get_unit_by_id(unit_id)
         local next_z = sorted_units:get(0, i)
-        profile("draw_map_rows_get_unit")
-        profile("draw_map_rows_decorations")
+        -- profile("draw_map_rows_get_unit")
+        -- profile("draw_map_rows_decorations")
         if next_z > prev_z then
             self:draw_map_decorations(layers, prev_z, next_z)
             prev_z = next_z
         end
-        profile("draw_map_rows_decorations")
-        profile("draw_map_rows_units")
+        -- profile("draw_map_rows_decorations")
+        -- profile("draw_map_rows_units")
         draw_unit(unit, draw_target_manager, state.battle_context)
-        profile("draw_map_rows_units")
+        -- profile("draw_map_rows_units")
     end
     self:draw_map_decorations(layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
     
-    profile("draw_map_rows")
+    -- profile("draw_map_rows")
 
-    profile("draw_map_post_rows")
+    -- profile("draw_map_post_rows")
     local layer_ceiling = layers.terrain.ceiling
     if layer_ceiling ~= nil then
         pt.map(layer_ceiling, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
@@ -437,7 +433,7 @@ function TacticsMap:draw(
     end
 
     draw_target_manager:draw(draw_x, 0)
-    profile("draw_map_post_rows")
+    -- profile("draw_map_post_rows")
     profile("tactics_map_draw")
 
     box.Box._draw_children(self, state, draw_target_manager, ui_theme)
