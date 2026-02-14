@@ -138,6 +138,9 @@ function book.flex_page(): box.UIElement
 			flex_grow = 1,
 			padding = box.layout.padding(2),
 		}
+		:style{
+			solid = true
+		}
 		:build()
 end
 
