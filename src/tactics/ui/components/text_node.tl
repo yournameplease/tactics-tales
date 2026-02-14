@@ -12,6 +12,7 @@ function text_node.title(text_info: box.text_info.TextInfo): box.UIElement
 
     text_info.draw_properties = text_info.draw_properties or {}
     text_info.draw_properties.justify = text_info.draw_properties.justify or "center"
+    text_info.draw_properties.wrap = "no_wrap"
 
     local self = box.builder("title_box")
     :layout(box.layout.col_fit())

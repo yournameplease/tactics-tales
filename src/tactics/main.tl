@@ -58,6 +58,10 @@ function _init()
 
     local should_profile = DYNAMIC_CONFIG.profile
     profile.enabled(should_profile, should_profile)
+
+    -- initial calculate, to ensure mouse has valid ui to hover
+    ui_context:enrich()
+    ui_manager:calculate(ui_context)
 end
 
 function _update()
