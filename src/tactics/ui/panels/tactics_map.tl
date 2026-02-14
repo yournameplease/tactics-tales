@@ -54,8 +54,8 @@ function tactics_map.new(map_width: integer, map_height: integer, props: box.UIE
     self.map_width = map_width or MAP_WIDTH
     self.map_height = map_height or MAP_HEIGHT
 
-    self.w = self.map_width * TILE_SIZE.x + self.internal_margin.l + self.internal_margin.r
-    self.h = self.map_height * TILE_SIZE.y + self.internal_margin.t + self.internal_margin.b
+    self.w = self.map_width * TILE_SIZE.x + self.layout.padding.l + self.layout.padding.r
+    self.h = self.map_height * TILE_SIZE.y + self.layout.padding.t + self.layout.padding.b
 
     return self
 end
@@ -348,11 +348,11 @@ function TacticsMap:draw(
     
     local map = state.battle_context.battle_map
 
-    local ud_width = self.w - self.internal_margin.l - self.internal_margin.r
+    local ud_width = self.w - self.layout.padding.l - self.layout.padding.r
     -- to top of screen
-    local ud_height = self.h + self.x - self.internal_margin.b
-    local draw_x = self.x + self.internal_margin.l
-    local draw_y = self.y + self.internal_margin.t
+    local ud_height = self.h + self.x - self.layout.padding.b
+    local draw_x = self.x + self.layout.padding.l
+    local draw_y = self.y + self.layout.padding.t
     draw_target_manager:push_target(ud_width, ud_height, 0, draw_y)
 
     -- draw row-by row, top to bottom aka back to front
@@ -444,8 +444,8 @@ function TacticsMap:get_selection_at(
     lx: number,
     ly: number
 ): mouse_menu_selection.MenuMouseSelection
-    local tx = pt.flr((lx-self.internal_margin.l) / TILE_WIDTH)
-    local ty = pt.flr((ly-self.internal_margin.t) / TILE_HEIGHT)
+    local tx = pt.flr((lx-self.layout.padding.l) / TILE_WIDTH)
+    local ty = pt.flr((ly-self.layout.padding.t) / TILE_HEIGHT)
 
     if tx >= 0 and tx < MAP_WIDTH
         and ty >= 0 and ty < MAP_HEIGHT

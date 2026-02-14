@@ -180,6 +180,7 @@ function NestedGridNode:claim_focus(
     selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
 )
+	self.has_focus = true
 	if selection ~= nil then
 		if selection is mouse_menu_selection.Grid then
 			self:move_cursor(point.of(selection.x, selection.y))
