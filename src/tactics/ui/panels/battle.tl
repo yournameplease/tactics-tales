@@ -3,6 +3,7 @@ local portrait_box = require("src.tactics.ui.panels.portrait_box")
 require("src.tactics.character.items.object.item")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.character.items.object.item_inventory")
+local text_node = require("src.tactics.ui.components.text_node")
 local wpn = require("src.tactics.character.items.object.weapon")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -36,6 +37,33 @@ local function get_preview_text(self: box.UIElement, state: UIContextManager): {
         self.text.content[5] = ""
         self.text.content[5] = ""
     end
+end
+
+function battle.battle_summary(): box.UIElement
+    local self = box.builder("battle_summary")
+    :layout(box.layout.col_fit())
+    :build()
+    self:add(
+        text_node.title{
+            content = {"BATTLE"}
+        })
+    self:add(
+        box.builder("battle_conditions")
+        :layout{
+            height = "auto"
+        }
+        :text{
+            draw_properties = {
+                wrap = "wrap",
+                justify = "center",
+            },
+        }
+        :on_update(function(self: box.UIElement, state: UIContextManager): { string }
+            self.text.content = state.battle_context.objective_text
+        end)
+        :build())
+	
+    return self
 end
 
 function battle.unit_info(): box.UIElement
