@@ -2,18 +2,10 @@
 --- A UI panel that displays contextual control hints (e.g., "Select", "Back").
 
 local box = require("src.tactics.ui.box")
-local text_node = require("src.tactics.ui.components.text_node")
-local sprite_node = require("src.tactics.ui.components.sprite_node")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local input_service = require("src.tactics.joypad")
 local InputMethod = input_service.InputMethod
 local InputLabel = input_service.InputLabel
-
-local record ControlHints
-    is box.UIElement
-end
-
-setmetatable(ControlHints, { __index = box.Box })
 
 local control_hints = {}
 
@@ -43,35 +35,47 @@ local function sprite_function(
 end
 
 local function control_hint_row(input_label: InputLabel): box.UIElement
-	local row = box.flex_row()
-
-	row:add(sprite_node.dynamic(sprite_function(input_label), {
-		internal_margin = {
-			t = 1,
-		},
-		w = 9,
-		h = 9
-	}))
-	row:add(text_node.new({
-		func = function(_self, state: UIContextManager): {string}
-			return { state.input_actions[input_label] }
-		end,
-		flex_grow = 1,
-		draw_properties = {
-			wrap = "no_wrap",
+	local row = box.builder("control_row_"..input_label)
+	:layout(box.layout.row_fill())
+	:build()
+	:add(
+		box.builder("control_sprite_"..input_label)
+		:sprite{
+			ox = 1,
+			oy = 1
 		}
-	}))
+		:layout{
+			width = 9,
+			height = 9,
+		}
+	    :on_update(function(self: box.UIElement, state: UIContextManager)
+			self.sprite.s = sprite_function(input_label)(state)
+	    end)
+	    :build())
+	:add(
+		box.builder("control_text_"..input_label)
+		:text{
+			draw_properties = {
+				wrap = "no_wrap"
+			}
+		}
+		:layout{
+			flex_grow = 1
+		}
+		:on_update(function(self: box.UIElement, state: UIContextManager)
+			self.text.content = { state.input_actions[input_label] }
+		end)
+	    :build())
 
 	return row
 end
 
-function control_hints.new(): ControlHints
-    local self = box.col()
-
-	self:add(control_hint_row("primary"))
-	self:add(control_hint_row("secondary"))
-	
-    return self as ControlHints
+function control_hints.new(): box.UIElement
+    return box.builder("control_hints")
+    :layout(box.layout.col_fit())
+    :build()
+	:add(control_hint_row("primary"))
+	:add(control_hint_row("secondary"))
 end
 
 return control_hints

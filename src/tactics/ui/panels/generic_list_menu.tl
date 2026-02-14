@@ -28,9 +28,6 @@ setmetatable(GenericMenuBox, { __index = box.Box })
 local generic_menu_box = {}
 
 function GenericMenuBox:get_selection_at(lx: number, ly: number): menu_mouse_selection.MenuMouseSelection
-	-- local line = self:get_hovered_line(lx, ly)
-
-	-- return menu_mouse_selection.list(line, "button_primary", "button_secondary")
 	return nil
 end
 
