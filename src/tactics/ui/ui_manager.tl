@@ -93,7 +93,7 @@ function UIManager:calculate(ui_ctx: UIContextManager)
     local root = self.current_layout.root
     
     -- Recalculate size and positions
-    root:recalculate(1, 0, 0, ui_ctx)
+    root:recalculate(1, 0, 0, 480, 270, ui_ctx)
     profile("ui_manager_calculate")
 end
 

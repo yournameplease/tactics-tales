@@ -92,6 +92,15 @@ local layout = {
     Layout = Layout,
 }
 
+function layout.padding(p: integer): Padding
+    return {
+        l = p,
+        r = p,
+        t = p,
+        b = p,
+    }
+end
+
 ---@desc
 --- Mouse-menu interaction handlers for a UI element
 local record MenuHandling
@@ -168,7 +177,11 @@ local interface UIElement
     on_update: function(self: UIElement, UIContextManager)
     custom_draw: function(self: UIElement, UIContextManager, DrawTargetManager, UITheme)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
-    recalculate: function(self, depth: integer, x: integer, y: integer, state: UIContextManager) 
+    recalculate: function(self,
+        depth: integer,
+        x: integer, y: integer,
+        w: integer, h: integer,
+        state: UIContextManager) 
 end
 
 local record Box
@@ -203,7 +216,24 @@ function box.builder(id: string): UIBuilder
 end
 
 function UIBuilder:build(): UIElement
-    assert(not (self.def.layout.flex_grow > 0  and (self.def.layout.width == "auto" and self.def.layout.height == "auto")), "Cannot flex grow with auto_width and auto_height")
+    self.def.rect = {}
+    
+    if self.def.layout.width == nil then
+        self.def.layout.width = "fill"
+    end
+    if self.def.layout.height == nil then
+        self.def.layout.height = "auto"
+    end
+    self.def.layout.flex_grow = self.def.layout.flex_grow or 0
+    self.def.layout.dir = self.def.layout.dir or "col"
+    self.def.layout.gap = self.def.layout.gap or 0
+    self.def.layout.padding = self.def.layout.padding or layout.padding(0)
+
+    self.def.style.transparent = self.def.style.transparent or true
+    self.def.style.decoration_padding = self.def.style.decoration_padding or 0
+    
+    assert(not (self.def.layout.flex_grow > 0
+        and (self.def.layout.width == "auto" and self.def.layout.height == "auto")), "Cannot flex grow with auto_width and auto_height")
     assert(
         self.def.style.decoration_padding == 0
         or
@@ -220,8 +250,18 @@ function UIBuilder:build(): UIElement
         error("auto_width must use no_wrap")
     end
 
-    if self.def.text.rows and self.def.layout.height == nil then
-        self.def.layout.height = (self.def.text.rows) * (TEXT_HEIGHT + 2)
+    if self.def.text then
+        if self.def.text.rows and self.def.layout.height == nil then
+            self.def.layout.height = (self.def.text.rows) * (TEXT_HEIGHT + 2)
+        end
+        self.def.text.content = self.def.text.content or {}
+
+        self.def.text.text_object = text.new(
+            self.def.text.content,
+            self.def.text.draw_properties,
+            0,
+            0
+        )
     end
 
     return setmetatable(self.def, {
@@ -298,15 +338,6 @@ function UIBuilder:on_update(
 end
 
 -- utility constructors
-
-function layout.padding(p: integer): Padding
-    return {
-        l = p,
-        r = p,
-        t = p,
-        b = p,
-    }
-end
 
 function box.floating(node: UIElement, x: integer, y: integer): UIElement
     return box.builder(node.id.."_float_container")
@@ -432,8 +463,9 @@ function Box:measure(depth: integer)
         local child = c as Box
         child:measure(depth+1)
 
-        local child_outer_w = child.rect.w 
-        local child_outer_h = child.rect.h 
+        -- these could be 0 in case of a "fill" dimension
+        local child_outer_w = child.rect.w or 0
+        local child_outer_h = child.rect.h or 0
 
         if is_row then
             content_w = content_w + child_outer_w
@@ -475,12 +507,16 @@ function Box:measure(depth: integer)
     local w = self.layout.width
     if w == "auto" then
         self.rect.w = content_w + self.layout.padding.l + self.layout.padding.r
+    elseif w == "fill" then
+        self.rect.w = nil
     elseif w is integer then
         self.rect.w = w
     end
     local h = self.layout.height
     if h == "auto" then
         self.rect.h = content_h + self.layout.padding.t + self.layout.padding.b
+    elseif h == "fill" then
+        self.rect.h = nil
     elseif h is integer then
         self.rect.h = h
     end
@@ -490,8 +526,21 @@ end
 --- The second pass of the layout system. It arranges the
 --- element's children within its own bounds, distributing available space
 --- according to each child's flex properties and alignment settings.
-function Box:apply_layout(parent_x: integer, parent_y: integer)
-    -- Use calculated sizes if available, otherwise fixed
+function Box:apply_layout(
+    parent_x: integer,
+    parent_y: integer,
+    max_w: integer,
+    max_h: integer
+)
+    if self.layout.width == "fill" then
+        self.rect.w = max_w
+    end
+    if self.layout.height == "fill" then
+        self.rect.h = max_h
+    end
+    self.rect.c_h = self.rect.h - self.layout.padding.t - self.layout.padding.b
+    self.rect.c_w = self.rect.w - self.layout.padding.l - self.layout.padding.r
+
     local my_w = self.rect.c_w
     local my_h = self.rect.c_h
 
@@ -499,6 +548,8 @@ function Box:apply_layout(parent_x: integer, parent_y: integer)
     -- If no parent (root), use self.rect.x/y
     self.rect.x = parent_x
     self.rect.y = parent_y
+    self.rect.c_x = parent_x + self.layout.padding.l
+    self.rect.c_y = parent_y + self.layout.padding.t
 
     local is_row = (self.layout.dir == "row")
 
@@ -550,20 +601,27 @@ function Box:apply_layout(parent_x: integer, parent_y: integer)
         -- Handle Flex
         if child.layout.flex_grow > 0 and total_flex > 0 then
             local added = pt.flr(child.layout.flex_grow * px_per_flex)
-            if is_row then child_w = added
-            else child_h = added end
+            if is_row then
+                child_w = added
+            else
+                child_h = added
+            end
         end
 
         if child.layout.height == "fill" then
-            child_h = self.rect.c_h
+            if is_row then
+                child_h = self.rect.c_h
+            end
         end
         if child.layout.width == "fill" then
-            child_w = self.rect.c_w
+            if not is_row then
+                child_w = self.rect.c_w
+            end
         end
         -- Recurse Layout
         if child.layout then
             child.rect.w, child.rect.h = child_w, child_h
-            child:apply_layout(cx, cy)
+            child:apply_layout(cx, cy, child_w, child_h)
         end
 
         -- Advance Cursor
@@ -794,9 +852,9 @@ end
 function box.find_topmost_selection(elem: UIElement, mx: number, my: number): MenuMouseSelection 
     for _,child in ipairs(elem.children) do
         local c_l = child.rect.c_x
-        local c_r = child.rect.c_x+child.rect.c_w
+        local c_r = child.rect.c_x + child.rect.c_w
         local c_t = child.rect.c_y
-        local c_b = child.rect.c_y+child.rect.c_h
+        local c_b = child.rect.c_y + child.rect.c_h
         
         if c_l <= mx and mx < c_r
             and c_t <= my and my < c_b
@@ -809,11 +867,13 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
             end
         end
     end
-    if elem.menu_handling.hover_event then
-        return elem.menu_handling.hover_event
-    elseif elem.menu_handling.get_selection_at ~= nil then
-        log.trace("checking box for selection", elem.id)
-        return elem.menu_handling:get_selection_at(mx - elem.rect.c_x, my - elem.rect.c_y)
+    if elem.menu_handling then
+        if elem.menu_handling.hover_event then
+            return elem.menu_handling.hover_event
+        elseif elem.menu_handling.get_selection_at ~= nil then
+            log.trace("checking box for selection", elem.id)
+            return elem.menu_handling:get_selection_at(mx - elem.rect.c_x, my - elem.rect.c_y)
+        end
     end
     return nil
 end
@@ -845,38 +905,50 @@ function Box:compute_children(state: UIContextManager)
 end
 
 function Box:compute_text()
-    -- compute text as a "child", so it may be measured
-    -- in the same frame
-    local lines = self.text.content
+    if self.text ~= nil then
+        local lines = self.text.content
 
-    if self.text.rows then
-        assert(
-                #lines ==
-                self.text.rows, "`func` should return expected number of rows"
-        )
+        if self.text.rows then
+            assert(
+                    #lines ==
+                    self.text.rows, "`func` should return expected number of rows"
+            )
+        end
+
+        local text_obj = self.text.text_object
+        text_obj:set_width(self.rect.c_w)
+        text_obj:set_height(self.rect.c_h)
+        text_obj:set_lines(lines)
+        text_obj:calculate_wrapping()
     end
 
-    local text_obj = self.text.text_object
-    text_obj:set_width(self.rect.c_w)
-    text_obj:set_height(self.rect.c_h)
-    text_obj:set_lines(lines)
-    text_obj:calculate_wrapping()
+    for _,c in ipairs(self.children) do
+        local child = c as Box
+        child:compute_text()
+    end
 end
 
 
-function Box:recalculate(depth: integer, x: integer, y: integer, state: UIContextManager) 
+function Box:recalculate(
+    depth: integer,
+    x: integer,
+    y: integer,
+    w: integer,
+    h: integer,
+    state: UIContextManager
+) 
     self:compute_children(state)
     self:update(state)
     self:compute_text()
     self:measure(depth)
-    self:apply_layout(x, y)
+    self:apply_layout(x, y, w, h)
 end
 
 function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     if self.custom_draw then
         self:custom_draw(state, draw_target_manager, ui_theme)
     else
-        Box:draw_background(ui_theme)
+        self:draw_background(ui_theme)
 
         if DYNAMIC_CONFIG.draw_flexbox_debug then
     		local color = colors.rainbow(self.rect.depth-1)	
@@ -895,7 +967,7 @@ function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManage
         end
 
         if self.text and self.text.content then
-            Box:draw_text(ui_theme)
+            self:draw_text(ui_theme)
         end
 
         if self.sprite and self.sprite.s then
