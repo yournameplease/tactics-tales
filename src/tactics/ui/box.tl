@@ -156,6 +156,8 @@ local interface UIElement
     text: TextInfo
     child_generator: ChildrenInfo
     cacheable: CacheInfo
+    -- custom data for complex elements.  Passed to some handlers
+    data: any
 
     -- nillable, for dynamic children
     compute_children: function(self, UIContextManager)
@@ -251,6 +253,11 @@ function UIBuilder:sprite(sprite_props: SpriteInfo): UIBuilder
     return self
 end
 
+function UIBuilder:data(data: any): UIBuilder
+    self.def.data = data
+    return self
+end
+
 function UIBuilder:text(text_props: TextInfo): UIBuilder
     local draw_properties = text_props.draw_properties or {}
     draw_properties.justify = draw_properties.justify or "left"
@@ -327,6 +334,12 @@ function layout.col_fill(gap?: integer, padding?: Padding): Layout
     }
 end
 
+function box.col_fill(gap?: integer, padding?: Padding): UIElement
+    return box.builder("col_fill")
+        :layout(layout.col_fill(gap, padding))
+        :build()
+end
+
 function layout.col_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "col",
@@ -335,6 +348,12 @@ function layout.col_fit(gap?: integer, padding?: Padding): Layout
         gap = gap,
         padding = padding,
     }
+end
+
+function box.col_fit(gap?: integer, padding?: Padding): UIElement
+    return box.builder("col_fit")
+        :layout(layout.col_fit(gap, padding))
+        :build()
 end
 
 function layout.row_fill(gap?: integer, padding?: Padding): Layout
@@ -347,6 +366,12 @@ function layout.row_fill(gap?: integer, padding?: Padding): Layout
     }
 end
 
+function box.row_fill(gap?: integer, padding?: Padding): UIElement
+    return box.builder("row_fill")
+        :layout(layout.row_fill(gap, padding))
+        :build()
+end
+
 function layout.row_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "row",
@@ -355,6 +380,12 @@ function layout.row_fit(gap?: integer, padding?: Padding): Layout
         gap = gap,
         padding = padding,
     }
+end
+
+function box.row_fit(gap?: integer, padding?: Padding): UIElement
+    return box.builder("row_fit")
+        :layout(layout.row_fit(gap, padding))
+        :build()
 end
 
 -- good for lazy justification

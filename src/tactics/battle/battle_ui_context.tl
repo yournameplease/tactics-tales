@@ -44,6 +44,7 @@ local record BattleUIContext
 
     -- internal stuff
     
+	dialogue_revision: integer
 	menu_revision: integer
 	marked_units_revision: integer
     tile_highlighted_unit: BattleUnit
@@ -88,6 +89,8 @@ function BattleUIContext:enrich()
     local menu = self.battle_menu_manager:serialize()
     local root_node_state = menu.node.state
 
+    self.dialogue_revision = self.tactics_engine.dialogue_revision
+    
     if self.menu_revision ~= self.battle_menu_manager.revision_count then
         if root_node_state is SerializedNestedGridState then
             self.menu_tile_highlights = root_node_state.tile_highlights

@@ -5,7 +5,6 @@
 require("profiler")
 require("src.tactics.config")
 
-local fp = require("src.tactics.util.fp")
 local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
@@ -20,18 +19,16 @@ local Point = point.Point
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
-local vertical_list_menu = require("src.tactics.ui.panels.vertical_list_menu")
+local menu_ui = require("src.tactics.ui.components.menu")
 local CharacterRenderer = require("src.tactics.character.character_renderer")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")
 
-local record TacticsMap
-    is box.UIElement
+
+local record MapData
     map_width: integer
     map_height: integer
-    child_object: any
     menu_node: MenuNode
 end
-setmetatable(TacticsMap, { __index = box.Box})
 
 local tactics_map = {}
 
@@ -46,19 +43,6 @@ local BASE_TILE_SPRITE = 2 * 256
 local CURSOR_SPRITE = 8
 
 local FOOT_GROUND_ANCHOR = point.of(8,12)
-
-function tactics_map.new(map_width: integer, map_height: integer, props: box.UIElement): TacticsMap
-    local self = box.new(props) as TacticsMap
-    setmetatable(self, { __index = TacticsMap})
-
-    self.map_width = map_width or MAP_WIDTH
-    self.map_height = map_height or MAP_HEIGHT
-
-    self.w = self.map_width * TILE_SIZE.x + self.layout.padding.l + self.layout.padding.r
-    self.h = self.map_height * TILE_SIZE.y + self.layout.padding.t + self.layout.padding.b
-
-    return self
-end
 
 local record AnimatedUnitPosition
     id: integer
@@ -201,7 +185,9 @@ local function get_path_layer(state: UIContextManager): Userdata
     end
 end
 
-function TacticsMap:draw_map_decorations(layers: bm.MapLayers, z_0: integer, z_1: integer)
+local function draw_map_decorations(self: box.UIElement, layers: bm.MapLayers, z_0: integer, z_1: integer)
+    local data: MapData = self.data as MapData
+
     local layer_wall_back = layers.terrain.back_wall
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
@@ -212,31 +198,32 @@ function TacticsMap:draw_map_decorations(layers: bm.MapLayers, z_0: integer, z_1
         --this is kinda dumb
         if z % TILE_HEIGHT == 0 then
             local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            pt.map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == HALF_HEIGHT then
             local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            pt.map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == 0 then
             local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, self.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            pt.map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
     end
+end
+
+local function compute_children_key(state: UIContextManager): integer
+    return state.battle_context.dialogue_revision + state.battle_context.menu_revision
 end
 
 ---@desc
 --- Dynamically adds or removes a floating menu as a child of the map.
 --- The menu appears next to the cursor when the menu state requires it
 --- (e.g., for action selection), and is removed otherwise.
-function TacticsMap:compute_children(state: UIContextManager)
+local function compute_children(state: UIContextManager): {box.UIElement}
     local menu = state.battle_context.battle_menu_manager
-    self.menu_node = menu.menu_step.node
-    
     local cursor = menu.menu_step.node
     local cursor_tile = get_cursor_tile(state.battle_context)
-
-    local child_object = self.child_object
+    
     local x: integer = 0
     local y: integer = 0
     local menu_box: box.UIElement = nil
@@ -248,99 +235,79 @@ function TacticsMap:compute_children(state: UIContextManager)
         x = pt.flr((unit.tile.x + x_step) * TILE_SIZE.x)
         y = pt.flr((unit.tile.y - 0.5) * TILE_SIZE.y)
 
-        local ui_object = state.battle_context.active_dialogue
-        if child_object ~= ui_object then
-            menu_box = box.new({
-                w = 80,
-                -- h = 30,
-                auto_height = true,
-                decoration_padding = 1,
-                padding = 2,
-                decoration = "border",
-            })
-        
-            local node = dialogue_node.new(
-            	{
-                    dialogue = state.battle_context.active_dialogue.dialogue,
-                    dialogue_mode = "active_line",
-                    draw_properties = {
-                        wrap = "wrap",
-                    },
-                    flex_grow = 1,
-                    rows = 3,
-                    -- internal_margin = { t = y, l = x}
-                }
-            )
-            menu_box:add(node)
-            self.child_object = ui_object
-        end
+        menu_box = box.builder("tactics_dialogue_box")
+        :layout{
+            width = 80,
+            -- h = 30,
+            height = "auto",
+            padding = box.layout.padding(2),
+        }
+        :style{
+            decoration_padding = 1,
+            decoration = "border",
+        }
+        :build()
+    
+        local node = dialogue_node.single_line(
+            state.battle_context.active_dialogue.dialogue,
+        	{
+                draw_properties = {
+                    wrap = "wrap",
+                },
+                rows = 3,
+            }
+        )
+        menu_box:add(node)
     elseif cursor_tile ~= nil then
         x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
         y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
 
         if cursor is nested_list.NestedMenuNode then
-            if child_object ~= cursor then
-                menu_box = box.new({
-                    auto_height = true,
-                    auto_width = true,
-                    decoration_padding = 1,
-                    padding = 2,
-                    decoration = "border",
-                })
-                log.info("Adding list child")
-                local node = vertical_list_menu.new(
-                    " {text}",
-                    ">{text}",
-                	function (s: UIContextManager): nested_list.NestedMenuNode
-                		local c = s.battle_context.battle_menu_manager.menu_step.node
-                		assert(c is nested_list.NestedMenuNode)
-                		return c
-                	end,
-                	{
-                        draw_properties = {
-                            wrap = "no_wrap",
-                        },
-                        auto_height = true,
-                        auto_width = true,
-                        -- internal_margin = { t = y, l = x}
-                    }
-                )
-                menu_box:add(node)
-                self.child_object = cursor
-            end
-        else
-            if #self.children ~= 0 then
-                log.info("removing list child")
-                self.children = {}
-                self.child_object = nil
-            end
-        end
-    else
-        if #self.children ~= 0 then
-            log.info("removing list child")
-            self.children = {}
-            self.child_object = nil
+            menu_box = box.builder("tactics_dialogue_box")
+            :layout{
+                width = "auto",
+                height = "auto",
+                padding = box.layout.padding(2),
+            }
+            :style{
+                decoration_padding = 1,
+                decoration = "border",
+            }
+            :build()
+            local node = menu_ui.generic_menu_box(
+                -- no need to recompute as this node handles new children
+                function(): integer return 0 end,
+            	function (s: UIContextManager): nested_list.NestedMenuNode
+            		local c = s.battle_context.battle_menu_manager.menu_step.node
+            		assert(c is nested_list.NestedMenuNode)
+            		return c
+            	end
+            )
+            menu_box:add(node)
         end
     end
 
     if menu_box ~= nil then
-        self.children = { box.floating(menu_box, x, y) }
+        return { box.floating(menu_box, x, y) }
     end
+
+    return {}
 end
 
 ---@desc
 --- The main rendering function for the entire battle map panel.
 --- Draws ground, walls and Z-sorted units, and ceilings from the tile map, as well as UI cursor tiles
 --- Prerender to a draw target to handle clipping at the edges.
-function TacticsMap:draw(
+local function draw_tactics_map(
+    self: box.UIElement,
     state: UIContextManager,
     draw_target_manager: DrawTargetManager,
-    ui_theme: UITheme
+    _ui_theme: UITheme
 )
     profile("tactics_map_draw")
     -- profile("draw_map_pre_rows")
-    
-    box.Box._draw_background(self, ui_theme)
+
+    local data: MapData = self.data as MapData
 
     local draw_cursor =
         state.game_context.input_service.current_input == "joypad"
@@ -348,11 +315,11 @@ function TacticsMap:draw(
     
     local map = state.battle_context.battle_map
 
-    local ud_width = self.w - self.layout.padding.l - self.layout.padding.r
+    local ud_width = self.rect.c_w
     -- to top of screen
-    local ud_height = self.h + self.x - self.layout.padding.b
-    local draw_x = self.x + self.layout.padding.l
-    local draw_y = self.y + self.layout.padding.t
+    local ud_height = self.rect.c_h + self.layout.padding.t
+    local draw_x = self.rect.c_x
+    local draw_y = self.rect.c_y
     draw_target_manager:push_target(ud_width, ud_height, 0, draw_y)
 
     -- draw row-by row, top to bottom aka back to front
@@ -378,11 +345,11 @@ function TacticsMap:draw(
     -- draw ground
     -- profile("draw_ground")
     
-    pt.map(layer_ground, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    pt.map(layer_ground, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    pt.map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    pt.map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     
-    pt.map(layer_path, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    pt.map(layer_path, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency
     if draw_cursor and cursor_tile ~= nil then
         local c_x = cursor_tile.x * TILE_SIZE.x
@@ -402,7 +369,7 @@ function TacticsMap:draw(
         -- profile("draw_map_rows_get_unit")
         -- profile("draw_map_rows_decorations")
         if next_z > prev_z then
-            self:draw_map_decorations(layers, prev_z, next_z)
+            draw_map_decorations(self, layers, prev_z, next_z)
             prev_z = next_z
         end
         -- profile("draw_map_rows_decorations")
@@ -410,14 +377,14 @@ function TacticsMap:draw(
         draw_unit(unit, draw_target_manager, state.battle_context)
         -- profile("draw_map_rows_units")
     end
-    self:draw_map_decorations(layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
+    draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
     
     -- profile("draw_map_rows")
 
     -- profile("draw_map_post_rows")
     local layer_ceiling = layers.terrain.ceiling
     if layer_ceiling ~= nil then
-        pt.map(layer_ceiling, 0, 0, 0, 0, self.map_width, self.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+        pt.map(layer_ceiling, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
 
     if cursor_tile ~= nil then
@@ -435,15 +402,15 @@ function TacticsMap:draw(
     draw_target_manager:draw(draw_x, 0)
     -- profile("draw_map_post_rows")
     profile("tactics_map_draw")
-
-    box.Box._draw_children(self, state, draw_target_manager, ui_theme)
 end
 
 -- TODO: consider using unit sprite masks for more accurate grid selection
-function TacticsMap:get_selection_at(
+local function get_selection_at(
+    self: box.UIElement,
     lx: number,
     ly: number
 ): mouse_menu_selection.MenuMouseSelection
+    local data: MapData = self.data as MapData
     local tx = pt.flr((lx-self.layout.padding.l) / TILE_WIDTH)
     local ty = pt.flr((ly-self.layout.padding.t) / TILE_HEIGHT)
 
@@ -452,10 +419,52 @@ function TacticsMap:get_selection_at(
     then
         return mouse_menu_selection.grid(
             tx, ty,
-            self.menu_node,
+            data.menu_node,
             "button_primary", "button_secondary")
     end
     return nil
+end
+
+function tactics_map.new(map_width: integer, map_height: integer): box.UIElement
+    local c_w = map_width * TILE_SIZE.x
+    local c_h = map_height * TILE_SIZE.y
+
+    local map_data: MapData = {
+        map_width = map_width,
+        map_height = map_height,
+    }
+
+    local self = box.builder("tactics_map")
+    :data(map_data)
+    :layout{
+        padding = {
+            t = 5,
+            b = 5,
+            l = 4,
+            r = 4,
+        },
+        width = c_w + 4 + 4,
+        height = c_h + 5 + 5,
+    }
+    :style{
+        decoration_padding = 2,
+        decoration = "border",
+    }
+    :child_generator{
+        current_key = compute_children_key,
+        generate_children = compute_children,
+    }
+    :menu_handling{
+        get_selection_at = get_selection_at,
+    }
+    :on_draw(draw_tactics_map)
+    :on_draw(function(self: box.UIElement, state: UIContextManager)
+        local data: MapData = self.data as MapData
+        data.menu_node = state.battle_context.battle_menu_manager.menu_step.node
+    end)
+    :build()
+
+    return self
 end
 
 return tactics_map

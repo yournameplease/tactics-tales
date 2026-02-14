@@ -1,18 +1,12 @@
 ---@brief
 --- Defines the UI layout for a story page.
 
-local box = require("src.tactics.ui.box")
-local split_pages = require("src.tactics.ui.panels.split_pages")
-local story_page_panel = require("src.tactics.ui.panels.story_page")
+local book = require("src.tactics.ui.decoration.book")
+local story_page = require("src.tactics.ui.panels.story_page")
 
-local left = box.new({ dir="col", flex_grow = 1, padding = 2})
+local left = book.flex_page()
+local right = story_page.new()
 
-local story_page = story_page_panel.new({
-    dir="col",
-    flex_grow = 1,
-    padding = 2,
-})
-
-local root = split_pages.new(left, story_page)
+local root = book.split_pages(left, right)
 
 return { root = root }

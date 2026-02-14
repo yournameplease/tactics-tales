@@ -130,4 +130,15 @@ function book.split_pages(left: box.UIElement, right: box.UIElement): box.UIElem
     return root 
 end
 
+function book.flex_page(): box.UIElement
+	return box.builder("chapter_select_left")
+		:layout{
+			dir="col",
+			height = "fill",
+			flex_grow = 1,
+			padding = box.layout.padding(2),
+		}
+		:build()
+end
+
 return book
