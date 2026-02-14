@@ -137,6 +137,12 @@ local record CacheInfo
     dirty_draw: boolean
 end
 
+local record ChildrenInfo
+    last_key: any
+    current_key: function(ctx: UIContextManager): any
+    generate_children: function(ctx: UIContextManager): { UIElement }
+end
+
 
 local interface UIElement
     -- Not necessarily unique.  For debug help.
@@ -148,6 +154,7 @@ local interface UIElement
     menu_handling: MenuHandling
     sprite: SpriteInfo
     text: TextInfo
+    child_generator: ChildrenInfo
     cacheable: CacheInfo
 
     -- nillable, for dynamic children
@@ -261,6 +268,11 @@ end
 
 function UIBuilder:cacheable(cache_info: CacheInfo): UIBuilder
     self.def.cacheable = cache_info
+    return self
+end
+
+function UIBuilder:child_generator(child_generator: ChildrenInfo): UIBuilder
+    self.def.child_generator = child_generator
     return self
 end
 
@@ -787,8 +799,12 @@ function Box:update(state: UIContextManager)
 end
 
 function Box:compute_children(state: UIContextManager)
-    if self.compute_children ~= nil then
-        self:compute_children(state)
+    if self.child_generator ~= nil then
+        local current_key = self.child_generator.current_key(state)
+        if current_key ~= self.child_generator.last_key then
+            self.children = self.child_generator.generate_children(state)
+            self.child_generator.last_key = current_key
+        end
     end
 
     for _,c in ipairs(self.children) do
@@ -818,9 +834,9 @@ end
 
 
 function Box:recalculate(depth: integer, x: integer, y: integer, state: UIContextManager) 
+    self:compute_children(state)
     self:update(state)
     self:compute_text()
-    self:compute_children(state)
     self:measure(depth)
     self:apply_layout(x, y)
 end

@@ -111,4 +111,23 @@ function book.book_box(
 	:build()
 end
 
+
+function book.split_pages(left: box.UIElement, right: box.UIElement): box.UIElement
+    local root = box.builder("split_pages")
+    :layout{
+        dir="row",
+    	width = 480,
+    	height = 270,
+    	padding = {
+    		t = 4
+    	}
+    }
+    :build()
+    root:add(left)
+    root:add(book.page_divider(7))
+    root:add(right)
+
+    return root 
+end
+
 return book
