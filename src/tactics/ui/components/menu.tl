@@ -152,3 +152,5 @@ function menu.generic_menu_box(
 	:build()
 
 end
+
+return menu

@@ -131,6 +131,7 @@ local record TacticsEngine
 
     marked_unit_tiles: Userdata
     marked_unit_revision: integer
+    dialogue_revision: integer
 end
 
 local tactics_engine = {
@@ -160,6 +161,7 @@ function tactics_engine.new(
 
     self.marked_unit_revision = 0
     self.marked_unit_tiles = pt.userdata("u8", self.battle_map.width, self.battle_map.height)
+    self.dialogue_revision = 0
     
     return self
 end
@@ -203,6 +205,7 @@ function TacticsEngine:update_dialogue(input: InputContext)
                 dialogue = new_dialogue,
             }
             pt.deli(self.dialogue_queue, 1)
+            self.dialogue_revision = self.dialogue_revision + 1
             log.debug("adding dialogue", #self.dialogue_queue, self.active_dialogue)
         end
     end
@@ -210,6 +213,7 @@ function TacticsEngine:update_dialogue(input: InputContext)
     if self.active_dialogue ~= nil and self.active_dialogue.dialogue.finished then
         log.debug("removing dialogue", #self.dialogue_queue, self.active_dialogue)
         self.active_dialogue = nil
+        self.dialogue_revision = self.dialogue_revision + 1
     end
 end
 

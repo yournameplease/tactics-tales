@@ -84,6 +84,7 @@ local record StoryImpl
     battle_services_bundle: BattleServicesBundle
     ui_context: UIContextManager
 
+
 end
 
 function StoryImpl:jump_to_node(node_id: string)
@@ -173,6 +174,8 @@ function StoryImpl:handle_new_node()
     else
         unexpected(node_definition.type)
     end
+
+    self.story_page.story_revision = self.story_page.story_revision + 1
 end
 
 ---@desc
@@ -276,7 +279,7 @@ function story.new(
 
     self.ui_context = ui_context
     self.ui_context:register_ui_context(story_ui_ctx)
-
+    
     self.event_listener:on("BATTLE_END_VICTORY", function()
         self:handle_battle_victory( )
     end)

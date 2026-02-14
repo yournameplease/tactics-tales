@@ -92,6 +92,7 @@ local interface StoryPage
     add_text_line: function(self, dialogue: Dialogue)
     add_character_customization_menu: function(self, base_character: Character, key: string, anim: animation.AnimatedSpriteData)
     clear_page: function(self)
+    story_revision: integer
 end
 
 local story_page = {
@@ -109,6 +110,7 @@ function story_page.story_page(
 ): StoryPage
     local self: StoryPageImpl = setmetatable({
         story_memory = story_mem,
+        story_revision = 0,
     }, { __index = StoryPageImpl })
     self.nodes = {}
     return self

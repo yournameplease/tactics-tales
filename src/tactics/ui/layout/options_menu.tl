@@ -2,28 +2,25 @@
 --- Defines the UI layout for the options menu screen.
 
 local text_node = require("src.tactics.ui.components.text_node")
-local box = require("src.tactics.ui.box")
-local generic_menu_box = require("src.tactics.ui.panels.generic_list_menu")
+local nested_list = require("src.tactics.menu.cursor.nested.list")
+local book = require("src.tactics.ui.decoration.book")
+local menu = require("src.tactics.ui.components.menu")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
-local menu_cursor = require("src.tactics.menu.menu_cursor")
-local MenuNode = menu_cursor.MenuNode
 
-local SplitPages = require("src.tactics.ui.panels.split_pages")
-
-local left = box.new({ dir="col", flex_grow = 1, padding = 2})
-local right = box.new({ dir = "col", flex_grow = 1, padding = 2})
-right:add(text_node.title( { text = {"Options"} } ))
-right:add(generic_menu_box.new(
-	function (state: UIContextManager): MenuNode
+local left = book.flex_page()
+local right = book.flex_page()
+right:add(text_node.title( { content = {"Options"} } ))
+right:add(menu.generic_menu_box(
+	function (state: UIContextManager): integer
+		return state.game_context.menu_manager.revision_count
+	end,
+	function (state: UIContextManager): nested_list.NestedMenuNode
 		local root_node = state.game_context.menu_manager.menu_step.node
 		local node = root_node
+		assert(node is nested_list.NestedMenuNode) 
 		return node
-	end,
-	{flex_grow = 1} ))
-right:add(box.spacer(1))
+	end))
 
-
-local root = SplitPages.new(left, right)
+local root = book.split_pages(left, right)
 
 return { root = root }
-

@@ -1,5 +1,5 @@
 local box = require("src.tactics.ui.box")
-local portrait_box = require("src.tactics.ui.panels.portrait_box")
+local character_ui = require("src.tactics.ui.panels.portrait_box")
 require("src.tactics.character.items.object.item")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.character.items.object.item_inventory")
@@ -82,7 +82,7 @@ function battle.unit_info(): box.UIElement
         box.builder("unit_info_left")
         :layout(box.layout.col_fill())
         :build())
-    left:add(portrait_box.new(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
+    left:add(character_ui.portrait_box(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
     left:add(box.spacer(1))
 
     local info_col = root:add(
@@ -179,7 +179,7 @@ function battle.combat_preview(): box.UIElement
     }
 	:build()
 
-    local attacker_portrait = portrait_box.new(
+    local attacker_portrait = character_ui.portrait_box(
         function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end,
         "paper")
     local left = box.builder("combat_preview_left")
@@ -188,7 +188,7 @@ function battle.combat_preview(): box.UIElement
     left:add(attacker_portrait)
     left:add(box.spacer(1))
 
-    local defender_portrait = portrait_box.new(
+    local defender_portrait = character_ui.portrait_box(
         function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end,
         "paper")
     local right = box.builder("combat_preview_right")
