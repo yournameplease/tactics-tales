@@ -101,6 +101,12 @@ local record MenuHandling
     get_selection_at: function(self, lx: number, ly: number): MenuMouseSelection
 end
 
+local record SpriteInfo
+    s: integer
+    ox: integer
+    oy: integer
+end
+
 local record TextInfo
     draw_properties: text.DrawProperties
     text_color: UITextColor
@@ -140,6 +146,7 @@ local interface UIElement
     layout: Layout
     style: Style
     menu_handling: MenuHandling
+    sprite: SpriteInfo
     text: TextInfo
     cacheable: CacheInfo
 
@@ -149,8 +156,8 @@ local interface UIElement
     children: { UIElement }
     add: function(self, UIElement): UIElement
 
-    on_update: function(self, UIContextManager)
-    custom_draw: function(self, UIContextManager, DrawTargetManager, UITheme)
+    on_update: function(self: UIElement, UIContextManager)
+    custom_draw: function(self: UIElement, UIContextManager, DrawTargetManager, UITheme)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
     recalculate: function(self, depth: integer, x: integer, y: integer, state: UIContextManager) 
 end
@@ -228,6 +235,15 @@ function UIBuilder:menu_handling(menu_handling: MenuHandling): UIBuilder
     return self
 end
 
+function UIBuilder:sprite(sprite_props: SpriteInfo): UIBuilder
+    self.def.sprite = {
+        s = sprite_props.s,
+        ox = sprite_props.ox or 0,
+        oy = sprite_props.oy or 0,
+    }
+    return self
+end
+
 function UIBuilder:text(text_props: TextInfo): UIBuilder
     local draw_properties = text_props.draw_properties or {}
     draw_properties.justify = draw_properties.justify or "left"
@@ -256,7 +272,7 @@ function UIBuilder:on_draw(
 end
 
 function UIBuilder:on_update(
-    on_update: function(self: UIElement, UIContextManager)
+    on_update: function(UIElement, UIContextManager)
 ): UIBuilder
     self.def.on_update = on_update
     return self
@@ -833,6 +849,14 @@ function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManage
 
         if self.text and self.text.content then
             Box:draw_text(ui_theme)
+        end
+
+        if self.sprite and self.sprite.s then
+            pt.spr(
+                self.sprite.s,
+                self.rect.c_x + self.sprite.ox,
+                self.rect.c_y + self.sprite.oy
+            )
         end
     end
 
