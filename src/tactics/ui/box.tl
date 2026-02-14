@@ -48,7 +48,7 @@ end
 local record Style
     decoration_padding: integer
     decoration: DecorationStyle
-    transparent: boolean
+    solid: boolean
 end
 
 ---@desc
@@ -227,9 +227,12 @@ function UIBuilder:build(): UIElement
     self.def.layout.flex_grow = self.def.layout.flex_grow or 0
     self.def.layout.dir = self.def.layout.dir or "col"
     self.def.layout.gap = self.def.layout.gap or 0
-    self.def.layout.padding = self.def.layout.padding or layout.padding(0)
+    self.def.layout.padding = self.def.layout.padding or {}
+    self.def.layout.padding.t = self.def.layout.padding.t or 0
+    self.def.layout.padding.b = self.def.layout.padding.b or 0
+    self.def.layout.padding.l = self.def.layout.padding.l or 0
+    self.def.layout.padding.r = self.def.layout.padding.r or 0
 
-    self.def.style.transparent = self.def.style.transparent or true
     self.def.style.decoration_padding = self.def.style.decoration_padding or 0
     
     assert(not (self.def.layout.flex_grow > 0
@@ -347,10 +350,6 @@ function box.floating(node: UIElement, x: integer, y: integer): UIElement
         height = "auto",
         width = "auto",
     }
-    :style{
-        transparent = true,
-        
-    }
     :build()
     :add(node)
 end
@@ -423,7 +422,6 @@ end
 function box.spacer(grow?: integer): UIElement
     return box.builder("spacer")
     :layout{flex_grow = grow or 1}
-    :style{transparent = true}
     :build()
 end
 
@@ -808,7 +806,7 @@ end
 function Box:draw_background(ui_theme: UITheme)
     local element = self as Box -- Cast!  All classes inherit from box though
 
-    if not element.style.transparent then
+    if element.style.solid then
         element:draw_solid(ui_theme)
     end
     
