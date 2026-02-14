@@ -90,6 +90,7 @@ function ButtonCursor:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
 )
+	self.has_focus = true
 	if self.parent then
 		self.parent:claim_focus(nil, self)
 	end

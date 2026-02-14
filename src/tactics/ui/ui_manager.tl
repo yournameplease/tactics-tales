@@ -93,14 +93,7 @@ function UIManager:calculate(ui_ctx: UIContextManager)
     local root = self.current_layout.root
     
     -- Recalculate size and positions
-    box.compute_children(root, ui_ctx)
-    root:measure(1)
-    root:layout(root.x, root.y)
-    -- lazy fix for text sizing. Double calculate everything.
-    -- Consider something else if performance matters
-    box.compute_children(root, ui_ctx)
-    root:measure(1)
-    root:layout(root.x, root.y)
+    root:recalculate(1, 0, 0, ui_ctx)
     profile("ui_manager_calculate")
 end
 

@@ -131,6 +131,7 @@ end
 local interface MenuNode
 	id: string
 	parent: MenuNode
+	has_focus: boolean
 	
 	-- note: passing contexts are only really needed for grid nonsense.
     update_joy: function(self, Joypad): MenuSignal

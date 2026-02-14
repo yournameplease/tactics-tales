@@ -40,8 +40,8 @@ function SpriteNode:draw(state: UIContextManager, draw_target_manager: DrawTarge
 
 	pt.spr(
 		self.sprite_function(state),
-		self.x + self.internal_margin.l,
-		self.y + self.internal_margin.t
+		self.rect.x + self.layout.padding.l,
+		self.rect.y + self.layout.padding.t
 	)
 end
 
