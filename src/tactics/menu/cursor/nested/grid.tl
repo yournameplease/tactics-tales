@@ -54,6 +54,7 @@ local record NestedGridNode
     max_path_length: integer
     children: {NestedGridChild}
     child_array: array_2d.Array2D<MenuNode>
+    text_array: array_2d.Array2D<string>
 end
 
 local record NestedGridChildDefinition
@@ -78,7 +79,11 @@ local record NestedGridDefinition
     is menu_cursor.MenuContainerDefinition
     where self.type == "grid"
 
+    x_max: integer
+    y_max: integer
+
     children: {NestedGridChildDefinition}
+	text_function: function(Point, GameContext, MenuContext): string
     get_tile_highlights: function(GameContext, MenuContext): Userdata
     get_path_anchor: function(GameContext, MenuContext): Point
     get_max_path_length: function(GameContext, MenuContext): integer
@@ -254,8 +259,8 @@ function NestedGridDefinition:to_cursor(
     local cursor: NestedGridNode = {
         type = "grid",
         parent = parent,
-        x_max = 16,
-        y_max = 16,
+        x_max = self.x_max,
+        y_max = self.y_max,
 		point = point.of(0, 0),
     }
     
@@ -298,18 +303,27 @@ function NestedGridDefinition:to_cursor(
 			return cursor:get_first_child(p, game_ctx, menu_ctx)
 		end)
 	else
+		error("Probably an error, grid with no children")
 		cursor.child_array = array_2d.new(cursor.x_max, cursor.y_max)
+	end
+
+	if self.text_function then
+		cursor.text_array = array_2d.new_from_function(cursor.x_max, cursor.y_max, function(p: Point): string
+			return self.text_function(p, game_ctx, menu_ctx)
+		end)
 	end
 
 	return cursor
 end
 
 function nested_grid.grid(
-	id: string
+	id: string, x_max: integer, y_max: integer
 ): NestedGridDefinition
 	return setmetatable({
 		id = id,
 	    type = "grid",
+	    x_max = x_max,
+	    y_max = y_max,
 	    children = {},
 	},{
 	    __index = NestedGridDefinition
@@ -330,15 +344,21 @@ function NestedGridDefinition:with_child(
 end
 
 function NestedGridDefinition:with_common_child(
-	child_definition: MenuNodeDefinition,
-	value_function: function(Point, GameContext, MenuContext): any
+	child_definition: MenuNodeDefinition
 ): NestedGridDefinition
 	pt.add(self.children, setmetatable({
 		filter = function(_, _): boolean return true end,
-		child = child_definition,
+		child = child_definition
 	},{
 		__index = NestedGridChildDefinition,
 	}))
+	return self
+end
+
+function NestedGridDefinition:with_text_function(
+	text_function: function(Point, GameContext, MenuContext): string
+): NestedGridDefinition
+	self.text_function = text_function
 	return self
 end
 

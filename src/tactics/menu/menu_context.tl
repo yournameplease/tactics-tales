@@ -57,7 +57,6 @@ end
 
 local interface MenuContext
     metadata: {string: any}
-    keyboard_mode: string
 end
 
 local record BattleMainMenuContext

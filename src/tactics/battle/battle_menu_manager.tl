@@ -27,6 +27,8 @@ local record BattleMenuManager
     is menu_manager.MenuManager
 end
 
+local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
+local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
 
 local function point_is_empty_or_acting_unit(
     point: Point,
@@ -269,7 +271,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
         initial_step = "SELECT_SWAP_UNIT",
         steps = {
             ["SELECT_SWAP_UNIT"] = step_definition.of_node(
-                grid.grid("select_swap_unit")
+                grid.grid("select_swap_unit", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return point_is_available_player(point, msb.battle_map)
@@ -285,7 +287,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("DEPLOYMENT_MENU"),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
-                grid.grid("select_swap_target")
+                grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
@@ -323,7 +325,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = step_definition.of_node(
-                grid.grid("select_acting_unit")
+                grid.grid("select_acting_unit", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, _ctx: BattleMainMenuContext): boolean
                             return point_is_available_player(point, msb.battle_map)
@@ -346,7 +348,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 ),
              ["SELECT_DESTINATION"] = step_definition.of_node(
-                grid.grid("select_destination")
+                grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                             return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
@@ -412,7 +414,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_previous_step("SELECT_DESTINATION")
                 :handle_back("unmove_acting_unit"),
              ["SELECT_TARGET"] = step_definition.of_node(
-                grid.grid("select_target")
+                grid.grid("select_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
                             return validate_tile_is_in_unit_attack_range(
