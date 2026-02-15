@@ -152,6 +152,25 @@ local record ChildrenInfo
     generate_children: function(ctx: UIContextManager): { UIElement }
 end
 
+local record Anchor
+    target: string
+    ox: integer
+    oy: integer
+end
+
+local record ModalInfo
+    current_key: function(ctx: UIContextManager): any
+    -- returns child and 
+    compute: function(ctx: UIContextManager): UIElement, Anchor 
+
+    -- internal use
+    last_key: any
+    active: boolean
+    anchor: Anchor
+    -- cached to prevent multiple tree searches
+    anchor_node: UIElement
+end
+
 
 local interface UIElement
     -- Not necessarily unique.  For debug help.
@@ -165,6 +184,7 @@ local interface UIElement
     text: TextInfo
     child_generator: ChildrenInfo
     cacheable: CacheInfo
+    modal: ModalInfo
     -- custom data for complex elements.  Passed to some handlers
     data: any
 
@@ -175,13 +195,17 @@ local interface UIElement
     add: function(self, UIElement): UIElement
 
     on_update: function(self: UIElement, UIContextManager)
+    find_node_by_id: function(self: UIElement, string): UIElement
     custom_draw: function(self: UIElement, UIContextManager, DrawTargetManager, UITheme)
     draw: function(self, UIContextManager, DrawTargetManager, UITheme)
+    draw_modal: function(self, UIContextManager, DrawTargetManager, UITheme)
+
     recalculate: function(self,
         depth: integer,
         x: integer, y: integer,
         w: integer, h: integer,
         state: UIContextManager) 
+    recalculate_modal: function(self, state: UIContextManager, root: UIElement) 
 end
 
 local record Box
@@ -195,6 +219,9 @@ local box = {
     UIElement = UIElement,
     Box = Box,
     layout = layout,
+    anchor = {
+        Anchor = Anchor,
+    },
     text_info = text_info,
 }
 
@@ -363,6 +390,11 @@ end
 
 function UIBuilder:child_generator(child_generator: ChildrenInfo): UIBuilder
     self.def.child_generator = child_generator
+    return self
+end
+
+function UIBuilder:modal(modal: ModalInfo): UIBuilder
+    self.def.modal = modal
     return self
 end
 
@@ -867,6 +899,19 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
     return nil
 end
 
+function Box:find_node_by_id(id: string): UIElement 
+    if self.id == id then
+        return self
+    end
+    for _,child in ipairs(self.children) do
+        local child_result = child:find_node_by_id(id)
+        if child_result ~= nil then
+            return child_result
+        end
+    end
+    return nil
+end
+
 function Box:update(state: UIContextManager)
     if self.on_update then
         self:on_update(state)
@@ -935,6 +980,41 @@ function Box:recalculate(
     self:apply_layout(x, y, w, h)
 end
 
+function Box:recalculate_modal(
+    state: UIContextManager,
+    root: UIElement
+) 
+    assert(self.modal ~= nil, "Got a non-modal in the modals! "..self.id)
+
+    local current_key = self.modal.current_key(state)
+    if current_key ~= self.modal.last_key then
+        local node, anchor = self.modal.compute(state)
+
+        if node == nil then
+            self.modal.active = false
+        else
+            self.modal.active = true
+            self.children = {node}
+            self.modal.anchor = anchor
+            self.modal.anchor_node = root:find_node_by_id(anchor.target)
+        end
+        self.modal.last_key = current_key
+    end
+
+    if self.modal.active then
+        self:compute_children(state)
+        self:update(state)
+        self:compute_text()
+        self:measure(1)
+        local x = self.modal.anchor_node.rect.x + self.modal.anchor.ox
+        local y = self.modal.anchor_node.rect.y + self.modal.anchor.oy
+        -- todo
+        local w = 100
+        local h = 100
+        self:apply_layout(x, y, w, h)
+    end
+end
+
 function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
     self:draw_background(ui_theme)
     if self.custom_draw then
@@ -970,6 +1050,14 @@ function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManage
 
     for _, child in ipairs(self.children) do
         child:draw(state, draw_target_manager, ui_theme)
+    end
+end
+
+function Box:draw_modal(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    assert(self.modal ~= nil, "Got modal without modal info!"..self.id)
+
+    if self.modal.active then
+        self:draw(state, draw_target_manager, ui_theme)
     end
 end
 

@@ -23,8 +23,65 @@
 -- 	{"`", "~", "-", "_", "+", "=", " ", " ", " ", " ",},
 -- } 
 
+-- local KEYBOARDS = {
+-- 	["lower"] = LAYOUT_LOWER,
+-- 	["upper"] = LAYOUT_upper,
+-- 	["symbol"] = LAYOUT_symbol,
+-- }
+
+
+-- local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
+
+-- HANDLERS["change_keyboard_mode"] = function(
+--     _services: BattleMenuContext,
+--     _menu_data: {string: any},
+--     session_context: MenuContext,
+--     value: grid.NestedGridValue
+-- )
+--     session_context.keyboard = services.battle_map:get_at_tile(value.point)
+-- end
+
+-- local menu_keyboard = {}
+
+-- function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
+-- 	return step_definition.of_node(
+--         list.column(
+--             "options_menu",
+--             function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+--                 local children: {MenuNodeDefinition} = {}
+
+--                 pt.add(children, list.grid("keyboard")
+-- 					:with_common_child(
+-- 						button.builder("keyboard_key")
+-- 	                        :with_text("key")
+-- 	                        :handle_select("type_character")	
+-- 				))
+                    
+--                 pt.add(children, list.row(
+--                     "options_navigation",
+--                     function(_msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+--                         local options: {MenuNodeDefinition} = {}
+--                         pt.add(options, button.builder("reset")
+--                             :with_text("Mode")
+--                             :handle_select("change_keyboard_mode"))
+--                         pt.add(options, button.builder("reset")
+--                             :with_text("Random")
+--                             :handle_select("reset_options")
+--                             :advance_to("MAIN_MENU"))
+--                         pt.add(options, button.builder("save")
+--                             :with_text("Confirm")
+--                             :handle_select("set_options")
+--                             :advance_to("MAIN_MENU"))
+--                         return options
+--                     end))
+
+--                 return children
+--             end
+--         )
+-- 	)
+-- end
+
 -- local MENU_DATA: menu_manager.MenuDefinition = {
--- 	initial_step = "KEYBOARD_LOWER",
 -- 	steps = {
 -- 	    ["KEYBOARD_LOWER"] = grid_cursor.definition({
 -- 			select_handler = function(_self: grid_cursor.GridMenuNode, game_ctx: MenuContext, menu_ctx: MenuContext)

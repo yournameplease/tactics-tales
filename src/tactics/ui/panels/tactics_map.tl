@@ -9,7 +9,6 @@ local box = require("src.tactics.ui.box")
 local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local bm = require("src.tactics.battle.battle_map")
-local nested_list = require("src.tactics.menu.cursor.nested.list")
 local BattleUIContext = require("src.tactics.battle.battle_ui_context").BattleUIContext
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNode = menu_cursor.MenuNode
@@ -19,9 +18,7 @@ local Point = point.Point
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
-local menu_ui = require("src.tactics.ui.components.menu")
 local CharacterRenderer = require("src.tactics.character.character_renderer")
-local dialogue_node = require("src.tactics.ui.components.dialogue_node")
 
 
 local record MapData
@@ -211,91 +208,6 @@ local function draw_map_decorations(self: box.UIElement, layers: bm.MapLayers, z
     end
 end
 
-local function compute_children_key(state: UIContextManager): integer
-    return state.battle_context.dialogue_revision + state.battle_context.menu_revision
-end
-
----@desc
---- Dynamically adds or removes a floating menu as a child of the map.
---- The menu appears next to the cursor when the menu state requires it
---- (e.g., for action selection), and is removed otherwise.
-local function compute_children(state: UIContextManager): {box.UIElement}
-    local menu = state.battle_context.battle_menu_manager
-    local cursor = menu.menu_step.node
-    local cursor_tile = get_cursor_tile(state.battle_context)
-    
-    local x: integer = 0
-    local y: integer = 0
-    local menu_box: box.UIElement = nil
-    if state.battle_context.active_dialogue ~= nil then
-        local unit = state.battle_context.active_dialogue.speaking_unit
-
-        local x_step = unit.facing.horizontal == "left" and -4.5 or 1.5
-
-        x = pt.flr((unit.tile.x + x_step) * TILE_SIZE.x)
-        y = pt.flr((unit.tile.y - 0.5) * TILE_SIZE.y)
-
-        menu_box = box.builder("tactics_dialogue_box")
-        :layout{
-            width = 80,
-            -- h = 30,
-            height = "fit_content",
-            padding = box.layout.padding(2),
-        }
-        :style{
-            decoration_padding = 1,
-            solid = true,
-            decoration = "border",
-        }
-        :build()
-    
-        local node = dialogue_node.single_line(
-            state.battle_context.active_dialogue.dialogue,
-        	{
-                draw_properties = {
-                    wrap = "wrap",
-                    justify = "left",
-                },
-            }
-        )
-        menu_box:add(node)
-    elseif cursor_tile ~= nil then
-        x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
-        y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
-
-        if cursor is nested_list.NestedMenuNode then
-            menu_box = box.builder("tactics_dialogue_box")
-            :layout{
-                width = "fit_content",
-                height = "fit_content",
-                padding = box.layout.padding(2),
-            }
-            :style{
-                decoration_padding = 1,
-                solid = true,
-                decoration = "border",
-            }
-            :build()
-            local node = menu_ui.generic_menu_modal(
-                -- no need to recompute as this node handles new children
-                function(): integer return 0 end,
-            	function (s: UIContextManager): nested_list.NestedMenuNode
-            		local c = s.battle_context.battle_menu_manager.menu_step.node
-            		assert(c is nested_list.NestedMenuNode)
-            		return c
-            	end
-            )
-            menu_box:add(node)
-        end
-    end
-
-    if menu_box ~= nil then
-        return { box.floating(menu_box, x, y) }
-    end
-
-    return {}
-end
-
 ---@desc
 --- The main rendering function for the entire battle map panel.
 --- Draws ground, walls and Z-sorted units, and ceilings from the tile map, as well as UI cursor tiles
@@ -453,10 +365,6 @@ function tactics_map.new(map_width: integer, map_height: integer): box.UIElement
         decoration_padding = 2,
         solid = true,
         decoration = "border",
-    }
-    :child_generator{
-        current_key = compute_children_key,
-        generate_children = compute_children,
     }
     :menu_handling{
         get_selection_at = get_selection_at,

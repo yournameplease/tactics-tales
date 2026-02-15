@@ -302,6 +302,8 @@ function menu.generic_menu_modal(
 	menu_cursor_func: function(UIContextManager): MenuNode
 ): box.UIElement
 	return box.builder("menu_container")
+	:direction("col")
+	:container("modal")
 	:child_generator{
 		current_key = menu_revision_func,
 		generate_children = generate_menu_modal_root_children(menu_cursor_func)

@@ -13,20 +13,55 @@ local nested_list = require("src.tactics.menu.cursor.nested.list")
 local book = require("src.tactics.ui.decoration.book")
 local menu = require("src.tactics.ui.components.menu")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local layout = require("src.tactics.ui.layout")
+local tactics_modal = require("src.tactics.ui.modal.tactics")
+
+local layouts: { UILayoutId: layout.UILayout }  = {}
 
 local battle_summary = battle.battle_summary()
 local map = tactics_map.new(
 	STATIC_CONFIG.MAP_WIDTH,
 	STATIC_CONFIG.MAP_HEIGHT
 )
-local left = book.flex_page()
-left:add(battle_summary)
-left:add(battle.unit_info())
-left:add(box.spacer(1))
-left:add(control_hints.new())
-local right = book.fit_page()
-right:add(map)
 
-local root = book.split_pages(left, map)
+local modals: {layout.ModalLayout} = {
+	{
+		node = tactics_modal.tactics_dialogue_menu(),
+	},
+	{
+		node = tactics_modal.tactics_action_menu(),
+	},
+}
 
-return { root = root }
+do 
+	local left = book.flex_page()
+	left:add(battle_summary)
+	left:add(battle.unit_info())
+	left:add(box.spacer(1))
+	left:add(control_hints.new())
+	local right = book.fit_page()
+	right:add(map)
+
+	layouts["TACTICS"] = {
+		root = book.split_pages(left, map),
+		modals = modals,
+	}
+end
+
+do 
+	local left = book.flex_page()
+	left:add(battle_summary)
+	left:add(battle.combat_preview())
+	left:add(box.spacer(1))
+	left:add(control_hints.new())
+	local right = book.fit_page()
+	right:add(map)
+
+	layouts["COMBAT_PREVIEW"] = {
+		root = book.split_pages(left, map),
+		modals = modals,
+	}
+end
+
+return layouts
