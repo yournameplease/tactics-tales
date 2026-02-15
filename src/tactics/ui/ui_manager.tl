@@ -77,6 +77,19 @@ function ui_manager.new(): UIManager
 end
 
 function UIManager:get_mouse_selection(mx: number, my: number): MenuMouseSelection 
+    local modals = self.current_layout.modals
+
+    if modals ~= nil then
+        for _,modal in ipairs(self.current_layout.modals) do
+            if modal.node.modal.active then
+                local modal_hit = box.find_topmost_selection(modal.node, mx, my)
+                if modal_hit then
+                    return modal_hit
+                end
+            end
+        end 
+    end
+    
     local root = self.current_layout.root
     
     return box.find_topmost_selection(root, mx, my)

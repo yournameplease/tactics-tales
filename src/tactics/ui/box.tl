@@ -869,7 +869,11 @@ function Box:draw_text(ui_theme: UITheme)
 end
 
 -- assumes layout has already been called
-function box.find_topmost_selection(elem: UIElement, mx: number, my: number): MenuMouseSelection 
+function box.find_topmost_selection(
+    elem: UIElement,
+    mx: number,
+    my: number
+): MenuMouseSelection 
     for _,child in ipairs(elem.children) do
         local c_l = child.rect.c_x
         local c_r = child.rect.c_x + child.rect.c_w
