@@ -105,20 +105,31 @@ function NestedMenuNode:update_joy(
 	if self.i == old_i then
 	    return menu_signal.ignored()
 	else
+		self.children[old_i]:lose_focus()
+		self.children[self.i]:claim_focus(nil, nil)
 		return menu_signal.consumed()
 	end
+end
+
+function NestedMenuNode:lose_focus()
+	self.has_focus = false
+	self.children[self.i]:lose_focus()
 end
 
 function NestedMenuNode:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     child: menu_cursor.MenuNode
 )
+	if self.has_focus then return end
+
 	self.has_focus = true
 	if child ~= nil then
-		self.children[self.i].has_focus = false
+		-- self.children[self.i]:lose_focus()
 		for i,c in ipairs(self.children) do
 			if c == child then
 				self.i = i
+			else
+				c:lose_focus()
 			end
 		end
 	end
