@@ -128,8 +128,9 @@ HANDLERS["select_swap_unit"] = function(
     _menu_data: {string: any},
     session_context: BattlePreparationsContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.unit = services.battle_map:get_at_tile(value.point)
+    return nil
 end
 
 HANDLERS["swap_units"] = function(
@@ -137,11 +138,13 @@ HANDLERS["swap_units"] = function(
     _menu_data: {string: any},
     session_context: BattlePreparationsContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:handle_swap_unit(
         session_context.unit,
         value.point
     )
+
+    return nil
 end
 
 HANDLERS["start_battle"] = function(
@@ -149,8 +152,10 @@ HANDLERS["start_battle"] = function(
     _menu_data: {string: any},
     _session_context: BattlePreparationsContext,
     _value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.handle_start_battle()
+
+    return nil
 end
 
 HANDLERS["select_acting_unit"] = function(
@@ -158,12 +163,14 @@ HANDLERS["select_acting_unit"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     local unit = services.battle_map:get_at_tile(value.point)
     session_context.acting_unit = {
         unit = unit,
         point = unit.tile:copy(),
     }
+
+    return nil
 end
 
 HANDLERS["mark_unit"] = function(
@@ -171,8 +178,10 @@ HANDLERS["mark_unit"] = function(
     _menu_data: {string: any},
     _session_context: BattleMainMenuContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:handle_mark_unit(value.point)
+
+    return nil
 end
 
 HANDLERS["wait_acting_unit"] = function(
@@ -180,8 +189,10 @@ HANDLERS["wait_acting_unit"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     _value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
+
+    return nil
 end
 
 HANDLERS["move_acting_unit"] = function(
@@ -189,7 +200,7 @@ HANDLERS["move_acting_unit"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.destination = {
         point = value.point,
         path = value.path,
@@ -199,6 +210,8 @@ HANDLERS["move_acting_unit"] = function(
         session_context.destination.point,
         session_context.destination.path
     )
+
+    return nil
 end
 
 HANDLERS["unmove_acting_unit"] = function(
@@ -206,11 +219,13 @@ HANDLERS["unmove_acting_unit"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     _value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:jump_unit_to_point(
         session_context.acting_unit.unit,
         session_context.acting_unit.point
     )
+
+    return nil
 end
 
 HANDLERS["attack_unit"] = function(
@@ -218,12 +233,14 @@ HANDLERS["attack_unit"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     value: grid.NestedGridValue
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point)}
     services.tactics_engine:handle_attack_unit(
         session_context.acting_unit.unit,
         session_context.target_unit.unit
     )
+
+    return nil
 end
 
 HANDLERS["handle_interaction"] = function(
@@ -231,7 +248,7 @@ HANDLERS["handle_interaction"] = function(
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     interaction: InteractionHook
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.selected_script = {
         script_id = interaction.script_id,
         target_unit = interaction.target_unit,
@@ -243,6 +260,8 @@ HANDLERS["handle_interaction"] = function(
         interaction.target_unit,
         interaction.target_tile
     )
+
+    return nil
 end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {

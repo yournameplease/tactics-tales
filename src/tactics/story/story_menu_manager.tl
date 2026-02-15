@@ -2,6 +2,7 @@
 --- Manages menus that appear during story sequences, such as
 --- the character customization screen.
 
+local random = require("src.tactics.util.random")
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
 local sprite_data = require("src.tactics.character.sprite_data")
@@ -21,6 +22,20 @@ local SelectionMenuDefinition = selection.SelectionMenuDefinition
 local SelectionOption = selection.SelectionMenuOption
 
 local lists = require("src.tactics.util.lists")
+
+local function random_appearance(): {string: string}
+    return {
+        ["head"] = random.choose_random_from_list(customization_options.HEAD),
+        ["hair"] = random.choose_random_from_list(customization_options.HAIR),
+        ["skin"] = random.choose_random_from_list(customization_options.SKIN_COLOR),
+        ["hair_color"] = random.choose_random_from_list(customization_options.HAIR_COLOR),
+        ["body_class"] = random.choose_random_from_list(customization_options.BODY_CLASS),
+        ["beard"] = random.choose_random_from_list(customization_options.FACIAL_HAIR),
+        ["eyes"] = random.choose_random_from_list(customization_options.EYES),
+        ["eyewear"] = random.choose_random_from_list(customization_options.EYEWEAR),
+        ["headwear"] = random.choose_random_from_list(customization_options.HEADWEAR),
+    }
+end
 
 local function list_cursor_options_for_part(
     options: {{ string, sprite_data.NamedSpriteData }}
@@ -87,6 +102,9 @@ local function menu_definition_for_character_select(): menu_manager.MenuStepDefi
                     "character_creation",
                     function(_msb: StoryMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
                         local options: {MenuNodeDefinition} = {}
+                        pt.add(options, button.builder("randomize")
+                            :with_text("Randomize")
+                            :handle_select("randomize_appearance"))
                         pt.add(options, button.builder("confirm")
                             :with_text("Confirm")
                             :handle_select("create_character"))
@@ -95,6 +113,9 @@ local function menu_definition_for_character_select(): menu_manager.MenuStepDefi
 
                 return children
             end))
+            :with_initial_data(function(_services: StoryMenuContext, _session_data: MenuContext): {string: any}
+                return random_appearance()
+            end)
 end
 
 
@@ -104,14 +125,26 @@ end
 
 local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
 
+HANDLERS["randomize_appearance"] = function(
+    _services: StoryMenuContext,
+    _menu_data: {string: any},
+    _session_context: MenuContext,
+    _value: any
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    return menu_manager.menu_handler.then_deserialize(random_appearance())
+end
+
 HANDLERS["create_character"] = function(
     services: StoryMenuContext,
     menu_data: {string: any},
     _session_context: MenuContext,
     _value: any
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     local appearance = menu_data as {character.CharacterAppearanceKey: string}
+    
     services.handle_create_character(appearance)
+
+    return nil
 end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {

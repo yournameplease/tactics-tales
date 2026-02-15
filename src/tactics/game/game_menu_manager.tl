@@ -33,8 +33,10 @@ HANDLERS["begin_story"] = function(
     _menu_data: {string: any},
     _session_context: GameMainMenuContext,
     story_id: StoryId
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.handle_begin_story(story_id)
+
+    return nil
 end
 
 HANDLERS["set_options"] = function(
@@ -42,8 +44,10 @@ HANDLERS["set_options"] = function(
     menu_data: DynamicConfig,
     _session_context: GameMainMenuContext,
     _value: any
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.config_manager:store_config(menu_data)
+
+    return nil
 end
 
 HANDLERS["reset_options"] = function(
@@ -51,8 +55,10 @@ HANDLERS["reset_options"] = function(
     _menu_data: DynamicConfig,
     _session_context: GameMainMenuContext,
     _value: any
-)
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.config_manager:reset_config()
+
+    return nil
 end
 
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
