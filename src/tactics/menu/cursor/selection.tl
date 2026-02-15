@@ -106,6 +106,7 @@ end
 
 function SelectionMenuDefinition:with_yes_no_options(): SelectionMenuDefinition
 	self.get_options = get_yes_no_options
+	self.wrap = true
 	return self
 end
 
@@ -175,10 +176,16 @@ function SelectionMenuNode:update_joy(
 	return menu_signal.ignored()
 end
 
+function SelectionMenuNode:lose_focus()
+	self.has_focus = false
+end
+
 function SelectionMenuNode:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
 )
+	if self.has_focus then return end
+
 	self.has_focus = true
 	if self.parent then
 		self.parent:claim_focus(nil, self)

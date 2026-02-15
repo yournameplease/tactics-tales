@@ -86,10 +86,16 @@ function ButtonCursor:update_joy(
 	return menu_signal.ignored()
 end
 
+function ButtonCursor:lose_focus()
+	self.has_focus = false
+end
+
 function ButtonCursor:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
 )
+	if self.has_focus then return end
+	
 	self.has_focus = true
 	if self.parent then
 		self.parent:claim_focus(nil, self)
