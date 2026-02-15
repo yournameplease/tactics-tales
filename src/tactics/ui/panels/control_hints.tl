@@ -38,7 +38,8 @@ local function control_hint_row(input_label: InputLabel): box.UIElement
 	local row = box.builder("control_row_"..input_label)
 	:layout(box.layout.row_fill())
 	:build()
-	:add(
+
+	row:add(
 		box.builder("control_sprite_"..input_label)
 		:sprite{
 			ox = 1,
@@ -52,7 +53,7 @@ local function control_hint_row(input_label: InputLabel): box.UIElement
 			self.sprite.s = sprite_function(input_label)(state)
 	    end)
 	    :build())
-	:add(
+	row:add(
 		box.builder("control_text_"..input_label)
 		:text{
 			draw_properties = {

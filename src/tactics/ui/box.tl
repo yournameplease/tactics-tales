@@ -224,6 +224,9 @@ function UIBuilder:build(): UIElement
     if self.def.layout.height == nil then
         self.def.layout.height = "auto"
     end
+    if self.def.layout.width == "fill" or self.def.layout.height == "fill" then
+        self.def.layout.flex_grow = self.def.layout.flex_grow or 1
+    end
     self.def.layout.flex_grow = self.def.layout.flex_grow or 0
     self.def.layout.dir = self.def.layout.dir or "col"
     self.def.layout.gap = self.def.layout.gap or 0
@@ -254,7 +257,7 @@ function UIBuilder:build(): UIElement
     end
 
     if self.def.text then
-        if self.def.text.rows and self.def.layout.height == nil then
+        if self.def.text.rows then
             self.def.layout.height = (self.def.text.rows) * (TEXT_HEIGHT + 2)
         end
         self.def.text.content = self.def.text.content or {}
@@ -302,17 +305,19 @@ function UIBuilder:data(data: any): UIBuilder
 end
 
 function UIBuilder:text(text_props: TextInfo): UIBuilder
-    local draw_properties = text_props.draw_properties or {}
+    self.def.text = text_props or {}
+
+    local draw_properties = self.def.text.draw_properties or {}
     draw_properties.justify = draw_properties.justify or "left"
     draw_properties.direction = draw_properties.direction or "down"
     draw_properties.align = draw_properties.align or false
     draw_properties.wrap = draw_properties.wrap or
         (draw_properties.align and "no_wrap" or "ellipsis")
-    
-    self.def.text = {
-        draw_properties = draw_properties
-    }
+
+    self.def.text.draw_properties = draw_properties
     self.def.text.text_color = text_props.text_color or "dark"
+    self.def.text.content = text_props.content
+
     return self
 end
 
@@ -565,10 +570,12 @@ function Box:apply_layout(
         -- Add Child Fixed Size (Size + Margin)
         -- Important: If child is flex_grow > 0 but we are auto_size,
         -- flex is effectively disabled for that axis.
-        if child.layout.flex_grow > 0
-            and not (is_row and self.layout.width == "auto")
-            and not (not is_row and self.layout.height == "auto")
-        then
+
+        local child_should_flex = ((is_row and child.layout.width == "fill")
+                or (not is_row and child.layout.height == "fill"))
+                and child.layout.flex_grow
+        
+        if child_should_flex then
             total_flex = total_flex + child.layout.flex_grow
             -- Don't add to used_space yet, flex takes remainder
         else
@@ -597,7 +604,12 @@ function Box:apply_layout(
         local child_h = child.rect.h
 
         -- Handle Flex
-        if child.layout.flex_grow > 0 and total_flex > 0 then
+
+        local child_should_flex = ((is_row and child.layout.width == "fill")
+                or (not is_row and child.layout.height == "fill"))
+                and child.layout.flex_grow
+        
+        if child_should_flex and total_flex > 0 then
             local added = pt.flr(child.layout.flex_grow * px_per_flex)
             if is_row then
                 child_w = added
@@ -618,7 +630,6 @@ function Box:apply_layout(
         end
         -- Recurse Layout
         if child.layout then
-            child.rect.w, child.rect.h = child_w, child_h
             child:apply_layout(cx, cy, child_w, child_h)
         end
 
@@ -631,6 +642,10 @@ function Box:apply_layout(
             cx = cx
         end
     end
+
+    log.debug("Menu layout for "..self.id)
+    log.debug("outer: ", self.rect.x, self.rect.y, self.rect.w, self.rect.h)
+    log.debug("inner: ", self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h)
 end
 
 function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color)
@@ -913,11 +928,13 @@ function Box:compute_text()
             )
         end
 
+        -- log.debug("Calculating text with ", lines[1], self.rect.c_w, self.rect.c_h)
         local text_obj = self.text.text_object
         text_obj:set_width(self.rect.c_w)
         text_obj:set_height(self.rect.c_h)
         text_obj:set_lines(lines)
         text_obj:calculate_wrapping()
+        -- log.debug("Wrapped to ", text_obj:get_wrapped_rows())
     end
 
     for _,c in ipairs(self.children) do
