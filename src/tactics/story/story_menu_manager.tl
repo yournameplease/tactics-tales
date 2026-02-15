@@ -52,6 +52,7 @@ local function multiple_option_cursor_for_part(
     return selection.row(key.."_selection")
             :with_label(text)
 			:with_key(key)
+			:with_wrap(true)
 			:with_precomputed_options(list_cursor_options_for_part(data_list))
 end
 

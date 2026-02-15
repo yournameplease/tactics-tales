@@ -14,7 +14,8 @@ function text_node.title(text_info: box.text_info.TextInfo): box.UIElement
     text_info.rows = 1
 
     local self = box.builder("title_box")
-        :layout(box.layout.col_fit())
+		:direction("col")
+		:container("block")
         :build()
 
     self:add(

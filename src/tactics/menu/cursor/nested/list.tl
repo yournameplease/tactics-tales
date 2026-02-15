@@ -120,8 +120,6 @@ function NestedMenuNode:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     child: menu_cursor.MenuNode
 )
-	if self.has_focus then return end
-
 	self.has_focus = true
 	if child ~= nil then
 		-- self.children[self.i]:lose_focus()

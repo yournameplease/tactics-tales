@@ -41,8 +41,10 @@ end
 
 function battle.battle_summary(): box.UIElement
     local self = box.builder("battle_summary")
-    :layout(box.layout.col_fit())
-    :build()
+    	:direction("col")
+    	:container("block")
+        :build()
+
     self:add(
         text_node.title{
             content = {"BATTLE"}
@@ -80,7 +82,8 @@ function battle.unit_info(): box.UIElement
     local left = root
     :add(
         box.builder("unit_info_left")
-        :layout(box.layout.col_fill())
+		:direction("col")
+		:container("panel")
         :build())
     left:add(character_ui.portrait_box(function(state: UIContextManager): BattleUnit return state.battle_context.last_hovered_unit end, "paper"))
     left:add(box.spacer(1))
@@ -183,7 +186,8 @@ function battle.combat_preview(): box.UIElement
         function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end,
         "paper")
     local left = box.builder("combat_preview_left")
-        :layout(box.layout.col_fill())
+		:direction("col")
+		:container("panel")
         :build()
     left:add(attacker_portrait)
     left:add(box.spacer(1))
@@ -192,7 +196,8 @@ function battle.combat_preview(): box.UIElement
         function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end,
         "paper")
     local right = box.builder("combat_preview_right")
-        :layout(box.layout.col_fill())
+		:direction("col")
+		:container("panel")
         :build()
     right:add(defender_portrait)
     right:add(box.spacer(1))

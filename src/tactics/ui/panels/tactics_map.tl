@@ -244,6 +244,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         }
         :style{
             decoration_padding = 1,
+            solid = true,
             decoration = "border",
         }
         :build()
@@ -253,8 +254,8 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         	{
                 draw_properties = {
                     wrap = "wrap",
+                    justify = "left",
                 },
-                rows = 3,
             }
         )
         menu_box:add(node)
@@ -271,6 +272,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
             }
             :style{
                 decoration_padding = 1,
+                solid = true,
                 decoration = "border",
             }
             :build()
@@ -399,7 +401,7 @@ local function draw_tactics_map(
         -- end
     end
 
-    draw_target_manager:draw(draw_x, 0)
+    draw_target_manager:draw(draw_x, draw_y)
     -- profile("draw_map_post_rows")
     profile("tactics_map_draw")
 end
@@ -448,6 +450,7 @@ function tactics_map.new(map_width: integer, map_height: integer): box.UIElement
     }
     :style{
         decoration_padding = 2,
+        solid = true,
         decoration = "border",
     }
     :child_generator{

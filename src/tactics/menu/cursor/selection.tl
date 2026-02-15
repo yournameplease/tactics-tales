@@ -94,6 +94,11 @@ function SelectionMenuDefinition:with_options(
 	return self
 end
 
+function SelectionMenuDefinition:with_wrap(wrap: boolean): SelectionMenuDefinition
+	self.wrap = wrap
+	return self
+end
+
 local get_yes_no_options = function(_game_ctx: GameContext, _menu_context: MenuContext): {SelectionMenuOption}
     return {{
 		text = "YES",
@@ -184,8 +189,6 @@ function SelectionMenuNode:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
 )
-	if self.has_focus then return end
-
 	self.has_focus = true
 	if self.parent then
 		self.parent:claim_focus(nil, self)

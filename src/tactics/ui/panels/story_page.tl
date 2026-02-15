@@ -16,10 +16,13 @@ local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNode = menu_cursor.MenuNode
 local DrawableCharacter = require("src.tactics.story.drawable_character").DrawableCharacter
 
-local story_page = {}
+local story_page_ui = {}
 
 local function chapter_header_page(node: rendered_story_node.ChapterHeader): box.UIElement
-	local root = box.col_fill()
+	local root = box.builder("chapter_title")
+		:direction("col")
+		:container("block")
+		:build()
     if node.number ~= nil then
 
         root:add(box.builder("chapter_number")
@@ -52,6 +55,7 @@ local function story_text_page(node: rendered_story_node.Text): box.UIElement
     	{
     	    draw_properties = {
         		wrap = "wrap",
+        		justify = "left",
         	}
     	}
     )
@@ -73,7 +77,10 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         elseif n is rendered_story_node.Text then
             child = story_text_page(n)
         elseif n is rendered_story_node.CharacterCustomization then
-			child = box.row_fill()
+			child = box.builder("character_customizer")
+        		:direction("row")
+        		:container("strip")
+        		:build()
 
 			local root_node = state.story_context.menu_manager.menu_step.node
             if root_node is nested_list.NestedMenuNode then
@@ -96,9 +103,15 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     end
 
     if is_chapter_header_page then
-		local page = box.col_fill()
+		local page = box.builder("story_page")
+    		:direction("col")
+    		:container("block")
+    		:build()
         page:add(box.spacer(1))
-        local page_content_box = box.col_fit()
+        local page_content_box = box.builder("story_page_header")
+    		:direction("col")
+    		:container("block")
+    		:build()
         for _,b in ipairs(content) do
             page_content_box:add(b)
         end
@@ -107,9 +120,15 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         
         return {page}
     else
-        local page = box.col_fill()
+        local page = box.builder("story_page")
+    		:direction("col")
+    		:container("panel")
+    		:build()
         if rendered_page.chapter_text ~= nil then
-            local header_box = box.col_fit()
+            local header_box = box.builder("story_page_header")
+        		:direction("col")
+        		:container("block")
+        		:build()
             local num_text = rendered_page.chapter_number
                 and tostring(rendered_page.chapter_number)
                 or ""
@@ -126,7 +145,10 @@ local function compute_children(state: UIContextManager): {box.UIElement}
             header_box:add(book.section_divider(1))
             page:add(header_box)
         end
-        local page_content_box = box.col_fit()
+        local page_content_box = box.builder("story_page_content")
+    		:direction("col")
+    		:container("block")
+    		:build()
 
         for _,b in ipairs(content) do
             page_content_box:add(b)
@@ -139,7 +161,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     end
 end
 
-function story_page.new(): box.UIElement
+function story_page_ui.new(): box.UIElement
     local content = box.builder("story_content")
         :layout{
             width = "fill",
@@ -156,4 +178,4 @@ function story_page.new(): box.UIElement
     return content
 end
 
-return story_page
+return story_page_ui

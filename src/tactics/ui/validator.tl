@@ -20,32 +20,42 @@ function menu_validator.validate(node: box.UIElement, path: string)
     local children = node.children
     assert(children ~= nil)
 
-    -- if node.layout.height == "fit_content" then
-    --     if is_col then
-    --         for i, child in ipairs(children) do
-    --             if (child.layout.flex_grow or 0) > 0 then
-    --                 error(
-    --                         "LAYOUT ERROR: Circular Dependency.\nPath: "
-    --                                 ..path.." > "..get_node_name(child, i)..
-    --                                 "Parent is 'auto_height' (col), but child has to 'flex_grow'."
-    --                 )
-    --             end
-    --         end
-    --     end
-    -- end
+    if node.layout.height == "fit_content" then
+        local fill_child: box.UIElement = nil
+        local non_fill_child = false
+        for _, child in ipairs(children) do
+            if child.layout.height == "fill" then
+                fill_child = child
+            else
+                non_fill_child = true
+            end
+        end
+        if fill_child and not non_fill_child then
+            error(
+                    "LAYOUT ERROR: Circular Dependency.\nPath: "
+                            ..path.." > "..fill_child.id..
+                            "Parent is 'fit_content' height, but child has to 'fill' height."
+            )
+        end
+    end
 
-    -- if node.layout.width == "fit_content" then
-    --     if is_row then
-    --         for i, child in ipairs(children) do
-    --             if (child.layout.flex_grow or 0) > 0 then
-    --                 error(string.format(
-    --                         "LAYOUT ERROR: Circular Dependency.\nPath: %s > %s\nReason: Parent is 'auto_width' (row), but child tries to 'flex_grow'.",
-    --                         path, get_node_name(child, i)
-    --                 ))
-    --             end
-    --         end
-    --     end
-    -- end
+    if node.layout.width == "fit_content" then
+        local fill_child: box.UIElement = nil
+        local non_fill_child = false
+        for i, child in ipairs(children) do
+            if child.layout.width == "fill" then
+                fill_child = child
+            else
+                non_fill_child = true
+            end
+        end
+        if fill_child and not non_fill_child then
+            error(string.format(
+                    "LAYOUT ERROR: Circular Dependency.\nPath: %s > %s\nReason: Parent is 'auto_width', but child tries to 'flex_grow'.",
+                    path, fill_child.id
+            ))
+        end
+    end
 
     for i, child in ipairs(children) do
         local child_path = path .. " > " .. get_node_name(child, i)
