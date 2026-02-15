@@ -5,23 +5,20 @@
 require("src.tactics.config")
 require("profiler")
 
+local maps = require("src.tactics.util.maps")
 local UILayoutId = require("src.tactics.ui.types").UILayoutId
+local UILayout = require("src.tactics.ui.layout").UILayout
 local draw_target_manager = require("src.tactics.draw.draw_target_manager")
 local box = require("src.tactics.ui.box")
 local menu_validator = require("src.tactics.ui.validator")
 local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local tactics_main = require("src.tactics.ui.layout.tactics_main")
-local combat_preview = require("src.tactics.ui.layout.combat_preview")
 local story_page = require("src.tactics.ui.layout.story_page")
 local title_screen = require("src.tactics.ui.layout.title_screen")
 local main_menu = require("src.tactics.ui.layout.main_menu")
 local chapter_select = require("src.tactics.ui.layout.chapter_select")
 local options_menu = require("src.tactics.ui.layout.options_menu")
-
-local record UILayout
-    root: box.UIElement
-end
 
 local record UIManager
     layouts: { UILayoutId: UILayout }
@@ -41,8 +38,7 @@ function ui_manager.new(): UIManager
          
     self.layouts = {}
 
-    self.layouts["TACTICS"] = tactics_main
-    self.layouts["COMBAT_PREVIEW"] = combat_preview
+    maps.add_all(self.layouts, tactics_main)
     self.layouts["STORY_PAGE"] = story_page
     self.layouts["TITLE_SCREEN"] = title_screen
     self.layouts["MAIN_MENU_PAGE"] = main_menu
@@ -94,6 +90,11 @@ function UIManager:calculate(ui_ctx: UIContextManager)
     
     -- Recalculate size and positions
     root:recalculate(1, 0, 0, 480, 270, ui_ctx)
+    if self.current_layout.modals then
+        for _,modal in ipairs(self.current_layout.modals) do
+            modal.node:recalculate_modal(ui_ctx, root)
+        end 
+    end
     profile("ui_manager_calculate")
 end
 
@@ -103,6 +104,11 @@ function UIManager:draw(ui_ctx: UIContextManager)
     profile("ui_manager_draw")
     pt.cls(self.theme.COLOR_CLEAR)
     root:draw(ui_ctx, self.draw_target_manager, self.theme)
+    if self.current_layout.modals then
+        for _,modal in ipairs(self.current_layout.modals) do
+            modal.node:draw_modal(ui_ctx, self.draw_target_manager, self.theme)
+        end 
+    end
     profile("ui_manager_draw")
 end
 

@@ -329,6 +329,19 @@ function NestedGridDefinition:with_child(
 	return self
 end
 
+function NestedGridDefinition:with_common_child(
+	child_definition: MenuNodeDefinition,
+	value_function: function(Point, GameContext, MenuContext): any
+): NestedGridDefinition
+	pt.add(self.children, setmetatable({
+		filter = function(_, _): boolean return true end,
+		child = child_definition,
+	},{
+		__index = NestedGridChildDefinition,
+	}))
+	return self
+end
+
 function NestedGridDefinition:with_path_length(
 	get_max_path_length: function(GameContext, MenuContext): integer
 ): NestedGridDefinition

@@ -1,6 +1,5 @@
 ---@brief
 --- Contains basic UI-related type definitions, such as UILayoutId.
-
 local enum UILayoutId
     "TITLE_SCREEN"
     "MAIN_MENU_PAGE"
