@@ -107,7 +107,7 @@ local record MenuHandling
     -- if present, return this instead of calling the handler
     hover_event: MenuMouseSelection
     -- nillable
-    get_selection_at: function(self, lx: number, ly: number): MenuMouseSelection
+    get_selection_at: function(self: UIElement, lx: number, ly: number): MenuMouseSelection
 end
 
 local record SpriteInfo
@@ -378,7 +378,7 @@ end
 function layout.col_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "col",
-        width = "auto",
+        width = "fill",
         height = "auto",
         gap = gap,
         padding = padding,
@@ -411,7 +411,7 @@ function layout.row_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "row",
         width = "auto",
-        height = "auto",
+        height = "fill",
         gap = gap,
         padding = padding,
     }
@@ -426,7 +426,11 @@ end
 -- good for lazy justification
 function box.spacer(grow?: integer): UIElement
     return box.builder("spacer")
-    :layout{flex_grow = grow or 1}
+    :layout{
+        flex_grow = grow or 1,
+        width = "fill",
+        height = "fill",
+    }
     :build()
 end
 
@@ -643,9 +647,9 @@ function Box:apply_layout(
         end
     end
 
-    log.debug("Menu layout for "..self.id)
-    log.debug("outer: ", self.rect.x, self.rect.y, self.rect.w, self.rect.h)
-    log.debug("inner: ", self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h)
+    -- log.debug("Menu layout for "..self.id)
+    -- log.debug("outer: ", self.rect.x, self.rect.y, self.rect.w, self.rect.h)
+    -- log.debug("inner: ", self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h)
 end
 
 function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color)
@@ -881,11 +885,12 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
         end
     end
     if elem.menu_handling then
+        log.debug("Mouse is hovering box for "..elem.id)
         if elem.menu_handling.hover_event then
             return elem.menu_handling.hover_event
         elseif elem.menu_handling.get_selection_at ~= nil then
             log.trace("checking box for selection", elem.id)
-            return elem.menu_handling:get_selection_at(mx - elem.rect.c_x, my - elem.rect.c_y)
+            return elem.menu_handling.get_selection_at(elem, mx - elem.rect.c_x, my - elem.rect.c_y)
         end
     end
     return nil

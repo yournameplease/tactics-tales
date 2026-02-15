@@ -110,6 +110,8 @@ function menu.select_row(
 			hover_event = menu_mouse_selection.leaf(node, "increment_selection", nil),
 		}
 		:build())
+
+	return row
 end
 
 local function generate_menu_node_element(
@@ -120,13 +122,19 @@ local function generate_menu_node_element(
 		if node.direction == "column" then
 			builder = builder:layout(box.layout.col_fit())
 		elseif node.direction == "row" then
-			builder = builder:layout(box.layout.row_fit())
+			builder = builder:layout(box.layout.row_fill())
 		end
 
 		local self = builder:build()
 
+		if node.direction == "row" then
+			self:add(box.spacer(1))
+		end
 		for _,child in ipairs(node.children) do
 			self:add(generate_menu_node_element(child))
+			if node.direction == "row" then
+				self:add(box.spacer(1))
+			end
 		end
 
 		return self

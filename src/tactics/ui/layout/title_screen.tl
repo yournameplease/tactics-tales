@@ -6,12 +6,15 @@ local text_node = require("src.tactics.ui.components.text_node")
 local book = require("src.tactics.ui.decoration.book")
 
 local root = box.builder("title_screen")
-:layout{
-    dir="col",
-    width = 480,
-    height = 270,
-}
-:build()
+    :layout{
+        dir="col",
+        width = 480,
+        height = 270,
+    }
+    :style{
+        solid = true,
+    }
+    :build()
 
 -- Left Sidebar
 

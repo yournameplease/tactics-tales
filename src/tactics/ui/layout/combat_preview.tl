@@ -19,6 +19,8 @@ left:add(battle_summary)
 left:add(battle.combat_preview())
 left:add(box.spacer(1))
 left:add(control_hints.new())
+local right = book.fit_page()
+right:add(map)
 
 local root = book.split_pages(left, map)
 
