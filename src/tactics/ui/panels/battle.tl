@@ -1,9 +1,9 @@
 local box = require("src.tactics.ui.box")
+local book = require("src.tactics.ui.decoration.book")
 local character_ui = require("src.tactics.ui.panels.portrait_box")
 require("src.tactics.character.items.object.item")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.character.items.object.item_inventory")
-local text_node = require("src.tactics.ui.components.text_node")
 local wpn = require("src.tactics.character.items.object.weapon")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
@@ -46,7 +46,7 @@ function battle.battle_summary(): box.UIElement
         :build()
 
     self:add(
-        text_node.title{
+        book.title{
             content = {"BATTLE"}
         })
     self:add(
