@@ -22,12 +22,38 @@ local record SelectionHistory
     step: menu_types.MenuStep
 end
 
+local enum MenuHandlerPostHandlingType
+    "deserialize"
+end
+
+local interface MenuHandlerPostHandling
+    type: MenuHandlerPostHandlingType
+end
+
+local record MenuHandlerDeserialize
+    is MenuHandlerPostHandling
+    where self.type == "deserialize"
+    data: {string: any}
+end
+
 local type MenuHandler = function(
     services: GameContext,
     menu_data: {string: any},
     session_context: MenuContext,
     value: any
-)
+): MenuHandlerPostHandling
+
+local menu_handler = {
+    MenuHandler = MenuHandler,
+    MenuHandlerPostHandling = MenuHandlerPostHandling,
+}
+
+function menu_handler.then_deserialize(data: {string: any}): MenuHandlerDeserialize
+    return {
+        type = "deserialize",
+        data = data,
+    }
+end
 
 local record MenuStep
 	previous_step: string
@@ -152,6 +178,7 @@ end
 local menu_manager = {
     MenuManager = MenuManager,
     MenuHandler = MenuHandler,
+    menu_handler = menu_handler,
     SelectionHistory = SelectionHistory,
     MenuDefinition = MenuDefinition,
     MenuStepDefinition = MenuStepDefinition,
@@ -354,12 +381,18 @@ function BaseMenuManager:update(input: InputContext)
         log.debug(ser.menu_id)
         log.debug(ser.step)
         log.debug(ser.node)
-        handler(
+        local handler_res = handler(
             self.game_ctx,
             self:serialize().node.data,
             self.menu_ctx,
             signal.value
         )
+        if handler_res then
+            if handler_res is MenuHandlerDeserialize then
+                log.debug("Deserializing from menu handler response.", self.menu_state.step)
+                self.menu_step.node:deserialize(nil, handler_res.data)
+            end
+        end
         if signal.then_navigate_to ~= nil then
             self:handle_menu_advance(signal.then_navigate_to)
         end
