@@ -36,8 +36,9 @@ end
 
 local function control_hint_row(input_label: InputLabel): box.UIElement
 	local row = box.builder("control_row_"..input_label)
-	:layout(box.layout.row_fill())
-	:build()
+		:direction("row")
+		:container("strip")
+		:build()
 
 	row:add(
 		box.builder("control_sprite_"..input_label)
@@ -72,11 +73,15 @@ local function control_hint_row(input_label: InputLabel): box.UIElement
 end
 
 function control_hints.new(): box.UIElement
-    return box.builder("control_hints")
-    :layout(box.layout.col_fit())
-    :build()
-	:add(control_hint_row("primary"))
-	:add(control_hint_row("secondary"))
+    local self = box.builder("control_hints")
+		:direction("col")
+		:container("block")
+	    :build()
+
+	self:add(control_hint_row("primary"))
+	self:add(control_hint_row("secondary"))
+
+	return self
 end
 
 return control_hints

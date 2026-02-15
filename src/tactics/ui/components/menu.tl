@@ -45,8 +45,9 @@ function menu.select_row(
 ): box.UIElement
 	log.debug("Generating select node menu box. ",node.id,node.label)
 	local row = box.builder(node.id)
-	:layout(box.layout.row_fill())
-	:build()
+		:direction("row")
+		:container("strip")
+		:build()
 
 	if node.label then
 		row:add(
@@ -120,9 +121,13 @@ local function generate_menu_node_element(
 	if node is nested_list.NestedMenuNode then
 		local builder = box.builder(node.id)
 		if node.direction == "column" then
-			builder = builder:layout(box.layout.col_fit())
+			builder = builder
+				:direction("col")
+				:container("block")
 		elseif node.direction == "row" then
-			builder = builder:layout(box.layout.row_fill())
+			builder = builder
+				:direction("row")
+				:container("strip")
 		end
 
 		local self = builder:build()

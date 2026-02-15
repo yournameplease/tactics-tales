@@ -275,6 +275,41 @@ function UIBuilder:build(): UIElement
     })
 end
 
+function UIBuilder:direction(dir: UIDirection): UIBuilder
+    self.def.layout.dir = dir
+    return self
+end
+
+local enum ContainerPreset
+    "block"
+    "panel"
+    "strip"
+    "modal"
+end
+
+--- sets layout a container may like
+function UIBuilder:container(dir: ContainerPreset): UIBuilder
+    local dimensions_by_preset <total>
+    : {ContainerPreset: {DimensionSpec, DimensionSpec}} = {
+        ["block"] = { "fit_content", "fill" },
+        ["panel"] = { "fill", "fill" },
+        ["strip"] = { "fill", "fit_content" },
+        ["modal"] = { "fit_content", "fit_content" },
+    }    
+
+    local dimensions = dimensions_by_preset[dir]
+    if self.def.layout.dir == "row" then
+        self.def.layout.width = dimensions[1]
+        self.def.layout.height = dimensions[2]
+    elseif self.def.layout.dir == "col" then
+        self.def.layout.height = dimensions[1]
+        self.def.layout.width = dimensions[2]
+    else
+        error("Should specify direction before using a preset")
+    end
+    return self
+end
+
 function UIBuilder:layout(box_layout: Layout): UIBuilder
     self.def.layout = box_layout
     return self
@@ -357,70 +392,6 @@ function box.floating(node: UIElement, x: integer, y: integer): UIElement
     }
     :build()
     :add(node)
-end
-
-function layout.col_fill(gap?: integer, padding?: Padding): Layout
-    return {
-        dir = "col",
-        width = "fit_content",
-        height = "fill",
-        gap = gap,
-        padding = padding,
-    }
-end
-
-function box.col_fill(gap?: integer, padding?: Padding): UIElement
-    return box.builder("col_fill")
-        :layout(layout.col_fill(gap, padding))
-        :build()
-end
-
-function layout.col_fit(gap?: integer, padding?: Padding): Layout
-    return {
-        dir = "col",
-        width = "fill",
-        height = "fit_content",
-        gap = gap,
-        padding = padding,
-    }
-end
-
-function box.col_fit(gap?: integer, padding?: Padding): UIElement
-    return box.builder("col_fit")
-        :layout(layout.col_fit(gap, padding))
-        :build()
-end
-
-function layout.row_fill(gap?: integer, padding?: Padding): Layout
-    return {
-        dir = "row",
-        width = "fill",
-        height = "fit_content",
-        gap = gap,
-        padding = padding,
-    }
-end
-
-function box.row_fill(gap?: integer, padding?: Padding): UIElement
-    return box.builder("row_fill")
-        :layout(layout.row_fill(gap, padding))
-        :build()
-end
-
-function layout.row_fit(gap?: integer, padding?: Padding): Layout
-    return {
-        dir = "row",
-        width = "fit_content",
-        height = "fill",
-        gap = gap,
-        padding = padding,
-    }
-end
-
-function box.row_fit(gap?: integer, padding?: Padding): UIElement
-    return box.builder("row_fit")
-        :layout(layout.row_fit(gap, padding))
-        :build()
 end
 
 -- good for lazy justification
@@ -885,7 +856,7 @@ function box.find_topmost_selection(elem: UIElement, mx: number, my: number): Me
         end
     end
     if elem.menu_handling then
-        log.debug("Mouse is hovering box for "..elem.id)
+        -- log.debug("Mouse is hovering box for "..elem.id)
         if elem.menu_handling.hover_event then
             return elem.menu_handling.hover_event
         elseif elem.menu_handling.get_selection_at ~= nil then
@@ -965,38 +936,36 @@ function Box:recalculate(
 end
 
 function Box:draw(state: UIContextManager, draw_target_manager: DrawTargetManager, ui_theme: UITheme)
+    self:draw_background(ui_theme)
     if self.custom_draw then
         self:custom_draw(state, draw_target_manager, ui_theme)
-    else
-        self:draw_background(ui_theme)
+    end
+    if self.text and self.text.content then
+        self:draw_text(ui_theme)
+    end
 
-        if DYNAMIC_CONFIG.draw_flexbox_debug then
-    		local color = colors.rainbow(self.rect.depth-1)	
-            pt.rrect(
-                    self.rect.x,
-                    self.rect.y,
-                    self.rect.w,
-                    self.rect.h,
-                    0, color[2])
-             pt.rrect(
-                    self.rect.c_x,
-                    self.rect.c_y,
-                    self.rect.c_w,
-                    self.rect.c_h,
-                     0, color[1])
-        end
+    if self.sprite and self.sprite.s then
+        pt.spr(
+            self.sprite.s,
+            self.rect.c_x + self.sprite.ox,
+            self.rect.c_y + self.sprite.oy
+        )
+    end
 
-        if self.text and self.text.content then
-            self:draw_text(ui_theme)
-        end
-
-        if self.sprite and self.sprite.s then
-            pt.spr(
-                self.sprite.s,
-                self.rect.c_x + self.sprite.ox,
-                self.rect.c_y + self.sprite.oy
-            )
-        end
+    if DYNAMIC_CONFIG.draw_flexbox_debug then
+		local color = colors.rainbow(self.rect.depth-1)	
+        pt.rrect(
+                self.rect.x,
+                self.rect.y,
+                self.rect.w,
+                self.rect.h,
+                0, color[2])
+         pt.rrect(
+                self.rect.c_x,
+                self.rect.c_y,
+                self.rect.c_w,
+                self.rect.c_h,
+                 0, color[1])
     end
 
     for _, child in ipairs(self.children) do
