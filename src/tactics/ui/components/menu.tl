@@ -1,6 +1,9 @@
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local nested_list = require("src.tactics.menu.cursor.nested.list")
+local nested_grid = require("src.tactics.menu.cursor.nested.grid")
+local point = require("src.tactics.util.point")
+local Point = point.Point
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNode = menu_cursor.MenuNode
@@ -38,6 +41,40 @@ function menu.text_button(
 		hover_event = menu_mouse_selection.leaf(b, "button_primary", "button_secondary"),
 	}
 	:build()
+end
+
+local function grid_button(
+	node: nested_grid.NestedGridNode,
+	p: Point
+): box.UIElement
+	-- log.debug("Generating button node menu box. ",b.id,b.text)
+	local text = node.text_array:get_point(p)
+
+	return box.builder("button")
+		:layout{
+			width = "fill",
+			height = "fit_content",
+			flex_grow = 1,
+			padding = box.layout.padding(2),
+		}
+		:text{
+			content = {text},
+			draw_properties = {
+				wrap = "no_wrap",
+			},
+		}
+		:style{
+			decoration_padding = 2,
+		}
+		:on_update(function(self: box.UIElement, _state: UIContextManager)
+			local has_focus = node.has_focus and node.point == p
+
+			self.style.decoration = has_focus and "border" or nil
+		end)
+		:menu_handling{
+			hover_event = menu_mouse_selection.grid(p.x, p.y, node, "button_primary", "button_secondary"),
+		}
+		:build()
 end
 
 function menu.select_row(
@@ -192,7 +229,25 @@ end
 local function generate_menu_node_element(
 	node: MenuNode
 ): box.UIElement
-	if node is nested_list.NestedMenuNode then
+	if node is nested_grid.NestedGridNode then
+		local column = box.builder(node.id.."_column")
+				:direction("col")
+				:container("block")
+				:build()
+
+		for y=1,node.y_max do
+			local row = box.builder(node.id.."_row_"..y)
+					:direction("row")
+					:container("block")
+					:build()
+			for x=1,node.x_max do
+				local p = point.of(x, y)
+				row:add(grid_button(node, p))
+			end
+		end
+
+		return column
+	elseif node is nested_list.NestedMenuNode then
 		local builder = box.builder(node.id)
 		if node.direction == "column" then
 			builder = builder
