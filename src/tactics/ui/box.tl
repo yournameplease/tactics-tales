@@ -337,6 +337,15 @@ function UIBuilder:container(dir: ContainerPreset): UIBuilder
     return self
 end
 
+function UIBuilder:padding(padding: integer | Padding): UIBuilder
+    if padding is integer then
+        self.def.layout.padding = layout.padding(padding)
+    else
+        self.def.layout.padding = padding
+    end
+    return self
+end
+
 function UIBuilder:layout(box_layout: Layout): UIBuilder
     self.def.layout = box_layout
     return self

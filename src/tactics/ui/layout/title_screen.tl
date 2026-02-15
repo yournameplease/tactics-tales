@@ -2,7 +2,6 @@
 --- Defines the UI layout for the title screen.
 
 local box = require("src.tactics.ui.box")
-local text_node = require("src.tactics.ui.components.text_node")
 local book = require("src.tactics.ui.decoration.book")
 
 local root = box.builder("title_screen")

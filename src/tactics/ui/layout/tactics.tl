@@ -8,11 +8,7 @@ local box = require("src.tactics.ui.box")
 local battle = require("src.tactics.ui.panels.battle")
 local control_hints = require("src.tactics.ui.panels.control_hints")
 
-local text_node = require("src.tactics.ui.components.text_node")
-local nested_list = require("src.tactics.menu.cursor.nested.list")
 local book = require("src.tactics.ui.decoration.book")
-local menu = require("src.tactics.ui.components.menu")
-local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local UILayoutId = require("src.tactics.ui.types").UILayoutId
 local layout = require("src.tactics.ui.layout")
 local tactics_modal = require("src.tactics.ui.modal.tactics")

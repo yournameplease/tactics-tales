@@ -12,7 +12,7 @@ local DrawableCharacterInstance = require("src.tactics.character.object.characte
 
 local character = {}
 
-local FEET_ANCHOR = point.of(9, 20)
+local FEET_ANCHOR = point.of(7, 18)
 
 local function draw_portrait(
     get_selected_unit: function(UIContextManager): DrawableCharacterInstance,

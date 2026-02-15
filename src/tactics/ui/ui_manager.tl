@@ -13,12 +13,10 @@ local box = require("src.tactics.ui.box")
 local menu_validator = require("src.tactics.ui.validator")
 local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
-local tactics_main = require("src.tactics.ui.layout.tactics_main")
+local tactics_layouts = require("src.tactics.ui.layout.tactics")
+local game_layouts = require("src.tactics.ui.layout.game")
 local story_page = require("src.tactics.ui.layout.story_page")
 local title_screen = require("src.tactics.ui.layout.title_screen")
-local main_menu = require("src.tactics.ui.layout.main_menu")
-local chapter_select = require("src.tactics.ui.layout.chapter_select")
-local options_menu = require("src.tactics.ui.layout.options_menu")
 
 local record UIManager
     layouts: { UILayoutId: UILayout }
@@ -38,12 +36,10 @@ function ui_manager.new(): UIManager
          
     self.layouts = {}
 
-    maps.add_all(self.layouts, tactics_main)
+    maps.add_all(self.layouts, tactics_layouts)
+    maps.add_all(self.layouts, game_layouts)
     self.layouts["STORY_PAGE"] = story_page
     self.layouts["TITLE_SCREEN"] = title_screen
-    self.layouts["MAIN_MENU_PAGE"] = main_menu
-    self.layouts["CHAPTER_SELECT_PAGE"] = chapter_select
-    self.layouts["OPTIONS_MENU_PAGE"] = options_menu
 
     -- Validate layouts
     for id, v in pairs(self.layouts) do

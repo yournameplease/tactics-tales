@@ -2,7 +2,6 @@
 --- The main panel for rendering the content of a story page.
 
 local box = require("src.tactics.ui.box")
-local text_node = require("src.tactics.ui.components.text_node")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")
 local character_ui = require("src.tactics.ui.panels.portrait_box")
 local book = require("src.tactics.ui.decoration.book")
@@ -39,7 +38,7 @@ local function chapter_header_page(node: rendered_story_node.ChapterHeader): box
 			}
 			:build())
     end
-    root:add(text_node.title{
+    root:add(book.title{
         content = {node.text},
 		draw_properties = {
 			wrap = "wrap"
@@ -69,11 +68,13 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     local content: {box.UIElement} = {}
 
     local is_chapter_header_page = false
+
     for _,n in ipairs(nodes) do
         local child: box.UIElement
 
         if n is rendered_story_node.ChapterHeader then
             child = chapter_header_page(n)
+            is_chapter_header_page = true
         elseif n is rendered_story_node.Text then
             child = story_text_page(n)
         elseif n is rendered_story_node.CharacterCustomization then
@@ -105,7 +106,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     if is_chapter_header_page then
 		local page = box.builder("story_page")
     		:direction("col")
-    		:container("block")
+    		:container("panel")
     		:build()
         page:add(box.spacer(1))
         local page_content_box = box.builder("story_page_header")
@@ -148,6 +149,11 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         local page_content_box = box.builder("story_page_content")
     		:direction("col")
     		:container("block")
+    		:padding{
+    		    t = 2,
+    		    l = 2,
+    		    r = 2,
+    		}
     		:build()
 
         for _,b in ipairs(content) do

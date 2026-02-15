@@ -57,6 +57,31 @@ function book.section_divider(height: integer): box.UIElement
 	:build()
 end
 
+function book.title(text_info: box.text_info.TextInfo): box.UIElement
+    text_info.draw_properties = text_info.draw_properties or {}
+    text_info.draw_properties.justify = text_info.draw_properties.justify or "center"
+    text_info.draw_properties.wrap = "no_wrap"
+    text_info.rows = 1
+
+    local self = box.builder("title_box")
+		:direction("col")
+		:container("block")
+		:padding{
+		    t = 3,
+		    b = 2
+		}
+        :build()
+
+    self:add(
+        box.builder("text")
+        :text(text_info)
+        :build()
+    )
+    self:add(
+        book.section_divider(2)
+    )
+    return self
+end
 
 local TRIM_PADDING = 3
 ---@desc
@@ -132,12 +157,13 @@ end
 
 function book.flex_page(): box.UIElement
 	return box.builder("book_flex_page")
-		:layout{
-			dir="col",
-			height = "fill",
-			width = "fill",
-			flex_grow = 1,
-			padding = box.layout.padding(2),
+		:direction("col")
+		:container("panel")
+		:padding{
+			t = 4,
+			l = 2,
+			r = 2,
+			b = 2,
 		}
 		:style{
 			solid = true
@@ -145,12 +171,36 @@ function book.flex_page(): box.UIElement
 		:build()
 end
 
+function book.titled_page(
+	title: string,
+	content: box.UIElement
+): box.UIElement
+	local page = book.flex_page()
+	
+	page:add(book.title( { content = {title} } ))
+	local page_content = page:add(box.builder("title_"..content.id)
+		:direction("col")
+		:container("panel")
+		:padding{
+			t = 2,
+			l = 2,
+			r = 2
+		}
+		:build())
+	page_content:add(content)
+
+	return page
+end
+
 function book.fit_page(): box.UIElement
 	return box.builder("book_fit_page")
-		:layout{
-			dir="col",
-			height = "fill",
-			width = "fit_content",
+		:direction("col")
+		:container("strip")
+		:padding{
+			t = 4,
+			l = 2,
+			r = 2,
+			b = 2,
 		}
 		:style{
 			solid = true
