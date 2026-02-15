@@ -50,7 +50,7 @@ function battle.battle_summary(): box.UIElement
     self:add(
         box.builder("battle_conditions")
         :layout{
-            height = "auto"
+            height = "fit_content"
         }
         :text{
             draw_properties = {
@@ -72,7 +72,7 @@ function battle.unit_info(): box.UIElement
         dir = "row",
         gap = 4,
         padding = box.layout.padding(4),
-        height = "auto",
+        height = "fit_content",
         width = "fill",
     }
 	:build()
@@ -89,7 +89,7 @@ function battle.unit_info(): box.UIElement
     	box.builder("unit_info_right")
     	:layout{
 	        dir = "col",
-	        height = "auto",
+	        height = "fit_content",
 	        flex_grow = 1,
 	        gap = 2
 	    }
@@ -174,7 +174,7 @@ function battle.combat_preview(): box.UIElement
         dir = "row",
         gap = 4,
         padding = box.layout.padding(4),
-        height = "auto",
+        height = "fit_content",
         width = "fill",
     }
 	:build()
@@ -200,7 +200,7 @@ function battle.combat_preview(): box.UIElement
     local preview_text = box.builder("combat_preview_center")
     	:layout{
 	        dir = "col",
-	        height = "auto",
+	        height = "fit_content",
 	        flex_grow = 1,
 	    }
 	    :text{}

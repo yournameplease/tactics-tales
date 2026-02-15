@@ -68,7 +68,7 @@ local record ComputedRectangle
 end
 
 local enum DimensionSpec
-    "auto"
+    "fit_content"
     "fill"
 end
 
@@ -222,7 +222,7 @@ function UIBuilder:build(): UIElement
         self.def.layout.width = "fill"
     end
     if self.def.layout.height == nil then
-        self.def.layout.height = "auto"
+        self.def.layout.height = "fit_content"
     end
     if self.def.layout.width == "fill" or self.def.layout.height == "fill" then
         self.def.layout.flex_grow = self.def.layout.flex_grow or 1
@@ -239,7 +239,7 @@ function UIBuilder:build(): UIElement
     self.def.style.decoration_padding = self.def.style.decoration_padding or 0
     
     assert(not (self.def.layout.flex_grow > 0
-        and (self.def.layout.width == "auto" and self.def.layout.height == "auto")), "Cannot flex grow with auto_width and auto_height")
+        and (self.def.layout.width == "fit_content" and self.def.layout.height == "fit_content")), "Cannot flex grow with auto_width and auto_height")
     assert(
         self.def.style.decoration_padding == 0
         or
@@ -251,7 +251,7 @@ function UIBuilder:build(): UIElement
         )
     )
 
-    if self.def.layout.width == "auto"
+    if self.def.layout.width == "fit_content"
         and (self.def.text and self.def.text.draw_properties.wrap ~= "no_wrap") then
         error("auto_width must use no_wrap")
     end
@@ -352,8 +352,8 @@ function box.floating(node: UIElement, x: integer, y: integer): UIElement
     :layout{
         dir = "row", -- row helps with bounding box... somehow.  remove when fixed
         padding = { t = y, l = x},
-        height = "auto",
-        width = "auto",
+        height = "fit_content",
+        width = "fit_content",
     }
     :build()
     :add(node)
@@ -362,7 +362,7 @@ end
 function layout.col_fill(gap?: integer, padding?: Padding): Layout
     return {
         dir = "col",
-        width = "auto",
+        width = "fit_content",
         height = "fill",
         gap = gap,
         padding = padding,
@@ -379,7 +379,7 @@ function layout.col_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "col",
         width = "fill",
-        height = "auto",
+        height = "fit_content",
         gap = gap,
         padding = padding,
     }
@@ -395,7 +395,7 @@ function layout.row_fill(gap?: integer, padding?: Padding): Layout
     return {
         dir = "row",
         width = "fill",
-        height = "auto",
+        height = "fit_content",
         gap = gap,
         padding = padding,
     }
@@ -410,7 +410,7 @@ end
 function layout.row_fit(gap?: integer, padding?: Padding): Layout
     return {
         dir = "row",
-        width = "auto",
+        width = "fit_content",
         height = "fill",
         gap = gap,
         padding = padding,
@@ -489,11 +489,11 @@ function Box:measure(depth: integer)
     local text_height = 0
     if self.text and self.text.content then
         local text_object = self.text.text_object
-        if self.layout.height == "auto" then
+        if self.layout.height == "fit_content" then
             local rows = text_object:get_wrapped_rows()
             text_height = rows * TEXT_ROW_HEIGHT
         end
-        if self.layout.width == "auto" then
+        if self.layout.width == "fit_content" then
             local paragraphs = text_object:get_lines()
 
             local max_width = 0
@@ -512,7 +512,7 @@ function Box:measure(depth: integer)
     content_h = pt.max(content_h, text_height)
     
     local w = self.layout.width
-    if w == "auto" then
+    if w == "fit_content" then
         self.rect.w = content_w + self.layout.padding.l + self.layout.padding.r
     elseif w == "fill" then
         self.rect.w = nil
@@ -520,7 +520,7 @@ function Box:measure(depth: integer)
         self.rect.w = w
     end
     local h = self.layout.height
-    if h == "auto" then
+    if h == "fit_content" then
         self.rect.h = content_h + self.layout.padding.t + self.layout.padding.b
     elseif h == "fill" then
         self.rect.h = nil

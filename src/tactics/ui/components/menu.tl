@@ -17,7 +17,7 @@ function menu.text_button(
 	log.debug("Generating button node menu box. ",b.id,b.text)
 	return box.builder("button")
 	:layout{
-		width = "auto",
+		width = "fit_content",
 		padding = box.layout.padding(7),
 	}
 	:text{
@@ -52,7 +52,7 @@ function menu.select_row(
 		row:add(
 			box.builder(node.id.."_label")
 			:layout({
-				width = "auto"
+				width = "fit_content"
 			})
 			:text{
 				rows = 1,
@@ -82,7 +82,7 @@ function menu.select_row(
 	row:add(
 		box.builder(node.id.."_text")
 		:layout({
-			width = "auto"
+			width = "fit_content"
 		})
 		:text{
 			rows = 1,

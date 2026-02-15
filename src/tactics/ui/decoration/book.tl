@@ -150,7 +150,7 @@ function book.fit_page(): box.UIElement
 		:layout{
 			dir="col",
 			height = "fill",
-			width = "auto",
+			width = "fit_content",
 		}
 		:style{
 			solid = true
