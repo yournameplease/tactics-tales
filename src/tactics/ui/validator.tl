@@ -20,7 +20,7 @@ function menu_validator.validate(node: box.UIElement, path: string)
     local children = node.children
     assert(children ~= nil)
 
-    -- if node.layout.height == "auto" then
+    -- if node.layout.height == "fit_content" then
     --     if is_col then
     --         for i, child in ipairs(children) do
     --             if (child.layout.flex_grow or 0) > 0 then
@@ -34,7 +34,7 @@ function menu_validator.validate(node: box.UIElement, path: string)
     --     end
     -- end
 
-    -- if node.layout.width == "auto" then
+    -- if node.layout.width == "fit_content" then
     --     if is_row then
     --         for i, child in ipairs(children) do
     --             if (child.layout.flex_grow or 0) > 0 then

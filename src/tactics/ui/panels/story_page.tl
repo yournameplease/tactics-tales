@@ -24,7 +24,7 @@ local function chapter_header_page(node: rendered_story_node.ChapterHeader): box
 
         root:add(box.builder("chapter_number")
             :layout{
-                height = "auto"
+                height = "fit_content"
             }
             :text{
                 content = {"Chapter "..node.number},

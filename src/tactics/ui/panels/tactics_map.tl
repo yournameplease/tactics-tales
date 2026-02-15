@@ -239,7 +239,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         :layout{
             width = 80,
             -- h = 30,
-            height = "auto",
+            height = "fit_content",
             padding = box.layout.padding(2),
         }
         :style{
@@ -265,8 +265,8 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         if cursor is nested_list.NestedMenuNode then
             menu_box = box.builder("tactics_dialogue_box")
             :layout{
-                width = "auto",
-                height = "auto",
+                width = "fit_content",
+                height = "fit_content",
                 padding = box.layout.padding(2),
             }
             :style{
