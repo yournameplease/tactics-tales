@@ -987,6 +987,12 @@ function Box:recalculate(
     state: UIContextManager
 ) 
     self:compute_children(state)
+
+    self:update(state)
+    self:compute_text()
+    self:measure(depth)
+    self:apply_layout(x, y, w, h)
+
     self:update(state)
     self:compute_text()
     self:measure(depth)

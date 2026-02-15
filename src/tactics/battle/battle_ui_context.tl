@@ -18,7 +18,6 @@ local grid = require("src.tactics.menu.cursor.nested.grid")
 local SerializedNestedGridState = grid.SerializedNestedGridState
 local menu_context = require("src.tactics.menu.menu_context")
 local BattleMainMenuContext = menu_context.BattleMainMenuContext
-local array_2d = require("src.tactics.util.array_2d")
 
 local record BattleUIContext
     is UIContext
@@ -93,11 +92,11 @@ function BattleUIContext:enrich()
     
     if self.menu_revision ~= self.battle_menu_manager.revision_count then
         if root_node_state is SerializedNestedGridState then
+            log.debug("setting menu tile highlights", menu.step, menu.node)
             self.menu_tile_highlights = root_node_state.tile_highlights
             should_recalculate_highlights = true
         end
 
-        log.debug("setting menu tile highlights")
         self.menu_revision = self.battle_menu_manager.revision_count
     end
     if self.marked_units_revision ~= self.tactics_engine.marked_unit_revision then
@@ -127,6 +126,7 @@ function BattleUIContext:enrich()
         end
 
         if menu.step == "SELECT_TARGET" then
+            should_highlight_hovered_unit = false
             local selection_point = root_node_state.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
@@ -147,6 +147,7 @@ function BattleUIContext:enrich()
         end
         
         if menu.step == "SELECT_SWAP_TARGET" then
+            should_highlight_hovered_unit = false
             local selection_point = root_node_state.point
             local unit = self.battle_map:get_at_tile(selection_point)
             self.hovered_unit = unit
@@ -194,11 +195,11 @@ function BattleUIContext:enrich()
     if should_recalculate_highlights then
         log.debug("Recalculating tile highlights")
         local hover_unit_highlights: Userdata
+        local menu_highlights: Userdata
         if should_highlight_hovered_unit then
             hover_unit_highlights = self.hovered_unit and self.hovered_unit.valid_tiles
-        else
-            hover_unit_highlights = self.menu_tile_highlights
         end
+        menu_highlights = self.menu_tile_highlights
 
         local marked_unit_highlights = self.tactics_engine.marked_unit_tiles
 
@@ -206,6 +207,7 @@ function BattleUIContext:enrich()
 
         local tile_highlights = marked_unit_highlights
             | hover_unit_highlights
+            | menu_highlights
             | tile_interaction_highlights
         
         for x=0,tile_highlights:width()-1 do
