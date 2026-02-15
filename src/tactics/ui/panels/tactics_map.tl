@@ -276,7 +276,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
                 decoration = "border",
             }
             :build()
-            local node = menu_ui.generic_menu_box(
+            local node = menu_ui.generic_menu_modal(
                 -- no need to recompute as this node handles new children
                 function(): integer return 0 end,
             	function (s: UIContextManager): nested_list.NestedMenuNode
