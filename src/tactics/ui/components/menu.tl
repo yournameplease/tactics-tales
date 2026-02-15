@@ -14,9 +14,20 @@ local menu = {}
 function menu.text_button(
 	b: ButtonCursor
 ): box.UIElement
+	log.debug("Generating button node menu box. ",b.id,b.text)
 	return box.builder("button")
+	:layout{
+		width = "auto",
+		padding = box.layout.padding(7),
+	}
 	:text{
-		content = {b.text}
+		content = {b.text},
+		draw_properties = {
+			wrap = "no_wrap",
+		},
+	}
+	:style{
+		decoration_padding = 1,
 	}
 	:on_update(function(self: box.UIElement, _state: UIContextManager)
 		local has_focus = b.has_focus
@@ -32,6 +43,7 @@ end
 function menu.select_row(
 	node: SelectionMenuNode
 ): box.UIElement
+	log.debug("Generating select node menu box. ",node.id,node.label)
 	local row = box.builder(node.id)
 	:layout(box.layout.row_fill())
 	:build()

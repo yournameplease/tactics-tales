@@ -115,9 +115,14 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
         return {row}
     end
 
+
     if self.wrap == "no_wrap" then
         return {row}
     elseif self.wrap == "ellipsis" then
+        if width == nil or width < 1 then
+            log.warn("Can't wrap with non-positive width.")
+            return {row}
+        end
         local out: string
         local char_count = 0
         local out_width: integer
@@ -132,9 +137,9 @@ function TextImpl:apply_text_wrapping(row: string, width: integer): {string}
             return {row}
         end
     elseif self.wrap == "wrap" then
-        if width < 1 then
+        if width == nil or width < 1 then
             log.warn("Can't wrap with non-positive width.")
-            return {}
+            return {row}
         end
         -- this needs unit tests x.x
         local out: {string} = {}
@@ -251,7 +256,7 @@ function TextImpl:draw_justified_text_row(
     row_number: integer,
     line_count: integer
 )
-	local x_offset = get_text_alignment_offset[justify](row, self.width)
+	local x_offset = get_text_alignment_offset[justify](row, self.width or 0)
 	local t_x = x + x_offset
 	local t_y = y + ((row_number-1) * (TEXT_ROW_HEIGHT))
     local out = row

@@ -135,6 +135,7 @@ function book.flex_page(): box.UIElement
 		:layout{
 			dir="col",
 			height = "fill",
+			width = "fill",
 			flex_grow = 1,
 			padding = box.layout.padding(2),
 		}

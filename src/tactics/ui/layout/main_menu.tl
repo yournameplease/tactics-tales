@@ -11,7 +11,9 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 
 local left = book.flex_page()
 local right = book.flex_page()
-right:add(text_node.title( { content = {"Main Menu"} } ))
+right:add(text_node.title( {
+	content = {"Main Menu"},
+} ))
 right:add(menu.generic_menu_box(
 	function (state: UIContextManager): integer
 		return state.game_context.menu_manager.revision_count

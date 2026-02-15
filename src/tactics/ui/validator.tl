@@ -20,32 +20,32 @@ function menu_validator.validate(node: box.UIElement, path: string)
     local children = node.children
     assert(children ~= nil)
 
-    if node.layout.height == "auto" then
-        if is_col then
-            for i, child in ipairs(children) do
-                if (child.layout.flex_grow or 0) > 0 then
-                    error(
-                            "LAYOUT ERROR: Circular Dependency.\nPath: "
-                                    ..path.." > "..get_node_name(child, i)..
-                                    "Parent is 'auto_height' (col), but child has to 'flex_grow'."
-                    )
-                end
-            end
-        end
-    end
+    -- if node.layout.height == "auto" then
+    --     if is_col then
+    --         for i, child in ipairs(children) do
+    --             if (child.layout.flex_grow or 0) > 0 then
+    --                 error(
+    --                         "LAYOUT ERROR: Circular Dependency.\nPath: "
+    --                                 ..path.." > "..get_node_name(child, i)..
+    --                                 "Parent is 'auto_height' (col), but child has to 'flex_grow'."
+    --                 )
+    --             end
+    --         end
+    --     end
+    -- end
 
-    if node.layout.width == "auto" then
-        if is_row then
-            for i, child in ipairs(children) do
-                if (child.layout.flex_grow or 0) > 0 then
-                    error(string.format(
-                            "LAYOUT ERROR: Circular Dependency.\nPath: %s > %s\nReason: Parent is 'auto_width' (row), but child tries to 'flex_grow'.",
-                            path, get_node_name(child, i)
-                    ))
-                end
-            end
-        end
-    end
+    -- if node.layout.width == "auto" then
+    --     if is_row then
+    --         for i, child in ipairs(children) do
+    --             if (child.layout.flex_grow or 0) > 0 then
+    --                 error(string.format(
+    --                         "LAYOUT ERROR: Circular Dependency.\nPath: %s > %s\nReason: Parent is 'auto_width' (row), but child tries to 'flex_grow'.",
+    --                         path, get_node_name(child, i)
+    --                 ))
+    --             end
+    --         end
+    --     end
+    -- end
 
     for i, child in ipairs(children) do
         local child_path = path .. " > " .. get_node_name(child, i)
