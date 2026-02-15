@@ -18,7 +18,7 @@ function menu.text_button(
 	return box.builder("button")
 	:layout{
 		width = "fit_content",
-		padding = box.layout.padding(7),
+		padding = box.layout.padding(2),
 	}
 	:text{
 		content = {b.text},
@@ -27,7 +27,7 @@ function menu.text_button(
 		},
 	}
 	:style{
-		decoration_padding = 1,
+		decoration_padding = 2,
 	}
 	:on_update(function(self: box.UIElement, _state: UIContextManager)
 		local has_focus = b.has_focus

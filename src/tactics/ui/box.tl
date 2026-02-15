@@ -244,10 +244,10 @@ function UIBuilder:build(): UIElement
         self.def.style.decoration_padding == 0
         or
         (
-            self.def.style.decoration_padding < self.def.layout.padding.t and
-            self.def.style.decoration_padding < self.def.layout.padding.b and
-            self.def.style.decoration_padding < self.def.layout.padding.l and
-            self.def.style.decoration_padding < self.def.layout.padding.r
+            self.def.style.decoration_padding <= self.def.layout.padding.t and
+            self.def.style.decoration_padding <= self.def.layout.padding.b and
+            self.def.style.decoration_padding <= self.def.layout.padding.l and
+            self.def.style.decoration_padding <= self.def.layout.padding.r
         )
     )
 
