@@ -109,11 +109,12 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     else
         local page = box.col_fill()
         if rendered_page.chapter_text ~= nil then
+            local header_box = box.col_fit()
             local num_text = rendered_page.chapter_number
                 and tostring(rendered_page.chapter_number)
                 or ""
             local chapter_text = rendered_page.chapter_text
-            page:add(box.builder("chapter_header_line")
+            header_box:add(box.builder("chapter_header_line")
                 :text{
                     content = {num_text.."|"..chapter_text.."|"},
                     text_color = "light",
@@ -122,7 +123,8 @@ local function compute_children(state: UIContextManager): {box.UIElement}
         			},
                 }
                 :build())
-            page:add(book.section_divider(1))
+            header_box:add(book.section_divider(1))
+            page:add(header_box)
         end
         local page_content_box = box.col_fit()
 
@@ -138,9 +140,11 @@ local function compute_children(state: UIContextManager): {box.UIElement}
 end
 
 function story_page.new(): box.UIElement
-    local page = book.flex_page()
-
     local content = box.builder("story_content")
+        :layout{
+            width = "fill",
+            height = "fill",
+        }
         :child_generator{
             current_key = function(state: UIContextManager): integer
                 return state.story_context.story_page.story_revision
@@ -149,7 +153,7 @@ function story_page.new(): box.UIElement
         }
         :build()
 
-    return page:add(content)
+    return content
 end
 
 return story_page

@@ -458,7 +458,7 @@ function tactics_map.new(map_width: integer, map_height: integer): box.UIElement
         get_selection_at = get_selection_at,
     }
     :on_draw(draw_tactics_map)
-    :on_draw(function(self: box.UIElement, state: UIContextManager)
+    :on_update(function(self: box.UIElement, state: UIContextManager)
         local data: MapData = self.data as MapData
         data.menu_node = state.battle_context.battle_menu_manager.menu_step.node
     end)

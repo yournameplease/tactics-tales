@@ -19,9 +19,6 @@ function text_node.title(text_info: box.text_info.TextInfo): box.UIElement
 
     self:add(
         box.builder("text")
-        :layout{
-            width = "auto",
-        }
         :text(text_info)
         :build()
     )
