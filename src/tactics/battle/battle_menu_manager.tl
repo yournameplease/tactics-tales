@@ -12,7 +12,6 @@ local menu_manager = require("src.tactics.menu.menu_manager")
 local step_definition = menu_manager.definition.step
 local event_bus = require("src.tactics.systems.event_bus")
 local BattleMenuContext = require("src.tactics.battle.battle_menu_context").BattleMenuContext
-local array_2d = require("src.tactics.util.array_2d")
 local battle_map_types = require("src.tactics.battle.battle_map.types")
 local InteractionHook = battle_map_types.InteractionHook
 local menu_types = require("src.tactics.menu.types")
@@ -112,7 +111,7 @@ local function get_players_to_act_tiles(msb: BattleMenuContext, _ctx: BattleMain
         "u8",
         function(p: Point): integer
             local unit = msb.battle_map:get_at_tile(p)
-            return (unit and not unit.has_acted)
+            return (unit and unit:is_player() and not unit.has_acted)
                 and HIGHLIGHT.IS_VALID
                 or 0
         end)
@@ -261,7 +260,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :advance_to("SELECT_SWAP_TARGET")
                     )
                     :with_tile_highlights(get_deployment_tiles)
-                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                    :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -277,7 +276,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :advance_to("SELECT_SWAP_UNIT")
                     )
                     :with_tile_highlights(get_deployment_tiles)
-                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                    :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -323,7 +322,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_back("mark_unit")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
-                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                    :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 ),
@@ -346,7 +345,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     :with_path_anchor(function(_: BattleMenuContext, ctx: BattleMainMenuContext): Point
                         return ctx.acting_unit.point:copy()
                     end)
-                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                    :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -397,7 +396,12 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 grid.grid("select_target")
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
-                            validate_tile_is_in_unit_attack_range(msb.battle_map, ctx.acting_unit.unit, ctx.destination.point, point)
+                            return validate_tile_is_in_unit_attack_range(
+                                msb.battle_map,
+                                ctx.acting_unit.unit,
+                                ctx.acting_unit.unit.tile,
+                                point
+                            )
                         end,
                         button.builder("attack_unit")
                             :handle_select("attack_unit")
@@ -412,7 +416,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     :with_path_anchor(function(_: BattleMenuContext, ctx: BattleMainMenuContext): Point
                         return ctx.acting_unit.point:copy()
                     end)
-                    :with_initial_point(function(services: BattleMenuContext, ctx: BattleMainMenuContext): Point
+                    :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 )

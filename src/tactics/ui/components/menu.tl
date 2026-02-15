@@ -14,7 +14,7 @@ local menu = {}
 function menu.text_button(
 	b: ButtonCursor
 ): box.UIElement
-	log.debug("Generating button node menu box. ",b.id,b.text)
+	-- log.debug("Generating button node menu box. ",b.id,b.text)
 	return box.builder("button")
 	:layout{
 		width = "fit_content",

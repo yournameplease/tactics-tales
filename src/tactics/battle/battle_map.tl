@@ -135,6 +135,7 @@ function BattleMap:get_tiles_userdata_by(
 
     for x=0,self.width-1 do
         for y=0,self.height-1 do
+            -- log.debug(x, y, func(point.of(x, y)))
             ud:set(x, y, func(point.of(x, y)))
         end
     end
