@@ -55,6 +55,7 @@ local record NestedGridNode
     children: {NestedGridChild}
     child_array: array_2d.Array2D<MenuNode>
     text_array: array_2d.Array2D<string>
+	text_function: function(Point, GameContext, MenuContext): string
 end
 
 local record NestedGridChildDefinition
@@ -255,6 +256,20 @@ function NestedGridNode:deserialize(state: menu_cursor.SerializedMenuState, data
 	end
 	for _,child in ipairs(self.children) do
 		child.child:deserialize(state and state.children[child.child.id] or nil, data)
+	end
+end
+
+function NestedGridNode:recompute(
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+)
+	if self.text_function then
+		self.text_array = array_2d.new_from_function(self.x_max, self.y_max, function(p: Point): string
+			return self.text_function(p, game_ctx, menu_ctx)
+		end)
+	end
+	for _,child in ipairs(self.children) do
+		child.child:recompute(game_ctx, menu_ctx)
 	end
 end
 

@@ -230,6 +230,12 @@ function SelectionMenuNode:deserialize(_state: menu_cursor.SerializedMenuState, 
 	end
 end
 
+function SelectionMenuNode:recompute(
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext
+)
+end
+
 function SelectionMenuDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
 	game_ctx: GameContext,

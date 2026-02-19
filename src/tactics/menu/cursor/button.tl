@@ -136,6 +136,12 @@ end
 function ButtonCursor:deserialize(_state: menu_cursor.SerializedMenuState, _data: {string: any}) 
 end
 
+function ButtonCursor:recompute(
+    _game_ctx: GameContext,
+    _menu_ctx: MenuContext
+)
+end
+
 function ButtonDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
     _game_ctx: GameContext,
