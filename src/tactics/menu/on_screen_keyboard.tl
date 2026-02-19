@@ -15,13 +15,13 @@ local LAYOUT_LOWER: {{string}} = {
 	{"q", "w", "e", "r", "t", "y", "u", "i", "o", "p",},
 	{"a", "s", "d", "f", "g", "h", "j", "k", "l", ";",},
 	{"z", "x", "c", "v", "b", "n", "m", ",", ".", "/",},
-	{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",},
+	{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")",},
 }
 local LAYOUT_UPPER: {{string}} = {
 	{"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",},
 	{"A", "S", "D", "F", "G", "H", "J", "K", "L", ":",},
 	{"Z", "X", "C", "V", "B", "N", "M", "<", ">", "?",},
-	{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")",},
+	{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",},
 }
 
 local LAYOUT_SYMBOL: {{string}} = {
@@ -38,8 +38,8 @@ local KEYBOARDS: {string: {{string}}} = {
 }
 
 local keyboard_modes = {
-	{"lower", "Lower"},
 	{"upper", "Upper"},
+	{"lower", "Lower"},
 	{"symbol", "Symbol"},
 }
 
@@ -81,7 +81,7 @@ HANDLERS["change_keyboard_mode"] = function(
 		session_context.keyboard_mode = (session_context.keyboard_mode % #keyboard_modes) + 1
 	end
 
-	return nil
+	return menu_manager.menu_handler.then_recompute()
 end
 
 HANDLERS["type_character"] = function(

@@ -107,6 +107,7 @@ local interface StoryPage
     
     add_chapter_header: function(self, text: string, number: integer)
     clear_chapter_header: function(self)
+    pop: function(self)
     finish_text: function(self)
     add_text_line: function(self, dialogue: Dialogue)
     add_text_input_menu: function(self, key: string, dialogue: Dialogue)
@@ -150,6 +151,10 @@ function StoryPageImpl:clear_chapter_header()
     assert(chapter_header_node is ChapterHeader)
     self.chapter_text = chapter_header_node.text
     self.chapter_number = chapter_header_node.number
+    pt.pop(self.nodes)
+end
+
+function StoryPageImpl:pop()
     pt.pop(self.nodes)
 end
 

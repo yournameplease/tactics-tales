@@ -24,6 +24,8 @@ end
 
 local enum MenuHandlerPostHandlingType
     "deserialize"
+    -- for now, only needed for grid keyboard...
+    "recompute_menu"
 end
 
 local interface MenuHandlerPostHandling
@@ -34,6 +36,11 @@ local record MenuHandlerDeserialize
     is MenuHandlerPostHandling
     where self.type == "deserialize"
     data: {string: any}
+end
+
+local record MenuHandlerRecompute
+    is MenuHandlerPostHandling
+    where self.type == "recompute_menu"
 end
 
 local type MenuHandler = function(
@@ -52,6 +59,12 @@ function menu_handler.then_deserialize(data: {string: any}): MenuHandlerDeserial
     return {
         type = "deserialize",
         data = data,
+    }
+end
+
+function menu_handler.then_recompute(): MenuHandlerRecompute
+    return {
+        type = "recompute_menu",
     }
 end
 
@@ -391,6 +404,9 @@ function BaseMenuManager:update(input: InputContext)
             if handler_res is MenuHandlerDeserialize then
                 log.debug("Deserializing from menu handler response.", self.menu_state.step)
                 self.menu_step.node:deserialize(nil, handler_res.data)
+            elseif handler_res is MenuHandlerRecompute then
+                log.debug("Recomputing from menu handler response.", self.menu_state.step)
+                self.menu_step.node:recompute(self.game_ctx, self.menu_ctx)
             end
         end
         if signal.then_navigate_to ~= nil then

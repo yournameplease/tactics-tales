@@ -49,7 +49,6 @@ local function grid_button(
 ): box.UIElement
 	-- log.debug("Generating button node menu box. ",b.id,b.text)
 	log.debug("Creating grid button: ", p, node.id)
-	local text = node.text_array:get_point(p)
 
 	return box.builder("button")
 		:layout{
@@ -59,7 +58,6 @@ local function grid_button(
 			padding = box.layout.padding(2),
 		}
 		:text{
-			content = {text},
 			draw_properties = {
 				wrap = "no_wrap",
 			},
@@ -70,6 +68,8 @@ local function grid_button(
 		:on_update(function(self: box.UIElement, _state: UIContextManager)
 			local has_focus = node.has_focus and node.point == p
 
+			local text = node.text_array:get_point(p)
+			self.text.content = {text}
 			self.style.decoration = has_focus and "border" or nil
 		end)
 		:menu_handling{
@@ -231,15 +231,22 @@ local function generate_menu_node_element(
 	node: MenuNode
 ): box.UIElement
 	if node is nested_grid.NestedGridNode then
+		local outer_row = box.builder(node.id.."_outer_row")
+				:direction("row")
+				:container("strip")
+				:build()
+		outer_row:add(box.spacer(1))
 		local column = box.builder(node.id.."_column")
 				:direction("col")
-				:container("block")
+				:container("modal")
 				:build()
+		outer_row:add(column)
+		outer_row:add(box.spacer(1))
 
 		for y=1,node.y_max do
 			local row = box.builder(node.id.."_row_"..y)
 					:direction("row")
-					:container("strip")
+					:container("modal")
 					:build()
 			for x=1,node.x_max do
 				local p = point.of(x-1, y-1)
@@ -248,7 +255,7 @@ local function generate_menu_node_element(
 			column:add(row)
 		end
 
-		return column
+		return outer_row
 	elseif node is nested_list.NestedMenuNode then
 		local builder = box.builder(node.id)
 		if node.direction == "column" then

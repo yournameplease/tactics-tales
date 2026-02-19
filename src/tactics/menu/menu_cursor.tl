@@ -140,6 +140,7 @@ local interface MenuNode
     claim_focus: function(self, MenuMouseSelection, child: MenuNode)
     serialize: function(self): SerializedMenu
     deserialize: function(self, state: SerializedMenuState, data: {string: any})
+    recompute: function(self, GameContext, MenuContext)
 end
 
 local interface MenuLeaf

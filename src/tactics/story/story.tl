@@ -198,8 +198,8 @@ function StoryImpl:handle_new_node()
             },
             memory_map,
             true
+            -- false
         )
-
         self.story_page:add_text_input_menu(key, self.active_dialogue)
     elseif node_definition is story_node.ExitStoryNode then
         self.event_writer:emit("GAME_EXIT_STORY", {})
@@ -238,7 +238,20 @@ function StoryImpl:advance_node()
             story_memory.text(self.text_input)
         )
         self.text_input = nil
-        self.menu_manager:clear_menu()
+        self.story_page:pop()
+        self.story_page:pop()
+        local dialogue = self.dialogue_manager:create_dialogue(
+            {node_definition.text},
+            {
+                can_skip = true,
+            },
+            self.story_memory:get_as_map(),
+            true
+            -- false
+        )
+        -- lol
+        dialogue.characters_rendered = 99999
+        self.story_page:add_text_line(dialogue)
     end
     self.current_node.node_step = self.current_node.node_step + 1
     self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
@@ -353,6 +366,11 @@ function StoryImpl:update(input: InputContext)
             self:advance_node()
         end
     elseif current_node is story_node.TextInputNode then
+        self.dialogue_manager:update(input)
+        if self.active_dialogue ~= nil and self.active_dialogue.finished then
+            log.debug("removing dialogue", self.active_dialogue)
+            self.active_dialogue = nil
+        end
         self.menu_manager:update(input)
     elseif current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(input)

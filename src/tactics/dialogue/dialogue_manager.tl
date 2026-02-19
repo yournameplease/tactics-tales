@@ -108,7 +108,11 @@ function DialogueManagerImpl:update(input: InputContext)
 	end
 end
 
-local function replace_text(text: {string}, replacement_vars: {string: string}): {string}
+local function replace_text(
+	text: {string},
+	replacement_vars: {string: string},
+	default_value: string
+): {string}
 	return lists.map(function(t: string): string
 		local out = string.gsub(
 			t,
@@ -116,7 +120,11 @@ local function replace_text(text: {string}, replacement_vars: {string: string}):
 			function(key: string): string
 				local val = replacement_vars[key]
 				if val == nil then
-					return "[MISSING KEY: "..key.."]"
+					if default_value then
+						return default_value
+					else
+						return "[MISSING KEY: "..key.."]"
+					end
 				end
 				return val
 			end)
@@ -134,7 +142,7 @@ function DialogueManagerImpl:create_dialogue(
 	local replaced_text: {string} = nil
 	
 	if not dynamic_replacement then
-		replaced_text = replace_text(text, replacement_vars)
+		replaced_text = replace_text(text, replacement_vars, nil)
 	end
 	
 	local d: DialogueImpl = {
@@ -150,7 +158,7 @@ function DialogueManagerImpl:create_dialogue(
 	local dialogue_mt = {
 		__index = function(t: DialogueImpl, k: string): any
 			if k == "text" and dynamic_replacement then
-				return replace_text(text, replacement_vars)
+				return replace_text(text, replacement_vars, "_____")
 			end
 			if k == "speed" then
 				return DYNAMIC_CONFIG.dialogue_speed

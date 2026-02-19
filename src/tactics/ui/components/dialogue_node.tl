@@ -17,6 +17,7 @@ function dialogue_node.multi_line(dialogue: Dialogue, text_info: box.text_info.T
     return box.builder("multi_dialogue")
     :text(text_info)
     :on_update(function(self: box.UIElement, _state: UIContextManager)
+        self.text.content = dialogue.text
         for i = 1,#dialogue.text do
             if i < dialogue.current_row then
                 self.text.line_counts[i] = #dialogue.text[i]
@@ -37,8 +38,9 @@ function dialogue_node.single_line(dialogue: Dialogue, text_info: box.text_info.
     return box.builder("single_dialogue")
     :text(text_info)
     :on_update(function(self: box.UIElement, _state: UIContextManager)
+        self.text.content = dialogue.text
         for i = 1,#dialogue.text do
-            if i < dialogue.current_row then
+                if i < dialogue.current_row then
                 self.text.line_counts[i] = #dialogue.text[i]
             elseif i == dialogue.current_row then
                 self.text.line_counts[i] = dialogue.characters_rendered

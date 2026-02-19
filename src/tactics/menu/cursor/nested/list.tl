@@ -183,6 +183,15 @@ function NestedMenuNode:deserialize(state: menu_cursor.SerializedMenuState, data
 	end
 end
 
+function NestedMenuNode:recompute(
+    game_ctx: GameContext,
+    menu_ctx: MenuContext
+)
+	for _,child in ipairs(self.children) do
+		child:recompute(game_ctx, menu_ctx)
+	end
+end
+
 function NestedMenuDefinition:to_cursor(
 	parent: menu_cursor.MenuNode,
 	game_ctx: GameContext,
