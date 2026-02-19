@@ -20,7 +20,8 @@ local interface DialogueManager
 		self,
 		text: {string},
 		props: DialogueProps,
-		replacement_vars: {string: string}
+		replacement_vars: {string: string},
+		dynamic_replacement?: boolean
 	): Dialogue
 end
 
@@ -107,12 +108,8 @@ function DialogueManagerImpl:update(input: InputContext)
 	end
 end
 
-function DialogueManagerImpl:create_dialogue(
-	text: {string},
-	props: DialogueProps,
-	replacement_vars: {string: string}
-): Dialogue
-	local replaced_text = lists.map(function(t: string): string
+local function replace_text(text: {string}, replacement_vars: {string: string}): {string}
+	return lists.map(function(t: string): string
 		local out = string.gsub(
 			t,
 			"${([%w_%.]+)}",
@@ -126,6 +123,19 @@ function DialogueManagerImpl:create_dialogue(
 		return out
 		end
 	)(text)
+end
+
+function DialogueManagerImpl:create_dialogue(
+	text: {string},
+	props: DialogueProps,
+	replacement_vars: {string: string},
+	dynamic_replacement?: boolean
+): Dialogue
+	local replaced_text: {string} = nil
+	
+	if not dynamic_replacement then
+		replaced_text = replace_text(text, replacement_vars)
+	end
 	
 	local d: DialogueImpl = {
 		text = replaced_text,
@@ -139,6 +149,9 @@ function DialogueManagerImpl:create_dialogue(
 	
 	local dialogue_mt = {
 		__index = function(t: DialogueImpl, k: string): any
+			if k == "text" and dynamic_replacement then
+				return replace_text(text, replacement_vars)
+			end
 			if k == "speed" then
 				return DYNAMIC_CONFIG.dialogue_speed
 			end

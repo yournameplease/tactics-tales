@@ -61,7 +61,8 @@ local function get_key_at_coordinates(
 
 	local board = KEYBOARDS[mode]
 
-	local key = board[p.y][p.x] 
+	log.debug("Getting key", p)
+	local key = board[p.y+1][p.x+1] 
 
 	return key
 end
@@ -87,7 +88,7 @@ HANDLERS["type_character"] = function(
     _services: GameContext,
     _menu_data: {string: any},
     session_context: KeyboardMenuContext,
-    value: Point
+    value: grid.NestedGridValue
 ): menu_manager.menu_handler.MenuHandlerPostHandling
 	if session_context.keyboard_mode == nil then
 		session_context.keyboard_mode = 1
@@ -96,7 +97,7 @@ HANDLERS["type_character"] = function(
 		session_context.keyboard_content = ""
 	end
 
-	local char = get_key_at_coordinates(value, session_context)
+	local char = get_key_at_coordinates(value.point, session_context)
 	session_context.keyboard_content = session_context.keyboard_content..char
 
 	return nil
@@ -122,7 +123,10 @@ HANDLERS["delete_character"] = function(
 	return nil
 end
 
-local menu_keyboard = {}
+local menu_keyboard = {
+	KeyboardMenuContext = KeyboardMenuContext,
+	handlers = HANDLERS,
+}
 
 function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
 	return step_definition.of_node(
@@ -148,13 +152,11 @@ function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
                             :with_text("Mode")
                             :handle_select("change_keyboard_mode"))
                         pt.add(options, button.builder("random")
-                            :with_text("Random")
-                            :handle_select("reset_options")
-                            :advance_to("MAIN_MENU"))
+                            :with_text("Back")
+                            :handle_select("delete_character"))
                         pt.add(options, button.builder("confirm")
                             :with_text("Confirm")
-                            :handle_select("set_options")
-                            :advance_to("MAIN_MENU"))
+                            :handle_select(submit))
                         return options
                     end))
 

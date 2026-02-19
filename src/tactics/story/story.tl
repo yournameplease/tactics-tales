@@ -27,6 +27,7 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
+local KeyboardMenuContext = require("src.tactics.menu.on_screen_keyboard").KeyboardMenuContext
 
 ---@desc
 --- services needed to create a battle
@@ -60,6 +61,7 @@ local record StoryImpl
 
     idle_animation: animation.AnimatedSpriteData
     customized_character: Character
+    text_input: string
     
     story_id: story_types.StoryId
 
@@ -155,7 +157,7 @@ function StoryImpl:handle_new_node()
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {"Customize your hero!"},
             {
-                can_skip = false,
+                can_skip = true,
             },
             self.story_memory:get_as_map()
         )
@@ -169,6 +171,36 @@ function StoryImpl:handle_new_node()
             self.idle_animation
         )
         self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
+    elseif node_definition is story_node.TextInputNode then
+        local key = node_definition.key
+        local text = node_definition.text
+        local mem = self.story_memory:get_as_map()
+
+        self.menu_manager:set_menu("MENU_TEXT_INPUT")
+
+        local memory_map = setmetatable({},{
+            __index = function(_: any, k: string): any
+                if mem[k] then return mem[k] end
+
+                if k == key then
+                    local ctx = self.menu_manager.menu_ctx as KeyboardMenuContext
+                    if ctx then
+                        return ctx.keyboard_content
+                    end
+                end
+            end
+        })
+    
+        self.active_dialogue = self.dialogue_manager:create_dialogue(
+            {text},
+            {
+                can_skip = true,
+            },
+            memory_map,
+            true
+        )
+
+        self.story_page:add_text_input_menu(key, self.active_dialogue)
     elseif node_definition is story_node.ExitStoryNode then
         self.event_writer:emit("GAME_EXIT_STORY", {})
     else
@@ -198,6 +230,14 @@ function StoryImpl:advance_node()
             story_memory.character(self.customized_character.id)
         )
         self.customized_character = nil
+        self.menu_manager:clear_menu()
+    end
+    if node_definition is story_node.TextInputNode then
+        self.story_memory:set(
+            node_definition.key,
+            story_memory.text(self.text_input)
+        )
+        self.text_input = nil
         self.menu_manager:clear_menu()
     end
     self.current_node.node_step = self.current_node.node_step + 1
@@ -234,6 +274,14 @@ function StoryImpl:create_character(appearance: {character.CharacterAppearanceKe
     self:advance_node()
 end
 
+function StoryImpl:submit_text(text: string)
+    if text == nil or #text == 0 then
+        return
+    end 
+    self.text_input = text
+    self:advance_node()
+end
+
 function story.new(
     story_id: StoryId,
     game_data: GameData,
@@ -262,7 +310,8 @@ function story.new(
     self.story_page = story_page.story_page(self.story_memory)
     self.menu_manager = story_menu_manager.new(
         story_menu_context.new(
-            function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end
+            function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end,
+            function(text: string) self:submit_text(text) end
         ),
         event_bus
     )
@@ -303,6 +352,8 @@ function StoryImpl:update(input: InputContext)
             self.active_dialogue = nil
             self:advance_node()
         end
+    elseif current_node is story_node.TextInputNode then
+        self.menu_manager:update(input)
     elseif current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then

@@ -56,6 +56,17 @@ function stories.character_customizer(
 	}
 end
 
+function stories.text_input(
+	text,
+	key
+)
+	return {
+		type = 'text_input',
+		text = text,
+		key = key,
+	}
+end
+
 function stories.set_memory(key, value)
 	return {
 		type = 'set_memory',
@@ -154,9 +165,8 @@ local STORIES = {
 		nodes = {
 			prologue = {
 				stories.chapter_header("Prologue"),
-				stories.set_memory("hero_name", "Talia"),
+				stories.text_input("This is the story of ${hero_name}", "hero_name"),
 				stories.set_memory("hero_village", "Herovillageton"),
-				stories.set_memory("bandit_clan", "Tidnab"),
 				stories.character_customizer("hero", "hero_name"),
 				stories.jump('ch_1_intro'),
 			},
@@ -165,7 +175,7 @@ local STORIES = {
 				stories.chapter_header("Homecoming", 1),
 
 				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
-				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were the ${bandit_clan} Bandits!"),
+				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
 				stories.story_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
 				stories.story_text("Prepare for battle!"),
 
