@@ -14,6 +14,7 @@ local enum StoryNodeType
 	'jump'
 	'new_page'
 	'character_customizer'
+	'text_input'
 	'exit_story'
 end
 
@@ -73,6 +74,13 @@ local record CharacterCustomizerNode
 	name_key: string
 end
 
+local record TextInputNode
+	is StoryNode
+	where self.type == 'text_input'
+	text: string
+	key: string
+end
+
 -- TODO: conditional jumps
 local record JumpNode
 	is StoryNode
@@ -92,6 +100,7 @@ local story_node = {
 	NewPageNode = NewPageNode,
 	RosterAddNode = RosterAddNode,
 	CharacterCustomizerNode = CharacterCustomizerNode,
+	TextInputNode = TextInputNode,
 }
 
 local record StoryDefinition

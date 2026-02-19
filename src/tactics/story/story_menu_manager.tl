@@ -14,8 +14,10 @@ local character = require("src.tactics.character.object.character")
 local CharacterAppearanceKey = character.CharacterAppearanceKey
 local event_bus = require("src.tactics.systems.event_bus")
 local list = require("src.tactics.menu.cursor.nested.list")
+local maps = require("src.tactics.util.maps")
 local button = require("src.tactics.menu.cursor.button")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
+local menu_keyboard = require("src.tactics.menu.on_screen_keyboard")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local selection = require("src.tactics.menu.cursor.selection")
 local SelectionMenuDefinition = selection.SelectionMenuDefinition
@@ -147,11 +149,30 @@ HANDLERS["create_character"] = function(
     return nil
 end
 
+HANDLERS["submit_text"] = function(
+    services: StoryMenuContext,
+    _menu_data: {string: any},
+    session_context: menu_keyboard.KeyboardMenuContext,
+    _value: any
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.handle_submit_text(session_context.keyboard_content)
+
+    return nil
+end
+
+maps.add_all(HANDLERS, menu_keyboard.handlers)
+
 local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
         steps = {
             ["APPEARANCE_OPTIONS"] = menu_definition_for_character_select(),
+        }
+    },
+    ["MENU_TEXT_INPUT"] = {
+        initial_step = "KEYBOARD",
+        steps = {
+            ["KEYBOARD"] = menu_keyboard.step("submit_text"),
         }
     }
 }

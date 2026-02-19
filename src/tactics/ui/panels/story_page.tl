@@ -68,6 +68,7 @@ local function compute_children(state: UIContextManager): {box.UIElement}
     local content: {box.UIElement} = {}
 
     local is_chapter_header_page = false
+    local is_text_input_page = false
 
     for _,n in ipairs(nodes) do
         local child: box.UIElement
@@ -96,6 +97,16 @@ local function compute_children(state: UIContextManager): {box.UIElement}
             child:add(character_ui.portrait_box(function(_: UIContextManager): DrawableCharacter
                 return n.character
             end, nil))
+        elseif n is rendered_story_node.TextInput then
+            is_text_input_page = true
+			local root_node = state.story_context.menu_manager.menu_step.node
+            child = menu_ui.generic_menu_box(
+            	function (_: UIContextManager): integer return 1 end,
+            	function (_: UIContextManager): MenuNode
+            		local node = root_node
+            		return node
+            	end
+            )
         else
             unexpected(n.type)
         end

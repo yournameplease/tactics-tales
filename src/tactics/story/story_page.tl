@@ -11,6 +11,7 @@ local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 local enum RenderedStoryNodeType
     "text"
     "character_customization"
+    "text_input"
     "chapter_header"
 end
 
@@ -31,6 +32,13 @@ local record CharacterCustomization
     character: drawable_character.DrawableCharacter
 end
 
+local record TextInput
+    is RenderedStoryNode
+    where self.type == "text_input"
+    key: string
+    text: Dialogue
+end
+
 local record ChapterHeader
     is RenderedStoryNode
     where self.type == "chapter_header"
@@ -41,6 +49,7 @@ end
 local rendered_story_node = {
     RenderedStoryNode = RenderedStoryNode,
     Text = Text,
+    TextInput = TextInput,
     ChapterHeader = ChapterHeader,
     CharacterCustomization = CharacterCustomization,
 }
@@ -81,6 +90,16 @@ function rendered_story_node.character_customization(
     return node
 end
 
+function rendered_story_node.text_input(
+    key: string
+): RenderedStoryNode
+    local node: TextInput = {
+        type = 'text_input',
+        key = key,
+    }
+    return node
+end
+
 local interface StoryPage
     nodes: {RenderedStoryNode}
     chapter_text: string
@@ -90,6 +109,7 @@ local interface StoryPage
     clear_chapter_header: function(self)
     finish_text: function(self)
     add_text_line: function(self, dialogue: Dialogue)
+    add_text_input_menu: function(self, key: string, dialogue: Dialogue)
     add_character_customization_menu: function(self, base_character: Character, key: string, anim: animation.AnimatedSpriteData)
     clear_page: function(self)
     story_revision: integer
@@ -155,6 +175,20 @@ function StoryPageImpl:add_character_customization_menu(
         anim
     )
     pt.add(self.nodes, node)
+end
+
+function StoryPageImpl:add_text_input_menu(
+    key: string,
+    text: Dialogue
+)
+    local text_node = rendered_story_node.text(
+        text
+    )
+    local input_node = rendered_story_node.text_input(
+        key
+    )
+    pt.add(self.nodes, text_node)
+    pt.add(self.nodes, input_node)
 end
 
 function StoryPageImpl:clear_page()

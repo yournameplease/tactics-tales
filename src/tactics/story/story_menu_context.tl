@@ -8,6 +8,7 @@ local GameContext = menu_context.GameContext
 local record StoryMenuContext
 	is GameContext
 	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string})
+	handle_submit_text: function(text: string)
 end
 
 local story_menu_context = {
@@ -15,10 +16,12 @@ local story_menu_context = {
 }
 
 function story_menu_context.new(
-	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string})
+	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string}),
+	handle_submit_text: function(text: string)
 ): StoryMenuContext
     return {
         handle_create_character = handle_create_character,
+        handle_submit_text = handle_submit_text,
     }
 end
 

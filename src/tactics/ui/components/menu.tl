@@ -48,13 +48,14 @@ local function grid_button(
 	p: Point
 ): box.UIElement
 	-- log.debug("Generating button node menu box. ",b.id,b.text)
+	log.debug("Creating grid button: ", p, node.id)
 	local text = node.text_array:get_point(p)
 
 	return box.builder("button")
 		:layout{
-			width = "fill",
-			height = "fit_content",
-			flex_grow = 1,
+			width = 16,
+			height = 16,
+			-- flex_grow = 1,
 			padding = box.layout.padding(2),
 		}
 		:text{
@@ -238,12 +239,13 @@ local function generate_menu_node_element(
 		for y=1,node.y_max do
 			local row = box.builder(node.id.."_row_"..y)
 					:direction("row")
-					:container("block")
+					:container("strip")
 					:build()
 			for x=1,node.x_max do
-				local p = point.of(x, y)
+				local p = point.of(x-1, y-1)
 				row:add(grid_button(node, p))
 			end
+			column:add(row)
 		end
 
 		return column

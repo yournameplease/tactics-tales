@@ -181,6 +181,14 @@ function NestedGridNode:update_joy(
 	end
 end
 
+function NestedGridNode:lose_focus()
+	self.has_focus = false
+	local focused_leaf = self:get_focused_leaf()
+	if focused_leaf then
+		focused_leaf:lose_focus()
+	end
+end
+
 function NestedGridNode:claim_focus(
     selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
