@@ -137,6 +137,7 @@ local interface MenuNode
     update_joy: function(self, Joypad): MenuSignal
     handle_command: function(self, menu_types.MenuCommand): MenuSignal
     lose_focus: function(self)
+    refresh_focus: function(self)
     claim_focus: function(self, MenuMouseSelection, child: MenuNode)
     serialize: function(self): SerializedMenu
     deserialize: function(self, state: SerializedMenuState, data: {string: any})

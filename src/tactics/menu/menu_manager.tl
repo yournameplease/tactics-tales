@@ -138,6 +138,7 @@ function MenuStepDefinition:build(
     local out: MenuStep = {
         node = self.node:to_cursor(nil, game_ctx, menu_ctx, menu_state),
     }
+    out.node:refresh_focus()
     return setmetatable(out, { __index = function(_: any, k: string): any 
             if (MenuStep as {string: any})[k] then
                 return (MenuStep as {string: any})[k]

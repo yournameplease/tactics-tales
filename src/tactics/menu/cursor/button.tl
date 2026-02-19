@@ -90,6 +90,10 @@ function ButtonCursor:lose_focus()
 	self.has_focus = false
 end
 
+function ButtonCursor:refresh_focus()
+	self.has_focus = true
+end
+
 function ButtonCursor:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode
