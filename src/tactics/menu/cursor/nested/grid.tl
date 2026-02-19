@@ -141,8 +141,8 @@ end
 
 function NestedGridNode:move_cursor(p: Point): boolean
     local prev_point = self.point:copy()
-    self.point.x = pt.mid(0, p.x, self.x_max)
-    self.point.y = pt.mid(0, p.y, self.y_max)
+    self.point.x = pt.mid(0, p.x, self.x_max-1)
+    self.point.y = pt.mid(0, p.y, self.y_max-1)
 
     if self.legal_tiles and self.path and self.point ~= prev_point then
         if self.legal_tiles:get(self.point.x, self.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
@@ -187,6 +187,14 @@ function NestedGridNode:lose_focus()
 	local focused_leaf = self:get_focused_leaf()
 	if focused_leaf then
 		focused_leaf:lose_focus()
+	end
+end
+
+function NestedGridNode:refresh_focus()
+	self.has_focus = true
+	local focused_leaf = self:get_focused_leaf()
+	if focused_leaf then
+		focused_leaf:refresh_focus()
 	end
 end
 

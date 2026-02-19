@@ -185,6 +185,10 @@ function SelectionMenuNode:lose_focus()
 	self.has_focus = false
 end
 
+function SelectionMenuNode:refresh_focus()
+	self.has_focus = true
+end
+
 function SelectionMenuNode:claim_focus(
     _selection: mouse_menu_selection.MenuMouseSelection,
     _child: menu_cursor.MenuNode

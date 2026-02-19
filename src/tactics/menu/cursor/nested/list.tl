@@ -106,7 +106,7 @@ function NestedMenuNode:update_joy(
 	    return menu_signal.ignored()
 	else
 		self.children[old_i]:lose_focus()
-		self.children[self.i]:claim_focus(nil, nil)
+		self.children[self.i]:refresh_focus()
 		return menu_signal.consumed()
 	end
 end
@@ -114,6 +114,11 @@ end
 function NestedMenuNode:lose_focus()
 	self.has_focus = false
 	self.children[self.i]:lose_focus()
+end
+
+function NestedMenuNode:refresh_focus()
+	self.has_focus = true
+	self.children[self.i]:refresh_focus()
 end
 
 function NestedMenuNode:claim_focus(
