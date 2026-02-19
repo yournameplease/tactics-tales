@@ -64,7 +64,7 @@ function schema_definition.boolean(): SchemaDefinition
 	local self: TypeSchemaDefinition = {
 		type = "type",
 		optional = false,
-		pt_type = "string",
+		pt_type = "boolean",
 	}
 	return self
 end
