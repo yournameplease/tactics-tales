@@ -117,7 +117,6 @@ end
 function NestedGridNode:get_first_child(p: Point, game_context: GameContext, menu_ctx: MenuContext): menu_cursor.MenuNode
 	for _,child in ipairs(self.children) do
 		if child.filter(p, game_context, menu_ctx) then
-			log.debug("Got child "..child.child.id.." for "..tostring(p))
 			return child.child
 		end
 	end

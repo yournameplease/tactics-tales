@@ -304,6 +304,7 @@ function ScriptManagerImpl:register_script(
 		function(args: {string: any})
 			local triggered, ctx = filter(args)
 			if triggered then
+				local tactics_lock = self.tactics_engine:acquire_lock()
 				if script.one_shot then
 					self.event_listener:remove(self.script_listeners[script.id])
 				end
@@ -315,6 +316,7 @@ function ScriptManagerImpl:register_script(
 						end
 						log.debug("Handled script effect.")
 					end
+					self.tactics_engine:remove_lock(tactics_lock)
 				end)
 			end
 		end
