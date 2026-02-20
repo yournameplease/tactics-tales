@@ -117,6 +117,7 @@ function battle_manager.new(
         self.battle_objective_service,
         self.enemy_ai_engine,
         event_bus,
+        task_manager,
         self.battle_menu_manager
     )
 
@@ -156,7 +157,7 @@ function BattleManagerImpl:teardown()
 end
 
 function BattleManagerImpl:update(input: InputContext)
-    if not self.tactics_engine.battle_is_blocked then
+    if not self.tactics_engine:is_hard_blocked() then
         self.battle_menu_manager:update(input)
     end
     self.tactics_engine:update(input)

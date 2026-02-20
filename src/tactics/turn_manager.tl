@@ -8,6 +8,7 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local bm = require("src.tactics.battle.battle_map")
 local BattleMenuManager = require("src.tactics.battle.battle_menu_manager").BattleMenuManager
+local TaskManager = require("src.tactics.systems.tasks").TaskManager
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
 local battle_objective_service = require("src.tactics.battle.battle_objective_service")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
@@ -45,6 +46,7 @@ local record TurnManagerImpl
     battle_objective_service: battle_objective_service.BattleObjectiveService
     ai_engine: ai_engine.AIEngine
     battle_menu_manager : BattleMenuManager
+    task_manager: TaskManager
 
     event_listener: event_listener.EventListener
     event_writer: event_writer.EventWriter
@@ -84,33 +86,46 @@ function TurnManagerImpl:advance_turn()
 end 
 
 function TurnManagerImpl:advance_phase()
-    self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-    self.event_writer:emit("TACTICS_END_PHASE", {
-        turn = self.turn,
-        side = self:acting_side(),
-    })
-    local next_phase = self.phase + 1
-    if next_phase > #PHASE_ORDER then
-        self:advance_turn()
-    else
-        self.phase = next_phase
-    end
-    self.event_writer:emit("TACTICS_BEGIN_PHASE", {
-        turn = self.turn,
-        side = self:acting_side(),
-    })
+    self.task_manager:start_routine(function()
+        self.battle_menu_manager:clear_menu()
+        self.event_writer:emit("TACTICS_END_PHASE", {
+            turn = self.turn,
+            side = self:acting_side(),
+        })
 
-    local side_units = self.battle_map:get_units(function(u: BattleUnit): boolean
-        return u.side == self:acting_side()
-    end)
-    -- skip phases for empty sides
-    if #side_units > 0 then
-        if self:acting_side() ~= "player" then
-            self.ai_engine:handle_one_unit_action(self:acting_side())
+        log.debug("yield after phase end") 
+		self.tactics_engine:yield_while_in_script()
+
+        local next_phase = self.phase + 1
+        if next_phase > #PHASE_ORDER then
+            self:advance_turn()
+        else
+            self.phase = next_phase
         end
-    else
-        self:advance_phase()
-    end
+
+        self.event_writer:emit("TACTICS_BEGIN_PHASE", {
+            turn = self.turn,
+            side = self:acting_side(),
+        })
+
+        log.debug("yield after phase begin") 
+		self.tactics_engine:yield_while_in_script()
+        self.tactics_engine:compute_unit_valid_tiles()
+
+        local side_units = self.battle_map:get_units(function(u: BattleUnit): boolean
+            return u.side == self:acting_side()
+        end)
+        -- skip phases for empty sides
+        if #side_units > 0 then
+            if self:acting_side() ~= "player" then
+                self.ai_engine:handle_one_unit_action(self:acting_side())
+            else
+                self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+            end
+        else
+            self:advance_phase()
+        end
+    end)
 end 
 
 function turn_manager.new(
@@ -119,6 +134,7 @@ function turn_manager.new(
     battle_objective_srv: battle_objective_service.BattleObjectiveService,
     ai_eng: ai_engine.AIEngine,
     bus: event_bus.EventBus,
+    task_manager: TaskManager,
     battle_menu_manager: BattleMenuManager
 ): TurnManager
     local self: TurnManagerImpl = setmetatable({
@@ -132,6 +148,7 @@ function turn_manager.new(
     self.battle_objective_service = battle_objective_srv
     self.ai_engine = ai_eng
     self.battle_menu_manager = battle_menu_manager
+    self.task_manager = task_manager
 
     self.event_listener = event_listener.new(bus)
     self.event_writer = event_writer.new(bus)
@@ -161,6 +178,7 @@ function turn_manager.new(
                     self.ai_engine:handle_one_unit_action(acting_side)
                 end
             else
+                self.battle_menu_manager:clear_menu()
                 self:advance_phase()
             end
         end

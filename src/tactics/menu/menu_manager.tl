@@ -274,12 +274,15 @@ end
 
 
 function BaseMenuManager:clear_menu()
+    log.debug("Clearing menu. Was ",self.menu_state.menu_id)
     self.menu_state.menu_id = nil
     self.menu_ctx = nil
     self.selection_history = {}
+    self.revision_count = self.revision_count + 1
 end
 
 function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
+    log.debug("Setting menu: "..menu_id)
     local definition = self.menu_definitions[menu_id]
     self.menu_state.menu_id = menu_id
     self.menu_ctx = {

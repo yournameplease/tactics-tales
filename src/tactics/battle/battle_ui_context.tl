@@ -164,7 +164,7 @@ function BattleUIContext:enrich()
 
     local menu_ctx = self.battle_menu_manager.menu_ctx
     -- todo
-    if self.turn_manager:acting_side() == "player" then
+    if self.turn_manager:acting_side() == "player" and menu_ctx ~= nil then
         assert(menu_ctx is BattleMainMenuContext)
         if menu_ctx.acting_unit ~= nil then
             self.acting_unit = menu_ctx.acting_unit.unit
@@ -193,7 +193,7 @@ function BattleUIContext:enrich()
     end
 
     if should_recalculate_highlights then
-        log.debug("Recalculating tile highlights")
+        log.trace("Recalculating tile highlights")
         local hover_unit_highlights: Userdata
         local menu_highlights: Userdata
         if should_highlight_hovered_unit then

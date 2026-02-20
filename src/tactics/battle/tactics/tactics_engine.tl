@@ -18,6 +18,9 @@ local bm = require("src.tactics.battle.battle_map")
 local tasks = require("src.tactics.systems.tasks")
 local animation = require("src.tactics.animation")
 local lists = require("src.tactics.util.lists")
+local id_generator = require("src.tactics.util.id_generator")
+local maps = require("src.tactics.util.maps")
+local Set = maps.Set
 local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
 local Character = require("src.tactics.character.object.character").Character
@@ -55,11 +58,14 @@ end
 local record TacticsEngine
     
     battle_is_blocked: boolean
+    tactics_locks: Set<integer>
+
     active_point: Point
 
     battle_map: bm.BattleMap
     character_manager: character_manager.CharacterManager
 
+    id_generator: id_generator.IdGenerator
     task_manager: tasks.TaskManager
     animation_manager: animation.AnimationManager
     event_writer: event_writer.EventWriter
@@ -148,10 +154,12 @@ function tactics_engine.new(
     local self: tactics_engine.TacticsEngine = setmetatable({
     }, { __index = TacticsEngine })
     self.battle_is_blocked = false
+    self.tactics_locks = {}
 
     self.battle_map = map
     self.character_manager = character_mgr
 
+    self.id_generator = id_generator.new()
     self.task_manager = task_manager
     self.animation_manager = animation_manager
     self.event_writer = event_writer.new(bus)
@@ -163,6 +171,16 @@ function tactics_engine.new(
     self.dialogue_revision = 0
     
     return self
+end
+
+function TacticsEngine:acquire_lock(): integer
+    local id = self.id_generator:get_id()
+    self.tactics_locks[id] = true
+    return id
+end
+
+function TacticsEngine:remove_lock(lock_id: integer)
+    self.tactics_locks[lock_id] = nil
 end
 
 -- normalize to offsets from first tile
@@ -636,6 +654,23 @@ function TacticsEngine:is_blocked(): boolean
     return is_dialogue or self.battle_is_blocked
 end
 
+function TacticsEngine:is_locked(): boolean
+    for _,_ in pairs(self.tactics_locks) do
+        return true
+    end
+    return false
+end
+
+function TacticsEngine:is_hard_blocked(): boolean
+    return self:is_blocked() or self:is_locked()
+end
+
+function TacticsEngine:yield_while_in_script()
+    while self:is_locked() do
+        pt.yield()
+    end
+end
+
 -- legal tile getters
 
 function TacticsEngine:tiles_with_distance_from_unit_attacks(unit: BattleUnit, tile: Point): Userdata
@@ -725,6 +760,9 @@ end
 function TacticsEngine:compute_unit_valid_tiles()
     local units = self.battle_map:get_all_units()
     local marked_units = self.battle_map:get_units(BattleUnit.is_marked)
+    local player_units = self.battle_map:get_units(BattleUnit.is_player)
+
+    log.debug("Computing unit valid tiles.")
 
     for _,unit in ipairs(units) do
         unit.valid_tiles = nil
@@ -734,6 +772,9 @@ function TacticsEngine:compute_unit_valid_tiles()
         unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
     self:recompute_marked_unit_tiles()
+    for _,unit in ipairs(player_units) do
+        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+    end
 
     -- these are less urgent
     -- this could probably be parallelized further
@@ -744,6 +785,7 @@ function TacticsEngine:compute_unit_valid_tiles()
                 pt.yield()
             end
         end
+        log.debug("Finished computing unit valid tiles.")
     end)
 end
 
