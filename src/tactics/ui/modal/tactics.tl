@@ -22,6 +22,7 @@ local function compute_dialogue_modal_key(state: UIContextManager): integer
 end
 
 local function compute_dialogue_modal(state: UIContextManager): box.UIElement, box.anchor.Anchor
+    log.debug("Computing dialogue menu modal")
     if state.battle_context.active_dialogue == nil then
 		return nil, nil
     end
@@ -79,14 +80,20 @@ local function compute_action_menu_modal_key(state: UIContextManager): integer
 end
 
 local function compute_action_menu_modal(state: UIContextManager): box.UIElement, box.anchor.Anchor
+    log.debug("Computing action menu modal")
     local menu = state.battle_context.battle_menu_manager
-    local cursor = menu.menu_step.node
+    local menu_step = menu.menu_step
+    if menu_step == nil then
+        return nil, nil
+    end
+
+    local cursor = menu_step.node
     local cursor_tile = state.battle_context.hovered_point
     
     local x: integer = 0
     local y: integer = 0
 
-    if not cursor is nested_list.NestedMenuNode then
+    if cursor == nil or not cursor is nested_list.NestedMenuNode then
         return nil, nil
     end
     x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)

@@ -491,7 +491,7 @@ local BATTLE_DATA = {
         scripts = {
             escape("escape_point"),
             script.on_talk("neutral_0")
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_dialogue(script_unit.tagged("neutral_0"), {"Let me join you!"})
                 :then_recruit_unit(script_unit.tagged("neutral_0"))
                 :as_one_shot(),

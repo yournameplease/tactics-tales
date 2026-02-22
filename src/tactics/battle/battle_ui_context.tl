@@ -86,12 +86,12 @@ function BattleUIContext:enrich()
     local should_highlight_hovered_unit = true
 
     local menu = self.battle_menu_manager:serialize()
-    local root_node_state = menu.node.state
+    local root_node_state = menu.node and menu.node.state
 
     self.dialogue_revision = self.tactics_engine.dialogue_revision
     
     if self.menu_revision ~= self.battle_menu_manager.revision_count then
-        if root_node_state is SerializedNestedGridState then
+        if root_node_state and root_node_state is SerializedNestedGridState then
             log.debug("setting menu tile highlights", menu.step, menu.node)
             self.menu_tile_highlights = root_node_state.tile_highlights
             should_recalculate_highlights = true
@@ -106,7 +106,7 @@ function BattleUIContext:enrich()
 
     self.hovered_unit = nil
 
-    if root_node_state is SerializedNestedGridState then
+    if root_node_state and root_node_state is SerializedNestedGridState then
         self.hovered_point = root_node_state.point
 
         if menu.step == "SELECT_UNIT" then
@@ -177,7 +177,7 @@ function BattleUIContext:enrich()
         self.acting_unit = nil
     end
 
-    if root_node_state is SerializedNestedGridState then
+    if root_node_state and root_node_state is SerializedNestedGridState then
         if menu.step == "SELECT_UNIT" then
             self.acting_unit = nil
         end

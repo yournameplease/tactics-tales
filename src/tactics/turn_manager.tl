@@ -93,7 +93,6 @@ function TurnManagerImpl:advance_phase()
             side = self:acting_side(),
         })
 
-        log.debug("yield after phase end") 
 		self.tactics_engine:yield_while_in_script()
 
         local next_phase = self.phase + 1
@@ -108,7 +107,6 @@ function TurnManagerImpl:advance_phase()
             side = self:acting_side(),
         })
 
-        log.debug("yield after phase begin") 
 		self.tactics_engine:yield_while_in_script()
         self.tactics_engine:compute_unit_valid_tiles()
 
@@ -163,25 +161,29 @@ function turn_manager.new(
     end)
 
     self.event_listener:on("TACTICS_UNIT_END_ACTION", function()
-        self.tactics_engine:compute_unit_valid_tiles()
+        self.task_manager:start_routine(function()
+            self.battle_menu_manager:clear_menu()
+    		self.tactics_engine:yield_while_in_script()
+            self.tactics_engine:compute_unit_valid_tiles()
         
-        if not self:check_objectives() then
-            local acting_side = self:acting_side()
-            local to_act = function(u: BattleUnit): boolean
-                return u.side == acting_side and not u.has_acted
-            end
-            local units_to_act = self.battle_map:get_units(to_act)
-            if #units_to_act > 0 then
-                if acting_side == "player" then
-                    self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-                else
-                    self.ai_engine:handle_one_unit_action(acting_side)
+            if not self:check_objectives() then
+                local acting_side = self:acting_side()
+                local to_act = function(u: BattleUnit): boolean
+                    return u.side == acting_side and not u.has_acted
                 end
-            else
-                self.battle_menu_manager:clear_menu()
-                self:advance_phase()
+                local units_to_act = self.battle_map:get_units(to_act)
+                if #units_to_act > 0 then
+                    if acting_side == "player" then
+                        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+                    else
+                        self.ai_engine:handle_one_unit_action(acting_side)
+                    end
+                else
+                    self.battle_menu_manager:clear_menu()
+                    self:advance_phase()
+                end
             end
-        end
+        end)
     end)
 
     self.event_listener:on("TACTICS_FINISH_SIDE_ACTIONS", function()
