@@ -277,6 +277,7 @@ function BaseMenuManager:clear_menu()
     log.debug("Clearing menu. Was ",self.menu_state.menu_id)
     self.menu_state.menu_id = nil
     self.menu_ctx = nil
+    self.menu_step = nil
     self.selection_history = {}
     self.revision_count = self.revision_count + 1
 end

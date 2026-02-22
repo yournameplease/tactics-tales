@@ -329,13 +329,15 @@ local function get_selection_at(
     local tx = pt.flr((lx-self.layout.padding.l) / TILE_WIDTH)
     local ty = pt.flr((ly-self.layout.padding.t) / TILE_HEIGHT)
 
-    if tx >= 0 and tx < MAP_WIDTH
-        and ty >= 0 and ty < MAP_HEIGHT
-    then
-        return mouse_menu_selection.grid(
-            tx, ty,
-            data.menu_node,
-            "button_primary", "button_secondary")
+    if data.menu_node then
+        if tx >= 0 and tx < MAP_WIDTH
+            and ty >= 0 and ty < MAP_HEIGHT
+        then
+            return mouse_menu_selection.grid(
+                tx, ty,
+                data.menu_node,
+                "button_primary", "button_secondary")
+        end
     end
     return nil
 end
@@ -372,7 +374,8 @@ function tactics_map.new(map_width: integer, map_height: integer): box.UIElement
     :on_draw(draw_tactics_map)
     :on_update(function(self: box.UIElement, state: UIContextManager)
         local data: MapData = self.data as MapData
-        data.menu_node = state.battle_context.battle_menu_manager.menu_step.node
+        local menu_step = state.battle_context.battle_menu_manager.menu_step
+        data.menu_node = menu_step and menu_step.node or nil
     end)
     :build()
 
