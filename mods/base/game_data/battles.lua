@@ -460,6 +460,7 @@ local BATTLE_DATA = {
             ["enemy_1"] = { 0x11 },
             ["enemy_2"] = { 0x12 },
             ["enemy_3"] = { 0x13 },
+            ["neutral_0"] = { 0x20 },
             ["escape_point"] = { 0x38 },
         },
         turn_limit = 1000,
@@ -484,8 +485,16 @@ local BATTLE_DATA = {
             { character_source = character_source.template("child_axe"), tile = "player_6" },
             { character_source = character_source.template("bandit_axe"), tile = "player_7" },
         },
+        neutral = {
+            { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "neutral_0", tags = {"civilian"} },
+        },
         scripts = {
             escape("escape_point"),
+            script.on_talk("neutral_0")
+                :then_play_music("recruit")
+                :then_dialogue(script_unit.tagged("neutral_0"), {"Let me join you!"})
+                :then_recruit_unit(script_unit.tagged("neutral_0"))
+                :as_one_shot(),
         }
     }
 }
