@@ -310,120 +310,122 @@ function BaseMenuManager:update(input: InputContext)
         return
     end
 
-    local signal = input_context.handle_update(
-        input,
-        function(joy: Joypad): MenuSignal
-            return self.menu_step.node:update_joy(joy)
-        end,
-        function(
-            mouse: Mouse,
-            hovered: mouse_menu_selection.MenuMouseSelection
-        ): MenuSignal
-            if hovered == nil then hovered = {} end
+    if self.menu_step ~= nil then
+        local signal = input_context.handle_update(
+            input,
+            function(joy: Joypad): MenuSignal
+                return self.menu_step.node:update_joy(joy)
+            end,
+            function(
+                mouse: Mouse,
+                hovered: mouse_menu_selection.MenuMouseSelection
+            ): MenuSignal
+                if hovered == nil then hovered = {} end
 
-            if hovered.node then
-                hovered.node:claim_focus(hovered, nil)
-            end
-            
-        	local command: menu_types.MenuCommand
-        	if (hovered.on_lmb_command or self.menu_step.default_lmb) and mouse.mlp then
-        	    if hovered.on_lmb_command then
-            		command = hovered.on_lmb_command
-            	else
-                    command = self.menu_step.default_lmb
-                    hovered.node = self.menu_step.node
+                if hovered.node then
+                    hovered.node:claim_focus(hovered, nil)
+                end
+
+            	local command: menu_types.MenuCommand
+            	if (hovered.on_lmb_command or self.menu_step.default_lmb) and mouse.mlp then
+            	    if hovered.on_lmb_command then
+                		command = hovered.on_lmb_command
+                	else
+                        command = self.menu_step.default_lmb
+                        hovered.node = self.menu_step.node
+                	end
+            	elseif (hovered.on_rmb_command or self.menu_step.default_rmb) and mouse.mrp then
+            	    if hovered.on_rmb_command then
+                		command = hovered.on_rmb_command
+                	else
+                        command = self.menu_step.default_rmb
+                        hovered.node = self.menu_step.node
+                	end
             	end
-        	elseif (hovered.on_rmb_command or self.menu_step.default_rmb) and mouse.mrp then
-        	    if hovered.on_rmb_command then
-            		command = hovered.on_rmb_command
-            	else
-                    command = self.menu_step.default_rmb
-                    hovered.node = self.menu_step.node
+            	if command then
+            	    log.debug("Got mouse command: "..command.." for "..hovered.node.id)
+                    return hovered.node:handle_command(command)
             	end
-        	end
-        	if command then
-        	    log.debug("Got mouse command: "..command.." for "..hovered.node.id)
-                return hovered.node:handle_command(command)
-        	end
-        	return menu_signal.ignored()
-        end
-    )
-
-    if signal is menu_signal.Consumed then
-        return
-    elseif signal is menu_signal.Ignored then
-        -- TODO: joy/mouse step-level back
-        if self.menu_step.back_handler or self.menu_step.previous_step then
-            local should_back = input_context.handle_update(
-                input,
-                function(joy: Joypad): boolean
-                    return joy.bp
-                end,
-                function(
-                    mouse: Mouse,
-                    _hovered: mouse_menu_selection.MenuMouseSelection
-                ): boolean
-                    return mouse.mrp
-                end
-            )
-            if should_back then
-                if self.menu_step.back_handler then
-                    local handler_id = self.menu_step.back_handler
-                    local handler = self.menu_handlers[handler_id]
-                    assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
-                    log.debug("Calling menu handler: "..handler_id)
-                    handler(
-                        self.game_ctx,
-                        self:serialize().node.data,
-                        self.menu_ctx,
-                        nil
-                    )
-                end
-                if self.menu_step.previous_step then
-                    self:handle_menu_advance(self.menu_step.previous_step)
-                end
+            	return menu_signal.ignored()
             end
-        end
-        -- if joy.bp then
-
-        -- end 
-    elseif signal is menu_signal.Back then
-        self:handle_menu_back()
-    elseif signal is menu_signal.Navigate then
-        self:handle_menu_advance(signal.target)
-    elseif signal is menu_signal.Finish then
-        self:clear_menu()
-    elseif signal is menu_signal.CallHandler then
-        local handler = self.menu_handlers[signal.handler]
-        assert(handler ~= nil, "Bad handler for id "..signal.handler)
-        log.debug("Calling menu handler: "..signal.handler)
-        local ser = self:serialize()
-        log.debug(ser.menu_id)
-        log.debug(ser.step)
-        log.debug(ser.node)
-        local handler_res = handler(
-            self.game_ctx,
-            self:serialize().node.data,
-            self.menu_ctx,
-            signal.value
         )
-        if handler_res then
-            if handler_res is MenuHandlerDeserialize then
-                log.debug("Deserializing from menu handler response.", self.menu_state.step)
-                self.menu_step.node:deserialize(nil, handler_res.data)
-            elseif handler_res is MenuHandlerRecompute then
-                log.debug("Recomputing from menu handler response.", self.menu_state.step)
-                self.menu_step.node:recompute(self.game_ctx, self.menu_ctx)
+
+        if signal is menu_signal.Consumed then
+            return
+        elseif signal is menu_signal.Ignored then
+            -- TODO: joy/mouse step-level back
+            if self.menu_step.back_handler or self.menu_step.previous_step then
+                local should_back = input_context.handle_update(
+                    input,
+                    function(joy: Joypad): boolean
+                        return joy.bp
+                    end,
+                    function(
+                        mouse: Mouse,
+                        _hovered: mouse_menu_selection.MenuMouseSelection
+                    ): boolean
+                        return mouse.mrp
+                    end
+                )
+                if should_back then
+                    if self.menu_step.back_handler then
+                        local handler_id = self.menu_step.back_handler
+                        local handler = self.menu_handlers[handler_id]
+                        assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                        log.debug("Calling menu handler: "..handler_id)
+                        handler(
+                            self.game_ctx,
+                            self:serialize().node.data,
+                            self.menu_ctx,
+                            nil
+                        )
+                    end
+                    if self.menu_step.previous_step then
+                        self:handle_menu_advance(self.menu_step.previous_step)
+                    end
+                end
             end
-        end
-        if signal.then_finish then
+            -- if joy.bp then
+
+            -- end 
+        elseif signal is menu_signal.Back then
+            self:handle_menu_back()
+        elseif signal is menu_signal.Navigate then
+            self:handle_menu_advance(signal.target)
+        elseif signal is menu_signal.Finish then
             self:clear_menu()
+        elseif signal is menu_signal.CallHandler then
+            local handler = self.menu_handlers[signal.handler]
+            assert(handler ~= nil, "Bad handler for id "..signal.handler)
+            log.debug("Calling menu handler: "..signal.handler)
+            local ser = self:serialize()
+            log.debug(ser.menu_id)
+            log.debug(ser.step)
+            log.debug(ser.node)
+            local handler_res = handler(
+                self.game_ctx,
+                self:serialize().node.data,
+                self.menu_ctx,
+                signal.value
+            )
+            if handler_res then
+                if handler_res is MenuHandlerDeserialize then
+                    log.debug("Deserializing from menu handler response.", self.menu_state.step)
+                    self.menu_step.node:deserialize(nil, handler_res.data)
+                elseif handler_res is MenuHandlerRecompute then
+                    log.debug("Recomputing from menu handler response.", self.menu_state.step)
+                    self.menu_step.node:recompute(self.game_ctx, self.menu_ctx)
+                end
+            end
+            if signal.then_finish then
+                self:clear_menu()
+            end
+            if signal.then_navigate_to ~= nil then
+                self:handle_menu_advance(signal.then_navigate_to)
+            end
+        else
+            unexpected(signal.type)
         end
-        if signal.then_navigate_to ~= nil then
-            self:handle_menu_advance(signal.then_navigate_to)
-        end
-    else
-        unexpected(signal.type)
     end
 end
 
