@@ -224,6 +224,9 @@ function BattleMap:get_unit_by_id(id: integer): battle_unit.BattleUnit
 end
 
 function BattleMap:get_at_tile(tile: Point): battle_unit.BattleUnit
+    if not self.units_by_x_y:is_point_in_range(tile) then
+        return nil
+    end
     return self.units_by_x_y:get_point(tile)
 end
 
@@ -334,6 +337,7 @@ function BattleMap:register_tile_interaction(
     interaction_text: string,
     interaction_distance: TileDistance
 )
+    log.debug("Registering tile interaction: ", tile, script_id)
     local hook: TileInteractionHook = {
         script_id = script_id,
         interaction_text = interaction_text,
@@ -358,11 +362,15 @@ function BattleMap:register_unit_interaction(
     script_id: integer,
     interaction_text: string
 )
+    log.debug("Registering unit interaction: ", unit, script_id)
     local hook: UnitInteractionHook = {
         script_id = script_id,
         interaction_text = interaction_text,
     }
 
+    if self.interactions_by_unit_id[unit.id] == nil then
+        self.interactions_by_unit_id[unit.id] = {}
+    end
     self.interactions_by_unit_id[unit.id][script_id] = hook
 end
 
@@ -410,10 +418,8 @@ function BattleMap:get_nearby_interactions(
         end
     end
 
-    -- TODO: unit interactions
-
     for _,offset in ipairs(adjacent_offsets) do
-        local p = tile+offset
+        local p = tile + offset
         local unit = self:get_at_tile(p)
         if unit ~= nil then
             local unit_interactions = self.interactions_by_unit_id[unit.id]
