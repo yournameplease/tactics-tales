@@ -449,7 +449,7 @@ local BATTLE_DATA = {
         map_id = "castle_defense",
         tile_labels = {
             ["player_deployment"] = { 0x00 },
-            ["militia_spear"] = { 0x10 },
+            ["militia_spearman"] = { 0x10 },
             ["militia_spear_captain"] = { 0x11 },
             ["militia_boss_w"] = { 0x12 },
             ["militia_boss_e"] = { 0x13 },
@@ -484,12 +484,21 @@ local BATTLE_DATA = {
         enemies = {
             { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
-            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_axe" }
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "bandit_axe" },
+            { character_source = character_source.template("bandit_guard"), ai = ai.move_one, tile = "bandit_guard" },
+            { character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
+            { character_source = character_source.template("cultist_goon"), ai = ai.move_two, tile = "cultist_goon" },
+            { character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "cultist_spearman" },
+            { character_source = character_source.template("cultist_guard"), ai = ai.move_one, tile = "cultist_guard" },
+            { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary, tile = "militia_boss_w", tags = {"boss"} },
+            { character_source = character_source.template("militia_spear_captain"), ai = ai.move_two, tile = "militia_spear_captain" },
+            { character_source = character_source.template("militia_spearman"), ai = ai.move_two, tile = "militia_spearman" },
+            { character_source = character_source.template("militia_armor"), ai = ai.move_one, tile = "militia_boss_e" },
         },
         neutral = {
             -- civilians
-            { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("monarch"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
+            { character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
             { character_source = character_source.template("militia_spearman"), ai = ai.stationary_allied, tile = "friendly_militia", tags = {"civilian"} },
         },
         players = {},
