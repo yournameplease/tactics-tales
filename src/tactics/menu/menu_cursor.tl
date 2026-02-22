@@ -11,6 +11,7 @@ local Joypad = input_service.Joypad
 
 local enum MenuSignalType
     "navigate"
+    "finish"
     "call_handler"
     "ignored" -- input was not used; should bubble up to parent
 	"consumed" -- input was used, but no actions
@@ -42,6 +43,11 @@ local record MenuSignalNavigate
 	target: menu_types.MenuStep
 end
 
+local record MenuSignalFinish
+	is MenuSignal
+	where self.type == "finish"
+end
+
 local record MenuSignalCallHandler
 	is MenuSignal
 	where self.type == "call_handler"
@@ -50,6 +56,7 @@ local record MenuSignalCallHandler
 
 	-- nillable
 	then_navigate_to: menu_types.MenuStep
+	then_finish: boolean
 end
 
 local menu_signal = {
@@ -58,6 +65,7 @@ local menu_signal = {
 	Consumed = MenuSignalConsumed,
 	Ignored = MenuSignalIgnored,
 	Navigate = MenuSignalNavigate,
+	Finish = MenuSignalFinish,
 	CallHandler = MenuSignalCallHandler
 }
 
@@ -76,6 +84,12 @@ end
 function menu_signal.ignored(): MenuSignal
 	return {
 		type = "ignored"
+	}
+end
+
+function menu_signal.finish(): MenuSignal
+	return {
+		type = "finish"
 	}
 end
 

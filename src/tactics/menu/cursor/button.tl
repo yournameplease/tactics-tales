@@ -30,6 +30,7 @@ local record ButtonCursor
     -- set_selected_context: function(ButtonCursor, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
+    final_step: boolean
     select_handler: menu_types.MenuHandlerId
     back_handler: menu_types.MenuHandlerId
 end
@@ -43,6 +44,7 @@ local record ButtonDefinition
     -- set_selected_context: function(self, GameContext, MenuContext)
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
+    final_step: boolean
     select_handler: menu_types.MenuHandlerId
     back_handler: menu_types.MenuHandlerId
 end
@@ -67,12 +69,17 @@ function ButtonCursor:update_joy(
 		if joy.ap then
 			if self.select_handler ~= nil then
 				local signal = menu_signal.call_handler(self.select_handler, self.value)
+				if self.final_step then
+					signal.then_finish = true
+				end
 				if self.next_state ~= nil then
 					signal.then_navigate_to = self.next_state
 				end
 				return signal
 			end
-			if self.next_state ~= nil then
+			if self.final_step then
+				return menu_signal.finish()
+			elseif self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
 			end
 			return menu_signal.consumed()
@@ -116,7 +123,9 @@ function ButtonCursor:handle_command(
 				end
 				return signal
 			end
-			if self.next_state ~= nil then
+			if self.final_step then
+				return menu_signal.finish()
+			elseif self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
 			end
 			return menu_signal.consumed()
@@ -179,6 +188,11 @@ function ButtonDefinition:advance_to(
 	next_state: string
 ): ButtonDefinition
 	self.next_state = next_state
+	return self
+end
+
+function ButtonDefinition:as_final_step(): ButtonDefinition
+	self.final_step = true
 	return self
 end
 
