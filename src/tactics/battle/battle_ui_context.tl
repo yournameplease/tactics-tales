@@ -95,6 +95,10 @@ function BattleUIContext:enrich()
             log.debug("setting menu tile highlights", menu.step, menu.node)
             self.menu_tile_highlights = root_node_state.tile_highlights
             should_recalculate_highlights = true
+        else
+            log.debug("clearing menu tile highlights")
+            self.menu_tile_highlights = nil
+            should_recalculate_highlights = true
         end
 
         self.menu_revision = self.battle_menu_manager.revision_count
@@ -121,8 +125,6 @@ function BattleUIContext:enrich()
         if menu.step == "SELECT_DESTINATION" then
             self.hovered_path = root_node_state.path
             should_highlight_hovered_unit = false
-        else
-            self.hovered_path = nil
         end
 
         if menu.step == "SELECT_TARGET" then
@@ -160,6 +162,13 @@ function BattleUIContext:enrich()
                 self.acting_unit = ctx["unit"] as BattleUnit
             end
         end
+    end
+
+    if menu.step ~= "SELECT_DESTINATION" then
+        self.hovered_path = nil
+    end
+    if menu.step == "SELECT_ACTION" then
+        should_highlight_hovered_unit = false
     end
 
     local menu_ctx = self.battle_menu_manager.menu_ctx
