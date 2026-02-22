@@ -107,7 +107,7 @@ function stories.chapter_debug(
 				stories.story_text("You Lose..."),
 				stories.exit_story(),
 			},
-		}	
+		}
 	}
 end
 
@@ -152,8 +152,22 @@ local STORIES = {
 			"child_greatsword",
 			"village_axe",
 		},
-		"Corrupt local militia have allied with bandits!",
+		"An unlikely alliance was guarding the cliffside.",
 		"cliff_crossing"
+	),
+	castle_defense = stories.chapter_debug(
+		{
+			"militia_spear_captain",
+			"militia_spearman",
+			"militia_armor",
+			"militia_archer",
+			"child_axe",
+			"child_bow",
+			"child_greatsword",
+			"village_axe",
+		},
+		"A three-way alliance is storming the capitol.",
+		"castle_defense"
 	),
 	demo_playground = stories.chapter_debug(
 		{},
@@ -272,6 +286,7 @@ return {
 		"cultist_cave",
 		"fortress_town",
 		"cliff_crossing",
+		"castle_defense",
 		"demo_playground",
 	}
 }

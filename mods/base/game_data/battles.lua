@@ -445,6 +445,56 @@ local BATTLE_DATA = {
             escape("escape_point"),
         }
     },
+    ["castle_defense"] = {
+        map_id = "castle_defense",
+        tile_labels = {
+            ["player_deployment"] = { 0x00 },
+            ["militia_spear"] = { 0x10 },
+            ["militia_spear_captain"] = { 0x11 },
+            ["militia_boss_w"] = { 0x12 },
+            ["militia_boss_e"] = { 0x13 },
+            ["cultist_boss"] = { 0x14 },
+            ["cultist_guard"] = { 0x15 },
+            ["cultist_spearman"] = { 0x16 },
+            ["cultist_goon"] = { 0x17 },
+            ["bandit_boss"] = { 0x18 },
+            ["bandit_guard"] = { 0x19 },
+            ["bandit_axe"] = { 0x1A },
+            ["bandit_goon"] = { 0x1B },
+            ["bandit_reinforce"] = { 0x1E },
+            ["cultist_reinforce"] = { 0x1F },
+            ["militia_reinforce_a"] = { 0x1C },
+            ["militia_reinforce_b"] = { 0x1D },
+            ["monarch"] = { 0x20 },
+            ["counselor"] = { 0x21 },
+            ["friendly_militia"] = { 0x22 },
+        },
+        turn_limit = 10,
+        victory_conditions = {
+            objectives.survive(),
+            objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
+        },
+        failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+            objectives.tagged_unit_dies("monarch")
+        },
+        deployment = {
+            deployment_tiles_tag = "player_deployment",
+        },
+        enemies = {
+            { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
+            { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_axe" }
+        },
+        neutral = {
+            -- civilians
+            { character_source = character_source.template("civilian"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
+            { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("militia_spearman"), ai = ai.stationary_allied, tile = "friendly_militia", tags = {"civilian"} },
+        },
+        players = {},
+        scripts = {}
+    },
     ["playground"] = {
         map_id = "playground",
         tile_labels = {
