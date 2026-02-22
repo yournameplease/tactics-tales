@@ -61,10 +61,12 @@ function EventBus:on(event_name: GameEvent, callback: function(args: { string: a
     if not self.listeners[event_name] then
         self.listeners[event_name] = {}
     end
+    local id = self.id_generator:get_id()
     pt.add(self.listeners[event_name], {
-        id = self.id_generator:get_id(),
+        id = id,
         callback = callback
     })
+    return id
 end
 
 function EventBus:remove(id: integer)

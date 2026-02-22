@@ -36,7 +36,9 @@ function event_listener.new(
 end
 
 function EventListenerImpl:on(event_name: event_bus.GameEvent, callback: function(args: { string: any })): integer
-	pt.add(self.listener_ids, self.bus:on(event_name, callback))
+	local id = self.bus:on(event_name, callback)
+	pt.add(self.listener_ids, id)
+	return id
 end
 
 function EventListenerImpl:remove(id: integer)

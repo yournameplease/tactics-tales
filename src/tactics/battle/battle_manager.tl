@@ -71,20 +71,20 @@ function battle_manager.new(
         event_bus
     )
 
-    self.script_manager = script_manager.new(
-        battle_def.scripts,
-        event_bus,
-        self.battle_map,
-        self.tactics_engine,
-        task_manager
-    )
-    
     self.tactics_engine:spawn_all(
         battle_def.players,
         battle_def.enemies,
         battle_def.neutral,
         nil,
         "prevent"
+    )
+
+    self.script_manager = script_manager.new(
+        battle_def.scripts,
+        event_bus,
+        self.battle_map,
+        self.tactics_engine,
+        task_manager
     )
 
     self.battle_objective_service = battle_objective_service.new(
