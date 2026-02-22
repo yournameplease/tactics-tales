@@ -349,6 +349,12 @@ local UNIT_TEMPLATES = {
         item_loadout = {
 		},
 	},
+	monarch = {
+		parent_template = "human_base",
+        hp_max = 4,
+        item_loadout = {
+		},
+	},
 	civilian = {
 		parent_template = "human_base",
         hp_max = 3,
