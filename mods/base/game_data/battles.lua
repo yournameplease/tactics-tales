@@ -501,8 +501,8 @@ local BATTLE_DATA = {
         },
         neutral = {
             -- civilians
-            { character_source = character_source.template("monarch"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("monarch"), ai = ai.stationary, tile = "monarch", tags = {"civilian"} },
+            { character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "counselor", tags = {"civilian"} },
             { character_source = character_source.template("militia_spearman"), ai = ai.stationary_allied, tile = "friendly_militia", tags = {"civilian"} },
         },
         players = {},
