@@ -95,7 +95,7 @@ function objectives.turn_limit()
 end
 
 local function escape(tile_tag)
-    return script.on_tile_interaction(tile_tag)
+    return script.on_tile_interaction(tile_tag, "Escape")
         :then_dialogue(script_unit.source(), "I'm retreating")
         :then_despawn_units(script_unit.source())
 end
@@ -202,8 +202,8 @@ local BATTLE_DATA = {
             ["door_d"] = { 0x35 },
             ["door_e"] = { 0x36 },
             ["escape_point"] = { 0x38 },
-            ["cultist_reinforce_a"] = { 0x18 },
-            ["cultist_reinforce_b"] = { 0x19 },
+            ["cultist_reinforce_w"] = { 0x18 },
+            ["cultist_reinforce_e"] = { 0x19 },
             ["jailed_royal"] = { 0x20 },
             ["jailed_priest"] = { 0x21 },
             ["jailed_bandit"] = { 0x28 },
@@ -239,18 +239,22 @@ local BATTLE_DATA = {
         players = {
         },
         scripts = {
-            script.on_turn(3, phase.after_enemy, 3)
+            script.on_turn(2, phase.after_enemy, 3)
                 :then_spawn_enemies({
-                    { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_b" },
-                },
-                "from_south"
-            ),
-            script.on_turn(6, phase.after_enemy, 3)
+                    { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
+                }, "from_west"
+                )
                 :then_spawn_enemies({
-                    { character_source = character_source.template("cultist_spearman"), ai = ai.move_inf, tile = "cultist_reinforce_a" },
-                },
-                "from_south"
-            ),
+                    { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_e" },
+                }, "from_east"),
+            script.on_turn(5, phase.after_enemy, 3)
+                :then_spawn_enemies({
+                    { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
+                }, "from_west"
+                )
+                :then_spawn_enemies({
+                    { character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_e" },
+                }, "from_east"),
             script.when_unit_dies("cultist_door_guard_b")
                 :then_modify_terrain("door_b", {["front_wall"] = 0})
                 :then_modify_terrain("door_b_ceiling", {["ceiling"] = 0})
@@ -497,8 +501,8 @@ local BATTLE_DATA = {
         },
         neutral = {
             -- civilians
-            { character_source = character_source.template("monarch"), ai = ai.stationary, tile = "civilian_noncombatant", tags = {"civilian"} },
-            { character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
+            { character_source = character_source.template("monarch"), ai = ai.stationary, tile = "monarch", tags = {"civilian"} },
+            { character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "counselor", tags = {"civilian"} },
             { character_source = character_source.template("militia_spearman"), ai = ai.stationary_allied, tile = "friendly_militia", tags = {"civilian"} },
         },
         players = {},
