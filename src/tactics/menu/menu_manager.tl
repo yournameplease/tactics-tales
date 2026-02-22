@@ -391,6 +391,8 @@ function BaseMenuManager:update(input: InputContext)
         self:handle_menu_back()
     elseif signal is menu_signal.Navigate then
         self:handle_menu_advance(signal.target)
+    elseif signal is menu_signal.Finish then
+        self:clear_menu()
     elseif signal is menu_signal.CallHandler then
         local handler = self.menu_handlers[signal.handler]
         assert(handler ~= nil, "Bad handler for id "..signal.handler)
@@ -413,6 +415,9 @@ function BaseMenuManager:update(input: InputContext)
                 log.debug("Recomputing from menu handler response.", self.menu_state.step)
                 self.menu_step.node:recompute(self.game_ctx, self.menu_ctx)
             end
+        end
+        if signal.then_finish then
+            self:clear_menu()
         end
         if signal.then_navigate_to ~= nil then
             self:handle_menu_advance(signal.then_navigate_to)

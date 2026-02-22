@@ -295,6 +295,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         button.builder("swap_units")
                             :handle_select("swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
+                            :as_final_step()
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
@@ -395,12 +396,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             pt.add(options, button.builder(id)
                                 :with_text(interaction.interaction_text)
                                 :with_value(interaction)
-                                :handle_select("handle_interaction"))
+                                :handle_select("handle_interaction")
+                                :as_final_step())
                         end
 
                         pt.add(options, button.builder("wait")
                             :with_text("Wait")
-                            :handle_select("wait_acting_unit"))
+                            :handle_select("wait_acting_unit")
+                            :as_final_step())
 
                         --- currently disabled as items aren't mechanically interesting yet
                         -- pt.add(options, {
@@ -426,7 +429,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         end,
                         button.builder("attack_unit")
                             :handle_select("attack_unit")
-                            :advance_to("SELECT_ACTION")
+                            :as_final_step()
                     )
                     :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
                         return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
