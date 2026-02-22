@@ -454,6 +454,7 @@ function BattleMap:get_tile_highlights(): Userdata
             end
         end
     end
+    return ud
 end
 
 return battle_map
