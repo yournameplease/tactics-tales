@@ -15,6 +15,7 @@ local record SkeletonNode
 	scale_x: integer
 	scale_y: integer
 	sprite_back: integer
+	ignore: boolean
 	computed_offset: Point
 	computed_scale_x: integer
 	computed_scale_y: integer
@@ -99,11 +100,15 @@ function AnimatedSkeletonImpl:compute_offset(key: string)
 		local parent_anchor = parent.anchors[key]
 		local child_anchor = node.root
 		if child_anchor ~= nil then
-			node.computed_scale_x = parent.computed_scale_x * node.scale_x
-			node.computed_scale_y = parent.computed_scale_y * node.scale_y
-			node.computed_offset = parent.computed_offset
-				+ parent_anchor
-				- child_anchor * point.of(node.computed_scale_x, node.computed_scale_y)
+			if parent_anchor == nil then
+				node.ignore = true
+			else
+				node.computed_scale_x = parent.computed_scale_x * node.scale_x
+				node.computed_scale_y = parent.computed_scale_y * node.scale_y
+				node.computed_offset = parent.computed_offset
+					+ parent_anchor
+					- child_anchor * point.of(node.computed_scale_x, node.computed_scale_y)
+			end
 		else
 			node.computed_offset = parent.computed_offset
 			node.computed_scale_x = parent.computed_scale_x
@@ -125,7 +130,7 @@ function AnimatedSkeletonImpl:draw_sprite(
 	x: integer,
 	y: integer
 )
-	if s ~= nil then
+	if s ~= nil and not node.ignore then
 		local n_x = x + node.computed_offset.x
 		local n_y = y + node.computed_offset.y
 		local n_sx = node.computed_scale_x

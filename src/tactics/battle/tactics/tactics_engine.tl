@@ -482,6 +482,28 @@ function TacticsEngine:attack_unit(
     target.animation_data = self.animation_manager:create_idle_animation()
 end
 
+-- to be called inside a coroutine
+function TacticsEngine:kill_unit(
+    defender: BattleUnit,
+    attacker: BattleUnit -- nillable
+)
+    self.battle_is_blocked = true
+    local anim = self.animation_manager:create_animation("DEATH", 0)    
+    defender.animation_data = anim
+    
+    self.battle_is_blocked = true
+    while anim.playing do
+        pt.yield()
+    end
+    self.battle_is_blocked = false
+    
+    self.battle_map:kill_unit(defender)
+    self.event_writer:emit("TACTICS_UNIT_DEATH", {
+        attacker = attacker,
+        defender = defender,
+    })   
+end
+
 function TacticsEngine:handle_move_unit(
     unit: BattleUnit,
     destination: Point,
@@ -617,11 +639,7 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
     end
 
     if not defender:is_alive() then
-        self.battle_map:kill_unit(defender)
-        self.event_writer:emit("TACTICS_UNIT_DEATH", {
-            attacker = attacker,
-            defender = defender,
-        })
+        self:kill_unit(defender, attacker)
     end
 end
 
