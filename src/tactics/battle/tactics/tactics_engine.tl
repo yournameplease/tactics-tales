@@ -490,9 +490,11 @@ function TacticsEngine:kill_unit(
     self.battle_is_blocked = true
     local anim = self.animation_manager:create_animation("DEATH", 0)    
     defender.animation_data = anim
+
+    self:start_dialogue(defender, {"I am dead."})
     
     self.battle_is_blocked = true
-    while anim.playing do
+    while anim.playing or self.active_dialogue ~= nil do
         pt.yield()
     end
     self.battle_is_blocked = false
