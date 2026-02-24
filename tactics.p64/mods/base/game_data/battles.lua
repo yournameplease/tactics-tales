@@ -346,11 +346,12 @@ local BATTLE_DATA = {
                 :then_spawn_enemies({
                     { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
                 },
-                phase.after_enemy,
                 "from_west"
             ),
             script.on_turn(3, phase.after_enemy)
-                :then_dialogue(script_unit.tagged("militia_boss"),{"This is taking too long...", "Clear out these pests!"})
+                :then_dialogue(
+                    script_unit.tagged("militia_boss"),
+                    {"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     script_unit.tagged("enemy_militia_stationary"),
                     ai.move_zero,

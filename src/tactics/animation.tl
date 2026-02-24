@@ -256,12 +256,12 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
     ["DEATH"] = {
         sprites = {
             {
-                sprite_name = "idle_1",
+                sprite_name = "death_1",
                 duration = 60
             }
         },
         track = {
-            0, 1, 4,12, 12, 12, 12, 12, 12, 12, 12
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         }
     }
 }

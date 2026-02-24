@@ -17,24 +17,30 @@ local enum BaseAnimationName
     "BACK_HAND"
     "FRONT_HAND"
     "HORIZONTAL"
+    "COMMON" -- used for sprites not on a specific stance
 end
 
 global enum AnimationName
     "DEFAULT_BACK_HAND"
     "DEFAULT_HORIZONTAL"
     "DEFAULT_FRONT_HAND"
+    "DEFAULT_COMMON"
     "SLEEVELESS_BACK_HAND"
     "SLEEVELESS_HORIZONTAL"
     "SLEEVELESS_FRONT_HAND"
+    "SLEEVELESS_COMMON"
     "SHIRTLESS_BACK_HAND"
     "SHIRTLESS_HORIZONTAL"
     "SHIRTLESS_FRONT_HAND"
+    "SHIRTLESS_COMMON"
     "ROBED_BACK_HAND"
     "ROBED_HORIZONTAL"
     "ROBED_FRONT_HAND"
+    "ROBED_COMMON"
     "CHILD_BACK_HAND"
     "CHILD_HORIZONTAL"
     "CHILD_FRONT_HAND"
+    "CHILD_COMMON"
 end
 
 global enum AnimationFrameName
@@ -42,6 +48,7 @@ global enum AnimationFrameName
     "idle_2"
     "walk_1"
     "walk_2"
+    "death_1"
 end
 
 global record BaseAnimationNode
@@ -169,6 +176,15 @@ local BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
             },
             root = { x = 7, y = 15}
         },
+    },
+    ["COMMON"] = {
+        death_1 = {
+            sprite_offset = 0,
+            anchors = {
+                ["head"] = { x = 6, y = 10},
+            },
+            root = { x = 7, y = 15}
+        },
     }
 }
 
@@ -286,7 +302,16 @@ local CHILD_BASE_FRAMES <total>: { BaseAnimationName: BaseAnimationBody } = {
             },
             root = { x = 7, y = 15}
         },
-    }
+    },
+    ["COMMON"] = {
+        death_1 = {
+            sprite_offset = 0,
+            anchors = {
+                ["head"] = { x = 6, y = 9},
+            },
+            root = { x = 7, y = 15}
+        },
+    },
 }
 
 local function frame_from_base_frame(
@@ -327,18 +352,23 @@ local ANIMATION_DATA: { AnimationName: AnimationBodyByFrame } = {
     ["DEFAULT_BACK_HAND"] = frames_from_base_frame(128, "BACK_HAND"),
     ["DEFAULT_HORIZONTAL"] = frames_from_base_frame(136, "HORIZONTAL"),
     ["DEFAULT_FRONT_HAND"] = frames_from_base_frame(144, "FRONT_HAND"),
+    ["DEFAULT_COMMON"] = frames_from_base_frame(152, "COMMON"),
     ["SLEEVELESS_BACK_HAND"] = frames_from_base_frame(160, "BACK_HAND"),
     ["SLEEVELESS_HORIZONTAL"] = frames_from_base_frame(168, "HORIZONTAL"),
     ["SLEEVELESS_FRONT_HAND"] = frames_from_base_frame(176, "FRONT_HAND"),
+    ["SLEEVELESS_COMMON"] = frames_from_base_frame(184, "COMMON"),
     ["SHIRTLESS_BACK_HAND"] = frames_from_base_frame(192, "BACK_HAND"),
     ["SHIRTLESS_HORIZONTAL"] = frames_from_base_frame(198, "HORIZONTAL"),
     ["SHIRTLESS_FRONT_HAND"] = frames_from_base_frame(206, "FRONT_HAND"),
+    ["SHIRTLESS_COMMON"] = frames_from_base_frame(214, "COMMON"),
     ["ROBED_BACK_HAND"] = frames_from_base_frame(224, "BACK_HAND"),
     ["ROBED_HORIZONTAL"] = frames_from_base_frame(232, "HORIZONTAL"),
     ["ROBED_FRONT_HAND"] = frames_from_base_frame(240, "FRONT_HAND"),
+    ["ROBED_COMMON"] = frames_from_base_frame(248, "COMMON"),
     ["CHILD_BACK_HAND"] = frames_from_base_frame_data(256, "BACK_HAND", CHILD_BASE_FRAMES),
     ["CHILD_HORIZONTAL"] = frames_from_base_frame_data(264, "HORIZONTAL", CHILD_BASE_FRAMES),
     ["CHILD_FRONT_HAND"] = frames_from_base_frame_data(272, "FRONT_HAND", CHILD_BASE_FRAMES),
+    ["CHILD_COMMON"] = frames_from_base_frame_data(280, "COMMON", CHILD_BASE_FRAMES),
 }
 
 return ANIMATION_DATA

@@ -115,6 +115,16 @@ local function get_body_type(
     return (body_class_prefix.."_"..base_body_type) as AnimationName
 end
 
+local function get_body_type_common(
+	drawable_unit: DrawableCharacterInstance
+): AnimationName
+	local body_class_id = drawable_unit.character:get_appearance().body_class
+	local body_class_prefix = sprite_data.BODY_CLASS[body_class_id].id_prefix
+
+	-- TODO: type safety
+    return (body_class_prefix.."_COMMON") as AnimationName
+end
+
 local function get_animation_frame(
 	drawable_unit: DrawableCharacterInstance
 ): AnimationFrame
@@ -129,7 +139,17 @@ local function get_animation_frame(
 		offset = {x = 0, y = 0}
 	end
 
-    local animation_frame = ANIMATION_DATA[get_body_type(drawable_unit)][frame_name]
+	local body_type = get_body_type(drawable_unit)
+	local body_type_common = get_body_type_common(drawable_unit)
+
+	local animation_frame: SkeletonNodeDefinition
+	if ANIMATION_DATA[body_type][frame_name] then
+		animation_frame = ANIMATION_DATA[body_type][frame_name]
+	elseif ANIMATION_DATA[body_type_common][frame_name] then
+		animation_frame = ANIMATION_DATA[body_type_common][frame_name]
+	else
+		log.error("No frame data found!", drawable_unit)
+	end
 
 	return {
 		offset = offset,
