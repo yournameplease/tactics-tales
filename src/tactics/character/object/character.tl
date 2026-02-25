@@ -10,6 +10,7 @@ local ItemInventory = require("src.tactics.character.items.object.item_inventory
 local targeting = require("src.tactics.character.items.object.weapon").targeting
 local Targeting = targeting.Targeting
 local maps = require("src.tactics.util.maps")
+local Point = require("src.tactics.util.point").Point
 
 local enum Side
     "player"
@@ -105,6 +106,50 @@ local record Facing
 	horizontal : FacingHorizontal
 end
 
+local facing = {}
+
+function Facing:turn_to(direction: CardinalDirection)
+	if direction == "up" then
+		self.vertical = "up"
+	elseif direction == "down" then
+		self.vertical = "down"
+	elseif direction == "left" then
+		self.horizontal = "left"
+	elseif direction == "right" then
+		self.horizontal = "right"
+	else
+		unexpected(direction)
+	end
+end
+
+---@param hard -- if false, keep looking up if moving horizontally
+function Facing:face_point(p: Point, hard: boolean)
+    local angle = pt.atan2(p.x, p.y)
+
+    if pt.absf(angle) < 0.25 then
+        self.horizontal = "right"
+    elseif pt.absf(angle) > 0.25 then
+        self.horizontal = "left"
+    end
+    
+    if angle > 0 and angle < 0.5 then
+    	self.vertical = "up"
+    elseif angle < 0 and angle > -0.5 then
+    	self.vertical = "down"
+    else
+    	if hard then self.vertical = "down" end
+    end
+end
+
+function facing.of(direction: CardinalDirection): Facing
+	local self: Facing = setmetatable({
+		vertical = "down",
+		horizontal = "right"
+	}, { __index = Facing })
+	self:turn_to(direction) 
+	return self
+end
+
 local interface DrawableCharacterInstance
 	side: Side
 	facing: Facing
@@ -118,6 +163,7 @@ local interface DrawableCharacterInstance
 end
 
 local character = {
+	facing = facing,
 	Side = Side,
 	Facing = Facing,
 	CharacterAppearanceKey = CharacterAppearanceKey,

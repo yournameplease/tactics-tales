@@ -7,13 +7,6 @@ local Point = point.Point
 local lists = require("src.tactics.util.lists")
 require("src.tactics.character.animation_data")
 
-local enum Facing
-    "up"
-    "down"
-    "left"
-    "right"
-end
-
 local record AnimatedSpriteData
     current_frame: AnimationFrameData
     playing: boolean
@@ -32,7 +25,7 @@ local interface AnimationInstance
     -- takes a the global frame as input
     get_sprite_frame_name: function(self, integer): AnimationFrameName
     get_animation_offset: function(self, integer): Point
-    get_animation_facing: function(self, integer): Facing
+    get_animation_facing: function(self, integer): CardinalDirection
 
     animated_object: AnimatedSpriteData
 end
@@ -120,7 +113,7 @@ function PathAnimationInstance:get_animation_offset(_global_frame: integer): Poi
     return lerp_offsets(prev_point.point, next_point.point, self.frame, prev_point.duration)
 end
 
-function PathAnimationInstance:get_animation_facing(_global_frame: integer): Facing
+function PathAnimationInstance:get_animation_facing(_global_frame: integer): CardinalDirection
     if #self.path_points == 1 then
         return nil
     end
@@ -195,7 +188,7 @@ end
 
 local record AnimationFrameData
     frame: AnimationFrameName
-    facing: Facing -- nillable
+    facing: CardinalDirection -- nillable
     offset: Point
 end
 

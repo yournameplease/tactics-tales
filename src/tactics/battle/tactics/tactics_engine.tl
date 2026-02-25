@@ -23,7 +23,8 @@ local maps = require("src.tactics.util.maps")
 local Set = maps.Set
 local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
-local Character = require("src.tactics.character.object.character").Character
+local character = require("src.tactics.character.object.character")
+local Character = character.Character
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
@@ -283,33 +284,30 @@ function TacticsEngine:spawn_units(
             end
 
             if should_spawn then
-                local character: Character = nil
+                local unit_character: Character = nil
 
                 local character_source = spawn_data.character_source
                 if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
-                    character = char_man:generate_character(character_source.template, {})
+                    unit_character = char_man:generate_character(character_source.template, {})
                     if side == "player" then
-                        char_man:persist_player(character)
+                        char_man:persist_player(unit_character)
                     end
                 elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
                     if player_roster[roster_count] ~= nil then
-                        character = player_roster[roster_count]
+                        unit_character = player_roster[roster_count]
                         roster_count = roster_count + 1
                     end
                 else
                     unexpected(character_source.type)
                 end
-                if character ~= nil then
+                if unit_character ~= nil then
                     local facing_r = spawn_point.x <= (MAP_WIDTH >> 1)
                     local unit = battle_unit.spawn_unit(
-                        character,
+                        unit_character,
                         spawn_point,
                         labels,
                         side,
-                        {
-                            vertical = "down",
-                            horizontal = facing_r and "right" or "left",
-                        },
+                        character.facing.of(facing_r and "right" or "left"),
                         spawn_data.ai
                     )
             
@@ -491,7 +489,9 @@ function TacticsEngine:kill_unit(
     local anim = self.animation_manager:create_animation("DEATH", 0)    
     defender.animation_data = anim
 
-    self:start_dialogue(defender, {"I am dead."})
+    if defender:is_player() then
+        self:start_dialogue(defender, {"..."})
+    end
     
     self.battle_is_blocked = true
     while anim.playing or self.active_dialogue ~= nil do
@@ -646,6 +646,10 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
 end
 
 function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
+    local delta = attacker.tile - defender.tile
+    defender.facing:face_point(delta, true)
+    attacker.facing:face_point(-delta, true)
+    
     local combat_result: combat_calculator.CombatResult = combat_calculator.compute_combat(attacker, defender, self.battle_map)
 
     for i,combat_step in ipairs(combat_result.steps) do

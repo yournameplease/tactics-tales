@@ -354,17 +354,7 @@ function character_renderer.draw(
 	-- update facing
 	do
 		if current_frame.facing ~= nil then
-			if current_frame.facing == "up" then
-				drawable_unit.facing.vertical = "up"
-			elseif current_frame.facing == "down" then
-				drawable_unit.facing.vertical = "down"
-			elseif current_frame.facing == "left" then
-				drawable_unit.facing.horizontal = "left"
-			elseif current_frame.facing == "right" then
-				drawable_unit.facing.horizontal = "right"
-			else
-				unexpected(current_frame.facing)
-			end
+			drawable_unit.facing:turn_to(current_frame.facing)
 		end		
 	end
 
