@@ -60,7 +60,7 @@ function ItemInventoryImpl:compute_current_slots()
 		if (item.equip_slot) ~= nil then
 			self._items_by_equip_slot[item.equip_slot] = item
 		end
-		count = count + item.item:get_slots()
+		count = count + item.item.slots
 	end
 	self._current_slot_usage = count
 end
@@ -97,22 +97,22 @@ end
 function ItemInventoryImpl:get_equipped_weapons(): { wpn.Weapon }
 	local out: { wpn.Weapon } = {}
 	if self._items_by_equip_slot["TWO_HANDS"] ~= nil
-		and self._items_by_equip_slot["TWO_HANDS"].item:get_type() == "WEAPON" then
-		pt.add(out, self._items_by_equip_slot["TWO_HANDS"].item:get_weapon_data())
+		and self._items_by_equip_slot["TWO_HANDS"].item.type == "WEAPON" then
+		pt.add(out, self._items_by_equip_slot["TWO_HANDS"].item.weapon)
 	end
 	if self._items_by_equip_slot["MAIN_HAND"] ~= nil
-		and self._items_by_equip_slot["MAIN_HAND"].item:get_type() == "WEAPON" then
-		pt.add(out, self._items_by_equip_slot["MAIN_HAND"].item:get_weapon_data())
+		and self._items_by_equip_slot["MAIN_HAND"].item.type == "WEAPON" then
+		pt.add(out, self._items_by_equip_slot["MAIN_HAND"].item.weapon)
 	end
 	if self._items_by_equip_slot["OFF_HAND"] ~= nil
-		and self._items_by_equip_slot["OFF_HAND"].item:get_type() == "WEAPON" then
-		pt.add(out, self._items_by_equip_slot["OFF_HAND"].item:get_weapon_data())
+		and self._items_by_equip_slot["OFF_HAND"].item.type == "WEAPON" then
+		pt.add(out, self._items_by_equip_slot["OFF_HAND"].item.weapon)
 	end
 	return out
 end
 
 function ItemInventoryImpl:can_equip(index: integer): boolean
-	local equip_slot = self.items[index].item:get_equip_slot()
+	local equip_slot = self.items[index].item.equip_slot
 	if equip_slot == "TWO_HANDS" then
 		return self._items_by_equip_slot.MAIN_HAND == nil
 			and self._items_by_equip_slot.OFF_HAND == nil
@@ -134,7 +134,7 @@ function ItemInventoryImpl:is_equipped(index: integer): boolean
 end
 
 function ItemInventoryImpl:can_add_item(item: Item.Item): boolean
-	return self._current_slot_usage + item:get_slots() <= self.max_slots	
+	return self._current_slot_usage + item.slots <= self.max_slots	
 end		
 
 function ItemInventoryImpl:add_item(item: Item.Item)
@@ -146,7 +146,7 @@ end
 function ItemInventoryImpl:equip_item(index: integer)
 	local inventory_item = self.items[index]
 
-	local slot_to_equip = inventory_item.item:get_equip_slot()
+	local slot_to_equip = inventory_item.item.equip_slot
 	assert(slot_to_equip ~= "NONE")
 	assert(slot_to_equip ~= "ANY_HAND", "NOT IMPLEMENTED")
 

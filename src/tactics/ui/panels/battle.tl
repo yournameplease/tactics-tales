@@ -158,9 +158,9 @@ function battle.unit_info(): box.UIElement
 
             local index = 1
             for _,item in ipairs(items) do
-                out[index+1] = item:get_name()
+                out[index+1] = item.name
                 index = index + 1
-                for _=2,item:get_slots() do
+                for _=2,item.slots do
                     out[index+1] = " |"
                     index = index + 1
                 end

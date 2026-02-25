@@ -625,7 +625,7 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
         if step.destroy_shield then
             local off_hand = defender.character.inventory:get_equipped_items()["OFF_HAND"]
             -- lazy, probably should temp disable or destroy instead
-            if off_hand ~= nil and off_hand:get_name() == "shield" then
+            if off_hand ~= nil and off_hand.name == "shield" then
                 defender.character.inventory:unequip_item_in_equip_slot("OFF_HAND")
                 defender.sprites = {}
             end

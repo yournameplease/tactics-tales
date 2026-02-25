@@ -6,10 +6,13 @@
 require("src.tactics.character.items.object.weapon")
 require("src.tactics.character.animation_data")
 local animation = require("src.tactics.animation")
+local item = require("src.tactics.character.items.object.item")
+local item_types = require("src.tactics.character.items.types")
 local ItemInventory = require("src.tactics.character.items.object.item_inventory")
 local targeting = require("src.tactics.character.items.object.weapon").targeting
 local Targeting = targeting.Targeting
 local maps = require("src.tactics.util.maps")
+local lists = require("src.tactics.util.lists")
 local Point = require("src.tactics.util.point").Point
 
 local enum Side
@@ -49,6 +52,15 @@ local record CharacterStats
     def: integer
 end
 
+local record SerializedCharacter
+    id: integer
+    name: string
+    appearance: CharacterAppearance
+    stats: CharacterStats
+	inventory: {item_types.ItemId}
+    tags: maps.Set<string>
+end
+
 local record Character
     id: integer
     name: string
@@ -57,10 +69,24 @@ local record Character
 	inventory: ItemInventory.ItemInventory
     tags: maps.Set<string>
 	
+	serialize: function(self): SerializedCharacter
 	-- may be overridden by inventory
 	get_appearance: function(self): CharacterAppearance
 	
 	get_weapon_targeting: function(self): Targeting
+end
+
+function Character:serialize(): SerializedCharacter
+	return {
+	    id = self.id,
+	    name = self.name,
+	    appearance = self.appearance,
+	    stats = self.stats,
+		inventory = lists.map(function(i: item.Item): item_types.ItemId
+			return i.id
+		end)(self.inventory:get_items()),
+	    tags = self.tags,
+	}
 end
 
 function Character:get_appearance(): CharacterAppearance
@@ -170,6 +196,7 @@ local character = {
 	CharacterAppearance = CharacterAppearance,
 	CharacterStats = CharacterStats,
 	Character = Character,
+	SerializedCharacter = SerializedCharacter,
 	DrawableCharacterInstance = DrawableCharacterInstance,
 }
 
