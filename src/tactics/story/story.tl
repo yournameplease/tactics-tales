@@ -133,6 +133,7 @@ function StoryImpl:handle_new_node()
         )
         self.story_page:add_text_line(self.active_dialogue)
     elseif node_definition is story_node.BattleNode then
+        self.story_page:clear_page()
         local battle_id = node_definition.battle_id
         self.battle_manager = battle_manager.new(
             battle_id,
