@@ -15,6 +15,13 @@ global type Angle = number
 global type Color = integer
 global type Path = string
 
+global enum CardinalDirection
+	"up"
+	"down"
+	"left"
+	"right"
+end
+
 -- global context for mods
 -- consider a more refined way to sandbox mods
 global lib: {string: any}
