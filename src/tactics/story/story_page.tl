@@ -5,7 +5,8 @@
 local animation = require("src.tactics.animation")
 local drawable_character = require("src.tactics.story.drawable_character")
 local story_memory = require("src.tactics.story.story_memory")
-local Character = require("src.tactics.character.object.character").Character
+local character = require("src.tactics.character.object.character")
+local Character = character.Character
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
 
 local enum RenderedStoryNodeType
@@ -84,7 +85,7 @@ function rendered_story_node.character_customization(
     node.character = drawable_character.create_drawable_unit(
         base_character,
         "player",
-        { vertical = "down", horizontal = "left" }
+        character.facing.of("left")
     )
     node.character.animation_data = anim
     return node
