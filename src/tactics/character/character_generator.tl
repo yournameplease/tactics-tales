@@ -125,4 +125,26 @@ function character_generator.generate_from_template(
 	return setmetatable(char, { __index = character.Character })
 end
 
+function character_generator.deserialize(c: character.SerializedCharacter, game_data: GameData): character.Character
+	local self: character.Character = setmetatable({
+	    id = c.id,
+	    name = c.name,
+	    appearance = c.appearance,
+	    stats = c.stats,
+	    tags = c.tags,
+	}, { __index = character.Character })
+	
+	self.inventory = ItemInventory.new(8)
+	local item_ids = c.inventory
+	for i, item_id in ipairs(item_ids) do
+		local item = ItemGenerator.generate(item_id, game_data.items)
+		if self.inventory:can_add_item(item) then
+			self.inventory:add_item(item)
+			if self.inventory:can_equip(i) then
+				self.inventory:equip_item(i)
+			end
+		end
+	end
+end
+
 return character_generator

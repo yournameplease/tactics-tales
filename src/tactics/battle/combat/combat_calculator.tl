@@ -113,7 +113,7 @@ local function build_combat_double(unit: BattleUnit): CombatDouble
     local equipped_items = unit.character.inventory:get_equipped_items()
 
     for _slot, item in pairs(equipped_items) do
-        for _, eff in ipairs(item:get_equipment_effects()) do
+        for _, eff in ipairs(item.equipment_effects) do
             if eff is effect.IncreaseDefenseEffect then
                 double.defense[eff.defense_type] = (double.defense[eff.defense_type] or 0) + eff.amount
             elseif eff is effect.IncreaseAvoidEffect then

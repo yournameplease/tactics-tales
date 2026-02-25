@@ -236,9 +236,9 @@ local function draw_character(
 		if slot == "BODY" then
 			-- this should modify the base frame?
 		else
-			if equip:get_sprite_data() ~= nil then
+			if equip.sprite_data ~= nil then
 				local anchor: string = slot == "OFF_HAND" and "off_hand" or "main_hand"
-				local item_sprite_data = equip:get_sprite_data()
+				local item_sprite_data = equip.sprite_data
 				equipment_nodes[anchor] = {
 					sprite = item_sprite_data.sprite,
 					root = item_sprite_data.anchor,
