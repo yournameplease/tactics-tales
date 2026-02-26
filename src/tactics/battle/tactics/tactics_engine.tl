@@ -403,7 +403,7 @@ function TacticsEngine:finish_unit_action(unit: BattleUnit)
 
     self.battle_is_blocked = false
     unit.animation_data = self.animation_manager:create_idle_animation()
-    unit.facing.vertical = "down"
+    unit.facing:turn_to("down")
     self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
 end
 
@@ -655,6 +655,13 @@ function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
     for i,combat_step in ipairs(combat_result.steps) do
         log.debug("Combat step: ",i)
         self:apply_combat_step(combat_step as combat_calculator.CombatResult.CombatStep)
+    end
+
+    if defender then
+        defender.facing:turn_to("down")
+    end
+    if attacker then
+        attacker.facing:turn_to("down")
     end
 end
 
