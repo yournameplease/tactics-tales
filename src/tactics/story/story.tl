@@ -102,6 +102,17 @@ function StoryImpl:jump_to_node(node_id: string)
     self:handle_new_node()
 end
 
+function StoryImpl:jump_to_node_step(node_id: string, node_step: integer)
+    local node_definition = self.story_definition.nodes[node_id][node_step]
+    self.current_node = {
+        node_id = node_id,
+        node_step = node_step,
+        definition = node_definition
+    }
+
+    self:handle_new_node()
+end
+
 ---@desc
 --- The core of the story progression logic. This function acts as a state
 --- machine that interprets the current story node and triggers the
@@ -213,6 +224,7 @@ function StoryImpl:handle_new_node()
             local save_data = {
             	story_id = self.story_id,
             	story_node_id = self.current_node.node_id,
+            	story_node_step = self.current_node.node_step + 1,
             	story_memory = self.story_memory,
             	roster = self.character_manager:get_player_roster(),
             }
@@ -407,12 +419,15 @@ function story.load(
         local c = self.character_manager:load_character(character_data)
         self.character_manager:persist_player(c)
     end
+
+    self:jump_to_node_step(save_data.story_node_id, save_data.story_node_step)
 end
 
 function StoryImpl:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
         or current_node is story_node.ChapterHeader
+        or current_node is story_node.SaveGameNode
     then
         self.dialogue_manager:update(input)
         if self.active_dialogue ~= nil and self.active_dialogue.finished then
@@ -422,15 +437,13 @@ function StoryImpl:update(input: InputContext)
         end
     elseif
         current_node is story_node.TextInputNode
-        or current_node is story_node.SaveGameNode
     then
         self.dialogue_manager:update(input)
         if self.active_dialogue ~= nil and self.active_dialogue.finished then
             log.debug("removing dialogue", self.active_dialogue)
             self.active_dialogue = nil
         end
-        -- this is unneeded, right?
-        -- self.menu_manager:update(input)
+        self.menu_manager:update(input)
     elseif current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then

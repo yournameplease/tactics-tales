@@ -35,6 +35,8 @@ local game_manager: game.Game
 local bus: event_bus.EventBus
 
 function _init()
+    pt.mkdir("/appdata/tactics_tales/saves")
+    
     input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
