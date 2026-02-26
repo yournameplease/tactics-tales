@@ -22,6 +22,12 @@ function stories.story_text(text)
 	}
 end
 
+function stories.save_game()
+	return {
+		type = 'save_game',
+	}
+end
+
 function stories.exit_story()
 	return {
 		type = 'exit_story',
@@ -197,6 +203,8 @@ local STORIES = {
 			},
 			ch_1_v = {
 				stories.new_page(),
+				stories.save_game(),
+				stories.new_page(),
 				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
 				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
 				stories.jump('ch_2_intro'),
@@ -220,6 +228,8 @@ local STORIES = {
 			},
 			ch_2_v = {
 				stories.new_page(),
+				stories.save_game(),
+				stories.new_page(),
 				stories.story_text("You Win!"),
 				stories.jump('ch_3_intro'),
 			},
@@ -241,6 +251,8 @@ local STORIES = {
 				stories.battle('fortress_town', 'ch_3_v', 'ch_3_f'),
 			},
 			ch_3_v = {
+				stories.new_page(),
+				stories.save_game(),
 				stories.new_page(),
 
 				stories.story_text("Clearly, bandit influence ran deep here."),

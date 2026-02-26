@@ -118,7 +118,9 @@ end
 
 function NestedMenuNode:refresh_focus()
 	self.has_focus = true
-	self.children[self.i]:refresh_focus()
+	if self.i > 0 and self.i <= #self.children then
+		self.children[self.i]:refresh_focus()
+	end
 end
 
 function NestedMenuNode:claim_focus(

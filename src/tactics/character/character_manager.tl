@@ -5,7 +5,8 @@
 
 local id_generator = require("src.tactics.util.id_generator")
 local GameData = require("src.tactics.game_data").GameData
-local Character = require("src.tactics.character.object.character").Character
+local character = require("src.tactics.character.object.character")
+local Character = character.Character
 local character_generator = require("src.tactics.character.character_generator")
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
@@ -15,6 +16,7 @@ local maps = require("src.tactics.util.maps")
 local interface CharacterManager
     get_character: function(self, id: integer): Character
     generate_character: function(self, template_id: string, tags: {string}): Character
+    load_character: function(self, data: character.SerializedCharacter): Character
     persist_player: function(self, character: Character)
     get_player_roster: function(self): { Character }
     teardown: function(self) 
@@ -43,19 +45,28 @@ function CharacterManagerImpl:generate_character(
     template_id: string,
     tags: {string}
 ): Character
-    local character: Character = character_generator.generate_from_template(
+    local out: Character = character_generator.generate_from_template(
         self.id_generator:get_id(),
         template_id,
         tags,
         self.game_data
     )
 
-    return character
+    return out
 end
 
-function CharacterManagerImpl:persist_player(character: Character)
-    self.characters[character.id] = character
-    pt.add(self.player_ids, character.id)
+function CharacterManagerImpl:load_character(
+    data: character.SerializedCharacter
+): Character
+    -- note: ids may collide if loaded after game is running
+    local out: Character = character_generator.deserialize(data, self.game_data)
+
+    return out
+end
+
+function CharacterManagerImpl:persist_player(c: Character)
+    self.characters[c.id] = c
+    pt.add(self.player_ids, c.id)
 end
 
 function CharacterManagerImpl:get_player_roster(): { Character }

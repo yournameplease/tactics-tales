@@ -30,14 +30,19 @@ local record CharacterMemoryEntry
 	character_id: integer
 end
 
+local type SerializedStoryMemory = {string: StoryMemoryEntry}
+
 local interface StoryMemory
 	set: function(self, key: string, entry: StoryMemoryEntry)
 	get: function(self, key: string): StoryMemoryEntry
 	get_as_map: function(self): StoryMemoryMap
+	serialize: function(self): SerializedStoryMemory
+	deserialize: function(self, SerializedStoryMemory)
 end
 
 local story_memory = {
-	StoryMemory = StoryMemory
+	StoryMemory = StoryMemory,
+	SerializedStoryMemory = SerializedStoryMemory,
 }
 
 function story_memory.text(text: string): StoryMemoryEntry
@@ -87,6 +92,20 @@ function StoryMemoryImpl:get_as_map(): StoryMemoryMap
 		end
 	end
 	return out
+end
+
+function StoryMemoryImpl:serialize(): SerializedStoryMemory
+	local out: SerializedStoryMemory = {}
+	for k,e in pairs(self.global) do
+		out[k] = e
+	end
+	return out
+end
+
+function StoryMemoryImpl:deserialize(data: SerializedStoryMemory)
+	for k,e in pairs(data) do
+		self.global[k] = e
+	end
 end
 
 function story_memory.new(
