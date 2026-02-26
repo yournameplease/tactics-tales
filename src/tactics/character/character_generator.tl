@@ -148,6 +148,8 @@ function character_generator.deserialize(
 			end
 		end
 	end
+
+	return self
 end
 
 return character_generator
