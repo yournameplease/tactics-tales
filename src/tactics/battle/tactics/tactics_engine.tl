@@ -632,7 +632,7 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
         end
     
         defender:take_damage(step.dmg)
-        local hurt_animation = self.animation_manager:create_animation("HURT", direction + 0.5)
+        local hurt_animation = self.animation_manager:create_animation("HURT", direction)
         defender.animation_data = hurt_animation
 
         while hurt_animation.playing do

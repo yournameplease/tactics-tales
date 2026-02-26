@@ -254,7 +254,8 @@ local OFFSET_ANIMATION_DATA<total>: { OffsetAnimationId: OffsetAnimationConfig }
             }
         },
         track = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         }
     }
 }
