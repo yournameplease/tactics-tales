@@ -3,16 +3,23 @@ local character = require("src.tactics.character.object.character")
 local lists = require("src.tactics.util.lists")
 local GameData = require("src.tactics.game_data").GameData
 local character_generator = require("src.tactics.character.character_generator")
+local story_types = require("src.tactics.story.types")
 
 local save_system = {}
 
+local SAVE_PATH = "/appdata/tactics_tales/saves/"
+
 local record GameSaveData
+	story_id: story_types.StoryId
+	story_node_id: string
 	story_memory: story_memory.StoryMemory
 	roster: {character.Character}
 end
 
 local record SerializedGameSaveData
-	story_memory: story_memory.StoryMemory
+	story_id: story_types.StoryId
+	story_node_id: string
+	story_memory: story_memory.SerializedStoryMemory
 	roster: {character.SerializedCharacter}
 end
 
@@ -20,22 +27,28 @@ end
 -- todo: check for existing files
 function save_system.save(name: string, data: GameSaveData)
 	local serialized_data = {
-		story_memory = data.story_memory,
+		story_id = data.story_id,
+		story_node_id = data.story_node_id,
+		story_memory = data.story_memory:serialize(),
 		roster = lists.map(function(c: character.Character): character.SerializedCharacter
 			return c:serialize()
 		end)(data.roster)
 	}
 	
-	pt.store("/appdata/tactics_tales/saves/"..name..".pod", serialized_data, nil)
+	pt.store(SAVE_PATH..name..".pod", serialized_data, nil)
 end
 
-function save_system.load(name: string, game_data: GameData): GameSaveData
-	local data: SerializedGameSaveData = pt.fetch("/appdata/tactics_tales/saves/"..name..".pod") as SerializedGameSaveData
-
-	return {
-		story_memory = data.story_memory,
-		roster = lists.map(function(c: character.SerializedCharacter): character.Character
-			return character_generator.deserialize(c, game_data)
-		end)(data.roster),
-	}
+function save_system.list_saves(): {string}
+	local paths = pt.ls(SAVE_PATH) or {}
+	return lists.map(function(p: string): string
+		return pt.split(p, '.')[1]
+	end)(paths)
 end
+
+function save_system.load(name: string): SerializedGameSaveData
+	local data: SerializedGameSaveData = pt.fetch(SAVE_PATH..name..".pod") as SerializedGameSaveData
+
+	return data
+end
+
+return save_system

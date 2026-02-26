@@ -48,18 +48,48 @@ local game = {
     Game = Game
 }
 
-function Game:begin_story(story_id: StoryId)
-    story_id = story_id or self.default_story
-
+function Game:load_story(file_name: string)
     local game_data = self.mod_loader:load_mod_data()
-    self.story = story.new(
-        story_id,
+    self.story = story.load(
+        file_name,
         game_data,
         self.story_services_bundle.task_manager,
         self.story_services_bundle.animation_manager,
         self.story_services_bundle.event_bus,
         self.ui_context
     )
+end
+
+function Game:begin_story(file_name: string, story_id: StoryId)
+    local game_data = self.mod_loader:load_mod_data()
+    if file_name == nil then -- unsaved story
+        assert(story_id)
+        self.story = story.new(
+            nil,
+            story_id,
+            game_data,
+            self.story_services_bundle.task_manager,
+            self.story_services_bundle.animation_manager,
+            self.story_services_bundle.event_bus,
+            self.ui_context
+        )
+        return
+    end
+
+    do    
+        story_id = story_id or self.default_story
+
+        self.story = story.new(
+            file_name,
+            story_id,
+            game_data,
+            self.story_services_bundle.task_manager,
+            self.story_services_bundle.animation_manager,
+            self.story_services_bundle.event_bus,
+            self.ui_context
+        )
+        return
+    end
 end
 
 function Game:set_config(config: DynamicConfig)
@@ -97,7 +127,8 @@ function game.new(
 
     local game_menu_ctx = game_menu_context.new(
         story_ids,
-        function(id: StoryId) self:begin_story(id) end,
+        function(file: string, id: StoryId) self:begin_story(file, id) end,
+        function(file: string) self:load_story(file) end,
         self.config_manager
     )
 	self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)

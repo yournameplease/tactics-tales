@@ -2,6 +2,7 @@
 --- The main manager for a story instance. It processes story nodes,
 --- handles transitions between story and battle, and manages story state.
 
+local save_system = require("src.tactics.save.save_system")
 local animation = require("src.tactics.animation")
 local battle_manager = require("src.tactics.battle.battle_manager")
 local story_menu_manager = require("src.tactics.story.story_menu_manager")
@@ -63,6 +64,7 @@ local record StoryImpl
     customized_character: Character
     text_input: string
     
+    save_name: string
     story_id: story_types.StoryId
 
     story_page: story_page.StoryPage
@@ -204,6 +206,28 @@ function StoryImpl:handle_new_node()
         self.story_page:add_text_input_menu(key, self.active_dialogue)
     elseif node_definition is story_node.ExitStoryNode then
         self.event_writer:emit("GAME_EXIT_STORY", {})
+    elseif node_definition is story_node.SaveGameNode then
+        if self.save_name == nil then
+            self:advance_node()
+        else
+            local save_data = {
+            	story_id = self.story_id,
+            	story_node_id = self.current_node.node_id,
+            	story_memory = self.story_memory,
+            	roster = self.character_manager:get_player_roster(),
+            }
+            save_system.save(self.save_name, save_data)
+
+            self.active_dialogue = self.dialogue_manager:create_dialogue(
+                {"Progress saved."},
+                {
+                    can_skip = true,
+                    auto_advance = false,
+                },
+                self.story_memory:get_as_map()
+            )
+            self.story_page:add_text_line(self.active_dialogue)
+        end
     else
         unexpected(node_definition.type)
     end
@@ -297,6 +321,7 @@ function StoryImpl:submit_text(text: string)
 end
 
 function story.new(
+    save_name: string,
     story_id: StoryId,
     game_data: GameData,
     task_manager: TaskManager,
@@ -308,6 +333,7 @@ function story.new(
 
     local self: StoryImpl = setmetatable({}, { __index = StoryImpl })
     self.story_id = story_id
+    self.save_name = save_name
 
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
@@ -355,6 +381,34 @@ function story.new(
     return self
 end
 
+function story.load(
+    save_name: string,
+    game_data: GameData,
+    task_manager: TaskManager,
+    animation_manager: AnimationManager,
+    event_bus: EventBus,
+    ui_context: UIContextManager
+): Story
+    local save_data = save_system.load(save_name)
+    assert(save_data, "File failed to load!")
+    
+    local self: StoryImpl = story.new(
+        save_name,
+        save_data.story_id,
+        game_data,
+        task_manager,
+        animation_manager,
+        event_bus,
+        ui_context
+    ) as StoryImpl
+
+    self.story_memory:deserialize(save_data.story_memory) 
+    for _,character_data in ipairs(save_data.roster) do
+        local c = self.character_manager:load_character(character_data)
+        self.character_manager:persist_player(c)
+    end
+end
+
 function StoryImpl:update(input: InputContext)
     local current_node = self.current_node.definition
     if current_node is story_node.StoryTextNode
@@ -366,13 +420,17 @@ function StoryImpl:update(input: InputContext)
             self.active_dialogue = nil
             self:advance_node()
         end
-    elseif current_node is story_node.TextInputNode then
+    elseif
+        current_node is story_node.TextInputNode
+        or current_node is story_node.SaveGameNode
+    then
         self.dialogue_manager:update(input)
         if self.active_dialogue ~= nil and self.active_dialogue.finished then
             log.debug("removing dialogue", self.active_dialogue)
             self.active_dialogue = nil
         end
-        self.menu_manager:update(input)
+        -- this is unneeded, right?
+        -- self.menu_manager:update(input)
     elseif current_node is story_node.CharacterCustomizerNode then
         self.menu_manager:update(input)
     elseif current_node is story_node.BattleNode then

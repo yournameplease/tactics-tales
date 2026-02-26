@@ -2,13 +2,13 @@
 --- Manages the main game menu, including the title screen,
 --- chapter select, and options menus.
 
+local lists = require("src.tactics.util.lists")
 local menu_types = require("src.tactics.menu.types")
 local MenuContext = require ("src.tactics.menu.menu_context").MenuContext
 local menu_manager = require("src.tactics.menu.menu_manager")
 local step_definition = menu_manager.definition.step
 local event_bus = require("src.tactics.systems.event_bus")
 local GameMenuContext = require("src.tactics.game.game_menu_context").GameMenuContext
-local GameMainMenuContext = require("src.tactics.menu.menu_context").GameMainMenuContext
 local menu_cursor = require("src.tactics.menu.menu_cursor")
 local MenuNodeDefinition = menu_cursor.MenuNodeDefinition
 local list = require("src.tactics.menu.cursor.nested.list")
@@ -26,15 +26,64 @@ local game_menu_manager = {
     GameMenuManager = GameMenuManager
 }
 
+local record MainMenuContext
+    is MenuContext
+    selected_file: string
+end
+
 local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}
 
-HANDLERS["begin_story"] = function(
+HANDLERS["store_selected_save"] = function(
+    _services: GameMenuContext,
+    _menu_data: {string: any},
+    session_context: MainMenuContext,
+    file: StoryId
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    session_context.selected_file = file
+
+    return nil
+end
+
+HANDLERS["begin_file"] = function(
     services: GameMenuContext,
     _menu_data: {string: any},
-    _session_context: GameMainMenuContext,
+    _session_context: MainMenuContext,
+    file: string
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.handle_begin_story(file, nil)
+
+    return nil
+end
+
+HANDLERS["begin_file_from_context"] = function(
+    services: GameMenuContext,
+    _menu_data: {string: any},
+    session_context: MainMenuContext,
+    _story_id: StoryId
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.handle_begin_story(session_context.selected_file, nil)
+
+    return nil
+end
+
+HANDLERS["load_story"] = function(
+    services: GameMenuContext,
+    _menu_data: {string: any},
+    _session_context: MainMenuContext,
+    file: StoryId
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.handle_load_story(file)
+
+    return nil
+end
+
+HANDLERS["begin_chapter"] = function(
+    services: GameMenuContext,
+    _menu_data: {string: any},
+    _session_context: MainMenuContext,
     story_id: StoryId
 ): menu_manager.menu_handler.MenuHandlerPostHandling
-    services.handle_begin_story(story_id)
+    services.handle_begin_story(nil, story_id)
 
     return nil
 end
@@ -42,7 +91,7 @@ end
 HANDLERS["set_options"] = function(
     services: GameMenuContext,
     menu_data: DynamicConfig,
-    _session_context: GameMainMenuContext,
+    _session_context: MainMenuContext,
     _value: any
 ): menu_manager.menu_handler.MenuHandlerPostHandling
     services.config_manager:store_config(menu_data)
@@ -53,7 +102,7 @@ end
 HANDLERS["reset_options"] = function(
     services: GameMenuContext,
     _menu_data: DynamicConfig,
-    _session_context: GameMainMenuContext,
+    _session_context: MainMenuContext,
     _value: any
 ): menu_manager.menu_handler.MenuHandlerPostHandling
     services.config_manager:reset_config()
@@ -77,8 +126,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         local options: {ButtonDefinition} = {}
 
                         pt.add(options, button.builder("begin_story")
-                            :with_text("Play")
-                            :handle_select("begin_story"))
+                            :with_text("New Game")
+                            :advance_to("NEW_FILE_SELECT"))
+                        pt.add(options, button.builder("load_story")
+                            :with_text("Load Game")
+                            :advance_to("LOAD_FILE_SELECT"))
                         pt.add(options, button.builder("to_chapter_select")
                             :with_text("Chapter Select")
                             :advance_to("CHAPTER_SELECT"))
@@ -89,7 +141,77 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         return options
                     end
                 )
-            ),
+            )
+            :with_previous_step("TITLE_SCREEN"),
+            ["NEW_FILE_SELECT"] = step_definition.of_node(
+                list.column(
+                    "new_file_select",
+                    function(msb: GameMenuContext, _ctx: MainMenuContext): {MenuNodeDefinition}
+                        local options: {ButtonDefinition} = {}
+                        local existing_files = msb.get_game_saves()
+
+                        for i = 1,5 do
+                            local file_name = "file_"..i
+                            local b = button.builder(file_name)
+                                :with_text("File "..i)
+                                :with_value(file_name)
+
+                            if lists.contains(existing_files, file_name) then
+                                b = b:handle_select("store_selected_save")
+                                    :advance_to("CONFIRM_FILE")
+                            else
+                                b = b:handle_select("begin_file")
+                            end
+                            pt.add(options, b)
+                        end
+
+                        return options
+                    end
+                )
+            )
+            :with_previous_step("MAIN_MENU"),
+            ["CONFIRM_FILE"] = step_definition.of_node(
+                list.column(
+                    "confirm_file",
+                    function(_msb: GameMenuContext, ctx: MainMenuContext): {MenuNodeDefinition}
+                        local options: {ButtonDefinition} = {}
+
+                        pt.add(options, button.builder("label") --lol
+                            :with_text("Confirm overwrite "..ctx.selected_file .."?"))
+                        pt.add(options, button.builder("confirm_overwrite") 
+                            :with_text("Confirm")
+                            :handle_select("begin_file_from_context")
+                            :as_final_step())
+                        pt.add(options, button.builder("no_overwrite") 
+                            :advance_to("NEW_FILE")
+                            :with_text("Back"))
+
+                        return options
+                    end
+                )
+            )
+            :with_previous_step("NEW_FILE"),
+            ["LOAD_FILE_SELECT"] = step_definition.of_node(
+                list.column(
+                    "load_file_select",
+                    function(msb: GameMenuContext, _ctx: MenuContext): {MenuNodeDefinition}
+                        local options: {ButtonDefinition} = {}
+                        local existing_files = msb.get_game_saves()
+
+                        for _,file_name in ipairs(existing_files) do
+                            local b = button.builder(file_name)
+                                :with_text(file_name)
+                                :with_value(file_name)
+                                :handle_select("load_story")
+
+                            pt.add(options, b)
+                        end
+
+                        return options
+                    end
+                )
+            )
+            :with_previous_step("MAIN_MENU"),
             ["CHAPTER_SELECT"] = step_definition.of_node(
                 list.column(
                     "chapter_select",
@@ -100,13 +222,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             pt.add(options, button.builder("begin_story_"..story_id)
                                 :with_text(story_id)
                                 :with_value(story_id)
-                                :handle_select("begin_story"))
+                                :handle_select("begin_chapter"))
                         end
 
                         return options
                     end
                 )
-            ),
+            )
+            :with_previous_step("MAIN_MENU"),
             ["OPTIONS_MENU"] = step_definition.of_node(
                 list.column(
                     "options_menu",

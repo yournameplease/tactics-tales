@@ -15,6 +15,7 @@ local enum StoryNodeType
 	'new_page'
 	'character_customizer'
 	'text_input'
+	'save_game'
 	'exit_story'
 end
 
@@ -45,6 +46,11 @@ local record SetMemoryNode
 	where self.type == 'set_memory'
 	key: string
 	value: string
+end
+
+local record SaveGameNode
+	is StoryNode
+	where self.type == 'save_game'
 end
 
 local record ExitStoryNode
@@ -92,6 +98,7 @@ local story_node = {
 	StoryNode = StoryNode,
 	StoryNodeType = StoryNodeType,
 	StoryTextNode = StoryTextNode,
+	SaveGameNode = SaveGameNode,
 	ExitStoryNode = ExitStoryNode,
 	ChapterHeader = ChapterHeader,
 	BattleNode = BattleNode,

@@ -83,6 +83,36 @@ function book.title(text_info: box.text_info.TextInfo): box.UIElement
     return self
 end
 
+function book.dynamic_title(text_function: function(state: UIContextManager): string, text_info: box.text_info.TextInfo): box.UIElement
+    text_info.draw_properties = text_info.draw_properties or {}
+    text_info.draw_properties.justify = text_info.draw_properties.justify or "center"
+    text_info.draw_properties.wrap = "no_wrap"
+    text_info.rows = 1
+
+    local self = box.builder("title_box")
+		:direction("col")
+		:container("block")
+		:padding{
+		    t = 3,
+		    b = 2
+		}
+        :build()
+
+    self:add(
+        box.builder("text")
+        :text(text_info)
+        :on_update(function(self: box.UIElement, state: UIContextManager)
+            self.text.content = { text_function(state) }
+        end)
+
+        :build()
+    )
+    self:add(
+        book.section_divider(2)
+    )
+    return self
+end
+
 local TRIM_PADDING = 3
 ---@desc
 --- A decorative UI container styled to look like a book cover.
@@ -172,12 +202,16 @@ function book.flex_page(): box.UIElement
 end
 
 function book.titled_page(
-	title: string,
 	content: box.UIElement
 ): box.UIElement
 	local page = book.flex_page()
 	
-	page:add(book.title( { content = {title} } ))
+	page:add(book.dynamic_title(
+		function(state: UIContextManager): string
+			return state.game_context.menu_title
+		end,
+		{}
+	))
 	local page_content = page:add(box.builder("title_"..content.id)
 		:direction("col")
 		:container("panel")

@@ -17,6 +17,8 @@ local record GameUIContext
     menu_manager: GameMenuManager
     event_bus: event_bus.EventBus
 
+    menu_title: string
+
     input_method: InputMethod
     
     layout: UILayoutId
@@ -41,17 +43,23 @@ end
 function GameUIContext:enrich()
     self.input_method = self.input_service.current_input
     
-    self.layout = "TITLE_SCREEN"
+    self.layout = "TITLED_MENU_PAGE"
 
     if self.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
         if self.menu_manager.menu_state.step == "TITLE_SCREEN" then
             self.layout = "TITLE_SCREEN"
         elseif self.menu_manager.menu_state.step == "MAIN_MENU" then
-            self.layout = "MAIN_MENU_PAGE"
+            self.menu_title = "Tactics Tales"
+        elseif self.menu_manager.menu_state.step == "NEW_FILE_SELECT" then
+            self.menu_title = "New File"
+        elseif self.menu_manager.menu_state.step == "CONFIRM_FILE" then
+            self.menu_title = "New File"
+        elseif self.menu_manager.menu_state.step == "LOAD_FILE_SELECT" then
+            self.menu_title = "Load File"
         elseif self.menu_manager.menu_state.step == "CHAPTER_SELECT" then
-            self.layout = "CHAPTER_SELECT_PAGE"
+            self.menu_title = "Chapters"
         elseif self.menu_manager.menu_state.step == "OPTIONS_MENU" then
-            self.layout = "OPTIONS_MENU_PAGE"
+            self.menu_title = "Options"
         else
             error("unexpected menu state")
         end

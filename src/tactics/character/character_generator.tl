@@ -125,7 +125,10 @@ function character_generator.generate_from_template(
 	return setmetatable(char, { __index = character.Character })
 end
 
-function character_generator.deserialize(c: character.SerializedCharacter, game_data: GameData): character.Character
+function character_generator.deserialize(
+	c: character.SerializedCharacter,
+	game_data: GameData
+): character.Character
 	local self: character.Character = setmetatable({
 	    id = c.id,
 	    name = c.name,

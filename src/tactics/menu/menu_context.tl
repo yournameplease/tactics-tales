@@ -80,12 +80,6 @@ local record StoryMenuContext
     character_customization: CharacterCustomizationSelection 
 end
 
-local record GameMainMenuContext
-    is MenuContext
-    story: StorySelection
-    metadata: {string: any}
-end
-
 local menu_context = {
 	TileSelection = TileSelection,
 	UnitSelection = UnitSelection,
@@ -100,7 +94,6 @@ local menu_context = {
     BattleMainMenuContext = BattleMainMenuContext,
     StorySelectMenuContext = StorySelectMenuContext,
     StoryMenuContext = StoryMenuContext,
-    GameMainMenuContext = GameMainMenuContext,
 }
 
 return menu_context
