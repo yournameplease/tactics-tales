@@ -12,6 +12,7 @@ local SAVE_PATH = "/appdata/tactics_tales/saves/"
 local record GameSaveData
 	story_id: story_types.StoryId
 	story_node_id: string
+	story_node_step: integer
 	story_memory: story_memory.StoryMemory
 	roster: {character.Character}
 end
@@ -19,6 +20,7 @@ end
 local record SerializedGameSaveData
 	story_id: story_types.StoryId
 	story_node_id: string
+	story_node_step: integer
 	story_memory: story_memory.SerializedStoryMemory
 	roster: {character.SerializedCharacter}
 end
@@ -29,13 +31,16 @@ function save_system.save(name: string, data: GameSaveData)
 	local serialized_data = {
 		story_id = data.story_id,
 		story_node_id = data.story_node_id,
+		story_node_step = data.story_node_step,
 		story_memory = data.story_memory:serialize(),
 		roster = lists.map(function(c: character.Character): character.SerializedCharacter
 			return c:serialize()
 		end)(data.roster)
 	}
-	
-	pt.store(SAVE_PATH..name..".pod", serialized_data, nil)
+
+	local path = SAVE_PATH..name..".pod"
+	log.debug("Saving data: ", name, path)
+	pt.store(path, serialized_data, nil)
 end
 
 function save_system.list_saves(): {string}
@@ -46,7 +51,9 @@ function save_system.list_saves(): {string}
 end
 
 function save_system.load(name: string): SerializedGameSaveData
-	local data: SerializedGameSaveData = pt.fetch(SAVE_PATH..name..".pod") as SerializedGameSaveData
+	local path = SAVE_PATH..name..".pod"
+	log.debug("Loading data: ", name, path)
+	local data: SerializedGameSaveData = pt.fetch(path) as SerializedGameSaveData
 
 	return data
 end
