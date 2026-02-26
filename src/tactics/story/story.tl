@@ -77,6 +77,7 @@ local record StoryImpl
     battle_manager: battle_manager.BattleManager
 
     jump_to_node: function(self, node_id: string)
+    jump_to_node_step: function(self, node_id: string, step: integer)
     handle_new_node: function(self)
     advance_node: function(self)
 
@@ -421,6 +422,8 @@ function story.load(
     end
 
     self:jump_to_node_step(save_data.story_node_id, save_data.story_node_step)
+
+    return self
 end
 
 function StoryImpl:update(input: InputContext)

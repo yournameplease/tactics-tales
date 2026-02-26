@@ -22,6 +22,12 @@ function stories.story_text(text)
 	}
 end
 
+function stories.save_game()
+	return {
+		type = 'save_game',
+	}
+end
+
 function stories.exit_story()
 	return {
 		type = 'exit_story',
@@ -197,6 +203,8 @@ local STORIES = {
 			},
 			ch_1_v = {
 				stories.new_page(),
+				stories.save_game(),
+				stories.new_page(),
 				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
 				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
 				stories.jump('ch_2_intro'),
@@ -211,7 +219,7 @@ local STORIES = {
 				stories.new_page(),
 				stories.chapter_header("Those Who Act in the Shadows", 2),
 
-				stories.story_text("En route to ${town}, ${hero.name}'s party learned of a local cult."),
+				stories.story_text("En route to the capitol, ${hero.name}'s party learned of a local cult."),
 				stories.story_text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
 				stories.story_text("Though the leader is powerful, the party could at least attempt to free some prisoners before making an escape."),
 				stories.story_text("Prepare for battle!"),
@@ -219,6 +227,8 @@ local STORIES = {
 				stories.battle('cultist_cave', 'ch_2_v', 'ch_2_f'),
 			},
 			ch_2_v = {
+				stories.new_page(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.story_text("You Win!"),
 				stories.jump('ch_3_intro'),
@@ -241,6 +251,8 @@ local STORIES = {
 				stories.battle('fortress_town', 'ch_3_v', 'ch_3_f'),
 			},
 			ch_3_v = {
+				stories.new_page(),
+				stories.save_game(),
 				stories.new_page(),
 
 				stories.story_text("Clearly, bandit influence ran deep here."),
