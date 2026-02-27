@@ -74,6 +74,7 @@ local record MenuStep
 	node: menu_cursor.MenuNode
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
+    control_hints: menu_types.ControlHints
 end
 
 local record MenuStepDefinition
@@ -83,6 +84,7 @@ local record MenuStepDefinition
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
 	initial_data: function(GameContext, MenuContext): {string: any}
+    control_hints: menu_types.ControlHints
 end
 
 local menu_step_definition = {}
@@ -113,6 +115,13 @@ function MenuStepDefinition:with_initial_data(
 	initial_data: function(GameContext, MenuContext): {string: any}
 ): MenuStepDefinition
 	self.initial_data = initial_data
+	return self
+end
+
+function MenuStepDefinition:with_control_hints(
+    control_hints: menu_types.ControlHints
+): MenuStepDefinition
+	self.control_hints = control_hints
 	return self
 end
 
@@ -196,6 +205,7 @@ local menu_manager = {
     SelectionHistory = SelectionHistory,
     MenuDefinition = MenuDefinition,
     MenuStepDefinition = MenuStepDefinition,
+    MenuStep = MenuStep,
 
     definition = {
         step = menu_step_definition,

@@ -164,6 +164,10 @@ function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
             end
         )
 	)
+    :with_control_hints{
+        primary = "Select",
+        secondary = "Back",
+    }
 end
 
 return menu_keyboard
