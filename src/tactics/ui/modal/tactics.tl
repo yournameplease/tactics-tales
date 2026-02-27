@@ -5,8 +5,6 @@ local box = require("src.tactics.ui.box")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local point = require("src.tactics.util.point")
-local dialogue = require("src.tactics.dialogue.dialogue")
-local Dialogue = dialogue.Dialogue
 local nested_list = require("src.tactics.menu.cursor.nested.list")
 local menu_ui = require("src.tactics.ui.components.menu")
 

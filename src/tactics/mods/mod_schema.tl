@@ -6,7 +6,7 @@
 
 local s = require("src.tactics.validator.schema_definition")
 
-local base_spec = s.record({
+local _base_spec = s.record({
 	id = s.string(),
 	name = s.optional(s.string()),
 	version = s.optional(s.string()),

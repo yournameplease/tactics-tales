@@ -7,15 +7,12 @@ local battle_ui_context = require("src.tactics.battle.battle_ui_context")
 local story_ui_context = require("src.tactics.story.story_ui_context")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 local UILayoutId = require("src.tactics.ui.types").UILayoutId
-local InputLabel = require("src.tactics.joypad").InputLabel
 
 local record UIContextManager
 
     battle_context: battle_ui_context.BattleUIContext
     story_context: story_ui_context.StoryUIContext
     game_context: game_ui_context.GameUIContext
-
-    input_actions: {InputLabel: string}
 
     layout: UILayoutId
     
@@ -54,10 +51,6 @@ end
 function ui_context_manager.new(): UIContextManager
     local self: UIContextManager = setmetatable({}, { __index = UIContextManager })
     self.layout = "TACTICS"
-    self.input_actions = {
-        primary = "Select",
-        secondary = "Back",
-    }
 
     return self
 end
@@ -89,9 +82,6 @@ function UIContextManager:enrich()
 
     if primary_context ~= nil then
         self.layout = primary_context.layout
-        if primary_context.input_actions ~= nil then
-            self.input_actions = primary_context.input_actions
-        end
     end
 end
 

@@ -14,8 +14,8 @@ end
 function menu_validator.validate(node: box.UIElement, path: string)
     if not node then return end
 
-    local is_col = (node.layout.dir == "col")
-    local is_row = (node.layout.dir == "row")
+    local _is_col = (node.layout.dir == "col")
+    local _is_row = (node.layout.dir == "row")
 
     local children = node.children
     assert(children ~= nil)
@@ -42,7 +42,7 @@ function menu_validator.validate(node: box.UIElement, path: string)
     if node.layout.width == "fit_content" then
         local fill_child: box.UIElement = nil
         local non_fill_child = false
-        for i, child in ipairs(children) do
+        for _, child in ipairs(children) do
             if child.layout.width == "fill" then
                 fill_child = child
             else
