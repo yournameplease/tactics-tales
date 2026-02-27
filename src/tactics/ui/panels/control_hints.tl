@@ -66,7 +66,8 @@ local function control_hint_row(
 			}
 		}
 		:layout{
-			flex_grow = 1
+			flex_grow = 1,
+            padding = box.layout.padding(1),
 		}
 		:on_update(function(self: box.UIElement, state: UIContextManager)
 			local menu_step = menu_step_func(state)
