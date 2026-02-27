@@ -17,12 +17,18 @@ local enum MenuCommand
     "decrement_selection"
 end
 
+local record ControlHints
+    primary: string
+    secondary: string
+end
+
 local menu_types = {
     MenuId = MenuId,
     MenuHandlerId = MenuHandlerId,
     MenuStep = MenuStep,
     MenuState = MenuState,
     MenuCommand = MenuCommand,
+    ControlHints = ControlHints,
 }
 
 return menu_types

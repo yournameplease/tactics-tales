@@ -118,7 +118,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 button.builder("to_main_menu")
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU")
-            ):with_default_lmb("button_primary"),
+            ):with_default_lmb("button_primary")
+            :with_control_hints{
+                primary = "Start",
+            },
             ["MAIN_MENU"] = step_definition.of_node(
                 list.column(
                     "main_menu",
@@ -142,7 +145,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             )
-            :with_previous_step("TITLE_SCREEN"),
+            :with_previous_step("TITLE_SCREEN")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
             ["NEW_FILE_SELECT"] = step_definition.of_node(
                 list.column(
                     "new_file_select",
@@ -169,7 +176,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             )
-            :with_previous_step("MAIN_MENU"),
+            :with_previous_step("MAIN_MENU")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
             ["CONFIRM_FILE"] = step_definition.of_node(
                 list.column(
                     "confirm_file",
@@ -190,7 +201,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             )
-            :with_previous_step("NEW_FILE"),
+            :with_previous_step("NEW_FILE")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
             ["LOAD_FILE_SELECT"] = step_definition.of_node(
                 list.column(
                     "load_file_select",
@@ -211,7 +226,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             )
-            :with_previous_step("MAIN_MENU"),
+            :with_previous_step("MAIN_MENU")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
             ["CHAPTER_SELECT"] = step_definition.of_node(
                 list.column(
                     "chapter_select",
@@ -229,7 +248,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             )
-            :with_previous_step("MAIN_MENU"),
+            :with_previous_step("MAIN_MENU")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
             ["OPTIONS_MENU"] = step_definition.of_node(
                 list.column(
                     "options_menu",
@@ -304,7 +327,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     head_scale = DYNAMIC_CONFIG.head_scale,
                     dialogue_speed = DYNAMIC_CONFIG.dialogue_speed,
                 }
-            end),
+            end)
+            :with_control_hints{
+                primary = "Select",
+            },
         }
     }
 
