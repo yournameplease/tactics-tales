@@ -1,8 +1,6 @@
 local story_memory = require("src.tactics.story.story_memory")
 local character = require("src.tactics.character.object.character")
 local lists = require("src.tactics.util.lists")
-local GameData = require("src.tactics.game_data").GameData
-local character_generator = require("src.tactics.character.character_generator")
 local story_types = require("src.tactics.story.types")
 
 local save_system = {}

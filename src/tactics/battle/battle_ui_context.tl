@@ -240,25 +240,7 @@ function BattleUIContext:enrich()
         end
     end
 
-    -- TODO: these names should live in the menu manager definition
     self.active_dialogue = self.tactics_engine.active_dialogue
-    if self.active_dialogue ~= nil then
-        self.input_actions = {
-            primary = "Advance",
-            secondary = "",
-        }
-    elseif menu.step == "SELECT_UNIT" then
-        self.input_actions = {
-            primary = "Select",
-            secondary = "Mark unit range",
-        }
-    else
-        self.input_actions = {
-            primary = "Select",
-            secondary = "Back",
-        }
-    end
-    -- log.debug("dialogue", self.active_dialogue)
 
     -- todo: cache
     self.objective_text = self.battle_objective_service:get_objective_text(self.turn_manager.turn)
