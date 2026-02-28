@@ -132,6 +132,7 @@ HANDLERS["select_swap_unit"] = function(
     value: grid.NestedGridValue
 ): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.unit = services.battle_map:get_at_tile(value.point)
+    services.tactics_engine.active_point = value.point
     return nil
 end
 
@@ -145,6 +146,7 @@ HANDLERS["swap_units"] = function(
         session_context.unit,
         value.point
     )
+    services.tactics_engine.active_point = value.point
 
     return nil
 end
@@ -171,6 +173,7 @@ HANDLERS["select_acting_unit"] = function(
         unit = unit,
         point = unit.tile:copy(),
     }
+    services.tactics_engine.active_point = value.point
 
     return nil
 end
@@ -212,6 +215,7 @@ HANDLERS["move_acting_unit"] = function(
         session_context.destination.point,
         session_context.destination.path
     )
+    services.tactics_engine.active_point = value.point
 
     return nil
 end
@@ -226,6 +230,7 @@ HANDLERS["unmove_acting_unit"] = function(
         session_context.acting_unit.unit,
         session_context.acting_unit.point
     )
+    services.tactics_engine.active_point = session_context.acting_unit.point
 
     return nil
 end
@@ -241,6 +246,7 @@ HANDLERS["attack_unit"] = function(
         session_context.acting_unit.unit,
         session_context.target_unit.unit
     )
+    services.tactics_engine.active_point = value.point
 
     return nil
 end
