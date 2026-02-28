@@ -89,6 +89,7 @@ global record BattleMap
     
     units_by_id: { integer: battle_unit.BattleUnit }
     units_by_x_y: array_2d.Array2D<battle_unit.BattleUnit>
+    dead_units: {battle_unit.BattleUnit}
 
     -- unit, script
     interactions_by_unit_id:  {integer: {integer: UnitInteractionHook}}
@@ -111,6 +112,7 @@ local battle_map = {
 function battle_map.new(width: integer, height: integer, labels: { string: {Point} }): BattleMap
     local self: BattleMap = setmetatable({
         units_by_id = {},
+        dead_units = {},
         units_by_x_y = array_2d.new(width, height),
         interactions_by_unit_id = {},
         interactions_by_x_y = array_2d.new(width, height),
@@ -280,6 +282,7 @@ function BattleMap:swap_tile_units(tile_a: Point, tile_b: Point)
 end
 
 function BattleMap:kill_unit(unit: battle_unit.BattleUnit)
+    pt.add(self.dead_units, unit)
     self.units_by_x_y:set_point(unit.tile, nil)
     self.units_by_id[unit.id] = nil
     unit:die()
@@ -323,6 +326,10 @@ function BattleMap:get_units(filter: function(battle_unit.BattleUnit): boolean):
         end
     end
     return units
+end
+
+function BattleMap:get_dead_units(filter: function(battle_unit.BattleUnit): boolean): { BattleUnit }
+    return lists.filter(filter)(self.dead_units)
 end
 
 function BattleMap:get_all_units(): { battle_unit.BattleUnit }

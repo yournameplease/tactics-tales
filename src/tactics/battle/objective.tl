@@ -71,10 +71,10 @@ end
 function TaggedPlayerDies:check(battle_map: bm.BattleMap, _turn_limit_exceeded: boolean): boolean
 	-- todo: this checks that all tagged players are dead
 	-- move to a script if we need to check any one dies
-    local players = battle_map:get_units(function(unit: BattleUnit): boolean
+    local players = battle_map:get_dead_units(function(unit: BattleUnit): boolean
 		return unit:is_player() and unit.tags[self.tag]
 	end)
-    return #players == 0
+    return #players > 0
 end
 
 local record TurnLimit
