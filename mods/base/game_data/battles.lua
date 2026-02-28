@@ -326,9 +326,9 @@ local BATTLE_DATA = {
             { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
             { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
-            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
+            { character_source = character_source.template("militia_spear_captain"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
             { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
-            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
+            { character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
             { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
@@ -338,13 +338,13 @@ local BATTLE_DATA = {
         scripts = {
             script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
-                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
+                    { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
                 },
                 "from_west"
             ),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
-                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
+                    { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
                 },
                 "from_west"
             ),
@@ -354,7 +354,7 @@ local BATTLE_DATA = {
                     {"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     script_unit.tagged("enemy_militia_stationary"),
-                    ai.move_zero,
+                    ai.stationary,
                     "enemy"
                 )
                 :then_modify_units(

@@ -81,7 +81,7 @@ local ITEM_DATA = {
     ),
     greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 70, 2),
     bow = lib.libs.weapon.ranged( "Bow", 104, 2, 90, 2, 2, 2 ),
-    shield = shield("Shield", 105, 1, 1, -10),
+    shield = shield("Shield", 105, 1, 0, 10),
     armor = armor("Armor", 2, 1, -10),
     boulder = lib.libs.weapon.of(
         "Boulder",

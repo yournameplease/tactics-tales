@@ -235,8 +235,8 @@ local STORIES = {
 			},
 			ch_2_f = {
 				stories.new_page(),
-				stories.story_text('Defeat!'),
-				stories.jump('ch_3_intro'),
+				stories.story_text("Defeat!"),
+				stories.jump('game_over'),
 			},
 			ch_3_intro = {
 				stories.new_page(),
@@ -262,8 +262,8 @@ local STORIES = {
 			},
 			ch_3_f = {
 				stories.new_page(),
-				stories.story_text(''),
-				stories.jump('ch_4_intro'),
+				stories.story_text("Defeat!"),
+				stories.jump('game_over'),
 			},
 			ch_4_intro = {
 				stories.new_page(),
@@ -278,10 +278,56 @@ local STORIES = {
 
 				stories.battle('cliff_crossing', 'ch_4_v', 'ch_4_f'),
 			},
+			ch_4_v = {
+				stories.new_page(),
+				stories.save_game(),
+				stories.new_page(),
+
+				stories.story_text("Clearly, bandit influence ran deep here."),
+				stories.story_text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
+
+				stories.jump('ch_5_intro'),
+			},
+			ch_4_f = {
+				stories.new_page(),
+				stories.story_text("Defeat!"),
+				stories.jump('game_over'),
+			},
+			ch_5_intro = {
+				stories.new_page(),
+				stories.chapter_header("Last Stand", 5),
+
+				stories.story_text("At last, ${hero.name} had reached the capitol.  And just in the nick of time."),
+				stories.story_text("A three-pronged alliance of bandits, cultists, and defecting milita were assaulting the fortress."),
+
+				stories.story_text("This is it, the final battle!  Protect the monarch!"),
+				stories.story_text("Prepare for battle!"),
+
+				stories.battle('castle_defense', 'ch_5_v', 'ch_5_f'),
+			},
+			ch_5_v = {
+				stories.new_page(),
+				stories.save_game(),
+				stories.new_page(),
+
+				stories.jump('victory'),
+			},
+			ch_5_f = {
+				stories.new_page(),
+				stories.story_text("Defeat!"),
+				stories.jump('game_over'),
+			},
+			victory = {
+				stories.new_page(),
+				stories.chapter_header("Victory"),
+				stories.story_text("Congratulations!"),
+				stories.story_text("Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
+				stories.exit_story(),
+			},
 			game_over = {
 				stories.new_page(),
 				stories.chapter_header("Game Over"),
-				stories.story_text("Try again.  I believe in you!  <3"),
+				stories.story_text("Try again.  I believe in you!"),
 				stories.exit_story(),
 			},
 		}
