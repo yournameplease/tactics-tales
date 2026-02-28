@@ -123,6 +123,16 @@ function ScriptBuilder:then_play_music(
 	return self
 end
 
+function ScriptBuilder:then_remove_scripts(
+	tag
+)
+	add(self.effects, {
+		type = "remove_script",
+		tag = tag,
+	})
+	return self
+end
+
 function ScriptBuilder:as_one_shot()
 	self.one_shot = true
 	return self
@@ -188,6 +198,8 @@ function script.on_adjacent_tile_interaction(tile_tag, text)
   })
 end
 
+-- helpers
+
 function script.unit.tagged(unit_tag)
 		return {
 		    type = "tag_lookup",
@@ -205,6 +217,13 @@ function script.unit.target()
 		return {
 		    type = "trigger_target",
 		}
+end
+
+-- other
+
+function ScriptBuilder:with_tags(tags)
+		self.tags = tags
+		return self
 end
 
 

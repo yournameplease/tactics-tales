@@ -15,6 +15,7 @@ local battle_script = require("src.tactics.battle.scripts.battle_script")
 local bm = require("src.tactics.battle.battle_map")
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
 local TaskManager = require("src.tactics.systems.tasks").TaskManager
+local lists = require("src.tactics.util.lists")
 
 local record ScriptContext
 	source_unit: BattleUnit
@@ -52,6 +53,8 @@ local record ScriptManagerImpl
 	tactics_engine: tactics_engine.TacticsEngine
 	event_listener: event_listener.EventListener
     task_manager: TaskManager
+
+    active_scripts: {integer: battle_script.BattleScript}
 	script_listeners: {integer: integer}
 end
 
@@ -113,6 +116,19 @@ function ScriptManagerImpl:resolve_tile_selector(
 		return { ctx.target_tile }
 	else
 		unexpected(selector.type)
+	end
+end
+
+function ScriptManagerImpl:remove_script(
+	script_id: integer
+)
+	if self.active_scripts[script_id] then
+		self.event_listener:remove(self.script_listeners[script_id])
+		self.battle_map:unregister_interaction(script_id)
+
+		self.active_scripts[script_id] = nil
+	else
+		log.info("Attempt to remove a script which is no longer active.  Ignoring.  Id: "..script_id)
 	end
 end
 
@@ -276,6 +292,15 @@ function ScriptManagerImpl:register_script(
 					pt.sfx(sound)
 				end
 			end
+		elseif effect is battle_script.effect.RemoveScript then
+			fn = function(_ctx: ScriptContext)
+				log.debug("Handling RemoveScript effect.")
+				for script_id,s in pairs(self.active_scripts) do
+					if s.tags and lists.contains(s.tags, effect.tag) then
+						self:remove_script(script_id)
+					end
+				end
+			end
 		elseif effect is battle_script.effect.PlayMusic then
 			fn = function(_ctx: ScriptContext)
 				log.debug("Handling PlayMusic effect.")
@@ -313,7 +338,7 @@ function ScriptManagerImpl:register_script(
 			if triggered then
 				local tactics_lock = self.tactics_engine:acquire_lock()
 				if script.one_shot then
-					self.event_listener:remove(self.script_listeners[script.id])
+					self:remove_script(script.id)
 				end
 		        self.task_manager:start_routine(function()
 					for _,effect in ipairs(effects) do
@@ -329,6 +354,7 @@ function ScriptManagerImpl:register_script(
 		end
 	)
 	self.script_listeners[script.id] = listener_id
+	self.active_scripts[script.id] = script
 end
 
 function script_manager.new(
@@ -349,6 +375,7 @@ function script_manager.new(
 	self.battle_map = map
 	self.task_manager = task_manager
 	self.script_listeners = {}
+	self.active_scripts = {}
 
 	local id_gen = id_generator.new()
 

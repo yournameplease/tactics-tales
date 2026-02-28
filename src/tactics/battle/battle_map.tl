@@ -338,6 +338,20 @@ end
 
 -- interactions / scripts
 
+function BattleMap:unregister_interaction(
+    script_id: integer
+)
+    self.interactions_by_x_y:foreachpoint(function(_: Point, i: { TileDistance: {integer: TileInteractionHook}})
+        for _,interactions in pairs(i) do
+            interactions[script_id] = nil
+        end
+    end)
+
+    for _,interactions in pairs(self.interactions_by_unit_id) do
+        interactions[script_id] = nil
+    end
+end
+
 function BattleMap:register_tile_interaction(
     tile: Point,
     script_id: integer,

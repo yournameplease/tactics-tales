@@ -363,16 +363,20 @@ local BATTLE_DATA = {
                     "enemy"
             ),
             script.on_talk("civilian_sword")
+                :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life to stand up to the crooked militia.", "Let us join you!"})
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
+                :then_remove_scripts("recruit_civilians")
                 :as_one_shot(),
             script.on_talk("civilian_axe")
+                :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_axe"), {"So there is still good in this world.", "I will join your cause.",  "I only ask, protect the civilians."})
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
+                :then_remove_scripts("recruit_civilians")
                 :as_one_shot(),
         }
     },
