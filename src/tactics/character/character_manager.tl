@@ -14,6 +14,8 @@ local maps = require("src.tactics.util.maps")
 -- Eventually, may want to differentiate between persistent
 -- and transient characters.  No real reason now though.
 local interface CharacterManager
+    id_generator: id_generator.IdGenerator
+
     get_character: function(self, id: integer): Character
     generate_character: function(self, template_id: string, tags: {string}): Character
     load_character: function(self, data: character.SerializedCharacter): Character

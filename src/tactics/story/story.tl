@@ -223,6 +223,7 @@ function StoryImpl:handle_new_node()
             self:advance_node()
         else
             local save_data = {
+                character_id_generator = self.character_manager.id_generator,
             	story_id = self.story_id,
             	story_node_id = self.current_node.node_id,
             	story_node_step = self.current_node.node_step + 1,
@@ -415,6 +416,7 @@ function story.load(
         ui_context
     ) as StoryImpl
 
+    self.character_manager.id_generator.id_count = save_data.character_id_count
     self.story_memory:deserialize(save_data.story_memory) 
     for _,character_data in ipairs(save_data.roster) do
         local c = self.character_manager:load_character(character_data)
