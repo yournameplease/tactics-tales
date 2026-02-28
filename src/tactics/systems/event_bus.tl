@@ -82,8 +82,8 @@ function EventBus:remove(id: integer)
     error("failed to remove listener")
 end
 
-function EventBus:remove_all(ids: {integer})
-    for _, id in ipairs(ids) do
+function EventBus:remove_all(ids: {integer: boolean})
+    for id, _ in pairs(ids) do
         self:remove(id)
     end
 end
