@@ -84,10 +84,11 @@ end
 function ScriptBuilder:then_recruit_unit(
     unit_selector
 )
-    return self:then_modify_units(unit_selector,
-    	{ move = "one", target_sides = {"enemy"}}, -- setting to nil not yet supported.  This is fine though
-    	"player")
-    -- todo: another script
+	add(self.effects, {
+		type = "recruit_units",
+		unit_selector = unit_selector,
+	})
+	return self
 end
 
 function ScriptBuilder:then_modify_terrain(

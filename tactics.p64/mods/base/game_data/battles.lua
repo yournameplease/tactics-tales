@@ -96,7 +96,7 @@ end
 
 local function escape(tile_tag)
     return script.on_tile_interaction(tile_tag, "Escape")
-        :then_dialogue(script_unit.source(), "I'm retreating")
+        :then_dialogue(script_unit.source(), {"I'm retreating"})
         :then_despawn_units(script_unit.source())
 end
 
@@ -118,7 +118,7 @@ local BATTLE_DATA = {
             ["player_archer"] = { 0x09 },
             ["player_armor"] = { 0x0A },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.defeat_tagged("boss", "Defeat bandit leader")
         },
@@ -209,7 +209,7 @@ local BATTLE_DATA = {
             ["jailed_bandit"] = { 0x28 },
             ["jailed_bandit_bro"] = { 0x29 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.escape(),
             objectives.defeat_tagged("boss", "Defeat cultist leader"),
@@ -231,7 +231,7 @@ local BATTLE_DATA = {
             { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
         },
         neutral = {
-            { character_source = character_source.template("old_fart"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
+            { character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
             { character_source = character_source.template("village_hero"), ai = ai.stationary_neutral, tile = "jailed_royal", tags = {"room_d"}  },
             { character_source = character_source.template("bandit_guard"), ai = ai.move_inf_allied, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
             { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf_allied, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
@@ -264,7 +264,7 @@ local BATTLE_DATA = {
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {
                     "Thank you for freeing me.",
-                    "Please, let me join and tend to your wounded."
+                    "Please, let me join and fight with you."
                 })
                 :then_recruit_unit(script_unit.tagged("jailed_priest")),
             script.when_unit_dies("cultist_door_guard_d")
@@ -304,7 +304,7 @@ local BATTLE_DATA = {
             ["monarch"] = { 0x29 },
             ["counselor"] = { 0x29 }
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.defeat_tagged("boss", "Defeat bandit and militia leaders"),
         },
@@ -328,7 +328,7 @@ local BATTLE_DATA = {
             -- militia who turn enemy
             { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
             { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
-            { character_source = character_source.template("militia_sword"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
+            { character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
             { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
             -- story units
             -- { character_source = character_source.template("monarch"), ai = ai.stationary_neutral, tile = "monarch" }
@@ -338,13 +338,13 @@ local BATTLE_DATA = {
         scripts = {
             script.on_turn(6, phase.after_enemy)
                 :then_spawn_enemies({
-                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
+                    { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
                 },
                 "from_west"
             ),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_enemies({
-                    { character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
+                    { character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_sw" },
                 },
                 "from_west"
             ),
@@ -391,7 +391,7 @@ local BATTLE_DATA = {
             ["enemy_reinforce_sw_boss"] = { 0x02 },
             ["escape_point"] = { 0x38 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.escape()
         },
@@ -474,7 +474,7 @@ local BATTLE_DATA = {
             ["counselor"] = { 0x21 },
             ["friendly_militia"] = { 0x22 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.survive(),
             objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
