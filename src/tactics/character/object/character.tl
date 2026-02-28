@@ -68,6 +68,8 @@ local record Character
     stats: CharacterStats
 	inventory: ItemInventory.ItemInventory
     tags: maps.Set<string>
+
+    dead: boolean
 	
 	serialize: function(self): SerializedCharacter
 	-- may be overridden by inventory
