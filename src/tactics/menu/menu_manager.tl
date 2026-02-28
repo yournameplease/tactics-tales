@@ -23,6 +23,7 @@ local record SelectionHistory
 end
 
 local enum MenuHandlerPostHandlingType
+    "navigate"
     "deserialize"
     -- for now, only needed for grid keyboard...
     "recompute_menu"
@@ -41,6 +42,12 @@ end
 local record MenuHandlerRecompute
     is MenuHandlerPostHandling
     where self.type == "recompute_menu"
+end
+
+local record MenuHandlerNavigate
+    is MenuHandlerPostHandling
+    where self.type == "navigate"
+    next_step: string
 end
 
 local type MenuHandler = function(
@@ -65,6 +72,13 @@ end
 function menu_handler.then_recompute(): MenuHandlerRecompute
     return {
         type = "recompute_menu",
+    }
+end
+
+function menu_handler.then_navigate(next_step: string): MenuHandlerNavigate
+    return {
+        type = "navigate",
+        next_step = next_step,
     }
 end
 
@@ -305,21 +319,6 @@ function BaseMenuManager:set_menu(menu_id: menu_types.MenuId)
 end
 
 function BaseMenuManager:update(input: InputContext)
-    local btn_skip_turn = false
-    
-    if input is input_context.JoypadContext then
-        btn_skip_turn = input.joypad.lp      
-    elseif input is input_context.MouseContext then
-    else
-        unexpected(input.type)
-    end
-
-    if btn_skip_turn then
-        -- DEBUG Only for now.  consider where to put
-        self.event_writer:emit("TACTICS_FINISH_SIDE_ACTIONS", {})
-        return
-    end
-
     if self.menu_step ~= nil then
         local signal = input_context.handle_update(
             input,
@@ -419,7 +418,11 @@ function BaseMenuManager:update(input: InputContext)
                 signal.value
             )
             if handler_res then
-                if handler_res is MenuHandlerDeserialize then
+                if handler_res is MenuHandlerNavigate then
+                    log.debug("Navigating from menu handler response.", self.menu_state.step)
+                    signal.then_navigate_to = nil
+                    self:handle_menu_advance(handler_res.next_step)
+                elseif handler_res is MenuHandlerDeserialize then
                     log.debug("Deserializing from menu handler response.", self.menu_state.step)
                     self.menu_step.node:deserialize(nil, handler_res.data)
                 elseif handler_res is MenuHandlerRecompute then

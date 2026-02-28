@@ -162,6 +162,17 @@ HANDLERS["start_battle"] = function(
     return nil
 end
 
+HANDLERS["end_turn"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattlePreparationsContext,
+    _value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.handle_end_turn()
+
+    return nil
+end
+
 HANDLERS["select_acting_unit"] = function(
     services: BattleMenuContext,
     _menu_data: {string: any},
@@ -187,6 +198,15 @@ HANDLERS["mark_unit"] = function(
     services.tactics_engine:handle_mark_unit(value.point)
 
     return nil
+end
+
+HANDLERS["navigate_to_turn_menu"] = function(
+    _services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    _value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    return menu_manager.menu_handler.then_navigate("TURN_MENU")
 end
 
 HANDLERS["wait_acting_unit"] = function(
@@ -361,6 +381,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         button.builder("non_available_unit")
                             :handle_back("mark_unit")
                     )
+                    :with_child( -- marking for non-units
+                        function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                            return not point_is_any_unit(point, msb.battle_map)
+                        end,
+                        button.builder("non_unit")
+                            :handle_back("navigate_to_turn_menu")
+                    )
                     :with_tile_highlights(get_players_to_act_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
@@ -368,7 +395,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_control_hints{
                     primary = "Select Unit",
-                    secondary = "Mark Enemy Range",
+                    secondary = "Menu / Mark Enemy Range",
                 },
              ["SELECT_DESTINATION"] = step_definition.of_node(
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
@@ -547,6 +574,27 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
             --             return options
             --     end
             -- }),
+            ["TURN_MENU"] = step_definition.of_node(
+                list.column(
+                    "turn_menu",
+                    function(_msb: BattleMenuContext, _ctx: BattleMainMenuContext): {MenuNodeDefinition}
+                        local options: {MenuNodeDefinition} = {}
+
+                        pt.add(options, button.builder("end_turn")
+                            :with_text("End Turn")
+                            :handle_select("end_turn"))
+                        pt.add(options, button.builder("turn_menu_back")
+                            :with_text("Back")
+                            :advance_to("SELECT_UNIT"))
+                    
+                        return options
+                    end
+                )
+            ):with_previous_step("SELECT_SWAP_UNIT")
+            :with_control_hints{
+                primary = "Select",
+                secondary = "Back",
+            },
         }
     }
 }

@@ -104,7 +104,8 @@ function battle_manager.new(
         self.battle_map,
         self.tactics_engine,
         battle_def.deployment and battle_def.deployment.deployment_tiles_tag or nil,
-        function() event_bus:emit("TACTICS_BEGIN_BATTLE", {}) end
+        function() event_bus:emit("TACTICS_BEGIN_BATTLE", {}) end,
+        function() event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {}) end
     )
     self.battle_menu_manager = battle_menu_manager.new(
         battle_menu_ctx,
