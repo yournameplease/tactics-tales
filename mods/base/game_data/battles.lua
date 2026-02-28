@@ -96,7 +96,7 @@ end
 
 local function escape(tile_tag)
     return script.on_tile_interaction(tile_tag, "Escape")
-        :then_dialogue(script_unit.source(), "I'm retreating")
+        :then_dialogue(script_unit.source(), {"I'm retreating"})
         :then_despawn_units(script_unit.source())
 end
 
