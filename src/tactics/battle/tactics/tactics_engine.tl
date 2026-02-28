@@ -490,7 +490,7 @@ function TacticsEngine:kill_unit(
     defender.animation_data = anim
 
     if defender:is_player() then
-        self:start_dialogue(defender, {"..."})
+        self:start_dialogue(defender, {"I've been slain..."})
     end
     
     self.battle_is_blocked = true
