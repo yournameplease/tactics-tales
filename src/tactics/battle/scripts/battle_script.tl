@@ -140,6 +140,7 @@ local enum ScriptEffectType
 	"despawn_units"
 	"play_sound"
 	"play_music"
+	"remove_script"
 end
 
 local interface ScriptEffect
@@ -203,8 +204,15 @@ local record PlayMusic
 	music_id: string 
 end
 
+local record RemoveScript
+	is ScriptEffect
+	where self.type == "remove_script"
+	tag: string 
+end
+
 local record BattleScript
 	id: integer
+	tags: {string}
 	trigger: ScriptTrigger
 	effects: {ScriptEffect}
 	one_shot: boolean -- should remove after firing
@@ -248,6 +256,7 @@ local battle_script = {
 		DespawnUnits = DespawnUnits,
 		PlaySound = PlaySound,
 		PlayMusic = PlayMusic,
+		RemoveScript = RemoveScript,
 	}
 }
 
