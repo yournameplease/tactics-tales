@@ -326,7 +326,7 @@ local BATTLE_DATA = {
             { character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
             { character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
-            { character_source = character_source.template("militia_armor"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
+            { character_source = character_source.template("militia_spear_captain"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
             { character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
             { character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
             { character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}}
@@ -354,7 +354,7 @@ local BATTLE_DATA = {
                     {"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     script_unit.tagged("enemy_militia_stationary"),
-                    ai.move_zero,
+                    ai.stationary,
                     "enemy"
                 )
                 :then_modify_units(
@@ -363,16 +363,20 @@ local BATTLE_DATA = {
                     "enemy"
             ),
             script.on_talk("civilian_sword")
+                :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life to stand up to the crooked militia.", "Let us join you!"})
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
+                :then_remove_scripts("recruit_civilians")
                 :as_one_shot(),
             script.on_talk("civilian_axe")
+                :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("civilian_axe"), {"So there is still good in this world.", "I will join your cause.",  "I only ask, protect the civilians."})
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
+                :then_remove_scripts("recruit_civilians")
                 :as_one_shot(),
         }
     },

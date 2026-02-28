@@ -491,6 +491,7 @@ function TacticsEngine:kill_unit(
     defender.animation_data = anim
 
     if defender:is_player() then
+        pt.music(9)
         self:start_dialogue(defender, {"I've been slain..."})
     end
     
