@@ -221,7 +221,7 @@ local STORIES = {
 
 				stories.story_text("En route to the capitol, ${hero.name}'s party learned of a local cult."),
 				stories.story_text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
-				stories.story_text("Though the leader is powerful, the party could at least attempt to free some prisoners before making an escape."),
+				stories.story_text("Though the leader is powerful, the party could attempt to free some prisoners before making an escape."),
 				stories.story_text("Prepare for battle!"),
 
 				stories.battle('cultist_cave', 'ch_2_v', 'ch_2_f'),
