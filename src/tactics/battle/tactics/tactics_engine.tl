@@ -131,6 +131,7 @@ local record TacticsEngine
     refresh_all_units: function(self)
     refresh_units: function(self, function(BattleUnit): boolean)
     modify_units: function(self, units: {BattleUnit}, new_unit_properties: NewUnitProperties)
+    recruit_units: function(self, units: {BattleUnit})
     tiles_in_movement_and_attack_range_for_unit: function(self, unit): Userdata
     
     update: function(self, InputContext)
@@ -589,6 +590,16 @@ function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: Ne
         if new_unit_properties.new_side ~= nil then
             u.side = new_unit_properties.new_side
         end
+
+        u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
+    end
+end
+
+function TacticsEngine:recruit_units(units: {BattleUnit})
+    for _,u in ipairs(units) do
+        u.unit_ai = nil
+        u.side = "player"
+        self.character_manager:persist_player(u.character)
 
         u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
     end

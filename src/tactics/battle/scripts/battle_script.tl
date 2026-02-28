@@ -134,6 +134,7 @@ end
 local enum ScriptEffectType
 	"spawn_units"
 	"modify_units"
+	"recruit_units"
 	"modify_terrain"
 	"dialogue"
 	"despawn_units"
@@ -161,6 +162,12 @@ local record ModifyUnits
 	unit_selector: UnitSelector
     new_side: character.Side
     new_ai: unit_ai.UnitAI
+end
+
+local record RecruitUnits
+	is ScriptEffect
+	where self.type == "recruit_units"
+	unit_selector: UnitSelector
 end
 
 local record ModifyTerrain
@@ -234,6 +241,7 @@ local battle_script = {
 
 		SpawnUnits = SpawnUnits,
 		ModifyUnits = ModifyUnits,
+		RecruitUnits = RecruitUnits,
 		TerrainLocation = battle_map.TerrainLocation,
 		ModifyTerrain = ModifyTerrain,
 		Dialogue = Dialogue,

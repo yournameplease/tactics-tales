@@ -237,6 +237,13 @@ function ScriptManagerImpl:register_script(
 					}
 				)
 			end
+		elseif effect is battle_script.effect.RecruitUnits then
+			fn = function(ctx: ScriptContext)
+				log.debug("Handling RecruitUnits effect.")
+				self.tactics_engine:recruit_units(
+					self:resolve_unit_selector(effect.unit_selector, ctx)
+				)
+			end
 		elseif effect is battle_script.effect.ModifyTerrain then
 			fn = function(_ctx: ScriptContext)
 				log.debug("Handling ModifyTerrain effect.")
