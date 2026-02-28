@@ -118,7 +118,7 @@ local BATTLE_DATA = {
             ["player_archer"] = { 0x09 },
             ["player_armor"] = { 0x0A },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.defeat_tagged("boss", "Defeat bandit leader")
         },
@@ -209,7 +209,7 @@ local BATTLE_DATA = {
             ["jailed_bandit"] = { 0x28 },
             ["jailed_bandit_bro"] = { 0x29 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.escape(),
             objectives.defeat_tagged("boss", "Defeat cultist leader"),
@@ -304,7 +304,7 @@ local BATTLE_DATA = {
             ["monarch"] = { 0x29 },
             ["counselor"] = { 0x29 }
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.defeat_tagged("boss", "Defeat bandit and militia leaders"),
         },
@@ -391,7 +391,7 @@ local BATTLE_DATA = {
             ["enemy_reinforce_sw_boss"] = { 0x02 },
             ["escape_point"] = { 0x38 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.escape()
         },
@@ -474,7 +474,7 @@ local BATTLE_DATA = {
             ["counselor"] = { 0x21 },
             ["friendly_militia"] = { 0x22 },
         },
-        turn_limit = 10,
+        turn_limit = 15,
         victory_conditions = {
             objectives.survive(),
             objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
