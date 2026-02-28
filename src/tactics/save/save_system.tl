@@ -2,13 +2,15 @@ local story_memory = require("src.tactics.story.story_memory")
 local character = require("src.tactics.character.object.character")
 local lists = require("src.tactics.util.lists")
 local story_types = require("src.tactics.story.types")
+local id_generator = require("src.tactics.util.id_generator")
 
 local save_system = {}
 
 local SAVE_PATH = "/appdata/tactics_tales/saves/"
 
 local record GameSaveData
-	story_id: story_types.StoryId
+    character_id_generator: id_generator.IdGenerator
+    story_id: string
 	story_node_id: string
 	story_node_step: integer
 	story_memory: story_memory.StoryMemory
@@ -16,6 +18,7 @@ local record GameSaveData
 end
 
 local record SerializedGameSaveData
+	character_id_count: integer
 	story_id: story_types.StoryId
 	story_node_id: string
 	story_node_step: integer
@@ -27,6 +30,7 @@ end
 -- todo: check for existing files
 function save_system.save(name: string, data: GameSaveData)
 	local serialized_data = {
+		character_id_count = data.character_id_generator.id_count,
 		story_id = data.story_id,
 		story_node_id = data.story_node_id,
 		story_node_step = data.story_node_step,
