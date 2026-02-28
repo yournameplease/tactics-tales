@@ -11,7 +11,7 @@ local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
 
 local battle = {}
 
-local function get_preview_text(self: box.UIElement, state: UIContextManager): {string}
+local function get_attacker_preview_text(self: box.UIElement, state: UIContextManager): {string}
     local attacker = state.battle_context.acting_unit
     local defender = state.battle_context.last_hovered_unit
     local attacker_tile = state.battle_context.destination
@@ -27,14 +27,23 @@ local function get_preview_text(self: box.UIElement, state: UIContextManager): {
         self.text.content[2] = ""
         self.text.content[3] = ""
     end
+end
+
+local function get_defender_preview_text(self: box.UIElement, state: UIContextManager): {string}
+    local attacker = state.battle_context.acting_unit
+    local defender = state.battle_context.last_hovered_unit
+    local attacker_tile = state.battle_context.destination
+    local battle_map = state.battle_context.battle_map
+    local preview = combat_calculator.preview_combat(attacker, defender, attacker_tile, battle_map).steps
+    
     if preview[2] ~= nil then
-        self.text.content[4] = attacker.character.name .." <- ".. defender.character.name
-        self.text.content[5] = "Hit: "..preview[2].hit_chance.."%"
-        self.text.content[6] = "Dmg: "..preview[2].dmg
+        self.text.content[1] = attacker.character.name .." <- ".. defender.character.name
+        self.text.content[2] = "Hit: "..preview[2].hit_chance.."%"
+        self.text.content[3] = "Dmg: "..preview[2].dmg
     else
-        self.text.content[4] = "No counteattack!"
-        self.text.content[5] = ""
-        self.text.content[6] = ""
+        self.text.content[1] = "No counteattack!"
+        self.text.content[2] = ""
+        self.text.content[3] = ""
     end
 end
 
@@ -172,49 +181,75 @@ end
 
 function battle.combat_preview(): box.UIElement
     local root = box.builder("combat_preview")
-    :layout{
-        dir = "row",
-        gap = 4,
-        padding = box.layout.padding(4),
-        height = "fit_content",
-        width = "fill",
-    }
-	:build()
+        :direction("col")
+        :container("block")
+        :padding(4)
+    	:build()
 
     local attacker_portrait = character_ui.portrait_box(
         function(state: UIContextManager): BattleUnit return state.battle_context.acting_unit end,
         "paper")
-    local left = box.builder("combat_preview_left")
+    local top_left = box.builder("combat_preview_left")
 		:direction("col")
 		:container("strip")
         :build()
-    left:add(attacker_portrait)
-    left:add(box.spacer(1))
+    top_left:add(attacker_portrait)
+    top_left:add(box.spacer(1))
 
     local defender_portrait = character_ui.portrait_box(
         function(state: UIContextManager): BattleUnit return state.battle_context.hovered_unit end,
         "paper")
-    local right = box.builder("combat_preview_right")
+    local bottom_right = box.builder("combat_preview_right")
 		:direction("col")
 		:container("strip")
         :build()
-    right:add(defender_portrait)
-    right:add(box.spacer(1))
+    bottom_right:add(defender_portrait)
+    bottom_right:add(box.spacer(1))
 
-    local preview_text = box.builder("combat_preview_center")
+    local top_right_text = box.builder("combat_preview_center")
     	:layout{
 	        dir = "col",
 	        height = "fit_content",
 	        flex_grow = 1,
 	    }
 	    :text{
+	        draw_properties = {
+	            justify = "center"
+	        }
 	    }
-	    :on_update(get_preview_text)
+	    :on_update(get_attacker_preview_text)
 	    :build()
 
-    root:add(left)
-    root:add(preview_text)
-    root:add(right)
+    local bottom_left_text = box.builder("combat_preview_center")
+    	:layout{
+	        dir = "col",
+	        height = "fit_content",
+	        flex_grow = 1,
+	    }
+	    :text{
+	        draw_properties = {
+	            justify = "center"
+	        }
+	    }
+	    :on_update(get_defender_preview_text)
+	    :build()
+
+    local top_row = box.builder("combat_attacker_preview")
+        :direction("row")
+        :container("strip")
+    	:build()
+    top_row:add(top_left)
+    top_row:add(top_right_text)
+
+    local bottom_row = box.builder("combat_attacker_preview")
+        :direction("row")
+        :container("strip")
+    	:build()
+    bottom_row:add(bottom_left_text)
+    bottom_row:add(bottom_right)
+
+    root:add(top_row)
+    root:add(bottom_row)
 
     return root
 end
