@@ -611,7 +611,9 @@ function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.Co
 
     local attack_animation = self.animation_manager:create_animation("BUMP", direction)
     attacker.animation_data = attack_animation
-    if not step.is_hit then
+    if step.is_hit then
+        pt.sfx(8)
+    else
         local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
         defender.animation_data = dodge_animation
         while dodge_animation.playing do
