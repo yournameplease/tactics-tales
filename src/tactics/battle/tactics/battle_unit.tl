@@ -60,6 +60,14 @@ function BattleUnit:is_enemy(): boolean
     return self.side == "enemy"
 end
 
+function BattleUnit:is_alive(): boolean
+    return not self.character.dead
+end
+
+function BattleUnit:is_dead(): boolean
+    return self.character.dead
+end
+
 function battle_unit.spawn_unit(
     permanent_unit: character.Character,
     tile: Point,
@@ -123,7 +131,9 @@ function BattleUnit:take_damage(amount: integer)
 end
 
 function BattleUnit:die()
-    log.info("Unit "..self.id.." is now dead")
+    log.debug("Killing "..tostring(self))
+    
+    self.character.dead = true
 end
 
 return battle_unit

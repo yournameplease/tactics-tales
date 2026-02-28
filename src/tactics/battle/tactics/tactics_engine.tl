@@ -499,6 +499,7 @@ function TacticsEngine:kill_unit(
     end
     self.battle_is_blocked = false
     
+    defender:die()
     self.battle_map:kill_unit(defender)
     self.event_writer:emit("TACTICS_UNIT_DEATH", {
         attacker = attacker,
