@@ -103,7 +103,10 @@ function DialogueManagerImpl:update(input: InputContext)
 						d.finished = true
 					end
 				end
-		    end
+		    elseif d.can_skip
+				and input.actions["ADVANCE"].pressed then
+				d.characters_rendered = row_len
+			end
 		end
 	end
 end
