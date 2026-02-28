@@ -23,19 +23,18 @@ local function get_preview_text(self: box.UIElement, state: UIContextManager): {
         self.text.content[2] = "Hit: "..preview[1].hit_chance.."%"
         self.text.content[3] = "Dmg: "..preview[1].dmg
     else
-        self.text.content[4] = "No attack!"
-        self.text.content[5] = ""
-        self.text.content[5] = ""
-        
+        self.text.content[1] = "No attack!"
+        self.text.content[2] = ""
+        self.text.content[3] = ""
     end
     if preview[2] ~= nil then
-        self.text.content[1] = attacker.character.name .." <- ".. defender.character.name
-        self.text.content[2] = "Hit: "..preview[2].hit_chance.."%"
-        self.text.content[3] = "Dmg: "..preview[2].dmg
+        self.text.content[4] = attacker.character.name .." <- ".. defender.character.name
+        self.text.content[5] = "Hit: "..preview[2].hit_chance.."%"
+        self.text.content[6] = "Dmg: "..preview[2].dmg
     else
-        self.text.content[4] = "No counterattack!"
+        self.text.content[4] = "No counteattack!"
         self.text.content[5] = ""
-        self.text.content[5] = ""
+        self.text.content[6] = ""
     end
 end
 
@@ -208,7 +207,8 @@ function battle.combat_preview(): box.UIElement
 	        height = "fit_content",
 	        flex_grow = 1,
 	    }
-	    :text{}
+	    :text{
+	    }
 	    :on_update(get_preview_text)
 	    :build()
 

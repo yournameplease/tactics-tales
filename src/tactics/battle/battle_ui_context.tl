@@ -131,8 +131,12 @@ function BattleUIContext:enrich()
             should_highlight_hovered_unit = false
             local selection_point = root_node_state.point
             local unit = self.battle_map:get_at_tile(selection_point)
+            local acting_unit = self.acting_unit
             self.hovered_unit = unit
-            if unit then
+            local targeting = self.acting_unit.character:get_weapon_targeting()
+            if unit
+                and unit.side ~= acting_unit.side
+                and targeting.is_target_valid(self.acting_unit.tile, self.hovered_unit.tile, self.battle_map) then
                 self.layout = "COMBAT_PREVIEW"
                 self.last_hovered_unit = unit
             end
