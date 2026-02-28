@@ -319,7 +319,7 @@ local UNIT_TEMPLATES = {
 	cultist_spearman = {
 		parent_template = "cultist_base",
 		headwear_options = options.list{"cultist_hood"},
-        item_loadout = {
+    item_loadout = {
 			 "spear" 
 		},
 	},
@@ -335,7 +335,9 @@ local UNIT_TEMPLATES = {
 		parent_template = "cultist_base",
         hp_max = 5,
 		headwear_options = options.list{"hooded_wizard_hat"},
-        item_loadout = {},
+    item_loadout = {
+			 "dagger" 
+		},
 	},
 	village_hero = {
 		parent_template = "human_base",
