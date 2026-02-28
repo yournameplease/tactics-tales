@@ -231,7 +231,7 @@ local BATTLE_DATA = {
             { character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
         },
         neutral = {
-            { character_source = character_source.template("old_fart"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
+            { character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
             { character_source = character_source.template("village_hero"), ai = ai.stationary_neutral, tile = "jailed_royal", tags = {"room_d"}  },
             { character_source = character_source.template("bandit_guard"), ai = ai.move_inf_allied, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
             { character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf_allied, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
@@ -264,7 +264,7 @@ local BATTLE_DATA = {
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {
                     "Thank you for freeing me.",
-                    "Please, let me join and tend to your wounded."
+                    "Please, let me join and fight with you."
                 })
                 :then_recruit_unit(script_unit.tagged("jailed_priest")),
             script.when_unit_dies("cultist_door_guard_d")
