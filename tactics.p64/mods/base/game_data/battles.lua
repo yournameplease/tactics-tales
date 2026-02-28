@@ -197,7 +197,7 @@ local BATTLE_DATA = {
             ["cultist_door_guard_d"] = { 0x15 },
             ["cultist_door_guard_e"] = { 0x16 },
             ["door_b"] = { 0x33 },
-            ["room_b_ceiling"] = { 0x30, 0x11, 0x10 },
+            ["room_b_ceiling"] = { 0x30, 0x12, 0x11, 0x10 },
             ["door_c"] = { 0x34 },
             ["door_d"] = { 0x35 },
             ["door_e"] = { 0x36 },
@@ -257,7 +257,7 @@ local BATTLE_DATA = {
                 }, "from_east"),
             script.when_unit_dies("cultist_door_guard_b")
                 :then_modify_terrain("door_b", {["front_wall"] = 0})
-                :then_modify_terrain("door_b_ceiling", {["ceiling"] = 0})
+                :then_modify_terrain("room_b_ceiling", {["ceiling"] = 0})
                 :then_dialogue(script_unit.tagged("cultist_boss"), {"Intruders?", "Attack!", "Don't let them escape!"}),
             script.when_unit_dies("cultist_door_guard_c")
                 :then_play_music("recruit")
