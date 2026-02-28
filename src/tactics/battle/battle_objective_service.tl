@@ -75,9 +75,6 @@ end
 function BattleObjectiveServiceImpl:get_objective_text(turn_number: integer): {string}
     local out: {string} = {}
 
-    if self.turn_limit then
-        pt.add(out, "Turn "..turn_number.."/"..self.turn_limit) 
-    end
     for _,v in ipairs(self.victory_conditions) do
         if v.text then
             pt.add(out, v.text)
@@ -88,7 +85,14 @@ function BattleObjectiveServiceImpl:get_objective_text(turn_number: integer): {s
             pt.add(out, f.text)
         end
     end
+
+    for i=2,#out do
+        out[i] = "or "..out[i]
+    end
     
+    if self.turn_limit then
+        pt.add(out, "Turn "..turn_number.."/"..self.turn_limit, 1) 
+    end
     return out
 end
 
