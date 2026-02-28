@@ -18,7 +18,7 @@ local event_listener = {
 local record EventListenerImpl
 	is EventListener
 
-    listener_ids: {integer}
+    listener_ids: {integer: boolean}
 	bus: event_bus.EventBus
 end
 
@@ -37,11 +37,12 @@ end
 
 function EventListenerImpl:on(event_name: event_bus.GameEvent, callback: function(args: { string: any })): integer
 	local id = self.bus:on(event_name, callback)
-	pt.add(self.listener_ids, id)
+	self.listener_ids[id] = true
 	return id
 end
 
 function EventListenerImpl:remove(id: integer)
+	self.listener_ids[id] = nil
 	self.bus:remove(id)
 end
 
