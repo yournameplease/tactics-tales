@@ -136,6 +136,7 @@ function menu.select_row(
 		:layout({
 			width = "fit_content"
 		})
+		:padding(1)
 		:text{
 			rows = 1,
 			content = { node.label },

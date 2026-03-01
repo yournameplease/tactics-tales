@@ -71,6 +71,7 @@ local record StoryImpl
     story_memory: story_memory.StoryMemory
 
     character_manager: character_manager.CharacterManager	
+    story_menu_context: story_menu_context.StoryMenuContext
     menu_manager: story_menu_manager.StoryMenuManager
     current_node: ActiveNode
 
@@ -176,7 +177,8 @@ function StoryImpl:handle_new_node()
             },
             self.story_memory:get_as_map()
         )
-        self.customized_character = self.character_manager:generate_character("village_hero", {"hero"})
+        self.customized_character = self.character_manager:generate_character("character_customizer_template", {"hero"})
+        self.story_menu_context.character_appearance = self.customized_character.appearance
         if node_definition.name_key then
             self.customized_character.name = self.story_memory:get(node_definition.name_key).text
         end
@@ -360,13 +362,14 @@ function story.new(
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
     
+    self.story_menu_context = story_menu_context.new(
+        function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end,
+        function(text: string) self:submit_text(text) end
+    )
     self.story_memory = story_memory.new(self.character_manager)
     self.story_page = story_page.story_page(self.story_memory)
     self.menu_manager = story_menu_manager.new(
-        story_menu_context.new(
-            function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end,
-            function(text: string) self:submit_text(text) end
-        ),
+        self.story_menu_context,
         event_bus
     )
 

@@ -7,6 +7,7 @@ local GameContext = menu_context.GameContext
 
 local record StoryMenuContext
 	is GameContext
+	character_appearance: {character.CharacterAppearanceKey: string}
 	handle_create_character: function(appearance: {character.CharacterAppearanceKey: string})
 	handle_submit_text: function(text: string)
 end

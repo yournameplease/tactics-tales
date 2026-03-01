@@ -115,8 +115,11 @@ local function menu_definition_for_character_select(): menu_manager.MenuStepDefi
 
                 return children
             end))
-            :with_initial_data(function(_services: StoryMenuContext, _session_data: MenuContext): {string: any}
-                return random_appearance()
+            :with_initial_data(function(services: StoryMenuContext, _session_data: MenuContext): {string: any}
+                if services.character_appearance then
+                    return services.character_appearance as {string: string}
+                end
+                return {}
             end)
             :with_control_hints{
                 primary = "Select",
