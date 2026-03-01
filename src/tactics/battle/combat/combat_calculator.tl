@@ -180,6 +180,9 @@ local function unit_is_long_reach(unit: CombatDouble): boolean
 end
 
 local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble, attack: AttackDouble, battle_map: bm.BattleMap): boolean
+    if not attack then
+        return false
+    end
     local is_long_reach = unit_is_long_reach(attacker)
     log.trace("Checking counter attack", attacker.id, defender.id, is_long_reach, attack.long_reach)
     if is_long_reach and not attack.long_reach then
