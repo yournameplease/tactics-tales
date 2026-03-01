@@ -18,7 +18,8 @@ left:add(box.spacer(1))
 left:add(control_hints.new(
 	function (s: UIContextManager): menu_manager.MenuStep
 		return s.game_context.menu_manager.menu_step
-	end
+	end,
+	{}
 ))
 
 local content = menu.generic_menu_box(

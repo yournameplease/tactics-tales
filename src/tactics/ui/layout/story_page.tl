@@ -13,7 +13,10 @@ left:add(box.spacer(1))
 left:add(control_hints.new(
 	function (s: UIContextManager): menu_manager.MenuStep
 		return s.story_context.menu_manager.menu_step
-	end
+	end,
+	{
+		primary = "Advance"
+	}
 ))
 
 local right = book.flex_page()

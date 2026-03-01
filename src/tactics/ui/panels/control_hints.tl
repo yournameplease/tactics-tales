@@ -6,6 +6,7 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 local input_service = require("src.tactics.joypad")
 local InputMethod = input_service.InputMethod
 local InputLabel = input_service.InputLabel
+local menu_types = require("src.tactics.menu.types")
 local menu_manager = require("src.tactics.menu.menu_manager")
 
 local control_hints = {}
@@ -37,7 +38,8 @@ end
 
 local function control_hint_row(
 	input_label: InputLabel,
-	menu_step_func: function(UIContextManager): menu_manager.MenuStep
+	menu_step_func: function(UIContextManager): menu_manager.MenuStep,
+	default_hints: menu_types.ControlHints
 ): box.UIElement
 	local row = box.builder("control_row_"..input_label)
 		:direction("row")
@@ -72,12 +74,19 @@ local function control_hint_row(
 		:on_update(function(self: box.UIElement, state: UIContextManager)
 			local menu_step = menu_step_func(state)
 
-			if menu_step == nil or menu_step.control_hints == nil then
-				self.text.content = {}
+			if menu_step ~= nil and menu_step.control_hints ~= nil then
+				self.text.content = {
+					menu_step.control_hints[input_label]
+				}
 				return
 			end
-			
-			self.text.content = { menu_step.control_hints[input_label] }
+
+			if default_hints ~= nil then			
+				self.text.content = {
+					default_hints[input_label]
+				}
+				return
+			end
 		end)
 	    :build())
 
@@ -85,15 +94,16 @@ local function control_hint_row(
 end
 
 function control_hints.new(
-	menu_step_func: function(UIContextManager): menu_manager.MenuStep
+	menu_step_func: function(UIContextManager): menu_manager.MenuStep,
+	default_hints: menu_types.ControlHints
 ): box.UIElement
     local self = box.builder("control_hints")
 		:direction("col")
 		:container("block")
 	    :build()
 
-	self:add(control_hint_row("primary", menu_step_func))
-	self:add(control_hint_row("secondary", menu_step_func))
+	self:add(control_hint_row("primary", menu_step_func, default_hints))
+	self:add(control_hint_row("secondary", menu_step_func, default_hints))
 
 	return self
 end
