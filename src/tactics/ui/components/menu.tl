@@ -85,6 +85,18 @@ function menu.select_row(
 	local row = box.builder(node.id)
 		:direction("row")
 		:container("strip")
+		:padding(2)
+		:style{
+			decoration_padding = 2,
+		}
+		:on_update(function(self: box.UIElement, _state: UIContextManager)
+			local has_focus = node.has_focus
+
+			self.style.decoration = has_focus and "border" or nil
+		end)
+		:menu_handling{
+			hover_event = menu_mouse_selection.leaf(node, nil, nil),
+		}
 		:build()
 
 	if node.label then
@@ -93,6 +105,7 @@ function menu.select_row(
 			:layout({
 				width = "fit_content"
 			})
+			:padding(1)
 			:text{
 				rows = 1,
 				content = { node.label },
