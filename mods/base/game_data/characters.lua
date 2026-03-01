@@ -347,7 +347,7 @@ local UNIT_TEMPLATES = {
 	},
 	character_customizer_template = {
 		parent_template = "human_base",
-		eyewear_options = options.list{"none"},
+		beard_options = options.list{"none"},
 		headwear_options = options.list{"none"},
     item_loadout = {
 			"sword"
