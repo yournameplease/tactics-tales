@@ -316,9 +316,9 @@ local BATTLE_DATA = {
             deployment_tiles_tag = "player_deployment",
         },
         enemies = {
-            { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss"} },
+            { character_source = character_source.template("bandit_berzerker"), ai = ai.stationary, tile = "bandit_boss", tags = {"boss", "enemy_bandit_waiting"} },
             { character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
-            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_axe" }
+            { character_source = character_source.template("bandit_axe"), ai = ai.move_one, tile = "bandit_axe", tags = {"enemy_bandit_waiting"} }
         },
         neutral = {
             -- civilians
@@ -361,7 +361,12 @@ local BATTLE_DATA = {
                     script_unit.tagged("enemy_militia_mobile"),
                     ai.move_inf,
                     "enemy"
-            ),
+                )
+                :then_modify_units(
+                    script_unit.tagged("enemy_bandit_waiting"),
+                    ai.move_inf,
+                    "enemy"
+                ),
             script.on_talk("civilian_sword")
                 :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
