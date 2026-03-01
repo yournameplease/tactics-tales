@@ -40,7 +40,8 @@ do
 	left:add(control_hints.new(
     	function (s: UIContextManager): menu_manager.MenuStep
     		return s.battle_context.battle_menu_manager.menu_step
-    	end
+		end,
+		{}
 	))
 	local right = book.fit_page()
 	right:add(map)
@@ -59,7 +60,8 @@ do
 	left:add(control_hints.new(
     	function (s: UIContextManager): menu_manager.MenuStep
     		return s.battle_context.battle_menu_manager.menu_step
-    	end
+		end,
+		{}
 	))
 	local right = book.fit_page()
 	right:add(map)
