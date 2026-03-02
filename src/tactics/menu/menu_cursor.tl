@@ -57,6 +57,7 @@ local record MenuSignalCallHandler
 	-- nillable
 	then_navigate_to: menu_types.MenuStep
 	then_finish: boolean
+	then_back: boolean
 end
 
 local menu_signal = {

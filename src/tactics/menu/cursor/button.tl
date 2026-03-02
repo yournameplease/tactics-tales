@@ -31,6 +31,7 @@ local record ButtonCursor
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
     final_step: boolean
+    go_back: boolean
     select_handler: menu_types.MenuHandlerId
     back_handler: menu_types.MenuHandlerId
 end
@@ -45,6 +46,7 @@ local record ButtonDefinition
     -- validator: function(ButtonCursor, GameContext, MenuContext): boolean
     next_state: menu_types.MenuStep
     final_step: boolean
+    go_back: boolean
     select_handler: menu_types.MenuHandlerId
     back_handler: menu_types.MenuHandlerId
 end
@@ -65,7 +67,7 @@ end
 function ButtonCursor:update_joy(
 	joy: Joypad
 ): MenuSignal
-	if self.select_handler ~= nil or self.next_state ~= nil then
+	if self.select_handler ~= nil or self.next_state ~= nil or self.go_back then
 		if joy.ap then
 			if self.select_handler ~= nil then
 				local signal = menu_signal.call_handler(self.select_handler, self.value)
@@ -75,12 +77,23 @@ function ButtonCursor:update_joy(
 				if self.next_state ~= nil then
 					signal.then_navigate_to = self.next_state
 				end
+				if self.go_back ~= nil then
+					if self.back_handler ~= nil then
+						return menu_signal.call_handler(self.back_handler, self.value)
+					end
+					return menu_signal.back()
+				end
 				return signal
 			end
 			if self.final_step then
 				return menu_signal.finish()
 			elseif self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
+			elseif self.go_back then
+				if self.back_handler ~= nil then
+					return menu_signal.call_handler(self.back_handler, self.value)
+				end
+				return menu_signal.back()
 			end
 			return menu_signal.consumed()
 		end
@@ -114,17 +127,28 @@ end
 function ButtonCursor:handle_command(
     command: menu_types.MenuCommand
 ): MenuSignal
-	if self.select_handler ~= nil or self.next_state ~= nil then
+	if self.select_handler ~= nil or self.next_state ~= nil or self.go_back then
 		if command == "button_primary" then
 			if self.select_handler ~= nil then
 				local signal = menu_signal.call_handler(self.select_handler, self.value)
 				if self.next_state ~= nil then
 					signal.then_navigate_to = self.next_state
 				end
+				if self.go_back ~= nil then
+					if self.back_handler ~= nil then
+						return menu_signal.call_handler(self.back_handler, self.value)
+					end
+					return menu_signal.back()
+				end
 				return signal
 			end
 			if self.final_step then
 				return menu_signal.finish()
+			elseif self.go_back ~= nil then
+				if self.back_handler ~= nil then
+					return menu_signal.call_handler(self.back_handler, self.value)
+				end
+				return menu_signal.back()
 			elseif self.next_state ~= nil then
 				return menu_signal.navigate(self.next_state)
 			end
@@ -188,6 +212,13 @@ function ButtonDefinition:advance_to(
 	next_state: string
 ): ButtonDefinition
 	self.next_state = next_state
+	return self
+end
+
+function ButtonDefinition:then_go_back(
+
+): ButtonDefinition
+	self.go_back = true
 	return self
 end
 
