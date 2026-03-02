@@ -418,6 +418,24 @@ function TacticsEngine:recompute_marked_unit_tiles()
     end
 end
 
+function TacticsEngine:handle_unmark_all_units()
+    local all_enemies = self.battle_map:get_units(BattleUnit.is_enemy)
+
+    for _,e in ipairs(all_enemies) do
+        e.marked = false
+    end
+    self.marked_unit_tiles = self.marked_unit_tiles & 0
+end
+
+function TacticsEngine:handle_mark_all_units()
+    local all_enemies = self.battle_map:get_units(BattleUnit.is_enemy)
+
+    for _,e in ipairs(all_enemies) do
+        e.marked = true
+    end
+    self:recompute_marked_unit_tiles()
+end
+
 function TacticsEngine:handle_mark_unit(p: Point)
     local unit = self.battle_map:get_at_tile(p)
     if unit == nil then return end

@@ -211,6 +211,28 @@ HANDLERS["mark_unit"] = function(
     return nil
 end
 
+HANDLERS["unmark_all_units"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    _value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.tactics_engine:handle_unmark_all_units()
+
+    return nil
+end
+
+HANDLERS["mark_all_units"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    _value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    services.tactics_engine:handle_mark_all_units()
+
+    return nil
+end
+
 HANDLERS["navigate_to_turn_menu"] = function(
     _services: BattleMenuContext,
     _menu_data: {string: any},
@@ -675,9 +697,17 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         pt.add(options, button.builder("end_turn")
                             :with_text("End Turn")
                             :handle_select("end_turn"))
+                        pt.add(options, button.builder("mark_all_units")
+                            :with_text("Mark All Enemies")
+                            :handle_select("mark_all_units")
+                            :then_go_back())
+                        pt.add(options, button.builder("unmark_all_units")
+                            :with_text("Unmark All Enemies")
+                            :handle_select("unmark_all_units")
+                            :then_go_back())
                         pt.add(options, button.builder("turn_menu_back")
                             :with_text("Back")
-                            :advance_to("SELECT_UNIT"))
+                            :then_go_back())
                     
                         return options
                     end
