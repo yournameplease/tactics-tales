@@ -56,6 +56,17 @@ local function point_is_available_player(
     return true
 end
 
+local function point_is_enemy_unit(
+    point: Point,
+    map: bm.BattleMap
+): boolean
+    local unit = map:get_at_tile(point)
+
+    if unit == nil then return false end
+
+    return unit:is_enemy()
+end
+
 local function point_is_any_unit(
     point: Point,
     map: bm.BattleMap
@@ -255,18 +266,63 @@ HANDLERS["unmove_acting_unit"] = function(
     return nil
 end
 
-HANDLERS["attack_unit"] = function(
+HANDLERS["move_and_store_attack_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    local target_point = value.point
+    local acting_unit = session_context.acting_unit.unit
+
+    -- follow the path backwards to get the first valid attack source
+    local targeting = acting_unit.character:get_weapon_targeting()
+
+    local destination_point = value.path[#value.path]
+    for i = #value.path, 1, -1 do
+        if targeting.is_target_valid(value.path[i], target_point, services.battle_map) then
+            destination_point = value.path[i]
+            break
+        end
+    end
+    
+    session_context.destination = {
+        point = destination_point,
+        path = value.path, -- todo?
+    }
+    services.tactics_engine:handle_move_unit(
+        session_context.acting_unit.unit,
+        session_context.destination.point,
+        session_context.destination.path
+    )
+    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point)}
+    services.tactics_engine.active_point = destination_point
+
+    return nil
+end
+
+HANDLERS["store_attack_unit"] = function(
     services: BattleMenuContext,
     _menu_data: {string: any},
     session_context: BattleMainMenuContext,
     value: grid.NestedGridValue
 ): menu_manager.menu_handler.MenuHandlerPostHandling
     session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point)}
+    services.tactics_engine.active_point = value.point
+
+    return nil
+end
+
+HANDLERS["attack_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    session_context: BattleMainMenuContext,
+    _value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:handle_attack_unit(
         session_context.acting_unit.unit,
         session_context.target_unit.unit
     )
-    services.tactics_engine.active_point = value.point
 
     return nil
 end
@@ -348,7 +404,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("start_battle"))
                         pt.add(options, button.builder("edit_formation")
                             :with_text("Edit Formation")
-                            :advance_to("SELECT_SWAP_UNIT"))
+                            :then_go_back())
                     
                         return options
                     end
@@ -409,6 +465,16 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("move_acting_unit")
                             :advance_to("SELECT_ACTION")
                     )
+                    :with_child(
+                        function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
+                            return point_is_enemy_unit(point, msb.battle_map)
+                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) ~= nil
+                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) & 0x4 ~= 0
+                        end,
+                        button.builder("attack_unit")
+                            :handle_select("move_and_store_attack_unit")
+                            :advance_to("CONFIRM_ATTACK")
+                    )
                     :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
                     :with_path_length(function(_: BattleMenuContext, ctx: BattleMainMenuContext): integer
                         return ctx.acting_unit.unit.character.stats.movement
@@ -458,6 +524,9 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("wait_acting_unit")
                             :as_final_step())
 
+                        pt.add(options, button.builder("cancel")
+                            :with_text("Cancel")
+                            :then_go_back())
                         --- currently disabled as items aren't mechanically interesting yet
                         -- pt.add(options, {
                         --     text = "Items",
@@ -485,8 +554,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             )
                         end,
                         button.builder("attack_unit")
-                            :handle_select("attack_unit")
-                            :as_final_step()
+                            :handle_select("store_attack_unit")
+                            :advance_to("CONFIRM_ATTACK")
                     )
                     :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
                         return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
@@ -504,6 +573,29 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_previous_step("SELECT_ACTION")
                 :with_control_hints{
                     primary = "Select Target",
+                    secondary = "Back",
+                },
+            ["CONFIRM_ATTACK"] = step_definition.of_node(
+                list.column(
+                    "confirm_attack",
+                    function(msb: BattleMenuContext, ctx: BattleMainMenuContext): {MenuNodeDefinition}
+                        local options: {MenuNodeDefinition} = {}
+
+                        pt.add(options, button.builder("attack")
+                            :with_text("Attack")
+                            :handle_select("attack_unit")
+                            :as_final_step())
+                        pt.add(options, button.builder("cancel")
+                            :with_text("Cancel")
+                            :then_go_back())
+                    
+                        return options
+                    end)
+                )
+                :with_previous_step("SELECT_DESTINATION")
+                :handle_back("unmove_acting_unit")
+                :with_control_hints{
+                    primary = "Select",
                     secondary = "Back",
                 },
             -- ["SELECT_ITEM"] = list_cursor.definition({
