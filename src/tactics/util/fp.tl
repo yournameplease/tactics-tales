@@ -25,6 +25,10 @@ function fp.not_nil<Type>(obj: Type): boolean
     return obj ~= nil
 end
 
+function fp.not_empty(str: string): boolean
+    return #str > 0
+end
+
 -- this is kind of stupid...
 -- but I think necessary due to no fn overloading with dif args
 

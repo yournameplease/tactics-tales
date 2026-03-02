@@ -64,6 +64,8 @@ function ModLoaderImpl:register_mod(path: string)
 	}
 	pt.add(self.registered, registered_mod)
 	self.registered_map[mod_spec.id] = registered_mod
+
+	log.debug("Registered mod "..registered_mod.id.." at "..full_path)
 end
 
 function ModLoaderImpl:validate_mod(id: ModId)
@@ -87,11 +89,11 @@ local function load_mod_map<Key, Definition>(
 	local definitions: {{Key: Definition}} = fp.pipeline_4(
 		lists.map(function(mod: RegisteredMod): Path
 			if get_path(mod) == nil then
-				return nil
+				return ""
 			end
 			return "mods/" .. mod.path .. "/" .. get_path(mod) .. ".lua"
 		end),
-		lists.filter(fp.not_nil),
+		lists.filter(fp.not_empty),
 		lists.map(function(path: Path): { string: any }
 			return pt.include(path) as { string: any }
 		end),
@@ -119,12 +121,13 @@ local function load_mod_val<Value>(
 	local values: {Value} = fp.pipeline_5(
 		lists.map(function(mod: RegisteredMod): Path
 			if get_path(mod) == nil then
-				return nil
+				return ""
 			end
 			return "mods/" .. mod.path .. "/" .. get_path(mod) .. ".lua"
 		end),
-		lists.filter(fp.not_nil),
+		lists.filter(fp.not_empty),
 		lists.map(function(path: Path): { string: any }
+			log.debug("Including "..path)
 			return pt.include(path) as { string: any }
 		end),
 		lists.map(function(spec: {string: any}): Value
@@ -134,7 +137,7 @@ local function load_mod_val<Value>(
 	)(registered)
 
 	-- get most recently declared value
-	return lists.do_reverse(values)[1] or error()
+	return lists.do_reverse(values)[1] or error("No mod data found for a value.")
 end
 
 -- TODO: consider safer approaches?
