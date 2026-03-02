@@ -113,6 +113,8 @@ function game.new(
 ): Game 
     
     mod_loader:register_mod("base")
+    mod_loader:register_mod("tactics_puzzler")
+    mod_loader:register_mod("tt_fantasy_demo_story")
     local game_data = mod_loader:load_mod_data()
 
     local story_ids = game_data.stories.story_select
