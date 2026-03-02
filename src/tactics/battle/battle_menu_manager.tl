@@ -682,7 +682,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         return options
                     end
                 )
-            ):with_previous_step("SELECT_SWAP_UNIT")
+            )
+            :with_previous_step("SELECT_UNIT")
             :with_control_hints{
                 primary = "Select",
                 secondary = "Back",
