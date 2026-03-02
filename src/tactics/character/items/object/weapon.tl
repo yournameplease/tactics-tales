@@ -25,6 +25,7 @@ local enum WeaponEffectType
     "long_reach"
     "shieldsplitter"
     "armorkiller"
+    "shieldkiller"
 end
 
 local interface WeaponEffect
@@ -137,6 +138,7 @@ local weapon = {
         LongReachEffect = LongReachEffect,
         ShieldsplitterEffect = ShieldsplitterEffect,
         ArmorkillerEffect = ArmorkillerEffect        
+        ShieldkillerEffect = ShieldkillerEffect        
     }
 }
 

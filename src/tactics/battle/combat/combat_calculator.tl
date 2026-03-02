@@ -85,6 +85,9 @@ local function build_attack_double(weapon: wpn.Weapon): AttackDouble
         elseif eff is effect.ArmorkillerEffect then
             double.ignored_defenses["ARMOR"] = true 
             double.ignored_avoids["ARMOR"] = true 
+        elseif eff is effect.ShieldkillerEffect then
+            double.ignored_defenses["SHIELD"] = true 
+            double.ignored_avoids["SHIELD"] = true 
         else
             unexpected(eff.type)
         end

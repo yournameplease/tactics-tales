@@ -22,6 +22,12 @@ function weapon.effect.armorkiller()
     }
 end
 
+function weapon.effect.shieldkiller()
+    return {
+        type = "shieldkiller"
+    }
+end
+
 function weapon.range.single_target(min_range, max_range)
     return {
         get_selection_tiles = function(origin, map)
@@ -55,7 +61,7 @@ local default_weapon = {
     sprite = 104,
     hand_anchor = lib.point.of(1,8), -- the top left position of the handle
     damage = 1,
-    accuracy = 90,
+    accuracy = 100,
     type = "MELEE",
     body_type = "BACK_HAND",
     targeting = weapon.range.single_target(1,1),
