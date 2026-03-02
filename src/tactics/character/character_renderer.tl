@@ -185,6 +185,9 @@ local function set_palette(
 	if draw_outline then
 		-- local outline_color = side_palette[1]
 		local outline_color = 21
+		if drawable_unit.side == "player" and not drawable_unit.has_acted then
+			outline_color = 7
+		end
 		pt.set_pal(COLOR_OUTLINE, outline_color)
 	else
 		pt.set_palt(COLOR_OUTLINE, true)
