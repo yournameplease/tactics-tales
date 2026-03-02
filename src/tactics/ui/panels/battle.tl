@@ -4,7 +4,6 @@ local character_ui = require("src.tactics.ui.panels.portrait_box")
 require("src.tactics.character.items.object.item")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.character.items.object.item_inventory")
-local wpn = require("src.tactics.character.items.object.weapon")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
@@ -85,6 +84,10 @@ function battle.unit_info(): box.UIElement
         height = "fit_content",
         width = "fill",
     }
+    :style{
+        decoration = "border",
+        decoration_padding = 3,
+    }
 	:build()
 
     local left = root
@@ -126,57 +129,77 @@ function battle.unit_info(): box.UIElement
     info_col:add(
         box.builder("unit_name")
         :text{
-            rows = 3,
+            rows = 2,
         }
         :on_update(function(self: box.UIElement, state: UIContextManager)
             local u = state.battle_context.last_hovered_unit
             if not u then
-                self.text.content = { "", "", "" }
+                self.text.content = { "", "" }
                 return
             end
             local weapons = u.character.inventory:get_equipped_weapons()
 
-            local w: wpn.Weapon
+            local w_string = ""
             if #weapons > 0 then
-                w = weapons[1]
+                w_string = weapons[1].damage.." damage"
             end
             self.text.content = {
                 "HP: " .. u.hp_current .. "/" .. u.character.stats.hp_max,
-                w and w.name or "Unarmed",
-                w and ("(" .. w.accuracy .. "% for " .. w.damage .. " dmg)") or "",
+                w_string,
             }
-        end)
-        :build())
-    
-    info_col:add(
-        box.builder("unit_name")
-        :text{
-            rows = 5,
-        }
-        :on_update(function(self: box.UIElement, state: UIContextManager)
-            local u = state.battle_context.last_hovered_unit
-            if not u then
-                self.text.content = { "", "", "", "", "" }
-                return
-            end
-
-            local items = u.character.inventory:get_items()
-
-            local out = {"Inventory:", "", "", "", ""}
-
-            local index = 1
-            for _,item in ipairs(items) do
-                out[index+1] = item.name
-                index = index + 1
-                for _=2,item.slots do
-                    out[index+1] = " |"
-                    index = index + 1
-                end
-            end
         end)
         :build())
 
     return root
+end
+
+function battle.unit_inventory(): box.UIElement
+    local out = box.builder("unit_inventory")
+        :direction"col"
+        :container"panel"
+        :padding(4)
+        :style{
+            -- decoration = "border",
+        }
+        :text{
+            draw_properties = {
+                wrap = "wrap",
+            },
+        }
+        :on_update(function(self: box.UIElement, state: UIContextManager)
+            local u = state.battle_context.last_hovered_unit
+            if not u then
+                self.text.content = { }
+                self.style.decoration_padding = 0
+                return
+            end
+
+            local items = u.character.inventory:get_item_descriptions()
+
+            local out = {}
+
+            for _,d in ipairs(items) do
+                if d.name then
+                    pt.add(out, d.name)
+                end
+                if d.effects then
+                    for _,e in ipairs(d.effects) do
+                        if e.name and e.description then
+                            pt.add(out, "> "..e.name..": "..e.description)
+                        elseif e.name then
+                            pt.add(out, "> "..e.name)
+                        elseif e.description then
+                            pt.add(out, "> "..e.description)
+                        end
+                    end
+                end
+            end
+            self.text.content = out
+            self.style.decoration_padding = 2
+        end)
+        :build()
+
+    return out
 end
 
 function battle.combat_preview(): box.UIElement

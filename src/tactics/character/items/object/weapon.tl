@@ -125,6 +125,42 @@ local record IncreaseAvoidEffect
     avoid_type: AvoidType
 end
 
+
+local effect_name <total>: {WeaponEffectType: string} = {
+    ["long_reach"] = "Long Reach",
+    ["shieldsplitter"] = "Shield-Splitter",
+    ["armorkiller"] = "Armor-Killer",
+    ["shieldkiller"] = "Shield-Killer",
+}
+
+local effect_description <total>: {WeaponEffectType: string} = {
+    ["long_reach"] = "Cannot be countered unless defender also has Long Reach.",
+    ["shieldsplitter"] = "Destroys shields.  (Not implemented)",
+    ["armorkiller"] = "Ignores armor bonuses.",
+    ["shieldkiller"] = "Ignores shield bonuses.",
+}
+
+local effect = {
+    DefenseType = DefenseType,
+    AvoidType = AvoidType,
+    IncreaseDefenseEffect = IncreaseDefenseEffect,
+    IncreaseAvoidEffect = IncreaseAvoidEffect,
+    LongReachEffect = LongReachEffect,
+    ShieldsplitterEffect = ShieldsplitterEffect,
+    ArmorkillerEffect = ArmorkillerEffect,
+    ShieldkillerEffect = ShieldkillerEffect,        
+    effect_name = effect_name,
+    effect_description = effect_description,
+}
+
+function effect.equipment_effect_description(eff: EquipmentEffect): string
+    if eff is IncreaseDefenseEffect then
+        return "Reduce damage taken by "..eff.amount..", to a minimum of 1."
+    elseif eff is IncreaseAvoidEffect then
+        return eff.amount.."% chance to dodge attacks." 
+    end
+end
+
 local weapon = {
     WeaponType = WeaponType,
     WeaponBodyType = WeaponBodyType,
@@ -135,16 +171,7 @@ local weapon = {
         none = none_targeting,    
         Targeting = Targeting,
     },
-    effect = {
-        DefenseType = DefenseType,
-        AvoidType = AvoidType,
-        IncreaseDefenseEffect = IncreaseDefenseEffect,
-        IncreaseAvoidEffect = IncreaseAvoidEffect,
-        LongReachEffect = LongReachEffect,
-        ShieldsplitterEffect = ShieldsplitterEffect,
-        ArmorkillerEffect = ArmorkillerEffect,
-        ShieldkillerEffect = ShieldkillerEffect,        
-    }
+    effect = effect,
 }
 
 return weapon
