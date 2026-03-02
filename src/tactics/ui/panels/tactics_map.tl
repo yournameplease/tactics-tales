@@ -62,23 +62,8 @@ local function compute_animated_unit_positions(map: bm.BattleMap): { AnimatedUni
     )(map:get_all_units())
 end
 
-local function should_draw_shadow(unit: BattleUnit, ctx: BattleUIContext): boolean
-    if ctx.acting_unit ~= nil and unit.id == ctx.acting_unit.id then
-        return true
-    end
-    if ctx.hovered_unit ~= nil and unit.id == ctx.hovered_unit.id then
-        return true
-    end
-    if unit.marked then
-        return true
-    end
-
-    return false
-end
-
-local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager, ctx: BattleUIContext)
+local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager, _ctx: BattleUIContext)
     local unit_tile = unit.tile
-    local draw_shadow = should_draw_shadow(unit, ctx)
 
     local world_point = unit_tile * TILE_SIZE
     local look_direction: CharacterRenderer.LookDirection = nil
@@ -99,7 +84,7 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
     -- end
 
     CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, draw_shadow, look_direction)
+    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, true, look_direction)
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
