@@ -78,10 +78,7 @@ function ButtonCursor:update_joy(
 					signal.then_navigate_to = self.next_state
 				end
 				if self.go_back ~= nil then
-					if self.back_handler ~= nil then
-						return menu_signal.call_handler(self.back_handler, self.value)
-					end
-					return menu_signal.back()
+					signal.then_back = true
 				end
 				return signal
 			end
@@ -135,10 +132,7 @@ function ButtonCursor:handle_command(
 					signal.then_navigate_to = self.next_state
 				end
 				if self.go_back ~= nil then
-					if self.back_handler ~= nil then
-						return menu_signal.call_handler(self.back_handler, self.value)
-					end
-					return menu_signal.back()
+					signal.then_back = true
 				end
 				return signal
 			end

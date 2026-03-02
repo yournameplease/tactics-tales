@@ -448,6 +448,21 @@ function BaseMenuManager:update(input: InputContext)
             if signal.then_navigate_to ~= nil then
                 self:handle_menu_advance(signal.then_navigate_to)
             end
+            if signal.then_back then
+                if self.menu_step.back_handler then
+                    local handler_id = self.menu_step.back_handler
+                    local back_handler = self.menu_handlers[handler_id]
+                    assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                    log.debug("Calling menu handler: "..handler_id)
+                    back_handler(
+                        self.game_ctx,
+                        self:serialize().node.data,
+                        self.menu_ctx,
+                        nil
+                    )
+                end
+                self:handle_menu_back()
+            end
         else
             unexpected(signal.type)
         end
