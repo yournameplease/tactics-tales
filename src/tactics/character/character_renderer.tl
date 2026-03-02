@@ -183,7 +183,8 @@ local function set_palette(
     pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[drawable_unit.character:get_appearance().hair_color].color)
 
 	if draw_outline then
-		local outline_color = drawable_unit.has_acted and 21 or side_palette[3]
+		-- local outline_color = side_palette[1]
+		local outline_color = 21
 		pt.set_pal(COLOR_OUTLINE, outline_color)
 	else
 		pt.set_palt(COLOR_OUTLINE, true)

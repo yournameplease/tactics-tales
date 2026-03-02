@@ -142,7 +142,9 @@ local STORIES = {
 			"militia_armor",
 			"militia_archer",
 			"child_axe",
-			"child_bow"
+			"child_bow",
+			"village_hero",
+			"militia_spearman",
 		},
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
@@ -155,6 +157,8 @@ local STORIES = {
 			"militia_archer",
 			"child_axe",
 			"child_bow",
+			"village_hero",
+			"militia_spearman",
 			"child_greatsword",
 			"village_axe",
 		},
@@ -169,6 +173,8 @@ local STORIES = {
 			"militia_archer",
 			"child_axe",
 			"child_bow",
+			"village_hero",
+			"militia_spearman",
 			"child_greatsword",
 			"village_axe",
 		},
