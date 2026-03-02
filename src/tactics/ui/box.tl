@@ -958,7 +958,7 @@ function Box:compute_text()
         if self.text.rows then
             assert(
                     #lines ==
-                    self.text.rows, "`func` should return expected number of rows"
+                    self.text.rows, self.id ..": `func` should return expected number of rows"
             )
         end
 

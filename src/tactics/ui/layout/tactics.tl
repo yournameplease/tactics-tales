@@ -36,6 +36,7 @@ do
 	local left = book.flex_page()
 	left:add(battle_summary)
 	left:add(battle.unit_info())
+	left:add(battle.unit_inventory())
 	left:add(box.spacer(1))
 	left:add(control_hints.new(
     	function (s: UIContextManager): menu_manager.MenuStep

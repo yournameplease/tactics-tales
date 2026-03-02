@@ -23,6 +23,14 @@ function effect.increase_avoid(
 end
 
 local function shield(name, sprite_id, slots, defense, avoid)
+    local effects = {}
+    if defense and defense ~= 0 then
+        add(effects, effect.increase_defense(defense, "SHIELD"))
+    end
+    if avoid and avoid ~= 0 then
+        add(effects, effect.increase_avoid(avoid, "SHIELD"))
+    end
+    
     return {
         name = name,
         type = "SHIELD",
@@ -33,24 +41,26 @@ local function shield(name, sprite_id, slots, defense, avoid)
             anchor = lib.point.of(14, 12)
         },
 
-        equipment_effects = {
-            effect.increase_defense(defense, "SHIELD"),
-            effect.increase_avoid(avoid, "SHIELD")
-        }        
+        equipment_effects = effects,        
     }
 end
 
 local function armor(name, slots, defense, avoid)
+    local effects = {}
+    if defense and defense ~= 0 then
+        add(effects, effect.increase_defense(defense, "ARMOR"))
+    end
+    if avoid and avoid ~= 0 then
+        add(effects, effect.increase_avoid(avoid, "ARMOR"))
+    end
+
     return {
         name = name,
         type = "ARMOR",
         slots = slots,
         equip_slot = "BODY",
 
-        equipment_effects = {
-            effect.increase_defense(defense, "ARMOR"),
-            effect.increase_avoid(avoid, "ARMOR")
-        },
+        equipment_effects = effects,
         appearance_overrides = {
             headwear = "helmet"
         }

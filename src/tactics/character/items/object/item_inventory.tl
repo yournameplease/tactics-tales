@@ -9,6 +9,16 @@ local wpn = require("src.tactics.character.items.object.weapon")
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
 
+local record EffectDescription
+	name: string
+	description: string
+end
+
+local record ItemDescription
+	name: string
+	effects: {EffectDescription}
+end
+
 local interface ItemInventory
 
 	-- items will be indexed, to account for slots
@@ -27,6 +37,8 @@ local interface ItemInventory
 	unequip_item_in_equip_slot: function(self, slot: item_types.EquipSlot)
 	remove_item: function(self, index: integer)
 	move_item: function(self, index: integer, before_index: integer)
+
+	get_item_descriptions: function(self): {ItemDescription}
 end
 
 local record InventoryItem
@@ -194,6 +206,39 @@ function ItemInventoryImpl:move_item(_index: integer, _before_index: integer)
 	error("not implemented")
 	
 	self:compute_current_slots()
+end
+
+function ItemInventoryImpl:get_item_descriptions(): {ItemDescription}
+	local out: {ItemDescription} = {}
+
+	local equipped = self:get_equipped_items()
+	for _,item in pairs(equipped) do
+		local description = {
+			name = item.name,
+			effects = {},
+		}
+		if item.weapon and item.weapon.effects then
+			local effects = item.weapon.effects
+			for _,eff in ipairs(effects) do
+				pt.add(description.effects, {
+					name = wpn.effect.effect_name[eff.type],	
+					description = wpn.effect.effect_description[eff.type],	
+				})
+			end
+		end
+		if item.equipment_effects then
+			local effects = item.equipment_effects
+			for _,eff in ipairs(effects) do
+				pt.add(description.effects, {
+					name = nil,	
+					description = wpn.effect.equipment_effect_description(eff),	
+				})
+			end
+		end
+
+		pt.add(out, description)
+	end
+	return out
 end
 
 local function new(max_slots: integer): ItemInventory
