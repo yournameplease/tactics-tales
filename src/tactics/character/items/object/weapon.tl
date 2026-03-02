@@ -47,6 +47,11 @@ local record ArmorkillerEffect
     where self.type == "armorkiller"
 end
 
+local record ShieldkillerEffect
+    is WeaponEffect
+    where self.type == "shieldkiller"
+end
+
 local interface Targeting
     get_selection_tiles: function(origin: Point, map: BattleMap): {Point}
     get_targets_for_selection: function(origin: Point, selection: Point, map: BattleMap): {BattleUnit}
@@ -137,8 +142,8 @@ local weapon = {
         IncreaseAvoidEffect = IncreaseAvoidEffect,
         LongReachEffect = LongReachEffect,
         ShieldsplitterEffect = ShieldsplitterEffect,
-        ArmorkillerEffect = ArmorkillerEffect        
-        ShieldkillerEffect = ShieldkillerEffect        
+        ArmorkillerEffect = ArmorkillerEffect,
+        ShieldkillerEffect = ShieldkillerEffect,        
     }
 }
 
