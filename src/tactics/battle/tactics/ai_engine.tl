@@ -100,7 +100,13 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
         return lists.contains(ai.target_sides, u.side)
     end
         
-    local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
+    local all_tile_costs = pathfinding.calculate_all_tile_costs(
+        self.battle_map,
+        unit.tile.x,
+        unit.tile.y,
+        unit.movement_side,
+        max_move
+    ) 
     
     local best_shallow_action: ShallowMovementOption = nil
     local deep_actions: {DeepMovementOption} = {}
