@@ -657,7 +657,7 @@ end
 --- Handles the visual and state-related consequences of a single combat step.
 --- This includes playing attack and dodge animations, applying damage and
 --- equipment effects, and checking if the defending unit has died.
-function TacticsEngine:apply_combat_step(step: combat_calculator.CombatResult.CombatStep)
+function TacticsEngine:apply_combat_step(step: combat_calculator.CombatStep)
     local attacker = step.attacker
     local defender = step.defender
 
@@ -715,7 +715,7 @@ function TacticsEngine:do_combat(attacker: BattleUnit, defender: BattleUnit)
 
     for i,combat_step in ipairs(combat_result.steps) do
         log.debug("Combat step: ",i)
-        self:apply_combat_step(combat_step as combat_calculator.CombatResult.CombatStep)
+        self:apply_combat_step(combat_step as combat_calculator.CombatStep)
     end
 
     if defender then
