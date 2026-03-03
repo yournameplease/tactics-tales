@@ -14,33 +14,33 @@ local wpn = require("src.tactics.character.items.object.weapon")
 local effect = wpn.effect
 local Targeting = require("src.tactics.character.items.object.weapon").targeting.Targeting
 
-local record CombatResult
-    record CombatStep
-        attacker: BattleUnit
-        defender: BattleUnit
-        hit_chance: integer
-        hit_roll: integer
-        is_hit: boolean
-        dmg: integer
-        destroy_shield: boolean
-    end
+local record CombatStep
+    attacker: BattleUnit
+    defender: BattleUnit
+    hit_chance: integer
+    hit_roll: integer
+    is_hit: boolean
+    dmg: integer
+    destroy_shield: boolean
+end
 
+local record CombatResult
     steps: { CombatStep }
 end
 
 
 local record CombatPreviewResult
-    record CombatPreviewStep
-        attacker: BattleUnit
-        defender: BattleUnit
-        hit_chance: integer
-        dmg: integer
-        destroy_shield: boolean
-    end
-    steps: { CombatPreviewStep }
+    steps: { CombatStep }
+
+    possible_kill: boolean
+    possible_self_kill: boolean
+    possible_counterattack: boolean
+    expected_damage: integer 
+    expected_self_damage: integer 
 end
 
 local combat_calculator = {
+    CombatStep = CombatStep,
     CombatResult = CombatResult,
     CombatPreviewResult = CombatPreviewResult,
 }
@@ -195,9 +195,9 @@ local function can_counter_attack(attacker: CombatDouble, defender: CombatDouble
     return can_attack(defender, attacker, attack, battle_map)
 end
 
-local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: bm.BattleMap): CombatResult.CombatStep
+local function get_combat_step(attacker: CombatDouble, defender: CombatDouble, weapon: AttackDouble, map: bm.BattleMap): CombatStep
     if weapon ~= nil then
-        local step: CombatResult.CombatStep = {
+        local step: CombatStep = {
             attacker = attacker.unit,
             defender = defender.unit,
             hit_chance = get_hit_chance(attacker, defender, weapon, map),
@@ -239,7 +239,11 @@ function combat_calculator.compute_combat(attacker_unit: BattleUnit, defender_un
 end
 
 function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_unit: BattleUnit, attacker_tile: Point, battle_map: bm.BattleMap): CombatPreviewResult
-    local result = { steps = {} }
+    local result: CombatPreviewResult = {
+        steps = {},
+        expected_damage = 0,
+        expected_self_damage = 0,
+    }
 
     local attacker = build_combat_double(attacker_unit)
     attacker.tile = attacker_tile
@@ -252,6 +256,7 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
     local step1 = get_combat_step(attacker, defender, attacker_attacks[1], battle_map)
     if step1 ~= nil then
         pt.add(result.steps, step1)
+        result.expected_damage = result.expected_damage + step1.dmg
     end
 
     -- defender counterattack
@@ -259,9 +264,14 @@ function combat_calculator.preview_combat(attacker_unit: BattleUnit, defender_un
     if can_counter_attack(attacker, defender, defender_attacks[1], battle_map) then
         local step2 = get_combat_step(defender, attacker, defender_attacks[1], battle_map)
         if step2 ~= nil then
+            result.possible_counterattack = true
             pt.add(result.steps, step2)
+            result.expected_self_damage = result.expected_self_damage + step2.dmg
         end
     end
+
+    result.possible_kill = result.expected_damage >= defender_unit.hp_current
+    result.possible_self_kill = result.expected_self_damage >= attacker_unit.hp_current
     
     return result
 end

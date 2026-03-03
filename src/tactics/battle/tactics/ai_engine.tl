@@ -7,21 +7,13 @@ local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local lists = require("src.tactics.util.lists")
 local character = require("src.tactics.character.object.character")
+local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
 local point = require("src.tactics.util.point")
 local Point = point.Point
 local pathfinding = require("src.tactics.battle.pathfinding")
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
 local tasks = require("src.tactics.systems.tasks")
 local bm = require("src.tactics.battle.battle_map")
-
---[[
-AI Mk 1:
-- perform full dijkstra on tiles, with ancestor references
-- if enemy in range, look at all tiles within attack range
-- - pick one at random
-- else
-- - pick nearest  enemy, move as close as possible
-]]
 
 local record AIEngine
     battle_map: bm.BattleMap
@@ -33,7 +25,44 @@ local ai_engine = {
     AIEngine = AIEngine,
 }
 
-local record MovementOption
+local record ShallowMovementOption
+    destination: Point
+    target: BattleUnit -- nillable
+    expected_kill: boolean
+    expected_self_kill: boolean
+    expected_counterattack: boolean
+    expected_damage: integer 
+    expected_self_damage: integer 
+    ally_score: integer
+end
+
+local function better_shallow_movement_option(a: ShallowMovementOption, b: ShallowMovementOption): boolean
+    if a == nil then
+        return false 
+    end
+    if b == nil then
+        return true
+    end
+    if a.expected_kill ~= b.expected_kill then
+        return a.expected_kill
+    end
+    if a.expected_self_kill ~= b.expected_self_kill then
+        return not a.expected_self_kill
+    end
+    if a.expected_counterattack ~= b.expected_counterattack then
+        return not a.expected_counterattack
+    end
+    if a.expected_damage ~= b.expected_damage then
+        return a.expected_damage > b.expected_damage
+    end
+    if a.expected_self_damage ~= b.expected_self_damage then
+        return a.expected_self_damage < b.expected_self_damage
+    end
+
+    return a.ally_score > b.ally_score
+end
+
+local record DeepMovementOption
     destination: Point
     target: BattleUnit -- nillable
 end
@@ -73,8 +102,8 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
         
     local all_tile_costs = pathfinding.calculate_all_tile_costs(self.battle_map, unit.tile.x, unit.tile.y, unit.side, max_move) 
     
-    local shallow_actions: {MovementOption} = {}
-    local deep_actions: {MovementOption} = {}
+    local best_shallow_action: ShallowMovementOption = nil
+    local deep_actions: {DeepMovementOption} = {}
 
     local targeting = unit.character:get_weapon_targeting()
         
@@ -83,23 +112,55 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
             and cost.cost <= shallow_move_limit
             and self.battle_map:tile_is_legal_destination(unit, p)
         then
+            local ally_score: integer = nil
             -- one_turn move, can attack
             local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
                 return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
             end)
             for _,t in ipairs(targets) do
-                pt.add(shallow_actions, {
+                if not ally_score then
+                    ally_score = 0
+                    for x = -2, 2 do
+                        for y = -2, 2 do
+                            if self.battle_map:tile_is_in_map(point.of(x, y)) then
+                                local u = self.battle_map:get_at_tile(point.of(x, y))
+                                if u and u.side == unit.side then
+                                    ally_score = ally_score + 1
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                local combat_result = combat_calculator.preview_combat(
+                    unit,
+                    t,
+                    p,
+                    self.battle_map
+                )
+
+                local shallow_action: ShallowMovementOption = {
                     destination = p,
                     target = t,
-                })
+                    expected_kill = combat_result.possible_kill,
+                    expected_self_kill = combat_result.possible_self_kill,
+                    expected_counterattack = combat_result.possible_counterattack,
+                    expected_damage =  combat_result.expected_damage,
+                    expected_self_damage =  combat_result.expected_self_damage,
+                    ally_score = ally_score, -- todo: count nearby allies
+                }
+
+                if better_shallow_movement_option(shallow_action, best_shallow_action) then
+                    best_shallow_action = shallow_action
+                end
             end
         end
     end)
-    if #shallow_actions == 0 then
+    if best_shallow_action == nil then
         all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
             if cost ~= nil
                 and cost.cost > shallow_move_limit
-                and self.battle_map:tile_is_legal_destination(unit, p)
+                -- and self.battle_map:tile_is_legal_destination(unit, p)
             then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
@@ -115,8 +176,8 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
         end)
     end
 
-    if #shallow_actions > 0 then
-        local choice = shallow_actions[1]
+    if best_shallow_action then
+        local choice = best_shallow_action
 
         local destination = choice.destination
         local path = pathfinding.get_path_to_tile(all_tile_costs, destination)
