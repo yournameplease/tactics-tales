@@ -152,9 +152,7 @@ local record SpawnUnits
 	where self.type == "spawn_units"
 	blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
 	animation: unit_spawn_data.UnitSpawnAnimation
-    enemies: { unit_spawn_data.UnitSpawnData}
-    neutral: { unit_spawn_data.UnitSpawnData}
-    players: { unit_spawn_data.UnitSpawnData}
+    units: { unit_spawn_data.UnitSpawnData}
 end
 
 local record ModifyUnits

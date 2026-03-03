@@ -3,6 +3,7 @@
 --- This includes the character source, AI behavior, and initial tile placement.
 
 local battle_definition_types = require("src.tactics.battle.definition.types")
+local character = require("src.tactics.character.object.character")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
 
 local enum UnitSpawnBlockedBehavior
@@ -39,6 +40,8 @@ end
 
 local record UnitSpawnData
     character_source: CharacterSource
+    side: character.Side
+    movement_side: string -- defaults to side
     -- optional for now, may want to make an interface
     ai: unit_ai.UnitAI
     tile: battle_definition_types.TileLabel

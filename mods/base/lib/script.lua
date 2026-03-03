@@ -17,26 +17,17 @@ end
 
 -- script effects
 
-function ScriptBuilder:then_spawn_units(players, enemies, animation)
+function ScriptBuilder:then_spawn_units(units, animation)
 	add(self.effects, {
 		type = "spawn_units",
-		players = players,
-		enemies = enemies,
+		units = units,
 		animation = animation,
 		blocked_behavior = "prevent"
 	})
 	return self
 end
-  
-function ScriptBuilder:then_spawn_players(players, animation)
-	return self:then_spawn_units(players, {}, animation)
-end
-  
-function ScriptBuilder:then_spawn_enemies(enemies, animation)
-	return self:then_spawn_units({}, enemies, animation)
-end
 
-function ScriptBuilder:then_despawn_units(units, text)
+function ScriptBuilder:then_despawn_units(units)
 	add(self.effects, {
 		type = "despawn_units",
 		units = units

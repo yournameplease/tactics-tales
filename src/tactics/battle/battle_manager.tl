@@ -72,9 +72,7 @@ function battle_manager.new(
     )
 
     self.tactics_engine:spawn_all(
-        battle_def.players,
-        battle_def.enemies,
-        battle_def.neutral,
+        battle_def.units,
         nil,
         "prevent"
     )
@@ -134,9 +132,11 @@ function battle_manager.new(
 
     if battle_def.deployment ~= nil then
         self.tactics_engine:spawn_all(
-            {{ character_source = {type = "player_roster"}, tile = "player_deployment" }},
-            {},
-            {},
+            {{
+                side = "player",
+                character_source = {type = "player_roster"},
+                tile = "player_deployment"
+            }},
             nil,
             "prevent"
         )

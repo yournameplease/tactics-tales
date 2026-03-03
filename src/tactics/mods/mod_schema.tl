@@ -114,6 +114,8 @@ local ai_spec = s.record({
 
 local battle_spawn_spec = s.record({
     character_source = character_source_spec,
+    side = s.string(),
+    movement_side = s.optional(s.string()),
     tile = s.string(), -- Should be a reference to a tile_label key
     ai = s.optional(ai_spec),
     tags = s.optional(s.list(s.string())),
@@ -129,9 +131,7 @@ local battle_spec = s.record({
     turn_limit = s.optional(s.integer()),
     victory_conditions = s.list(objective_spec),
     failure_conditions = s.list(objective_spec),
-    enemies = s.list(battle_spawn_spec),
-    players = s.list(battle_spawn_spec),
-    neutral = s.optional(s.list(battle_spawn_spec)),
+    units = s.list(battle_spawn_spec),
     deployment = s.optional(battle_deployment_spec),
     scripts = s.list(s.record({})), -- Scripts are too complex to define statically
 })

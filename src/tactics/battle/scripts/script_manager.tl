@@ -235,9 +235,7 @@ function ScriptManagerImpl:register_script(
 			fn = function(_: ScriptContext)
 				log.debug("Handling SpawnUnits effect.")
 			    self.tactics_engine:spawn_all(
-			        effect.players,
-			        effect.enemies,
-			        effect.neutral,
+			        effect.units,
 					effect.animation,
 					effect.blocked_behavior
 			    )
