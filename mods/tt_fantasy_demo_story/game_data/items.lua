@@ -86,12 +86,13 @@ local ITEM_DATA = {
     ),
     club = lib.libs.weapon.melee( "Club", 101, 1, 100, 1),
     mace = lib.libs.weapon.melee( "Mace", 102, 2, 100, 1, {
-            lib.libs.weapon.effect.armorkiller()
+            lib.libs.weapon.effect.armorkiller(),
+            lib.libs.weapon.effect.shieldkiller()
         }
     ),
     greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 100, 2),
     bow = lib.libs.weapon.ranged( "Bow", 104, 2, 100, 2, 2, 2 ),
-    shield = shield("Shield", 105, 1, 0, 25),
+    shield = shield("Shield", 105, 1, 1, 0),
     armor = armor("Armor", 2, 1, 0),
     boulder = lib.libs.weapon.of(
         "Boulder",
