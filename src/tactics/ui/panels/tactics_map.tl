@@ -204,7 +204,7 @@ local function draw_tactics_map(
     _ui_theme: UITheme
 )
     profile("tactics_map_draw")
-    -- profile("draw_map_pre_rows")
+    profile("draw_map_pre_rows")
 
     local data: MapData = self.data as MapData
 
@@ -243,7 +243,7 @@ local function draw_tactics_map(
     local cursor_tile = get_cursor_tile(state.battle_context)
 
     -- draw ground
-    -- profile("draw_ground")
+    profile("draw_ground")
     
     pt.map(layer_ground, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
@@ -256,10 +256,10 @@ local function draw_tactics_map(
         local c_y = cursor_tile.y * TILE_SIZE.y
         pt.spr(CURSOR_SPRITE, c_x, c_y)
     end
-    -- profile("draw_ground")
-    -- profile("draw_map_pre_rows")
+    profile("draw_ground")
+    profile("draw_map_pre_rows")
     
-    -- profile("draw_map_rows")
+    profile("draw_map_rows")
     local prev_z = 0
     for i=0,#unit_positions-1 do
         -- profile("draw_map_rows_get_unit")
@@ -279,9 +279,9 @@ local function draw_tactics_map(
     end
     draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
     
-    -- profile("draw_map_rows")
+    profile("draw_map_rows")
 
-    -- profile("draw_map_post_rows")
+    profile("draw_map_post_rows")
     local layer_ceiling = layers.terrain.ceiling
     if layer_ceiling ~= nil then
         pt.map(layer_ceiling, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
@@ -300,7 +300,7 @@ local function draw_tactics_map(
     end
 
     draw_target_manager:draw(draw_x, draw_y)
-    -- profile("draw_map_post_rows")
+    profile("draw_map_post_rows")
     profile("tactics_map_draw")
 end
 

@@ -21,6 +21,7 @@ local title_screen = require("src.tactics.ui.layout.title_screen")
 local record UIManager
     layouts: { UILayoutId: UILayout }
     current_layout: UILayout
+    current_layout_id: UILayoutId
     theme: UITheme
     draw_target_manager: draw_target_manager.DrawTargetManager
 end
@@ -93,12 +94,18 @@ end
 
 function UIManager:calculate(ui_ctx: UIContextManager)
     profile("ui_manager_calculate")
+
+    local is_new_layout = self.current_layout_id ~= ui_ctx.layout
+    
     self.current_layout = self.layouts[ui_ctx.layout]
+    self.current_layout_id = ui_ctx.layout
+    
 
     local root = self.current_layout.root
+
     
     -- Recalculate size and positions
-    root:recalculate(1, 0, 0, 480, 270, ui_ctx)
+    root:recalculate(1, 0, 0, 480, 270, ui_ctx, is_new_layout)
     if self.current_layout.modals then
         for _,modal in ipairs(self.current_layout.modals) do
             modal.node:recalculate_modal(ui_ctx, root)

@@ -137,10 +137,11 @@ local text_info = {
 
 local record CacheInfo
     draw_target: Userdata | nil
+    static_layout: boolean
 
     last_key: any
-    current_key: function(self: UIElement, ctx: UIContextManager): any
-    update_cached: function(self: UIElement, ctx: UIContextManager): any
+    current_key: function(ctx: UIContextManager): any
+    update_cached: function(self: UIElement, ctx: UIContextManager)
 
     dirty_layout: boolean
     dirty_draw: boolean
@@ -204,7 +205,9 @@ local interface UIElement
         depth: integer,
         x: integer, y: integer,
         w: integer, h: integer,
-        state: UIContextManager) 
+        state: UIContextManager,
+        is_dirty: boolean
+    ) 
     recalculate_modal: function(self, state: UIContextManager, root: UIElement) 
 end
 
@@ -264,6 +267,10 @@ function UIBuilder:build(): UIElement
     self.def.layout.padding.r = self.def.layout.padding.r or 0
 
     self.def.style.decoration_padding = self.def.style.decoration_padding or 0
+    
+    self.def.cacheable = self.def.cacheable or {}
+    self.def.cacheable.dirty_draw = true
+    self.def.cacheable.dirty_layout = true
     
     assert(not (self.def.layout.flex_grow > 0
         and (self.def.layout.width == "fit_content" and self.def.layout.height == "fit_content")), "Cannot flex grow with auto_width and auto_height")
@@ -455,7 +462,15 @@ end
 --- The first pass of the layout system. It calculates the
 --- intrinsic size of this element. If the element's size is set to 'auto',
 --- it will first measure its children to determine its own content-based size.
-function Box:measure(depth: integer)
+function Box:measure(depth: integer, is_dirty: boolean)
+    if not is_dirty and not self.cacheable.dirty_layout then
+        for _, c in ipairs(self.children) do
+            local child = c as Box
+            child:measure(depth+1, false)
+        end
+        return
+    end
+    
     self.rect.depth = depth
 
     local width = self.layout.width
@@ -469,7 +484,7 @@ function Box:measure(depth: integer)
         -- We still measure children so they know their own size
         for _, c in ipairs(self.children) do
             local child = c as Box
-            child:measure(depth+1)
+            child:measure(depth+1, is_dirty or self.cacheable.dirty_layout)
         end
         return
     end
@@ -480,7 +495,7 @@ function Box:measure(depth: integer)
 
     for i, c in ipairs(self.children) do
         local child = c as Box
-        child:measure(depth+1)
+        child:measure(depth+1, is_dirty or self.cacheable.dirty_layout)
 
         -- these could be 0 in case of a "fill" dimension
         local child_outer_w = child.rect.w or 0
@@ -549,8 +564,23 @@ function Box:apply_layout(
     parent_x: integer,
     parent_y: integer,
     max_w: integer,
-    max_h: integer
+    max_h: integer,
+    is_dirty: boolean
 )
+    if not is_dirty and not self.cacheable.dirty_layout then
+        for _, c in ipairs(self.children) do
+            local child = c as Box
+            child:apply_layout(
+                self.rect.c_x,
+                self.rect.c_y,
+                self.rect.c_w,
+                self.rect.c_h,
+                false
+            )
+        end
+        return
+    end
+
     if self.layout.width == "fill" then
         self.rect.w = max_w
     end
@@ -646,7 +676,7 @@ function Box:apply_layout(
         end
         -- Recurse Layout
         if child.layout then
-            child:apply_layout(cx, cy, child_w, child_h)
+            child:apply_layout(cx, cy, child_w, child_h, is_dirty or self.cacheable.dirty_layout)
         end
 
         -- Advance Cursor
@@ -662,6 +692,14 @@ function Box:apply_layout(
     -- log.debug("Menu layout for "..self.id)
     -- log.debug("outer: ", self.rect.x, self.rect.y, self.rect.w, self.rect.h)
     -- log.debug("inner: ", self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h)
+end
+
+function Box:post_layout()
+    self.cacheable.dirty_layout = false
+    for _, c in ipairs(self.children) do
+        local child = c as Box
+        child:post_layout()
+    end
 end
 
 function Box:draw_shaded(color_ne: Color, color_sw: Color, color_interior: Color)
@@ -936,12 +974,28 @@ function Box:update(state: UIContextManager)
     end
 end
 
+function Box:compute_caching(state: UIContextManager)
+    if self.cacheable.update_cached ~= nil then
+        local current_key = self.cacheable.current_key(state)
+        if current_key ~= self.cacheable.last_key then
+            self.cacheable.update_cached(self, state)
+            self.cacheable.last_key = current_key
+        end
+    end
+
+    for _,c in ipairs(self.children) do
+        local child = c as Box
+        child:compute_caching(state)
+    end
+end
+
 function Box:compute_children(state: UIContextManager)
     if self.child_generator ~= nil then
         local current_key = self.child_generator.current_key(state)
         if current_key ~= self.child_generator.last_key then
             self.children = self.child_generator.generate_children(state)
             self.child_generator.last_key = current_key
+            self.cacheable.dirty_layout = true
         end
     end
 
@@ -984,19 +1038,30 @@ function Box:recalculate(
     y: integer,
     w: integer,
     h: integer,
-    state: UIContextManager
+    state: UIContextManager,
+    is_dirty: boolean
 ) 
+    if is_dirty then
+        log.debug("Dirty layout, recalculating")
+    end
+
+    
+    self:compute_caching(state)
     self:compute_children(state)
 
     self:update(state)
     self:compute_text()
-    self:measure(depth)
-    self:apply_layout(x, y, w, h)
+    self:measure(depth, is_dirty)
+    self:apply_layout(x, y, w, h, is_dirty)
 
     self:update(state)
     self:compute_text()
-    self:measure(depth)
-    self:apply_layout(x, y, w, h)
+    self:measure(depth, is_dirty)
+    self:apply_layout(x, y, w, h, is_dirty)
+
+    if not is_dirty then
+        self:post_layout()
+    end
 end
 
 function Box:recalculate_modal(
@@ -1024,13 +1089,13 @@ function Box:recalculate_modal(
         self:compute_children(state)
         self:update(state)
         self:compute_text()
-        self:measure(1)
+        self:measure(1, true)
         local x = self.modal.anchor_node.rect.x + self.modal.anchor.ox
         local y = self.modal.anchor_node.rect.y + self.modal.anchor.oy
         -- todo
         local w = 100
         local h = 100
-        self:apply_layout(x, y, w, h)
+        self:apply_layout(x, y, w, h, true)
     end
 end
 
