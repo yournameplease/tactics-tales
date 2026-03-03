@@ -420,7 +420,7 @@ function TacticsEngine:recompute_marked_unit_tiles()
     self.marked_unit_tiles = self.marked_unit_tiles - self.marked_unit_tiles
     for _,unit in ipairs(marked_units) do
         self.marked_unit_tiles = self.marked_unit_tiles
-            | ((self.valid_tiles_by_unit[unit.id] & HIGHLIGHT.CAN_ATTACK) << 1)
+            | ((self:get_valid_tiles_for_unit(unit) & HIGHLIGHT.CAN_ATTACK) << 1)
     end
 end
 
@@ -858,13 +858,16 @@ end
 
 function TacticsEngine:invalidate_tiles_for_unit(unit: BattleUnit)
     self.valid_tiles_by_unit[unit.id] = nil
+    if unit.is_marked then
+        self:recompute_marked_unit_tiles()
+    end
 end
 
 function TacticsEngine:invalidate_tiles_for_point(p: Point)
     for id,_ in pairs(self.valid_tiles_by_unit) do
         local unit = self.battle_map:get_unit_by_id(id)
         if point.taxicab_distance(unit.tile, p) <= unit.character.stats.movement then
-            self.valid_tiles_by_unit[id] = nil
+            self:invalidate_tiles_for_unit(unit)
         end
     end
 end
