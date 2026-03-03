@@ -19,6 +19,8 @@ local record BattleUnit
     tile: Point
     hp_current: integer
     side: character.Side
+    movement_side: string
+
     has_acted: boolean
     
     character: character.Character
@@ -72,6 +74,7 @@ function battle_unit.spawn_unit(
     tile: Point,
     tags: {string},
     side: character.Side,
+    movement_side: string,
     facing: character.Facing,
     ai: unit_ai.UnitAI
 ): BattleUnit
@@ -86,6 +89,7 @@ function battle_unit.spawn_unit(
             permanent_unit.tags
         ),
         side = side,
+        movement_side = movement_side or side,
         facing = facing,
         marked = false,
         unit_ai = ai,

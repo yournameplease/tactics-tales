@@ -312,6 +312,7 @@ function TacticsEngine:spawn_units(
                         spawn_point,
                         labels,
                         spawn_data.side,
+                        spawn_data.movement_side,
                         character.facing.of(facing_r and "right" or "left"),
                         spawn_data.ai
                     )
@@ -822,7 +823,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(
         self.battle_map,
         unit.tile.x,
         unit.tile.y,
-        unit.side,
+        unit.movement_side,
         movement
     )
 
