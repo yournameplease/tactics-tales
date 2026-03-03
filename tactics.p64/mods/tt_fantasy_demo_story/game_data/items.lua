@@ -23,6 +23,14 @@ function effect.increase_avoid(
 end
 
 local function shield(name, sprite_id, slots, defense, avoid)
+    local effects = {}
+    if defense and defense ~= 0 then
+        add(effects, effect.increase_defense(defense, "SHIELD"))
+    end
+    if avoid and avoid ~= 0 then
+        add(effects, effect.increase_avoid(avoid, "SHIELD"))
+    end
+    
     return {
         name = name,
         type = "SHIELD",
@@ -33,24 +41,26 @@ local function shield(name, sprite_id, slots, defense, avoid)
             anchor = lib.point.of(14, 12)
         },
 
-        equipment_effects = {
-            effect.increase_defense(defense, "SHIELD"),
-            effect.increase_avoid(avoid, "SHIELD")
-        }        
+        equipment_effects = effects,        
     }
 end
 
 local function armor(name, slots, defense, avoid)
+    local effects = {}
+    if defense and defense ~= 0 then
+        add(effects, effect.increase_defense(defense, "ARMOR"))
+    end
+    if avoid and avoid ~= 0 then
+        add(effects, effect.increase_avoid(avoid, "ARMOR"))
+    end
+
     return {
         name = name,
         type = "ARMOR",
         slots = slots,
         equip_slot = "BODY",
 
-        equipment_effects = {
-            effect.increase_defense(defense, "ARMOR"),
-            effect.increase_avoid(avoid, "ARMOR")
-        },
+        equipment_effects = effects,
         appearance_overrides = {
             headwear = "helmet"
         }
@@ -59,30 +69,31 @@ end
 
 
 local ITEM_DATA = {
-    dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 90, 1 ),
-    sword = lib.libs.weapon.melee( "Sword", 97, 2, 80, 1 ),
-    axe = lib.libs.weapon.melee( "Axe", 98, 2, 70, 1, {
-            lib.libs.weapon.effect.shieldsplitter()
+    dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1 ),
+    sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1 ),
+    axe = lib.libs.weapon.melee( "Axe", 98, 2, 100, 1, {
+            lib.libs.weapon.effect.shieldkiller()
         }
     ),
-    spear = lib.libs.weapon.melee( "Spear", 99, 1, 90, 1, {
+    spear = lib.libs.weapon.melee( "Spear", 99, 1, 100, 1, {
             lib.libs.weapon.effect.long_reach()
         }
     ),
-    poleaxe = lib.libs.weapon.melee( "Poleaxe", 100, 2, 60, 1, {
+    poleaxe = lib.libs.weapon.melee( "Poleaxe", 100, 2, 100, 1, {
             lib.libs.weapon.effect.long_reach(),
-            lib.libs.weapon.effect.shieldsplitter()
+            lib.libs.weapon.effect.shieldkiller()
         }
     ),
-    club = lib.libs.weapon.melee( "Club", 101, 1, 80, 1),
-    mace = lib.libs.weapon.melee( "Mace", 102, 2, 70, 1, {
-            lib.libs.weapon.effect.armorkiller()
+    club = lib.libs.weapon.melee( "Club", 101, 1, 100, 1),
+    mace = lib.libs.weapon.melee( "Mace", 102, 2, 100, 1, {
+            lib.libs.weapon.effect.armorkiller(),
+            lib.libs.weapon.effect.shieldkiller()
         }
     ),
-    greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 70, 2),
-    bow = lib.libs.weapon.ranged( "Bow", 104, 2, 90, 2, 2, 2 ),
-    shield = shield("Shield", 105, 1, 0, 10),
-    armor = armor("Armor", 2, 1, -10),
+    greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 100, 2),
+    bow = lib.libs.weapon.ranged( "Bow", 104, 2, 100, 2, 2, 2 ),
+    shield = shield("Shield", 105, 1, 1, 0),
+    armor = armor("Armor", 2, 1, 0),
     boulder = lib.libs.weapon.of(
         "Boulder",
         1,
@@ -94,8 +105,8 @@ local ITEM_DATA = {
         {
             name = "Boulder",
             sprite = 108,
-            damage = 3,
-            accuracy = 60,
+            damage = 1,
+            accuracy = 100,
             targeting = {
                 get_selection_tiles = function(origin, map)
                     local out = {}

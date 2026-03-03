@@ -59,14 +59,12 @@ local BASE_UNIT = {
 	head_options_m = options.list{
 		"round",
 		"strong_chin",
-		"bony_chin",
-		"blocky_chin",
+		"small_chin",
 	},
 	head_options_f = options.list{
 		"narrow_chin",
 		"pointed_chin",
-		"chubby_chin",
-		"small_chin",
+		"round",
 	},
 	headwear_options = options.weighted{
 		["none"] = 8,
@@ -345,8 +343,15 @@ local UNIT_TEMPLATES = {
 			"sword"
 		}
 	},
-	character_customizer_template = {
+	protagonist = {
 		parent_template = "human_base",
+		hp_max = 5,
+    item_loadout = {
+			"sword"
+		}
+	},
+	character_customizer_template = {
+		parent_template = "protagonist",
 		beard_options = options.list{"none"},
 		headwear_options = options.list{"none"},
     item_loadout = {
