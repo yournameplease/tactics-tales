@@ -89,9 +89,7 @@ local record TacticsEngine
     -- mutations
     spawn_all: function(
         self,
-        players: {unit_spawn_data.UnitSpawnData},
-        enemies: {unit_spawn_data.UnitSpawnData},
-        neutrals: {unit_spawn_data.UnitSpawnData},
+        units: {unit_spawn_data.UnitSpawnData},
         animation: unit_spawn_data.UnitSpawnAnimation,
         blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
     )
@@ -249,6 +247,7 @@ function TacticsEngine:spawn_unit(unit: battle_unit.BattleUnit, spawn_point: Poi
     local idle_animation = self.animation_manager:create_idle_animation()
     unit.animation_data = idle_animation
     self.battle_map:spawn_unit(unit, spawn_point)
+    self:invalidate_tiles_for_point(spawn_point)
     log.debug("Spawned unit: "..tostring(unit))
 end
 
@@ -261,7 +260,6 @@ end
 --- Iterates over unit definitions and calls CharacterManager
 function TacticsEngine:spawn_units(
     units: {unit_spawn_data.UnitSpawnData},
-    side: battle_unit.Side,
     blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
 ): {battle_unit.BattleUnit}
     local spawned_units: {battle_unit.BattleUnit} = {}
@@ -296,7 +294,7 @@ function TacticsEngine:spawn_units(
                 local character_source = spawn_data.character_source
                 if character_source is unit_spawn_data.character_source.CharacterTemplateSource then
                     unit_character = char_man:generate_character(character_source.template, {})
-                    if side == "player" then
+                    if spawn_data.side == "player" then
                         char_man:persist_player(unit_character)
                     end
                 elseif character_source is unit_spawn_data.character_source.PlayerRosterSource then
@@ -313,7 +311,7 @@ function TacticsEngine:spawn_units(
                         unit_character,
                         spawn_point,
                         labels,
-                        side,
+                        spawn_data.side,
                         character.facing.of(facing_r and "right" or "left"),
                         spawn_data.ai
                     )
@@ -328,16 +326,12 @@ function TacticsEngine:spawn_units(
 end
 
 function TacticsEngine:spawn_all(
-    players: {unit_spawn_data.UnitSpawnData},
-    enemies: {unit_spawn_data.UnitSpawnData},
-    neutral: {unit_spawn_data.UnitSpawnData},
+    units: {unit_spawn_data.UnitSpawnData},
     anim: unit_spawn_data.UnitSpawnAnimation,
     blocked_behavior: unit_spawn_data.UnitSpawnBlockedBehavior
 )
     local spawned: {battle_unit.BattleUnit} = {}
-    lists.add_all(spawned, self:spawn_units(players or {}, "player", blocked_behavior))
-    lists.add_all(spawned, self:spawn_units(enemies or {}, "enemy", blocked_behavior))
-    lists.add_all(spawned, self:spawn_units(neutral or {}, "neutral", blocked_behavior))
+    lists.add_all(spawned, self:spawn_units(units, blocked_behavior))
 
     log.debug("Spawned "..#spawned.." units.")
     if anim ~= nil and #spawned > 0 then

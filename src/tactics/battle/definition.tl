@@ -19,9 +19,7 @@ local record BattleDefinition
     victory_conditions: { battle_objective.VictoryCondition }
     failure_conditions: { battle_objective.FailureCondition }
     deployment: BattleDeploymentDefinition
-    enemies: { unit_spawn_data.UnitSpawnData}
-    neutral: { unit_spawn_data.UnitSpawnData}
-    players: { unit_spawn_data.UnitSpawnData}
+    units: { unit_spawn_data.UnitSpawnData}
     scripts: { battle_script.BattleScript }
 end
 
