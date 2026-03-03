@@ -9,6 +9,8 @@ describe("included mods #it", function()
             -- Given
             local loader = mod_loader.new()
             loader:register_mod("base")
+            loader:register_mod("tactics_puzzler")
+            loader:register_mod("tt_fantasy_demo_story")
 
             -- When
             local is_valid, errors = loader:validate_mods()

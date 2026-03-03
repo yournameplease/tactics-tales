@@ -184,6 +184,10 @@ local pt_shim: Picotron = {
     fullpath = function(filename: any): string return "/mock/" .. tostring(filename) end,
     ls = function(path: string): {string}
         local files: {string} = {}
+        if not pcall(lfs.dir, path) then
+            return nil
+        end
+        
         for file in lfs.dir(path) do
             if file ~= "." and file ~= ".." then
                 table.insert(files, file)
