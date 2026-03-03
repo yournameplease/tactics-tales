@@ -63,8 +63,8 @@ local BASE_UNIT = {
 	},
 	head_options_f = options.list{
 		"narrow_chin",
-		"pointed_chin",
 		"round",
+		"small_chin",
 	},
 	headwear_options = options.weighted{
 		["none"] = 8,
