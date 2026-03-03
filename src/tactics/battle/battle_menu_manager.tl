@@ -104,8 +104,7 @@ end
 
 local record BattlePreparationsContext
     is menu_context.MenuContext
-    unit: BattleUnit
-    swap_target: Point
+    swap_source: Point
 end
 
 local function get_deployment_tiles(msb: BattleMenuContext, _ctx: BattleMainMenuContext): Userdata
@@ -142,7 +141,7 @@ HANDLERS["select_swap_unit"] = function(
     session_context: BattlePreparationsContext,
     value: grid.NestedGridValue
 ): menu_manager.menu_handler.MenuHandlerPostHandling
-    session_context.unit = services.battle_map:get_at_tile(value.point)
+    session_context.swap_source = value.point
     services.tactics_engine.active_point = value.point
     return nil
 end
@@ -154,12 +153,13 @@ HANDLERS["swap_units"] = function(
     value: grid.NestedGridValue
 ): menu_manager.menu_handler.MenuHandlerPostHandling
     services.tactics_engine:handle_swap_unit(
-        session_context.unit,
+        session_context.swap_source,
         value.point
     )
     services.tactics_engine.active_point = value.point
+    session_context.swap_source = nil
 
-    return nil
+	return menu_manager.menu_handler.then_recompute()
 end
 
 HANDLERS["start_battle"] = function(
@@ -384,6 +384,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("select_swap_unit")
                             :advance_to("SELECT_SWAP_TARGET")
                     )
+                    :with_child( -- marking for non-actable units
+                        function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                            return point_is_any_unit(point, msb.battle_map)
+                        end,
+                        button.builder("non_available_unit")
+                            :handle_back("mark_unit")
+                    )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
@@ -404,6 +411,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :handle_select("swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
                             :as_final_step()
+                    )
+                    :with_child( -- marking for non-actable units
+                        function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
+                            return point_is_any_unit(point, msb.battle_map)
+                        end,
+                        button.builder("non_available_unit")
+                            :handle_back("mark_unit")
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
@@ -479,9 +493,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
+                            local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
                             return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
-                                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) ~= nil
-                                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) & 0x1 ~= 0
+                                                    and valid_tiles:get(point.x, point.y) ~= nil
+                                                    and valid_tiles:get(point.x, point.y) & 0x1 ~= 0
                         end,
                         button.builder("move_unit")
                             :handle_select("move_acting_unit")
@@ -489,9 +504,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     )
                     :with_child(
                         function(point: Point, msb: BattleMenuContext, ctx: BattleMainMenuContext): boolean
+                            local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
                             return point_is_enemy_unit(point, msb.battle_map)
-                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) ~= nil
-                                    and ctx.acting_unit.unit.valid_tiles:get(point.x, point.y) & 0x4 ~= 0
+                                    and valid_tiles:get(point.x, point.y) ~= nil
+                                    and valid_tiles:get(point.x, point.y) & 0x4 ~= 0
                         end,
                         button.builder("attack_unit")
                             :handle_select("move_and_store_attack_unit")

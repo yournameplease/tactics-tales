@@ -26,7 +26,6 @@ local record BattleUnit
     unit_ai: unit_ai.UnitAI
     tags: maps.Set<string>
 
-    valid_tiles: Userdata
     marked: boolean
 
     is_marked: function(self): boolean
@@ -88,7 +87,6 @@ function battle_unit.spawn_unit(
         ),
         side = side,
         facing = facing,
-        valid_tiles = nil,
         marked = false,
         unit_ai = ai,
         sprites = {},
