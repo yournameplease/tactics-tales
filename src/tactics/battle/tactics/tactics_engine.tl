@@ -74,12 +74,16 @@ local record TacticsEngine
     dialogue_queue: {QueuedBattleDialogue}
     active_dialogue: ActiveBattleDialogue
 
+    valid_tiles_by_unit: {integer: Userdata}
+
     -- queries
     
     is_blocked: function(self): boolean
     tiles_with_distance_from_unit_attacks: function(self, unit: BattleUnit, point: Point): Userdata
     find_tiles_with_distance_from_tile: function(self, integer, integer, integer, integer): array_2d.Array2D<boolean>
     tiles_in_movement_and_attack_range: function(self, unit: BattleUnit): Userdata
+    
+    get_valid_tiles_for_unit: function(self, unit: BattleUnit): Userdata
     
     -- mutations
     spawn_all: function(
@@ -100,7 +104,7 @@ local record TacticsEngine
     set_unit_idle: function(self, BattleUnit)
     finish_unit_action: function(self, BattleUnit)
     handle_swap_unit: function(self,
-        unit: BattleUnit,
+        swap_source: Point,
         swap_target: Point
     )
     handle_move_unit: function(self,
@@ -167,6 +171,7 @@ function tactics_engine.new(
     self.event_writer = event_writer.new(bus)
     self.dialogue_manager = dialogue_manager.new()
     self.dialogue_queue = {}
+    self.valid_tiles_by_unit = {}
 
     self.marked_unit_revision = 0
     self.marked_unit_tiles = pt.userdata("u8", self.battle_map.width, self.battle_map.height)
@@ -414,7 +419,7 @@ function TacticsEngine:recompute_marked_unit_tiles()
     self.marked_unit_tiles = self.marked_unit_tiles - self.marked_unit_tiles
     for _,unit in ipairs(marked_units) do
         self.marked_unit_tiles = self.marked_unit_tiles
-            | ((unit.valid_tiles & HIGHLIGHT.CAN_ATTACK) << 1)
+            | ((self.valid_tiles_by_unit[unit.id] & HIGHLIGHT.CAN_ATTACK) << 1)
     end
 end
 
@@ -448,7 +453,7 @@ function TacticsEngine:handle_mark_unit(p: Point)
         else
             unit.marked = true
             self.marked_unit_tiles = self.marked_unit_tiles
-                | ((unit.valid_tiles & HIGHLIGHT.CAN_ATTACK) << 1)
+                | ((self.valid_tiles_by_unit[unit.id] & HIGHLIGHT.CAN_ATTACK) << 1)
         end
     end
 end
@@ -565,14 +570,14 @@ function TacticsEngine:jump_unit_to_point(
 end
 
 function TacticsEngine:handle_swap_unit(
-    unit: BattleUnit,
+    swap_source: Point,
     swap_target: Point
 )
     self.task_manager:start_routine(function()
         self.battle_is_blocked = true
 
         -- todo: animate
-        self.battle_map:swap_tile_units(unit.tile, swap_target)
+        self.battle_map:swap_tile_units(swap_source, swap_target)
         self.battle_is_blocked = false
     end)
 end
@@ -610,7 +615,7 @@ function TacticsEngine:modify_units(units: {BattleUnit}, new_unit_properties: Ne
             u.side = new_unit_properties.new_side
         end
 
-        u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
+        self.valid_tiles_by_unit[u.id] = self:tiles_in_movement_and_attack_range_for_unit(u)
     end
 end
 
@@ -620,7 +625,7 @@ function TacticsEngine:recruit_units(units: {BattleUnit})
         u.side = "player"
         self.character_manager:persist_player(u.character)
 
-        u.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(u)
+        self.valid_tiles_by_unit[u.id] = self:tiles_in_movement_and_attack_range_for_unit(u)
     end
 end
 
@@ -830,23 +835,23 @@ function TacticsEngine:compute_unit_valid_tiles()
     log.debug("Computing unit valid tiles.")
 
     for _,unit in ipairs(units) do
-        unit.valid_tiles = nil
+        self.valid_tiles_by_unit[unit.id] = nil
     end
     -- these should be computed ASAP to prevent flickering
     for _,unit in ipairs(marked_units) do
-        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+        self.valid_tiles_by_unit[unit.id] = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
     self:recompute_marked_unit_tiles()
     for _,unit in ipairs(player_units) do
-        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+        self.valid_tiles_by_unit[unit.id] = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
 
     -- these are less urgent
     -- this could probably be parallelized further
     self.task_manager:start_routine(function()
         for _,unit in ipairs(units) do
-            if unit.valid_tiles == nil then
-                unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+            if self.valid_tiles_by_unit[unit.id] == nil then
+                self.valid_tiles_by_unit[unit.id] = self:tiles_in_movement_and_attack_range_for_unit(unit)
                 pt.yield()
             end
         end
@@ -854,11 +859,11 @@ function TacticsEngine:compute_unit_valid_tiles()
     end)
 end
 
-function TacticsEngine:tiles_in_movement_and_attack_range(unit: BattleUnit): Userdata
-    if unit.valid_tiles == nil then
-        unit.valid_tiles = self:tiles_in_movement_and_attack_range_for_unit(unit)
+function TacticsEngine:get_valid_tiles_for_unit(unit: BattleUnit): Userdata
+    if self.valid_tiles_by_unit[unit.id] == nil then
+        self.valid_tiles_by_unit[unit.id] = self:tiles_in_movement_and_attack_range_for_unit(unit)
     end
-    return unit.valid_tiles
+    return self.valid_tiles_by_unit[unit.id]
 end
 
 function TacticsEngine:update(input: InputContext)
