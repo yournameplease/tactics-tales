@@ -551,7 +551,7 @@ local BATTLE_DATA = {
         players = {
             { character_source = character_source.template("militia_spear_captain"), tile = "player_0" },
             { character_source = character_source.template("militia_archer"), tile = "player_1" },
-            { character_source = character_source.template("village_hero"), tile = "player_2" },
+            { character_source = character_source.template("protagonist"), tile = "player_2" },
             { character_source = character_source.template("child_greatsword"), tile = "player_3" },
             { character_source = character_source.template("bandit_axe"), tile = "player_4" },
             { character_source = character_source.template("bandit_guard"), tile = "player_5" },
