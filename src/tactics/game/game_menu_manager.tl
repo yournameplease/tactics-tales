@@ -282,7 +282,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                 pt.add(options, selection.row("head_scale")
                                     :with_label("Head Scale")
                                     :with_key("head_scale")
-                                    :with_static_options({1, 2, 3, 4}))
+                                    :with_static_options({1, 2, 3, 0.75, 0}))
                                 pt.add(options, selection.row("dialogue_speed")
                                     :with_label("Text Speed")
                                     :with_key("dialogue_speed")
