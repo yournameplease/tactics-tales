@@ -156,7 +156,7 @@ end
 function battle.unit_inventory(): box.UIElement
     local out = box.builder("unit_inventory")
         :direction"col"
-        :container"panel"
+        :container"block"
         :padding(4)
         :style{
             -- decoration = "border",
