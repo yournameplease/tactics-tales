@@ -130,7 +130,7 @@ local function get_players_to_act_tiles(msb: BattleMenuContext, _ctx: BattleMain
 end
 
 local function get_tile_highlights_in_move_and_attack_range(msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
-    return msb.tactics_engine:tiles_in_movement_and_attack_range(ctx.acting_unit.unit)
+    return msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
 end
 
 local HANDLERS: { menu_types.MenuHandlerId: menu_manager.MenuHandler } = {}

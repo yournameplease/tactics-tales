@@ -108,7 +108,6 @@ function TurnManagerImpl:advance_phase()
         })
 
 		self.tactics_engine:yield_while_in_script()
-        self.tactics_engine:compute_unit_valid_tiles()
 
         local side_units = self.battle_map:get_units(function(u: BattleUnit): boolean
             return u.side == self:acting_side()
@@ -152,7 +151,6 @@ function turn_manager.new(
     self.event_writer = event_writer.new(bus)
 
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: event_bus.EventArgs)
-        self.tactics_engine:compute_unit_valid_tiles()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_writer:emit("TACTICS_BEGIN_TURN", {
             turn = self.turn,
@@ -164,7 +162,6 @@ function turn_manager.new(
         self.task_manager:start_routine(function()
             self.battle_menu_manager:clear_menu()
     		self.tactics_engine:yield_while_in_script()
-            self.tactics_engine:compute_unit_valid_tiles()
         
             if not self:check_objectives() then
                 local acting_side = self:acting_side()
