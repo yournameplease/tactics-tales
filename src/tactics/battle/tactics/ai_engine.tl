@@ -158,10 +158,7 @@ function AIEngine:compute_unit_ai(unit: BattleUnit)
     end)
     if best_shallow_action == nil then
         all_tile_costs:foreachpoint(function(p: Point, cost: pathfinding.ShortestPathEntry)
-            if cost ~= nil
-                and cost.cost > shallow_move_limit
-                -- and self.battle_map:tile_is_legal_destination(unit, p)
-            then
+            if cost ~= nil then
                 -- one_turn move, can attack
                 local targets = self.battle_map:get_units(function(u: BattleUnit): boolean
                     return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
