@@ -345,12 +345,16 @@ local BATTLE_DATA = {
             { side = "neutral", movement_side = "player", character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "civilian_sword", tags = {"civilian"} },
             { side = "neutral", movement_side = "player", character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "civilian_axe", tags = {"civilian"} },
             -- militia who turn enemy
-            { side = "neutral", movement_side = "enemy", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
-            { side = "neutral", movement_side = "enemy", character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
-            { side = "neutral", movement_side = "enemy", character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
-            { side = "neutral", movement_side = "enemy", character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}},
+            { side = "enemy", movement_side = "enemy", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary_neutral, tile = "militia_armor", tags = {"enemy_militia_stationary", "neutral_enemy"}},
+            { side = "enemy", movement_side = "enemy", character_source = character_source.template("militia_archer"), ai = ai.stationary_neutral, tile = "militia_bow", tags = {"enemy_militia_mobile", "neutral_enemy"}},
+            { side = "enemy", movement_side = "enemy", character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "militia_sword", tags = {"enemy_militia_mobile", "neutral_enemy"}},
+            { side = "enemy", movement_side = "enemy", character_source = character_source.template("militia_sword_captain"), ai = ai.stationary_neutral, tile = "militia_boss", tags = {"enemy_militia_stationary", "neutral_enemy", "boss"}},
         },
         scripts = {
+            script.on_turn(1, phase.before_player)
+                :then_dialogue(
+                    script_unit.tagged("militia_boss"),
+                    {"We'll let the bandits soften them up.", "Move to attack on my command."}),
             script.on_turn(6, phase.after_enemy)
                 :then_spawn_units({
                     { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "cultist_reinforce_w" },
@@ -363,24 +367,24 @@ local BATTLE_DATA = {
                 },
                 "from_west"
             ),
-            script.on_turn(3, phase.after_enemy)
+            script.on_turn(4, phase.after_enemy)
                 :then_dialogue(
                     script_unit.tagged("militia_boss"),
                     {"This is taking too long...", "Clear out these pests!"})
                 :then_modify_units(
                     script_unit.tagged("enemy_militia_stationary"),
                     ai.stationary,
-                    "enemy"
+                    nil
                 )
                 :then_modify_units(
                     script_unit.tagged("enemy_militia_mobile"),
                     ai.move_inf,
-                    "enemy"
+                    nil
                 )
                 :then_modify_units(
                     script_unit.tagged("enemy_bandit_waiting"),
                     ai.move_inf,
-                    "enemy"
+                    "nil"
                 ),
             script.on_talk("civilian_sword")
                 :with_tags{"recruit_civilians"}
