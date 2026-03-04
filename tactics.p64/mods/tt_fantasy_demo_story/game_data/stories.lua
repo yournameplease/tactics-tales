@@ -94,7 +94,7 @@ function stories.chapter_debug(
 	battle_id
 )
 	local intro_node = {}
-	add(intro_node, stories.roster_add('village_hero', {'hero'}))
+	add(intro_node, stories.roster_add('protagonist', {'hero'}))
 	for k,u in ipairs(roster_units) do
 		add(intro_node, stories.roster_add(u))
 	end

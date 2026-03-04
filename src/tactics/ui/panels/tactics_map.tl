@@ -217,10 +217,10 @@ local function draw_tactics_map(
     local ud_width = self.rect.c_w
     -- to top of screen
     local ud_height = self.rect.c_h + self.layout.padding.t
+    local padding_top = self.layout.padding.t
     local draw_x = self.rect.c_x
     local draw_y = self.rect.y
-    local draw_target_y = self.rect.c_y
-    draw_target_manager:push_target(ud_width, ud_height, 0, draw_target_y)
+    draw_target_manager:push_target(ud_width, ud_height, 0, padding_top)
 
     -- draw row-by row, top to bottom aka back to front
 
