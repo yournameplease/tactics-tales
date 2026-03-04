@@ -56,7 +56,7 @@ function modal.tactics_dialogue_menu(): box.UIElement
 	local menu_box = box.builder("tactics_dialogue_box")
 	:layout{
 	    width = 80,
-	    height = 32,
+	    height = 33,
 	    padding = box.layout.padding(2),
 	}
 	:style{

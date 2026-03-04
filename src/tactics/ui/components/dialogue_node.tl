@@ -15,6 +15,7 @@ function dialogue_node.multi_line(dialogue: Dialogue, text_info: box.text_info.T
     text_info.content = dialogue.text
 
     return box.builder("multi_dialogue")
+    :padding(1)
     :text(text_info)
     :on_update(function(self: box.UIElement, _state: UIContextManager)
         self.text.content = dialogue.text
@@ -36,6 +37,7 @@ function dialogue_node.single_line(dialogue: Dialogue, text_info: box.text_info.
     text_info.content = dialogue.text
 
     return box.builder("single_dialogue")
+    :padding(1)
     :text(text_info)
     :on_update(function(self: box.UIElement, _state: UIContextManager)
         self.text.content = dialogue.text
