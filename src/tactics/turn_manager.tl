@@ -152,6 +152,10 @@ function turn_manager.new(
 
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_: event_bus.EventArgs)
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+        self.event_writer:emit("TACTICS_BEGIN_PHASE", {
+            turn = self.turn,
+            side = PHASE_ORDER[1].side,
+        })
         self.event_writer:emit("TACTICS_BEGIN_TURN", {
             turn = self.turn,
             side = PHASE_ORDER[1].side,
