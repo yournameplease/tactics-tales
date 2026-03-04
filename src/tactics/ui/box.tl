@@ -922,13 +922,17 @@ function box.find_topmost_selection(
     my: number
 ): MenuMouseSelection 
     for _,child in ipairs(elem.children) do
+        local l = child.rect.x
+        local r = child.rect.x + child.rect.w
+        local t = child.rect.y
+        local b = child.rect.y + child.rect.h
         local c_l = child.rect.c_x
         local c_r = child.rect.c_x + child.rect.c_w
         local c_t = child.rect.c_y
         local c_b = child.rect.c_y + child.rect.c_h
         
-        if c_l <= mx and mx < c_r
-            and c_t <= my and my < c_b
+        if l <= mx and mx < r
+            and t <= my and my < b
         then
             log.trace("checking child box for selection", child.id, c_l, c_r, c_t, c_b)
             local child_selection = box.find_topmost_selection(child, mx, my)
