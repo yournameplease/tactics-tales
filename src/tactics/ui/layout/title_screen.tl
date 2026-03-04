@@ -3,6 +3,9 @@
 
 local box = require("src.tactics.ui.box")
 local book = require("src.tactics.ui.decoration.book")
+local control_hints = require("src.tactics.ui.panels.control_hints")
+local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local menu_manager = require("src.tactics.menu.menu_manager")
 
 local root = box.builder("title_screen")
     :layout{
@@ -25,7 +28,17 @@ local row = root:add(
         :build()
 )
 root:add(box.spacer(1))
-row:add(box.spacer(1))
+
+local left = box.spacer(1)
+left:add(box.spacer(1))
+left:add(control_hints.new(
+	function (s: UIContextManager): menu_manager.MenuStep
+		return s.game_context.menu_manager.menu_step
+	end,
+    {}
+))
+
+row:add(left)
 local book_box = row:add(book.book_box(150,200,15))
 row:add(box.spacer(1))
 
