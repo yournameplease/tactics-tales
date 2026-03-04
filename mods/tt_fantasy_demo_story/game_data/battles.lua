@@ -198,16 +198,19 @@ local BATTLE_DATA = {
             ["cultist_door_guard_c"] = { 0x14 },
             ["cultist_door_guard_d"] = { 0x15 },
             ["cultist_door_guard_e"] = { 0x16 },
+            ["cultist_door_guard_f"] = { 0x17 },
             ["door_b"] = { 0x33 },
             ["room_b_ceiling"] = { 0x30, 0x12, 0x11, 0x10 },
             ["door_c"] = { 0x34 },
             ["door_d"] = { 0x35 },
             ["door_e"] = { 0x36 },
+            ["door_f"] = { 0x37 },
             ["escape_point"] = { 0x38 },
             ["cultist_reinforce_w"] = { 0x18 },
             ["cultist_reinforce_e"] = { 0x19 },
             ["jailed_royal"] = { 0x20 },
             ["jailed_priest"] = { 0x21 },
+            ["jailed_bandit_nerd"] = { 0x22 },
             ["jailed_bandit"] = { 0x28 },
             ["jailed_bandit_bro"] = { 0x29 },
         },
@@ -224,15 +227,17 @@ local BATTLE_DATA = {
             deployment_tiles_tag = "player_deployment",
         },
         units = {
-            { side = "enemy", character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss"} },
+            { side = "enemy", character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss", "wait_to_charge"} },
             { side = "enemy", character_source = character_source.template("cultist_goon"), ai = ai.move_two, tile = "cultist_goon" },
-            { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_guard" },
+            { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.move_one, tile = "cultist_guard", tags = {"wait_to_charge"} },
             { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_door_guard_b" },
             { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_c" },
             { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_d" },
             { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_e" },
+            { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.stationary, tile = "cultist_door_guard_f" },
             { side = "neutral", movement_side = "player", character_source = character_source.template("militia_spearman"), ai = ai.stationary_neutral, tile = "jailed_priest", tags = {"room_c"}  },
             { side = "neutral", movement_side = "player", character_source = character_source.template("village_hero"), ai = ai.stationary_neutral, tile = "jailed_royal", tags = {"room_d"}  },
+            { side = "neutral", movement_side = "player", character_source = character_source.template("bandit_nerd"), ai = ai.stationary_neutral, tile = "jailed_bandit_nerd", tags = {"room_f"}  },
             { side = "neutral", movement_side = "player", character_source = character_source.template("bandit_guard"), ai = ai.move_inf_allied, tile = "jailed_bandit", tags = {"room_e", "bandit"}  },
             { side = "neutral", movement_side = "player", character_source = character_source.template("bandit_berzerker"), ai = ai.move_inf_allied, tile = "jailed_bandit_bro", tags = {"room_e", "bandit"} },
         },
@@ -253,10 +258,6 @@ local BATTLE_DATA = {
                 :then_spawn_units({
                     { side = "enemy", character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_e" },
                 }, "from_east"),
-            script.when_unit_dies("cultist_door_guard_b")
-                :then_modify_terrain("door_b", {["front_wall"] = 0})
-                :then_modify_terrain("room_b_ceiling", {["ceiling"] = 0})
-                :then_dialogue(script_unit.tagged("cultist_boss"), {"Intruders?", "Attack!", "Don't let them escape!"}),
             script.when_unit_dies("cultist_door_guard_c")
                 :then_play_music("recruit")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
@@ -265,20 +266,41 @@ local BATTLE_DATA = {
                     "Please, let me join and fight with you."
                 })
                 :then_recruit_unit(script_unit.tagged("jailed_priest")),
+            script.when_unit_dies("cultist_door_guard_f")
+                :then_play_music("recruit")
+                :then_modify_terrain("door_f", {["front_wall"] = 0})
+                :then_dialogue(script_unit.tagged("jailed_bandit_nerd"), {
+                    "Those other bandits are too noisy for me.",
+                    "Why don't I join you instead?"
+                })
+                :then_recruit_unit(script_unit.tagged("jailed_bandit_nerd")),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("jailed_royal"), {
-                    "Those cultists worked with bandits to capture me.",
+                    "Those cultists worked with bandits.",
                     "They should hate each other!",
                     "Something dark is looming.",
-                    "Allow me to travel with you to seek the truth."
+                    "Allow me to travel with you."
                 })
                 :then_recruit_unit(script_unit.tagged("jailed_royal")),
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_bro"), {"Aaaaaaargh, I'm gonna kill those cultists!"})
                 :then_dialogue(script_unit.tagged("jailed_bandit"), {"Don't leave me behind, boss!"}),
+            script.on_turn(1, phase.before_enemy)
+                :then_dialogue(
+                    script_unit.tagged("cultist_boss"),
+                    {"Intruders?", "Get rid of them, my followers!"}),
+            script.on_turn(8, phase.after_enemy)
+                :then_dialogue(
+                    script_unit.tagged("cultist_boss"),
+                    {"Why are the intruders still here?", "I guess we should get involved."})
+                :then_modify_units(
+                    script_unit.tagged("wait_to_charge"),
+                    ai.move_inf,
+                    nil
+                ),
             escape("escape_point"),
         }
     },

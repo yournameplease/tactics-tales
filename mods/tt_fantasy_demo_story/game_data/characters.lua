@@ -220,7 +220,17 @@ local UNIT_TEMPLATES = {
         item_loadout = {
 			 "axe" ,
 			"shield"
-		}
+			},
+		},
+    bandit_nerd = {
+      parent_template = "bandit_base",
+			hp_max = 4,
+			headwear_options = options.list{"wizard_hat"},
+			eyewear_options = options.list{"glasses_a", "glasses_b", "glasses_c"},
+      item_loadout = {
+			 "axe" ,
+			"shield"
+			},
     },
     bandit_boulder = {
         parent_template = "bandit_base",
