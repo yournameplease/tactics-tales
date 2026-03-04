@@ -526,6 +526,14 @@ local HEADWEAR: {string: HeadwearSpriteData} = {
 		sprite = 67,
 		back_sprite = 75,
 	},
+	crown = {
+		name = 'Crown',
+		draw_hair = false,
+		draw_beard = true,
+		draw_eyewear = true,
+		sprite = 113,
+		back_sprite = 121,
+	},
 	helmet = {
 		name = 'Helmet',
 		draw_hair = false,
@@ -644,6 +652,7 @@ local HEADWEAR_OPTIONS = {
 	"animal_mask",
 	"bandana",
 	"outlaw_hat",
+	"crown",
 }
 
 local customization_options = {

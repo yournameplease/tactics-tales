@@ -377,6 +377,7 @@ local UNIT_TEMPLATES = {
 	monarch = {
 		parent_template = "human_base",
         hp_max = 4,
+        headwear_options = options.list{"crown"},
         item_loadout = {
 		},
 	},
