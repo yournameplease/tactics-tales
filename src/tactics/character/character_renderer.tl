@@ -172,15 +172,18 @@ local function set_palette(
 	draw_outline: boolean,
 	look_direction: LookDirection
 )
+	profile("character_renderer_set_palette")
+	
 	local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
     pt.set_pal(COLOR_SIDE_1, side_palette[1])
     pt.set_pal(COLOR_SIDE_2, side_palette[2])
     pt.set_pal(COLOR_SIDE_3, side_palette[3])
-    local skin = drawable_unit.character:get_appearance().skin
+    local appearance = drawable_unit.character:get_appearance()
+    local skin = appearance.skin
     pt.set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
     pt.set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
-    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[drawable_unit.character:get_appearance().hair_color].color)
-    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[drawable_unit.character:get_appearance().hair_color].color)
+    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
 
 	if draw_outline then
 		-- local outline_color = side_palette[1]
@@ -219,6 +222,7 @@ local function set_palette(
 		    pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
 		end
 	end
+	profile("character_renderer_set_palette")
 end
 
 ---@desc
