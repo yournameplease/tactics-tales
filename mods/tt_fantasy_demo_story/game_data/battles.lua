@@ -8,6 +8,7 @@ local ai <const> = {
     move_inf = { move = "infinity", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
     stationary = { move = "zero", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
     stationary_allied = { move = "zero", target_sides = {"enemy"}},
+    move_one_allied = { move = "one", target_sides = {"enemy"}},
     move_inf_allied = { move = "infinity", target_sides = {"enemy"}},
     stationary_neutral = { move = "zero", target_sides = {} }
 }
@@ -522,10 +523,46 @@ local BATTLE_DATA = {
             { side = "enemy", character_source = character_source.template("militia_armor"), ai = ai.move_one, tile = "militia_boss_e" },
             -- civilians
             { side = "neutral", movement_side = "player", character_source = character_source.template("monarch"), ai = ai.stationary, tile = "monarch", tags = {"civilian"} },
-            { side = "neutral", movement_side = "player", character_source = character_source.template("old_fart"), ai = ai.stationary_allied, tile = "counselor", tags = {"civilian"} },
+            { side = "neutral", movement_side = "player", character_source = character_source.template("militia_spear_captain"), ai = ai.move_one_allied, tile = "counselor", tags = {"civilian"} },
             { side = "neutral", movement_side = "player", character_source = character_source.template("militia_spearman"), ai = ai.stationary_allied, tile = "friendly_militia", tags = {"civilian"} },
         },
-        scripts = {}
+        scripts = {
+            script.on_turn(1, phase.before_player)
+                :then_dialogue(
+                    script_unit.tagged("counselor"),
+                    {"Protect the monarch!", "Defeat enemy leaders to stop reinforcements."}),
+            script.on_turn(4, phase.after_enemy, 3)
+                :with_tags{"bandit_reinforcements"}
+                :then_spawn_units({
+                    { side = "enemy", character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce" },
+                },
+                "from_west"
+            ),
+            script.when_unit_dies("bandit_boss")
+                :then_remove_scripts("bandit_reinforcements")
+                :as_one_shot(),
+            script.on_turn(4, phase.after_enemy, 3)
+                :with_tags{"cultist_reinforcements"}
+                :then_spawn_units({
+                    { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.move_inf, tile = "cultist_reinforce" },
+                },
+                "from_east"
+            ),
+            script.when_unit_dies("cultist_boss")
+                :then_remove_scripts("cultist_reinforcements")
+                :as_one_shot(),
+            script.on_turn(4, phase.after_enemy, 3)
+                :with_tags{"militia_reinforcements"}
+                :then_spawn_units({
+                    { side = "enemy", character_source = character_source.template("militia_archer"), ai = ai.move_inf, tile = "militia_reinforce_a" },
+                    { side = "enemy", character_source = character_source.template("militia_spearman"), ai = ai.move_inf, tile = "militia_reinforce_b" },
+                },
+                "from_south"
+            ),
+            script.when_unit_dies("militia_boss")
+                :then_remove_scripts("militia_reinforcements")
+                :as_one_shot(),
+        }
     },
     ["playground"] = {
         map_id = "playground",
