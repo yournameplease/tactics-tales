@@ -46,7 +46,6 @@ end
 
 local enum InputMethod
     "mouse"
-    "keyboard"
     "joypad"
 end
 
@@ -156,7 +155,7 @@ function InputServiceImpl:get_user_input(): UserInput
         or mouse.mr
         or mouse.mm
 
-    if any_joy then self.current_input = "keyboard" end
+    if any_joy then self.current_input = "joypad" end
     if any_mouse then self.current_input = "mouse" end
 
     local new_actions: {InputAction: boolean} = nil
@@ -165,7 +164,7 @@ function InputServiceImpl:get_user_input(): UserInput
             ["ADVANCE"] = mouse.ml
         }
         new_actions = actions
-    elseif self.current_input == "joypad" or self.current_input == "keyboard" then
+    elseif self.current_input == "joypad" then
         local actions <total>: {InputAction: boolean} = {
             ["ADVANCE"] = joy.a
         }

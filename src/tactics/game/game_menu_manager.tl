@@ -290,6 +290,17 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                         	"very_fast",
                                         	"instant",
                                         }))
+                                pt.add(options, selection.row("glyph_family")
+                                    :with_label("Glyphs")
+                                    :with_key("glyph_family")
+                                    :with_static_options({
+                                        	"keyboard",
+                                        	"picotron",
+                                        	"snes",
+                                        	"nintendo",
+                                        	"xbox",
+                                        	"playstation",
+                                        }))
                                 return options
                             end))
                             
@@ -315,14 +326,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             ):with_initial_data(function(_services: GameMenuContext, _session_data: MenuContext): {string: any}
-                return {
-                    log_level = DYNAMIC_CONFIG.log_level,
-                    draw_flexbox_debug = DYNAMIC_CONFIG.draw_flexbox_debug,
-                    draw_target_debug = DYNAMIC_CONFIG.draw_target_debug,
-                    profile = DYNAMIC_CONFIG.profile,
-                    head_scale = DYNAMIC_CONFIG.head_scale,
-                    dialogue_speed = DYNAMIC_CONFIG.dialogue_speed,
-                }
+                return DYNAMIC_CONFIG
             end)
             :with_control_hints{
                 primary = "Select",

@@ -4,7 +4,6 @@
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local input_service = require("src.tactics.joypad")
-local InputMethod = input_service.InputMethod
 local InputLabel = input_service.InputLabel
 local menu_types = require("src.tactics.menu.types")
 local menu_manager = require("src.tactics.menu.menu_manager")
@@ -13,26 +12,34 @@ local control_hints = {}
 
 local type ActionSprites = { InputLabel: integer }
 
-local SPRITES <total>: { InputMethod: ActionSprites } = {
-	mouse = {
-		primary = 16,
-		secondary = 17,
-	},
-	keyboard = {
-		primary = 18,
-		secondary = 19,
-	},
-	joypad = {
-		primary = 20,
-		secondary = 21,
-	},
+local SPRITE_OFFSETS: ActionSprites = {
+	primary = 0,
+	secondary = 1,
+}
+
+local BASE_MOUSE_SPRITE = 16
+
+local BASE_JOYPAD_SPRITES <total>: { GlyphFamily: integer } = {
+	["keyboard"] = 24,
+	["picotron"] = 32,
+	["snes"] = 40,
+	["nintendo"] = 48,
+	["xbox"] = 56,
+	["playstation"] = 64,
 }
 
 local function sprite_function(
 	input_label: InputLabel
 ): function(state: UIContextManager): integer
 	return function(state: UIContextManager): integer
-		return SPRITES[state.game_context.input_method][input_label]
+		local base_sprite: integer
+		if state.game_context.input_method == "mouse" then
+			base_sprite = BASE_MOUSE_SPRITE
+		else
+			base_sprite = BASE_JOYPAD_SPRITES[DYNAMIC_CONFIG.glyph_family]
+		end
+		
+		return base_sprite + SPRITE_OFFSETS[input_label]
 	end
 end
 
