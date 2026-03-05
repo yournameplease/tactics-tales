@@ -210,7 +210,6 @@ local function draw_tactics_map(
 
     local draw_cursor =
         state.game_context.input_service.current_input == "joypad"
-        or state.game_context.input_service.current_input == "keyboard"
     
     local map = state.battle_context.battle_map
 

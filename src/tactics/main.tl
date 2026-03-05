@@ -70,7 +70,7 @@ function _update()
     animation_manager:tick()
     user_input = input:get_user_input()
     local input_ctx: input_context.InputContext = nil
-    if user_input.active_method == "joypad" or user_input.active_method == "keyboard" then
+    if user_input.active_method == "joypad" then
         input_ctx = input_context.joypad(user_input.joypad, user_input.actions)
     elseif user_input.active_method == "mouse" then
         local hovered: MenuMouseSelection
@@ -91,10 +91,7 @@ end
 
 function _draw()
     if user_input.method_changed then
-        if
-            user_input.active_method == "joypad"
-            or user_input.active_method == "keyboard"
-        then
+        if user_input.active_method == "joypad" then
             pt.set_window_attributes({hide_cursor = "until_move"})
         elseif user_input.active_method == "mouse" then
         end

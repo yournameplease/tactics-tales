@@ -36,6 +36,14 @@ global enum DialogueSpeed
 	"very_fast"
 	"instant"
 end
+global enum GlyphFamily
+	"keyboard"
+	"picotron"
+	"snes"
+	"nintendo"
+	"xbox"
+	"playstation"
+end
 global record DynamicConfig
 	log_level: LogLevel
 	draw_flexbox_debug: boolean
@@ -43,6 +51,7 @@ global record DynamicConfig
 	profile: boolean
 	head_scale: integer
 	dialogue_speed: DialogueSpeed
+	glyph_family: GlyphFamily
 end
 global DYNAMIC_CONFIG: DynamicConfig
 global record StaticConfig

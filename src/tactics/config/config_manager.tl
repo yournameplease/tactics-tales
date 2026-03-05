@@ -11,6 +11,7 @@ local DEFAULT_CONFIG: DynamicConfig = {
 	profile = false,
 	head_scale = 1,
 	dialogue_speed = "normal",
+	glyph_family = "keyboard",
 }
 
 local interface ConfigManager
