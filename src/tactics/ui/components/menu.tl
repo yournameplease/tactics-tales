@@ -115,7 +115,7 @@ function menu.select_row(
 			}
 			:build())
 	end
-	row:add(box.spacer(1))
+	row:add(box.spacer(2))
 	row:add(
 		box.builder(node.id.."left")
 		:layout{
@@ -133,15 +133,16 @@ function menu.select_row(
 		:build())
 	row:add(
 		box.builder(node.id.."_text")
-		:layout({
-			width = "fit_content"
-		})
+		:layout{
+			width = 80,
+		}
 		:padding(1)
 		:text{
 			rows = 1,
 			content = { node.label },
 			draw_properties = {
 				wrap = "no_wrap",
+				justify = "center",
 			},
 		}
 		:on_update(function(self: box.UIElement, _state: UIContextManager)
