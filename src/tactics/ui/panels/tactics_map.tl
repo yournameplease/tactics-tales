@@ -310,8 +310,8 @@ local function get_selection_at(
     ly: number
 ): mouse_menu_selection.MenuMouseSelection
     local data: MapData = self.data as MapData
-    local tx = pt.flr((lx-self.layout.padding.l) / TILE_WIDTH)
-    local ty = pt.flr((ly-self.layout.padding.t) / TILE_HEIGHT)
+    local tx = pt.flr(lx / TILE_WIDTH)
+    local ty = pt.flr(ly / TILE_HEIGHT)
 
     if data.menu_node then
         if tx >= 0 and tx < MAP_WIDTH
