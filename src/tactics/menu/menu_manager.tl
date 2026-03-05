@@ -23,6 +23,7 @@ local record SelectionHistory
 end
 
 local enum MenuHandlerPostHandlingType
+    "consume" -- prevent navigation, if it was provided
     "navigate"
     "deserialize"
     -- for now, only needed for grid keyboard...
@@ -42,6 +43,11 @@ end
 local record MenuHandlerRecompute
     is MenuHandlerPostHandling
     where self.type == "recompute_menu"
+end
+
+local record MenuHandlerConsume
+    is MenuHandlerPostHandling
+    where self.type == "consume"
 end
 
 local record MenuHandlerNavigate
@@ -72,6 +78,12 @@ end
 function menu_handler.then_recompute(): MenuHandlerRecompute
     return {
         type = "recompute_menu",
+    }
+end
+
+function menu_handler.then_dont_navigate(): MenuHandlerRecompute
+    return {
+        type = "consume",
     }
 end
 
@@ -446,7 +458,9 @@ function BaseMenuManager:update(input: InputContext)
                 self:clear_menu()
             end
             if signal.then_navigate_to ~= nil then
-                self:handle_menu_advance(signal.then_navigate_to)
+                if not (handler_res and handler_res is MenuHandlerConsume) then
+                    self:handle_menu_advance(signal.then_navigate_to)
+                end
             end
             if signal.then_back then
                 if self.menu_step.back_handler then

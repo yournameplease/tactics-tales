@@ -301,21 +301,36 @@ HANDLERS["move_and_store_attack_unit"] = function(
     local targeting = acting_unit.character:get_weapon_targeting()
 
     local destination_point = value.path[#value.path]
+    local valid_destination = false
     for i = #value.path, 1, -1 do
         if targeting.is_target_valid(value.path[i], target_point, services.battle_map) then
             destination_point = value.path[i]
+            valid_destination = true
             break
         end
     end
+
+    if not valid_destination then
+        return menu_manager.menu_handler.then_dont_navigate()
+    end
+
+    local trimmed_path: {Point} = {}
+    for i,p in ipairs(value.path) do
+        trimmed_path[i] = p
+        if p == destination_point then
+            break
+        end
+    end
+
     
     session_context.destination = {
         point = destination_point,
-        path = value.path, -- todo?
+        path = trimmed_path, -- todo?
     }
     services.tactics_engine:handle_move_unit(
         session_context.acting_unit.unit,
         session_context.destination.point,
-        session_context.destination.path
+        trimmed_path
     )
     session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point)}
     services.tactics_engine.active_point = destination_point
