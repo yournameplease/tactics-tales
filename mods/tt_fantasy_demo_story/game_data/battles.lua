@@ -384,12 +384,12 @@ local BATTLE_DATA = {
                 :then_modify_units(
                     script_unit.tagged("enemy_bandit_waiting"),
                     ai.move_inf,
-                    "nil"
+                    nil
                 ),
             script.on_talk("civilian_sword")
                 :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
-                :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life to stand up to the crooked militia.", "Let us join you!"})
+                :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life", "to stand up to the crooked militia.", "Let us join you!"})
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_remove_scripts("recruit_civilians")
