@@ -265,7 +265,7 @@ local BATTLE_DATA = {
                     { side = "enemy", character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_e" },
                 }, "from_east"),
             script.when_unit_dies("cultist_door_guard_c")
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {
                     "Thank you for freeing me.",
@@ -274,7 +274,7 @@ local BATTLE_DATA = {
                 :then_recruit_unit(script_unit.tagged("jailed_priest"))
                 :then_resume_music(),
             script.when_unit_dies("cultist_door_guard_f")
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_modify_terrain("door_f", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_nerd"), {
                     "Those other bandits are too noisy for me.",
@@ -284,7 +284,7 @@ local BATTLE_DATA = {
                 :then_resume_music(),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_dialogue(script_unit.tagged("jailed_royal"), {
                     "Those cultists worked with bandits.",
                     "They should hate each other!",
