@@ -220,6 +220,7 @@ local box = {
     UIDirection = UIDirection,
     DecorationStyle = DecorationStyle,
     UIElement = UIElement,
+    UITextColor = UITextColor,
     Box = Box,
     layout = layout,
     anchor = {
