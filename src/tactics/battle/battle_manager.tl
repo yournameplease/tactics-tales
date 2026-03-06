@@ -20,6 +20,7 @@ local GameData = require("src.tactics.game_data").GameData
 local TaskManager = require("src.tactics.systems.tasks").TaskManager
 local AnimationManager = require("src.tactics.animation").AnimationManager
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
+local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 
 local interface BattleManager
     teardown: function(self)
@@ -44,6 +45,7 @@ local record BattleManagerImpl
 
     character_manager: CharacterManager
     ui_context: UIContextManager
+    music_player: MusicPlayer
 end
 
 function battle_manager.new(
@@ -53,11 +55,13 @@ function battle_manager.new(
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus,
+    music_player: MusicPlayer,
     ui_context: UIContextManager
 ): BattleManager 
     local self: BattleManagerImpl = setmetatable({}, { __index = BattleManagerImpl })
 
     self.character_manager = char_man
+    self.music_player = music_player
 
     local battle_def = game_data.battles[battle_id]
     local map_def = game_data.maps[battle_def.map_id]
@@ -68,7 +72,8 @@ function battle_manager.new(
         self.character_manager,
         task_manager,
         animation_manager,
-        event_bus
+        event_bus,
+        music_player
     )
 
     self.tactics_engine:spawn_all(
@@ -80,6 +85,7 @@ function battle_manager.new(
     self.script_manager = script_manager.new(
         battle_def.scripts,
         event_bus,
+        music_player,
         self.battle_map,
         self.tactics_engine,
         task_manager
@@ -130,6 +136,13 @@ function battle_manager.new(
     self.ui_context = ui_context
     self.ui_context:register_ui_context(battle_ui_ctx)
 
+    if battle_def.music then
+        -- todo: move this to after deployment phase
+
+        music_player:set_music(battle_def.music, 0)
+    end
+
+    
     if battle_def.deployment ~= nil then
         self.tactics_engine:spawn_all(
             {{
@@ -145,13 +158,11 @@ function battle_manager.new(
         event_bus:emit("TACTICS_BEGIN_BATTLE", {})
     end
 
-    -- todo: re-enable when better or i add a mute button
-    -- pt.music(0)
     return self
 end
 
 function BattleManagerImpl:teardown()
-    pt.music(-1)
+    self.music_player:clear_music()
     self.ui_context:unregister_ui_context('battle')
     self.turn_manager:teardown()
     self.script_manager:teardown()

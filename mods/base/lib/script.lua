@@ -110,6 +110,14 @@ function ScriptBuilder:then_play_music(
 	add(self.effects, {
 		type = "play_music",
 		music_id = music_id,
+		music_type = "jingle",
+	})
+	return self
+end
+
+function ScriptBuilder:then_resume_music()
+	add(self.effects, {
+		type = "play_music",
 	})
 	return self
 end

@@ -365,7 +365,7 @@ global record Picotron
 	send_message: function(pid: integer, event: any) 
 	pid: function() : integer 
 	notify: function(message: string) 
-	stat: function(id?: integer, addr?: integer) 
+	stat: function(id?: integer, addr?: integer): any
 	theme: function(which: string) 
 	open: function(file: string) 
 

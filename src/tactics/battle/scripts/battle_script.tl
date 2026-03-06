@@ -196,10 +196,16 @@ local record PlaySound
 	sound_id: string 
 end
 
+local enum MusicType
+	"music"
+	"jingle"
+end
+
 local record PlayMusic
 	is ScriptEffect
 	where self.type == "play_music"
 	music_id: string 
+	music_type: MusicType
 end
 
 local record RemoveScript

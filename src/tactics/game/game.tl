@@ -14,6 +14,7 @@ local InputContext = require("src.tactics.input.input_context").InputContext
 local ConfigManager = require("src.tactics.config.config_manager").ConfigManager
 local ModLoader = require("src.tactics.mods.mod_loader").ModLoader
 local EventBus = require("src.tactics.systems.event_bus").EventBus
+local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local InputService = require("src.tactics.joypad").InputService
 local TaskManager = require("src.tactics.systems.tasks").TaskManager
 local AnimationManager = require("src.tactics.animation").AnimationManager
@@ -38,6 +39,7 @@ local record Game
 
     event_listener: event_listener.EventListener
     event_writer: event_writer.EventWriter
+    music_player: MusicPlayer
 
     ui_context: UIContextManager
 
@@ -56,6 +58,7 @@ function Game:load_story(file_name: string)
         self.story_services_bundle.task_manager,
         self.story_services_bundle.animation_manager,
         self.story_services_bundle.event_bus,
+        self.music_player,
         self.ui_context
     )
 end
@@ -71,6 +74,7 @@ function Game:begin_story(file_name: string, story_id: StoryId)
             self.story_services_bundle.task_manager,
             self.story_services_bundle.animation_manager,
             self.story_services_bundle.event_bus,
+            self.music_player, 
             self.ui_context
         )
         return
@@ -86,6 +90,7 @@ function Game:begin_story(file_name: string, story_id: StoryId)
             self.story_services_bundle.task_manager,
             self.story_services_bundle.animation_manager,
             self.story_services_bundle.event_bus,
+            self.music_player,
             self.ui_context
         )
         return
@@ -106,6 +111,7 @@ function game.new(
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus,
+    music_player: MusicPlayer,
     ui_context: UIContextManager,
     config_manager: ConfigManager,
     mod_loader: ModLoader,
@@ -126,6 +132,7 @@ function game.new(
 
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
+    self.music_player = music_player
 
     local game_menu_ctx = game_menu_context.new(
         story_ids,

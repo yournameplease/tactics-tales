@@ -13,6 +13,7 @@ local config_manager = require("src.tactics.config.config_manager")
 
 local tasks = require("src.tactics.systems.tasks")
 local event_bus = require("src.tactics.systems.event_bus")
+local music_player = require("src.tactics.music.music_player")
 local animation = require("src.tactics.animation")
 local ui_mgr = require("src.tactics.ui.ui_manager")
 local mod_ldr = require("src.tactics.mods.mod_loader")
@@ -42,6 +43,7 @@ function _init()
     ui_manager = ui_mgr.new()
     animation_manager = animation.animation_manager()
     bus = event_bus.new()
+    local music = music_player.new()
 
     ui_context = ui_context_manager.new()
 
@@ -52,6 +54,7 @@ function _init()
         task_manager,
         animation_manager,
         bus,
+        music,
         ui_context,
         config_mgr,
         mod_loader,
