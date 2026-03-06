@@ -82,7 +82,12 @@ end
 function NestedMenuNode:update_joy(
 	joy: Joypad
 ): MenuSignal
-	local signal = self:get_focused_leaf():update_joy(joy)
+	local focused_leaf = self:get_focused_leaf()
+	if focused_leaf == nil then
+		return menu_signal.ignored()
+	end
+	
+	local signal = focused_leaf:update_joy(joy)
     if signal ~= nil and signal.type ~= "ignored" then return signal end
     local old_i = self.i
 

@@ -105,6 +105,7 @@ end
 local BATTLE_DATA = {
     ["bandit_village"] = {
         map_id = "bandit_village",
+        music = 0,
         tile_labels = {
             ["player_deployment"] = { 0x00 },
             ["bandit_boss"] = { 0x1E },
@@ -153,7 +154,8 @@ local BATTLE_DATA = {
                 "while avoiding counterattacks.",
                 "Shields can be shattered by axes.",
                 "Defeat their leader to save this village!"
-            }),
+            })
+            :then_resume_music(),
             script.on_turn(3, phase.after_enemy, 3)
                 :then_spawn_units({
                     { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.move_inf, tile = "bandit_reinforce_l" },
@@ -176,7 +178,8 @@ local BATTLE_DATA = {
                 :then_dialogue(script_unit.tagged("child_bow_player"), {
                     "Thank you!",
                     "Let me fight, I'm good with a bow!",
-                }),
+                })
+                :then_resume_music(),
             script.when_unit_dies("spawn_child_axe")
                 :then_play_music("recruit_short")
                 :then_spawn_units({
@@ -185,11 +188,13 @@ local BATTLE_DATA = {
                 :then_dialogue(script_unit.tagged("child_axe_player"), {
                     "Gah, I'm free!",
                     "Those bandits will taste my axe!",
-                }),
+                })
+                :then_resume_music(),
         }
     },
     ["cultist_cave"] = {
         map_id = "cultist_cave",
+        music = 12,
         tile_labels = {
             ["player_deployment"] = { 0x00 },
             ["cultist_boss"] = { 0x10 },
@@ -260,31 +265,34 @@ local BATTLE_DATA = {
                     { side = "enemy", character_source = character_source.template("cultist_goon"), ai = ai.move_inf, tile = "cultist_reinforce_e" },
                 }, "from_east"),
             script.when_unit_dies("cultist_door_guard_c")
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_modify_terrain("door_c", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_priest"), {
                     "Thank you for freeing me.",
                     "Please, let me join and fight with you."
                 })
-                :then_recruit_unit(script_unit.tagged("jailed_priest")),
+                :then_recruit_unit(script_unit.tagged("jailed_priest"))
+                :then_resume_music(),
             script.when_unit_dies("cultist_door_guard_f")
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_modify_terrain("door_f", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_nerd"), {
                     "Those other bandits are too noisy for me.",
                     "Why don't I join you instead?"
                 })
-                :then_recruit_unit(script_unit.tagged("jailed_bandit_nerd")),
+                :then_recruit_unit(script_unit.tagged("jailed_bandit_nerd"))
+                :then_resume_music(),
             script.when_unit_dies("cultist_door_guard_d")
                 :then_modify_terrain("door_d", {["front_wall"] = 0})
-                :then_play_music("recruit")
+                :then_play_music("recruit_short")
                 :then_dialogue(script_unit.tagged("jailed_royal"), {
                     "Those cultists worked with bandits.",
                     "They should hate each other!",
                     "Something dark is looming.",
                     "Allow me to travel with you."
                 })
-                :then_recruit_unit(script_unit.tagged("jailed_royal")),
+                :then_recruit_unit(script_unit.tagged("jailed_royal"))
+                :then_resume_music(),
             script.when_unit_dies("cultist_door_guard_e")
                 :then_modify_terrain("door_e", {["front_wall"] = 0})
                 :then_dialogue(script_unit.tagged("jailed_bandit_bro"), {"Aaaaaaargh, I'm gonna kill those cultists!"})
@@ -307,6 +315,7 @@ local BATTLE_DATA = {
     },
     ["fortress_town"] = {
         map_id = "fortress_town",
+        music = 0,
         tile_labels = {
             ["player_deployment"] = { 0x00, 0x01 },
             ["bandit_goon"] = { 0x10 },
@@ -384,15 +393,16 @@ local BATTLE_DATA = {
                 :then_modify_units(
                     script_unit.tagged("enemy_bandit_waiting"),
                     ai.move_inf,
-                    "nil"
+                    nil
                 ),
             script.on_talk("civilian_sword")
                 :with_tags{"recruit_civilians"}
                 :then_play_music("recruit")
-                :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life to stand up to the crooked militia.", "Let us join you!"})
+                :then_dialogue(script_unit.tagged("civilian_sword"), {"I've been training all my life", "to stand up to the crooked militia.", "Let us join you!"})
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_remove_scripts("recruit_civilians")
+                :then_resume_music()
                 :as_one_shot(),
             script.on_talk("civilian_axe")
                 :with_tags{"recruit_civilians"}
@@ -401,11 +411,13 @@ local BATTLE_DATA = {
                 :then_recruit_unit(script_unit.tagged("civilian_axe"))
                 :then_recruit_unit(script_unit.tagged("civilian_sword"))
                 :then_remove_scripts("recruit_civilians")
+                :then_resume_music()
                 :as_one_shot(),
         }
     },
     ["cliff_crossing"] = {
         map_id = "cliff_crossing",
+        music = 12,
         tile_labels = {
             ["player_deployment"] = { 0x00, 0x01, 0x02 },
             ["bandit_boulder"] = { 0x17 },
@@ -478,6 +490,7 @@ local BATTLE_DATA = {
     },
     ["castle_defense"] = {
         map_id = "castle_defense",
+        music = 0,
         tile_labels = {
             ["player_deployment"] = { 0x00 },
             ["militia_spearman"] = { 0x10 },
@@ -613,6 +626,7 @@ local BATTLE_DATA = {
                 :then_play_music("recruit_short")
                 :then_dialogue(script_unit.tagged("neutral_0"), {"Let me join you!"})
                 :then_recruit_unit(script_unit.tagged("neutral_0"))
+                :then_resume_music()
                 :as_one_shot(),
         }
     }
