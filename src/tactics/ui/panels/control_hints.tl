@@ -140,14 +140,14 @@ local function control_hint_row(
 
 			if menu_step ~= nil and menu_step.control_hints ~= nil then
 				self.text.content = {
-					menu_step.control_hints[input_label]
+					" "..menu_step.control_hints[input_label]
 				}
 				return
 			end
 
 			if default_hints ~= nil then			
 				self.text.content = {
-					default_hints[input_label]
+					" "..default_hints[input_label]
 				}
 				return
 			end
