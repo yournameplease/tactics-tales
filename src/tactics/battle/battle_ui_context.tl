@@ -176,12 +176,16 @@ function BattleUIContext:enrich()
         should_highlight_hovered_unit = false
     end
     if menu.step == "CONFIRM_ATTACK" then
-        should_highlight_hovered_unit = false
-        local confirm_ctx = menu_ctx as BattleMainMenuContext
-        local unit = confirm_ctx.target_unit.unit
-        self.hovered_unit = unit
-        self.layout = "COMBAT_PREVIEW"
-        self.last_hovered_unit = unit
+        if menu_ctx then
+            should_highlight_hovered_unit = false
+            local confirm_ctx = menu_ctx as BattleMainMenuContext
+            local unit = confirm_ctx.target_unit and confirm_ctx.target_unit.unit
+            if unit then
+                self.hovered_unit = unit
+            end
+            self.layout = "COMBAT_PREVIEW"
+            self.last_hovered_unit = unit
+        end
     end
 
     -- todo
