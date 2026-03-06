@@ -21,6 +21,7 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local Character = require("src.tactics.character.object.character").Character
 local EventBus = require("src.tactics.systems.event_bus").EventBus
+local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local GameData = require("src.tactics.game_data").GameData
 local TaskManager = require("src.tactics.systems.tasks").TaskManager
 local AnimationManager = require("src.tactics.animation").AnimationManager
@@ -86,6 +87,7 @@ local record StoryImpl
     active_dialogue: Dialogue
     event_listener: event_listener.EventListener
     event_writer: event_writer.EventWriter
+    music_player: MusicPlayer
 
     battle_services_bundle: BattleServicesBundle
     ui_context: UIContextManager
@@ -157,6 +159,7 @@ function StoryImpl:handle_new_node()
             self.battle_services_bundle.task_manager,
             self.battle_services_bundle.animation_manager,
             self.battle_services_bundle.event_bus,
+            self.music_player,
             self.ui_context
         )
     elseif node_definition is story_node.NewPageNode then
@@ -343,6 +346,7 @@ function story.new(
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus,
+    music_player: MusicPlayer,
     ui_context: UIContextManager
 ): Story
     assert(game_data.stories.data[story_id] ~= nil)
@@ -361,6 +365,7 @@ function story.new(
     self.dialogue_manager = dialogue_manager.new()
     self.event_listener = event_listener.new(event_bus)
     self.event_writer = event_writer.new(event_bus)
+    self.music_player = music_player
     
     self.story_menu_context = story_menu_context.new(
         function(appearance: {character.CharacterAppearanceKey: string}) self:create_character(appearance) end,
@@ -404,6 +409,7 @@ function story.load(
     task_manager: TaskManager,
     animation_manager: AnimationManager,
     event_bus: EventBus,
+    music_player: MusicPlayer,
     ui_context: UIContextManager
 ): Story
     local save_data = save_system.load(save_name)
@@ -416,6 +422,7 @@ function story.load(
         task_manager,
         animation_manager,
         event_bus,
+        music_player,
         ui_context
     ) as StoryImpl
 

@@ -10,6 +10,7 @@ local id_generator = require("src.tactics.util.id_generator")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 local event_bus = require("src.tactics.systems.event_bus")
+local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local battle_script = require("src.tactics.battle.scripts.battle_script")
 local bm = require("src.tactics.battle.battle_map")
@@ -52,6 +53,7 @@ local record ScriptManagerImpl
 	battle_map: bm.BattleMap
 	tactics_engine: tactics_engine.TacticsEngine
 	event_listener: event_listener.EventListener
+    music_player: MusicPlayer
     task_manager: TaskManager
 
     active_scripts: {integer: battle_script.BattleScript}
@@ -318,9 +320,18 @@ function ScriptManagerImpl:register_script(
 						id = 9,
 					},
 				}
-				local music = MUSIC_MAP[effect.music_id]
-				if music ~= nil then
-					pt.music(music.id, nil, nil, nil, music.offset)
+
+				if effect.music_id == nil then
+					self.music_player:resume_music(1000)
+				else
+					local music = MUSIC_MAP[effect.music_id]
+					if music ~= nil then
+						if effect.music_type == "music" then
+							self.music_player:set_music(music.id, music.offset)
+						else
+							self.music_player:push_music(music.id, music.offset)
+						end
+					end
 				end
 			end
 		else
@@ -358,6 +369,7 @@ end
 function script_manager.new(
 	scripts: { battle_script.BattleScript },
 	bus: event_bus.EventBus,
+    music_player: MusicPlayer,
 	map: bm.BattleMap,
 	tactics: tactics_engine.TacticsEngine,
     task_manager: TaskManager
@@ -369,6 +381,7 @@ function script_manager.new(
 	})
 
 	self.event_listener = event_listener.new(bus)
+	self.music_player = music_player
 	self.tactics_engine = tactics
 	self.battle_map = map
 	self.task_manager = task_manager

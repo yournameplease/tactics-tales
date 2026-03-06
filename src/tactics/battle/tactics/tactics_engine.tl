@@ -25,6 +25,7 @@ local unit_spawn_data = require("src.tactics.battle.unit.spawn_data")
 local unit_ai = require("src.tactics.battle.unit.unit_ai")
 local character = require("src.tactics.character.object.character")
 local Character = character.Character
+local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
@@ -65,6 +66,7 @@ local record TacticsEngine
 
     battle_map: bm.BattleMap
     character_manager: character_manager.CharacterManager
+    music_player: MusicPlayer
 
     id_generator: id_generator.IdGenerator
     task_manager: tasks.TaskManager
@@ -154,7 +156,8 @@ function tactics_engine.new(
     character_mgr: character_manager.CharacterManager,
     task_manager: tasks.TaskManager,
     animation_manager: animation.AnimationManager,
-    bus: event_bus.EventBus
+    bus: event_bus.EventBus,
+    music_player: MusicPlayer
 ): tactics_engine.TacticsEngine
     local self: tactics_engine.TacticsEngine = setmetatable({
     }, { __index = TacticsEngine })
@@ -163,6 +166,7 @@ function tactics_engine.new(
 
     self.battle_map = map
     self.character_manager = character_mgr
+    self.music_player = music_player
 
     self.id_generator = id_generator.new()
     self.task_manager = task_manager
@@ -516,9 +520,11 @@ function TacticsEngine:kill_unit(
     self.battle_is_blocked = true
     local anim = self.animation_manager:create_animation("DEATH", 0)    
     defender.animation_data = anim
-
+    local played_music = false
+    
     if defender:is_player() then
-        pt.music(9)
+        played_music = true
+        self.music_player:push_music(9, 0)
         self:start_dialogue(defender, {"I've been slain..."})
     end
     
@@ -530,6 +536,9 @@ function TacticsEngine:kill_unit(
     
     defender:die()
     self.battle_map:kill_unit(defender)
+    if played_music then
+        self.music_player:resume_music(1000)
+    end
 
     self:invalidate_tiles_for_point(defender_tile)
 
