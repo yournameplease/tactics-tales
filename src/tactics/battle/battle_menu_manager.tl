@@ -502,7 +502,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_control_hints{
                     primary = "Select Unit",
-                    secondary = "Menu / Mark Enemy Range",
+                    secondary = "Menu / Mark Enemy",
                 },
              ["SELECT_DESTINATION"] = step_definition.of_node(
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
