@@ -87,6 +87,7 @@ function BattleUIContext:enrich()
 
     local menu = self.battle_menu_manager:serialize()
     local root_node_state = menu.node and menu.node.state
+    local menu_ctx = self.battle_menu_manager.menu_ctx
 
     self.dialogue_revision = self.tactics_engine.dialogue_revision
     
@@ -174,8 +175,15 @@ function BattleUIContext:enrich()
     if menu.step == "SELECT_ACTION" then
         should_highlight_hovered_unit = false
     end
+    if menu.step == "CONFIRM_ATTACK" then
+        should_highlight_hovered_unit = false
+        local confirm_ctx = menu_ctx as BattleMainMenuContext
+        local unit = confirm_ctx.target_unit.unit
+        self.hovered_unit = unit
+        self.layout = "COMBAT_PREVIEW"
+        self.last_hovered_unit = unit
+    end
 
-    local menu_ctx = self.battle_menu_manager.menu_ctx
     -- todo
     if self.turn_manager:acting_side() == "player" and menu_ctx ~= nil then
         assert(menu_ctx is BattleMainMenuContext)
