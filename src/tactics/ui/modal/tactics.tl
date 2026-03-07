@@ -27,10 +27,8 @@ local function compute_dialogue_modal(state: UIContextManager): box.UIElement, b
 
     local unit = state.battle_context.active_dialogue.speaking_unit
 
-    local x_step = unit.facing.horizontal == "left" and -4.5 or 1.5
-
-    local x = pt.flr((unit.tile.x + x_step) * TILE_SIZE.x)
-    local y = pt.flr((unit.tile.y - 0.5) * TILE_SIZE.y)
+    local x = pt.flr((unit.tile.x + 0.5) * TILE_SIZE.x)
+    local y = pt.flr((unit.tile.y + 0.5) * TILE_SIZE.y)
 
     local node = dialogue_node.single_line(
         state.battle_context.active_dialogue.dialogue,
@@ -67,6 +65,10 @@ function modal.tactics_dialogue_menu(): box.UIElement
     :modal{
         current_key = compute_dialogue_modal_key,
         compute = compute_dialogue_modal,
+
+        priorities = {"right", "left", "up", "down"},
+        anchor_margin = 16,
+        screen_padding = 24,
     }
 	:build()
 
@@ -94,8 +96,8 @@ local function compute_action_menu_modal(state: UIContextManager): box.UIElement
     if cursor == nil or not cursor is nested_list.NestedMenuNode then
         return nil, nil
     end
-    x = pt.flr((cursor_tile.x + 1) * TILE_SIZE.x)
-    y = pt.flr((cursor_tile.y - 0.5) * TILE_SIZE.y)
+    x = pt.flr((cursor_tile.x + 0.5) * TILE_SIZE.x)
+    y = pt.flr((cursor_tile.y + 0.5) * TILE_SIZE.y)
 
     local node = menu_ui.generic_menu_modal(
         -- no need to recompute as this node handles new children
@@ -132,6 +134,10 @@ function modal.tactics_action_menu(): box.UIElement
         :modal{
             current_key = compute_action_menu_modal_key,
             compute = compute_action_menu_modal,
+
+            priorities = {"right", "left", "up", "down"},
+            anchor_margin = 16,
+            screen_padding = 24,
         }
 	:build()
 

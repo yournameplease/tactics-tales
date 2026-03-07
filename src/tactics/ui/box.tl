@@ -164,7 +164,16 @@ local record ModalInfo
     -- returns child and 
     compute: function(ctx: UIContextManager): UIElement, Anchor 
 
+    priorities: {CardinalDirection}
+    anchor_margin: integer
+    screen_padding: integer
+
     -- internal use
+    screen_x: number
+    screen_y: number
+    screen_w: number
+    screen_h: number
+
     last_key: any
     active: boolean
     anchor: Anchor
@@ -1069,6 +1078,69 @@ function Box:recalculate(
     end
 end
 
+function Box:resolve_modal_position()
+    local priorities = self.modal.priorities or {}
+
+    local r_w = self.rect.w
+    local r_h = self.rect.h
+    
+    local a_x = self.modal.anchor_node.rect.c_x + self.modal.anchor.ox
+    local a_y = self.modal.anchor_node.rect.c_y + self.modal.anchor.oy
+    
+    local s_x = self.modal.anchor_node.rect.c_x
+    local s_y = self.modal.anchor_node.rect.c_y
+    local s_w = self.modal.anchor_node.rect.c_w
+    local s_h = self.modal.anchor_node.rect.c_h
+
+    local anchor_margin = self.modal.anchor_margin or 0
+    local screen_padding = self.modal.screen_padding or 0
+    local total_margin = anchor_margin + screen_padding
+    
+    local d_x = 0
+    local d_y = 0
+    
+    for _,p in ipairs(priorities) do
+        if p == "left" then
+            if a_x - s_x >= r_w + total_margin then
+                log.debug("left")
+                d_x = a_x - anchor_margin - r_w
+                d_y = a_y - (r_h >> 1)
+                break
+            end
+        elseif p == "right" then
+            if s_x + s_w - a_x >= r_w + total_margin then
+                log.debug("right")
+                d_x = a_x + anchor_margin
+                d_y = a_y - (r_h >> 1)
+                break
+            end
+        elseif p == "up" then
+            if a_y - s_y >= r_h + total_margin then
+                log.debug("up")
+                d_x = a_y - anchor_margin - r_h
+                d_y = a_x - (r_w >> 1)
+                break
+            end
+        elseif p == "down" then
+            if s_y + s_h - a_y >= r_h + total_margin then
+                log.debug("down")
+                d_x = a_y + anchor_margin
+                d_y = a_x - (r_w >> 1)
+                break
+            end
+        else
+            unexpected(p)
+        end
+    end
+
+    d_x = pt.max(s_x + screen_padding, d_x)
+    d_x = pt.min(d_x, s_x + s_w - r_w - screen_padding)
+    d_y = pt.max(s_y + screen_padding, d_y)
+    d_y = pt.min(d_y, s_y + s_h - r_h -screen_padding)
+
+    self:apply_layout(d_x, d_y, s_w, s_h, true)
+end
+
 function Box:recalculate_modal(
     state: UIContextManager,
     root: UIElement
@@ -1095,12 +1167,9 @@ function Box:recalculate_modal(
         self:update(state)
         self:compute_text()
         self:measure(1, true)
-        local x = self.modal.anchor_node.rect.x + self.modal.anchor.ox
-        local y = self.modal.anchor_node.rect.y + self.modal.anchor.oy
-        -- todo
-        local w = 100
-        local h = 100
-        self:apply_layout(x, y, w, h, true)
+        
+        
+        self:resolve_modal_position()
     end
 end
 
