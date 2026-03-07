@@ -239,7 +239,8 @@ local STORIES = {
 				stories.new_page(),
 				stories.save_game(),
 				stories.new_page(),
-				stories.story_text("You Win!"),
+				stories.story_text("The heroes managed to escape the cave."),
+				stories.story_text("Future encounters may not afford such stealthy encounters."),
 				stories.jump('ch_3_intro'),
 			},
 			ch_2_f = {
