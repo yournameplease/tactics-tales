@@ -453,7 +453,7 @@ function TacticsEngine:handle_mark_unit(p: Point)
         else
             unit.marked = true
             self.marked_unit_tiles = self.marked_unit_tiles
-                | ((self.valid_tiles_by_unit[unit.id] & HIGHLIGHT.CAN_ATTACK) << 1)
+                | ((self:get_valid_tiles_for_unit(unit) & HIGHLIGHT.CAN_ATTACK) << 1)
         end
     end
 end
@@ -861,6 +861,12 @@ function TacticsEngine:get_valid_tiles_for_unit(unit: BattleUnit): Userdata
 end
 
 function TacticsEngine:invalidate_tiles_for_unit(unit: BattleUnit)
+    if unit == nil or unit.id == nil then
+        log.warn("attempt to invalidate tiles for a nil unit.")
+
+        return
+    end
+    
     self.valid_tiles_by_unit[unit.id] = nil
     if unit.is_marked then
         self:recompute_marked_unit_tiles()
