@@ -1102,28 +1102,24 @@ function Box:resolve_modal_position()
     for _,p in ipairs(priorities) do
         if p == "left" then
             if a_x - s_x >= r_w + total_margin then
-                log.debug("left")
                 d_x = a_x - anchor_margin - r_w
                 d_y = a_y - (r_h >> 1)
                 break
             end
         elseif p == "right" then
             if s_x + s_w - a_x >= r_w + total_margin then
-                log.debug("right")
                 d_x = a_x + anchor_margin
                 d_y = a_y - (r_h >> 1)
                 break
             end
         elseif p == "up" then
             if a_y - s_y >= r_h + total_margin then
-                log.debug("up")
                 d_x = a_y - anchor_margin - r_h
                 d_y = a_x - (r_w >> 1)
                 break
             end
         elseif p == "down" then
             if s_y + s_h - a_y >= r_h + total_margin then
-                log.debug("down")
                 d_x = a_y + anchor_margin
                 d_y = a_x - (r_w >> 1)
                 break

@@ -145,6 +145,7 @@ local STORIES = {
 			"child_bow",
 			"village_hero",
 			"militia_spearman",
+			"bandit_nerd",
 		},
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
@@ -159,6 +160,7 @@ local STORIES = {
 			"child_bow",
 			"village_hero",
 			"militia_spearman",
+			"bandit_nerd",
 			"child_greatsword",
 			"village_axe",
 		},
@@ -175,6 +177,7 @@ local STORIES = {
 			"child_bow",
 			"village_hero",
 			"militia_spearman",
+			"bandit_nerd",
 			"child_greatsword",
 			"village_axe",
 		},

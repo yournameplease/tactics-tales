@@ -285,7 +285,6 @@ function BattleMap:kill_unit(unit: battle_unit.BattleUnit)
     pt.add(self.dead_units, unit)
     self.units_by_x_y:set_point(unit.tile, nil)
     self.units_by_id[unit.id] = nil
-    unit:die()
 end
 
 

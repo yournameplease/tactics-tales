@@ -223,7 +223,6 @@ local BATTLE_DATA = {
         turn_limit = 15,
         victory_conditions = {
             objectives.escape(),
-            objectives.defeat_tagged("boss", "Defeat cultist leader"),
         },
         failure_conditions = {
             objectives.turn_limit(),
