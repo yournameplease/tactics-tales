@@ -870,7 +870,11 @@ end
 function TacticsEngine:invalidate_tiles_for_point(p: Point)
     for id,_ in pairs(self.valid_tiles_by_unit) do
         local unit = self.battle_map:get_unit_by_id(id)
-        if point.taxicab_distance(unit.tile, p) <= unit.character.stats.movement then
+        if unit == nil then
+            -- unit died
+            self.valid_tiles_by_unit[id] = nil
+            self:recompute_marked_unit_tiles()
+        elseif point.taxicab_distance(unit.tile, p) <= unit.character.stats.movement then
             self:invalidate_tiles_for_unit(unit)
         end
     end
