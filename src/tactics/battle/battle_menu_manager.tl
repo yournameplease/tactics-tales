@@ -303,7 +303,9 @@ HANDLERS["move_and_store_attack_unit"] = function(
     local destination_point = value.path[#value.path]
     local valid_destination = false
     for i = #value.path, 1, -1 do
-        if targeting.is_target_valid(value.path[i], target_point, services.battle_map) then
+        if targeting.is_target_valid(value.path[i], target_point, services.battle_map) --can attack
+            and services.battle_map:get_at_tile(value.path[i]) == nil -- can move
+        then
             destination_point = value.path[i]
             valid_destination = true
             break
