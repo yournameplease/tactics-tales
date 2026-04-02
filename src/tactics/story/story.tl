@@ -7,6 +7,7 @@ local animation = require("src.tactics.animation")
 local battle_manager = require("src.tactics.battle.battle_manager")
 local story_menu_manager = require("src.tactics.story.story_menu_manager")
 local character_manager = require("src.tactics.character.character_manager")
+local stats_service = require("src.tactics.story.statistics.stats_service")
 local character = require("src.tactics.character.object.character")
 local story_menu_context = require("src.tactics.story.story_menu_context")
 local story_ui_context = require("src.tactics.story.story_ui_context")
@@ -74,6 +75,7 @@ local record StoryImpl
     character_manager: character_manager.CharacterManager	
     story_menu_context: story_menu_context.StoryMenuContext
     menu_manager: story_menu_manager.StoryMenuManager
+    stats_service: stats_service.StatsService
     current_node: ActiveNode
 
     battle_manager: battle_manager.BattleManager
@@ -377,6 +379,7 @@ function story.new(
         self.story_menu_context,
         event_bus
     )
+    self.stats_service = stats_service.new()
 
     self.idle_animation = animation_manager:create_idle_animation()
 
