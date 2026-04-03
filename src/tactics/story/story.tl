@@ -379,7 +379,9 @@ function story.new(
         self.story_menu_context,
         event_bus
     )
-    self.stats_service = stats_service.new()
+    self.stats_service = stats_service.new(
+        event_bus
+    )
 
     self.idle_animation = animation_manager:create_idle_animation()
 
