@@ -29,6 +29,7 @@ local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
+local payloads = require("src.tactics.battle.tactics.types").payloads
 
 local InputContext = require("src.tactics.input.input_context").InputContext
 local character_manager = require("src.tactics.character.character_manager")
@@ -542,10 +543,12 @@ function TacticsEngine:kill_unit(
 
     self:invalidate_tiles_for_point(defender_tile)
 
-    self.event_writer:emit("TACTICS_UNIT_DEATH", {
+    local death_event: payloads.UnitDeathPayload = {
         attacker = attacker,
         defender = defender,
-    })   
+        chapter = 0,
+    }
+    self.event_writer:emit("TACTICS_UNIT_DEATH", death_event)   
 end
 
 function TacticsEngine:handle_move_unit(
