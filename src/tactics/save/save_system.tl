@@ -3,6 +3,7 @@ local character = require("src.tactics.character.object.character")
 local lists = require("src.tactics.util.lists")
 local story_types = require("src.tactics.story.types")
 local id_generator = require("src.tactics.util.id_generator")
+local stats = require("src.tactics.story.statistics.story_statistics")
 
 local save_system = {}
 
@@ -15,6 +16,7 @@ local record GameSaveData
 	story_node_step: integer
 	story_memory: story_memory.StoryMemory
 	roster: {character.Character}
+	stats: stats.StoryResults
 end
 
 local record SerializedGameSaveData
@@ -24,6 +26,7 @@ local record SerializedGameSaveData
 	story_node_step: integer
 	story_memory: story_memory.SerializedStoryMemory
 	roster: {character.SerializedCharacter}
+	stats: stats.StoryResults
 end
 
 -- todo: sanitize path
@@ -37,7 +40,8 @@ function save_system.save(name: string, data: GameSaveData)
 		story_memory = data.story_memory:serialize(),
 		roster = lists.map(function(c: character.Character): character.SerializedCharacter
 			return c:serialize()
-		end)(data.roster)
+		end)(data.roster),
+		stats = data.stats,
 	}
 
 	local path = SAVE_PATH..name..".pod"
