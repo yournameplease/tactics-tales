@@ -9,8 +9,14 @@ local record UnitDeathPayload
 	turn_number: integer
 end
 
+local record BattleEndPayload
+	chapter: integer
+	turn_number: integer
+end
+
 local payloads = {
 	UnitDeathPayload = UnitDeathPayload,
+	BattleEndPayload = BattleEndPayload,
 }
 
 return {
