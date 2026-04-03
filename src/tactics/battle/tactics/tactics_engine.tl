@@ -547,6 +547,7 @@ function TacticsEngine:kill_unit(
         attacker = attacker,
         defender = defender,
         chapter = 0,
+        turn_number = 0,
     }
     self.event_writer:emit("TACTICS_UNIT_DEATH", death_event)   
 end
