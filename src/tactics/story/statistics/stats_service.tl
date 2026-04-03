@@ -21,8 +21,24 @@ local record StatsServiceImpl
     event_listener: event_listener.EventListener
 end
 
+function StatsServiceImpl:get_chapter(id: integer): stats.StoryChapterResult
+    if self.story_results.chapter_results[id] == nil then
+        self.story_results.chapter_results[id] = {
+            units_lost = {}
+        }
+    end
+
+    return self.story_results.chapter_results[id]
+end
+
 function StatsServiceImpl:record_death(data: payloads.UnitDeathPayload)
-    
+    local chapter_results = self:get_chapter(data.chapter)
+      
+    pt.add(chapter_results.units_lost, {
+        unit_id = data.defender.id,  
+        attacker_id = data.attacker.id,  
+        turn_number = data.turn_number,
+    })
 end
 
 function stats_service.new(

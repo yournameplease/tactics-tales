@@ -6,6 +6,7 @@ local record UnitDeathPayload
 	attacker: BattleUnit
 	defender: BattleUnit
 	chapter: integer
+	turn_number: integer
 end
 
 local payloads = {
