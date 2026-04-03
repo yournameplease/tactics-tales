@@ -236,6 +236,7 @@ function StoryImpl:handle_new_node()
             	story_node_step = self.current_node.node_step + 1,
             	story_memory = self.story_memory,
             	roster = self.character_manager:get_player_roster(),
+            	stats = self.stats_service.story_results,
             }
             save_system.save(self.save_name, save_data)
 
@@ -437,6 +438,7 @@ function story.load(
         local c = self.character_manager:load_character(character_data)
         self.character_manager:persist_player(c)
     end
+    self.stats_service.story_results = save_data.stats
 
     self:jump_to_node_step(save_data.story_node_id, save_data.story_node_step)
 
