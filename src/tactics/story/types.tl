@@ -16,6 +16,7 @@ local enum StoryNodeType
 	'character_customizer'
 	'text_input'
 	'save_game'
+	'game_results'
 	'exit_story'
 end
 
@@ -80,6 +81,11 @@ local record CharacterCustomizerNode
 	name_key: string
 end
 
+local record GameResultsNode
+	is StoryNode
+	where self.type == 'game_results'
+end
+
 local record TextInputNode
 	is StoryNode
 	where self.type == 'text_input'
@@ -103,6 +109,7 @@ local story_node = {
 	ChapterHeader = ChapterHeader,
 	BattleNode = BattleNode,
 	SetMemoryNode = SetMemoryNode,
+	GameResultsNode = GameResultsNode,
 	JumpNode = JumpNode,
 	NewPageNode = NewPageNode,
 	RosterAddNode = RosterAddNode,

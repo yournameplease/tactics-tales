@@ -41,6 +41,12 @@ function StatsServiceImpl:record_death(data: payloads.UnitDeathPayload)
     })
 end
 
+function StatsServiceImpl:record_battle_end(data: payloads.BattleEndPayload)
+    local chapter_results = self:get_chapter(data.chapter)
+
+    chapter_results.turns_taken = data.turn_number
+end
+
 function stats_service.new(
     event_bus: EventBus
 ): StatsService 
@@ -49,6 +55,9 @@ function stats_service.new(
     self.event_listener = event_listener.new(event_bus)
 
     self.event_listener:on("TACTICS_UNIT_DEATH", function(data: payloads.UnitDeathPayload)
+        self:record_death(data)
+    end)
+    self.event_listener:on("BATTLE_END_VICTORY", function(data: payloads.UnitDeathPayload)
         self:record_death(data)
     end)
 
