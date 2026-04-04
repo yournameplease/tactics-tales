@@ -193,6 +193,10 @@ function StoryImpl:handle_new_node()
             self.idle_animation
         )
         self.menu_manager:set_menu("MENU_CUSTOMIZE_CHARACTER")
+    elseif node_definition is story_node.GameResultsNode then
+        self.story_page:add_game_results(
+            self.stats_service.story_results
+        )
     elseif node_definition is story_node.TextInputNode then
         local key = node_definition.key
         local text = node_definition.text

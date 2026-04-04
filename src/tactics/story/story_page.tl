@@ -8,12 +8,14 @@ local story_memory = require("src.tactics.story.story_memory")
 local character = require("src.tactics.character.object.character")
 local Character = character.Character
 local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
+local stats = require("src.tactics.story.statistics.story_statistics")
 
 local enum RenderedStoryNodeType
     "text"
     "character_customization"
     "text_input"
     "chapter_header"
+    "game_results"
 end
 
 local interface RenderedStoryNode
@@ -31,6 +33,20 @@ local record CharacterCustomization
     where self.type == "character_customization"
     key: string
     character: drawable_character.DrawableCharacter
+end
+
+local enum GameResultsSection
+    "chapters"
+    "units"
+end
+
+local record GameResults
+    is RenderedStoryNode
+    where self.type == "game_results"
+
+    section: GameResultsSection
+    page: integer
+    results: stats.StoryResults
 end
 
 local record TextInput
@@ -53,6 +69,7 @@ local rendered_story_node = {
     TextInput = TextInput,
     ChapterHeader = ChapterHeader,
     CharacterCustomization = CharacterCustomization,
+    GameResults = GameResults,
 }
 
 function rendered_story_node.chapter_header(text: string, number: integer): RenderedStoryNode
@@ -60,6 +77,16 @@ function rendered_story_node.chapter_header(text: string, number: integer): Rend
         type = 'chapter_header',
         text = text,
         number = number,
+    }
+    return node
+end
+
+function rendered_story_node.game_results(results: stats.StoryResults): RenderedStoryNode
+    local node: GameResults = {
+        type = 'game_results',
+        section = 'chapters',
+        page = 1,
+        results = results,
     }
     return node
 end
@@ -113,6 +140,7 @@ local interface StoryPage
     add_text_line: function(self, dialogue: Dialogue)
     add_text_input_menu: function(self, key: string, dialogue: Dialogue)
     add_character_customization_menu: function(self, base_character: Character, key: string, anim: animation.AnimatedSpriteData)
+    add_game_results: function(self, stats.StoryResults)
     clear_page: function(self)
     story_revision: integer
 end
@@ -180,6 +208,13 @@ function StoryPageImpl:add_character_customization_menu(
         key,
         anim
     )
+    pt.add(self.nodes, node)
+end
+
+function StoryPageImpl:add_game_results(
+    results: stats.StoryResults
+)
+    local node = rendered_story_node.game_results(results)
     pt.add(self.nodes, node)
 end
 
