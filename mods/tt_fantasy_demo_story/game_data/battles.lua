@@ -232,7 +232,7 @@ local BATTLE_DATA = {
             deployment_tiles_tag = "player_deployment",
         },
         units = {
-            { side = "enemy", character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"boss", "wait_to_charge"} },
+            { side = "enemy", character_source = character_source.template("cultist_boss"), ai = ai.stationary, tile = "cultist_boss", tags = {"wait_to_charge"} },
             { side = "enemy", character_source = character_source.template("cultist_goon"), ai = ai.move_two, tile = "cultist_goon" },
             { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.move_one, tile = "cultist_guard", tags = {"wait_to_charge"} },
             { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.stationary, tile = "cultist_door_guard_b" },
@@ -442,7 +442,7 @@ local BATTLE_DATA = {
             deployment_tiles_tag = "player_deployment",
         },
         units = {
-            { side = "enemy", character_source = character_source.template("bandit_boulder"), ai = ai.move_inf, tile = "bandit_boulder", tags = { "boss" } },
+            { side = "enemy", character_source = character_source.template("bandit_boulder"), ai = ai.move_inf, tile = "bandit_boulder", tags = { } },
             { side = "enemy", character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "bandit_goon" },
             { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "cultist_goon" },
             { side = "enemy", character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_guard" },

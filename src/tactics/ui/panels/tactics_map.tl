@@ -83,8 +83,18 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
     --     end
     -- end
 
-    CharacterRenderer.draw_health_bar(unit, world_point + FOOT_GROUND_ANCHOR, true, true)
-    CharacterRenderer.draw(unit, world_point + FOOT_GROUND_ANCHOR, draw_target_manager, true, true, true, look_direction)
+    local draw_point = world_point + FOOT_GROUND_ANCHOR
+
+    CharacterRenderer.draw_health_bar(unit, draw_point, true, true)
+    CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, look_direction)
+
+    -- TODO: these should check objective instead    
+	if unit.tags["hero"] then
+		pt.spr(128, draw_point.x, world_point.y)
+	end
+	if unit.tags["boss"] then
+		pt.spr(129, draw_point.x, world_point.y)
+	end
 end
 
 local function set_ud_tile(ud: Userdata, t: Point, s: integer)
