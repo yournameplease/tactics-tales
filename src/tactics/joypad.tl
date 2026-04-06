@@ -10,6 +10,10 @@ end
 
 local enum InputAction
     "ADVANCE"
+    "BUTTON_A"
+    "BUTTON_B"
+    "SHOULDER_L"
+    "SHOULDER_R"
 end
 
 local type InputActions = {InputAction: InputActionState}
@@ -161,12 +165,20 @@ function InputServiceImpl:get_user_input(): UserInput
     local new_actions: {InputAction: boolean} = nil
     if self.current_input == "mouse" then
         local actions <total>: {InputAction: boolean} = {
-            ["ADVANCE"] = mouse.ml
+            ["ADVANCE"] = mouse.ml,
+            ["BUTTON_A"] = mouse.ml,
+            ["BUTTON_B"] = mouse.mr,
+            ["SHOULDER_L"] = false,
+            ["SHOULDER_R"] = false,
         }
         new_actions = actions
     elseif self.current_input == "joypad" then
         local actions <total>: {InputAction: boolean} = {
-            ["ADVANCE"] = joy.a
+            ["ADVANCE"] = joy.a,
+            ["BUTTON_A"] = joy.a,
+            ["BUTTON_B"] = joy.b,
+            ["SHOULDER_L"] = joy.l,
+            ["SHOULDER_R"] = joy.r,
         }
         new_actions = actions
     end
@@ -192,7 +204,11 @@ end
 
 function input_service.new(): InputService
     local actions <total>: {InputAction: InputActionState} = {
-        ["ADVANCE"] = {}
+        ["ADVANCE"] = {},
+        ["BUTTON_A"] = {},
+        ["BUTTON_B"] = {},
+        ["SHOULDER_L"] = {},
+        ["SHOULDER_R"] = {},
     } 
     local self: InputServiceImpl = setmetatable({
         current_input = "mouse",
