@@ -15,6 +15,8 @@ local enum MenuCommand
     "button_secondary"
     "increment_selection"
     "decrement_selection"
+    "cycle_left"
+    "cycle_right"
 end
 
 local record ControlHints

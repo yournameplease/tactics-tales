@@ -9,6 +9,14 @@ local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local Joypad = input_service.Joypad
 
+local enum MenuAction
+	"select"
+	"back"
+	"alt_select"
+	"cycle_left"
+	"cycle_right"
+end
+
 local enum MenuSignalType
     "navigate"
     "finish"
