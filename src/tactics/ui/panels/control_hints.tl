@@ -203,6 +203,8 @@ function control_hints.new(
 
 	self:add(control_hint_row("BUTTON_A", menu_step_func, default_hints))
 	self:add(control_hint_row("BUTTON_B", menu_step_func, default_hints))
+	self:add(control_hint_row("SHOULDER_L", menu_step_func, default_hints))
+	self:add(control_hint_row("SHOULDER_R", menu_step_func, default_hints))
 
 	return self
 end
