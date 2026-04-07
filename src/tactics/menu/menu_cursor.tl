@@ -149,7 +149,7 @@ local interface MenuNode
 	has_focus: boolean
 	
 	-- note: passing contexts are only really needed for grid nonsense.
-    update_joy: function(self, Joypad): MenuSignal
+    update_joy: function(self, Joypad, {menu_types.MenuCommand}): MenuSignal
     handle_command: function(self, menu_types.MenuCommand): MenuSignal
     lose_focus: function(self)
     refresh_focus: function(self)

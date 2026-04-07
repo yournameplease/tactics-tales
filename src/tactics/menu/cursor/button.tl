@@ -63,13 +63,14 @@ function button.definition(
 end
 
 function ButtonCursor:update_joy(
-	joy: Joypad
+	_joy: Joypad,
+	commands: {menu_types.MenuCommand}
 ): MenuSignal
-    if joy.ap then
-        return self:handle_command("select")
-    elseif joy.bp then
-        return self:handle_command("back")
-    end
+	for _,command in ipairs(commands) do
+		if self.handlers[command] then
+			return self:handle_command(command)
+		end
+	end
 	return menu_signal.ignored()
 end
 
