@@ -96,7 +96,7 @@ end
 
 local record MenuStep
 	previous_step: string
-	back_handler: menu_types.MenuHandlerId
+	handlers: {menu_types.MenuCommand: menu_types.MenuHandlerId}
 	node: menu_cursor.MenuNode
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
@@ -105,7 +105,7 @@ end
 
 local record MenuStepDefinition
 	previous_step: string
-	back_handler: menu_types.MenuHandlerId
+	handlers: {menu_types.MenuCommand: menu_types.MenuHandlerId}
 	node: menu_cursor.MenuNodeDefinition
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
@@ -130,11 +130,21 @@ function MenuStepDefinition:with_previous_step(step_id: string): MenuStepDefinit
     return self
 end
 
+function MenuStepDefinition:handle_action(
+	command: menu_types.MenuCommand,
+	handler: menu_types.MenuHandlerId
+): MenuStepDefinition
+	if self.handlers == nil then
+		self.handlers = {}
+	end
+	self.handlers[command] = handler
+	return self
+end
+
 function MenuStepDefinition:handle_back(
 	back_handler: menu_types.MenuHandlerId
 ): MenuStepDefinition
-	self.back_handler = back_handler
-	return self
+	return self:handle_action("back", back_handler)
 end
 
 function MenuStepDefinition:with_initial_data(
@@ -183,6 +193,7 @@ function MenuStepDefinition:build(
 ): MenuStep
     local out: MenuStep = {
         node = self.node:to_cursor(nil, game_ctx, menu_ctx, menu_state),
+        handlers = self.handlers,
     }
     out.node:refresh_focus()
     return setmetatable(out, { __index = function(_: any, k: string): any 
@@ -385,46 +396,48 @@ function BaseMenuManager:update(input: InputContext)
         if signal is menu_signal.Consumed then
             return
         elseif signal is menu_signal.Ignored then
-            -- TODO: joy/mouse step-level back
-            if self.menu_step.back_handler or self.menu_step.previous_step then
-                local should_back = input_context.handle_update(
-                    input,
-                    function(joy: Joypad): boolean
-                        return joy.bp
-                    end,
-                    function(
-                        mouse: Mouse,
-                        _hovered: mouse_menu_selection.MenuMouseSelection
-                    ): boolean
-                        return mouse.mrp
-                    end
-                )
-                if should_back then
-                    if self.menu_step.back_handler then
-                        local handler_id = self.menu_step.back_handler
-                        local handler = self.menu_handlers[handler_id]
-                        assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
-                        log.debug("Calling menu handler: "..handler_id)
-                        handler(
-                            self.game_ctx,
-                            self:serialize().node.data,
-                            self.menu_ctx,
-                            nil
-                        )
-                    end
-                    if self.menu_step.previous_step then
-                        self:handle_menu_advance(self.menu_step.previous_step)
+            local triggered_command: menu_types.MenuCommand
+            if self.menu_step.menu_actions then
+                for input_name, state in pairs(input.actions) do
+                    if state.pressed then
+                        local action = self.menu_step.menu_actions[input_name]
+                        if action then
+                            triggered_command = action.command
+                            break
+                        end
                     end
                 end
             end
-            -- if joy.bp then
 
-            -- end 
+            if triggered_command == nil then
+                -- fallback for mouse
+                if input is input_context.MouseContext and input.mouse.mrp then
+                    triggered_command = "back"
+                end
+            end
+
+            if triggered_command then
+                local handler_id = self.menu_step.handlers and self.menu_step.handlers[triggered_command]
+                if handler_id then
+                    local handler = self.menu_handlers[handler_id]
+                    assert(handler ~= nil, "Bad handler for id "..handler_id)
+                    log.debug("Calling menu handler: "..handler_id)
+                    handler(
+                        self.game_ctx,
+                        self:serialize().node.data,
+                        self.menu_ctx,
+                        nil
+                    )
+                end
+                if triggered_command == "back" and self.menu_step.previous_step then
+                    self:handle_menu_advance(self.menu_step.previous_step)
+                end
+            end
         elseif signal is menu_signal.Back then
-            if self.menu_step.back_handler then
-                local handler_id = self.menu_step.back_handler
+            local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
+            if handler_id then
                 local handler = self.menu_handlers[handler_id]
-                assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                assert(handler ~= nil, "Bad handler for id "..handler_id)
                 log.debug("Calling menu handler: "..handler_id)
                 handler(
                     self.game_ctx,
@@ -474,10 +487,10 @@ function BaseMenuManager:update(input: InputContext)
                 end
             end
             if signal.then_back then
-                if self.menu_step.back_handler then
-                    local handler_id = self.menu_step.back_handler
+                local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
+                if handler_id then
                     local back_handler = self.menu_handlers[handler_id]
-                    assert(handler ~= nil, "Bad handler for id "..self.menu_step.back_handler)
+                    assert(back_handler ~= nil, "Bad handler for id "..handler_id)
                     log.debug("Calling menu handler: "..handler_id)
                     back_handler(
                         self.game_ctx,
