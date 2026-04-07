@@ -19,9 +19,9 @@ local enum MenuCommand
     "cycle_right"
 end
 
-local record ControlHints
-    primary: string
-    secondary: string
+local record MenuAction
+	command: MenuCommand
+	description: string
 end
 
 local menu_types = {
@@ -30,7 +30,7 @@ local menu_types = {
     MenuStep = MenuStep,
     MenuState = MenuState,
     MenuCommand = MenuCommand,
-    ControlHints = ControlHints,
+    MenuAction = MenuAction,
 }
 
 return menu_types

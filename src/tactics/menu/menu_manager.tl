@@ -100,7 +100,7 @@ local record MenuStep
 	node: menu_cursor.MenuNode
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
-    control_hints: menu_types.ControlHints
+    menu_actions: {menu_types.MenuAction}
 end
 
 local record MenuStepDefinition
@@ -110,7 +110,7 @@ local record MenuStepDefinition
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
 	initial_data: function(GameContext, MenuContext): {string: any}
-    control_hints: menu_types.ControlHints
+    menu_actions: { input_service.InputAction: menu_types.MenuAction }
 end
 
 local menu_step_definition = {}
@@ -144,10 +144,21 @@ function MenuStepDefinition:with_initial_data(
 	return self
 end
 
-function MenuStepDefinition:with_control_hints(
-    control_hints: menu_types.ControlHints
+function MenuStepDefinition:with_action(
+    input: input_service.InputAction,
+    action: menu_types.MenuAction
 ): MenuStepDefinition
-	self.control_hints = control_hints
+    if self.menu_actions == nil then
+        self.menu_actions = {}
+    end
+	self.menu_actions[input] = action
+	return self
+end
+
+function MenuStepDefinition:with_actions(
+    menu_actions: { input_service.InputAction: menu_types.MenuAction}
+): MenuStepDefinition
+	self.menu_actions = menu_actions
 	return self
 end
 
