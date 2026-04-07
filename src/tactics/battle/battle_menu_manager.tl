@@ -398,7 +398,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder("select_swap_unit")
-                            :handle_select("select_swap_unit")
+                            :handle_action("select", "select_swap_unit")
                             :advance_to("SELECT_SWAP_TARGET")
                     )
                     :with_child( -- marking for non-actable units
@@ -406,7 +406,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
-                            :handle_back("mark_unit")
+                            :handle_action("menu", "mark_unit")
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
@@ -423,7 +423,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
                         end,
                         button.builder("swap_units")
-                            :handle_select("swap_units")
+                            :handle_action("select", "swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
                             :as_final_step()
                     )
@@ -432,7 +432,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
-                            :handle_back("mark_unit")
+                            :handle_action("back", "mark_unit")
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
@@ -450,7 +450,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 
                         pt.add(options, button.builder("start_battle")
                             :with_text("Start Battle")
-                            :handle_select("start_battle"))
+                            :handle_action("select", "start_battle"))
                         pt.add(options, button.builder("edit_formation")
                             :with_text("Edit Formation")
                             :then_go_back())
@@ -473,8 +473,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder("available_player")
-                            :handle_select("select_acting_unit")
-                            :handle_back("mark_unit")
+                            :handle_action("select", "select_acting_unit")
+                            :handle_action("menu", "mark_unit")
                             :advance_to("SELECT_DESTINATION")
                     )
                     :with_child( -- marking for non-actable units
@@ -482,14 +482,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
-                            :handle_back("mark_unit")
+                            :handle_action("menu", "mark_unit")
                     )
                     :with_child( -- marking for non-units
                         function(point: Point, msb: BattleMenuContext, _ctx: BattlePreparationsContext): boolean
                             return not point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_unit")
-                            :handle_back("navigate_to_turn_menu")
+                            :handle_action("menu", "navigate_to_turn_menu")
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
@@ -508,7 +508,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                                     and valid_tiles:get(point.x, point.y) & 0x1 ~= 0
                         end,
                         button.builder("move_unit")
-                            :handle_select("move_acting_unit")
+                            :handle_action("select", "move_acting_unit")
                             :advance_to("SELECT_ACTION")
                     )
                     :with_child(
@@ -519,7 +519,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                     and valid_tiles:get(point.x, point.y) & 0x4 ~= 0
                         end,
                         button.builder("attack_unit")
-                            :handle_select("move_and_store_attack_unit")
+                            :handle_action("select", "move_and_store_attack_unit")
                             :advance_to("CONFIRM_ATTACK")
                     )
                     :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
@@ -560,13 +560,13 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             pt.add(options, button.builder(id)
                                 :with_text(interaction.interaction_text)
                                 :with_value(interaction)
-                                :handle_select("handle_interaction")
+                                :handle_action("select", "handle_interaction")
                                 :as_final_step())
                         end
 
                         pt.add(options, button.builder("wait")
                             :with_text("Wait")
-                            :handle_select("wait_acting_unit")
+                            :handle_action("select", "wait_acting_unit")
                             :as_final_step())
 
                         pt.add(options, button.builder("cancel")
@@ -582,7 +582,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_DESTINATION")
-                :handle_back("unmove_acting_unit")
+                :handle_action("back", "unmove_acting_unit")
                 :with_action("BUTTON_A", { command = "select", description = "Select"})
                 :with_action("BUTTON_B", { command = "back", description = "Back"}),
              ["SELECT_TARGET"] = step_definition.of_node(
@@ -597,7 +597,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             )
                         end,
                         button.builder("attack_unit")
-                            :handle_select("store_attack_unit")
+                            :handle_action("select", "store_attack_unit")
                             :advance_to("CONFIRM_ATTACK")
                     )
                     :with_tile_highlights(function (msb: BattleMenuContext, ctx: BattleMainMenuContext): Userdata
@@ -624,7 +624,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 
                         pt.add(options, button.builder("attack")
                             :with_text("Attack")
-                            :handle_select("attack_unit")
+                            :handle_action("select", "attack_unit")
                             :as_final_step())
                         pt.add(options, button.builder("cancel")
                             :with_text("Cancel")
@@ -634,7 +634,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_DESTINATION")
-                :handle_back("unmove_acting_unit")
+                :handle_action("back", "unmove_acting_unit")
                 :with_action("BUTTON_A", { command = "select", description = "Select"})
                 :with_action("BUTTON_B", { command = "back", description = "Back"}),
             -- ["SELECT_ITEM"] = list_cursor.definition({
@@ -713,14 +713,14 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
 
                         pt.add(options, button.builder("end_turn")
                             :with_text("End Turn")
-                            :handle_select("end_turn"))
+                            :handle_action("select", "end_turn"))
                         pt.add(options, button.builder("mark_all_units")
                             :with_text("Mark All Enemies")
-                            :handle_select("mark_all_units")
+                            :handle_action("select", "mark_all_units")
                             :then_go_back())
                         pt.add(options, button.builder("unmark_all_units")
                             :with_text("Unmark All Enemies")
-                            :handle_select("unmark_all_units")
+                            :handle_action("select", "unmark_all_units")
                             :then_go_back())
                         pt.add(options, button.builder("turn_menu_back")
                             :with_text("Back")

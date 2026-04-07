@@ -106,10 +106,10 @@ local function menu_definition_for_character_select(): menu_manager.MenuStepDefi
                         local options: {MenuNodeDefinition} = {}
                         pt.add(options, button.builder("randomize")
                             :with_text("Randomize")
-                            :handle_select("randomize_appearance"))
+                            :handle_action("select", "randomize_appearance"))
                         pt.add(options, button.builder("confirm")
                             :with_text("Confirm")
-                            :handle_select("create_character"))
+                            :handle_action("select", "create_character"))
                         return options
                     end))
 

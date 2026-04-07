@@ -139,7 +139,7 @@ function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
 					:with_common_child(
 						button.builder("keyboard_key")
 	                        :with_text("key")
-	                        :handle_select("type_character")
+	                        :handle_action("select", "type_character")
 				):with_text_function(function(point: Point, _services: GameContext, ctx: KeyboardMenuContext): string
 					return get_key_at_coordinates(point, ctx)
 				end))
@@ -150,13 +150,13 @@ function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
                         local options: {MenuNodeDefinition} = {}
                         pt.add(options, button.builder("mode")
                             :with_text("Mode")
-                            :handle_select("change_keyboard_mode"))
+                            :handle_action("select", "change_keyboard_mode"))
                         pt.add(options, button.builder("random")
                             :with_text("Back")
-                            :handle_select("delete_character"))
+                            :handle_action("select", "delete_character"))
                         pt.add(options, button.builder("confirm")
                             :with_text("Confirm")
-                            :handle_select(submit))
+                            :handle_action("select", submit))
                         return options
                     end))
 
