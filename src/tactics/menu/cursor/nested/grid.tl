@@ -154,7 +154,8 @@ function NestedGridNode:move_cursor(p: Point): boolean
 end
 
 function NestedGridNode:update_joy(
-	joy: Joypad
+	joy: Joypad,
+	commands: {menu_types.MenuCommand}
 ): MenuSignal
 	local focused_leaf = self:get_focused_leaf()
 
@@ -163,7 +164,7 @@ function NestedGridNode:update_joy(
 		if focused_leaf is ButtonCursor then
 			focused_leaf.value = self:get_nested_grid_value()
 		end
-		signal = focused_leaf:update_joy(joy)
+		signal = focused_leaf:update_joy(joy, commands)
 	end
 
     if signal.type ~= "ignored" then return signal end

@@ -368,7 +368,22 @@ function BaseMenuManager:update(input: InputContext)
         local signal = input_context.handle_update(
             input,
             function(joy: Joypad): MenuSignal
-                return self.menu_step.node:update_joy(joy)
+            	-- TODO: this should live somewhere more global, or per step
+            	local button_priority: {input_service.InputAction} = {
+            	    "BUTTON_A",
+            	    "BUTTON_B",
+            	    "SHOULDER_L",
+            	    "SHOULDER_R",
+            	}
+            	local commands: {menu_types.MenuCommand} = {}
+
+            	for _,button in ipairs(button_priority) do
+            		if self.menu_step.menu_actions[button] and input.actions[button].pressed then
+                        pt.add(commands, self.menu_step.menu_actions[button].command)
+            		end
+            	end
+
+                return self.menu_step.node:update_joy(joy, commands)
             end,
             function(
                 mouse: Mouse,

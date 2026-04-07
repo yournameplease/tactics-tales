@@ -157,7 +157,8 @@ function SelectionMenuNode:decrement_selection()
 end
 
 function SelectionMenuNode:update_joy(
-	joy: Joypad
+	joy: Joypad,
+	_commands: {menu_types.MenuCommand}
 ): MenuSignal
     if self.direction == "vertical" then
 		if joy.dyp == 1 then
