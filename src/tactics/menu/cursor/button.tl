@@ -150,13 +150,15 @@ function ButtonDefinition:to_cursor(
         type = "button",
         parent = parent,
     }
-    return setmetatable(cursor, { __index = function(_: any, k: string): any 
+    setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (ButtonCursor as {string: any})[k] then
                 return (ButtonCursor as {string: any})[k]
             end
             return (self as {string: any})[k]
         end
-        })
+    })
+    if cursor.handlers == nil then cursor.handlers = {} end
+    return cursor
 end
 
 -- definition builder
