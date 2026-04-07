@@ -118,7 +118,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 button.builder("to_main_menu")
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU")
-            ):with_default_lmb("button_primary")
+            )
+            :with_default_lmb("select")
             :with_action("BUTTON_A", { command = "select", description = "Start"}),
             ["MAIN_MENU"] = step_definition.of_node(
                 list.column(

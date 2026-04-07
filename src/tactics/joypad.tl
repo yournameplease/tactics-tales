@@ -9,7 +9,6 @@ local record InputActionState
 end
 
 local enum InputAction
-    "ADVANCE"
     "BUTTON_A"
     "BUTTON_B"
     "SHOULDER_L"
@@ -53,11 +52,6 @@ local enum InputMethod
     "joypad"
 end
 
-local enum InputLabel
-    "primary"
-    "secondary"
-end
-
 local record UserInput
     active_method: InputMethod
     method_changed: boolean
@@ -75,7 +69,6 @@ end
 
 local input_service = {
     InputMethod = InputMethod,
-    InputLabel = InputLabel,
     Joypad = Joypad,
     Mouse = Mouse,
     UserInput = UserInput,
@@ -165,7 +158,6 @@ function InputServiceImpl:get_user_input(): UserInput
     local new_actions: {InputAction: boolean} = nil
     if self.current_input == "mouse" then
         local actions <total>: {InputAction: boolean} = {
-            ["ADVANCE"] = mouse.ml,
             ["BUTTON_A"] = mouse.ml,
             ["BUTTON_B"] = mouse.mr,
             ["SHOULDER_L"] = false,
@@ -174,7 +166,6 @@ function InputServiceImpl:get_user_input(): UserInput
         new_actions = actions
     elseif self.current_input == "joypad" then
         local actions <total>: {InputAction: boolean} = {
-            ["ADVANCE"] = joy.a,
             ["BUTTON_A"] = joy.a,
             ["BUTTON_B"] = joy.b,
             ["SHOULDER_L"] = joy.l,
@@ -204,7 +195,6 @@ end
 
 function input_service.new(): InputService
     local actions <total>: {InputAction: InputActionState} = {
-        ["ADVANCE"] = {},
         ["BUTTON_A"] = {},
         ["BUTTON_B"] = {},
         ["SHOULDER_L"] = {},

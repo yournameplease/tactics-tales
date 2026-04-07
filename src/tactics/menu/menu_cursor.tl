@@ -62,7 +62,6 @@ end
 
 local menu_signal = {
 	MenuSignal = MenuSignal,
-	MenuAction = MenuAction,
 	Back = MenuSignalBack,
 	Consumed = MenuSignalConsumed,
 	Ignored = MenuSignalIgnored,

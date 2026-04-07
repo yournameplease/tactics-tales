@@ -38,7 +38,7 @@ function menu.text_button(
 		self.style.decoration = has_focus and "border" or nil
 	end)
 	:menu_handling{
-		hover_event = menu_mouse_selection.leaf(b, "button_primary", "button_secondary"),
+		hover_event = menu_mouse_selection.leaf(b, "select", "back"),
 	}
 	:build()
 end
@@ -73,7 +73,7 @@ local function grid_button(
 			self.style.decoration = has_focus and "border" or nil
 		end)
 		:menu_handling{
-			hover_event = menu_mouse_selection.grid(p.x, p.y, node, "button_primary", "button_secondary"),
+			hover_event = menu_mouse_selection.grid(p.x, p.y, node, "select", "back"),
 		}
 		:build()
 end

@@ -47,7 +47,7 @@ book_box:add(box.builder("title_text")
     :build())
 book_box:add(box.spacer(2))
 book_box:add(control_hints.centered_control_hint_row(
-    "primary",
+    "BUTTON_A",
     "Start",
     "trim"
 ))
