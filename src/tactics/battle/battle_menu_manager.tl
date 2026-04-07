@@ -414,10 +414,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("DEPLOYMENT_MENU")
-                :with_control_hints{
-                    primary = "Select Unit",
-                    secondary = "Menu",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select Unit"})
+                :with_action("BUTTON_B", { command = "menu", description = "Menu"}),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
                 grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
