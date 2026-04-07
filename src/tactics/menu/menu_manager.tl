@@ -2,12 +2,14 @@
 --- A generic manager for menu systems. It handles state transitions,
 --- history, and dispatches input to the active menu cursor.
 
+local Point = require("src.tactics.util.point").Point
 local menu_types = require ("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
 local Mouse = input_service.Mouse
 local input_context = require("src.tactics.input.input_context")
 local InputContext = input_context.InputContext
+local nested_grid = require("src.tactics.menu.cursor.nested.grid")
 local event_bus = require("src.tactics.systems.event_bus")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
@@ -26,6 +28,7 @@ local enum MenuHandlerPostHandlingType
     "consume" -- prevent navigation, if it was provided
     "navigate"
     "deserialize"
+    "move_cursor"
     -- for now, only needed for grid keyboard...
     "recompute_menu"
 end
@@ -38,6 +41,13 @@ local record MenuHandlerDeserialize
     is MenuHandlerPostHandling
     where self.type == "deserialize"
     data: {string: any}
+end
+
+-- for now, only implemented for grids
+local record MenuHandlerMoveCursor
+    is MenuHandlerPostHandling
+    where self.type == "move_cursor"
+    point: Point
 end
 
 local record MenuHandlerRecompute
@@ -91,6 +101,13 @@ function menu_handler.then_navigate(next_step: string): MenuHandlerNavigate
     return {
         type = "navigate",
         next_step = next_step,
+    }
+end
+
+function menu_handler.then_move_cursor(point: Point): MenuHandlerNavigate
+    return {
+        type = "navigate",
+        point = point,
     }
 end
 
@@ -467,6 +484,17 @@ function BaseMenuManager:update(input: InputContext)
                 elseif handler_res is MenuHandlerDeserialize then
                     log.debug("Deserializing from menu handler response.", self.menu_state.step)
                     self.menu_step.node:deserialize(nil, handler_res.data)
+                elseif handler_res is MenuHandlerMoveCursor then
+                    log.debug("Moving cursor from menu handler response.", self.menu_state.step)
+                    if handler_res.point then
+                        local state: nested_grid.SerializedNestedGridState = {
+                            type = "grid",
+                            point = handler_res.point,
+                        }
+                        self.menu_step.node:deserialize(state, {})
+                    else
+                        todo("Movement handler not implemented outside of grids")
+                    end
                 elseif handler_res is MenuHandlerRecompute then
                     log.debug("Recomputing from menu handler response.", self.menu_state.step)
                     self.menu_step.node:recompute(self.game_ctx, self.menu_ctx)
