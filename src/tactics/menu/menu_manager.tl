@@ -141,12 +141,6 @@ function MenuStepDefinition:handle_action(
 	return self
 end
 
-function MenuStepDefinition:handle_back(
-	back_handler: menu_types.MenuHandlerId
-): MenuStepDefinition
-	return self:handle_action("back", back_handler)
-end
-
 function MenuStepDefinition:with_initial_data(
 	initial_data: function(GameContext, MenuContext): {string: any}
 ): MenuStepDefinition
