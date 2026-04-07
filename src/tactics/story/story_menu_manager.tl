@@ -121,9 +121,7 @@ local function menu_definition_for_character_select(): menu_manager.MenuStepDefi
                 end
                 return {}
             end)
-            :with_control_hints{
-                primary = "Select",
-            }
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
 end
 
 
