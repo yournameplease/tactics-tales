@@ -32,8 +32,7 @@ local record ButtonCursor
     next_state: menu_types.MenuStep
     final_step: boolean
     go_back: boolean
-    select_handler: menu_types.MenuHandlerId
-    back_handler: menu_types.MenuHandlerId
+    handlers: {menu_types.MenuCommand: menu_types.MenuHandlerId}
 end
 
 local record ButtonDefinition
@@ -47,8 +46,7 @@ local record ButtonDefinition
     next_state: menu_types.MenuStep
     final_step: boolean
     go_back: boolean
-    select_handler: menu_types.MenuHandlerId
-    back_handler: menu_types.MenuHandlerId
+    handlers: {menu_types.MenuCommand: menu_types.MenuHandlerId}
 end
 
 local button = {
@@ -67,39 +65,11 @@ end
 function ButtonCursor:update_joy(
 	joy: Joypad
 ): MenuSignal
-	if self.select_handler ~= nil or self.next_state ~= nil or self.go_back then
-		if joy.ap then
-			if self.select_handler ~= nil then
-				local signal = menu_signal.call_handler(self.select_handler, self.value)
-				if self.final_step then
-					signal.then_finish = true
-				end
-				if self.next_state ~= nil then
-					signal.then_navigate_to = self.next_state
-				end
-				if self.go_back ~= nil then
-					signal.then_back = true
-				end
-				return signal
-			end
-			if self.final_step then
-				return menu_signal.finish()
-			elseif self.next_state ~= nil then
-				return menu_signal.navigate(self.next_state)
-			elseif self.go_back then
-				if self.back_handler ~= nil then
-					return menu_signal.call_handler(self.back_handler, self.value)
-				end
-				return menu_signal.back()
-			end
-			return menu_signal.consumed()
-		end
-	end
-	if self.back_handler ~= nil then
-		if joy.bp then
-			return menu_signal.call_handler(self.back_handler, self.value)
-		end
-	end
+    if joy.ap then
+        return self:handle_command("select")
+    elseif joy.bp then
+        return self:handle_command("back")
+    end
 	return menu_signal.ignored()
 end
 
@@ -124,36 +94,32 @@ end
 function ButtonCursor:handle_command(
     command: menu_types.MenuCommand
 ): MenuSignal
-	if self.select_handler ~= nil or self.next_state ~= nil or self.go_back then
-		if command == "select" then
-			if self.select_handler ~= nil then
-				local signal = menu_signal.call_handler(self.select_handler, self.value)
-				if self.next_state ~= nil then
-					signal.then_navigate_to = self.next_state
-				end
-				if self.go_back ~= nil then
-					signal.then_back = true
-				end
-				return signal
-			end
-			if self.final_step then
-				return menu_signal.finish()
-			elseif self.go_back ~= nil then
-				if self.back_handler ~= nil then
-					return menu_signal.call_handler(self.back_handler, self.value)
-				end
-				return menu_signal.back()
-			elseif self.next_state ~= nil then
-				return menu_signal.navigate(self.next_state)
-			end
-			return menu_signal.consumed()
-		end
-	end
-	if self.back_handler ~= nil then
-		if command == "back" then
-			return menu_signal.call_handler(self.back_handler, self.value)
-		end
-	end
+    local handler = self.handlers and self.handlers[command]
+    
+    if handler then
+        local signal = menu_signal.call_handler(handler, self.value)
+        if command == "select" then
+            if self.final_step then
+                signal.then_finish = true
+            elseif self.next_state then
+                signal.then_navigate_to = self.next_state
+            elseif self.go_back then
+                signal.then_back = true
+            end
+        end
+        return signal
+    end
+
+    if command == "select" then
+        if self.final_step then
+            return menu_signal.finish()
+        elseif self.next_state ~= nil then
+            return menu_signal.navigate(self.next_state)
+        elseif self.go_back then
+            return menu_signal.back()
+        end
+    end
+
 	return menu_signal.ignored()
 end
 
@@ -221,17 +187,14 @@ function ButtonDefinition:as_final_step(): ButtonDefinition
 	return self
 end
 
-function ButtonDefinition:handle_select(
-	select_handler: menu_types.MenuHandlerId
+function ButtonDefinition:handle_action(
+	command: menu_types.MenuCommand,
+	handler: menu_types.MenuHandlerId
 ): ButtonDefinition
-	self.select_handler = select_handler
-	return self
-end
-
-function ButtonDefinition:handle_back(
-	back_handler: menu_types.MenuHandlerId
-): ButtonDefinition
-	self.back_handler = back_handler
+	if self.handlers == nil then
+		self.handlers = {}
+	end
+	self.handlers[command] = handler
 	return self
 end
 
@@ -250,4 +213,3 @@ function ButtonDefinition:with_value(
 end
 
 return button
-

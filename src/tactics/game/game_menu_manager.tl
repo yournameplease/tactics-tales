@@ -161,10 +161,10 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                 :with_value(file_name)
 
                             if lists.contains(existing_files, file_name) then
-                                b = b:handle_select("store_selected_save")
+                                b = b:handle_action("select", "store_selected_save")
                                     :advance_to("CONFIRM_FILE")
                             else
-                                b = b:handle_select("begin_file")
+                                b = b:handle_action("select", "begin_file")
                             end
                             pt.add(options, b)
                         end
@@ -186,7 +186,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             :with_text("Confirm overwrite "..ctx.selected_file .."?"))
                         pt.add(options, button.builder("confirm_overwrite") 
                             :with_text("Confirm")
-                            :handle_select("begin_file_from_context")
+                            :handle_action("select", "begin_file_from_context")
                             :as_final_step())
                         pt.add(options, button.builder("no_overwrite") 
                             :advance_to("NEW_FILE")
@@ -210,7 +210,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             local b = button.builder(file_name)
                                 :with_text(file_name)
                                 :with_value(file_name)
-                                :handle_select("load_story")
+                                :handle_action("select", "load_story")
 
                             pt.add(options, b)
                         end
@@ -232,7 +232,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                             pt.add(options, button.builder("begin_story_"..story_id)
                                 :with_text(story_id)
                                 :with_value(story_id)
-                                :handle_select("begin_chapter"))
+                                :handle_action("select", "begin_chapter"))
                         end
 
                         return options
@@ -302,11 +302,11 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                                     :advance_to("MAIN_MENU"))
                                 pt.add(options, button.builder("reset")
                                     :with_text("Defaults")
-                                    :handle_select("reset_options")
+                                    :handle_action("select", "reset_options")
                                     :advance_to("MAIN_MENU"))
                                 pt.add(options, button.builder("save")
                                     :with_text("Save")
-                                    :handle_select("set_options")
+                                    :handle_action("select", "set_options")
                                     :advance_to("MAIN_MENU"))
                                 return options
                             end))
