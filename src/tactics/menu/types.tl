@@ -11,8 +11,10 @@ local record MenuState
 end
 
 local enum MenuCommand
-    "button_primary"
-    "button_secondary"
+    "select"
+    "select_alt"
+    "menu"
+    "back"
     "increment_selection"
     "decrement_selection"
     "cycle_left"
