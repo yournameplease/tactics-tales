@@ -6,7 +6,9 @@ local record Point
     y: integer
     copy: function(self): Point
     
-    metamethod __eq: function(Point|any, Point|any): boolean
+    metamethod __eq: function(Point, Point): boolean
+    metamethod __lt: function(Point, Point): boolean
+    metamethod __le: function(Point, Point): boolean
     metamethod __add: function(Point|any, Point|any): Point
     metamethod __sub: function(Point|any, Point|any): Point
     metamethod __mul: function(Point|number, Point|number): Point -- gets rounded!
@@ -30,6 +32,12 @@ local point_of: (function(integer, integer): Point)
 local point_mt: metatable<Point> = {
     __eq = function(a: Point, b: Point): boolean
         return a.x == b.x and a.y == b.y
+    end,
+    __lt = function(a: Point, b: Point): boolean
+        return a.y < b.y or (a.y == b.y and a.x < b.x)
+    end,
+    __le = function(a: Point, b: Point): boolean
+        return a.y < b.y or (a.y == b.y and a.x <= b.x)
     end,
     __add = function(a: Point, b: Point): Point
         return point_of(a.x + b.x, a.y + b.y)

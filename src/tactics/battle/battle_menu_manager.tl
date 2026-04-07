@@ -184,6 +184,74 @@ HANDLERS["end_turn"] = function(
     return nil
 end
 
+local function acting_unit_after(point: Point): function(BattleUnit): boolean
+    return function(unit: BattleUnit): boolean
+        return unit.tile > point
+    end
+end
+
+local function acting_unit_before(point: Point): function(BattleUnit): boolean
+    return function(unit: BattleUnit): boolean
+        return unit.tile < point
+    end
+end
+
+HANDLERS["cycle_next_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    local point = value.point
+    local next_unit: BattleUnit = nil
+    
+    local units_after = services.battle_map:get_units(acting_unit_after(point))
+    for _,u in ipairs(units_after) do
+        if not next_unit or u.tile < next_unit.tile then
+            next_unit = u
+        end
+    end
+    local units_before = services.battle_map:get_units(acting_unit_after(point))
+    for _,u in ipairs(units_before) do
+        if not next_unit or u.tile < next_unit.tile then
+            next_unit = u
+        end
+    end
+
+    if next_unit then
+        return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
+    end
+    return nil
+end
+
+HANDLERS["cycle_previous_unit"] = function(
+    services: BattleMenuContext,
+    _menu_data: {string: any},
+    _session_context: BattleMainMenuContext,
+    value: grid.NestedGridValue
+): menu_manager.menu_handler.MenuHandlerPostHandling
+    local point = value.point
+    local previous_unit: BattleUnit = nil
+    
+    local units_before = services.battle_map:get_units(acting_unit_after(point))
+    for _,u in ipairs(units_before) do
+        if not previous_unit or u.tile > previous_unit.tile then
+            previous_unit = u
+        end
+    end
+    local units_after = services.battle_map:get_units(acting_unit_after(point))
+    for _,u in ipairs(units_after) do
+        if not previous_unit or u.tile > previous_unit.tile then
+            previous_unit = u
+        end
+    end
+
+    if previous_unit then
+        return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
+    end
+    return nil
+end
+
 HANDLERS["select_acting_unit"] = function(
     services: BattleMenuContext,
     _menu_data: {string: any},
@@ -491,13 +559,20 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         button.builder("non_unit")
                             :handle_action("menu", "navigate_to_turn_menu")
                     )
+                    :with_common_child( -- unit cycling
+                        button.builder("cycle_units")
+                            :handle_action("cycle_left", "cycle_previous_unit")
+                            :handle_action("cycle_right", "cycle_next_unit")
+                    )
                     :with_tile_highlights(get_players_to_act_tiles)
                     :with_initial_point(function(services: BattleMenuContext, _ctx: BattleMainMenuContext): Point
                         return services.tactics_engine.active_point
                     end)
                 )
                 :with_action("BUTTON_A", { command = "select", description = "Select Unit"})
-                :with_action("BUTTON_B", { command = "menu", description = "Menu / Mark Enemy"}),
+                :with_action("BUTTON_B", { command = "menu", description = "Menu / Mark Enemy"})
+                :with_action("SHOULDER_L", { command = "cycle_left", description = "Previous Unit"})
+                :with_action("SHOULDER_R", { command = "cycle_right", description = "Next Unit"}),
              ["SELECT_DESTINATION"] = step_definition.of_node(
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
