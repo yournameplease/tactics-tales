@@ -205,13 +205,14 @@ HANDLERS["cycle_next_unit"] = function(
     local point = value.point
     local next_unit: BattleUnit = nil
     
+    log.debug("CYCLING NEXT UNIT")
     local units_after = services.battle_map:get_units(acting_unit_after(point))
     for _,u in ipairs(units_after) do
         if not next_unit or u.tile < next_unit.tile then
             next_unit = u
         end
     end
-    local units_before = services.battle_map:get_units(acting_unit_after(point))
+    local units_before = services.battle_map:get_units(acting_unit_before(point))
     for _,u in ipairs(units_before) do
         if not next_unit or u.tile < next_unit.tile then
             next_unit = u
@@ -233,7 +234,8 @@ HANDLERS["cycle_previous_unit"] = function(
     local point = value.point
     local previous_unit: BattleUnit = nil
     
-    local units_before = services.battle_map:get_units(acting_unit_after(point))
+    log.debug("CYCLING PREVIOUS UNIT")
+    local units_before = services.battle_map:get_units(acting_unit_before(point))
     for _,u in ipairs(units_before) do
         if not previous_unit or u.tile > previous_unit.tile then
             previous_unit = u
