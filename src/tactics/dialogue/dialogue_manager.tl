@@ -93,7 +93,7 @@ function DialogueManagerImpl:update(input: InputContext)
 			end
 			if d.characters_rendered >= row_len and d.current_row <= #d.text then
 				if d.auto_advance
-					or input.actions["ADVANCE"].pressed
+					or input.actions["BUTTON_A"].pressed
 				then
 					log.debug("advancing dialogue")
 					d.current_row = d.current_row + 1
@@ -104,7 +104,7 @@ function DialogueManagerImpl:update(input: InputContext)
 					end
 				end
 		    elseif d.can_skip
-				and input.actions["ADVANCE"].pressed then
+				and input.actions["BUTTON_A"].pressed then
 				d.characters_rendered = row_len
 			end
 		end

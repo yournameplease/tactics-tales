@@ -100,7 +100,7 @@ local record MenuStep
 	node: menu_cursor.MenuNode
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
-    menu_actions: {menu_types.MenuAction}
+    menu_actions: menu_types.MenuActions
 end
 
 local record MenuStepDefinition
@@ -110,7 +110,7 @@ local record MenuStepDefinition
 	default_lmb: menu_types.MenuCommand
 	default_rmb: menu_types.MenuCommand
 	initial_data: function(GameContext, MenuContext): {string: any}
-    menu_actions: { input_service.InputAction: menu_types.MenuAction }
+    menu_actions: menu_types.MenuActions
 end
 
 local menu_step_definition = {}

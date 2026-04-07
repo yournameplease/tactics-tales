@@ -15,7 +15,7 @@ left:add(control_hints.new(
 		return s.story_context.menu_manager.menu_step
 	end,
 	{
-		primary = "Advance"
+		["BUTTON_A"] = { description = "Advance" },
 	}
 ))
 

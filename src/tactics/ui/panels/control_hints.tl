@@ -4,18 +4,19 @@
 local box = require("src.tactics.ui.box")
 local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 local input_service = require("src.tactics.joypad")
-local InputLabel = input_service.InputLabel
 local menu_types = require("src.tactics.menu.types")
 local menu_manager = require("src.tactics.menu.menu_manager")
 local text = require("src.tactics.util.text")
 
 local control_hints = {}
 
-local type ActionSprites = { InputLabel: integer }
+local type ActionSprites = { input_service.InputAction: integer }
 
-local SPRITE_OFFSETS: ActionSprites = {
-	primary = 0,
-	secondary = 1,
+local SPRITE_OFFSETS <total>: ActionSprites = {
+    ["BUTTON_A"] = 0,
+    ["BUTTON_B"] = 1,
+    ["SHOULDER_L"] = 0,
+    ["SHOULDER_R"] = 0,
 }
 
 local BASE_MOUSE_SPRITE = 16
@@ -31,7 +32,7 @@ local BASE_JOYPAD_SPRITES <total>: { GlyphFamily: integer } = {
 
 
 local function sprite_by_label_and_method(
-	input_label: InputLabel,
+	input_label: input_service.InputAction,
 	input_method: input_service.InputMethod
 ): integer
 	local base_sprite: integer
@@ -45,7 +46,7 @@ local function sprite_by_label_and_method(
 end
 
 local function sprite_function(
-	input_label: InputLabel
+	input_label: input_service.InputAction
 ): function(state: UIContextManager): integer
 	return function(state: UIContextManager): integer
 		local base_sprite: integer
@@ -60,7 +61,7 @@ local function sprite_function(
 end
 
 local function control_hint_glyphs(
-	input_label: InputLabel,
+	input_label: input_service.InputAction,
 	text_color: box.UITextColor
 ): box.UIElement
 	local row = box.builder("control_row_"..input_label)
@@ -114,9 +115,9 @@ local function control_hint_glyphs(
 end
 
 local function control_hint_row(
-	input_label: InputLabel,
+	input_label: input_service.InputAction,
 	menu_step_func: function(UIContextManager): menu_manager.MenuStep,
-	default_hints: menu_types.ControlHints
+	default_hints: menu_types.MenuActions
 ): box.UIElement
 	local row = box.builder("control_row_"..input_label)
 		:direction("row")
@@ -138,10 +139,10 @@ local function control_hint_row(
 		:on_update(function(self: box.UIElement, state: UIContextManager)
 			local menu_step = menu_step_func(state)
 
-			if menu_step ~= nil and menu_step.control_hints ~= nil then
+			if menu_step ~= nil and menu_step.menu_actions ~= nil then
 				self.text.content = {
-					menu_step.control_hints[input_label]
-					and " "..menu_step.control_hints[input_label]
+					menu_step.menu_actions[input_label]
+					and " "..menu_step.menu_actions[input_label].description
 					or nil
 				}
 				return
@@ -150,7 +151,7 @@ local function control_hint_row(
 			if default_hints ~= nil then			
 				self.text.content = {
 					default_hints[input_label]
-					and " "..default_hints[input_label]
+					and " "..default_hints[input_label].description
 					or nil
 				}
 				return
@@ -162,7 +163,7 @@ local function control_hint_row(
 end
 
 function control_hints.centered_control_hint_row(
-	input_label: InputLabel,
+	input_label: input_service.InputAction,
 	message: string,
 	text_color: box.UITextColor
 ): box.UIElement
@@ -193,15 +194,15 @@ end
 
 function control_hints.new(
 	menu_step_func: function(UIContextManager): menu_manager.MenuStep,
-	default_hints: menu_types.ControlHints
+	default_hints: menu_types.MenuActions
 ): box.UIElement
     local self = box.builder("control_hints")
 		:direction("col")
 		:container("block")
 	    :build()
 
-	self:add(control_hint_row("primary", menu_step_func, default_hints))
-	self:add(control_hint_row("secondary", menu_step_func, default_hints))
+	self:add(control_hint_row("BUTTON_A", menu_step_func, default_hints))
+	self:add(control_hint_row("BUTTON_B", menu_step_func, default_hints))
 
 	return self
 end

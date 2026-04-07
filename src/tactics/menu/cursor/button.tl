@@ -125,7 +125,7 @@ function ButtonCursor:handle_command(
     command: menu_types.MenuCommand
 ): MenuSignal
 	if self.select_handler ~= nil or self.next_state ~= nil or self.go_back then
-		if command == "button_primary" then
+		if command == "select" then
 			if self.select_handler ~= nil then
 				local signal = menu_signal.call_handler(self.select_handler, self.value)
 				if self.next_state ~= nil then
@@ -150,7 +150,7 @@ function ButtonCursor:handle_command(
 		end
 	end
 	if self.back_handler ~= nil then
-		if command == "button_secondary" then
+		if command == "back" then
 			return menu_signal.call_handler(self.back_handler, self.value)
 		end
 	end

@@ -330,7 +330,7 @@ local function get_selection_at(
             return mouse_menu_selection.grid(
                 tx, ty,
                 data.menu_node,
-                "button_primary", "button_secondary")
+                "select", "menu") -- this probably needs update
         end
     end
     return nil
