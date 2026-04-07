@@ -440,10 +440,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_SWAP_UNIT")
-                :with_control_hints{
-                    primary = "Select Swap Target",
-                    secondary = "Back",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select Swap Target"})
+                :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["DEPLOYMENT_MENU"] = step_definition.of_node(
                 list.column(
                     "deployment_menu",
@@ -461,10 +459,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end
                 )
             ):with_previous_step("SELECT_SWAP_UNIT")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
         }
     },
     ["MENU_PLAYER_TURN"] = {
@@ -500,10 +496,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                         return services.tactics_engine.active_point
                     end)
                 )
-                :with_control_hints{
-                    primary = "Select Unit",
-                    secondary = "Menu / Mark Enemy",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select Unit"})
+                :with_action("BUTTON_B", { command = "menu", description = "Menu / Mark Enemy"}),
              ["SELECT_DESTINATION"] = step_definition.of_node(
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
@@ -540,10 +534,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_UNIT")
-                :with_control_hints{
-                    primary = "Select Destination",
-                    secondary = "Back",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select Destination"})
+                :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["SELECT_ACTION"] = step_definition.of_node(
                 list.column(
                     "select_action",
@@ -591,10 +583,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("SELECT_DESTINATION")
                 :handle_back("unmove_acting_unit")
-                :with_control_hints{
-                    primary = "Select",
-                    secondary = "Back",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select"})
+                :with_action("BUTTON_B", { command = "back", description = "Back"}),
              ["SELECT_TARGET"] = step_definition.of_node(
                 grid.grid("select_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
@@ -624,10 +614,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                     end)
                 )
                 :with_previous_step("SELECT_ACTION")
-                :with_control_hints{
-                    primary = "Select Target",
-                    secondary = "Back",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select Target"})
+                :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["CONFIRM_ATTACK"] = step_definition.of_node(
                 list.column(
                     "confirm_attack",
@@ -647,10 +635,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("SELECT_DESTINATION")
                 :handle_back("unmove_acting_unit")
-                :with_control_hints{
-                    primary = "Select",
-                    secondary = "Back",
-                },
+                :with_action("BUTTON_A", { command = "select", description = "Select"})
+                :with_action("BUTTON_B", { command = "back", description = "Back"}),
             -- ["SELECT_ITEM"] = list_cursor.definition({
             --     previous_state = "SELECT_ACTION",
             --     set_selected_context = function(s: list_cursor.ListMenuNode<string>, _msb: BattleMenuContext, ctx: BattleMainMenuContext)
@@ -745,10 +731,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("SELECT_UNIT")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
         }
     }
 }

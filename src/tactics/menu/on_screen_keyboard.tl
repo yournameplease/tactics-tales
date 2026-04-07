@@ -164,10 +164,8 @@ function menu_keyboard.step(submit: string): menu_manager.MenuStepDefinition
             end
         )
 	)
-    :with_control_hints{
-        primary = "Select",
-        secondary = "Back",
-    }
+    :with_action("BUTTON_A", { command = "select", description = "Select"})
+    :with_action("BUTTON_B", { command = "back", description = "Back"})
 end
 
 return menu_keyboard

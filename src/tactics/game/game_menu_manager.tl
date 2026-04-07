@@ -119,9 +119,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 :with_text("Main Menu")
                 :advance_to("MAIN_MENU")
             ):with_default_lmb("button_primary")
-            :with_control_hints{
-                primary = "Start",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Start"}),
             ["MAIN_MENU"] = step_definition.of_node(
                 list.column(
                     "main_menu",
@@ -146,10 +144,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("TITLE_SCREEN")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["NEW_FILE_SELECT"] = step_definition.of_node(
                 list.column(
                     "new_file_select",
@@ -177,10 +173,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("MAIN_MENU")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["CONFIRM_FILE"] = step_definition.of_node(
                 list.column(
                     "confirm_file",
@@ -202,10 +196,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("NEW_FILE")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["LOAD_FILE_SELECT"] = step_definition.of_node(
                 list.column(
                     "load_file_select",
@@ -227,10 +219,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("MAIN_MENU")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["CHAPTER_SELECT"] = step_definition.of_node(
                 list.column(
                     "chapter_select",
@@ -249,10 +239,8 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
             )
             :with_previous_step("MAIN_MENU")
-            :with_control_hints{
-                primary = "Select",
-                secondary = "Back",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["OPTIONS_MENU"] = step_definition.of_node(
                 list.column(
                     "options_menu",
@@ -328,9 +316,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
             ):with_initial_data(function(_services: GameMenuContext, _session_data: MenuContext): {string: any}
                 return DYNAMIC_CONFIG
             end)
-            :with_control_hints{
-                primary = "Select",
-            },
+            :with_action("BUTTON_A", { command = "select", description = "Select"}),
         }
     }
 
