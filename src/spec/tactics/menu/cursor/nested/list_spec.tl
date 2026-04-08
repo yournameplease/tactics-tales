@@ -101,4 +101,36 @@ describe("tactics.menu.cursor.nested.list", function()
         manager:update(input_helper.joypad({ dyp = -1 }))
         luassert.are_equal(2, node.i)
     end)
+
+    it("should navigate between children horizontally in a row", function()
+        local menu_defs: { string: menu_manager.MenuDefinition } = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        list.row("test_list", function(_: menu_context.GameContext, _: menu_context.MenuContext): {menu_cursor.MenuNodeDefinition}
+                            return {
+                                button.builder("btn1"),
+                                button.builder("btn2")
+                            }
+                        end)
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node as list.NestedMenuNode
+        luassert.are_equal(1, node.i)
+
+        -- move right
+        manager:update(input_helper.joypad({ dxp = 1 }))
+        luassert.are_equal(2, node.i)
+
+        -- move left
+        manager:update(input_helper.joypad({ dxp = -1 }))
+        luassert.are_equal(1, node.i)
+    end)
 end)

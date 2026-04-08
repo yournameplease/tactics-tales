@@ -335,6 +335,9 @@ function BaseMenuManager:handle_menu_back()
         self.selection_history[#self.selection_history].step ~= previous_step do
         self.selection_history[#self.selection_history] = nil
     end
+    if #self.selection_history > 0 then
+        self.selection_history[#self.selection_history] = nil
+    end
     self:populate_menu_state(previous_step)
     if #self.selection_history > 0 then
         -- self.menu_cursor = self.selection_history[#self.selection_history].selection
@@ -464,8 +467,8 @@ function BaseMenuManager:update(input: InputContext)
                         nil
                     )
                 end
-                if triggered_command == "back" and self.menu_step.previous_step then
-                    self:handle_menu_advance(self.menu_step.previous_step)
+                if triggered_command == "back" then
+                    self:handle_menu_back()
                 end
             end
         elseif signal is menu_signal.Back then

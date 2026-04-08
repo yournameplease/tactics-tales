@@ -98,4 +98,64 @@ describe("tactics.menu.cursor.selection", function()
         local ser = manager:serialize()
         luassert.are_equal("B", ser.node.data["my_key"])
     end)
+
+    it("should cycle options using joypad vertical input when configured", function()
+        local menu_defs: { string: menu_manager.MenuDefinition } = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        (function(): selection.SelectionMenuDefinition
+                            local def = selection.row("test_sel")
+                                :with_static_options({"A", "B", "C"})
+                            def.direction = "vertical"
+                            return def
+                        end)()
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node as selection.SelectionMenuNode
+        luassert.are_equal("A", node:get_selected_value())
+
+        -- move down
+        manager:update(input_helper.joypad({ dyp = 1 }))
+        luassert.are_equal("B", node:get_selected_value())
+
+        -- move up
+        manager:update(input_helper.joypad({ dyp = -1 }))
+        luassert.are_equal("A", node:get_selected_value())
+    end)
+
+    it("should handle increment/decrement commands directly", function()
+        local menu_defs: { string: menu_manager.MenuDefinition } = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        selection.row("test_sel")
+                            :with_static_options({"A", "B", "C"})
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node as selection.SelectionMenuNode
+        luassert.are_equal("A", node:get_selected_value())
+
+        -- increment
+        node:handle_command("increment_selection", { metadata = {} } as menu_context.MenuContext, ctx)
+        luassert.are_equal("B", node:get_selected_value())
+
+        -- decrement
+        node:handle_command("decrement_selection", { metadata = {} } as menu_context.MenuContext, ctx)
+        luassert.are_equal("A", node:get_selected_value())
+    end)
 end)
