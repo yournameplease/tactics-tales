@@ -377,11 +377,13 @@ function BaseMenuManager:update(input: InputContext)
             	}
             	local commands: {menu_types.MenuCommand} = {}
 
-            	for _,button in ipairs(button_priority) do
-            		if self.menu_step.menu_actions[button] and input.actions[button].pressed then
-                        pt.add(commands, self.menu_step.menu_actions[button].command)
-            		end
-            	end
+                if self.menu_step.menu_actions then
+            	    for _,button in ipairs(button_priority) do
+            		    if self.menu_step.menu_actions[button] and input.actions[button].pressed then
+                            pt.add(commands, self.menu_step.menu_actions[button].command)
+            		    end
+            	    end
+                end
 
                 return self.menu_step.node:update_joy(joy, commands, self.menu_ctx, self.game_ctx)
             end,
