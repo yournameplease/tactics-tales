@@ -6,10 +6,9 @@ local grid = require("src.tactics.menu.cursor.nested.grid")
 local button = require("src.tactics.menu.cursor.button")
 local event_bus = require("src.tactics.systems.event_bus")
 local menu_context = require("src.tactics.menu.menu_context")
-local input_context = require("src.tactics.input.input_context")
 local point = require("src.tactics.util.point")
 local Point = point.Point
-local joypad_service = require("src.tactics.joypad")
+local input_helper = require("src.spec.input.input_helper")
 
 describe("tactics.menu.cursor.nested.grid", function()
     local bus: event_bus.EventBus
@@ -40,35 +39,18 @@ describe("tactics.menu.cursor.nested.grid", function()
         luassert.are_equal(0, node.point.x)
         luassert.are_equal(0, node.point.y)
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = false, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = false, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
         -- move right
-        joypad.dxp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1 }))
         luassert.are_equal(1, node.point.x)
         luassert.are_equal(0, node.point.y)
 
         -- move down
-        joypad.dxp = 0
-        joypad.dyp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(1, node.point.x)
         luassert.are_equal(1, node.point.y)
 
         -- move diagonal
-        joypad.dxp = 1
-        joypad.dyp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1, dyp = 1 }))
         luassert.are_equal(2, node.point.x)
         luassert.are_equal(2, node.point.y)
     end)
@@ -114,20 +96,8 @@ describe("tactics.menu.cursor.nested.grid", function()
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = true, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = true, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
         -- at (0,0), trigger btn00
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ a = true, ap = true }))
         luassert.is_true(button1_called)
         luassert.is_false(button2_called)
 
@@ -135,18 +105,10 @@ describe("tactics.menu.cursor.nested.grid", function()
         button1_called = false
 
         -- move to (1,1)
-        joypad.ap = false
-        actions["BUTTON_A"].pressed = false
-        joypad.dxp = 1
-        joypad.dyp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1, dyp = 1 }))
         
         -- trigger btn11
-        joypad.dxp = 0
-        joypad.dyp = 0
-        joypad.ap = true
-        actions["BUTTON_A"].pressed = true
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ a = true, ap = true }))
         luassert.is_false(button1_called)
         luassert.is_true(button2_called)
     end)

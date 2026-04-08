@@ -5,8 +5,7 @@ local menu_manager = require("src.tactics.menu.menu_manager")
 local selection = require("src.tactics.menu.cursor.selection")
 local event_bus = require("src.tactics.systems.event_bus")
 local menu_context = require("src.tactics.menu.menu_context")
-local input_context = require("src.tactics.input.input_context")
-local joypad_service = require("src.tactics.joypad")
+local input_helper = require("src.spec.input.input_helper")
 
 describe("tactics.menu.cursor.selection", function()
     local bus: event_bus.EventBus
@@ -37,34 +36,20 @@ describe("tactics.menu.cursor.selection", function()
         local node = manager.menu_step.node as selection.SelectionMenuNode
         luassert.are_equal("A", node:get_selected_value())
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = false, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = false, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
         -- move right
-        joypad.dxp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1 }))
         luassert.are_equal("B", node:get_selected_value())
 
         -- move right again
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1 }))
         luassert.are_equal("C", node:get_selected_value())
 
         -- wrap around
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1 }))
         luassert.are_equal("A", node:get_selected_value())
 
         -- move left
-        joypad.dxp = -1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = -1 }))
         luassert.are_equal("C", node:get_selected_value())
     end)
 
@@ -100,7 +85,7 @@ describe("tactics.menu.cursor.selection", function()
                         selection.row("test_sel")
                             :with_key("my_key")
                             :with_static_options({"A", "B", "C"})
-                    )
+                    ):with_action("BUTTON_A", { command = "select" })
                 }
             }
         }
@@ -108,18 +93,7 @@ describe("tactics.menu.cursor.selection", function()
         local manager = menu_manager.new(menu_defs, {}, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 1, dy = 0, dyp = 0,
-            a = false, ap = false, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = false, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dxp = 1 }))
         
         local ser = manager:serialize()
         luassert.are_equal("B", ser.node.data["my_key"])
