@@ -10,7 +10,14 @@
 - Instead, ask me to take over and get the code to compile.
 - If the typed code is isolated enough (such as in a test case), you may comment the code until you are done with other work.
 - Do not use casts `as Type` or overly generic types like `any` unless you are given permission or interfacing with code using those types.
--
+
+## Style
+
+- When creating services, prefer to define an interface with public fields and methods and hide private fields and methods in a corresponding Impl.
+- Name Records, Interfaces, and Enums in PascalCase
+- Name all other functions and variables in snake_case
+- "Static" methods should belong to the module's table (local variable, not a record)
+- Records themselves should not have static methods ("dot") defined unless it is a variable.
 
 ## Testing
 
