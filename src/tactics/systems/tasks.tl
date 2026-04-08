@@ -26,7 +26,7 @@ function TaskManager:update_tasks()
             local ok, err = pt.coresume(co)
             if not ok then
                 log.error("Task Error: "..err)
-                assert(ok, "An error occurred in a coroutine.  If you know what you were doing at the time, share any details with the developer to see if they can fix it.")
+                assert(ok, "An error occurred in a coroutine.  Let the developer know!")
             end
         elseif pt.costatus(co) == "dead" then
             pt.del(self.tasks, co)
