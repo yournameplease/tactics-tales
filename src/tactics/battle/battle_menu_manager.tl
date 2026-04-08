@@ -502,7 +502,7 @@ local MENU_DATA: { menu_types.MenuId: menu_manager.MenuDefinition } = {
                 )
                 :with_previous_step("DEPLOYMENT_MENU")
                 :with_action("BUTTON_A", { command = "select", description = "Select Unit"})
-                :with_action("BUTTON_B", { command = "menu", description = "Menu"}),
+                :with_action("BUTTON_B", { command = "back", description = "Menu"}),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
                 grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
