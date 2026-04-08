@@ -43,6 +43,15 @@ local function point_is_empty_or_acting_unit(
     return destination_unit.id == acting_unit.id
 end
 
+local function unit_is_available_player(
+    unit: BattleUnit
+): boolean
+    if not unit:is_player() then return false end
+    if unit.has_acted then return false end
+
+    return true
+end
+
 local function point_is_available_player(
     point: Point,
     map: bm.BattleMap
@@ -184,15 +193,15 @@ HANDLERS["end_turn"] = function(
     return nil
 end
 
-local function acting_unit_after(point: Point): function(BattleUnit): boolean
+local function is_acting_unit_after(point: Point): function(BattleUnit): boolean
     return function(unit: BattleUnit): boolean
-        return unit.tile > point
+        return unit_is_available_player(unit) and unit.tile > point
     end
 end
 
-local function acting_unit_before(point: Point): function(BattleUnit): boolean
+local function is_acting_unit_before(point: Point): function(BattleUnit): boolean
     return function(unit: BattleUnit): boolean
-        return unit.tile < point
+        return unit_is_available_player(unit) and unit.tile < point
     end
 end
 
@@ -206,22 +215,26 @@ HANDLERS["cycle_next_unit"] = function(
     local next_unit: BattleUnit = nil
     
     log.debug("CYCLING NEXT UNIT")
-    local units_after = services.battle_map:get_units(acting_unit_after(point))
+    local units_after = services.battle_map:get_units(is_acting_unit_after(point))
     for _,u in ipairs(units_after) do
         if not next_unit or u.tile < next_unit.tile then
             next_unit = u
         end
     end
-    local units_before = services.battle_map:get_units(acting_unit_before(point))
+    if next_unit then
+        return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
+    end
+
+    local units_before = services.battle_map:get_units(is_acting_unit_before(point))
     for _,u in ipairs(units_before) do
         if not next_unit or u.tile < next_unit.tile then
             next_unit = u
         end
     end
-
     if next_unit then
         return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
     end
+
     return nil
 end
 
@@ -235,22 +248,26 @@ HANDLERS["cycle_previous_unit"] = function(
     local previous_unit: BattleUnit = nil
     
     log.debug("CYCLING PREVIOUS UNIT")
-    local units_before = services.battle_map:get_units(acting_unit_before(point))
+    local units_before = services.battle_map:get_units(is_acting_unit_before(point))
     for _,u in ipairs(units_before) do
         if not previous_unit or u.tile > previous_unit.tile then
             previous_unit = u
         end
     end
-    local units_after = services.battle_map:get_units(acting_unit_after(point))
+    if previous_unit then
+        return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
+    end
+
+    local units_after = services.battle_map:get_units(is_acting_unit_after(point))
     for _,u in ipairs(units_after) do
         if not previous_unit or u.tile > previous_unit.tile then
             previous_unit = u
         end
     end
-
     if previous_unit then
         return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
     end
+
     return nil
 end
 
