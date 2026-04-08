@@ -9,6 +9,7 @@ local SerializedMenu = menu_cursor.SerializedMenu
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
@@ -64,13 +65,24 @@ end
 
 function ButtonCursor:update_joy(
 	_joy: Joypad,
-	commands: {menu_types.MenuCommand}
+	commands: {menu_types.MenuCommand},
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
 ): MenuSignal
 	for _,command in ipairs(commands) do
 		if self.handlers[command] then
-			return self:handle_command(command)
+			return self:handle_command(command, menu_ctx, game_ctx)
 		end
 	end
+	return menu_signal.ignored()
+end
+
+function ButtonCursor:update_mouse(
+	_mouse: Mouse,
+	_selection: mouse_menu_selection.MenuMouseSelection,
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
+): MenuSignal
 	return menu_signal.ignored()
 end
 
@@ -93,7 +105,9 @@ function ButtonCursor:claim_focus(
 end
 
 function ButtonCursor:handle_command(
-    command: menu_types.MenuCommand
+    command: menu_types.MenuCommand,
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
 ): MenuSignal
     local handler = self.handlers and self.handlers[command]
     

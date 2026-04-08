@@ -11,7 +11,9 @@ local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local lists = require("src.tactics.util.lists")
-local Joypad = require("src.tactics.joypad").Joypad
+local input_service = require("src.tactics.joypad")
+local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
 global enum SelectionDirection
@@ -158,7 +160,9 @@ end
 
 function SelectionMenuNode:update_joy(
 	joy: Joypad,
-	_commands: {menu_types.MenuCommand}
+	_commands: {menu_types.MenuCommand},
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
 ): MenuSignal
     if self.direction == "vertical" then
 		if joy.dyp == 1 then
@@ -182,6 +186,15 @@ function SelectionMenuNode:update_joy(
 	return menu_signal.ignored()
 end
 
+function SelectionMenuNode:update_mouse(
+	_mouse: Mouse,
+	_selection: mouse_menu_selection.MenuMouseSelection,
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
+): MenuSignal
+	return menu_signal.ignored()
+end
+
 function SelectionMenuNode:lose_focus()
 	self.has_focus = false
 end
@@ -201,7 +214,9 @@ function SelectionMenuNode:claim_focus(
 end
 
 function SelectionMenuNode:handle_command(
-    command: menu_types.MenuCommand
+    command: menu_types.MenuCommand,
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
 ): MenuSignal
 	if command == "increment_selection" then
 		self:increment_selection()
