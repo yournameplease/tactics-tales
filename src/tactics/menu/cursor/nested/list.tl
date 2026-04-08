@@ -1,4 +1,3 @@
-
 ---@brief
 --- Implements a menu cursor for navigating a 1D list of options,
 --- supporting both horizontal and vertical lists.
@@ -16,7 +15,9 @@ local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
-local Joypad = require("src.tactics.joypad").Joypad
+local input_service = require("src.tactics.joypad")
+local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 
 local enum NestedMenuType
@@ -70,25 +71,39 @@ function NestedMenuNode:get_selected_child(): menu_cursor.MenuNode
 	return self.children[self.i]
 end
 
-function NestedMenuNode:get_focused_leaf(): menu_cursor.MenuLeaf
+function NestedMenuNode:get_focused_leaves(
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
+): { menu_cursor.MenuNode }
 	local child = self:get_selected_child()
 	if child is menu_cursor.MenuLeaf then
-		return child
+		return {child}
 	elseif child is menu_cursor.MenuContainer then
-		return child:get_focused_leaf()
+		return child:get_focused_leaves(menu_ctx, game_ctx)
 	end
 end
 
 function NestedMenuNode:update_joy(
 	joy: Joypad,
-	commands: {menu_types.MenuCommand}
+	commands: {menu_types.MenuCommand},
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
 ): MenuSignal
-	local focused_leaf = self:get_focused_leaf()
-	if focused_leaf == nil then
+	local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
+
+	if #focused_leaves == 0 then
 		return menu_signal.ignored()
 	end
 	
-	local signal = focused_leaf:update_joy(joy, commands)
+	local signal = menu_signal.ignored()
+	for _,leaf in ipairs(focused_leaves) do
+		if leaf ~= nil then
+			signal = leaf:update_joy(joy, commands, menu_ctx, game_ctx)
+			if signal.type ~= "ignored" then
+				break
+			end
+		end
+	end
     if signal ~= nil and signal.type ~= "ignored" then return signal end
     local old_i = self.i
 
@@ -117,9 +132,29 @@ function NestedMenuNode:update_joy(
 	end
 end
 
+function NestedMenuNode:update_mouse(
+	mouse: Mouse,
+	selection: mouse_menu_selection.MenuMouseSelection,
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
+): MenuSignal
+	local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
+
+	for _,leaf in ipairs(focused_leaves) do
+		local signal = leaf:update_mouse(mouse, selection, menu_ctx, game_ctx)
+		if signal.type ~= "ignored" then
+			return signal
+		end
+	end
+
+	return menu_signal.ignored()
+end
+
 function NestedMenuNode:lose_focus()
 	self.has_focus = false
-	self.children[self.i]:lose_focus()
+	if self.i > 0 and self.i <= #self.children then
+		self.children[self.i]:lose_focus()
+	end
 end
 
 function NestedMenuNode:refresh_focus()
@@ -150,7 +185,9 @@ function NestedMenuNode:claim_focus(
 end
 
 function NestedMenuNode:handle_command(
-    _command: menu_types.MenuCommand
+    _command: menu_types.MenuCommand,
+	_menu_ctx: MenuContext,
+	_game_ctx: GameContext
 ): MenuSignal
     return menu_signal.ignored()
 end

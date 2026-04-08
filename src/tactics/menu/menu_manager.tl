@@ -383,7 +383,7 @@ function BaseMenuManager:update(input: InputContext)
             		end
             	end
 
-                return self.menu_step.node:update_joy(joy, commands)
+                return self.menu_step.node:update_joy(joy, commands, self.menu_ctx, self.game_ctx)
             end,
             function(
                 mouse: Mouse,
@@ -394,6 +394,13 @@ function BaseMenuManager:update(input: InputContext)
                 if hovered.node then
                     hovered.node:claim_focus(hovered, nil)
                 end
+
+                local signal = menu_signal.ignored()
+                if hovered.node then
+                    signal = hovered.node:update_mouse(mouse, hovered, self.menu_ctx, self.game_ctx)
+                end
+
+                if signal.type ~= "ignored" then return signal end
 
             	local command: menu_types.MenuCommand
             	if (hovered.on_lmb_command or self.menu_step.default_lmb) and mouse.mlp then
@@ -413,7 +420,7 @@ function BaseMenuManager:update(input: InputContext)
             	end
             	if command then
             	    log.debug("Got mouse command: "..command.." for "..hovered.node.id)
-                    return hovered.node:handle_command(command)
+                    return hovered.node:handle_command(command, self.menu_ctx, self.game_ctx)
             	end
             	return menu_signal.ignored()
             end

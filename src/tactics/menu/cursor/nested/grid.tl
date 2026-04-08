@@ -3,6 +3,7 @@
 --- selecting tiles on the battle map.
 
 local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
+local fp = require("src.tactics.util.fp")
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
@@ -17,6 +18,7 @@ local Point = point.Point
 local menu_types = require("src.tactics.menu.types")
 local input_service = require("src.tactics.joypad")
 local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
@@ -53,7 +55,6 @@ local record NestedGridNode
     legal_tiles: Userdata
     max_path_length: integer
     children: {NestedGridChild}
-    child_array: array_2d.Array2D<MenuNode>
     text_array: array_2d.Array2D<string>
 	text_function: function(Point, GameContext, MenuContext): string
 end
@@ -122,13 +123,24 @@ function NestedGridNode:get_first_child(p: Point, game_context: GameContext, men
 	end
 end
 
-function NestedGridNode:get_focused_leaf(): menu_cursor.MenuLeaf
-	local child = self.child_array:get_point(self.point)
-	if child is menu_cursor.MenuLeaf then
-		return child
-	elseif child is menu_cursor.MenuContainer then
-		return child:get_focused_leaf()
-	end
+function NestedGridNode:get_focused_leaves(
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
+): { menu_cursor.MenuNode }
+	return fp.pipeline_2(
+		lists.filter(function(child: NestedGridChild): boolean
+			return child.filter(self.point, game_ctx, menu_ctx)
+		end),
+		lists.map(function(child: NestedGridChild): MenuNode
+			return child.child
+		end)
+	)(self.children)
+end
+
+function NestedGridNode:get_all_focused_leaves(): { menu_cursor.MenuNode }
+	return lists.map(function(child: NestedGridChild): MenuNode
+		return child.child
+	end)(self.children)
 end
 
 function NestedGridNode:get_nested_grid_value(): NestedGridValue
@@ -155,16 +167,23 @@ end
 
 function NestedGridNode:update_joy(
 	joy: Joypad,
-	commands: {menu_types.MenuCommand}
+	commands: {menu_types.MenuCommand},
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
 ): MenuSignal
-	local focused_leaf = self:get_focused_leaf()
+	local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
 
 	local signal = menu_signal.ignored()
-	if focused_leaf ~= nil then
-		if focused_leaf is ButtonCursor then
-			focused_leaf.value = self:get_nested_grid_value()
+	for _,leaf in ipairs(focused_leaves) do
+		if leaf ~= nil then
+			if leaf is ButtonCursor then
+				leaf.value = self:get_nested_grid_value()
+			end
+			signal = leaf:update_joy(joy, commands, menu_ctx, game_ctx)
+			if signal.type ~= "ignored" then
+				break
+			end
 		end
-		signal = focused_leaf:update_joy(joy, commands)
 	end
 
     if signal.type ~= "ignored" then return signal end
@@ -182,19 +201,37 @@ function NestedGridNode:update_joy(
 	end
 end
 
+function NestedGridNode:update_mouse(
+	mouse: Mouse,
+	selection: mouse_menu_selection.MenuMouseSelection,
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
+): MenuSignal
+	local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
+
+	for _,leaf in ipairs(focused_leaves) do
+		local signal = leaf:update_mouse(mouse, selection, menu_ctx, game_ctx)
+		if signal.type ~= "ignored" then
+			return signal
+		end
+	end
+
+	return menu_signal.ignored()
+end
+
 function NestedGridNode:lose_focus()
 	self.has_focus = false
-	local focused_leaf = self:get_focused_leaf()
-	if focused_leaf then
-		focused_leaf:lose_focus()
+	local focused_leaves = self:get_all_focused_leaves()
+	for _,leaf in ipairs(focused_leaves) do
+		leaf:lose_focus()
 	end
 end
 
 function NestedGridNode:refresh_focus()
 	self.has_focus = true
-	local focused_leaf = self:get_focused_leaf()
-	if focused_leaf then
-		focused_leaf:refresh_focus()
+	local focused_leaves = self:get_all_focused_leaves()
+	for _,leaf in ipairs(focused_leaves) do
+		leaf:refresh_focus()
 	end
 end
 
@@ -214,16 +251,23 @@ function NestedGridNode:claim_focus(
 end
 
 function NestedGridNode:handle_command(
-    command: menu_types.MenuCommand
+    command: menu_types.MenuCommand,
+	menu_ctx: MenuContext,
+	game_ctx: GameContext
 ): MenuSignal
-	local focused_leaf = self:get_focused_leaf()
+	local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
 
-	if focused_leaf ~= nil then
-		log.debug("Focused leaf: "..focused_leaf.id.." at "..tostring(self.point).." for "..self.id)
-		if focused_leaf is ButtonCursor then
-			focused_leaf.value = self:get_nested_grid_value()
+	for _,leaf in ipairs(focused_leaves) do
+		if leaf ~= nil then
+			log.debug("Focused leaf: "..leaf.id.." at "..tostring(self.point).." for "..self.id)
+			if leaf is ButtonCursor then
+				leaf.value = self:get_nested_grid_value()
+			end
+			local signal = leaf:handle_command(command, menu_ctx, game_ctx)
+			if signal.type ~= "ignored" then
+				return signal
+			end
 		end
-		return focused_leaf:handle_command(command)
 	end
 	log.debug("No focused leaf: "..tostring(self.point).." for "..self.id)
 	return menu_signal.ignored()
@@ -330,12 +374,8 @@ function NestedGridDefinition:to_cursor(
 		cursor.children = lists.map(function(c: NestedGridChildDefinition): NestedGridChild
 			return c:to_cursor(cursor, game_ctx, menu_ctx, menu_state)
 		end)(self.children)
-		cursor.child_array = array_2d.new_from_function(cursor.x_max, cursor.y_max, function(p: Point): MenuNode
-			return cursor:get_first_child(p, game_ctx, menu_ctx)
-		end)
 	else
 		error("Probably an error, grid with no children")
-		cursor.child_array = array_2d.new(cursor.x_max, cursor.y_max)
 	end
 
 	if self.text_function then

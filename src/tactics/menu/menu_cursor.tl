@@ -8,6 +8,7 @@ local menu_context = require("src.tactics.menu.menu_context")
 local MenuContext = menu_context.MenuContext
 local GameContext = menu_context.GameContext
 local Joypad = input_service.Joypad
+local Mouse = input_service.Mouse
 
 local enum MenuSignalType
     "navigate"
@@ -149,8 +150,10 @@ local interface MenuNode
 	has_focus: boolean
 	
 	-- note: passing contexts are only really needed for grid nonsense.
-    update_joy: function(self, Joypad, {menu_types.MenuCommand}): MenuSignal
-    handle_command: function(self, menu_types.MenuCommand): MenuSignal
+    update_joy: function(self, Joypad, {menu_types.MenuCommand}, MenuContext, GameContext): MenuSignal
+    update_mouse: function(self, Mouse, MenuMouseSelection, MenuContext, GameContext): MenuSignal
+    handle_command: function(self, menu_types.MenuCommand, MenuContext, GameContext): MenuSignal
+    get_focused_leaves: function(self, MenuContext, GameContext): { MenuNode }
     lose_focus: function(self)
     refresh_focus: function(self)
     claim_focus: function(self, MenuMouseSelection, child: MenuNode)
@@ -168,7 +171,6 @@ end
 local interface MenuContainer
 	is MenuNode
     type: MenuContainerType
-    get_focused_leaf: function(self): MenuLeaf
 end
 
 local interface MenuNodeDefinition

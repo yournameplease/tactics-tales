@@ -6,7 +6,6 @@ local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextM
 local input_service = require("src.tactics.joypad")
 local menu_types = require("src.tactics.menu.types")
 local menu_manager = require("src.tactics.menu.menu_manager")
-local text = require("src.tactics.util.text")
 
 local control_hints = {}
 
@@ -78,7 +77,7 @@ local function control_hint_glyphs(
 			width = 9,
 			height = 9,
 		}
-	    :on_update(function(self: box.UIElement, state: UIContextManager)
+	    :on_update(function(self: box.UIElement, _state: UIContextManager)
 			self.sprite.s = sprite_by_label_and_method(input_label, "mouse")
 	    end)
 	    :build())
@@ -107,7 +106,7 @@ local function control_hint_glyphs(
 			width = 9,
 			height = 9,
 		}
-	    :on_update(function(self: box.UIElement, state: UIContextManager)
+	    :on_update(function(self: box.UIElement, _state: UIContextManager)
 			self.sprite.s = sprite_by_label_and_method(input_label, "joypad")
 	    end)
 	    :build())
