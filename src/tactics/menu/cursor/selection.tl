@@ -267,6 +267,7 @@ function SelectionMenuDefinition:to_cursor(
         parent = parent,
         i = 1,
         options = self.get_options(game_ctx, menu_ctx),
+        has_focus = false,
     }
     return setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (SelectionMenuNode as {string: any})[k] then

@@ -252,6 +252,7 @@ function NestedMenuDefinition:to_cursor(
         type = "list",
         parent = parent,
         i = 1,
+        has_focus = false,
     }
     setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (NestedMenuNode as {string: any})[k] then

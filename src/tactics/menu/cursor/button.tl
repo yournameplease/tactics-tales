@@ -161,6 +161,7 @@ function ButtonDefinition:to_cursor(
     local cursor: ButtonCursor = {
         type = "button",
         parent = parent,
+        has_focus = false,
     }
     setmetatable(cursor, { __index = function(_: any, k: string): any 
             if (ButtonCursor as {string: any})[k] then

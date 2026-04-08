@@ -337,6 +337,7 @@ function NestedGridDefinition:to_cursor(
         x_max = self.x_max,
         y_max = self.y_max,
 		point = point.of(0, 0),
+        has_focus = false,
     }
     
     if self.get_tile_highlights ~= nil then
