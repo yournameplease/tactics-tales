@@ -6,9 +6,8 @@ local list = require("src.tactics.menu.cursor.nested.list")
 local button = require("src.tactics.menu.cursor.button")
 local event_bus = require("src.tactics.systems.event_bus")
 local menu_context = require("src.tactics.menu.menu_context")
-local input_context = require("src.tactics.input.input_context")
 local menu_cursor = require("src.tactics.menu.menu_cursor")
-local joypad_service = require("src.tactics.joypad")
+local input_helper = require("src.spec.input.input_helper")
 
 describe("tactics.menu.cursor.nested.list", function()
     local bus: event_bus.EventBus
@@ -45,36 +44,22 @@ describe("tactics.menu.cursor.nested.list", function()
         luassert.is_true(node.children[1].has_focus)
         luassert.is_false(node.children[2].has_focus)
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = false, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = false, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
         -- move down
-        joypad.dyp = 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(2, node.i)
         luassert.is_false(node.children[1].has_focus)
         luassert.is_true(node.children[2].has_focus)
 
         -- move down again
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(3, node.i)
 
         -- no wrapping by default, should stay at 3
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(3, node.i)
 
         -- move up
-        joypad.dyp = -1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = -1 }))
         luassert.are_equal(2, node.i)
     end)
 
@@ -105,28 +90,15 @@ describe("tactics.menu.cursor.nested.list", function()
         local node = manager.menu_step.node as list.NestedMenuNode
         luassert.are_equal(1, node.i)
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 1,
-            a = false, ap = false, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = false, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(2, node.i)
 
         -- wrap around to 1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = 1 }))
         luassert.are_equal(1, node.i)
 
         -- move up from 1 wraps to 2
-        joypad.dyp = -1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ dyp = -1 }))
         luassert.are_equal(2, node.i)
     end)
 end)

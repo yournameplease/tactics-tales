@@ -5,8 +5,7 @@ local menu_manager = require("src.tactics.menu.menu_manager")
 local button = require("src.tactics.menu.cursor.button")
 local event_bus = require("src.tactics.systems.event_bus")
 local menu_context = require("src.tactics.menu.menu_context")
-local input_context = require("src.tactics.input.input_context")
-local joypad_service = require("src.tactics.joypad")
+local input_helper = require("src.spec.input.input_helper")
 
 describe("tactics.menu.cursor.button", function()
     local bus: event_bus.EventBus
@@ -46,20 +45,7 @@ describe("tactics.menu.cursor.button", function()
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = true, ap = true, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = true, pressed = true, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-        
-        local input = input_context.joypad(joypad, actions)
-        manager:update(input)
+        manager:update(input_helper.joypad({ a = true, ap = true }))
 
         luassert.is_true(handler_called)
         luassert.are_equal("test_value", handler_value)
@@ -86,18 +72,7 @@ describe("tactics.menu.cursor.button", function()
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = true, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = true, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ ap = true }))
 
         luassert.are_equal("STEP_2", manager.menu_state.step)
     end)
@@ -122,24 +97,12 @@ describe("tactics.menu.cursor.button", function()
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = true, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = true, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
         -- advance to STEP_2
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ ap = true }))
         luassert.are_equal("STEP_2", manager.menu_state.step)
 
         -- go back to STEP_1
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ ap = true }))
         luassert.are_equal("STEP_1", manager.menu_state.step)
     end)
 
@@ -159,19 +122,7 @@ describe("tactics.menu.cursor.button", function()
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
 
-        local joypad: joypad_service.Joypad = {
-            dx = 0, dxp = 0, dy = 0, dyp = 0,
-            a = false, ap = true, b = false, bp = false,
-            l = false, lp = false, r = false, rp = false
-        }
-        local actions: joypad_service.InputActions = {
-            ["BUTTON_A"] = { held = false, pressed = true, released = false },
-            ["BUTTON_B"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_L"] = { held = false, pressed = false, released = false },
-            ["SHOULDER_R"] = { held = false, pressed = false, released = false },
-        }
-
-        manager:update(input_context.joypad(joypad, actions))
+        manager:update(input_helper.joypad({ ap = true }))
         luassert.is_nil(manager.menu_state.menu_id)
     end)
 end)
