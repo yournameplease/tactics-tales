@@ -70,9 +70,7 @@ function ButtonCursor:update_joy(
 	game_ctx: GameContext
 ): MenuSignal
 	for _,command in ipairs(commands) do
-		if self.handlers[command] then
-			return self:handle_command(command, menu_ctx, game_ctx)
-		end
+		return self:handle_command(command, menu_ctx, game_ctx)
 	end
 	return menu_signal.ignored()
 end
