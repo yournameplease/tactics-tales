@@ -14,8 +14,15 @@ local type ActionSprites = { input_service.InputAction: integer }
 local SPRITE_OFFSETS <total>: ActionSprites = {
     ["BUTTON_A"] = 0,
     ["BUTTON_B"] = 1,
-    ["SHOULDER_L"] = 0,
-    ["SHOULDER_R"] = 0,
+    ["SHOULDER_L"] = 4,
+    ["SHOULDER_R"] = 5,
+}
+
+local HAS_MOUSE_SPRITE <total>: { input_service.InputAction: boolean } = {
+    ["BUTTON_A"] = true,
+    ["BUTTON_B"] = true,
+    ["SHOULDER_L"] = false,
+    ["SHOULDER_R"] = false,
 }
 
 local BASE_MOUSE_SPRITE = 16
@@ -44,21 +51,6 @@ local function sprite_by_label_and_method(
 	return base_sprite + SPRITE_OFFSETS[input_label]
 end
 
-local function sprite_function(
-	input_label: input_service.InputAction
-): function(state: UIContextManager): integer
-	return function(state: UIContextManager): integer
-		local base_sprite: integer
-		if state.game_context.input_method == "mouse" then
-			base_sprite = BASE_MOUSE_SPRITE
-		else
-			base_sprite = BASE_JOYPAD_SPRITES[DYNAMIC_CONFIG.glyph_family]
-		end
-		
-		return base_sprite + SPRITE_OFFSETS[input_label]
-	end
-end
-
 local function control_hint_glyphs(
 	input_label: input_service.InputAction,
 	text_color: box.UITextColor
@@ -67,35 +59,47 @@ local function control_hint_glyphs(
 		:direction("row")
 		:container("modal")
 		:build()
-	row:add(
-		box.builder("control_sprite_"..input_label)
-		:sprite{
-			ox = 1,
-			oy = 1
-		}
-		:layout{
-			width = 9,
-			height = 9,
-		}
-	    :on_update(function(self: box.UIElement, _state: UIContextManager)
-			self.sprite.s = sprite_by_label_and_method(input_label, "mouse")
-	    end)
-	    :build())
-	row:add(
-		box.builder("control_text_"..input_label)
-		:layout{
-			width = 6,
-			height = 10,
-			padding = box.layout.padding(2),
-		}
-		:text{
-			content = {"/"},
-			draw_properties = {
-				wrap = "no_wrap",
-			},
-			text_color = text_color,
-		}
-		:build())
+
+	if HAS_MOUSE_SPRITE[input_label] then
+		row:add(
+			box.builder("control_sprite_"..input_label)
+			:sprite{
+				ox = 1,
+				oy = 1
+			}
+			:layout{
+				width = 9,
+				height = 9,
+			}
+		    :on_update(function(self: box.UIElement, _state: UIContextManager)
+				self.sprite.s = sprite_by_label_and_method(input_label, "mouse")
+		    end)
+		    :build())
+		row:add(
+			box.builder("control_text_"..input_label)
+			:layout{
+				width = 6,
+				height = 10,
+				padding = box.layout.padding(2),
+			}
+			:text{
+				content = {"/"},
+				draw_properties = {
+					wrap = "no_wrap",
+				},
+				text_color = text_color,
+			}
+			:build())
+	else
+		row:add(
+			box.builder("no_mouse_spacer_"..input_label)
+			:layout{
+				width = 15,
+				height = 10,
+				padding = box.layout.padding(2),
+			}
+			:build())
+	end
 	row:add(
 		box.builder("control_sprite_"..input_label)
 		:sprite{
