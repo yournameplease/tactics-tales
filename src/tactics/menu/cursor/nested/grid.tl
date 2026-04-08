@@ -305,6 +305,7 @@ function NestedGridNode:deserialize(state: menu_cursor.SerializedMenuState, data
 	if state ~= nil and state is SerializedNestedGridState then
 		self.point = state.point:copy()
 		self.path = state.path
+		self.legal_tiles = state.tile_highlights
 	end
 	for _,child in ipairs(self.children) do
 		child.child:deserialize(state and state.children and state.children[child.child.id] or nil, data)
