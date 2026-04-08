@@ -40,6 +40,7 @@ local BASE_TILE_SPRITE = 2 * 256
 local CURSOR_SPRITE = 8
 
 local FOOT_GROUND_ANCHOR = point.of(8,12)
+local ICON_ANCHOR = point.of(4,-8)
 
 local record AnimatedUnitPosition
     id: integer
@@ -62,7 +63,12 @@ local function compute_animated_unit_positions(map: bm.BattleMap): { AnimatedUni
     )(map:get_all_units())
 end
 
-local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManager, _ctx: BattleUIContext)
+local function draw_unit(
+    unit: BattleUnit,
+    animated_position: Point,
+    draw_target_manager: DrawTargetManager,
+    _ctx: BattleUIContext
+)
     local unit_tile = unit.tile
 
     local world_point = unit_tile * TILE_SIZE
@@ -89,11 +95,12 @@ local function draw_unit(unit: BattleUnit, draw_target_manager: DrawTargetManage
     CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, look_direction)
 
     -- TODO: these should check objective instead    
+    local animated_sprite_point = animated_position + ICON_ANCHOR
 	if unit.tags["hero"] then
-		pt.spr(128, draw_point.x, world_point.y)
+		pt.spr(128, animated_sprite_point.x, animated_sprite_point.y)
 	end
 	if unit.tags["boss"] then
-		pt.spr(129, draw_point.x, world_point.y)
+		pt.spr(129, animated_sprite_point.x, animated_sprite_point.y)
 	end
 end
 
@@ -236,10 +243,11 @@ local function draw_tactics_map(
     -- pre-compute actor animations for z-ordering
     local unit_positions = compute_animated_unit_positions(state.battle_context.battle_map)
 
-    local sorted_units = pt.userdata("i16", 2, #unit_positions) as Userdata
+    local sorted_units = pt.userdata("i16", 3, #unit_positions) as Userdata
     for i,u in ipairs(unit_positions) do
         sorted_units:set(0,i-1, u.point.y)
-        sorted_units:set(1,i-1, u.id)
+        sorted_units:set(1,i-1, u.point.x)
+        sorted_units:set(2,i-1, u.id)
     end
     sorted_units:sort()
 
@@ -272,9 +280,10 @@ local function draw_tactics_map(
     local prev_z = 0
     for i=0,#unit_positions-1 do
         -- profile("draw_map_rows_get_unit")
-        local unit_id = sorted_units:get(1, i)
+        local unit_id = sorted_units:get(2, i)
         local unit = map:get_unit_by_id(unit_id)
         local next_z = sorted_units:get(0, i)
+        local next_x = sorted_units:get(1, i)
         -- profile("draw_map_rows_get_unit")
         -- profile("draw_map_rows_decorations")
         if next_z > prev_z then
@@ -283,7 +292,8 @@ local function draw_tactics_map(
         end
         -- profile("draw_map_rows_decorations")
         -- profile("draw_map_rows_units")
-        draw_unit(unit, draw_target_manager, state.battle_context)
+        local animated_point = point.of(next_x, next_z)
+        draw_unit(unit, animated_point, draw_target_manager, state.battle_context)
         -- profile("draw_map_rows_units")
     end
     draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
