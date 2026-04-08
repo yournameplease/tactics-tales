@@ -50,31 +50,33 @@ sudo dnf install lua-language-server
 # https://github.com/LuaLS/lua-language-server/releases
 ```
 
-Add a `.luarc.json` at the project root:
+The `.luarc.json` at the project root (already in place):
 
 ```json
 {
+  "workspace.library": ["types/"],
+  "workspace.ignoreDir": ["build", "tactics.p64", "lib", ".git"],
   "runtime.version": "Lua 5.4",
   "diagnostics.enable": true,
-  "diagnostics.globals": ["pt", "log", "todo", "unexpected", "DYNAMIC_CONFIG", "STATIC_CONFIG", "DATP", "lib"],
-  "workspace.library": ["types/"],
   "workspace.checkThirdParty": false,
   "type.checkTableShape": true,
-  "strict": true
+  "runtime.builtin": { "package": "enable", ... },
+  "runtime.special": { "include": "require" }
 }
 ```
+
+Key decisions:
+- `lib/` is ignored — it contains Picotron runtime bridge files, not source to check.
+- `package` is enabled — the test environment uses standard Lua `require`.
+- Game-specific globals (`log`, `DYNAMIC_CONFIG`, `pt`, etc.) are declared in `types/globals.lua`.
+- `types/` Picotron system definitions were copied from the Picotron install and are used as-is.
 
 Run type checking:
 
 ```bash
-lua-language-server --check src/ --configpath .luarc.json
-```
-
-Add to `Makefile`:
-
-```makefile
-check: tactics
-    lua-language-server --check src/ --configpath .luarc.json
+make check
+# or directly:
+lua-language-server --check=$(pwd) --configpath=.luarc.json --check_format=pretty
 ```
 
 ### Selene (optional linter)

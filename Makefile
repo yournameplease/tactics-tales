@@ -8,6 +8,8 @@ CYANFLAGS =
 
 BUILD_MARKER = build/.cyan_built
 
+LLS = lua-language-server
+
 .PHONY: all check build clean
 
 
@@ -19,7 +21,10 @@ tactics: $(BUILD_MARKER)
 $(BUILD_MARKER): $(TL_SRC) $(LUA_BUILD)
 	@touch $@
 
-all: clean test
+all: clean check test
+
+check:
+	$(LLS) --check=$(CURDIR) --configpath=$(CURDIR)/.luarc.json --check_format=pretty
 
 clean:
 	rm -rf build
