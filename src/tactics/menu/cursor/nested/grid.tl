@@ -307,7 +307,7 @@ function NestedGridNode:deserialize(state: menu_cursor.SerializedMenuState, data
 		self.path = state.path
 	end
 	for _,child in ipairs(self.children) do
-		child.child:deserialize(state and state.children[child.child.id] or nil, data)
+		child.child:deserialize(state and state.children and state.children[child.child.id] or nil, data)
 	end
 end
 

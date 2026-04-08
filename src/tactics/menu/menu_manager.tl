@@ -106,7 +106,7 @@ end
 
 function menu_handler.then_move_cursor(point: Point): MenuHandlerMoveCursor
     return {
-        type = "navigate",
+        type = "move_cursor",
         point = point,
     }
 end
