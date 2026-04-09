@@ -74,8 +74,6 @@ end
 
 function randomizer.weighted_option_selector.of_recursive<V>(...: WeightedOption<WeightedOptionSelector<V>>): WeightedOptionSelector<V>
 	local array: {WeightedOption<WeightedOptionSelector<V>>} = {...}
-	--uhhhh
-	-- lua is not great for fp lolll
 	local options = lists.flat_map(
 		function(o: WeightedOption<WeightedOptionSelector<V>>): {WeightedOption<V>}
 			local weight = o[2]
