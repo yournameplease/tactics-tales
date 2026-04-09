@@ -1,6 +1,8 @@
 local real_require = require
 
-_G.require = function(path: string): any
+---@param path string
+---@return any
+_G.require = function(path)
 	local trimmed_path = string.gsub(path, "^src%.", "")
 	return real_require(trimmed_path)
 end
