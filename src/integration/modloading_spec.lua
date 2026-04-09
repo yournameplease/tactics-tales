@@ -1,4 +1,3 @@
-local type _ = require("busted")
 local luassert = require("luassert")
 
 local mod_loader = require("src.tactics.mods.mod_loader")
@@ -21,4 +20,3 @@ describe("included mods #it", function()
         end)
     end)
 end)
-
