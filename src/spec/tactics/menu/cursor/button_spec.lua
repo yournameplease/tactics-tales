@@ -1,5 +1,4 @@
-local type _ = require("busted")
-local luassert <const> = require("luassert")
+local luassert = require("luassert")
 
 local menu_manager = require("src.tactics.menu.menu_manager")
 local button = require("src.tactics.menu.cursor.button")
@@ -8,27 +7,27 @@ local menu_context = require("src.tactics.menu.menu_context")
 local input_helper = require("src.spec.input.input_helper")
 
 describe("tactics.menu.cursor.button", function()
-    local bus: event_bus.EventBus
-    local ctx: menu_context.GameContext
+    local bus
+    local ctx
 
     before_each(function()
         bus = event_bus.new()
-        ctx = {} as menu_context.GameContext
+        ctx = {}
     end)
 
     it("should trigger a handler when pressed via joypad", function()
         local handler_called = false
-        local handler_value: any = nil
+        local handler_value = nil
 
-        local handlers: { string: menu_manager.MenuHandler } = {
-            ["test_handler"] = function(_: menu_context.GameContext, _: {string: any}, _: menu_context.MenuContext, value: any): menu_manager.menu_handler.MenuHandlerPostHandling
+        local handlers = {
+            ["test_handler"] = function(_gc, _md, _mc, value)
                 handler_called = true
                 handler_value = value
                 return nil
             end
         }
 
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -52,8 +51,8 @@ describe("tactics.menu.cursor.button", function()
     end)
 
     it("should navigate to next state when configured", function()
-        local handlers: { string: menu_manager.MenuHandler } = {}
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local handlers = {}
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -76,10 +75,10 @@ describe("tactics.menu.cursor.button", function()
 
         luassert.are_equal("STEP_2", manager.menu_state.step)
     end)
-    
+
     it("should go back when configured", function()
-        local handlers: { string: menu_manager.MenuHandler } = {}
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local handlers = {}
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -107,8 +106,8 @@ describe("tactics.menu.cursor.button", function()
     end)
 
     it("should finish menu when as_final_step is set", function()
-        local handlers: { string: menu_manager.MenuHandler } = {}
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local handlers = {}
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -130,18 +129,18 @@ describe("tactics.menu.cursor.button", function()
         local select_called = false
         local menu_called = false
 
-        local handlers: { string: menu_manager.MenuHandler } = {
-            ["select_h"] = function(_: menu_context.GameContext, _: {string: any}, _: menu_context.MenuContext, _: any): menu_manager.menu_handler.MenuHandlerPostHandling
+        local handlers = {
+            ["select_h"] = function(_gc, _md, _mc, _v)
                 select_called = true
                 return nil
             end,
-            ["menu_h"] = function(_: menu_context.GameContext, _: {string: any}, _: menu_context.MenuContext, _: any): menu_manager.menu_handler.MenuHandlerPostHandling
+            ["menu_h"] = function(_gc, _md, _mc, _v)
                 menu_called = true
                 return nil
             end
         }
 
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -170,16 +169,16 @@ describe("tactics.menu.cursor.button", function()
 
     it("should handle complex handler responses (recompute and navigate)", function()
         local recompute_count = 0
-        local handlers: { string: menu_manager.MenuHandler } = {
-            ["recompute_h"] = function(_: menu_context.GameContext, _: {string: any}, _: menu_context.MenuContext, _: any): menu_manager.menu_handler.MenuHandlerPostHandling
+        local handlers = {
+            ["recompute_h"] = function(_gc, _md, _mc, _v)
                 return menu_manager.menu_handler.then_recompute()
             end,
-            ["navigate_h"] = function(_: menu_context.GameContext, _: {string: any}, _: menu_context.MenuContext, _: any): menu_manager.menu_handler.MenuHandlerPostHandling
+            ["navigate_h"] = function(_gc, _md, _mc, _v)
                 return menu_manager.menu_handler.then_navigate("STEP_2")
             end
         }
 
-        local menu_defs: { string: menu_manager.MenuDefinition } = {
+        local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
@@ -198,10 +197,10 @@ describe("tactics.menu.cursor.button", function()
 
         local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
         manager:set_menu("TEST_MENU")
-        
+
         -- hook into recompute
         local original_recompute = manager.menu_step.node.recompute
-        manager.menu_step.node.recompute = function(self: button.ButtonCursor, g: menu_context.GameContext, m: menu_context.MenuContext)
+        manager.menu_step.node.recompute = function(self, g, m)
             recompute_count = recompute_count + 1
             original_recompute(self, g, m)
         end
@@ -213,5 +212,49 @@ describe("tactics.menu.cursor.button", function()
         -- trigger navigate
         manager:update(input_helper.joypad({ bp = true }))
         luassert.are_equal("STEP_2", manager.menu_state.step)
+    end)
+
+    describe("serialize/deserialize", function()
+        it("should serialize to empty state and data", function()
+            local menu_defs = {
+                ["TEST_MENU"] = {
+                    initial_step = "STEP_1",
+                    steps = {
+                        ["STEP_1"] = menu_manager.definition.step.of_node(
+                            button.builder("btn1"):with_text("OK")
+                        )
+                    }
+                }
+            }
+
+            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            manager:set_menu("TEST_MENU")
+
+            local ser = manager:serialize()
+            luassert.is_nil(ser.node.state)
+            luassert.are_same({}, ser.node.data)
+        end)
+
+        it("should deserialize without error or state change", function()
+            local menu_defs = {
+                ["TEST_MENU"] = {
+                    initial_step = "STEP_1",
+                    steps = {
+                        ["STEP_1"] = menu_manager.definition.step.of_node(
+                            button.builder("btn1"):with_text("OK")
+                        )
+                    }
+                }
+            }
+
+            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            manager:set_menu("TEST_MENU")
+
+            -- deserialize with empty data; should be a no-op
+            manager.menu_step.node:deserialize(nil, {})
+
+            local ser = manager:serialize()
+            luassert.is_nil(ser.node.state)
+        end)
     end)
 end)
