@@ -4,6 +4,7 @@ global unexpected: function(state: string)
 
 -- nice utility types
 global enum LogLevel
+    "NONE"
     "ERROR"
     "WARN"
     "INFO"

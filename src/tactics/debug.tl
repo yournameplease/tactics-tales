@@ -4,7 +4,9 @@
 
 local function should_print (level: LogLevel): boolean
     local log_level = DYNAMIC_CONFIG.log_level
-    if log_level == "ERROR" then
+    if log_level == "NONE" then
+        return false
+    elseif log_level == "ERROR" then
         return level == "ERROR"
     elseif log_level == "WARN" then
         return level == "WARN" or level == "ERROR"
