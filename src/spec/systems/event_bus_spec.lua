@@ -23,7 +23,7 @@ describe("tactics.systems.event_bus", function()
 
         it("should pass args to the callback", function()
             local bus = event_bus.new()
-            ---@class DummyMessage
+            ---@class DummyBusMessage
             ---@field turn integer
             local received = nil
             bus:on("TACTICS_BEGIN_TURN", function(args) received = args end)
