@@ -385,6 +385,53 @@ A migrated file is complete when:
 - [ ] `lua-language-server --check` produces no new warnings/errors for this file
 - [ ] All existing tests for this file pass unchanged
 - [ ] Any new pre-migration tests for this file also pass
+- [ ] All non-obvious parameters and fields have descriptions (see Documentation Standard below)
+
+---
+
+## Documentation Standard
+
+Migration is an opportunity to add descriptions that were absent from the Teal source. Apply
+these rules whenever writing or reviewing annotations:
+
+**Parameters (`---@param`)**: Add an inline description after the type unless the parameter
+name alone is completely unambiguous (one plain word whose meaning is obvious from the
+function name, e.g. `x`, `y`, `n`, `key`). Multi-word names, domain concepts, flags, and
+anything accepting `any` always need a description.
+
+```lua
+---@param filter fun(elem: A): boolean Predicate; elements for which this returns true are kept.
+---@param initial V Accumulator starting value passed to the first fn call.
+---@param one_char boolean When true, return the single character at position `start`.
+```
+
+**Fields (`---@field`)**: Same rule — skip only the most self-evident single-word fields
+(`x`, `y`, `w`, `h`, `id`). Describe anything that encodes a convention, a unit, or a
+non-obvious invariant.
+
+```lua
+---@field wrapped_lines string[]|nil Cached wrap result; nil means wrapping not yet computed.
+---@field data table<integer, table<integer, V>> 1-indexed column-major storage (col[x][y]).
+```
+
+**Return values (`---@return`)**: Describe the return when its meaning is not obvious from
+the function name, or when the type alone is ambiguous (e.g. two different integers).
+
+```lua
+---@return integer count Number of elements matching the predicate.
+---@return boolean ok, string? err
+```
+
+**Summary lines**: Every public function needs at least one `---` summary line above its
+annotations. Keep it short (one sentence). The summary should say *what* the function does,
+not *how* it does it.
+
+```lua
+--- Clamp `val` to [lo, hi] using the median of three values.
+---@param lo number
+---@param val number
+---@param hi number
+---@return number
 
 ---
 
@@ -683,6 +730,7 @@ For each batch:
       - Remove Teal-specific syntax: `global`, `local record`, `local interface`, `local enum`,
         generic angle-bracket syntax, `is`/`where` constraints, `as` casts, `local type _`
       - Add LuaCATS annotations for all types, functions, and fields
+      - Add descriptions to parameters and fields per the **Documentation Standard** below
       - Translate `pt.add` → `table.insert`, `pt.max` → `math.max`, etc. (see replacement
         table above)
    d. **Keep the `.tl` source file** — do not delete it. Cyan still needs it to type-check
