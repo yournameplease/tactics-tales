@@ -1,5 +1,4 @@
-local type _ = require("busted")
-local luassert <const> = require("luassert")
+local luassert = require("luassert")
 
 local point = require("src.tactics.util.point")
 
@@ -41,12 +40,12 @@ describe("tactics.util.point", function()
             local p3 = point.of(2, 3)
             local result2 = p3 * 3
             luassert.is_true(result2 == point.of(6, 9))
-            
+
             -- number * point
             local p4 = point.of(2, 3)
             local result3 = 3 * p4
             luassert.is_true(result3 == point.of(6, 9))
-            
+
             -- with floats
             local p5 = point.of(3, 5)
             local result4 = 2.5 * p5
@@ -64,15 +63,14 @@ describe("tactics.util.point", function()
             luassert.are_equal("(12,34)", tostring(p))
         end)
     end)
-    
+
     describe("copy", function()
         it("should create a new point with the same coordinates and be independent", function()
             local p1 = point.of(1, 2)
             local p2 = p1:copy()
 
-            luassert.is_true(p1 == p2) -- Value equality
+            luassert.is_true(p1 == p2)
 
-            -- Modify p1 and ensure p2 is unchanged
             p1.x = 99
             p1.y = 100
 
