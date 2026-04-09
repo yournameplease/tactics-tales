@@ -675,7 +675,10 @@ For each batch:
 2. **For each file in the batch, migrate spec then source:**
    a. Translate the `_spec.tl` → `_spec.lua`: remove Teal imports (`local type _ = require`),
       convert inline type annotations on lambdas, replace `local record` with `---@class`.
-   b. Delete the `_spec.tl` file.
+   b. Delete the `_spec.tl` file — **only if nothing else imports it**. Most spec files are
+      standalone and can always be deleted. Shared test helpers (e.g. `input_helper.tl`)
+      are imported by other spec files and must be kept alongside their `.lua` counterpart
+      until all their `.tl` importers are migrated.
    c. Translate the source `.tl` → `.lua` alongside the existing `.tl`:
       - Remove Teal-specific syntax: `global`, `local record`, `local interface`, `local enum`,
         generic angle-bracket syntax, `is`/`where` constraints, `as` casts, `local type _`
