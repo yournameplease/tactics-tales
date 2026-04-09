@@ -7,7 +7,6 @@ local event_bus = require("src.tactics.systems.event_bus")
 ---@class EventListener
 ---@field listener_ids table<integer, boolean> Set of active subscription IDs managed by this listener.
 ---@field bus EventBus Bus this listener is subscribed to.
-
 local EventListener = {}
 EventListener.__index = EventListener
 

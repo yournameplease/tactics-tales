@@ -5,7 +5,6 @@ local event_bus = require("src.tactics.systems.event_bus")
 
 ---@class EventWriter
 ---@field bus EventBus Underlying bus; all emits are forwarded here.
-
 local EventWriter = {}
 EventWriter.__index = EventWriter
 
