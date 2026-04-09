@@ -103,24 +103,35 @@ unused_variable = "deny"
 The current build flow: `cyan build` compiles `src/**/*.tl` → `build/**/*.lua`; busted runs
 with `lpath = build/?.lua`.
 
-During migration, `.lua` files in `src/` need to reach `build/` without being compiled.
-Add a copy step to the Makefile that runs after `cyan build`:
+During migration, source `.tl` files are kept in place so that `cyan` can continue to
+type-check the unmigrated files that depend on them. Migrated `.lua` files are created
+alongside their `.tl` counterparts and **overwrite** the cyan-compiled output in `build/`,
+so tests always run against the migrated Lua. Spec `.tl` files are the exception — they
+can be deleted immediately because no other file imports them.
+
+The Makefile must guarantee that the `.lua` copy runs *after* `cyan build`, because
+pattern-rule ordering in Make is not sufficient when both `src/%.tl` and `src/%.lua` exist
+for the same module (both produce the same `build/%.lua` target). Replace the
+`$(BUILD_MARKER)` recipe with an explicit sequential copy:
 
 ```makefile
-LUA_SRC      = $(shell find src/ -type f -name '*.lua' -not -path '*/spec/*')
-LUA_SPEC_SRC = $(shell find src/ -type f -name '*.lua' -path '*/spec/*')
-LUA_BUILD    = $(patsubst src/%.lua, build/%.lua, $(LUA_SRC) $(LUA_SPEC_SRC))
+LUA_SRC = $(shell find src/ -type f -name '*.lua')
 
-# Copy migrated .lua files to build/
-build/%.lua: src/%.lua
-    @mkdir -p $(dir $@)
-    cp $< $@
-
-$(BUILD_MARKER): $(TL_SRC) $(LUA_SRC) $(LUA_SPEC_SRC) $(LUA_BUILD_FROM_TL) $(LUA_BUILD)
+$(BUILD_MARKER): $(TL_SRC) $(LUA_SRC)
+    $(CYAN) $(CYANFLAGS) build
+    @for f in $(LUA_SRC); do \
+        dest="build/$${f#src/}"; \
+        mkdir -p "$$(dirname $$dest)"; \
+        cp "$$f" "$$dest"; \
+    done
     @touch $@
 ```
 
-Once the final `.tl` file is deleted, remove `cyan` from the Makefile and drop the `tlconfig.lua`.
+This ensures cyan compiles `.tl` files first, then every `.lua` in `src/` is copied on top —
+migrated modules overwrite their teal-compiled counterparts, unmigrated modules are unaffected.
+
+Once the final `.tl` source file is deleted (Final Cleanup), remove `cyan` and the loop;
+the recipe becomes just the copy.
 
 ---
 
@@ -661,16 +672,22 @@ For each batch:
 
 1. **Write missing tests** (in plain `.lua`) against the current Teal-compiled code. Run `make
    ut` and confirm green.
-2. **Translate each file** from `.tl` to `.lua`:
-   - Remove Teal-specific syntax: `global`, `local record`, `local interface`, `local enum`,
-     generic angle-bracket syntax, `is`/`where` constraints, `as` casts, `local type _`
-   - Add LuaCATS annotations for all types, functions, and fields
-   - Translate `pt.add` → `table.insert` (or keep `pt.add` if the shim continues to provide
-     it — see note below)
-3. **Delete the `.tl` file** for each migrated module.
-4. **Run `make ut`** (or `make it` for integration specs). All tests must pass.
-5. **Run `lua-language-server --check src/`**. Resolve all new warnings.
-6. **Review**: confirm every public symbol has documentation and type annotations.
+2. **For each file in the batch, migrate spec then source:**
+   a. Translate the `_spec.tl` → `_spec.lua`: remove Teal imports (`local type _ = require`),
+      convert inline type annotations on lambdas, replace `local record` with `---@class`.
+   b. Delete the `_spec.tl` file.
+   c. Translate the source `.tl` → `.lua` alongside the existing `.tl`:
+      - Remove Teal-specific syntax: `global`, `local record`, `local interface`, `local enum`,
+        generic angle-bracket syntax, `is`/`where` constraints, `as` casts, `local type _`
+      - Add LuaCATS annotations for all types, functions, and fields
+      - Translate `pt.add` → `table.insert`, `pt.max` → `math.max`, etc. (see replacement
+        table above)
+   d. **Keep the `.tl` source file** — do not delete it. Cyan still needs it to type-check
+      other unmigrated files that import this module. The `.lua` file overwrites the built
+      output so tests run against the migrated code.
+   e. **Run `make ut`** (or `make it` for integration specs). All tests must pass.
+3. **Run `lua-language-server --check src/`**. Resolve all new warnings.
+4. **Review**: confirm every public symbol has documentation and type annotations.
 
 > **Note on `pt.*` APIs**: `pt.add`, `pt.del`, `pt.mid`, etc. are Picotron globals that the
 > shim provides in tests. During migration, decide whether to keep them (simpler — just keep
@@ -685,9 +702,12 @@ For each batch:
 
 Once all 12 batches are complete:
 
-1. Remove `tlconfig.lua`
-2. Remove `cyan` from `Makefile`; the build step becomes just the `cp` of `.lua` files
-3. Remove `types/*.d.tl` (replaced by `types/*.lua` with `---@meta`)
+1. Delete all remaining `src/**/*.tl` source files (kept during migration for cyan's
+   benefit). This is the single bulk deletion deferred from the per-file process.
+2. Remove `tlconfig.lua`
+3. Simplify `Makefile`: remove the `cyan` step; the `$(BUILD_MARKER)` recipe becomes just
+   the `cp` loop (or eliminate `build/` entirely — see below)
+4. Remove `types/*.d.tl` (replaced by `types/*.lua` with `---@meta`)
 4. Consider: can `build/` be eliminated entirely? If `src/` is pointed at in `.busted`, the
    copy step disappears. The `require_trimmer` would need adjustment or removal.
 5. Update `CLAUDE.md` to reflect the new toolchain (no `cyan`, add `lua-language-server`)
