@@ -5,7 +5,7 @@ local lfs = require("lfs")
 -- various global configs
 ---@type DynamicConfig
 _G.DYNAMIC_CONFIG = {
-    log_level = "ERROR",
+    log_level = "NONE",
     draw_flexbox_debug = false,
     draw_target_debug = false,
     head_scale = 1,
