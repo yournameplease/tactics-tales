@@ -3,7 +3,10 @@
     "workspace.checkThirdParty": false,
     "workspace.library": [
         "types",
-        "../addons/busted/library"
+        "../addons/busted/library",
+        "../addons/luassert/library",
+        "../addons/luassert",
+        "../addons"
     ],
     "workspace.userThirdParty": ["../addons"],
     "workspace.ignoreDir": ["build", "tactics.p64", "lib", ".git"],
@@ -23,7 +26,7 @@
         "io": "disable",
         "jit": "disable",
         "math": "enable",
-        "os": "disable",
+        "os": "enable",
         "package": "enable",
         "string": "enable",
         "table": "enable",
