@@ -17,6 +17,8 @@ describe("tactics.systems.event_bus.event_writer", function()
         it("should pass args through to the bus callbacks", function()
             local bus = event_bus.new()
             local writer = event_writer.new(bus)
+            ---@class DummyWriterMessage
+            ---@field reason integer
             local received = nil
             bus:on("GAME_EXIT_STORY", function(args) received = args end)
             writer:emit("GAME_EXIT_STORY", { reason = "done" })
