@@ -30,7 +30,6 @@ local id_generator = require("src.tactics.util.id_generator")
 ---@field id_generator IdGenerator Source of unique subscription IDs.
 ---@field event_history GameEvent[] Ring buffer of recently emitted events.
 ---@field listeners table<GameEvent, EventCallback[]> Callbacks keyed by event name.
-
 local EventBus = {}
 EventBus.__index = EventBus
 

@@ -3,7 +3,6 @@
 
 ---@class IdGenerator
 ---@field id_count integer Running counter; incremented on each call to get_id.
-
 local IdGenerator = {}
 
 local id_generator = {}
