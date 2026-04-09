@@ -1,0 +1,37 @@
+{
+    "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+    "workspace.checkThirdParty": false,
+    "workspace.library": [
+        "types",
+        "../addons/busted/library"
+    ],
+    "workspace.userThirdParty": ["../addons"],
+    "workspace.ignoreDir": ["build", "tactics.p64", "lib", ".git"],
+    "runtime.version": "Lua 5.4",
+    "diagnostics.disable": [
+        "trailing-space",
+        "lowercase-global"
+    ],
+    "runtime.builtin": {
+        "basic": "enable",
+        "bit": "disable",
+        "bit32": "disable",
+        "builtin": "enable",
+        "coroutine": "enable",
+        "debug": "enable",
+        "ffi": "disable",
+        "io": "disable",
+        "jit": "disable",
+        "math": "enable",
+        "os": "disable",
+        "package": "enable",
+        "string": "enable",
+        "table": "enable",
+        "table.clear": "disable",
+        "table.new": "disable",
+        "utf8": "enable"
+    },
+    "runtime.special": {
+        "include": "require"
+    }
+}

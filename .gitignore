@@ -1,5 +1,4 @@
 .ignore
-.luarc.json
 tactics.iml
 .idea/.gitignore
 .idea/misc.xml
