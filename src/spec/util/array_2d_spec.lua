@@ -1,5 +1,4 @@
-local type _ = require("busted")
-local luassert <const> = require("luassert")
+local luassert = require("luassert")
 
 local array_2d = require("src.tactics.util.array_2d")
 local point = require("src.tactics.util.point")
@@ -27,7 +26,6 @@ describe("tactics.util.array_2d", function()
         end)
     end)
 
-    
     describe("is_in_range and is_point_in_range", function()
         local arr = array_2d.new(width, height)
 
@@ -53,9 +51,8 @@ describe("tactics.util.array_2d", function()
         end)
     end)
 
-    
     describe("get, get_point, set, set_point", function()
-        local arr: array_2d.Array2D<string|nil> = array_2d.new(width, height)
+        local arr = array_2d.new(width, height)
 
         it("should correctly set and get values by coordinates", function()
             arr:set(1, 1, "test_value_1_1")
@@ -71,7 +68,6 @@ describe("tactics.util.array_2d", function()
         end)
     end)
 
-    
     describe("foreach", function()
         it("should iterate over all elements and call the callback with correct coordinates and values", function()
             local arr = array_2d.new(2, 2, 0)
@@ -86,14 +82,11 @@ describe("tactics.util.array_2d", function()
             end)
 
             local count = 0
-            for _,_ in pairs(visited) do
-                count = count + 1
-            end
+            for _ in pairs(visited) do count = count + 1 end
             luassert.are_equal(4, count)
         end)
     end)
 
-    
     describe("foreachpoint", function()
         it("should iterate over all elements and call the callback with correct point and values", function()
             local arr = array_2d.new(2, 2, 0)
@@ -101,27 +94,23 @@ describe("tactics.util.array_2d", function()
             arr:set(1, 0, 20)
 
             local visited_points = {}
-            arr:foreachpoint(function(p: point.Point, v)
+            arr:foreachpoint(function(p, v)
                 visited_points[tostring(p.x) .. "," .. tostring(p.y)] = v
             end)
 
             luassert.are_equal(10, visited_points["0,0"])
             luassert.are_equal(20, visited_points["1,0"])
-            luassert.are_equal(0, visited_points["0,1"]) -- Default value
+            luassert.are_equal(0, visited_points["0,1"])
         end)
     end)
 
-    
     describe("map", function()
         it("should create a new Array2D with transformed values", function()
             local arr = array_2d.new(2, 2, 1)
             arr:set(0, 0, 10)
             arr:set(1, 1, 20)
 
-            local transform_fn_1 = function(v: number): number
-                return v * 2
-            end
-            local mapped_arr = arr:map(transform_fn_1)
+            local mapped_arr = arr:map(function(v) return v * 2 end)
 
             luassert.are_equal(arr.w, mapped_arr.w)
             luassert.are_equal(arr.h, mapped_arr.h)
@@ -133,12 +122,8 @@ describe("tactics.util.array_2d", function()
 
         it("should create a new Array2D with different types if transformation changes type", function()
             local arr = array_2d.new(1, 1, 5)
-            local transform_fn_2 = function(v: number): string
-                return "value_" .. tostring(v)
-            end
-            local mapped_arr = arr:map(transform_fn_2)
+            local mapped_arr = arr:map(function(v) return "value_" .. tostring(v) end)
             luassert.are_equal("value_5", mapped_arr:get(0, 0))
         end)
     end)
-    
 end)

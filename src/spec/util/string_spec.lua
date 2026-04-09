@@ -1,5 +1,4 @@
-local type _ = require("busted")
-local luassert <const> = require("luassert")
+local luassert = require("luassert")
 
 local string_util = require("src.tactics.util.string")
 
