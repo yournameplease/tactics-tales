@@ -1,5 +1,4 @@
-local type _ = require("busted")
-local luassert <const> = require("luassert")
+local luassert = require("luassert")
 
 local maps = require("src.tactics.util.maps")
 
@@ -23,7 +22,7 @@ describe("tactics.util.maps", function()
     describe("map and do_map", function()
         it("should transform map values", function()
             local m = {a = 1, b = 2}
-            local transform = function(_k: string, v: integer): integer return v * 2 end
+            local transform = function(_k, v) return v * 2 end
             local mapped = maps.do_map(m, transform)
             luassert.are_same({a = 2, b = 4}, mapped)
 
@@ -35,8 +34,8 @@ describe("tactics.util.maps", function()
     describe("full_map", function()
         it("should transform both keys and values of a map", function()
             local m = {a = 1, b = 2}
-            local key_fn = function(k: string, v: integer): string return k .. v end
-            local val_fn = function(k: string, v: integer): string return v .. k end
+            local key_fn = function(k, v) return k .. v end
+            local val_fn = function(k, v) return v .. k end
             local result = maps.full_map(key_fn, val_fn)(m)
             luassert.are_same({a1 = "1a", b2 = "2b"}, result)
         end)
@@ -63,14 +62,13 @@ describe("tactics.util.maps", function()
 
     describe("collect", function()
         it("should create a map from a list", function()
-            local record Item
-                k: string
-                v: integer
-            end
+            ---@class Item
+            ---@field k string
+            ---@field v integer
 
-            local list: {Item} = {{k = "a", v = 1}, {k = "b", v = 2}}
-            local key_fn = function(item: Item): string return item.k end
-            local val_fn = function(item: Item): integer return item.v end
+            local list = {{k = "a", v = 1}, {k = "b", v = 2}}
+            local key_fn = function(item) return item.k end
+            local val_fn = function(item) return item.v end
             local result = maps.collect(list, key_fn, val_fn)
             luassert.are_same({a = 1, b = 2}, result)
         end)
@@ -111,9 +109,7 @@ describe("tactics.util.maps", function()
         it("should overwrite tables over non-table values", function()
             local m1 = { a = 1, b = "not a table" }
             local m2 = { b = { x = 1 } }
-
             local merged = maps.deep_merge(m1, m2)
-            
             luassert.are_same({ a = 1, b = { x = 1 } }, merged)
         end)
     end)
