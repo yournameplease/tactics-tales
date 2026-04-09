@@ -83,7 +83,8 @@ end
 ---@param row string
 ---@return integer
 local function width_of(row)
-    return pt.print(row, 0, -1000)
+    local w, _ = pt.print(row, 0, -1000)
+    return w
 end
 
 ---@param row string
@@ -152,6 +153,9 @@ function TextImpl:apply_text_wrapping(row, width)
                 line_start = line_end - 1
             end
         end
+    else
+        unexpected(self.wrap)
+        return {}
     end
 end
 
