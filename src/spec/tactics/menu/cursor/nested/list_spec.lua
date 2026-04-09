@@ -38,6 +38,7 @@ describe("tactics.menu.cursor.nested.list", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedMenuNode
         luassert.are_equal(1, node.i)
         luassert.is_true(node.children[1].has_focus)
         luassert.is_false(node.children[2].has_focus)
@@ -86,6 +87,7 @@ describe("tactics.menu.cursor.nested.list", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedMenuNode
         luassert.are_equal(1, node.i)
 
         manager:update(input_helper.joypad({ dyp = 1 }))
@@ -121,6 +123,7 @@ describe("tactics.menu.cursor.nested.list", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedMenuNode
         luassert.are_equal(1, node.i)
 
         -- move right
@@ -226,6 +229,7 @@ describe("tactics.menu.cursor.nested.list", function()
             manager:update(input_helper.joypad({ dxp = 1 }))
 
             local node = manager.menu_step.node
+            ---@cast node NestedMenuNode
             luassert.are_equal(2, node.i)
             luassert.are_equal("blue", node.children[2]:get_selected_value())
 
@@ -239,6 +243,7 @@ describe("tactics.menu.cursor.nested.list", function()
             manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 
             local node2 = manager2.menu_step.node
+            ---@cast node2 NestedMenuNode
             luassert.are_equal(2, node2.i)
             luassert.are_equal("blue", node2.children[2]:get_selected_value())
         end)
