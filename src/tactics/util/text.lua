@@ -12,10 +12,10 @@ local lists = require("src.tactics.util.lists")
 ---@alias Wrap "no_wrap"|"ellipsis"|"wrap"
 
 ---@class DrawProperties
----@field justify Justify
----@field direction Direction
----@field wrap Wrap
----@field align boolean
+---@field justify Justify How to align text horizontally within the available width.
+---@field direction Direction Whether rows flow downward or upward from the draw origin.
+---@field wrap Wrap Behaviour when a line exceeds the available width.
+---@field align boolean When true, `|`-delimited segments are drawn left, center, and right.
 
 ---@class Text
 ---@field set_width fun(self: Text, w: integer)
@@ -32,7 +32,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 ---@class TextLine
 ---@field text string
----@field wrapped_lines string[]|nil
+---@field wrapped_lines string[]|nil Cached wrap result; nil means wrapping not yet computed.
 
 ---@param lines string[]
 ---@return TextLine[]
@@ -45,20 +45,21 @@ local function text_lines(lines)
 end
 
 ---@class TextImpl : Text
----@field justify Justify
----@field direction Direction
----@field wrap Wrap
----@field align boolean
----@field width integer
----@field height integer
----@field lines TextLine[]
+---@field justify Justify How to align text horizontally.
+---@field direction Direction Whether rows flow downward or upward.
+---@field wrap Wrap Wrapping mode applied when a line exceeds `width`.
+---@field align boolean When true, use `|`-column alignment instead of uniform justification.
+---@field width integer Draw area width in pixels.
+---@field height integer Draw area height in pixels.
+---@field lines TextLine[] Paragraphs, each with its cached wrapped sub-lines.
 
 local TextImpl = {}
 
 local text = {}
 
----@param lines string[]
----@param draw_properties DrawProperties
+--- Construct a Text object from a list of paragraph strings and display properties.
+---@param lines string[] Paragraph strings to display.
+---@param draw_properties DrawProperties Layout and wrapping configuration.
 ---@param w integer
 ---@param h integer
 ---@return Text
@@ -79,7 +80,7 @@ function text.new(lines, draw_properties, w, h)
     return self
 end
 
--- in pixels
+--- Return the pixel width of `row` as rendered by the current font.
 ---@param row string
 ---@return integer
 local function width_of(row)
@@ -87,9 +88,10 @@ local function width_of(row)
     return w
 end
 
----@param row string
----@param width integer
----@return string[]
+--- Break or truncate `row` to fit within `width` pixels according to `self.wrap`.
+---@param row string The raw text to wrap or truncate.
+---@param width integer Maximum pixel width for a single output line.
+---@return string[] Lines that each fit within `width`.
 function TextImpl:apply_text_wrapping(row, width)
     if row == '' then return {row} end
 
@@ -159,6 +161,8 @@ function TextImpl:apply_text_wrapping(row, width)
     end
 end
 
+--- Update the draw area width, invalidating cached wrapping when the width changes.
+---@param w integer
 function TextImpl:set_width(w)
     if self.width ~= w then
         for _, l in ipairs(self.lines) do
@@ -168,10 +172,14 @@ function TextImpl:set_width(w)
     self.width = w
 end
 
+--- Update the draw area height.
+---@param h integer
 function TextImpl:set_height(h)
     self.height = h
 end
 
+--- Replace the paragraph strings, preserving cached wrapping for unchanged lines.
+---@param lines string[] New paragraph strings.
 function TextImpl:set_lines(lines)
     if #lines ~= #self.lines then
         self.lines = text_lines(lines)
@@ -185,6 +193,8 @@ function TextImpl:set_lines(lines)
     end
 end
 
+--- Return the total number of display rows after all paragraphs are wrapped.
+---@return integer Total wrapped row count across all paragraphs.
 function TextImpl:get_wrapped_rows()
     return lists.sum(function(l)
         if l.wrapped_lines == nil then
@@ -195,6 +205,8 @@ function TextImpl:get_wrapped_rows()
     end)(self.lines)
 end
 
+--- Return the wrapped sub-lines for each paragraph.
+---@return string[][] For each paragraph, its list of wrapped display lines.
 function TextImpl:get_lines()
     return lists.map(function(l)
         if l.wrapped_lines == nil then
@@ -217,6 +229,13 @@ local get_text_alignment_offset = {
     end,
 }
 
+---@param row string
+---@param x integer
+---@param y integer
+---@param justify Justify
+---@param color Color
+---@param row_number integer 1-based display row index used to compute the y offset.
+---@param line_count integer|nil Character limit for typewriter reveal; nil draws the full row.
 function TextImpl:draw_justified_text_row(row, x, y, justify, color, row_number, line_count)
     local x_offset = get_text_alignment_offset[justify](row, self.width or 0)
     local t_x = x + x_offset
@@ -232,6 +251,12 @@ function TextImpl:draw_justified_text_row(row, x, y, justify, color, row_number,
     pt.print(out, t_x, t_y, color)
 end
 
+---@param text_row string
+---@param x integer
+---@param y integer
+---@param color Color
+---@param row_number integer 1-based display row index.
+---@param line_count integer|nil Character limit for typewriter reveal; nil draws the full row.
 function TextImpl:draw_text_row(text_row, x, y, color, row_number, line_count)
     if self.align then
         -- split on "|"
@@ -264,6 +289,7 @@ function TextImpl:draw_text_row(text_row, x, y, color, row_number, line_count)
     end
 end
 
+--- Pre-compute and cache wrapped lines for every paragraph.
 function TextImpl:calculate_wrapping()
     for _, paragraph in ipairs(self.lines) do
         if paragraph.wrapped_lines == nil then
@@ -272,6 +298,11 @@ function TextImpl:calculate_wrapping()
     end
 end
 
+--- Draw all paragraphs at (x, y) using the given color.
+---@param x integer
+---@param y integer
+---@param color Color
+---@param line_counts integer[]|nil Per-paragraph character limit for typewriter-style reveals; nil draws the full text.
 function TextImpl:draw(x, y, color, line_counts)
     -- profile("draw_text")
     self:calculate_wrapping()
@@ -292,6 +323,12 @@ function TextImpl:draw(x, y, color, line_counts)
     -- profile("draw_text")
 end
 
+--- Draw a single paragraph by 1-based index.
+---@param row_number integer 1-based index of the paragraph to draw.
+---@param x integer
+---@param y integer
+---@param color Color
+---@param line_count integer|nil Character limit for typewriter reveal; nil draws the full paragraph.
 function TextImpl:draw_one(row_number, x, y, color, line_count)
     -- profile("draw_text")
     self:calculate_wrapping()

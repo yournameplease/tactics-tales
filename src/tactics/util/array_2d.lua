@@ -18,16 +18,17 @@ local point = require("src.tactics.util.point")
 ---@field map_points fun(self: Array2D<V>, fn: fun(p: Point): any): Array2D<any>
 
 ---@class Array2DImpl<V> : Array2D<V>
----@field data table<integer, table<integer, V>>
+---@field data table<integer, table<integer, V>> 1-indexed column-major storage (col[x][y]).
 
 local Array2DImpl = {}
 
 local array_2d = {}
 
+--- Create a new Array2D of size `w`×`h`, optionally pre-filled with `initial`.
 ---@generic V
 ---@param w integer
 ---@param h integer
----@param initial? V
+---@param initial? V Optional value to fill every cell; cells are nil when omitted.
 ---@return Array2D<V>
 function array_2d.new(w, h, initial)
     local out = setmetatable({ w = w, h = h, data = {} }, { __index = Array2DImpl })
@@ -42,10 +43,11 @@ function array_2d.new(w, h, initial)
     return out
 end
 
+--- Create a new Array2D populated by calling `initial` for each 0-indexed Point.
 ---@generic V
 ---@param w integer
 ---@param h integer
----@param initial fun(p: Point): V
+---@param initial fun(p: Point): V Called with each cell's 0-indexed Point to produce its initial value.
 ---@return Array2D<V>
 function array_2d.new_from_function(w, h, initial)
     local out = setmetatable({ w = w, h = h, data = {} }, { __index = Array2DImpl })
@@ -58,6 +60,7 @@ function array_2d.new_from_function(w, h, initial)
     return out
 end
 
+--- Return true if (x, y) are valid 0-indexed coordinates within this array.
 ---@param x integer
 ---@param y integer
 ---@return boolean
@@ -65,6 +68,7 @@ function Array2DImpl:is_in_range(x, y)
     return x >= 0 and y >= 0 and x < self.w and y < self.h
 end
 
+--- Return the value at 0-indexed (x, y), asserting the coordinates are in range.
 ---@generic V
 ---@param x integer
 ---@param y integer
@@ -74,12 +78,14 @@ function Array2DImpl:get(x, y)
     return self.data[x + 1][y + 1]
 end
 
+--- Return true if point `p` is within this array's bounds.
 ---@param p Point
 ---@return boolean
 function Array2DImpl:is_point_in_range(p)
     return self:is_in_range(p.x, p.y)
 end
 
+--- Return the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
 ---@return V
@@ -87,24 +93,27 @@ function Array2DImpl:get_point(p)
     return self:get(p.x, p.y)
 end
 
+--- Set the value at 0-indexed (x, y), asserting the coordinates are in range.
 ---@generic V
 ---@param x integer
 ---@param y integer
----@param v V
+---@param v V Value to store at (x, y).
 function Array2DImpl:set(x, y, v)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x + 1][y + 1] = v
 end
 
+--- Set the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
----@param v V
+---@param v V Value to store at `p`.
 function Array2DImpl:set_point(p, v)
     self:set(p.x, p.y, v)
 end
 
+--- Call `fn` for every cell in the array with its 0-indexed coordinates and value.
 ---@generic V
----@param fn fun(x: integer, y: integer, v: V)
+---@param fn fun(x: integer, y: integer, v: V) Callback invoked with 0-indexed x, y and the cell value.
 function Array2DImpl:foreach(fn)
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
@@ -113,8 +122,9 @@ function Array2DImpl:foreach(fn)
     end
 end
 
+--- Call `fn` for every cell in the array with its 0-indexed Point and value.
 ---@generic V
----@param fn fun(p: Point, v: V)
+---@param fn fun(p: Point, v: V) Callback invoked with the 0-indexed Point and cell value.
 function Array2DImpl:foreachpoint(fn)
     for x, col in pairs(self.data) do
         for y, v in pairs(col) do
@@ -123,8 +133,9 @@ function Array2DImpl:foreachpoint(fn)
     end
 end
 
+--- Return a new Array2D with each cell transformed by `fn`.
 ---@generic V, NewType
----@param fn fun(v: V): NewType
+---@param fn fun(v: V): NewType Transform applied to each cell value.
 ---@return Array2D<NewType>
 function Array2DImpl:map(fn)
     local out = array_2d.new(self.w, self.h)
@@ -134,8 +145,9 @@ function Array2DImpl:map(fn)
     return out
 end
 
+--- Return a new Array2D where each cell is produced by `fn` given its 0-indexed Point.
 ---@generic NewType
----@param fn fun(p: Point): NewType
+---@param fn fun(p: Point): NewType Produces the new cell value from the cell's 0-indexed Point.
 ---@return Array2D<NewType>
 function Array2DImpl:map_points(fn)
     local out = array_2d.new(self.w, self.h)

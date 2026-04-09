@@ -52,6 +52,7 @@ local point_mt = {
 }
 point_mt.__index = point_mt
 
+--- Construct a Point from integer coordinates.
 ---@param x integer
 ---@param y integer
 ---@return Point
@@ -63,8 +64,9 @@ end
 
 point_of = point.of
 
----@param angle number
----@param scale number
+--- Construct a Point from polar coordinates, rounding to the nearest integer.
+---@param angle number Angle in radians.
+---@param scale number Radial distance (magnitude).
 ---@return Point
 function point.of_angle(angle, scale)
     local x = math.floor(scale * math.cos(angle) + 0.5)
@@ -72,17 +74,20 @@ function point.of_angle(angle, scale)
     return point.of(x, y)
 end
 
----@param rec PointRecord
+--- Construct a Point from a plain record with `x` and `y` fields.
+---@param rec PointRecord Plain table with integer `x` and `y` fields.
 ---@return Point
 function point.of_record(rec)
     return point.of(rec.x, rec.y)
 end
 
+--- Return a new Point with the same coordinates.
 ---@return Point
 function point_mt:copy()
     return setmetatable({ x = self.x, y = self.y }, point_mt)
 end
 
+--- Return the Manhattan (L1) distance between two points.
 ---@param p1 Point
 ---@param p2 Point
 ---@return integer
@@ -90,8 +95,9 @@ function point.taxicab_distance(p1, p2)
     return math.abs(p1.x - p2.x) + math.abs(p1.y - p2.y)
 end
 
+--- Return the squared Euclidean norm (x²+y²) of the point.
 ---@param p Point
----@return integer
+---@return integer squared Sum of squared coordinates.
 function point.norm_squared(p)
     return p.x * p.x + p.y * p.y
 end

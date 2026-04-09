@@ -3,9 +3,9 @@
 
 local str = {}
 
---- Populate "{key}" strings with values from the map
----@param template string
----@param values table<string, any>
+--- Populate `{key}` placeholders in a template string with values from a map.
+---@param template string Template string containing `{key}`-style placeholders.
+---@param values table<string, any> Map of placeholder names to their replacement values.
 ---@return string
 function str.format(template, values)
     local out = template
