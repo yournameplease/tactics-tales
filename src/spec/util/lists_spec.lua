@@ -48,9 +48,9 @@ describe("tactics.util.lists", function()
             local list2 = {3, 4}
             local list3 = {5}
             local merged = lists.merge(list1, list2, list3)
-            luassert.is_not_equal(merged, list1)
-            luassert.is_not_equal(merged, list2)
-            luassert.is_not_equal(merged, list3)
+            luassert.are_not_equal(merged, list1)
+            luassert.are_not_equal(merged, list2)
+            luassert.are_not_equal(merged, list3)
         end)
 
         it("should handle empty lists when merging", function()
