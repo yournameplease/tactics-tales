@@ -432,6 +432,28 @@ not *how* it does it.
 ---@param val number
 ---@param hi number
 ---@return number
+```
+
+**No blank lines inside a LuaCATS block**: lua-language-server attaches an annotation block
+to the next non-blank line. A blank line breaks the connection — the class or function
+definition will no longer be associated with the annotations above it, and member functions
+will not be recognized on instances of that class.
+
+```lua
+-- WRONG: blank line severs the @class from its table
+---@class Foo
+---@field x integer
+
+local Foo = {}          -- Foo is now an anonymous table; :method() won't resolve
+
+-- CORRECT: annotation block is contiguous with the declaration
+---@class Foo
+---@field x integer
+local Foo = {}          -- Foo is recognized as a class; :method() resolves correctly
+```
+
+This rule applies equally to `---@class`, `---@param`/`---@return` blocks on functions,
+and `---@type` annotations.
 
 ---
 
