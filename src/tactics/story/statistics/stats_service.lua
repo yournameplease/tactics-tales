@@ -1,0 +1,75 @@
+---@brief
+--- A service that manages story-wide statistics.
+
+local event_listener = require("src.tactics.systems.event_bus.event_listener")
+
+--- Public interface for the stats service.
+---@class StatsService
+---@field story_results StoryResults
+local StatsService = {}
+
+---@class StatsServiceImpl : StatsService
+---@field event_listener EventListener
+local StatsServiceImpl = {}
+StatsServiceImpl.__index = StatsServiceImpl
+
+--- Return the chapter result for the given battle ID, creating it if absent.
+---@param id integer
+---@return StoryChapterResult
+function StatsServiceImpl:get_chapter(id)
+    if self.story_results.chapter_results[id] == nil then
+        self.story_results.chapter_results[id] = {
+            units_lost = {}
+        }
+    end
+
+    return self.story_results.chapter_results[id]
+end
+
+--- Record a unit death event into the appropriate chapter result.
+---@param data UnitDeathPayload
+function StatsServiceImpl:record_death(data)
+    local chapter_results = self:get_chapter(data.chapter)
+
+    table.insert(chapter_results.units_lost, {
+        unit_id = data.defender.id,
+        attacker_id = data.attacker.id,
+        turn_number = data.turn_number,
+    })
+end
+
+--- Record the end of a battle into the appropriate chapter result.
+---@param data BattleEndPayload
+function StatsServiceImpl:record_battle_end(data)
+    local chapter_results = self:get_chapter(data.chapter)
+
+    chapter_results.turns_taken = data.turn_number
+end
+
+--- Tear down event listeners.
+function StatsServiceImpl:teardown()
+    self.event_listener:teardown()
+end
+
+local stats_service = {}
+
+--- Create a new StatsService and register event listeners on the bus.
+---@param event_bus EventBus
+---@return StatsService
+function stats_service.new(event_bus)
+    ---@type StatsServiceImpl
+    local self = setmetatable({}, StatsServiceImpl)
+
+    self.event_listener = event_listener.new(event_bus)
+
+    self.event_listener:on("TACTICS_UNIT_DEATH", function(data)
+        self:record_death(data)
+    end)
+    self.event_listener:on("BATTLE_END_VICTORY", function(data)
+        self:record_death(data)
+    end)
+
+    return self
+end
+
+return stats_service
