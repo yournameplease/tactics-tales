@@ -37,8 +37,8 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package story_page StoryPage
 ---@field package story_memory StoryMemory
 ---@field package character_manager CharacterManager
----@field package story_menu_context StoryMenuContext
----@field package menu_manager StoryMenuManager
+---@field package story_menu_context StoryMenuServices
+---@field package menu_manager MenuManager
 ---@field package stats_service StatsService
 ---@field package current_node ActiveNode
 ---@field package battle_manager BattleManager
