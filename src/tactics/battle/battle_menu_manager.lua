@@ -259,6 +259,10 @@ HANDLERS["navigate_to_turn_menu"] = function(_services, _menu_data, _session_con
     return menu_manager.menu_handler.then_navigate("TURN_MENU")
 end
 
+HANDLERS["navigate_to_deployment_menu"] = function(_services, _menu_data, _session_context, _value)
+    return menu_manager.menu_handler.then_navigate("DEPLOYMENT_MENU")
+end
+
 HANDLERS["wait_acting_unit"] = function(services, _menu_data, session_context, _value)
     services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
     return nil
@@ -382,14 +386,20 @@ local MENU_DATA = {
                         button.builder("non_available_unit")
                             :handle_action("menu", "mark_unit")
                     )
+                    :with_child( -- marking for non-units
+                        function(point, msb, _ctx)
+                            return not point_is_any_unit(point, msb.battle_map)
+                        end,
+                        button.builder("non_unit")
+                            :handle_action("menu", "navigate_to_deployment_menu")
+                    )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services, _ctx)
                         return services.tactics_engine.active_point
                     end)
                 )
-                :with_previous_step("DEPLOYMENT_MENU")
                 :with_action("BUTTON_A", { command = "select", description = "Select Unit" })
-                :with_action("BUTTON_B", { command = "back", description = "Menu" }),
+                :with_action("BUTTON_B", { command = "menu", description = "Menu" }),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
                 grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
