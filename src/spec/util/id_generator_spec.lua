@@ -1,4 +1,3 @@
-local type _ = require("busted")
 local luassert <const> = require("luassert")
 
 local id_generator = require("src.tactics.util.id_generator")
