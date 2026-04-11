@@ -9,10 +9,6 @@ local lists = require("src.tactics.util.lists")
 ---@field speed? DialogueSpeed Text render speed; nil falls back to DYNAMIC_CONFIG.dialogue_speed.
 ---@field can_skip? boolean Allow pressing BUTTON_A to skip rendering the current row instantly.
 
----@class DialogueManager
----@field update fun(self: DialogueManager, input: InputContext)
----@field create_dialogue fun(self: DialogueManager, text: string[], props: DialogueProps, replacement_vars: table<string,string>, dynamic_replacement?: boolean): ActiveDialogue
-
 ---@class ActiveDialogue
 ---@field text string[] Lines of dialogue text (may be computed via __index for dynamic replacement).
 ---@field current_row integer Currently displayed row index (1-based).
@@ -26,11 +22,11 @@ local lists = require("src.tactics.util.lists")
 ---@field package timer_offset? integer Time offset for syncing to global timer; set immediately after construction.
 local ActiveDialogue = {}
 
----@class DialogueManagerImpl : DialogueManager
----@field global_timer integer Monotonically increasing frame counter.
----@field active_dialogues ActiveDialogue[] All currently tracked dialogue instances.
-local DialogueManagerImpl = {}
-DialogueManagerImpl.__index = DialogueManagerImpl
+---@class DialogueManager
+---@field package global_timer integer Monotonically increasing frame counter.
+---@field package active_dialogues ActiveDialogue[] All currently tracked dialogue instances.
+local DialogueManager = {}
+DialogueManager.__index = DialogueManager
 
 --- Negative mask: advance N characters per frame. Positive mask: advance 1 char every (mask+1) frames.
 ---@type table<DialogueSpeed, integer>
@@ -84,7 +80,7 @@ end
 
 --- Advance all active dialogues by one frame, rendering characters and handling input.
 ---@param input InputContext
-function DialogueManagerImpl:update(input)
+function DialogueManager:update(input)
     self.global_timer = self.global_timer + 1
 
     for _, d in ipairs(self.active_dialogues) do
@@ -123,7 +119,7 @@ end
 ---@param replacement_vars table<string,string> Map of placeholder keys to substitution values.
 ---@param dynamic_replacement? boolean Re-evaluate substitutions on every text read when true.
 ---@return ActiveDialogue
-function DialogueManagerImpl:create_dialogue(text, props, replacement_vars, dynamic_replacement)
+function DialogueManager:create_dialogue(text, props, replacement_vars, dynamic_replacement)
     local replaced_text = nil
 
     if not dynamic_replacement then
@@ -172,11 +168,10 @@ local dialogue_manager = {}
 --- Create a new DialogueManager.
 ---@return DialogueManager
 function dialogue_manager.new()
-    ---@type DialogueManagerImpl
     local self = setmetatable({
         global_timer     = 0,
         active_dialogues = {},
-    }, DialogueManagerImpl)
+    }, DialogueManager)
     return self
 end
 
