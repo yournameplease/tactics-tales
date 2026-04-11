@@ -9,7 +9,9 @@ local menu_manager = require("src.tactics.menu.menu_manager")
 
 local control_hints = {}
 
----@type table<string, integer> Sprite sheet offset per input action.
+---@alias DefaultHints table<InputAction, string>
+
+---@type table<InputAction, integer> Sprite sheet offset per input action.
 local SPRITE_OFFSETS = {
     ["BUTTON_A"] = 0,
     ["BUTTON_B"] = 1,
@@ -17,7 +19,7 @@ local SPRITE_OFFSETS = {
     ["SHOULDER_R"] = 5,
 }
 
----@type table<string, boolean> Whether a mouse sprite exists for this action.
+---@type table<InputAction, boolean> Whether a mouse sprite exists for this action.
 local HAS_MOUSE_SPRITE = {
     ["BUTTON_A"] = true,
     ["BUTTON_B"] = true,
@@ -107,7 +109,7 @@ end
 --- Build a full control hint row with glyphs and a dynamic text label.
 ---@param input_label string InputAction key
 ---@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
----@param default_hints MenuActions Fallback hints when no menu step is active.
+---@param default_hints DefaultHints Fallback hints when no menu step is active.
 ---@return UIElement
 local function control_hint_row(input_label, menu_step_func, default_hints)
     local row = box.builder("control_row_" .. input_label)
@@ -138,7 +140,7 @@ local function control_hint_row(input_label, menu_step_func, default_hints)
             if default_hints ~= nil then
                 self.text.content = {
                     default_hints[input_label]
-                    and " " .. default_hints[input_label].description
+                    and " " .. default_hints[input_label]
                     or nil
                 }
                 return
@@ -180,7 +182,7 @@ end
 
 --- Build a control hints panel showing hints for all four input actions.
 ---@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
----@param default_hints MenuActions Fallback hints when no menu step is active.
+---@param default_hints DefaultHints Fallback hints when no menu step is active.
 ---@return UIElement
 function control_hints.new(menu_step_func, default_hints)
     local self = box.builder("control_hints")
