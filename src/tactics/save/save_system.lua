@@ -1,0 +1,70 @@
+---@brief Save and load game state to/from disk in .pod format.
+
+local lists = require("src.tactics.util.lists")
+
+---@class GameSaveData
+---@field character_id_generator IdGenerator
+---@field story_id string
+---@field story_node_id string
+---@field story_node_step integer
+---@field story_memory StoryMemory
+---@field roster Character[]
+---@field stats StoryResults
+local GameSaveData = {}
+
+---@class SerializedGameSaveData
+---@field character_id_count integer
+---@field story_id StoryId
+---@field story_node_id string
+---@field story_node_step integer
+---@field story_memory SerializedStoryMemory
+---@field roster SerializedCharacter[]
+---@field stats StoryResults
+local SerializedGameSaveData = {}
+
+local save_system = {}
+
+local SAVE_PATH = "/appdata/tactics_tales/saves/"
+
+-- todo: sanitize path
+-- todo: check for existing files
+--- Serialize and write a game save to disk.
+---@param name string Save slot name (used as filename without extension).
+---@param data GameSaveData
+function save_system.save(name, data)
+	local serialized_data = {
+		character_id_count = data.character_id_generator.id_count,
+		story_id = data.story_id,
+		story_node_id = data.story_node_id,
+		story_node_step = data.story_node_step,
+		story_memory = data.story_memory:serialize(),
+		roster = lists.map(function(c)
+			return c:serialize()
+		end)(data.roster),
+		stats = data.stats,
+	}
+
+	local path = SAVE_PATH .. name .. ".pod"
+	log.debug("Saving data: ", name, path)
+	pt.store(path, serialized_data, nil)
+end
+
+--- Return a list of save slot names found on disk.
+---@return string[]
+function save_system.list_saves()
+	local paths = pt.ls(SAVE_PATH) or {}
+	return lists.map(function(p)
+		return pt.split(p, '.')[1]
+	end)(paths)
+end
+
+--- Load and return a serialized save by slot name, or nil if not found.
+---@param name string Save slot name (used as filename without extension).
+---@return SerializedGameSaveData?
+function save_system.load(name)
+	local path = SAVE_PATH .. name .. ".pod"
+	log.debug("Loading data: ", name, path)
+	return pt.fetch(path)
+end
+
+return save_system
