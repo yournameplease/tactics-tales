@@ -12,17 +12,12 @@ local lists = require("src.tactics.util.lists")
 local BattleFinishState = {}
 
 ---@class BattleObjectiveService Abstract interface for checking and displaying battle objectives.
----@field check_objectives fun(self: BattleObjectiveService, turn_number: integer): BattleFinishState
----@field get_objective_text fun(self: BattleObjectiveService, turn_number: integer): string[]
+---@field package battle_map table BattleMap used to inspect unit positions and deaths.
+---@field package turn_limit integer|nil Maximum number of turns before the turn-limit condition triggers.
+---@field package victory_conditions VictoryCondition[] Active victory conditions to evaluate each turn.
+---@field package failure_conditions FailureCondition[] Active failure conditions to evaluate each turn.
 local BattleObjectiveService = {}
-
----@class BattleObjectiveServiceImpl : BattleObjectiveService
----@field battle_map table BattleMap used to inspect unit positions and deaths.
----@field turn_limit integer|nil Maximum number of turns before the turn-limit condition triggers.
----@field victory_conditions VictoryCondition[] Active victory conditions to evaluate each turn.
----@field failure_conditions FailureCondition[] Active failure conditions to evaluate each turn.
-local BattleObjectiveServiceImpl = {}
-BattleObjectiveServiceImpl.__index = BattleObjectiveServiceImpl
+BattleObjectiveService.__index = BattleObjectiveService
 
 local battle_objective_service = {
     BattleObjectiveService = BattleObjectiveService,
@@ -39,8 +34,8 @@ function battle_objective_service.new(map, turn_limit, victory_conditions, failu
     victory_conditions = victory_conditions or {}
     failure_conditions = failure_conditions or {}
 
-    ---@type BattleObjectiveServiceImpl
-    local self = setmetatable({}, { __index = BattleObjectiveServiceImpl })
+    ---@type BattleObjectiveService
+    local self = setmetatable({}, { __index = BattleObjectiveService })
 
     self.battle_map = map
     self.turn_limit = turn_limit
@@ -54,7 +49,7 @@ end
 --- Failure conditions are evaluated before victory conditions; a simultaneous loss takes priority.
 ---@param turn_number integer The current turn number.
 ---@return BattleFinishState
-function BattleObjectiveServiceImpl:check_objectives(turn_number)
+function BattleObjectiveService:check_objectives(turn_number)
     local turn_limit_exceeded = self.turn_limit ~= nil and turn_number > self.turn_limit
 
     for _, f in ipairs(self.failure_conditions) do
@@ -75,7 +70,7 @@ end
 --- Turn counter is inserted at position 1 when a turn limit is set; entries after the first are prefixed with "or ".
 ---@param turn_number integer The current turn number, used to format the turn counter.
 ---@return string[]
-function BattleObjectiveServiceImpl:get_objective_text(turn_number)
+function BattleObjectiveService:get_objective_text(turn_number)
     local out = {}
 
     for _, v in ipairs(self.victory_conditions) do

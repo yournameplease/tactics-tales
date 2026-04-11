@@ -6,17 +6,14 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 --- Public interface for the stats service.
 ---@class StatsService
 ---@field story_results StoryResults
+---@field package event_listener EventListener
 local StatsService = {}
-
----@class StatsServiceImpl : StatsService
----@field event_listener EventListener
-local StatsServiceImpl = {}
-StatsServiceImpl.__index = StatsServiceImpl
+StatsService.__index = StatsService
 
 --- Return the chapter result for the given battle ID, creating it if absent.
 ---@param id integer
 ---@return StoryChapterResult
-function StatsServiceImpl:get_chapter(id)
+function StatsService:get_chapter(id)
     if self.story_results.chapter_results[id] == nil then
         self.story_results.chapter_results[id] = {
             units_lost = {}
@@ -28,7 +25,7 @@ end
 
 --- Record a unit death event into the appropriate chapter result.
 ---@param data UnitDeathPayload
-function StatsServiceImpl:record_death(data)
+function StatsService:record_death(data)
     local chapter_results = self:get_chapter(data.chapter)
 
     table.insert(chapter_results.units_lost, {
@@ -40,14 +37,14 @@ end
 
 --- Record the end of a battle into the appropriate chapter result.
 ---@param data BattleEndPayload
-function StatsServiceImpl:record_battle_end(data)
+function StatsService:record_battle_end(data)
     local chapter_results = self:get_chapter(data.chapter)
 
     chapter_results.turns_taken = data.turn_number
 end
 
 --- Tear down event listeners.
-function StatsServiceImpl:teardown()
+function StatsService:teardown()
     self.event_listener:teardown()
 end
 
@@ -57,8 +54,8 @@ local stats_service = {}
 ---@param event_bus EventBus
 ---@return StatsService
 function stats_service.new(event_bus)
-    ---@type StatsServiceImpl
-    local self = setmetatable({}, StatsServiceImpl)
+    ---@type StatsService
+    local self = setmetatable({}, StatsService)
 
     self.event_listener = event_listener.new(event_bus)
 
