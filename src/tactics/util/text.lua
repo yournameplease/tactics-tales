@@ -17,6 +17,12 @@ local lists = require("src.tactics.util.lists")
 ---@field wrap Wrap Behaviour when a line exceeds the available width.
 ---@field align boolean When true, `|`-delimited segments are drawn left, center, and right.
 
+---@class DrawPropertiesOptions
+---@field justify? Justify How to align text horizontally within the available width.
+---@field direction? Direction Whether rows flow downward or upward from the draw origin.
+---@field wrap? Wrap Behaviour when a line exceeds the available width.
+---@field align? boolean When true, `|`-delimited segments are drawn left, center, and right.
+
 ---@class Text
 ---@field set_width fun(self: Text, w: integer)
 ---@field set_height fun(self: Text, h: integer)
@@ -59,7 +65,7 @@ local text = {}
 
 --- Construct a Text object from a list of paragraph strings and display properties.
 ---@param lines string[] Paragraph strings to display.
----@param draw_properties DrawProperties Layout and wrapping configuration.
+---@param draw_properties DrawPropertiesOptions Layout and wrapping configuration.
 ---@param w integer
 ---@param h integer
 ---@return Text
