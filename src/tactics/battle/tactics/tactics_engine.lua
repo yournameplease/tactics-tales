@@ -3,8 +3,6 @@
 --- This service manages unit spawning, movement, combat, and interactions,
 --- coordinating tasks, animations, and events.
 
-require("src.tactics.config")
-
 local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
 local fp = require("src.tactics.util.fp")
