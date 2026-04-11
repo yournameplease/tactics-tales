@@ -19,8 +19,8 @@ local lists = require("src.tactics.util.lists")
 ---@field dodge integer Dodge bonus provided by this terrain.
 
 ---@class MapLayers
----@field metatiles Userdata Metatile layer used for semantic tile labeling.
----@field terrain table<TerrainLocation, Userdata> Per-layer terrain sprite data.
+---@field metatiles userdata Metatile layer used for semantic tile labeling.
+---@field terrain table<TerrainLocation, userdata> Per-layer terrain sprite data.
 local MapLayers = {}
 
 ---@class MapMetadata
@@ -85,10 +85,10 @@ function BattleMap:tile_is_in_map(tile)
         and tile.y >= 0 and tile.y < self.height
 end
 
---- Return a Userdata grid produced by calling `func` at each tile position.
+--- Return a userdata grid produced by calling `func` at each tile position.
 ---@param ud_type string Picotron userdata type string (e.g. "u8").
 ---@param func fun(point: Point): integer Called for each tile to produce its value.
----@return Userdata
+---@return userdata
 function BattleMap:get_tiles_userdata_by(ud_type, func)
     local ud = pt.userdata(ud_type, self.width, self.height)
     for x = 0, self.width - 1 do
@@ -462,8 +462,8 @@ function BattleMap:get_nearby_interactions(tile)
     return out
 end
 
---- Return a Userdata marking every tile that has an "on" tile interaction.
----@return Userdata
+--- Return a userdata marking every tile that has an "on" tile interaction.
+---@return userdata
 function BattleMap:get_tile_highlights()
     local ud = pt.userdata("u8", self.width, self.height)
     for x = 0, self.width - 1 do

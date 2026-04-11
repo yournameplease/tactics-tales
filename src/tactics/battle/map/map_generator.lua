@@ -11,7 +11,7 @@ local BASE_METATILE = 0x400
 
 ---@class MapFetchResultEntry
 ---@field name string Layer name (e.g. "floor", "metatiles").
----@field bmp Userdata Sprite data for this layer.
+---@field bmp userdata Sprite data for this layer.
 
 --- Convert a raw pt.fetch result into a MapLayers table.
 ---@param map_fetch MapFetchResultEntry[] Raw fetch result array.

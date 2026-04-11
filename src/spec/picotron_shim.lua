@@ -43,10 +43,10 @@ local function create_mock_userdata(width, height)
     return ud
 end
 
----@param a Userdata
----@param b Userdata|number
+---@param a userdata
+---@param b userdata|number
 ---@param op fun(x: number, y: number): number
----@return Userdata
+---@return userdata
 local function elementwise_op(a, b, op)
     local state_a = internal_data[a]
     local w = state_a.width
