@@ -13,17 +13,22 @@ local lists = require("src.tactics.util.lists")
 ---@field update fun(self: DialogueManager, input: InputContext)
 ---@field create_dialogue fun(self: DialogueManager, text: string[], props: DialogueProps, replacement_vars: table<string,string>, dynamic_replacement?: boolean): ActiveDialogue
 
----@class DialogueImpl : ActiveDialogue
----@field text? string[] Nil when dynamic_replacement is true; text is computed via __index.
----@field auto_advance boolean
----@field speed? DialogueSpeed Nil falls back to DYNAMIC_CONFIG.dialogue_speed via __index.
----@field can_skip boolean
----@field timer_offset? integer Time offset for syncing to global timer; set immediately after construction.
-local DialogueImpl = {}
+---@class ActiveDialogue
+---@field text string[] Lines of dialogue text (may be computed via __index for dynamic replacement).
+---@field current_row integer Currently displayed row index (1-based).
+---@field characters_rendered integer Non-whitespace characters rendered so far.
+---@field timer? integer Current animation timer value (computed via __index metamethod).
+---@field timer_limit? integer Maximum timer value before advancing (computed via __index metamethod).
+---@field finished? boolean Whether all rows have been displayed.
+---@field package auto_advance boolean
+---@field package speed? DialogueSpeed Nil falls back to DYNAMIC_CONFIG.dialogue_speed via __index.
+---@field package can_skip boolean
+---@field package timer_offset? integer Time offset for syncing to global timer; set immediately after construction.
+local ActiveDialogue = {}
 
 ---@class DialogueManagerImpl : DialogueManager
 ---@field global_timer integer Monotonically increasing frame counter.
----@field active_dialogues DialogueImpl[] All currently tracked dialogue instances.
+---@field active_dialogues ActiveDialogue[] All currently tracked dialogue instances.
 local DialogueManagerImpl = {}
 DialogueManagerImpl.__index = DialogueManagerImpl
 
@@ -125,7 +130,7 @@ function DialogueManagerImpl:create_dialogue(text, props, replacement_vars, dyna
         replaced_text = replace_text(text, replacement_vars, nil)
     end
 
-    ---@type DialogueImpl
+    ---@type ActiveDialogue
     local d = {
         text                = replaced_text,
         current_row         = 1,
