@@ -341,7 +341,7 @@ end
 ---@param drawable_unit DrawableCharacterInstance
 ---@param draw_point Point Screen-space draw origin.
 ---@param draw_target_manager DrawTargetManager
----@param set_pal boolean|integer True to apply palette swaps; false to skip; a PaletteId to apply a specific palette.
+---@param set_pal boolean|PaletteId True to apply palette swaps; false to skip; a PaletteId to apply a specific palette.
 ---@param apply_animation boolean Whether to apply the animation frame offset to the draw position.
 ---@param draw_outline boolean Whether to draw the character outline.
 ---@param look_direction LookDirection? Eye look direction; nil uses default forward gaze.
