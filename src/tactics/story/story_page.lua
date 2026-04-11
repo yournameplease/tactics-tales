@@ -12,7 +12,7 @@ local character = require("src.tactics.character.object.character")
 
 ---@class RenderedText : RenderedStoryNode Rendered dialogue line.
 ---@field type "text"
----@field text Dialogue
+---@field text ActiveDialogue
 
 ---@class RenderedCharacterCustomization : RenderedStoryNode Character appearance editor shown in-story.
 ---@field type "character_customization"
@@ -30,7 +30,7 @@ local character = require("src.tactics.character.object.character")
 ---@class RenderedTextInput : RenderedStoryNode Player text-entry prompt.
 ---@field type "text_input"
 ---@field key string Memory key where the entered text will be stored.
----@field text? Dialogue Prompt shown above the input; set only when constructed via add_text_input_menu.
+---@field text? ActiveDialogue Prompt shown above the input; set only when constructed via add_text_input_menu.
 
 ---@class RenderedChapterHeader : RenderedStoryNode Chapter title card.
 ---@field type "chapter_header"
@@ -68,7 +68,7 @@ function rendered_story_node.game_results(results)
 end
 
 --- Create a text node wrapping a dialogue.
----@param text Dialogue
+---@param text ActiveDialogue
 ---@return RenderedStoryNode
 function rendered_story_node.text(text)
     ---@type RenderedText
@@ -169,7 +169,7 @@ function StoryPageImpl:finish_text()
 end
 
 --- Append a text node for the given dialogue.
----@param dialogue Dialogue
+---@param dialogue ActiveDialogue
 function StoryPageImpl:add_text_line(dialogue)
     local node = rendered_story_node.text(dialogue)
     table.insert(self.nodes, node)
@@ -193,7 +193,7 @@ end
 
 --- Append a prompt text node followed by a text input node.
 ---@param key string Memory key where the entered text will be stored.
----@param text Dialogue Prompt dialogue shown above the input field.
+---@param text ActiveDialogue Prompt dialogue shown above the input field.
 function StoryPageImpl:add_text_input_menu(key, text)
     local text_node = rendered_story_node.text(text)
     local input_node = rendered_story_node.text_input(key)

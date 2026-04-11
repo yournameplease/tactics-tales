@@ -43,7 +43,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package current_node ActiveNode
 ---@field package battle_manager BattleManager
 ---@field package dialogue_manager DialogueManager
----@field package active_dialogue Dialogue
+---@field package active_dialogue ActiveDialogue
 ---@field package event_listener EventListener
 ---@field package event_writer EventWriter
 ---@field package music_player MusicPlayer

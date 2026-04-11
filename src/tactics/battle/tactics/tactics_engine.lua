@@ -28,7 +28,7 @@ local Character = character.Character
 local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local DialogueManager = dialogue_manager.DialogueManager
-local Dialogue = require("src.tactics.dialogue.dialogue").Dialogue
+local _ActiveDialogue = require("src.tactics.dialogue.dialogue")
 local payloads = require("src.tactics.battle.tactics.types").payloads
 
 local InputContext = require("src.tactics.input.input_context").InputContext
@@ -55,7 +55,7 @@ local QueuedBattleDialogue = {}
 
 ---@class ActiveBattleDialogue
 ---@field speaking_unit BattleUnit
----@field dialogue Dialogue
+---@field dialogue ActiveDialogue
 local ActiveBattleDialogue = {}
 
 ---@class TacticsEngine
