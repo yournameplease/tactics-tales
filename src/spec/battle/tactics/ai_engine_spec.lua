@@ -1,5 +1,3 @@
-require("src.spec.picotron_shim")
-
 local luassert = require("luassert")
 local ai_engine = require("src.tactics.battle.tactics.ai_engine")
 local point = require("src.tactics.util.point")

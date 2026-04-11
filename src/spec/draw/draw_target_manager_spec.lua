@@ -1,5 +1,4 @@
 local luassert = require("luassert")
-require("src.spec.picotron_shim")
 
 local draw_target_manager = require("src.tactics.draw.draw_target_manager")
 
