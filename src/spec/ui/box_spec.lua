@@ -1,4 +1,3 @@
-require("src.spec.picotron_shim")
 local luassert = require("luassert")
 
 local box_module = require("src.tactics.ui.box")

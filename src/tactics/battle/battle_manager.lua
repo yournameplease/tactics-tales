@@ -3,8 +3,6 @@
 --- It initializes and coordinates all battle-related services,
 --- including the tactics engine, UI, menus, and AI.
 
-local InputContext = require("src.tactics.input.input_context").InputContext -- luacheck: ignore
-local bm = require("src.tactics.battle.battle_map")
 local tactics_engine = require("src.tactics.battle.tactics.tactics_engine")
 local map_generator = require("src.tactics.battle.map.map_generator")
 local battle_menu_manager = require("src.tactics.battle.battle_menu_manager")
@@ -14,13 +12,6 @@ local ai_engine = require("src.tactics.battle.tactics.ai_engine")
 local battle_objective_service = require("src.tactics.battle.battle_objective_service")
 local battle_menu_context = require("src.tactics.battle.battle_menu_context")
 local script_manager = require("src.tactics.battle.scripts.script_manager")
-local CharacterManager = require("src.tactics.character.character_manager").CharacterManager -- luacheck: ignore
-local EventBus = require("src.tactics.systems.event_bus").EventBus -- luacheck: ignore
-local GameData = require("src.tactics.game_data").GameData -- luacheck: ignore
-local TaskManager = require("src.tactics.systems.tasks").TaskManager -- luacheck: ignore
-local AnimationManager = require("src.tactics.animation").AnimationManager -- luacheck: ignore
-local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager -- luacheck: ignore
-local MusicPlayer = require("src.tactics.music.music_player").MusicPlayer -- luacheck: ignore
 
 ---@class BattleManager Abstract interface for a battle instance.
 ---@field teardown fun(self: BattleManager) Tear down all battle services and unregister UI.
