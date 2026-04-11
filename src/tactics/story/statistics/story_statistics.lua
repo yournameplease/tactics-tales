@@ -8,9 +8,9 @@
 local UnitDeathResult = {}
 
 ---@class StoryChapterResult
----@field battle_id integer?
----@field turns_taken integer?
----@field was_victory boolean?
+---@field battle_id integer
+---@field turns_taken integer
+---@field was_victory boolean
 ---@field units_lost UnitDeathResult[]
 local StoryChapterResult = {}
 
