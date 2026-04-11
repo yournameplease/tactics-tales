@@ -106,7 +106,7 @@
 
 ---@class Dialogue : ScriptEffect
 ---@field type "dialogue"
----@field unit UnitSelector Unit whose portrait/name appears in the dialogue.
+---@field unit UnitSelector Unit who is speaking the dialogue.
 ---@field text string[] Lines of dialogue text to display.
 
 ---@class DespawnUnits : ScriptEffect

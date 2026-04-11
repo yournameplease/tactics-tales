@@ -31,7 +31,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 ---@class Style
 ---@field decoration_padding integer
----@field decoration DecorationStyle
+---@field decoration? DecorationStyle
 ---@field solid boolean
 
 ---@class ComputedRectangle
@@ -63,7 +63,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field oy integer
 
 ---@class TextInfo
----@field draw_properties DrawProperties
+---@field draw_properties DrawPropertiesOptions
 ---@field text_color UITextColor
 ---@field rows integer Fixed row count; height is derived from this if set.
 ---@field content string[]
@@ -274,29 +274,51 @@ function UIBuilder:padding(padding)
     return self
 end
 
+---@class LayoutOptions
+---@field width? integer|DimensionSpec
+---@field height? integer|DimensionSpec
+---@field dir? UIDirection
+---@field flex_grow? integer
+---@field gap? integer
+---@field padding? Padding
+
 --- Set the full layout spec directly.
----@param box_layout Layout
+---@param box_layout LayoutOptions
 ---@return UIBuilder
 function UIBuilder:layout(box_layout)
     self.def.layout = box_layout
     return self
 end
 
+---@class StyleOptions
+---@field decoration_padding? integer
+---@field decoration? DecorationStyle
+---@field solid? boolean
+
 --- Set the draw style.
----@param style Style
+---@param style StyleOptions
 ---@return UIBuilder
 function UIBuilder:style(style)
     self.def.style = style
     return self
 end
 
+---@class MenuHandlingOptions
+---@field hover_event? MenuMouseSelection Return this event directly instead of calling get_selection_at.
+---@field get_selection_at? fun(self: UIElement, lx: number, ly: number): MenuMouseSelection
+
 --- Set mouse menu interaction handlers.
----@param menu_handling MenuHandling
+---@param menu_handling MenuHandlingOptions
 ---@return UIBuilder
 function UIBuilder:menu_handling(menu_handling)
     self.def.menu_handling = menu_handling
     return self
 end
+
+---@class SpriteInfoOptions
+---@field s? integer The sprite index to display
+---@field ox? integer The sprite offset from the content left
+---@field oy? integer The sprite offset from the content top
 
 --- Set a sprite to render inside the element.
 ---@param sprite_props SpriteInfo
@@ -318,8 +340,17 @@ function UIBuilder:data(data)
     return self
 end
 
+---@class TextInfoOptions
+---@field draw_properties? DrawPropertiesOptions
+---@field text_color? UITextColor
+---@field rows? integer Fixed row count; height is derived from this if set.
+---@field content? string[]
+---@field line_counts? integer[] Per-paragraph line limits for dialogue boxes.
+---@field drawn_line? integer If set, only this line index is drawn.
+---@field text_object? Text Cached text layout object.
+
 --- Configure text rendering for the element.
----@param text_props TextInfo
+---@param text_props TextInfoOptions
 ---@return UIBuilder
 function UIBuilder:text(text_props)
     self.def.text = text_props or {}
