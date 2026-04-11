@@ -1,5 +1,3 @@
-require("src.spec.picotron_shim")
-
 local luassert = require("luassert")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 

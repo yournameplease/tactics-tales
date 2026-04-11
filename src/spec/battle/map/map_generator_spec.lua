@@ -1,5 +1,3 @@
-require("src.spec.picotron_shim")
-
 local luassert = require("luassert")
 local map_generator = require("src.tactics.battle.map.map_generator")
 

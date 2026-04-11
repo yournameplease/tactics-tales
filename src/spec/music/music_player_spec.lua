@@ -1,4 +1,3 @@
-require("spec/picotron_shim")
 local luassert = require("luassert")
 local music_player = require("tactics/music/music_player")
 
