@@ -141,7 +141,7 @@ local layout = {}
 
 --- Create uniform padding on all sides.
 ---@param p integer
----@return Padding
+---@return PaddingOptions
 function layout.padding(p)
     return { l = p, r = p, t = p, b = p }
 end
