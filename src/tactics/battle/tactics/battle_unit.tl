@@ -123,10 +123,6 @@ function battle_unit.has_tag(tag: string): function(BattleUnit): boolean
     end
 end
 
-function BattleUnit:is_alive(): boolean
-    return self.hp_current > 0
-end
-
 function BattleUnit:take_damage(amount: integer)
     local new_hp = pt.mid(0, self.hp_current - amount, self.character.stats.hp_max)
     self.hp_current = new_hp
