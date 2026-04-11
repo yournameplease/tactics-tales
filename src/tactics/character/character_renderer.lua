@@ -5,17 +5,10 @@
 
 require("profiler")
 local point = require("src.tactics.util.point")
-local Point = point.Point
 
 local draw = require("src.tactics.draw")
 local colors = require("src.tactics.colors")
-local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
-local battle_unit = require("src.tactics.battle.tactics.battle_unit")
-local BattleUnit = battle_unit.BattleUnit
-local character = require("src.tactics.character.object.character")
-local DrawableCharacterInstance = character.DrawableCharacterInstance
 local sprite_data = require("src.tactics.character.sprite_data")
-local wpn = require("src.tactics.character.items.object.weapon")
 
 local animated_skeleton = require("src.tactics.animation.animated_skeleton")
 
