@@ -2,10 +2,6 @@
 --- Defines a unified context for handling both joypad and mouse input,
 --- abstracting the specific input method from the systems that use it.
 
--- Forward declaration; fully defined in src/tactics/menu/menu_cursor.lua (Batch 5).
----@class MenuMouseSelection
----@field type string Discriminant: "leaf", "list", or "grid".
-
 ---@class InputContext Abstract base for JoypadContext and MouseContext.
 ---@field type InputMethod The active input method for this context.
 ---@field actions InputActions Logical action states for this frame.
