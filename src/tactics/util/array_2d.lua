@@ -7,11 +7,11 @@ local point = require("src.tactics.util.point")
 ---@field w integer
 ---@field h integer
 ---@field is_in_range fun(self: Array2D<V>, x: integer, y: integer): boolean
----@field get fun(self: Array2D<V>, x: integer, y: integer): V
+---@field get fun(self: Array2D<V>, x: integer, y: integer): V?
 ---@field is_point_in_range fun(self: Array2D<V>, p: Point): boolean
----@field get_point fun(self: Array2D<V>, p: Point): V
----@field set fun(self: Array2D<V>, x: integer, y: integer, v: V)
----@field set_point fun(self: Array2D<V>, p: Point, v: V)
+---@field get_point fun(self: Array2D<V>, p: Point): V?
+---@field set fun(self: Array2D<V>, x: integer, y: integer, v: V|nil)
+---@field set_point fun(self: Array2D<V>, p: Point, v: V|nil)
 ---@field foreach fun(self: Array2D<V>, fn: fun(x: integer, y: integer, v: V))
 ---@field foreachpoint fun(self: Array2D<V>, fn: fun(p: Point, v: V))
 ---@field map fun(self: Array2D<V>, fn: fun(v: V): any): Array2D<any>
@@ -72,7 +72,7 @@ end
 ---@generic V
 ---@param x integer
 ---@param y integer
----@return V
+---@return V?
 function Array2DImpl:get(x, y)
     assert(self:is_in_range(x, y))
     return self.data[x + 1][y + 1]
@@ -88,7 +88,7 @@ end
 --- Return the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
----@return V
+---@return V?
 function Array2DImpl:get_point(p)
     return self:get(p.x, p.y)
 end
@@ -97,7 +97,7 @@ end
 ---@generic V
 ---@param x integer
 ---@param y integer
----@param v V Value to store at (x, y).
+---@param v V|nil Value to store at (x, y).
 function Array2DImpl:set(x, y, v)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x + 1][y + 1] = v
@@ -106,7 +106,7 @@ end
 --- Set the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
----@param v V Value to store at `p`.
+---@param v V|nil Value to store at `p`.
 function Array2DImpl:set_point(p, v)
     self:set(p.x, p.y, v)
 end
