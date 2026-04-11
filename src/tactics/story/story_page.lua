@@ -112,11 +112,11 @@ function rendered_story_node.text_input(key)
 end
 
 ---@class StoryPage The current story scene state.
----@field package nodes RenderedStoryNode[] Ordered list of nodes currently visible on the page.
----@field package chapter_text string Title text of the current chapter, set after clearing the header node.
----@field package chapter_number integer Number of the current chapter, set after clearing the header node.
----@field package story_revision integer Incremented each time the page content changes.
----@field package story_memory StoryMemory
+---@field nodes RenderedStoryNode[] Ordered list of nodes currently visible on the page.
+---@field chapter_text string Title text of the current chapter, set after clearing the header node.
+---@field chapter_number integer Number of the current chapter, set after clearing the header node.
+---@field story_revision integer Incremented each time the page content changes.
+---@field story_memory StoryMemory
 local StoryPage = {}
 StoryPage.__index = StoryPage
 
