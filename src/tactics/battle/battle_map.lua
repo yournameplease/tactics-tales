@@ -90,7 +90,7 @@ end
 ---@param func fun(point: Point): integer Called for each tile to produce its value.
 ---@return userdata
 function BattleMap:get_tiles_userdata_by(ud_type, func)
-    local ud = pt.userdata(ud_type, self.width, self.height)
+    local ud = userdata(ud_type, self.width, self.height)
     for x = 0, self.width - 1 do
         for y = 0, self.height - 1 do
             ud:set(x, y, func(point.of(x, y)))
@@ -280,7 +280,7 @@ end
 ---@param t1 Point
 ---@param t2 Point
 ---@param min_distance integer
----@param max_distance integer?
+---@param max_distance? integer
 ---@return boolean
 function BattleMap:tile_has_distance_from_tile(t1, t2, min_distance, max_distance)
     max_distance = max_distance or min_distance
@@ -465,7 +465,7 @@ end
 --- Return a userdata marking every tile that has an "on" tile interaction.
 ---@return userdata
 function BattleMap:get_tile_highlights()
-    local ud = pt.userdata("u8", self.width, self.height)
+    local ud = userdata("u8", self.width, self.height)
     for x = 0, self.width - 1 do
         for y = 0, self.height - 1 do
             local interactions = self.interactions_by_x_y:get(x, y)

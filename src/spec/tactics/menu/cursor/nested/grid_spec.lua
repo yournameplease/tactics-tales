@@ -150,7 +150,7 @@ describe("tactics.menu.cursor.nested.grid", function()
                                 return 5
                             end)
                             :with_tile_highlights(function(_gc, _mc)
-                                local tiles = pt.userdata("u8", 16, 16)
+                                local tiles = userdata("u8", 16, 16)
                                 for y = 0, 15 do
                                     for x = 0, 15 do
                                         tiles:set(x, y, 3)
@@ -193,7 +193,7 @@ describe("tactics.menu.cursor.nested.grid", function()
                                 return 5
                             end)
                             :with_tile_highlights(function(_gc, _mc)
-                                local tiles = pt.userdata("u8", 16, 16)
+                                local tiles = userdata("u8", 16, 16)
                                 for y = 0, 15 do
                                     for x = 0, 15 do
                                         tiles:set(x, y, 3)

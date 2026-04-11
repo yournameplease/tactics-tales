@@ -14,11 +14,11 @@ local BASE_METATILE = 0x400
 ---@return table
 local function make_fetch_result(w, h)
     return {
-        { name = "metatiles",   bmp = pt.userdata("u8", w, h) },
-        { name = "floor",       bmp = pt.userdata("u8", w, h) },
-        { name = "front_walls", bmp = pt.userdata("u8", w, h) },
-        { name = "mid_walls",   bmp = pt.userdata("u8", w, h) },
-        { name = "back_walls",  bmp = pt.userdata("u8", w, h) },
+        { name = "metatiles",   bmp = userdata("u8", w, h) },
+        { name = "floor",       bmp = userdata("u8", w, h) },
+        { name = "front_walls", bmp = userdata("u8", w, h) },
+        { name = "mid_walls",   bmp = userdata("u8", w, h) },
+        { name = "back_walls",  bmp = userdata("u8", w, h) },
     }
 end
 
