@@ -14,33 +14,27 @@ local schema_validator = require("src.tactics.validator.schema_validator")
 ---@field spec ModSpec The loaded mod specification.
 
 ---@class ModLoader Abstract interface for loading and validating mods.
----@field register_mod fun(self: ModLoader, path: string) Register a mod from the given path (relative to mods/).
----@field load_mod_data fun(self: ModLoader): any Load and merge all data from registered mods.
----@field validate_mods fun(self: ModLoader): boolean, string[] Validate all registered mods against the game data schema.
+---@field private registered RegisteredMod[] Ordered list of registered mods.
+---@field private registered_map table<string, RegisteredMod> Mods indexed by mod ID.
 local ModLoader = {}
-
----@class ModLoaderImpl : ModLoader
----@field registered RegisteredMod[] Ordered list of registered mods.
----@field registered_map table<string, RegisteredMod> Mods indexed by mod ID.
-local ModLoaderImpl = {}
-ModLoaderImpl.__index = ModLoaderImpl
+ModLoader.__index = ModLoader
 
 local mod_loader = {}
 
 --- Create a new ModLoader instance.
 ---@return ModLoader
 function mod_loader.new()
-    ---@type ModLoaderImpl
+    ---@type ModLoader
     local self = setmetatable({
         registered = {},
         registered_map = {}
-    }, ModLoaderImpl)
+    }, ModLoader)
     return self
 end
 
 --- Register a mod from the given path (relative to mods/).
 ---@param path string Local path within the mods/ directory.
-function ModLoaderImpl:register_mod(path)
+function ModLoader:register_mod(path)
     local full_path = "mods/"..path.."/mod.lua"
     ---@type ModSpec
     local mod_spec = pt.include(full_path)
@@ -61,7 +55,7 @@ end
 --- Stub: validate a single mod by ID (not yet implemented).
 ---@param id string
 ---@diagnostic disable-next-line: unused-local
-function ModLoaderImpl:validate_mod(id)
+function ModLoader:validate_mod(id)
     self:load_mod_data() -- stub; result intentionally discarded
 end
 
@@ -132,7 +126,7 @@ end
 
 --- Set up the shared sandbox table available to mod scripts as `lib`.
 -- TODO: consider safer approaches?
-function ModLoaderImpl:create_sandbox()
+function ModLoader:create_sandbox()
     local sandbox = {
         point = point,
     }
@@ -159,7 +153,7 @@ end
 
 --- Load and merge all data from registered mods into a GameData table.
 ---@return any -- TODO: narrow to GameData once game_data.tl is migrated
-function ModLoaderImpl:load_mod_data()
+function ModLoader:load_mod_data()
     self:create_sandbox()
 
     local game_data = {} -- TODO: annotate as GameData once game_data.tl is migrated
@@ -223,7 +217,7 @@ end
 
 --- Validate all registered mods against the game data schema.
 ---@return boolean is_valid, string[] errors
-function ModLoaderImpl:validate_mods()
+function ModLoader:validate_mods()
     local game_data = self:load_mod_data()
 
     -- final validation, for all loaded data

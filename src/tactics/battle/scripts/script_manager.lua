@@ -16,9 +16,6 @@ local lists = require("src.tactics.util.lists")
 ---@field turn_number integer
 local ScriptContext = {}
 
----@class ScriptManager
-local ScriptManager = {}
-
 ---@class TileInteractionMessage
 ---@field script_id integer
 ---@field source_unit BattleUnit
@@ -34,7 +31,7 @@ local TileInteractionMessage = {}
 ---@field target_tile Point
 local UnitInteractionMessage = {}
 
----@class ScriptManagerImpl : ScriptManager
+---@class ScriptManager
 ---@field battle_map BattleMap
 ---@field tactics_engine TacticsEngine
 ---@field event_listener EventListener
@@ -42,13 +39,13 @@ local UnitInteractionMessage = {}
 ---@field task_manager TaskManager
 ---@field active_scripts table<integer, BattleScript>
 ---@field script_listeners table<integer, integer>
-local ScriptManagerImpl = {}
-ScriptManagerImpl.__index = ScriptManagerImpl
+local ScriptManager = {}
+ScriptManager.__index = ScriptManager
 
 --- Return units matching the given specifier (no context required).
 ---@param selector table UnitSpecifier
 ---@return BattleUnit[]
-function ScriptManagerImpl:resolve_unit_specifier(selector)
+function ScriptManager:resolve_unit_specifier(selector)
     if selector.type == "tag_lookup" then
         local battle_unit = require("src.tactics.battle.tactics.battle_unit")
         return self.battle_map:get_units(battle_unit.has_tag(selector.tag))
@@ -62,7 +59,7 @@ end
 ---@param selector table UnitSelector
 ---@param ctx ScriptContext
 ---@return BattleUnit[]
-function ScriptManagerImpl:resolve_unit_selector(selector, ctx)
+function ScriptManager:resolve_unit_selector(selector, ctx)
     if selector.type == "tag_lookup" then
         return self:resolve_unit_specifier(selector)
     elseif selector.type == "trigger_source" then
@@ -80,7 +77,7 @@ end
 --- Return tiles matching the given specifier (no context required).
 ---@param selector table TileSpecifier
 ---@return Point[]
-function ScriptManagerImpl:resolve_tile_specifier(selector)
+function ScriptManager:resolve_tile_specifier(selector)
     if selector.type == "tag_lookup" then
         return self.battle_map:get_tiles_by_label(selector.tag)
     elseif selector.type == "static_point" then
@@ -95,7 +92,7 @@ end
 ---@param selector table TileSelector
 ---@param ctx ScriptContext
 ---@return Point[]
-function ScriptManagerImpl:resolve_tile_selector(selector, ctx)
+function ScriptManager:resolve_tile_selector(selector, ctx)
     if selector.type == "static_point" or selector.type == "tag_lookup" then
         return self:resolve_tile_specifier(selector)
     elseif selector.type == "trigger_source" then
@@ -112,7 +109,7 @@ end
 
 --- Deactivate a script and remove its event listener and interaction registration.
 ---@param script_id integer
-function ScriptManagerImpl:remove_script(script_id)
+function ScriptManager:remove_script(script_id)
     if self.active_scripts[script_id] then
         self.event_listener:remove(self.script_listeners[script_id])
         self.battle_map:unregister_interaction(script_id)
@@ -124,7 +121,7 @@ end
 
 --- Register a script's trigger and build its effect callbacks.
 ---@param script BattleScript
-function ScriptManagerImpl:register_script(script)
+function ScriptManager:register_script(script)
     local event
     local filter
 
@@ -335,7 +332,7 @@ function ScriptManagerImpl:register_script(script)
 end
 
 --- Tear down all event listeners.
-function ScriptManagerImpl:teardown()
+function ScriptManager:teardown()
     self.event_listener:teardown()
 end
 
@@ -354,8 +351,8 @@ local script_manager = {
 function script_manager.new(scripts, bus, music_player, map, tactics, task_manager)
     scripts = scripts or {}
 
-    ---@type ScriptManagerImpl
-    local self = setmetatable({}, ScriptManagerImpl)
+    ---@type ScriptManager
+    local self = setmetatable({}, ScriptManager)
 
     self.event_listener = event_listener.new(bus)
     self.music_player = music_player

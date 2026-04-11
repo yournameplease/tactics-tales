@@ -46,20 +46,17 @@
 ---@field joypad Joypad Raw joypad state for this frame.
 ---@field mouse Mouse Raw mouse state for this frame.
 
----@class InputService Abstract interface implemented by InputServiceImpl.
+---@class InputService
 ---@field current_input InputMethod The currently active input method.
----@field get_user_input fun(self: InputService): UserInput Return the current frame's unified user input state.
-
----@class InputServiceImpl : InputService
----@field actions InputActions Persistent action state table updated each frame.
----@field previous_input InputMethod|nil The active input method from the previous frame.
----@field mouse_prev Mouse|nil The mouse state from the previous frame, or nil on the first frame.
-local InputServiceImpl = {}
-InputServiceImpl.__index = InputServiceImpl
+---@field private actions InputActions Persistent action state table updated each frame.
+---@field private previous_input InputMethod|nil The active input method from the previous frame.
+---@field private mouse_prev Mouse|nil The mouse state from the previous frame, or nil on the first frame.
+local InputService = {}
+InputService.__index = InputService
 
 --- Read raw mouse state from the Picotron API and compute pressed-this-frame flags.
 ---@return Mouse
-function InputServiceImpl:get_mouse()
+function InputService:get_mouse()
     local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = pt.get_mouse()
 
     local ml = mouse_b & 0x1 == 0x1
@@ -95,7 +92,7 @@ end
 
 --- Read raw joypad state from the Picotron API.
 ---@return Joypad
-function InputServiceImpl:get_joypad()
+function InputService:get_joypad()
     ---@type Joypad
     local joy = {
         -- currently locked to -1, 0, 1 on joysticks
@@ -117,7 +114,7 @@ end
 
 --- Sample raw input, update action pressed/released state, and return a unified UserInput.
 ---@return UserInput
-function InputServiceImpl:get_user_input()
+function InputService:get_user_input()
     local joy   = self:get_joypad()
     local mouse = self:get_mouse()
 
@@ -190,13 +187,13 @@ function input_service.new()
         ["SHOULDER_L"] = { held = false, pressed = false, released = false },
         ["SHOULDER_R"] = { held = false, pressed = false, released = false },
     }
-    ---@type InputServiceImpl
+    ---@type InputService
     local self = setmetatable({
         current_input   = "mouse",
         previous_input  = nil,
         mouse_prev      = nil,
         actions         = actions,
-    }, InputServiceImpl)
+    }, InputService)
     return self
 end
 
