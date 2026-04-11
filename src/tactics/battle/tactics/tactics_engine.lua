@@ -45,7 +45,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 
 ---@class NewUnitProperties
 ---@field new_side Side
----@field new_ai unit_ai.UnitAI
+---@field new_ai UnitAI
 local NewUnitProperties = {}
 
 ---@class QueuedBattleDialogue
@@ -191,7 +191,7 @@ function TacticsEngine:update_dialogue(input)
 end
 
 --- Place `unit` on the map at `spawn_point` with an idle animation.
----@param unit battle_unit.BattleUnit
+---@param unit BattleUnit
 ---@param spawn_point Point
 function TacticsEngine:spawn_unit(unit, spawn_point)
     local idle_animation = self.animation_manager:create_idle_animation()
@@ -202,7 +202,7 @@ function TacticsEngine:spawn_unit(unit, spawn_point)
 end
 
 --- Remove each unit in `units` from the map.
----@param units battle_unit.BattleUnit[]
+---@param units BattleUnit[]
 function TacticsEngine:despawn_unit(units)
     for _, unit in ipairs(units) do
         self.battle_map:remove_unit(unit.id)
@@ -210,9 +210,9 @@ function TacticsEngine:despawn_unit(units)
 end
 
 --- Iterate over unit definitions and spawn each via CharacterManager, respecting `blocked_behavior`.
----@param units unit_spawn_data.UnitSpawnData[]
----@param blocked_behavior unit_spawn_data.UnitSpawnBlockedBehavior
----@return battle_unit.BattleUnit[]
+---@param units UnitSpawnData[]
+---@param blocked_behavior UnitSpawnBlockedBehavior
+---@return BattleUnit[]
 function TacticsEngine:spawn_units(units, blocked_behavior)
     local spawned_units = {}
     local char_man = self.character_manager
@@ -279,9 +279,9 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
 end
 
 --- Spawn all units and optionally play a slide-in animation from the given direction.
----@param units unit_spawn_data.UnitSpawnData[]
----@param anim unit_spawn_data.UnitSpawnAnimation|nil
----@param blocked_behavior unit_spawn_data.UnitSpawnBlockedBehavior
+---@param units UnitSpawnData[]
+---@param anim UnitSpawnAnimation|nil
+---@param blocked_behavior UnitSpawnBlockedBehavior
 function TacticsEngine:spawn_all(units, anim, blocked_behavior)
     local spawned = {}
     lists.add_all(spawned, self:spawn_units(units, blocked_behavior))
