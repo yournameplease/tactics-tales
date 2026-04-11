@@ -42,8 +42,8 @@ local ai_engine = {
 
 --- Return true if shallow movement option `a` is strictly better than `b`.
 --- Priority: kill > no self-kill > no counterattack > damage > low self-damage > ally score.
----@param a ShallowMovementOption
----@param b ShallowMovementOption
+---@param a? ShallowMovementOption
+---@param b? ShallowMovementOption
 ---@return boolean
 local function better_shallow_movement_option(a, b)
     if a == nil then
