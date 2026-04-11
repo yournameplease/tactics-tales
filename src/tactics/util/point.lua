@@ -4,7 +4,6 @@
 ---@class Point
 ---@field x integer
 ---@field y integer
----@field copy fun(self: Point): Point
 ---@operator add(Point): Point
 ---@operator sub(Point): Point
 ---@operator mul(Point|number): Point
