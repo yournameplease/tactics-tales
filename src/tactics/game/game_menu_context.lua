@@ -5,7 +5,7 @@ local save_system = require("src.tactics.save.save_system")
 
 ---@class GameMenuContext : GameContext
 ---@field story_ids StoryId[] Available story IDs to present in the menu.
----@field handle_begin_story fun(save_id: string, story_id: StoryId) Callback to start a new story.
+---@field handle_begin_story fun(save_id: string?, story_id: StoryId?) Callback to start a new story.
 ---@field handle_load_story fun(save_id: string) Callback to load an existing story save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
 ---@field config_manager ConfigManager
