@@ -327,7 +327,7 @@ end
 ---@field oy? integer The sprite offset from the content top
 
 --- Set a sprite to render inside the element.
----@param sprite_props SpriteInfo
+---@param sprite_props SpriteInfoOptions
 ---@return UIBuilder
 function UIBuilder:sprite(sprite_props)
     self.def.sprite = {
