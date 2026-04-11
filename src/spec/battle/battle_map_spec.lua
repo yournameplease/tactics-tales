@@ -28,10 +28,10 @@ end
 local function make_layers(w, h)
     return {
         terrain = {
-            ground    = pt.userdata("u8", w, h),
-            back_wall = pt.userdata("u8", w, h),
-            mid_wall  = pt.userdata("u8", w, h),
-            front_wall = pt.userdata("u8", w, h),
+            ground    = userdata("u8", w, h),
+            back_wall = userdata("u8", w, h),
+            mid_wall  = userdata("u8", w, h),
+            front_wall = userdata("u8", w, h),
         }
     }
 end

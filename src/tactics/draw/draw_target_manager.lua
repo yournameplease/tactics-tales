@@ -35,7 +35,7 @@ end
 ---@param d_x integer X offset for the camera (stored negated).
 ---@param d_y integer Y offset for the camera (stored negated).
 function DrawTargetManager:push_target(w, h, d_x, d_y)
-    local ud = pt.userdata("u8", w, h)
+    local ud = userdata("u8", w, h)
     local new_target = {
         ud = ud,
         w = w,

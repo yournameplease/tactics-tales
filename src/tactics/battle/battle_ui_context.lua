@@ -54,7 +54,7 @@ function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_ma
     self.hovered_unit = nil
     self.acting_unit = nil
 
-    self.highlighted_tiles = pt.userdata("i16", self.battle_map.width, self.battle_map.height)
+    self.highlighted_tiles = userdata("i16", self.battle_map.width, self.battle_map.height)
     return self
 end
 

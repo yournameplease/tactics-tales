@@ -99,7 +99,7 @@ function tactics_engine.new(
     self.valid_tiles_by_unit = {}
 
     self.marked_unit_revision = 0
-    self.marked_unit_tiles = pt.userdata("u8", self.battle_map.width, self.battle_map.height)
+    self.marked_unit_tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
     self.dialogue_revision = 0
 
     return self
@@ -726,7 +726,7 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
 
     local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
 
-    local tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+    local tiles = userdata("u8", MAP_WIDTH, MAP_HEIGHT)
 
     for _, t in ipairs(tiles_in_distance) do
         tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
@@ -789,7 +789,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(unit)
         movement
     )
 
-    local tiles = pt.userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+    local tiles = userdata("u8", MAP_WIDTH, MAP_HEIGHT)
 
     reachable_tiles:foreach(function(x, y, reachable)
         if reachable then
