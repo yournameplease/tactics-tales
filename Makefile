@@ -26,7 +26,7 @@ $(BUILD_MARKER): $(TL_SRC) $(LUA_SRC)
 all: clean check test
 
 check:
-	$(LLS) --check=$(CURDIR) --configpath=$(CURDIR)/.luarc.json --check_format=pretty
+	$(LLS) --check=$(CURDIR) --configpath=$(CURDIR)/.luarc.json
 
 clean:
 	rm -rf build
