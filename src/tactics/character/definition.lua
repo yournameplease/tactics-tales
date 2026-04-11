@@ -30,22 +30,22 @@ local StaticOption = {}
 
 --- Template describing how to generate a character of a given archetype.
 ---@class CharacterTemplate
----@field movement integer? Base movement range in tiles.
----@field hp_max integer? Maximum hit points.
----@field item_loadout string[]? Item IDs to add to the starting inventory.
----@field head_options_m AttributeOptions? Head shape options for male characters.
----@field head_options_f AttributeOptions? Head shape options for female characters.
----@field eyewear_options AttributeOptions? Eyewear accessory options.
----@field headwear_options AttributeOptions? Headwear accessory options.
----@field body_options AttributeOptions? Body class (shirt style) options.
----@field gender_options AttributeOptions? Gender options.
----@field skin_color_options AttributeOptions? Skin colour options.
----@field hair_color_options AttributeOptions? Hair colour options.
----@field hair_options_m AttributeOptions? Hair style options for male characters.
----@field hair_options_f AttributeOptions? Hair style options for female characters.
----@field beard_options AttributeOptions? Facial hair options.
----@field eye_options AttributeOptions? Eye shape options.
----@field parent_template string? ID of the template this one inherits from.
+---@field movement? integer Base movement range in tiles.
+---@field hp_max? integer Maximum hit points.
+---@field item_loadout? string[] Item IDs to add to the starting inventory.
+---@field head_options_m? AttributeOptions Head shape options for male characters.
+---@field head_options_f? AttributeOptions Head shape options for female characters.
+---@field eyewear_options? AttributeOptions Eyewear accessory options.
+---@field headwear_options? AttributeOptions Headwear accessory options.
+---@field body_options? AttributeOptions Body class (shirt style) options.
+---@field gender_options? AttributeOptions Gender options.
+---@field skin_color_options? AttributeOptions Skin colour options.
+---@field hair_color_options? AttributeOptions Hair colour options.
+---@field hair_options_m? AttributeOptions Hair style options for male characters.
+---@field hair_options_f? AttributeOptions Hair style options for female characters.
+---@field beard_options? AttributeOptions Facial hair options.
+---@field eye_options? AttributeOptions Eye shape options.
+---@field parent_template? string ID of the template this one inherits from.
 local CharacterTemplate = {}
 
 return {

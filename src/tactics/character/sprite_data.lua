@@ -17,8 +17,8 @@ local NamedColor = {}
 --- A named sprite with optional front/back variants.
 ---@class SpriteData : NamedSpriteData
 ---@field name string
----@field sprite integer? Sprite index for the front-facing frame.
----@field back_sprite integer? Sprite index for the back-facing frame.
+---@field sprite? integer Sprite index for the front-facing frame.
+---@field back_sprite? integer Sprite index for the back-facing frame.
 local SpriteData = {}
 
 --- Skin colour entry; stores two palette indices for highlight and shadow.
@@ -39,8 +39,8 @@ local BodyClassData = {}
 ---@field draw_hair boolean Whether hair is drawn when this headwear is equipped.
 ---@field draw_beard boolean Whether beard is drawn when this headwear is equipped.
 ---@field draw_eyewear boolean Whether eyewear is drawn when this headwear is equipped.
----@field sprite integer? Front-facing sprite index.
----@field back_sprite integer? Back-facing sprite index.
+---@field sprite? integer Front-facing sprite index.
+---@field back_sprite? integer Back-facing sprite index.
 local HeadwearSpriteData = {}
 
 -- Names from https://picotron.fandom.com/wiki/Palette
