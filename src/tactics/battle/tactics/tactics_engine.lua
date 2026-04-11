@@ -640,7 +640,7 @@ function TacticsEngine:apply_combat_step(step)
         end
     end
 
-    if not defender:is_alive() then
+    if defender.hp_current <= 0 then
         self:kill_unit(defender, attacker)
     end
 end
