@@ -29,6 +29,12 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field l integer
 ---@field r integer
 
+---@class PaddingOptions
+---@field t? integer
+---@field b? integer
+---@field l? integer
+---@field r? integer
+
 ---@class Style
 ---@field decoration_padding integer
 ---@field decoration? DecorationStyle
@@ -263,7 +269,7 @@ function UIBuilder:container(preset)
 end
 
 --- Set padding. Accepts a uniform integer or a Padding table.
----@param padding integer|Padding
+---@param padding integer|PaddingOptions
 ---@return UIBuilder
 function UIBuilder:padding(padding)
     if type(padding) == "number" then
@@ -280,7 +286,7 @@ end
 ---@field dir? UIDirection
 ---@field flex_grow? integer
 ---@field gap? integer
----@field padding? Padding
+---@field padding? PaddingOptions
 
 --- Set the full layout spec directly.
 ---@param box_layout LayoutOptions
