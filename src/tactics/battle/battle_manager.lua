@@ -106,11 +106,18 @@ function battle_manager.new(
         task_manager
     )
 
+    local begin_battle = function()
+        event_bus:emit("TACTICS_BEGIN_BATTLE", {
+            chapter = chapter,
+            battle_id = battle_id,
+        })
+    end
+
     local battle_menu_ctx = battle_menu_context.new(
         self.battle_map,
         self.tactics_engine,
         battle_def.deployment and battle_def.deployment.deployment_tiles_tag or nil,
-        function() event_bus:emit("TACTICS_BEGIN_BATTLE", {}) end,
+        begin_battle,
         function() event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {}) end
     )
     self.battle_menu_manager = battle_menu_manager.new(
@@ -156,7 +163,7 @@ function battle_manager.new(
         )
         self.battle_menu_manager:set_menu("MENU_DEPLOYMENT")
     else
-        event_bus:emit("TACTICS_BEGIN_BATTLE", {})
+        begin_battle()
     end
 
     return self

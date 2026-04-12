@@ -149,6 +149,7 @@ function turn_manager.new(
     ---@type TurnManagerImpl
     local self = setmetatable({}, TurnManagerImpl)
 
+    self.chapter = chapter
     self.turn = 1
     self.phase = 1
 
