@@ -7,7 +7,7 @@ local random = {}
 ---@param i number Upper bound (exclusive); the result is always less than i.
 ---@return integer
 function random.rndi(i)
-    return flr(rnd(i) // 1)
+    return flr(rnd(i))
 end
 
 --- Return a random element from `list`.
