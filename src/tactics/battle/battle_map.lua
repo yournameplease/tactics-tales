@@ -288,6 +288,24 @@ function BattleMap:tile_has_distance_from_tile(t1, t2, min_distance, max_distanc
     return distance >= min_distance and distance <= max_distance
 end
 
+---Whether one side can attack the other
+---@param side_1 Side
+---@param side_2 Side
+---@return boolean
+function sides_can_fight(side_1, side_2)
+    if side_1 == side_2 then
+        return false
+    end
+    if side_1 == "player" and side_2 == "neutral" then
+        return false
+    end
+    if side_2 == "player" and side_1 == "neutral" then
+        return false
+    end
+    return true
+end
+
+
 --- Return all enemy units in weapon range of `unit_id` from `tile`.
 ---@param unit_id integer
 ---@param tile Point
@@ -298,7 +316,7 @@ function BattleMap:get_targets_in_range(unit_id, tile)
     local targeting = attacker.character:get_weapon_targeting()
     for _, target in pairs(self.units_by_id) do
         if target.id ~= attacker.id then
-            if target.side ~= attacker.side
+            if sides_can_fight(attacker.side, target.side)
                 and targeting.is_target_valid(
                     tile,
                     target.tile,
