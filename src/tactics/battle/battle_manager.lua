@@ -37,6 +37,7 @@ local battle_manager = {
 }
 
 --- Create and initialize a new BattleManager for the given battle.
+---@param chapter integer
 ---@param battle_id string
 ---@param game_data GameData
 ---@param char_man CharacterManager
@@ -46,7 +47,17 @@ local battle_manager = {
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
 ---@return BattleManager
-function battle_manager.new(battle_id, game_data, char_man, task_manager, animation_manager, event_bus, music_player, ui_context)
+function battle_manager.new(
+    chapter,
+    battle_id,
+    game_data,
+    char_man,
+    task_manager,
+    animation_manager,
+    event_bus,
+    music_player,
+    ui_context
+)
     ---@type BattleManagerImpl
     local self = setmetatable({}, BattleManagerImpl)
 
@@ -58,6 +69,7 @@ function battle_manager.new(battle_id, game_data, char_man, task_manager, animat
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
 
     self.tactics_engine = tactics_engine.new(
+        chapter,
         self.battle_map,
         self.character_manager,
         task_manager,
