@@ -29,7 +29,7 @@ local internal_data = setmetatable({}, { __mode = "k" })
 
 ---@param width integer
 ---@param height integer
----@return Userdata
+---@return userdata
 local function create_mock_userdata(width, height)
     local data = {}
     for y = 0, height - 1 do
@@ -125,7 +125,6 @@ MockUserdata_mt = {
     },
 }
 
----@type Picotron
 local pt_shim = {
     menuitem       = function(_id_or_item, _label, _action) end,
     sfx            = function(_n, _channel, _offset, _length, _pan, _mix_volume) end,
@@ -176,10 +175,8 @@ local pt_shim = {
     fget           = function(_n) return 0 end,
     fset           = function(_n, _f, _val) end,
     cursor         = function(_x, _y, _col) end,
-    set_color      = function(_col) end,
-    reset_color    = function() end,
-    set_camera     = function(_x, _y) return 0, 0 end,
-    reset_camera   = function() end,
+    color      = function(_col) end,
+    camera     = function(_x, _y) return 0, 0 end,
     circ           = function(_x, _y, _r, _col) end,
     circfill       = function(_x, _y, _r, _col) end,
     oval           = function(_x0, _y0, _x1, _y1, _col) end,
@@ -189,10 +186,8 @@ local pt_shim = {
     rrect          = function(_x, _y, _w, _h, _radius, _col) end,
     rectfill       = function(_x0, _y0, _x1, _y1, _col) end,
     rrectfill      = function(_x, _y, _w, _h, _radius, _col) end,
-    set_pal        = function(_c0, _c1, _p) end,
-    reset_pal      = function() end,
-    set_palt       = function(_c, _is_transparent) end,
-    reset_palt     = function(_c) end,
+    pal        = function(_c0, _c1, _p) end,
+    palt       = function(_c, _is_transparent) end,
     spr            = function(_s, _x, _y, _flip_x, _flip_y) end,
     sspr           = function(_s, _sx, _sy, _sw, _sh, _dx, _dy, _dw, _dh, _flip_x, _flip_y) end,
     fillp          = function(...) local _ = { ... } end,
@@ -206,8 +201,7 @@ local pt_shim = {
     clear_key      = function(_k) end,
     peektext       = function() return false end,
     readtext       = function(_clear) return "" end,
-    get_mouse      = function() return 0, 0, 0, 0, 0 end,
-    set_mouse      = function(_new_mx, _new_my) end,
+    mouse      = function(_new_mx, _new_my) return 0, 0, 0, 0, 0 end,
     mouselock      = function(_lock, _event_sensitivity, _move_sensitivity) return 0, 0 end,
     map            = function(_src, _tile_x, _tile_y, _sx, _sy, _tiles_x, _tiles_y, _p8layers, _tile_w, _tile_h) end,
     mget           = function(_x, _y) return 0 end,
@@ -317,7 +311,6 @@ local pt_shim = {
         return nil
     end,
     deli           = table.remove,
-    pop            = function(t) return table.remove(t) end,
     count          = function(t, v)
         if v == nil then return #t end
         local c = 0
@@ -351,14 +344,10 @@ local pt_shim = {
     get_display        = function() return create_mock_userdata(240, 136) end,
     set_draw_target    = function(_ud) end,
     get_draw_target    = function() return create_mock_userdata(240, 136) end,
-    set_window_attributes = function(_attribs) end,
-    set_window_size    = function(_width, _height, _attribs) end,
+    window = function(_attribs) end,
     wrangle_working_file = function(_save_state, _load_state, _untitled_filename, _get_hlocation, _set_hlocation) end,
     pwf                = function() return nil end,
 }
-
--- for calls within the engine
-_G.pt = pt_shim
 
 -- copy shim keys onto _G for bare global access (used by mods and legacy call sites)
 for k, v in pairs(pt_shim) do

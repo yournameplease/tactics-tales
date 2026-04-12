@@ -4,12 +4,12 @@ local input_service = require("src.tactics.joypad")
 -- Helpers to override Picotron globals per-test.
 local original_btn      = btn
 local original_btnp     = btnp
-local original_get_mouse = get_mouse
+local original_mouse = mouse
 
 after_each(function()
     btn       = original_btn
     btnp      = original_btnp
-    get_mouse = original_get_mouse
+    mouse = original_mouse
 end)
 
 --- Build a btn/btnp stub that returns true only for the listed button indices.
@@ -19,7 +19,7 @@ local function btn_returns(...)
     return function(b) return pressed[b] or false end
 end
 
---- Build a get_mouse stub returning the given values (defaults to all-zero/idle).
+--- Build a mouse stub returning the given values (defaults to all-zero/idle).
 local function mouse_returns(mx, my, buttons, wx, wy)
     return function() return mx or 0, my or 0, buttons or 0, wx or 0, wy or 0 end
 end
@@ -30,7 +30,7 @@ describe("tactics.joypad", function()
             btn  = btn_returns(4)       -- A button held
             btnp = btn_returns(4)       -- A button pressed this frame
             -- Ensure no mouse activity so current_input stays "joypad"
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
 
             local svc = input_service.new()
             svc.current_input = "joypad"
@@ -44,7 +44,7 @@ describe("tactics.joypad", function()
         it("should report pressed=false and held=true on the second frame a button is held", function()
             btn  = btn_returns(4)
             btnp = btn_returns(4)
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
 
             local svc = input_service.new()
             svc.current_input = "joypad"
@@ -61,7 +61,7 @@ describe("tactics.joypad", function()
         it("should report released=true and held=false on the frame a button is released", function()
             btn  = btn_returns(4)
             btnp = btn_returns(4)
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
 
             local svc = input_service.new()
             svc.current_input = "joypad"
@@ -82,7 +82,7 @@ describe("tactics.joypad", function()
         it("should map joypad shoulder buttons to SHOULDER_L and SHOULDER_R actions", function()
             btn  = btn_returns(14, 15)  -- L and R shoulders held
             btnp = btn_returns(14, 15)
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
 
             local svc = input_service.new()
             svc.current_input = "joypad"
@@ -95,7 +95,7 @@ describe("tactics.joypad", function()
         it("should report method_changed=true on the first call", function()
             btn  = btn_returns(4)
             btnp = btn_returns(4)
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
 
             local svc = input_service.new()
             svc.current_input = "joypad"
@@ -109,7 +109,7 @@ describe("tactics.joypad", function()
     describe("mouse pressed/released logic", function()
         it("should report held=true and pressed=true on the first frame left button is down", function()
             -- mouse_b = 1 → ml = true (bit 0)
-            get_mouse = mouse_returns(0, 0, 1)
+            mouse = mouse_returns(0, 0, 1)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -122,7 +122,7 @@ describe("tactics.joypad", function()
         end)
 
         it("should report pressed=false and held=true on the second consecutive frame", function()
-            get_mouse = mouse_returns(0, 0, 1)
+            mouse = mouse_returns(0, 0, 1)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -137,7 +137,7 @@ describe("tactics.joypad", function()
         end)
 
         it("should report released=true and held=false on the frame the button is released", function()
-            get_mouse = mouse_returns(0, 0, 1)
+            mouse = mouse_returns(0, 0, 1)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -145,7 +145,7 @@ describe("tactics.joypad", function()
             svc:get_user_input()             -- frame 1: pressed
             svc:get_user_input()             -- frame 2: held
 
-            get_mouse = mouse_returns(0, 0, 0)
+            mouse = mouse_returns(0, 0, 0)
             local inp = svc:get_user_input() -- frame 3: released
 
             luassert.is_false(inp.actions["BUTTON_A"].held)
@@ -155,7 +155,7 @@ describe("tactics.joypad", function()
 
         it("should map right mouse button to BUTTON_B", function()
             -- mouse_b = 2 → mr = true (bit 1)
-            get_mouse = mouse_returns(0, 0, 2)
+            mouse = mouse_returns(0, 0, 2)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -168,7 +168,7 @@ describe("tactics.joypad", function()
         end)
 
         it("should derive mlp correctly on the first frame when mouse_prev is nil", function()
-            get_mouse = mouse_returns(0, 0, 1)
+            mouse = mouse_returns(0, 0, 1)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -181,7 +181,7 @@ describe("tactics.joypad", function()
         end)
 
         it("should derive mlp=false on the second frame when button was already held", function()
-            get_mouse = mouse_returns(0, 0, 1)
+            mouse = mouse_returns(0, 0, 1)
             btn  = btn_returns()
             btnp = btn_returns()
 
@@ -197,7 +197,7 @@ describe("tactics.joypad", function()
 
     describe("input method switching", function()
         it("should switch active_method to joypad when a joy button is pressed", function()
-            get_mouse = mouse_returns()
+            mouse = mouse_returns()
             btn  = btn_returns(4)
             btnp = btn_returns(4)
 

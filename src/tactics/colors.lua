@@ -59,14 +59,14 @@ local cols_by_id = {
     ["paper"]   = 1,
 }
 
---- Load a palette column from a sprite and apply it via set_pal.
+--- Load a palette column from a sprite and apply it via pal.
 ---@param palette_id PaletteId Identifies which palette column to apply.
 function colors.apply_palette(palette_id)
     local color_col = cols_by_id[palette_id]
     local sprite = get_spr(palette_sprite)
     for y = 1, 63 do
         local c = sprite:get(color_col, y)
-        set_pal(y, c)
+        pal(y, c)
     end
 end
 

@@ -146,7 +146,7 @@ function PathAnimationInstance:get_animation_facing(_global_frame)
 
     local d = next_point.point - prev_point.point
     local angle = atan2(d.x, d.y)
-    if absf(angle) <= 0.125 then
+    if abs(angle) <= 0.125 then
         return "right"
     elseif angle > 0.125 and angle < 0.375 then
         return "up"

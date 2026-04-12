@@ -172,8 +172,8 @@ local function get_path_layer(state)
                 set_ud_tile(path_layer, path[#path], s)
             end
         end
-        return path_layer
     end
+    return path_layer
 end
 
 
@@ -231,7 +231,7 @@ local function draw_tactics_map(
     local draw_cursor =
         state.game_context.input_service.current_input == "joypad"
     
-    local map = state.battle_context.battle_map
+    local battle_map = state.battle_context.battle_map
 
     local ud_width = self.rect.c_w
     -- to top of screen
@@ -244,7 +244,7 @@ local function draw_tactics_map(
     -- draw row-by row, top to bottom aka back to front
 
     -- pre-compute actor animations for z-ordering
-    local unit_positions = compute_animated_unit_positions(state.battle_context.battle_map)
+    local unit_positions = compute_animated_unit_positions(battle_map)
 
     local sorted_units = userdata("i16", 3, #unit_positions)
     for i,u in ipairs(unit_positions) do
@@ -255,7 +255,7 @@ local function draw_tactics_map(
     sorted_units:sort()
 
     -- TODO: preload layers
-    local layers = state.battle_context.battle_map.layers
+    local layers = battle_map.layers
     local layer_ground = layers.terrain.ground
     -- todo: move to ui context
     local layer_path = get_path_layer(state)
@@ -284,7 +284,7 @@ local function draw_tactics_map(
     for i=0,#unit_positions-1 do
         -- profile("draw_map_rows_get_unit")
         local unit_id = sorted_units:get(2, i)
-        local unit = map:get_unit_by_id(unit_id)
+        local unit = battle_map:get_unit_by_id(unit_id)
         local next_z = sorted_units:get(0, i)
         local next_x = sorted_units:get(1, i)
         -- profile("draw_map_rows_get_unit")
