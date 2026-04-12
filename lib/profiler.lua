@@ -7,7 +7,7 @@ local function do_nothing() end
 -- Why use a table at all? Because otherwise lua will try to cache the function call,
 -- which by default is do_nothing.
 local profile_meta = {__call = do_nothing}
----@overload fun()
+---@overload fun(string)
 profile = setmetatable({draw = do_nothing},profile_meta)
 
 local running = {} -- All incomplete profiles
