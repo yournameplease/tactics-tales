@@ -48,9 +48,10 @@ function TurnManagerImpl:check_objectives()
         return false
     else
         log.debug("Battle finished!")
-        self.event_writer:emit(battle_result.command, {
+        self.event_writer:emit("BATTLE_END", {
             chapter = self.chapter,
-            turn = self.turn
+            turn = self.turn,
+            result = battle_result.result,
         })
         return true
     end
@@ -202,14 +203,6 @@ function turn_manager.new(
         if not self:check_objectives() then
             self:advance_phase()
         end
-    end)
-
-    self.event_listener:on("BATTLE_END_VICTORY", function()
-        log.info("You win!")
-    end)
-
-    self.event_listener:on("BATTLE_END_DEFEAT", function()
-        log.info("You lose!")
     end)
 
     return self
