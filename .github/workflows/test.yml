@@ -26,13 +26,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          luarocks install tl && luarocks install cyan && luarocks install busted && luarocks install luassert
-
-      - name: Build
-        run: |
-          make tactics
+          luarocks install busted && luarocks install luassert
 
       - name: Test
         run: |
           make test
+
+      - name: Check
+        run: |
+          make check
 
