@@ -244,7 +244,7 @@ function AIEngine:handle_one_unit_action(side)
 
         self:compute_unit_ai(enemies_to_act[1])
         while self.tactics_engine:is_blocked() do
-            pt.yield()
+            yield()
         end
     end)
 end

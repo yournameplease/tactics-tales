@@ -37,7 +37,7 @@ end
 function ModLoader:register_mod(path)
     local full_path = "mods/"..path.."/mod.lua"
     ---@type ModSpec
-    local mod_spec = pt.include(full_path)
+    local mod_spec = include(full_path)
 
     -- TODO: validate dependencies
 
@@ -80,7 +80,7 @@ local function load_mod_map(registered, get_path, get_data)
         end),
         lists.filter(fp.not_empty),
         lists.map(function(path)
-            return pt.include(path)
+            return include(path)
         end),
         lists.map(function(spec)
             return get_data(spec)
@@ -112,7 +112,7 @@ local function load_mod_val(registered, get_path, get_data)
         lists.filter(fp.not_empty),
         lists.map(function(path)
             log.debug("Including "..path)
-            return pt.include(path)
+            return include(path)
         end),
         lists.map(function(spec)
             return get_data(spec)
@@ -137,12 +137,12 @@ function ModLoader:create_sandbox()
     for _,r in ipairs(self.registered) do
         log.info("Loading libraries for "..r.id)
         local base_lib_path = "mods/"..r.path.."/lib"
-        local lib_paths = pt.ls(base_lib_path) or {}
+        local lib_paths = ls(base_lib_path) or {}
         log.debug("Found "..#lib_paths.." libraries at "..base_lib_path)
         for _,lib_path in ipairs(lib_paths) do
             local full_path = base_lib_path.."/"..lib_path
             log.debug("Loading "..full_path)
-            local l = pt.include(full_path)
+            local l = include(full_path)
             libs = maps.deep_merge(libs, l)
         end
     end

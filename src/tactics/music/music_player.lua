@@ -22,26 +22,26 @@ end
 ---@param offset integer
 function MusicPlayer:set_music(track, offset)
     self.current_track = track
-    pt.music(track, nil, nil, nil, offset)
+    music(track, nil, nil, nil, offset)
 end
 
 --- Play a new track, saving the current playback position for later resume.
 ---@param track integer
 ---@param offset integer
 function MusicPlayer:push_music(track, offset)
-    self.current_offset = pt.stat(466) or 0
-    pt.music(track, nil, nil, nil, offset)
+    self.current_offset = stat(466) or 0
+    music(track, nil, nil, nil, offset)
 end
 
 --- Resume the previously playing track at its saved offset.
 ---@param fade_time integer
 function MusicPlayer:resume_music(fade_time)
-    pt.music(self.current_track, fade_time, nil, nil, self.current_offset)
+    music(self.current_track, fade_time, nil, nil, self.current_offset)
 end
 
 --- Stop all music.
 function MusicPlayer:clear_music()
-    pt.music(-1, nil, nil, nil, nil)
+    music(-1, nil, nil, nil, nil)
 end
 
 return music_player

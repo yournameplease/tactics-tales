@@ -83,10 +83,10 @@ local function draw_unit(
     -- TODO: these should check objective instead    
     local animated_sprite_point = animated_position + ICON_ANCHOR
 	if unit.tags["hero"] then
-		pt.spr(128, animated_sprite_point.x, animated_sprite_point.y)
+		spr(128, animated_sprite_point.x, animated_sprite_point.y)
 	end
 	if unit.tags["boss"] then
-		pt.spr(129, animated_sprite_point.x, animated_sprite_point.y)
+		spr(129, animated_sprite_point.x, animated_sprite_point.y)
 	end
 end
 
@@ -190,21 +190,21 @@ local function draw_map_decorations(self, layers, z_0, z_1)
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
 
-    -- local y_0 = pt.flr(z_0 / t_y)
-    -- local y_1 = pt.flr(z_1 / t_y)
+    -- local y_0 = flr(z_0 / t_y)
+    -- local y_1 = flr(z_1 / t_y)
     for z=z_0,z_1 do
         --this is kinda dumb
         if z % TILE_HEIGHT == 0 then
-            local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            local y = flr(z / TILE_HEIGHT)
+            map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == HALF_HEIGHT then
-            local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            local y = flr(z / TILE_HEIGHT)
+            map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == 0 then
-            local y = pt.flr(z / TILE_HEIGHT)
-            pt.map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            local y = flr(z / TILE_HEIGHT)
+            map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
     end
 end
@@ -265,16 +265,16 @@ local function draw_tactics_map(
     -- draw ground
     profile("draw_ground")
     
-    pt.map(layer_ground, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    map(layer_ground, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    pt.map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     
-    pt.map(layer_path, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    map(layer_path, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency
     if draw_cursor and cursor_tile ~= nil then
         local c_x = cursor_tile.x * TILE_SIZE.x
         local c_y = cursor_tile.y * TILE_SIZE.y
-        pt.spr(CURSOR_SPRITE, c_x, c_y)
+        spr(CURSOR_SPRITE, c_x, c_y)
     end
     profile("draw_ground")
     profile("draw_map_pre_rows")
@@ -306,14 +306,14 @@ local function draw_tactics_map(
     profile("draw_map_post_rows")
     local layer_ceiling = layers.terrain.ceiling
     if layer_ceiling ~= nil then
-        pt.map(layer_ceiling, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+        map(layer_ceiling, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
 
     if cursor_tile ~= nil then
         local x = cursor_tile.x * TILE_SIZE.x
         local y = cursor_tile.y * TILE_SIZE.y
         if draw_cursor then
-            pt.spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
+            spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
         end
 
         -- if cursor is list_cursor.ListMenuNode<string> then
@@ -338,8 +338,8 @@ local function get_selection_at(
 )
     ---@type MapData
     local data = self.data
-    local tx = pt.flr(lx / TILE_WIDTH)
-    local ty = pt.flr(ly / TILE_HEIGHT)
+    local tx = flr(lx / TILE_WIDTH)
+    local ty = flr(ly / TILE_HEIGHT)
 
     if data.menu_node then
         if tx >= 0 and tx < MAP_WIDTH

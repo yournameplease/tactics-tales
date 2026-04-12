@@ -199,7 +199,7 @@ end
 ---@param slot integer
 function ItemInventory:remove_item(slot)
     local inv_item = self._items_by_slot[slot]
-    pt.del(self.items, inv_item)
+    del(self.items, inv_item)
     self:compute_current_slots()
 end
 

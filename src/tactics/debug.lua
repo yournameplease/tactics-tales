@@ -54,7 +54,7 @@ local function debug_print(level, ...)
             str = str .. tostring(v)
         end
 
-        pt.printh(level .. ": " .. str)
+        printh(level .. ": " .. str)
     end
 end
 

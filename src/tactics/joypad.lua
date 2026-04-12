@@ -57,7 +57,7 @@ InputService.__index = InputService
 --- Read raw mouse state from the Picotron API and compute pressed-this-frame flags.
 ---@return Mouse
 function InputService:get_mouse()
-    local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = pt.get_mouse()
+    local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = get_mouse()
 
     local ml = mouse_b & 0x1 == 0x1
     local mr = mouse_b & 0x2 == 0x2
@@ -96,18 +96,18 @@ function InputService:get_joypad()
     ---@type Joypad
     local joy = {
         -- currently locked to -1, 0, 1 on joysticks
-        dx  = (pt.btn(1) and 1 or 0) - (pt.btn(0) and 1 or 0),
-        dxp = (pt.btnp(1) and 1 or 0) - (pt.btnp(0) and 1 or 0),
-        dy  = (pt.btn(3) and 1 or 0) - (pt.btn(2) and 1 or 0),
-        dyp = (pt.btnp(3) and 1 or 0) - (pt.btnp(2) and 1 or 0),
-        a   = pt.btn(4),
-        ap  = pt.btnp(4),
-        b   = pt.btn(5),
-        bp  = pt.btnp(5),
-        l   = pt.btn(14),
-        lp  = pt.btnp(14),
-        r   = pt.btn(15),
-        rp  = pt.btnp(15),
+        dx  = (btn(1) and 1 or 0) - (btn(0) and 1 or 0),
+        dxp = (btnp(1) and 1 or 0) - (btnp(0) and 1 or 0),
+        dy  = (btn(3) and 1 or 0) - (btn(2) and 1 or 0),
+        dyp = (btnp(3) and 1 or 0) - (btnp(2) and 1 or 0),
+        a   = btn(4),
+        ap  = btnp(4),
+        b   = btn(5),
+        bp  = btnp(5),
+        l   = btn(14),
+        lp  = btnp(14),
+        r   = btn(15),
+        rp  = btnp(15),
     }
     return joy
 end

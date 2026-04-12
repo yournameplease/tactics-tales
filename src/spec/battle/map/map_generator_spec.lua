@@ -7,7 +7,7 @@ local map_generator = require("src.tactics.battle.map.map_generator")
 
 local BASE_METATILE = 0x400
 
---- Build a minimal pt.fetch result with all required layers backed by real
+--- Build a minimal fetch result with all required layers backed by real
 --- MockUserdata of size w×h.  All sprites default to 0.
 ---@param w integer
 ---@param h integer
@@ -22,14 +22,14 @@ local function make_fetch_result(w, h)
     }
 end
 
---- Install a temporary pt.fetch override that returns `result`.
+--- Install a temporary fetch override that returns `result`.
 --- Returns a cleanup function that restores the original.
 ---@param result table
 ---@return fun()
 local function stub_fetch(result)
-    local original = pt.fetch
-    pt.fetch = function(_) return result end
-    return function() pt.fetch = original end
+    local original = fetch
+    fetch = function(_) return result end
+    return function() fetch = original end
 end
 
 -- ---------------------------------------------------------------------------

@@ -13,7 +13,7 @@ local BASE_METATILE = 0x400
 ---@field name string Layer name (e.g. "floor", "metatiles").
 ---@field bmp userdata Sprite data for this layer.
 
---- Convert a raw pt.fetch result into a MapLayers table.
+--- Convert a raw fetch result into a MapLayers table.
 ---@param map_fetch MapFetchResultEntry[] Raw fetch result array.
 ---@return MapLayers
 local function as_map(map_fetch)
@@ -41,7 +41,7 @@ local function apply_checkerboard(map_layers)
     for x = 0, ground:height() - 1 do
         for y = 0, ground:width() - 1 do
             local tile = ground:get(x, y)
-            if x + y & 1 == 0 and pt.fget(tile) & 0x40 == 0x40 then
+            if x + y & 1 == 0 and fget(tile) & 0x40 == 0x40 then
                 ground:set(x, y, tile + 1)
             end
         end
@@ -57,7 +57,7 @@ local function apply_default_walls(map_layers)
     for x = 0, ground:height() - 1 do
         for y = 0, ground:width() - 1 do
             local tile = ground:get(x, y)
-            if pt.fget(tile) & 0x80 == 0x80 then
+            if fget(tile) & 0x80 == 0x80 then
                 if back_wall:get(x, y) == 0 then
                     back_wall:set(x, y, tile + 2)
                 end
@@ -74,7 +74,7 @@ end
 ---@param tile_labels table<string, integer[]> Metatile indices grouped by label name.
 ---@return BattleMap
 local function load_static(definition, tile_labels)
-    local map_fetch = pt.fetch(DATP .. definition.file)
+    local map_fetch = fetch(DATP .. definition.file)
 
     local layers = as_map(map_fetch)
 

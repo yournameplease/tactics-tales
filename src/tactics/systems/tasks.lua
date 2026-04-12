@@ -20,21 +20,21 @@ end
 --- Wrap func in a coroutine and add it to the task list.
 ---@param func function
 function TaskManager:start_routine(func)
-    local co = pt.cocreate(func)
+    local co = cocreate(func)
     table.insert(self.tasks, co)
 end
 
 --- Resume all suspended tasks; remove dead ones. Errors on coroutine failure.
 function TaskManager:update_tasks()
     for _, co in ipairs(self.tasks) do
-        if pt.costatus(co) == "suspended" then
-            local ok, err = pt.coresume(co)
+        if costatus(co) == "suspended" then
+            local ok, err = coresume(co)
             if not ok then
                 log.error("Task Error: " .. err)
                 assert(ok, "An error occurred in a coroutine.  Let the developer know!")
             end
-        elseif pt.costatus(co) == "dead" then
-            pt.del(self.tasks, co)
+        elseif costatus(co) == "dead" then
+            del(self.tasks, co)
         end
     end
 end

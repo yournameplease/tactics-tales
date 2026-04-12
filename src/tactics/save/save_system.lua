@@ -46,15 +46,15 @@ function save_system.save(name, data)
 
 	local path = SAVE_PATH .. name .. ".pod"
 	log.debug("Saving data: ", name, path)
-	pt.store(path, serialized_data, nil)
+	store(path, serialized_data, nil)
 end
 
 --- Return a list of save slot names found on disk.
 ---@return string[]
 function save_system.list_saves()
-	local paths = pt.ls(SAVE_PATH) or {}
+	local paths = ls(SAVE_PATH) or {}
 	return lists.map(function(p)
-		return pt.split(p, '.')[1]
+		return split(p, '.')[1]
 	end)(paths)
 end
 
@@ -64,7 +64,7 @@ end
 function save_system.load(name)
 	local path = SAVE_PATH .. name .. ".pod"
 	log.debug("Loading data: ", name, path)
-	return pt.fetch(path)
+	return fetch(path)
 end
 
 return save_system
