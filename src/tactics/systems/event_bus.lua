@@ -18,8 +18,7 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "TACTICS_UNIT_END_ACTION"
 ---| "TACTICS_UNIT_DEATH"
 ---| "TACTICS_INTERACTION"
----| "BATTLE_END_VICTORY"
----| "BATTLE_END_DEFEAT"
+---| "BATTLE_END"
 ---| "GAME_EXIT_STORY"
 
 ---@class EventCallback

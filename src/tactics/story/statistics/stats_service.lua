@@ -21,7 +21,7 @@ function StatsService:begin_chapter(
         units_lost = {},
         turns_taken = 0,
         battle_id = battle_id,
-        was_victory = false
+        result = "VICTORY"
     }
 end
 
@@ -52,6 +52,7 @@ function StatsService:record_battle_end(data)
     local chapter_results = self:get_chapter(data.chapter)
 
     chapter_results.turns_taken = data.turn_number
+    chapter_results.result = data.result
 end
 
 --- Tear down event listeners.
@@ -82,8 +83,8 @@ function stats_service.new(event_bus)
     self.event_listener:on("TACTICS_UNIT_DEATH", function(data)
         self:record_death(data)
     end)
-    self.event_listener:on("BATTLE_END_VICTORY", function(data)
-        self:record_death(data)
+    self.event_listener:on("BATTLE_END", function(data)
+        self:record_battle_end(data)
     end)
 
     return self

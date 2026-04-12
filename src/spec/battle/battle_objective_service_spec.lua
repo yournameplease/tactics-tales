@@ -61,10 +61,10 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_false(result.finished)
-            luassert.is_nil(result.command)
+            luassert.is_nil(result.result)
         end)
 
-        it("returns BATTLE_END_VICTORY when the victory condition triggers", function()
+        it("returns VICTORY when the victory condition triggers", function()
             local map = make_map({}, {})   -- no living units → rout succeeds
             local svc = make_service(map, nil,
                 { { type = "rout", text = "Rout" } },
@@ -72,10 +72,10 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_VICTORY", result.command)
+            luassert.are_equal("VICTORY", result.result)
         end)
 
-        it("returns BATTLE_END_DEFEAT when a failure condition triggers", function()
+        it("returns DEFEAT when a failure condition triggers", function()
             local map = make_map({}, {})  -- no living players → all_players_die triggers
             local svc = make_service(map, nil,
                 {},
@@ -83,7 +83,7 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_DEFEAT", result.command)
+            luassert.are_equal("DEFEAT", result.result)
         end)
 
         it("failure is checked before victory — defeat wins when both trigger", function()
@@ -95,7 +95,7 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_DEFEAT", result.command)
+            luassert.are_equal("DEFEAT", result.result)
         end)
 
         it("turn limit exceeded triggers TurnLimit failure condition", function()
@@ -109,7 +109,7 @@ describe("tactics.battle.battle_objective_service", function()
             -- turn 6 exceeds the limit
             local result = svc:check_objectives(6)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_DEFEAT", result.command)
+            luassert.are_equal("DEFEAT", result.result)
         end)
 
         it("turn limit exceeded triggers Survive victory condition", function()
@@ -121,7 +121,7 @@ describe("tactics.battle.battle_objective_service", function()
             luassert.is_false(svc:check_objectives(5).finished)
             local result = svc:check_objectives(6)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_VICTORY", result.command)
+            luassert.are_equal("VICTORY", result.result)
         end)
 
         it("defeat_tagged triggers when no tagged enemies remain", function()
@@ -133,7 +133,7 @@ describe("tactics.battle.battle_objective_service", function()
             -- enemy without "boss" tag → tagged enemies = 0 → victory triggers
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_VICTORY", result.command)
+            luassert.are_equal("VICTORY", result.result)
         end)
 
         it("defeat_tagged does not trigger while tagged enemies remain", function()
@@ -153,7 +153,7 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_DEFEAT", result.command)
+            luassert.are_equal("DEFEAT", result.result)
         end)
 
         it("escape triggers when no player units remain on the map", function()
@@ -164,7 +164,7 @@ describe("tactics.battle.battle_objective_service", function()
             )
             local result = svc:check_objectives(1)
             luassert.is_true(result.finished)
-            luassert.are_equal("BATTLE_END_VICTORY", result.command)
+            luassert.are_equal("VICTORY", result.result)
         end)
 
     end)

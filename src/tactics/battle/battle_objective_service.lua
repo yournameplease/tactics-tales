@@ -8,7 +8,7 @@ local lists = require("src.tactics.util.lists")
 
 ---@class BattleFinishState
 ---@field finished boolean Whether the battle has ended.
----@field command string|nil Game event to emit on finish; nil when battle continues.
+---@field result BattleEndResult|nil Game event to emit on finish; nil when battle continues.
 local BattleFinishState = {}
 
 ---@class BattleObjectiveService Abstract interface for checking and displaying battle objectives.
@@ -19,10 +19,7 @@ local BattleFinishState = {}
 local BattleObjectiveService = {}
 BattleObjectiveService.__index = BattleObjectiveService
 
-local battle_objective_service = {
-    BattleObjectiveService = BattleObjectiveService,
-    BattleFinishState = BattleFinishState,
-}
+local battle_objective_service = {}
 
 --- Create a new BattleObjectiveService with the given map, turn limit, and objective definitions.
 ---@param map table BattleMap — the current battle map used to inspect unit positions and deaths.
@@ -54,12 +51,12 @@ function BattleObjectiveService:check_objectives(turn_number)
 
     for _, f in ipairs(self.failure_conditions) do
         if f:check(self.battle_map, turn_limit_exceeded) then
-            return { finished = true, command = "BATTLE_END_DEFEAT" }
+            return { finished = true, result = "DEFEAT" }
         end
     end
     for _, v in ipairs(self.victory_conditions) do
         if v:check(self.battle_map, turn_limit_exceeded) then
-            return { finished = true, command = "BATTLE_END_VICTORY" }
+            return { finished = true, result = "VICTORY" }
         end
     end
 

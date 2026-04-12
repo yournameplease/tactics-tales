@@ -367,11 +367,12 @@ function story.new(save_name, story_id, game_data, task_manager, animation_manag
     self.ui_context = ui_context
     self.ui_context:register_ui_context(story_ui_ctx)
 
-    self.event_listener:on("BATTLE_END_VICTORY", function()
-        self:handle_battle_victory()
-    end)
-    self.event_listener:on("BATTLE_END_DEFEAT", function()
-        self:handle_battle_defeat()
+    self.event_listener:on("BATTLE_END", function(payload)
+        if payload.result == "VICTORY" then
+            self:handle_battle_victory()
+        else
+            self:handle_battle_defeat()
+        end
     end)
 
     self:jump_to_node(self.story_definition.starting_node)

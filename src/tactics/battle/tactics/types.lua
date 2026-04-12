@@ -7,8 +7,13 @@
 ---@field chapter integer Story chapter number in which this death occurred.
 ---@field turn_number integer Battle turn on which this death occurred.
 
+---@alias BattleEndResult
+---| "VICTORY"
+---| "DEFEAT"
+
 ---@class BattleEndPayload
 ---@field chapter integer Story chapter number in which this battle ended.
 ---@field turn_number integer Battle turn on which the battle ended.
+---@field result BattleEndResult Whether the battle was a victory or defeat.
 
 return {}
