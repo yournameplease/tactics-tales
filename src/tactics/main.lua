@@ -22,6 +22,14 @@ local ui_context_manager = require("src.tactics.ui.ui_context_manager")
 local input_service = require("src.tactics.joypad")
 local input_context = require("src.tactics.input.input_context")
 
+function todo(message)
+	error("Function is not implemented!"..(message and " "..message or ""))
+end
+
+function unexpected(state)
+	error("Received an unexpected state: "..(state and state or "nil"))
+end
+
 require("profiler")
 
 ---@type UserInput
