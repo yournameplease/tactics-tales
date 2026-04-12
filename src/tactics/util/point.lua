@@ -8,6 +8,8 @@
 ---@operator sub(Point): Point
 ---@operator mul(Point|number): Point
 ---@operator unm: Point
+local Point = {}
+Point.__index = Point
 
 ---@class PointRecord
 ---@field x integer
@@ -17,39 +19,36 @@ local point = {}
 
 local point_of  -- forward declaration
 
-local point_mt = {
-    __eq = function(a, b)
-        return a.x == b.x and a.y == b.y
-    end,
-    __lt = function(a, b)
-        return a.y < b.y or (a.y == b.y and a.x < b.x)
-    end,
-    __le = function(a, b)
-        return a.y < b.y or (a.y == b.y and a.x <= b.x)
-    end,
-    __add = function(a, b)
-        return point_of(a.x + b.x, a.y + b.y)
-    end,
-    __sub = function(a, b)
-        return point_of(a.x - b.x, a.y - b.y)
-    end,
-    __mul = function(a, b)
-        if type(a) == "number" then
-            return point_of(math.floor(a * b.x), math.floor(a * b.y))
-        end
-        if type(b) == "number" then
-            return point_of(math.floor(a.x * b), math.floor(a.y * b))
-        end
-        return point_of(a.x * b.x, a.y * b.y)
-    end,
-    __unm = function(p)
-        return point_of(-p.x, -p.y)
-    end,
-    __tostring = function(p)
-        return "(" .. p.x .. "," .. p.y .. ")"
-    end,
-}
-point_mt.__index = point_mt
+Point.__eq = function(a, b)
+    return a.x == b.x and a.y == b.y
+end
+Point.__lt = function(a, b)
+    return a.y < b.y or (a.y == b.y and a.x < b.x)
+end
+Point.__le = function(a, b)
+    return a.y < b.y or (a.y == b.y and a.x <= b.x)
+end
+Point.__add = function(a, b)
+    return point_of(a.x + b.x, a.y + b.y)
+end
+Point.__sub = function(a, b)
+    return point_of(a.x - b.x, a.y - b.y)
+end
+Point.__mul = function(a, b)
+    if type(a) == "number" then
+        return point_of(math.floor(a * b.x), math.floor(a * b.y))
+    end
+    if type(b) == "number" then
+        return point_of(math.floor(a.x * b), math.floor(a.y * b))
+    end
+    return point_of(a.x * b.x, a.y * b.y)
+end
+Point.__unm = function(p)
+    return point_of(-p.x, -p.y)
+end
+Point.__tostring = function(p)
+    return "(" .. p.x .. "," .. p.y .. ")"
+end
 
 --- Construct a Point from integer coordinates.
 ---@param x integer
@@ -58,7 +57,7 @@ point_mt.__index = point_mt
 function point.of(x, y)
     assert(x ~= nil)
     assert(y ~= nil)
-    return setmetatable({ x = x, y = y }, point_mt)
+    return setmetatable({ x = x, y = y }, Point)
 end
 
 point_of = point.of
@@ -82,8 +81,8 @@ end
 
 --- Return a new Point with the same coordinates.
 ---@return Point
-function point_mt:copy()
-    return setmetatable({ x = self.x, y = self.y }, point_mt)
+function Point:copy()
+    return setmetatable({ x = self.x, y = self.y }, Point)
 end
 
 --- Return the Manhattan (L1) distance between two points.
