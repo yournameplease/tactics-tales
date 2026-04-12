@@ -5,14 +5,10 @@
 require("profiler")
 
 ---@class ConfigManager
----@field config DynamicConfig Merged view of user and default config.
+---@field package config DynamicConfig Merged view of user and default config.
+---@field package user_config DynamicConfig Overrides stored by the user.
 local ConfigManager = {}
 ConfigManager.__index = ConfigManager
-
----@class ConfigManagerImpl : ConfigManager
----@field user_config DynamicConfig Overrides stored by the user.
-local ConfigManagerImpl = {}
-ConfigManagerImpl.__index = ConfigManagerImpl
 
 local DEFAULT_CONFIG = {
 	log_level = "DEBUG",
@@ -28,7 +24,7 @@ local config_manager = {}
 
 --- Persist new config to disk and apply profiler settings.
 ---@param new_config DynamicConfig
-function ConfigManagerImpl:store_config(new_config)
+function ConfigManager:store_config(new_config)
 	self.user_config = new_config
 	pt.store("/appdata/tactics_tales/config.pod", new_config, nil)
 
@@ -37,7 +33,7 @@ function ConfigManagerImpl:store_config(new_config)
 end
 
 --- Reset config to defaults by storing an empty override table.
-function ConfigManagerImpl:reset_config()
+function ConfigManager:reset_config()
 	self:store_config({})
 end
 
@@ -51,8 +47,8 @@ function config_manager.new()
 		user_config = {}
 	end
 
-	---@type ConfigManagerImpl
-	local self = setmetatable({}, ConfigManagerImpl)
+	---@type ConfigManager
+	local self = setmetatable({}, ConfigManager)
 
 	self.user_config = user_config
 	DYNAMIC_CONFIG = setmetatable({}, {
