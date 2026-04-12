@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-02-01 22:42:59",revision=107,xstickers={}]]
+--[[pod_format="raw",created="2025-11-14 23:50:30",modified="2026-04-12 15:11:49",revision=108,xstickers={}]]
 -- tactics game
 -- ynp
 -- template based on abledbody's https://github.com/abledbody/picotron-external-template
@@ -19,7 +19,7 @@ end
 DATP = ""
 	--DATP = "tactics.p64/"
 --if not fetch "build/main.lua" then
-	cp("/desktop/projects/tactics/build/tactics", "build/tactics")
+	cp("/desktop/projects/tactics/src/tactics", "src/tactics")
 	cp("/desktop/projects/tactics/lib", "lib")
  	cp("/desktop/projects/tactics/mods", "mods")
 	--DATP = "tactics.p64/"
@@ -29,7 +29,7 @@ pt = include "lib/picotron.lua"
 
 include "lib/profiler.lua"
 
-include "build/tactics/main.lua"
+include "src/tactics/main.lua"
 
 include "lib/error_explorer.lua"
 
