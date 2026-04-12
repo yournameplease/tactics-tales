@@ -2,9 +2,6 @@
 --- The main UI manager, responsible for calculating layouts and drawing
 --- the current UI based on the active layout and context.
 
-require("src.tactics.config")
-require("profiler")
-
 local maps = require("src.tactics.util.maps")
 local draw_target_manager = require("src.tactics.draw.draw_target_manager")
 local box = require("src.tactics.ui.box")
