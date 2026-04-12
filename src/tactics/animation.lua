@@ -3,7 +3,6 @@
 --- animations for characters.
 
 local point = require("src.tactics.util.point")
-local Point = point.Point
 local lists = require("src.tactics.util.lists")
 require("src.tactics.character.animation_data")
 
