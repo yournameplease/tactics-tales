@@ -129,7 +129,7 @@ end
 ---@param p Point Target point to face toward.
 ---@param hard boolean When false, keep current vertical facing when moving horizontally.
 function Facing:face_point(p, hard)
-    local angle = math.atan(p.y, p.x)
+    local angle = atan2(p.y, p.x)
 
     if math.abs(angle) < 0.25 then
         self.horizontal = "right"

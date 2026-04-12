@@ -67,8 +67,8 @@ point_of = point.of
 ---@param scale number Radial distance (magnitude).
 ---@return Point
 function point.of_angle(angle, scale)
-    local x = math.floor(scale * math.cos(angle) + 0.5)
-    local y = math.floor(scale * math.sin(angle) + 0.5)
+    local x = math.floor(scale * cos(angle) + 0.5)
+    local y = math.floor(scale * sin(angle) + 0.5)
     return point.of(x, y)
 end
 
