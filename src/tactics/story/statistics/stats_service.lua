@@ -86,6 +86,9 @@ function stats_service.new(event_bus)
     self.event_listener:on("BATTLE_END", function(data)
         self:record_battle_end(data)
     end)
+    self.event_listener:on("TACTICS_BEGIN_BATTLE", function(data)
+        self:begin_chapter(data.chapter, data.battle_id)
+    end)
 
     return self
 end
