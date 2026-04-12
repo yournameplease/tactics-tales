@@ -22,10 +22,10 @@ DrawTargetManager.__index = DrawTargetManager
 function DrawTargetManager:apply_current_target()
     if self.current_target ~= nil then
         set_draw_target(self.current_target.ud)
-        set_camera(self.current_target.camera_x, self.current_target.camera_y)
+        camera(self.current_target.camera_x, self.current_target.camera_y)
     else
         set_draw_target()
-        reset_camera()
+        camera()
     end
 end
 
@@ -72,7 +72,7 @@ function DrawTargetManager:draw(x, y)
     assert(self.current_target ~= nil)
     local prev_target = self.current_target
     ---@cast prev_target DrawTargetEntry
-    self.current_target = pop(self.targets)
+    self.current_target = table.remove(self.targets)
     self:apply_current_target()
 
     -- sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)
@@ -89,7 +89,7 @@ function DrawTargetManager:pop_sprite()
     assert(self.current_target ~= nil)
     local prev_target = self.current_target
     ---@cast prev_target DrawTargetEntry
-    self.current_target = pop(self.targets)
+    self.current_target = table.remove(self.targets)
     self:apply_current_target()
     return prev_target.ud
 end

@@ -168,15 +168,15 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
     profile("character_renderer_set_palette")
 
     local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
-    set_pal(COLOR_SIDE_1, side_palette[1])
-    set_pal(COLOR_SIDE_2, side_palette[2])
-    set_pal(COLOR_SIDE_3, side_palette[3])
+    pal(COLOR_SIDE_1, side_palette[1])
+    pal(COLOR_SIDE_2, side_palette[2])
+    pal(COLOR_SIDE_3, side_palette[3])
     local appearance = drawable_unit.character:get_appearance()
     local skin = appearance.skin
-    set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
-    set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
-    set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
-    set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+  pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
+  pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
+  pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+    pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
 
     if draw_outline then
         -- local outline_color = side_palette[1]
@@ -184,9 +184,9 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
         if drawable_unit.side == "player" and not drawable_unit.has_acted then
             outline_color = 7
         end
-        set_pal(COLOR_OUTLINE, outline_color)
+        pal(COLOR_OUTLINE, outline_color)
     else
-        set_palt(COLOR_OUTLINE, true)
+        palt(COLOR_OUTLINE, true)
     end
 
     --eyes
@@ -198,24 +198,24 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
             if look_direction == "left" and drawable_unit.facing.horizontal == "left"
                 or look_direction == "right" and (drawable_unit.facing.horizontal == "right" or drawable_unit.facing.horizontal == nil)
             then
-                set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-                set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-                set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
-                set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
+                pal(COLOR_EYE_L_INNER, COLOR_EYE)
+                pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+                pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
+                pal(COLOR_EYE_R_OUTER, COLOR_EYE)
             else
-                set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
-                set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
-                set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-                set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+                pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
+                pal(COLOR_EYE_L_OUTER, COLOR_EYE)
+                pal(COLOR_EYE_R_INNER, COLOR_EYE)
+                pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
             end
         else
-            set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-            set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-            set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-            set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+            pal(COLOR_EYE_L_INNER, COLOR_EYE)
+            pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+            pal(COLOR_EYE_R_INNER, COLOR_EYE)
+            pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
         end
     end
-    profile("character_renderer_set_palette")
+    profile("character_renderer_palette")
 end
 
 --- Assemble and draw a multi-part character sprite using skeletal animation.
@@ -408,7 +408,7 @@ function character_renderer.draw(
     spr(sprite, sprite_draw_point.x, sprite_draw_point.y, flip_h)
 
     if set_pal then
-        reset_pal()
+        pal()
     end
     -- profile("draw_character")
 end
@@ -462,7 +462,7 @@ function character_renderer.draw_health_bar(unit, draw_point, set_pal, apply_ani
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
-        reset_pal()
+        pal()
     end
 end
 

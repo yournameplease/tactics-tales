@@ -57,7 +57,7 @@ InputService.__index = InputService
 --- Read raw mouse state from the Picotron API and compute pressed-this-frame flags.
 ---@return Mouse
 function InputService:get_mouse()
-    local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = get_mouse()
+    local mouse_x, mouse_y, mouse_b, wheel_x, wheel_y = mouse()
 
     local ml = mouse_b & 0x1 == 0x1
     local mr = mouse_b & 0x2 == 0x2
