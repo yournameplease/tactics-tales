@@ -8,7 +8,7 @@ local dialogue_node = {}
 
 --- Build a multi-dialogue element that displays one or more dialogue lines.
 ---@param dialogue ActiveDialogue
----@param text_info TextInfo
+---@param text_info TextInfoOptions
 ---@return UIElement
 function dialogue_node.multi_line(dialogue, text_info)
     text_info.draw_properties = text_info.draw_properties or {}
@@ -34,7 +34,7 @@ end
 
 --- Build a dialogue element that reveals one dialogue line at a time.
 ---@param dialogue ActiveDialogue
----@param text_info TextInfo
+---@param text_info TextInfoOptions
 ---@return UIElement
 function dialogue_node.single_line(dialogue, text_info)
     text_info.draw_properties = text_info.draw_properties or {}

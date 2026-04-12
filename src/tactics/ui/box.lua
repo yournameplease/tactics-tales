@@ -391,8 +391,23 @@ function UIBuilder:child_generator(child_generator)
     return self
 end
 
+---@class ModalInfoOptions
+---@field current_key? fun(ctx: UIContextManager): any
+---@field compute? fun(ctx: UIContextManager): UIElement, Anchor
+---@field priorities? CardinalDirection[]
+---@field anchor_margin? integer
+---@field screen_padding? integer
+---@field screen_x? number
+---@field screen_y? number
+---@field screen_w? number
+---@field screen_h? number
+---@field last_key? any
+---@field active? boolean
+---@field anchor? Anchor
+---@field anchor_node? UIElement Cached anchor node to avoid repeated tree searches.
+
 --- Configure modal positioning for the element.
----@param modal ModalInfo
+---@param modal ModalInfoOptions
 ---@return UIBuilder
 function UIBuilder:modal(modal)
     self.def.modal = modal
