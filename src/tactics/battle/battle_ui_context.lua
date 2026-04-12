@@ -32,6 +32,24 @@ local battle_ui_context = {
     BattleUIContext = BattleUIContext
 }
 
+-- TODO: duplicated with battle_map
+---Whether one side can attack the other
+---@param side_1 Side
+---@param side_2 Side
+---@return boolean
+function sides_can_fight(side_1, side_2)
+    if side_1 == side_2 then
+        return false
+    end
+    if side_1 == "player" and side_2 == "neutral" then
+        return false
+    end
+    if side_2 == "player" and side_1 == "neutral" then
+        return false
+    end
+    return true
+end
+
 --- Create a new BattleUIContext wiring together the battle subsystems.
 ---@param map BattleMap
 ---@param battle_menu_manager BattleMenuManager
@@ -115,7 +133,7 @@ function BattleUIContext:enrich()
             self.hovered_unit = unit
             local targeting = self.acting_unit.character:get_weapon_targeting()
             if unit
-                and unit.side ~= acting_unit.side
+                and sides_can_fight(unit.side, acting_unit.side)
                 and targeting.is_target_valid(self.acting_unit.tile, self.hovered_unit.tile, self.battle_map) then
                 self.layout = "COMBAT_PREVIEW"
                 self.last_hovered_unit = unit

@@ -85,7 +85,7 @@ local function validate_tile_is_in_unit_attack_range(map, unit, unit_position, t
     local targeting = unit.character:get_weapon_targeting()
     local target_unit = map:get_at_tile(target_point)
     if target_unit == nil then return false end
-    if target_unit.side == unit.side then return false end
+    if target_unit.side ~= "enemy" then return false end
     return targeting.is_target_valid(unit_position, target_point, map)
 end
 
