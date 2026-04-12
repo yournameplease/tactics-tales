@@ -133,7 +133,7 @@ local function to_tile_path(path)
 end
 
 --- Enqueue a dialogue line to be spoken by `unit`.
----@param unit battle_unit.BattleUnit
+---@param unit BattleUnit
 ---@param text string[]
 function TacticsEngine:start_dialogue(unit, text)
     table.insert(self.dialogue_queue, {
@@ -227,11 +227,13 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
 
                 local character_source = spawn_data.character_source
                 if character_source.type == "template" then
+                    ---@cast character_source CharacterTemplateSource
                     unit_character = char_man:generate_character(character_source.template, {})
                     if spawn_data.side == "player" then
                         char_man:persist_player(unit_character)
                     end
                 elseif character_source.type == "player_roster" then
+                    ---@cast character_source PlayerRosterSource
                     if player_roster[roster_count] ~= nil then
                         unit_character = player_roster[roster_count]
                         roster_count = roster_count + 1
