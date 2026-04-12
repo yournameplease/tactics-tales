@@ -60,18 +60,6 @@ local function story_text_page(node: rendered_story_node.Text): box.UIElement
     )
 end
 
--- local function chapter_results_page(node: rendered_story_node.ChapterResults): box.UIElement
---     return dialogue_node.multi_line(
---         node.text,
---     	{
---     	    draw_properties = {
---         		wrap = "wrap",
---         		justify = "left",
---         	}
---     	}
---     )
--- end
-
 local function compute_children(state: UIContextManager): {box.UIElement}
     -- why is cast needed?
     local rendered_page = state.story_context.story_page
