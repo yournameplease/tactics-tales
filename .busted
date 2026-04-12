@@ -1,7 +1,7 @@
 local cd = require"lfs".currentdir()
 return {
    default = {
-      lpath = cd .. "/build/?.lua;"..cd .. "/lib/?.lua;".. cd .. "/mods/?.lua;" .. cd .. "/build/?/init.lua;./?.lua;./?/init.lua;",
+      lpath = cd .. "/src/?.lua;"..cd .. "/lib/?.lua;".. cd .. "/mods/?.lua;" .. cd .. "/src/?/init.lua;./?.lua;./?/init.lua;",
       helper = "busted_setup.lua"
    }
 }
