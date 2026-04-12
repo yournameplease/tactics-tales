@@ -2,9 +2,6 @@
 --- The UI panel responsible for rendering the entire battle map,
 --- including tiles, units, and cursors.
 
-require("profiler")
-require("src.tactics.config")
-
 local box = require("src.tactics.ui.box")
 local lists = require("src.tactics.util.lists")
 local point = require("src.tactics.util.point")

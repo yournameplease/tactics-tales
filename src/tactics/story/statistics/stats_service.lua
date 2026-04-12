@@ -55,7 +55,16 @@ local stats_service = {}
 ---@return StatsService
 function stats_service.new(event_bus)
     ---@type StatsService
-    local self = setmetatable({}, StatsService)
+    local self = setmetatable({
+    }, StatsService)
+
+    self.story_results = {
+        statistics = {
+            turns_taken = 0,
+            units_lost = 0,
+        },
+        chapter_results = {},
+    }
 
     self.event_listener = event_listener.new(event_bus)
 
