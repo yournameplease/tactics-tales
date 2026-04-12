@@ -119,6 +119,7 @@ function battle_manager.new(
     )
 
     self.turn_manager = turn_manager.new(
+        chapter,
         self.battle_map,
         self.tactics_engine,
         self.battle_objective_service,

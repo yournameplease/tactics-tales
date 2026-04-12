@@ -27,6 +27,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field rendered_node RenderedStoryNode
 
 ---@class Story
+---@field package battle_count integer
 ---@field package story_definition StoryDefinition
 ---@field package game_data GameData
 ---@field package idle_animation AnimatedSpriteData
@@ -113,8 +114,10 @@ function Story:handle_new_node()
         self.story_page:add_text_line(self.active_dialogue)
     elseif node_definition.type == 'battle' then
         self.story_page:clear_page()
+        self.battle_count = self.battle_count + 1
         local battle_id = node_definition.battle_id
         self.battle_manager = battle_manager.new(
+            self.battle_count,
             battle_id,
             self.game_data,
             self.character_manager,
@@ -325,6 +328,7 @@ function story.new(save_name, story_id, game_data, task_manager, animation_manag
 
     ---@type Story
     local self = setmetatable({}, Story)
+    self.battle_count = 0
     self.story_id = story_id
     self.save_name = save_name
 
@@ -387,6 +391,8 @@ end
 function story.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context)
     local save_data = save_system.load(save_name)
     assert(save_data, "File failed to load!")
+
+    --TODO: battle count
 
     local self = story.new(
         save_name,
