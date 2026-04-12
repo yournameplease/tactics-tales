@@ -145,8 +145,8 @@ function PathAnimationInstance:get_animation_facing(_global_frame)
     end
 
     local d = next_point.point - prev_point.point
-    local angle = pt.atan2(d.x, d.y)
-    if pt.absf(angle) <= 0.125 then
+    local angle = atan2(d.x, d.y)
+    if absf(angle) <= 0.125 then
         return "right"
     elseif angle > 0.125 and angle < 0.375 then
         return "up"
@@ -317,7 +317,7 @@ function AnimationManager:tick()
         if not self.active_animations[i].playing then
             log.debug("Ending animation")
             self.active_animations[i].animated_object.playing = false
-            pt.deli(self.active_animations, i)
+            deli(self.active_animations, i)
         else
             i = i + 1
         end
@@ -345,7 +345,7 @@ function AnimationManager:create_idle_animation()
         playing = true
     }
     
-    pt.add(self.active_animations, instance)
+    add(self.active_animations, instance)
     setmetatable(instance, GlobalAnimationInstance)
 
     return instance.animated_object
@@ -369,7 +369,7 @@ function AnimationManager:create_animation(animation_id, direction)
         animated_object = { playing = true }
     }
 
-    pt.add(self.active_animations, animation_data)
+    add(self.active_animations, animation_data)
     setmetatable(animation_data, DirectionalOffsetAnimationInstance )
 
     return animation_data.animated_object
@@ -420,7 +420,7 @@ function AnimationManager:create_walk_animation(
         animated_object = { playing = true },
         playing = true
     }
-    pt.add(self.active_animations, instance)
+    add(self.active_animations, instance)
     setmetatable(instance, PathAnimationInstance)
 
     return instance.animated_object

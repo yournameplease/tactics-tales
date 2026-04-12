@@ -43,7 +43,7 @@ local game_manager
 local bus
 
 function _init()
-    pt.mkdir("/appdata/tactics_tales/saves")
+    mkdir("/appdata/tactics_tales/saves")
     
     input = input_service.new()
     task_manager = tasks.task_manager()
@@ -104,7 +104,7 @@ end
 function _draw()
     if user_input.method_changed then
         if user_input.active_method == "joypad" then
-            pt.set_window_attributes({hide_cursor = "until_move"})
+            set_window_attributes({hide_cursor = "until_move"})
         elseif user_input.active_method == "mouse" then
         end
     end

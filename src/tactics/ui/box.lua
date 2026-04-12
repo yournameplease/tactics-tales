@@ -701,12 +701,12 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
     local h = self.rect.c_h
     local pad = self.style.decoration_padding
     if pad ~= 0 then
-        pt.rectfill(x,           y + pad - 1, x + pad - 1,     y + h - 1,         color_sw)
-        pt.rectfill(x,           y + h - 1,   x + w - 1,       y + h - 1,         color_sw)
-        pt.rectfill(x,           y,           x + w - 1,       y + pad - 1,       color_ne)
-        pt.rectfill(x + w - pad, y,           x + w - 1,       y + h - 1 - pad,   color_ne)
+        rectfill(x,           y + pad - 1, x + pad - 1,     y + h - 1,         color_sw)
+        rectfill(x,           y + h - 1,   x + w - 1,       y + h - 1,         color_sw)
+        rectfill(x,           y,           x + w - 1,       y + pad - 1,       color_ne)
+        rectfill(x + w - pad, y,           x + w - 1,       y + h - 1 - pad,   color_ne)
     end
-    pt.rectfill(x + pad, y + pad, x + w - 1 - pad, y + h - 1 - pad, color_interior)
+    rectfill(x + pad, y + pad, x + w - 1 - pad, y + h - 1 - pad, color_interior)
 end
 
 ---@param color_ne Color
@@ -725,9 +725,9 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
                 local child = self.children[i]
                 local c_y = child.rect.c_y
                 local gap_h = self.layout.gap
-                pt.rectfill(x, c_y - gap_h + pad,     x + w - 1, c_y - pad,             color_interior)
-                pt.rectfill(x, c_y - gap_h,           x + w - 1, c_y - gap_h + pad - 1, color_sw)
-                pt.rectfill(x, c_y - pad + 1,         x + w - 1, c_y,                   color_ne)
+                rectfill(x, c_y - gap_h + pad,     x + w - 1, c_y - pad,             color_interior)
+                rectfill(x, c_y - gap_h,           x + w - 1, c_y - gap_h + pad - 1, color_sw)
+                rectfill(x, c_y - pad + 1,         x + w - 1, c_y,                   color_ne)
             elseif self.layout.dir == "row" then
                 local prev_child = self.children[i]
                 local next_child = self.children[i]
@@ -737,9 +737,9 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
                 local h_prev = prev_child.rect.h
                 local y_next = next_child.rect.c_y
                 local h_next = next_child.rect.h
-                pt.rectfill(c_x - gap_w + pad, y,      c_x - pad,             y + h - 1,          color_interior)
-                pt.rectfill(c_x - gap_w,       y_prev, c_x - gap_w + pad - 1, h_prev + h_prev - 1, color_sw)
-                pt.rectfill(c_x - pad + 1,     y_next, c_x,                   y_next + h_next - 1, color_ne)
+                rectfill(c_x - gap_w + pad, y,      c_x - pad,             y + h - 1,          color_interior)
+                rectfill(c_x - gap_w,       y_prev, c_x - gap_w + pad - 1, h_prev + h_prev - 1, color_sw)
+                rectfill(c_x - pad + 1,     y_next, c_x,                   y_next + h_next - 1, color_ne)
             end
         end
     end
@@ -764,12 +764,12 @@ function Box:draw_border(ui_theme)
     local w = self.rect.c_w + 2 * d_pad
     local h = self.rect.c_h + 2 * d_pad
     local r = math.max(0, d_pad - 1)
-    pt.rrect(x, y, w, h, r, ui_theme.COLOR_PAGE_DECOR)
+    rrect(x, y, w, h, r, ui_theme.COLOR_PAGE_DECOR)
 end
 
 ---@param ui_theme UITheme
 function Box:draw_solid(ui_theme)
-    pt.rrectfill(self.rect.x, self.rect.y, self.rect.w, self.rect.h, 0, ui_theme.COLOR_INTERIOR)
+    rrectfill(self.rect.x, self.rect.y, self.rect.w, self.rect.h, 0, ui_theme.COLOR_INTERIOR)
 end
 
 --- Draw the background decoration for this element.
@@ -1062,7 +1062,7 @@ function Box:draw(state, draw_target_manager, ui_theme)
     end
 
     if self.sprite and self.sprite.s then
-        pt.spr(
+        spr(
             self.sprite.s,
             self.rect.c_x + self.sprite.ox,
             self.rect.c_y + self.sprite.oy
@@ -1071,8 +1071,8 @@ function Box:draw(state, draw_target_manager, ui_theme)
 
     if DYNAMIC_CONFIG.draw_flexbox_debug then
         local color = colors.rainbow(self.rect.depth - 1)
-        pt.rrect(self.rect.x,   self.rect.y,   self.rect.w,   self.rect.h,   0, color[2])
-        pt.rrect(self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h, 0, color[1])
+        rrect(self.rect.x,   self.rect.y,   self.rect.w,   self.rect.h,   0, color[2])
+        rrect(self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h, 0, color[1])
     end
 
     for _, child in ipairs(self.children) do

@@ -110,7 +110,7 @@ end
 function UIManager:draw(ui_ctx)
     local root = self.current_layout.root
     profile("ui_manager_draw")
-    pt.cls(self.theme.COLOR_CLEAR)
+    cls(self.theme.COLOR_CLEAR)
     root:draw(ui_ctx, self.draw_target_manager, self.theme)
     if self.current_layout.modals then
         for _, modal in ipairs(self.current_layout.modals) do

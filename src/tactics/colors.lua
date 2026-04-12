@@ -46,9 +46,9 @@ function colors.apply_colortable_row(row_id)
     local address = 0x8000 + color_row * 64
     for x = 0, 63 do
         local c = sprite:get(x, color_row)
-        pt.poke(address + x, c)
+        poke(address + x, c)
     end
-    pt.poke(0x550b, 0x3f)
+    poke(0x550b, 0x3f)
 end
 
 local palette_sprite = 2
@@ -66,7 +66,7 @@ function colors.apply_palette(palette_id)
     local sprite = get_spr(palette_sprite)
     for y = 1, 63 do
         local c = sprite:get(color_col, y)
-        pt.set_pal(y, c)
+        set_pal(y, c)
     end
 end
 

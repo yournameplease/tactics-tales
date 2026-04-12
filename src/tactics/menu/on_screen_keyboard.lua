@@ -21,9 +21,9 @@ local LAYOUT_UPPER = {
     {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
 }
 local LAYOUT_SYMBOL = {
-    {pt.chr(143), pt.chr(149), pt.chr(131), pt.chr(144), pt.chr(146), pt.chr(151), pt.chr(147), pt.chr(135), pt.chr(141), pt.chr(142)},
-    {pt.chr(127), pt.chr(145), pt.chr(130), pt.chr(132), pt.chr(133), pt.chr(134), pt.chr(136), pt.chr(137), pt.chr(138), " "},
-    {pt.chr(152), pt.chr(150), pt.chr(129), pt.chr(148), pt.chr(128), pt.chr(140), pt.chr(139), " ", " ", " "},
+    {chr(143), chr(149), chr(131), chr(144), chr(146), chr(151), chr(147), chr(135), chr(141), chr(142)},
+    {chr(127), chr(145), chr(130), chr(132), chr(133), chr(134), chr(136), chr(137), chr(138), " "},
+    {chr(152), chr(150), chr(129), chr(148), chr(128), chr(140), chr(139), " ", " ", " "},
     {"`", "~", "-", "_", "+", "=", " ", " ", " ", " "},
 }
 

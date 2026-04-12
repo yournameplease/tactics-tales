@@ -168,15 +168,15 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
     profile("character_renderer_set_palette")
 
     local side_palette = PALETTE_BY_SIDE[drawable_unit.side]
-    pt.set_pal(COLOR_SIDE_1, side_palette[1])
-    pt.set_pal(COLOR_SIDE_2, side_palette[2])
-    pt.set_pal(COLOR_SIDE_3, side_palette[3])
+    set_pal(COLOR_SIDE_1, side_palette[1])
+    set_pal(COLOR_SIDE_2, side_palette[2])
+    set_pal(COLOR_SIDE_3, side_palette[3])
     local appearance = drawable_unit.character:get_appearance()
     local skin = appearance.skin
-    pt.set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
-    pt.set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
-    pt.set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
-    pt.set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+    set_pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
+    set_pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
+    set_pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+    set_pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
 
     if draw_outline then
         -- local outline_color = side_palette[1]
@@ -184,9 +184,9 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
         if drawable_unit.side == "player" and not drawable_unit.has_acted then
             outline_color = 7
         end
-        pt.set_pal(COLOR_OUTLINE, outline_color)
+        set_pal(COLOR_OUTLINE, outline_color)
     else
-        pt.set_palt(COLOR_OUTLINE, true)
+        set_palt(COLOR_OUTLINE, true)
     end
 
     --eyes
@@ -198,21 +198,21 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
             if look_direction == "left" and drawable_unit.facing.horizontal == "left"
                 or look_direction == "right" and (drawable_unit.facing.horizontal == "right" or drawable_unit.facing.horizontal == nil)
             then
-                pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-                pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-                pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
-                pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
+                set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+                set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+                set_pal(COLOR_EYE_R_INNER, COLOR_EYE_WHITE)
+                set_pal(COLOR_EYE_R_OUTER, COLOR_EYE)
             else
-                pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
-                pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
-                pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-                pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+                set_pal(COLOR_EYE_L_INNER, COLOR_EYE_WHITE)
+                set_pal(COLOR_EYE_L_OUTER, COLOR_EYE)
+                set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+                set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
             end
         else
-            pt.set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
-            pt.set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
-            pt.set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
-            pt.set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
+            set_pal(COLOR_EYE_L_INNER, COLOR_EYE)
+            set_pal(COLOR_EYE_L_OUTER, COLOR_EYE_WHITE)
+            set_pal(COLOR_EYE_R_INNER, COLOR_EYE)
+            set_pal(COLOR_EYE_R_OUTER, COLOR_EYE_WHITE)
         end
     end
     profile("character_renderer_set_palette")
@@ -380,10 +380,10 @@ function character_renderer.draw(
         draw.draw_shadow(COLOR_OUTLINE,
             function(draw_x, draw_y)
                 local outline_draw_point = point.of(draw_x, draw_y) - DRAW_TARGET_D
-                pt.spr(unit_sprite, outline_draw_point.x, outline_draw_point.y)
+                spr(unit_sprite, outline_draw_point.x, outline_draw_point.y)
             end,
             0, 0)
-        pt.spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
+        spr(unit_sprite, -DRAW_TARGET_D.x, -DRAW_TARGET_D.y)
 
         drawable_unit.sprites[frame_name][facing_v] = draw_target_manager:pop_sprite()
     end
@@ -405,10 +405,10 @@ function character_renderer.draw(
     end
 
     local flip_h = facing_h == "left"
-    pt.spr(sprite, sprite_draw_point.x, sprite_draw_point.y, flip_h)
+    spr(sprite, sprite_draw_point.x, sprite_draw_point.y, flip_h)
 
     if set_pal then
-        pt.reset_pal()
+        reset_pal()
     end
     -- profile("draw_character")
 end
@@ -432,13 +432,13 @@ local function draw_health_bar(unit, draw_point)
     -- TODO: get this from UI theme
     local COLOR_BORDER = 21
     local COLOR_SPENT = 15
-    pt.rrectfill(x, y, width, height, 1, COLOR_BORDER)
-    pt.rrectfill(x + 1, y + 1, width - 2, height - 2, 0, COLOR_SPENT)
-    pt.rrectfill(x + 1, y + 1, current_width - 2, height - 2, 0, COLOR_SIDE)
+    rrectfill(x, y, width, height, 1, COLOR_BORDER)
+    rrectfill(x + 1, y + 1, width - 2, height - 2, 0, COLOR_SPENT)
+    rrectfill(x + 1, y + 1, current_width - 2, height - 2, 0, COLOR_SIDE)
     if cell_width > 1 then
         for i = 1, hp_max - 1 do
             local x_bar = x + i * cell_width
-            pt.line(x_bar, y, x_bar, y + height - 1, COLOR_BORDER)
+            line(x_bar, y, x_bar, y + height - 1, COLOR_BORDER)
         end
     end
 end
@@ -462,7 +462,7 @@ function character_renderer.draw_health_bar(unit, draw_point, set_pal, apply_ani
     draw_health_bar(unit, health_bar_anchor)
 
     if set_pal then
-        pt.reset_pal()
+        reset_pal()
     end
 end
 

@@ -11,7 +11,7 @@ MockFilesystem.__index = MockFilesystem
 
 local mock_filesystem = {}
 
---- Create a MockFilesystem that stubs pt.include and pt.ls.
+--- Create a MockFilesystem that stubs include and ls.
 ---@return MockFilesystem
 function mock_filesystem.new()
     ---@type MockFilesystem
@@ -19,7 +19,7 @@ function mock_filesystem.new()
         files = {},
     }, MockFilesystem)
 
-    pt.include = function(path)
+    include = function(path)
         local dir = self.files
         for word in string.gmatch(path, "[%a%.]+/") do
             local next_dir = dir[word]
@@ -35,7 +35,7 @@ function mock_filesystem.new()
         return dir[file_name]
     end
 
-    pt.ls = function(path)
+    ls = function(path)
         local dir = self.files
         for word in string.gmatch(path, "[%a%.]+") do
             local next_dir = dir[word]

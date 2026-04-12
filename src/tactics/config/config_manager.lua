@@ -26,7 +26,7 @@ local config_manager = {}
 ---@param new_config DynamicConfig
 function ConfigManager:store_config(new_config)
 	self.user_config = new_config
-	pt.store("/appdata/tactics_tales/config.pod", new_config, nil)
+	store("/appdata/tactics_tales/config.pod", new_config, nil)
 
 	local should_profile = DYNAMIC_CONFIG.profile
 	profile.enabled(should_profile, should_profile)
@@ -41,7 +41,7 @@ end
 ---@return ConfigManager
 function config_manager.new()
 	---@type DynamicConfig
-	local user_config = pt.fetch("/appdata/tactics_tales/config.pod") --[[@as DynamicConfig]]
+	local user_config = fetch("/appdata/tactics_tales/config.pod") --[[@as DynamicConfig]]
 
 	if user_config == nil then
 		user_config = {}

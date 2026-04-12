@@ -90,7 +90,7 @@ end
 ---@param row string
 ---@return integer
 local function width_of(row)
-    local w, _ = pt.print(row, 0, -1000)
+    local w, _ = print(row, 0, -1000)
     return w
 end
 
@@ -254,7 +254,7 @@ function TextImpl:draw_justified_text_row(row, x, y, justify, color, row_number,
             out = string.sub(out, 1, line_count)
         end
     end
-    pt.print(out, t_x, t_y, color)
+    print(out, t_x, t_y, color)
 end
 
 ---@param text_row string

@@ -2,9 +2,9 @@ local luassert = require("luassert")
 
 local randomizer = require("src.tactics.util.randomizer")
 
--- Helper: replace pt.rnd with a function that returns each value in sequence.
+-- Helper: replace rnd with a function that returns each value in sequence.
 -- rndi(n) = floor(rnd(n)), so passing an integer k makes rndi return k.
-local original_rnd = pt.rnd
+local original_rnd = rnd
 
 local function rnd_returns(...)
     local vals = {...}
@@ -16,7 +16,7 @@ local function rnd_returns(...)
 end
 
 after_each(function()
-    pt.rnd = original_rnd
+    rnd = original_rnd
 end)
 
 describe("tactics.util.randomizer", function()
@@ -24,19 +24,19 @@ describe("tactics.util.randomizer", function()
         -- of() uses the fast path: all weights are 1, so rndi(n)+1 is the direct index.
 
         it("should pick the first option when rnd returns 0", function()
-            pt.rnd = rnd_returns(0)
+            rnd = rnd_returns(0)
             local sel = randomizer.weighted_option_selector.of("a", "b", "c")
             luassert.are_equal("a", sel:pick_random())
         end)
 
         it("should pick the second option when rnd returns 1", function()
-            pt.rnd = rnd_returns(1)
+            rnd = rnd_returns(1)
             local sel = randomizer.weighted_option_selector.of("a", "b", "c")
             luassert.are_equal("b", sel:pick_random())
         end)
 
         it("should pick the last option when rnd returns n-1", function()
-            pt.rnd = rnd_returns(2)
+            rnd = rnd_returns(2)
             local sel = randomizer.weighted_option_selector.of("a", "b", "c")
             luassert.are_equal("c", sel:pick_random())
         end)
@@ -51,25 +51,25 @@ describe("tactics.util.randomizer", function()
         --   i=4: 4-1=3 > 0; 3-2=1 > 0; 1-1=0 <= 0 → "c"
 
         it("should pick 'a' (weight 1) when rnd returns 0", function()
-            pt.rnd = rnd_returns(0)
+            rnd = rnd_returns(0)
             local sel = randomizer.weighted_option_selector.of_weighted({"a",1}, {"b",2}, {"c",1})
             luassert.are_equal("a", sel:pick_random())
         end)
 
         it("should pick 'b' (weight 2) when rnd returns 1", function()
-            pt.rnd = rnd_returns(1)
+            rnd = rnd_returns(1)
             local sel = randomizer.weighted_option_selector.of_weighted({"a",1}, {"b",2}, {"c",1})
             luassert.are_equal("b", sel:pick_random())
         end)
 
         it("should still pick 'b' when rnd returns 2 (within b's weight range)", function()
-            pt.rnd = rnd_returns(2)
+            rnd = rnd_returns(2)
             local sel = randomizer.weighted_option_selector.of_weighted({"a",1}, {"b",2}, {"c",1})
             luassert.are_equal("b", sel:pick_random())
         end)
 
         it("should pick 'c' (weight 1) when rnd returns 3", function()
-            pt.rnd = rnd_returns(3)
+            rnd = rnd_returns(3)
             local sel = randomizer.weighted_option_selector.of_weighted({"a",1}, {"b",2}, {"c",1})
             luassert.are_equal("c", sel:pick_random())
         end)
@@ -88,7 +88,7 @@ describe("tactics.util.randomizer", function()
         end
 
         it("should pick from the heavier sub-selector when rnd is low", function()
-            pt.rnd = rnd_returns(0)  -- i=1
+            rnd = rnd_returns(0)  -- i=1
             local sel = randomizer.weighted_option_selector.of_recursive(
                 {make_sub("a", "b"), 2},
                 {make_sub("c", "d"), 1}
@@ -97,7 +97,7 @@ describe("tactics.util.randomizer", function()
         end)
 
         it("should pick the second option of the heavier sub-selector", function()
-            pt.rnd = rnd_returns(2)  -- i=3
+            rnd = rnd_returns(2)  -- i=3
             local sel = randomizer.weighted_option_selector.of_recursive(
                 {make_sub("a", "b"), 2},
                 {make_sub("c", "d"), 1}
@@ -106,7 +106,7 @@ describe("tactics.util.randomizer", function()
         end)
 
         it("should pick from the lighter sub-selector when rnd is higher", function()
-            pt.rnd = rnd_returns(4)  -- i=5
+            rnd = rnd_returns(4)  -- i=5
             local sel = randomizer.weighted_option_selector.of_recursive(
                 {make_sub("a", "b"), 2},
                 {make_sub("c", "d"), 1}
@@ -118,19 +118,19 @@ describe("tactics.util.randomizer", function()
     describe("random_range", function()
         describe("between", function()
             it("should return min_value when rnd returns 0", function()
-                pt.rnd = rnd_returns(0)
+                rnd = rnd_returns(0)
                 local r = randomizer.random_range.between(5, 10)
                 luassert.are_equal(5, r:pick_random())
             end)
 
             it("should return max_value when rnd returns the range size", function()
-                pt.rnd = rnd_returns(5)  -- rndi(6)=5; 5+5=10
+                rnd = rnd_returns(5)  -- rndi(6)=5; 5+5=10
                 local r = randomizer.random_range.between(5, 10)
                 luassert.are_equal(10, r:pick_random())
             end)
 
             it("should return a mid-range value", function()
-                pt.rnd = rnd_returns(3)  -- rndi(6)=3; 5+3=8
+                rnd = rnd_returns(3)  -- rndi(6)=3; 5+3=8
                 local r = randomizer.random_range.between(5, 10)
                 luassert.are_equal(8, r:pick_random())
             end)
@@ -138,13 +138,13 @@ describe("tactics.util.randomizer", function()
 
         describe("of", function()
             it("should return 0 when rnd returns 0", function()
-                pt.rnd = rnd_returns(0)
+                rnd = rnd_returns(0)
                 local r = randomizer.random_range.of(4)  -- between(0, 3)
                 luassert.are_equal(0, r:pick_random())
             end)
 
             it("should return n-1 when rnd returns n-1", function()
-                pt.rnd = rnd_returns(3)  -- rndi(4)=3; 0+3=3
+                rnd = rnd_returns(3)  -- rndi(4)=3; 0+3=3
                 local r = randomizer.random_range.of(4)
                 luassert.are_equal(3, r:pick_random())
             end)
@@ -154,7 +154,7 @@ describe("tactics.util.randomizer", function()
     describe("list_selector", function()
         it("should collect pick_random results from each sub-randomizer", function()
             -- Use two fixed ranges that each always return the same value.
-            pt.rnd = rnd_returns(0, 0)
+            rnd = rnd_returns(0, 0)
             local r1 = randomizer.random_range.between(7, 7)
             local r2 = randomizer.random_range.between(42, 42)
             local sel = randomizer.list_selector.of_randomizers(r1, r2)
@@ -162,7 +162,7 @@ describe("tactics.util.randomizer", function()
         end)
 
         it("should return results in sub-randomizer order", function()
-            pt.rnd = rnd_returns(0, 1, 2)
+            rnd = rnd_returns(0, 1, 2)
             local sel = randomizer.list_selector.of_randomizers(
                 randomizer.weighted_option_selector.of("a", "b", "c"),
                 randomizer.weighted_option_selector.of("x", "y", "z"),

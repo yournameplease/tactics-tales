@@ -130,12 +130,12 @@ function AnimatedSkeletonImpl:draw_sprite(node, base_sprite, s, x, y)
             local spr_ud = get_spr(s)
             local s_w = spr_ud:width()
             local s_h = spr_ud:height()
-            pt.sspr(base_sprite + s,
+            sspr(base_sprite + s,
                 0, 0, s_w, s_h,
                 n_x, n_y,
                 s_w * n_sx, s_h * n_sy)
         else
-            pt.spr(base_sprite + s, n_x, n_y)
+            spr(base_sprite + s, n_x, n_y)
         end
     end
 end

@@ -27,7 +27,7 @@ local function draw_portrait(get_selected_unit, palette)
                 true,
                 nil
             )
-            pt.reset_pal()
+            reset_pal()
         end
     end
 end

@@ -314,7 +314,7 @@ function TacticsEngine:spawn_all(units, anim, blocked_behavior)
             end
 
             while spawn_animation.playing do
-                pt.yield()
+                yield()
             end
 
             local idle_animation = self.animation_manager:create_idle_animation()
@@ -423,7 +423,7 @@ function TacticsEngine:move_unit(unit, destination, path)
         unit.animation_data = anim
         log.debug("Animating!", anim.playing)
         while anim.playing do
-            pt.yield()
+            yield()
         end
     end
 
@@ -466,7 +466,7 @@ function TacticsEngine:kill_unit(defender, attacker)
 
     self.battle_is_blocked = true
     while anim.playing or self.active_dialogue ~= nil do
-        pt.yield()
+        yield()
     end
     self.battle_is_blocked = false
 
@@ -600,7 +600,7 @@ function TacticsEngine:apply_combat_step(step)
     local attacker = step.attacker
     local defender = step.defender
 
-    local direction = pt.atan2(
+    local direction = atan2(
         defender.tile.x - attacker.tile.x,
         defender.tile.y - attacker.tile.y
     )
@@ -608,17 +608,17 @@ function TacticsEngine:apply_combat_step(step)
     local attack_animation = self.animation_manager:create_animation("BUMP", direction)
     attacker.animation_data = attack_animation
     if step.is_hit then
-        pt.sfx(8)
+        sfx(8)
     else
-        pt.sfx(9)
+        sfx(9)
         local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
         defender.animation_data = dodge_animation
         while dodge_animation.playing do
-            pt.yield()
+            yield()
         end
     end
     while attack_animation.playing do
-        pt.yield()
+        yield()
     end
 
     if step.is_hit then
@@ -636,7 +636,7 @@ function TacticsEngine:apply_combat_step(step)
         defender.animation_data = hurt_animation
 
         while hurt_animation.playing do
-            pt.yield()
+            yield()
         end
     end
 
@@ -711,7 +711,7 @@ end
 --- Yield until all held script locks are released.
 function TacticsEngine:yield_while_in_script()
     while self:is_locked() do
-        pt.yield()
+        yield()
     end
 end
 
@@ -748,7 +748,7 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_di
     for x = -max_distance, max_distance do
         local map_x = x + tile_x
         if map_x >= 0 and map_x < MAP_WIDTH then
-            local abs_x = pt.abs(x)
+            local abs_x = abs(x)
             local min_y_abs = math.max(0, min_distance - abs_x)
             local max_y_abs = max_distance - abs_x
 

@@ -21,11 +21,11 @@ DrawTargetManager.__index = DrawTargetManager
 --- Apply the current draw target and camera state to Picotron.
 function DrawTargetManager:apply_current_target()
     if self.current_target ~= nil then
-        pt.set_draw_target(self.current_target.ud)
-        pt.set_camera(self.current_target.camera_x, self.current_target.camera_y)
+        set_draw_target(self.current_target.ud)
+        set_camera(self.current_target.camera_x, self.current_target.camera_y)
     else
-        pt.set_draw_target()
-        pt.reset_camera()
+        set_draw_target()
+        reset_camera()
     end
 end
 
@@ -51,7 +51,7 @@ function DrawTargetManager:push_target(w, h, d_x, d_y)
     self:apply_current_target()
     if DYNAMIC_CONFIG.draw_target_debug then
         local color = colors.rainbow(#self.targets)
-        pt.rrectfill(d_x, d_y, w, h, 0, color[2])
+        rrectfill(d_x, d_y, w, h, 0, color[2])
     end
 end
 
@@ -72,14 +72,14 @@ function DrawTargetManager:draw(x, y)
     assert(self.current_target ~= nil)
     local prev_target = self.current_target
     ---@cast prev_target DrawTargetEntry
-    self.current_target = pt.pop(self.targets)
+    self.current_target = pop(self.targets)
     self:apply_current_target()
 
-    -- pt.sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)
-    pt.spr(prev_target.ud, x, y)
+    -- sspr(prev_target.ud, 0, 0, prev_target.w, prev_target.h, x, y)
+    spr(prev_target.ud, x, y)
     if DYNAMIC_CONFIG.draw_target_debug then
         local color = colors.rainbow(#self.targets + (self.current_target == nil and 0 or 1))
-        pt.rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
+        rrect(x, y, prev_target.w, prev_target.h, 0, color[1])
     end
 end
 
@@ -89,7 +89,7 @@ function DrawTargetManager:pop_sprite()
     assert(self.current_target ~= nil)
     local prev_target = self.current_target
     ---@cast prev_target DrawTargetEntry
-    self.current_target = pt.pop(self.targets)
+    self.current_target = pop(self.targets)
     self:apply_current_target()
     return prev_target.ud
 end

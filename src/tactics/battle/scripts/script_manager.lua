@@ -265,7 +265,7 @@ function ScriptManager:register_script(script)
                 }
                 local sound = SFX_MAP[effect.sound_id]
                 if sound ~= nil then
-                    pt.sfx(sound)
+                    sfx(sound)
                 end
             end
         elseif effect.type == "remove_script" then
@@ -318,7 +318,7 @@ function ScriptManager:register_script(script)
                     for _, eff in ipairs(effects) do
                         eff(ctx)
                         while self.tactics_engine:is_blocked() do
-                            pt.yield()
+                            yield()
                         end
                         log.debug("Handled script effect.")
                     end

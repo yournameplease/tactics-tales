@@ -56,18 +56,18 @@ local function make_map(dodge)
     }
 end
 
--- rnd_returns(v) makes pt.rnd always return v.
--- random.rndi(100) = math.floor(pt.rnd(100)), so:
+-- rnd_returns(v) makes rnd always return v.
+-- random.rndi(100) = math.floor(rnd(100)), so:
 --   rnd_returns(0)  → hit_roll = 0  → hits any positive hit_chance
 --   rnd_returns(99) → hit_roll = 99 → misses unless hit_chance = 100
-local original_rnd = pt.rnd
-after_each(function() pt.rnd = original_rnd end)
+local original_rnd = rnd
+after_each(function() rnd = original_rnd end)
 
 local function rnd_returns(val)
     return function(_limit) return val end
 end
-local function always_hit()  pt.rnd = rnd_returns(0)  end
-local function always_miss() pt.rnd = rnd_returns(99) end
+local function always_hit()  rnd = rnd_returns(0)  end
+local function always_miss() rnd = rnd_returns(99) end
 
 -- ---------------------------------------------------------------------------
 -- compute_combat

@@ -24,9 +24,9 @@ function book.page_divider(width)
             local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
             local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
 
-            pt.line(l + i, t + i, l + i, b, c_l)
+            line(l + i, t + i, l + i, b, c_l)
             if i < w or w & 1 == 0 then
-                pt.line(r - i, t + i, r - i, b, c_r)
+                line(r - i, t + i, r - i, b, c_r)
             end
         end
     end)
@@ -50,7 +50,7 @@ function book.section_divider(height)
         local c = ui_theme.COLOR_PAGE_DECOR
 
         for i = 0, h - 1 do
-            pt.line(l + i, t + i, r - i, t + i, c)
+            line(l + i, t + i, r - i, t + i, c)
         end
     end)
     :build()
@@ -145,21 +145,21 @@ function book.book_box(width, height, pages_height)
         local b = self.rect.y + self.rect.h - 1
         local p = pages_height
 
-        pt.line(l, t + 1, l, b - 1, ui_theme.COLOR_DECORATION_SHADOW)
-        pt.rectfill(l + 1, t + p, r, b, ui_theme.COLOR_DECORATION_SHADOW)
+        line(l, t + 1, l, b - 1, ui_theme.COLOR_DECORATION_SHADOW)
+        rectfill(l + 1, t + p, r, b, ui_theme.COLOR_DECORATION_SHADOW)
 
         local p_2 = ((p + 1) >> 1) - 1
         for i = 0, p_2 do
             local c = i & 1 == 0 and ui_theme.COLOR_DECORATION_HIGHLIGHT or ui_theme.COLOR_DECORATION_PRIMARY
 
-            pt.line(l + 1 + i, b - 1 - i, r - 1, b - 1 - i, c)
+            line(l + 1 + i, b - 1 - i, r - 1, b - 1 - i, c)
             if i < p_2 or p_2 & 1 == 0 then
-                pt.line(l + 1 + i, b - p + i, r - 1, b - p + i, c)
+                line(l + 1 + i, b - p + i, r - 1, b - p + i, c)
             end
         end
 
-        pt.rectfill(l + 1, t, r, b - p - 1, ui_theme.COLOR_DECORATION_PRIMARY)
-        pt.rect(l + 1 + 2, t + 2, r - 2, b - p - 1 - 2, ui_theme.COLOR_TRIM)
+        rectfill(l + 1, t, r, b - p - 1, ui_theme.COLOR_DECORATION_PRIMARY)
+        rect(l + 1 + 2, t + 2, r - 2, b - p - 1 - 2, ui_theme.COLOR_TRIM)
 
         for _, child in ipairs(self.children) do
             child:draw(state, draw_target_manager, ui_theme)
