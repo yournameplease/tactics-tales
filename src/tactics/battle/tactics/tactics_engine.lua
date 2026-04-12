@@ -41,6 +41,8 @@ local QueuedBattleDialogue = {}
 local ActiveBattleDialogue = {}
 
 ---@class TacticsEngine
+---@field turn integer The current turn.  Set by TurnManager.
+---@field chapter integer The current chapter.
 ---@field battle_is_blocked boolean Whether a coroutine is currently blocking battle input.
 ---@field tactics_locks table<integer, boolean> Set of active lock IDs preventing certain actions.
 ---@field active_point Point|nil
@@ -67,6 +69,7 @@ local tactics_engine = {
 }
 
 --- Construct a new TacticsEngine bound to the given battle services.
+---@param chapter integer
 ---@param map BattleMap
 ---@param character_mgr CharacterManager
 ---@param task_manager TaskManager
@@ -75,14 +78,18 @@ local tactics_engine = {
 ---@param music_player MusicPlayer
 ---@return TacticsEngine
 function tactics_engine.new(
+    chapter,
     map,
     character_mgr,
     task_manager,
     animation_manager,
     bus,
-    music_player)
+    music_player
+)
     ---@type TacticsEngine
     local self = setmetatable({}, TacticsEngine)
+    self.chapter = chapter
+    self.turn = 1
     self.battle_is_blocked = false
     self.tactics_locks = {}
 
@@ -451,7 +458,7 @@ end
 --- Play the death sequence for `defender` and remove it from the map.
 --- Must be called from inside a coroutine.
 ---@param defender BattleUnit
----@param attacker BattleUnit|nil Unit that dealt the killing blow.
+---@param attacker? BattleUnit Unit that dealt the killing blow.
 function TacticsEngine:kill_unit(defender, attacker)
     local defender_tile = defender.tile:copy()
 
@@ -480,11 +487,12 @@ function TacticsEngine:kill_unit(defender, attacker)
 
     self:invalidate_tiles_for_point(defender_tile)
 
+    ---@type UnitDeathPayload
     local death_event = {
         attacker = attacker,
         defender = defender,
-        chapter = 0,
-        turn_number = 0,
+        chapter = self.chapter,
+        turn_number = self.turn,
     }
     self.event_writer:emit("TACTICS_UNIT_DEATH", death_event)
 end

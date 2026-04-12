@@ -8,7 +8,7 @@
 local UnitDeathResult = {}
 
 ---@class StoryChapterResult
----@field battle_id integer
+---@field battle_id string
 ---@field turns_taken integer
 ---@field was_victory boolean
 ---@field units_lost UnitDeathResult[]
@@ -25,9 +25,4 @@ local StoryStatistics = {}
 ---@field chapter_results table<integer, StoryChapterResult>
 local StoryResults = {}
 
-local stats = {
-    StoryResults = StoryResults,
-    StoryChapterResult = StoryChapterResult,
-}
-
-return stats
+return {}

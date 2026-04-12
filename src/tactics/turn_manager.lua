@@ -17,6 +17,7 @@ local PHASE_ORDER = {
 
 ---@class TurnManager
 ---@field turn integer Current turn number.
+---@field chapter integer Current chapter number.
 ---@field phase integer Current phase index into PHASE_ORDER.
 local TurnManager = {}
 TurnManager.__index = TurnManager
@@ -47,7 +48,10 @@ function TurnManagerImpl:check_objectives()
         return false
     else
         log.debug("Battle finished!")
-        self.event_writer:emit(battle_result.command, {})
+        self.event_writer:emit(battle_result.command, {
+            chapter = self.chapter,
+            turn = self.turn
+        })
         return true
     end
 end
@@ -66,6 +70,7 @@ function TurnManagerImpl:advance_turn()
     if not self:check_objectives() then
         self.phase = 1
         self.turn = self.turn + 1
+        self.tactics_engine.turn = self.turn
         self.tactics_engine:refresh_all_units()
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_writer:emit("TACTICS_BEGIN_TURN", {
@@ -121,6 +126,7 @@ function TurnManagerImpl:teardown()
 end
 
 --- Create a new TurnManager and wire up battle event handlers.
+---@param chapter integer
 ---@param map BattleMap
 ---@param tactics_eng TacticsEngine
 ---@param battle_objective_srv BattleObjectiveService
@@ -129,7 +135,16 @@ end
 ---@param task_mgr TaskManager
 ---@param battle_menu_mgr BattleMenuManager
 ---@return TurnManager
-function turn_manager.new(map, tactics_eng, battle_objective_srv, ai_eng, bus, task_mgr, battle_menu_mgr)
+function turn_manager.new(
+    chapter,
+    map,
+    tactics_eng,
+    battle_objective_srv,
+    ai_eng,
+    bus,
+    task_mgr,
+    battle_menu_mgr
+)
     ---@type TurnManagerImpl
     local self = setmetatable({}, TurnManagerImpl)
 

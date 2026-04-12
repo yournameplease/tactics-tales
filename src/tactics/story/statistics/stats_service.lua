@@ -10,15 +10,26 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local StatsService = {}
 StatsService.__index = StatsService
 
---- Return the chapter result for the given battle ID, creating it if absent.
+--- Begin a chapter result for the given battle ID, overwriting if one already exists
+---@param id integer The chapter index
+---@param battle_id string The battle id (from the current mod) 
+function StatsService:begin_chapter(
+    id,
+    battle_id
+)
+    self.story_results.chapter_results[id] = {
+        units_lost = {},
+        turns_taken = 0,
+        battle_id = battle_id,
+        was_victory = false
+    }
+end
+
+--- Return the chapter result for the given battle ID.
 ---@param id integer
 ---@return StoryChapterResult
 function StatsService:get_chapter(id)
-    if self.story_results.chapter_results[id] == nil then
-        self.story_results.chapter_results[id] = {
-            units_lost = {}
-        }
-    end
+    assert(self.story_results.chapter_results[id])
 
     return self.story_results.chapter_results[id]
 end
@@ -30,7 +41,7 @@ function StatsService:record_death(data)
 
     table.insert(chapter_results.units_lost, {
         unit_id = data.defender.id,
-        attacker_id = data.attacker.id,
+        attacker_id = data.attacker and data.attacker.id,
         turn_number = data.turn_number,
     })
 end
