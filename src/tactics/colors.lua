@@ -42,7 +42,7 @@ local color_table_sprite = 1
 ---@param row_id ColorTableId Identifies which color table row to apply.
 function colors.apply_colortable_row(row_id)
     local color_row = rows_by_id[row_id]
-    local sprite = pt.get_spr(color_table_sprite)
+    local sprite = get_spr(color_table_sprite)
     local address = 0x8000 + color_row * 64
     for x = 0, 63 do
         local c = sprite:get(x, color_row)
@@ -63,7 +63,7 @@ local cols_by_id = {
 ---@param palette_id PaletteId Identifies which palette column to apply.
 function colors.apply_palette(palette_id)
     local color_col = cols_by_id[palette_id]
-    local sprite = pt.get_spr(palette_sprite)
+    local sprite = get_spr(palette_sprite)
     for y = 1, 63 do
         local c = sprite:get(color_col, y)
         pt.set_pal(y, c)
