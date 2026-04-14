@@ -281,6 +281,14 @@ local MENU_DATA = {
                                         "xbox",
                                         "playstation",
                                     }))
+                                table.insert(options, selection.row("input_group")
+                                    :with_label("Input Mode")
+                                    :with_key("input_group")
+                                    :with_static_options({
+                                        "mouse_and_keyboard",
+                                        "mouse_only",
+                                        "joy_only",
+                                    }))
                                 return options
                             end))
 
