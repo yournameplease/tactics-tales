@@ -1,4 +1,4 @@
----@brief
+--@brief
 --- The main entry point for the game, responsible for initializing all
 --- systems and running the main game loop.
 
@@ -53,6 +53,8 @@ local bus
 function _init()
     mkdir("/appdata/tactics_tales/saves")
     
+    local config_mgr = config_manager.new()
+
     input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
@@ -62,7 +64,6 @@ function _init()
 
     ui_context = ui_context_manager.new()
 
-    local config_mgr = config_manager.new()
     local mod_loader = mod_ldr.new()
     
     game_manager = game.new(

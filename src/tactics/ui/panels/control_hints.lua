@@ -2,10 +2,6 @@
 --- A UI panel that displays contextual control hints (e.g., "Select", "Back").
 
 local box = require("src.tactics.ui.box")
-local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
-local input_service = require("src.tactics.joypad")
-local menu_types = require("src.tactics.menu.types")
-local menu_manager = require("src.tactics.menu.menu_manager")
 
 local control_hints = {}
 
@@ -63,7 +59,19 @@ local function control_hint_glyphs(input_label, text_color)
         :container("modal")
         :build()
 
-    if HAS_MOUSE_SPRITE[input_label] then
+    local allow_draw_mouse = true
+    local allow_draw_joy = true
+    if DYNAMIC_CONFIG then
+        allow_draw_joy = DYNAMIC_CONFIG.input_group == "mouse_and_keyboard"
+            or DYNAMIC_CONFIG.input_group == "joy_only"
+        allow_draw_mouse = DYNAMIC_CONFIG.input_group == "mouse_and_keyboard"
+                or DYNAMIC_CONFIG.input_group == "mouse_only"
+    end
+
+    local draw_mouse = HAS_MOUSE_SPRITE[input_label] and allow_draw_mouse
+    local draw_joy = allow_draw_joy
+
+    if draw_mouse then
         row:add(
             box.builder("control_sprite_" .. input_label)
             :sprite{ ox = 1, oy = 1 }
@@ -72,6 +80,8 @@ local function control_hint_glyphs(input_label, text_color)
                 self.sprite.s = sprite_by_label_and_method(input_label, "mouse")
             end)
             :build())
+    end
+    if draw_mouse and draw_joy then
         row:add(
             box.builder("control_text_" .. input_label)
             :layout{
@@ -85,24 +95,27 @@ local function control_hint_glyphs(input_label, text_color)
                 text_color = text_color,
             }
             :build())
-    else
+    end
+    -- if draw_joy then
+    --     row:add(
+    --         box.builder("no_mouse_spacer_" .. input_label)
+    --         :layout{
+    --             width = 15,
+    --             height = 10,
+    --             padding = box.layout.padding(2),
+    --         }
+    --         :build())
+    -- end
+    if draw_joy then
         row:add(
-            box.builder("no_mouse_spacer_" .. input_label)
-            :layout{
-                width = 15,
-                height = 10,
-                padding = box.layout.padding(2),
-            }
+            box.builder("control_sprite_" .. input_label)
+            :sprite{ ox = 1, oy = 1 }
+            :layout{ width = 9, height = 9 }
+            :on_update(function(self, _state)
+                self.sprite.s = sprite_by_label_and_method(input_label, "joypad")
+            end)
             :build())
     end
-    row:add(
-        box.builder("control_sprite_" .. input_label)
-        :sprite{ ox = 1, oy = 1 }
-        :layout{ width = 9, height = 9 }
-        :on_update(function(self, _state)
-            self.sprite.s = sprite_by_label_and_method(input_label, "joypad")
-        end)
-        :build())
     return row
 end
 
@@ -180,6 +193,27 @@ function control_hints.centered_control_hint_row(input_label, message, text_colo
     return row
 end
 
+---@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
+---@param default_hints DefaultHints Fallback hints when no menu step is active.
+---@return fun(ctx: UIContextManager): UIElement[]
+function control_hint_rows(menu_step_func, default_hints)
+    return function(_)
+        children = {}
+
+        if DYNAMIC_CONFIG.input_group == "mouse_only" then
+            table.insert(children, control_hint_row("BUTTON_A", menu_step_func, default_hints))
+            table.insert(children, control_hint_row("BUTTON_B", menu_step_func, default_hints))
+        else
+            table.insert(children, control_hint_row("BUTTON_A", menu_step_func, default_hints))
+            table.insert(children, control_hint_row("BUTTON_B", menu_step_func, default_hints))
+            table.insert(children, control_hint_row("SHOULDER_L", menu_step_func, default_hints))
+            table.insert(children, control_hint_row("SHOULDER_R", menu_step_func, default_hints))
+        end
+    
+        return children
+    end
+end
+
 --- Build a control hints panel showing hints for all four input actions.
 ---@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
 ---@param default_hints DefaultHints Fallback hints when no menu step is active.
@@ -188,12 +222,13 @@ function control_hints.new(menu_step_func, default_hints)
     local self = box.builder("control_hints")
         :direction("col")
         :container("block")
+        :child_generator{
+            current_key = function(_)
+                return DYNAMIC_CONFIG and DYNAMIC_CONFIG.input_group
+            end,
+            generate_children = control_hint_rows(menu_step_func, default_hints)
+        }
         :build()
-
-    self:add(control_hint_row("BUTTON_A", menu_step_func, default_hints))
-    self:add(control_hint_row("BUTTON_B", menu_step_func, default_hints))
-    self:add(control_hint_row("SHOULDER_L", menu_step_func, default_hints))
-    self:add(control_hint_row("SHOULDER_R", menu_step_func, default_hints))
 
     return self
 end
