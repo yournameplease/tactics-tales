@@ -37,6 +37,7 @@ local nested_menu = {
 
 --- Advance the focused child index by one, wrapping or clamping as configured.
 function NestedMenuNode:increment_focus_index()
+    log.debug("incrementing", self.i, #self.children)
     local new_i = self.i + 1
     if self.wrap then
         self.i = (new_i - 1) % #self.children + 1
@@ -81,20 +82,11 @@ end
 ---@param game_ctx GameContext
 ---@return MenuSignal
 function NestedMenuNode:update_joy(joy, commands, menu_ctx, game_ctx)
-    local focused_leaves = self:get_focused_leaves(menu_ctx, game_ctx)
-
-    if #focused_leaves == 0 then
-        return menu_signal.ignored()
-    end
+    local child = self:get_selected_child()
 
     local signal = menu_signal.ignored()
-    for _, leaf in ipairs(focused_leaves) do
-        if leaf ~= nil then
-            signal = leaf:update_joy(joy, commands, menu_ctx, game_ctx)
-            if signal.type ~= "ignored" then
-                break
-            end
-        end
+    if child ~= nil then
+        signal = child:update_joy(joy, commands, menu_ctx, game_ctx)
     end
     if signal ~= nil and signal.type ~= "ignored" then return signal end
     local old_i = self.i
