@@ -49,16 +49,12 @@ local function sprite_by_label_and_method(input_label, input_method)
     return base_sprite + SPRITE_OFFSETS[input_label]
 end
 
---- Build a row of glyphs (mouse + joypad sprites) for the given input action.
----@param input_label string InputAction key
----@param text_color string|nil UITextColor for the separator text
----@return UIElement
-local function control_hint_glyphs(input_label, text_color)
-    local row = box.builder("control_row_" .. input_label)
-        :direction("row")
-        :container("modal")
-        :build()
 
+---
+---@param input_label InputAction
+---@return boolean draw_mouse
+---@return boolean draw_joy
+local function allow_inputs_for_label(input_label)
     local allow_draw_mouse = true
     local allow_draw_joy = true
     if DYNAMIC_CONFIG then
@@ -70,6 +66,22 @@ local function control_hint_glyphs(input_label, text_color)
 
     local draw_mouse = HAS_MOUSE_SPRITE[input_label] and allow_draw_mouse
     local draw_joy = allow_draw_joy
+
+    return draw_mouse, draw_joy
+end
+
+
+--- Build a row of glyphs (mouse + joypad sprites) for the given input action.
+---@param input_label InputAction key
+---@param text_color string|nil UITextColor for the separator text
+---@return UIElement
+local function control_hint_glyphs(input_label, text_color)
+    local row = box.builder("control_row_" .. input_label)
+        :direction("row")
+        :container("modal")
+        :build()
+
+    local draw_mouse, draw_joy = allow_inputs_for_label(input_label)
 
     if draw_mouse then
         row:add(
@@ -96,16 +108,6 @@ local function control_hint_glyphs(input_label, text_color)
             }
             :build())
     end
-    -- if draw_joy then
-    --     row:add(
-    --         box.builder("no_mouse_spacer_" .. input_label)
-    --         :layout{
-    --             width = 15,
-    --             height = 10,
-    --             padding = box.layout.padding(2),
-    --         }
-    --         :build())
-    -- end
     if draw_joy then
         row:add(
             box.builder("control_sprite_" .. input_label)
@@ -116,6 +118,7 @@ local function control_hint_glyphs(input_label, text_color)
             end)
             :build())
     end
+
     return row
 end
 
@@ -164,33 +167,55 @@ local function control_hint_row(input_label, menu_step_func, default_hints)
     return row
 end
 
+
+---@param input_label string InputAction key
+---@param message string Label text to display beside the glyph.
+---@param text_color string|nil UITextColor for glyph and label text.
+---@return fun(ctx: UIContextManager): UIElement[]
+function generate_centered_control_hint_row(input_label, message, text_color)
+    return function(_)
+        local row = box.builder("control_row_" .. input_label)
+            :direction("row")
+            :container("strip")
+            :build()
+
+        row:add(box.spacer(1))
+        row:add(control_hint_glyphs(input_label, text_color))
+        row:add(
+            box.builder("control_text_" .. input_label)
+            :direction("col")
+            :container("strip")
+            :padding(1)
+            :text{
+                content = { " " .. message },
+                draw_properties = { wrap = "no_wrap" },
+                text_color = text_color,
+            }
+            :build())
+        row:add(box.spacer(1))
+    
+        return {row}
+    end
+end
+
 --- Build a centered control hint row with a fixed message and optional text color.
 ---@param input_label string InputAction key
 ---@param message string Label text to display beside the glyph.
 ---@param text_color string|nil UITextColor for glyph and label text.
 ---@return UIElement
 function control_hints.centered_control_hint_row(input_label, message, text_color)
-    local row = box.builder("control_row_" .. input_label)
-        :direction("row")
-        :container("strip")
+    local self = box.builder("control_hints")
+        :direction("col")
+        :container("block")
+        :child_generator{
+            current_key = function(_)
+                return DYNAMIC_CONFIG and DYNAMIC_CONFIG.input_group
+            end,
+            generate_children = generate_centered_control_hint_row(input_label, message, text_color)
+        }
         :build()
 
-    row:add(box.spacer(1))
-    row:add(control_hint_glyphs(input_label, text_color))
-    row:add(
-        box.builder("control_text_" .. input_label)
-        :direction("col")
-        :container("strip")
-        :padding(1)
-        :text{
-            content = { " " .. message },
-            draw_properties = { wrap = "no_wrap" },
-            text_color = text_color,
-        }
-        :build())
-    row:add(box.spacer(1))
-
-    return row
+    return self
 end
 
 ---@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
