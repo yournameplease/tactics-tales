@@ -115,6 +115,7 @@ end
 --- Sample raw input, update action pressed/released state, and return a unified UserInput.
 ---@return UserInput
 function InputService:get_user_input()
+   
     local joy   = self:get_joypad()
     local mouse = self:get_mouse()
 
@@ -133,8 +134,14 @@ function InputService:get_user_input()
         or mouse.mr
         or mouse.mm
 
-    if any_joy   then self.current_input = "joypad" end
-    if any_mouse then self.current_input = "mouse"  end
+    if DYNAMIC_CONFIG.input_group == "mouse_and_keyboard" then
+        if any_joy   then self.current_input = "joypad" end
+        if any_mouse then self.current_input = "mouse"  end
+    elseif DYNAMIC_CONFIG.input_group == "mouse_only" then
+        self.current_input = "mouse"
+    else
+        self.current_input = "joypad"
+    end
 
     ---@type table<InputAction, boolean>
     local new_actions
