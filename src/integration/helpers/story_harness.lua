@@ -15,6 +15,15 @@ local input_helper     = require("src.spec.input.input_helper")
 local TICK_LIMIT = 1000
 
 ---@class StoryHarness
+---@field _task_manager TaskManager
+---@field _event_bus EventBus
+---@field _animation_manager AnimationManager
+---@field _ui_context UIContextManager
+---@field _music_player MusicPlayer
+---@field _game_data table
+---@field _complete boolean
+---@field _emitted table<string, table[]>
+---@field _story table|nil
 local StoryHarness = {}
 StoryHarness.__index = StoryHarness
 
