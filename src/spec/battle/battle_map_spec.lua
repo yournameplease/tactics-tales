@@ -426,27 +426,27 @@ describe("battle.battle_map", function()
         end)
 
         it("should return solid=true when ground sprite has the solid flag (0x1)", function()
-            local original_fget = fget
+            local original_fget = _G.fget
             local map = make_map()
             local layers = make_layers(5, 5)
             layers.terrain.ground:set(0, 1)
             map.layers = layers
-            fget = function(_) return 0x1 end
+            _G.fget = function(_) return 0x1 end
             local result = map:get_terrain(point.of(0, 0))
-            fget = original_fget
+            _G.fget = original_fget
             luassert.is_true(result.solid)
         end)
 
         it("should decode terrain index from flags to pick movement_cost", function()
             -- flags = 0xD (1101): solid=1, terrain=(0xD>>1)=6 → movement_cost=5
-            local original_fget = fget
+            local original_fget = _G.fget
             local map = make_map()
             local layers = make_layers(5, 5)
             layers.terrain.ground:set(0, 1)
             map.layers = layers
-            fget = function(_) return 0xD end
+            _G.fget = function(_) return 0xD end
             local result = map:get_terrain(point.of(0, 0))
-            fget = original_fget
+            _G.fget = original_fget
             luassert.is_true(result.solid)
             luassert.are_equal(5, result.movement_cost)
         end)

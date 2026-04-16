@@ -10,6 +10,7 @@ _G.DYNAMIC_CONFIG = {
     draw_target_debug = false,
     head_scale = 1,
     dialogue_speed = "normal",
+    input_group = "mouse_and_keyboard",
 }
 
 _G.DATP = ""
