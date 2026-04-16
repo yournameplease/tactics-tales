@@ -22,7 +22,7 @@ local TICK_LIMIT = 1000
 ---@field _music_player MusicPlayer
 ---@field _game_data table
 ---@field _complete boolean
----@field _emitted table<string, table[]>
+---@field _emitted table<string, table<string, any>[]>
 ---@field _story table|nil
 local StoryHarness = {}
 StoryHarness.__index = StoryHarness
@@ -78,6 +78,7 @@ end
 --- Create and start the named story, then tick to idle.
 ---@param story_id string
 function StoryHarness:start_story(story_id)
+    assert(not self._story, "start_story() has already been called on this harness")
     self._story = story_mod.new(
         nil,
         story_id,
@@ -115,6 +116,7 @@ end
 ---@param dx integer Horizontal direction (-1, 0, or 1)
 ---@param dy integer Vertical direction (-1, 0, or 1)
 function StoryHarness:dpad(dx, dy)
+    -- dxp/dyp mirror dx/dy: each dpad() call is a fresh pressed-this-frame signal.
     local input = input_helper.joypad({ dx = dx, dy = dy, dxp = dx, dyp = dy })
     self._story:update(input)
     self:tick_to_idle()
