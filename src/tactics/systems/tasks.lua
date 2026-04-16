@@ -3,7 +3,6 @@
 
 ---@class TaskManager
 ---@field tasks any[] Active coroutines being managed.
----@field is_idle fun(self: TaskManager): boolean
 local TaskManager = {}
 TaskManager.__index = TaskManager
 
