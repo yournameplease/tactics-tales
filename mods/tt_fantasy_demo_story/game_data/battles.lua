@@ -640,7 +640,38 @@ local BATTLE_DATA = {
                     :as_one_shot(),
             }
         }
-end
+    end,
+    ["model_room"] = function(story_config)
+        return {
+            map_id = "model_room",
+            tile_labels = {
+                ["player_0"] = { 0x00 },
+                ["player_1"] = { 0x01 },
+                ["player_2"] = { 0x02 },
+                ["enemy_0"] = { 0x10 },
+                ["enemy_1"] = { 0x11 },
+                ["neutral_0"] = { 0x20 },
+                ["neutral_1"] = { 0x21 },
+            },
+            turn_limit = 1000,
+            victory_conditions = {
+                objectives.escape()
+            },
+            failure_conditions = {
+            },
+            units = {
+                { side = "enemy", character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "enemy_0" },
+                { side = "enemy", character_source = character_source.template("cultist_spearman"), ai = ai.move_two, tile = "enemy_1" },
+                { side = "player", character_source = character_source.template("village_hero"), tile = "player_0" },
+                { side = "player", character_source = character_source.template("militia_armor"), tile = "player_1" },
+                { side = "player", character_source = character_source.template("militia_spear_captain"), tile = "player_2" },
+                { side = "neutral", character_source = character_source.template("child_greatsword"), ai = ai.stationary_allied, tile = "neutral_0", tags = {"civilian"} },
+                { side = "neutral", character_source = character_source.template("village_axe"), ai = ai.stationary_allied, tile = "neutral_1", tags = {"civilian"} },
+            },
+            scripts = {
+            }
+        }
+    end
 }
 
 return BATTLE_DATA

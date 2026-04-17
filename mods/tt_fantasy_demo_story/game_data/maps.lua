@@ -13,6 +13,7 @@ local MAP_DEFINITIONS = {
     cliff_crossing = static_map("map/cliff_crossing.map"),
     castle_defense = static_map("map/castle_defense.map"),
     playground = static_map("map/playground.map"),
+    model_room = static_map("map/model_room.map"),
 }
 
 return MAP_DEFINITIONS
