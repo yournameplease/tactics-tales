@@ -4,12 +4,12 @@
     "workspace.library": [
         "types",
         "lib",
-        "../addons/busted/library",
-        "../addons/luassert/library",
-        "../addons/luassert",
-        "../addons"
+        "addons/busted/library",
+        "addons/luassert/library",
+        "addons/luassert",
+        "addons"
     ],
-    "workspace.userThirdParty": ["../addons"],
+    "workspace.userThirdParty": ["addons"],
     "workspace.ignoreDir": ["build", "tactics.p64", ".git"],
     "runtime.version": "Lua 5.4",
     "diagnostics.disable": [
