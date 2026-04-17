@@ -122,6 +122,7 @@ function Story:handle_new_node()
         self.battle_manager = battle_manager.new(
             self.battle_count,
             battle_id,
+            self.story_config,
             self.game_data,
             self.character_manager,
             self.battle_services_bundle.task_manager,
