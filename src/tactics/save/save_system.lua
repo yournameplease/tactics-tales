@@ -5,6 +5,7 @@ local lists = require("src.tactics.util.lists")
 ---@class GameSaveData
 ---@field character_id_generator IdGenerator
 ---@field story_id string
+---@field story_config StoryConfig
 ---@field story_node_id string
 ---@field story_node_step integer
 ---@field story_memory StoryMemory
@@ -15,6 +16,7 @@ local GameSaveData = {}
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
 ---@field story_id StoryId
+---@field story_config StoryConfig
 ---@field story_node_id string
 ---@field story_node_step integer
 ---@field story_memory SerializedStoryMemory
@@ -32,10 +34,12 @@ local SAVE_PATH = "/appdata/tactics_tales/saves/"
 ---@param name string Save slot name (used as filename without extension).
 ---@param data GameSaveData
 function save_system.save(name, data)
+	---@type SerializedGameSaveData
 	local serialized_data = {
 		character_id_count = data.character_id_generator.id_count,
 		story_id = data.story_id,
 		story_node_id = data.story_node_id,
+		story_config = data.story_config,
 		story_node_step = data.story_node_step,
 		story_memory = data.story_memory:serialize(),
 		roster = lists.map(function(c)
