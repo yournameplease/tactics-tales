@@ -35,6 +35,25 @@ return {
                 },
             },
         },
+
+        -- Battle node then exit. Tests the story↔battle boundary.
+        -- Uses rout_no_enemies: VICTORY on first finish_player_turn().
+        battle_and_exit = {
+            starting_node = "the_battle",
+            nodes = {
+                the_battle = {
+                    { type = "battle", battle_id = "rout_no_enemies",
+                      next_node_victory = "after_victory",
+                      next_node_failure = "after_defeat" },
+                },
+                after_victory = {
+                    { type = "exit_story" },
+                },
+                after_defeat = {
+                    { type = "exit_story" },
+                },
+            },
+        },
     },
     default_story = "simple_exit",
     story_select  = { "simple_exit", "linear_text", "jump_flow" },
