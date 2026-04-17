@@ -55,6 +55,7 @@ function Game:begin_story(file_name, story_id)
         self.story = story.new(
             nil,
             story_id,
+            {}, -- TODO
             game_data,
             self.story_services_bundle.task_manager,
             self.story_services_bundle.animation_manager,
@@ -70,6 +71,7 @@ function Game:begin_story(file_name, story_id)
     self.story = story.new(
         file_name,
         story_id,
+        {}, -- TODO
         game_data,
         self.story_services_bundle.task_manager,
         self.story_services_bundle.animation_manager,
