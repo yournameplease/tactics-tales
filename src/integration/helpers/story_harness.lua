@@ -11,6 +11,9 @@ local music_player     = require("src.tactics.music.music_player")
 local mod_loader_mod   = require("src.tactics.mods.mod_loader")
 local story_mod        = require("src.tactics.story.story")
 local input_helper     = require("src.spec.input.input_helper")
+local sprite_fixtures       = require("src.integration.helpers.sprite_fixtures")
+local map_fetch_interceptor = require("src.integration.helpers.map_fetch_interceptor")
+local battle_harness        = require("src.integration.helpers.battle_harness")
 
 local TICK_LIMIT = 1000
 
@@ -24,6 +27,7 @@ local TICK_LIMIT = 1000
 ---@field _complete boolean
 ---@field _emitted table<string, table<string, any>[]>
 ---@field _story table|nil
+---@field _interceptor MapFetchInterceptor
 local StoryHarness = {}
 StoryHarness.__index = StoryHarness
 
@@ -35,6 +39,8 @@ local story_harness = {}
 ---@return StoryHarness
 function story_harness.new(overrides)
     local self = setmetatable({}, StoryHarness)
+
+    sprite_fixtures.setup()
 
     -- Instant dialogue speed: one update() renders all chars and advances the row.
     DYNAMIC_CONFIG.dialogue_speed = "instant"
@@ -72,6 +78,17 @@ function story_harness.new(overrides)
     end
 
     self._story = nil
+
+    -- Install fetch interceptor so story nodes that start battles can load maps.
+    self._interceptor = map_fetch_interceptor.new()
+    self._interceptor:register(
+        "map/test_arena.map",
+        battle_harness.build_map_fetch(16, 16, {
+            [0x01] = { { x = 2,  y = 7 } },
+            [0x02] = { { x = 13, y = 7 } },
+        })
+    )
+
     return self
 end
 
@@ -148,6 +165,25 @@ end
 ---@return table[]
 function StoryHarness:emitted(event_type)
     return self._emitted[event_type] or {}
+end
+
+--- Register a mock fetch response for a map path.
+---@param path string
+---@param fetch_data table
+function StoryHarness:register_map_fetch(path, fetch_data)
+    self._interceptor:register(path, fetch_data)
+end
+
+--- Emit TACTICS_FINISH_SIDE_ACTIONS (end the player turn) and tick to idle.
+--- Only meaningful when a battle is active within the story.
+function StoryHarness:finish_player_turn()
+    self._event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {})
+    self:tick_to_idle()
+end
+
+--- Restore _G.fetch to its original value.
+function StoryHarness:teardown()
+    self._interceptor:teardown()
 end
 
 return story_harness
