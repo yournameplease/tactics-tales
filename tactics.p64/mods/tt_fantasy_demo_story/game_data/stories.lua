@@ -189,6 +189,11 @@ local STORIES = {
 		"Playground",
 		"playground"
 	),
+	model_room = stories.chapter_debug(
+		{},
+		"Model Room",
+		"model_room"
+	),
 	demo_story = {
 		starting_node = 'prologue',
 		nodes = {
@@ -356,5 +361,6 @@ return {
 		"cliff_crossing",
 		"castle_defense",
 		"demo_playground",
+		"model_room",
 	}
 }

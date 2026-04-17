@@ -4,15 +4,23 @@
 
 local story = require("src.tactics.story.story")
 local game_menu_manager = require("src.tactics.game.game_menu_manager")
-local game_menu_context = require("src.tactics.game.game_menu_context")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local save_system = require("src.tactics.save.save_system")
 
 ---@class StoryServicesBundle Services needed to create a story.
 ---@field task_manager TaskManager
 ---@field animation_manager AnimationManager
 ---@field event_bus EventBus
+
+---@class GameMenuContext : GameContext
+---@field default_story_id string the story_id to use if starting from main
+---@field story_ids StoryId[] Available story IDs to present in the menu.
+---@field handle_begin_story fun(save_id: string?, story_id: StoryId) Callback to start a new story.
+---@field handle_load_story fun(save_id: string) Callback to load an existing story save.
+---@field get_game_saves fun(): string[] Returns list of existing save IDs.
+---@field config_manager ConfigManager
 
 ---@class Game
 ---@field menu_manager GameMenuManager
@@ -47,7 +55,7 @@ end
 
 --- Start a new story, either from scratch or from a save file.
 ---@param file_name string|nil Save file path, or nil for a new story.
----@param story_id StoryId|nil Story to start; defaults to the game's default story.
+---@param story_id StoryId Story to start; defaults to the game's default story.
 function Game:begin_story(file_name, story_id)
     local game_data = self.mod_loader:load_mod_data()
     if file_name == nil then -- unsaved story
@@ -65,8 +73,6 @@ function Game:begin_story(file_name, story_id)
         )
         return
     end
-
-    story_id = story_id or self.default_story
 
     self.story = story.new(
         file_name,
@@ -147,12 +153,13 @@ function game.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
-    local game_menu_ctx = game_menu_context.new(
-        story_ids,
-        function(file, id) self:begin_story(file, id) end,
-        function(file) self:load_story(file) end,
-        self.config_manager
-    )
+    local game_menu_ctx = {
+        story_ids = story_ids,
+        config_manager = self.config_manager,
+        get_game_saves = save_system.list_saves,
+        handle_begin_story = function(file, id) self:begin_story(file, id) end,
+        handle_load_story = function(file) self:load_story(file) end,
+    }
     self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 
