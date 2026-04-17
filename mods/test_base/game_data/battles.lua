@@ -12,6 +12,7 @@ return {
         victory_conditions = { { type = "rout" } },
         failure_conditions = {},
         units            = {},
+        scripts          = {},
     },
 
     -- Rout victory with one player unit present.
@@ -24,6 +25,7 @@ return {
         units = {
             { side = "player", character_source = { type = "template", template = "test_fighter" }, tile = "player_spawn" },
         },
+        scripts = {},
     },
 
     -- Turn-limit defeat: turn_limit = 1, so turn 2 (reached after 2× finish_player_turn) triggers DEFEAT.
@@ -37,5 +39,6 @@ return {
         units = {
             { side = "player", character_source = { type = "template", template = "test_fighter" }, tile = "player_spawn" },
         },
+        scripts = {},
     },
 }
