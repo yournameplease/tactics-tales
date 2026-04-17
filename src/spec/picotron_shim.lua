@@ -174,8 +174,12 @@ local pt_shim = {
     clip           = function(_x, _y, _w, _h, _clip_previous) end,
     pset           = function(_x, _y, _col) end,
     pget           = function(_x, _y) return 0 end,
-    fget           = function(n)
-        return _sprite_flags[n] or 0
+    fget           = function(n, f)
+        local flags = _sprite_flags[n] or 0
+        if f ~= nil then
+            return (flags >> f) & 1 == 1
+        end
+        return flags
     end,
     fset           = function(n, f, val)
         local flags = _sprite_flags[n] or 0
