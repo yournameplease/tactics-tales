@@ -11,15 +11,15 @@ describe("tactics.util.text", function()
     local print_spy
 
     before_each(function()
-        old_print = print
+        old_print = _G.print
         print_spy = spy.new(function(str, x, y, _color)
             return x + #str * 4, y + 8
         end)
-        print = print_spy
+        _G.print = print_spy
     end)
 
     after_each(function()
-        print = old_print
+        _G.print = old_print
     end)
 
     describe("wrapping", function()
