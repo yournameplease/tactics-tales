@@ -39,4 +39,10 @@ function TaskManager:update_tasks()
     end
 end
 
+--- Return true when there are no active or pending tasks.
+---@return boolean
+function TaskManager:is_idle()
+    return #self.tasks == 0
+end
+
 return tasks

@@ -70,4 +70,25 @@ describe("tactics.systems.tasks", function()
             end)
         end)
     end)
+
+    describe("is_idle", function()
+        it("should return true when no tasks are queued", function()
+            local tm = tasks.task_manager()
+            luassert.is_true(tm:is_idle())
+        end)
+
+        it("should return false while a task is pending", function()
+            local tm = tasks.task_manager()
+            tm:start_routine(function() coroutine.yield() end)
+            luassert.is_false(tm:is_idle())
+        end)
+
+        it("should return true after all tasks run and are cleaned up", function()
+            local tm = tasks.task_manager()
+            tm:start_routine(function() end)
+            tm:update_tasks() -- runs task to completion; task still in list as dead
+            tm:update_tasks() -- cleans up dead task
+            luassert.is_true(tm:is_idle())
+        end)
+    end)
 end)
