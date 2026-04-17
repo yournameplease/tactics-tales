@@ -4,9 +4,9 @@
 
 local M = {}
 
---- Passable floor tile: flags 0x00, not solid, terrain type 0, movement cost 1.
+--- Passable floor tile: flag bit 0 clear. Terrain defaults to index 0 (movement_cost=1).
 M.FLOOR = 1
---- Impassable solid tile: flags 0x01, solid bit set, movement cost 999.
+--- Impassable solid tile: flag bit 0 set, blocked by pathfinder.
 M.SOLID = 2
 
 --- Set sprite flags for FLOOR and SOLID. Idempotent — safe to call multiple times.
