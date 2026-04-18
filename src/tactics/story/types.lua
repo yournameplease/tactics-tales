@@ -75,7 +75,19 @@ local TextInputNode = {}
 ---@field next_node NodeId Node to jump to.
 local JumpNode = {}
 
+---@alias StoryConfigDefinition table<string, StoryConfigDefinitionEntry>
+ 
+---@class StoryConfigDefinitionEntry
+---@field name string 
+---@field description string 
+---@field options StoryConfigOption[]
+
+---@class StoryConfigOption
+---@field name string
+---@field value string
+
 ---@class StoryDefinition
+---@field config? StoryConfigDefinition
 ---@field nodes table<NodeId, StoryNode[]> Maps each node ID to a sequence of nodes played in order.
 ---@field starting_node NodeId ID of the first node played when the story begins.
 local StoryDefinition = {}
