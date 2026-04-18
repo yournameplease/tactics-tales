@@ -5,6 +5,7 @@
 local id_generator = require("src.tactics.util.id_generator")
 
 ---@alias EventArgs table<string, any>
+---@alias ListenerId integer Unique subscription ID returned by EventBus:on.
 
 -- TODO: distinguish commands (menu actions) from events?
 
@@ -22,7 +23,7 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "GAME_EXIT_STORY"
 
 ---@class EventCallback
----@field id integer Unique subscription ID used to remove this callback.
+---@field id ListenerId Unique subscription ID used to remove this callback.
 ---@field callback fun(args: EventArgs) Function invoked when the event fires.
 
 ---@class EventBus
@@ -49,7 +50,7 @@ end
 --- Register `callback` to be called whenever `event_name` is emitted.
 ---@param event_name GameEvent Event to subscribe to.
 ---@param callback fun(args: EventArgs) Function invoked with the event's arguments.
----@return integer Subscription ID; pass to `remove` to unsubscribe.
+---@return ListenerId Subscription ID; pass to `remove` to unsubscribe.
 function EventBus:on(event_name, callback)
     if not self.listeners[event_name] then
         self.listeners[event_name] = {}
@@ -63,7 +64,7 @@ function EventBus:on(event_name, callback)
 end
 
 --- Remove the subscription with the given ID.
----@param id integer Subscription ID returned by `on`.
+---@param id ListenerId Subscription ID returned by `on`.
 function EventBus:remove(id)
     -- lazy: scan all event slots
     for _, slots in pairs(self.listeners) do
@@ -78,7 +79,7 @@ function EventBus:remove(id)
 end
 
 --- Remove all subscriptions whose IDs are keys in `ids`.
----@param ids table<integer, boolean> Set of subscription IDs to remove.
+---@param ids table<ListenerId, boolean> Set of subscription IDs to remove.
 function EventBus:remove_all(ids)
     for id, _ in pairs(ids) do
         self:remove(id)
