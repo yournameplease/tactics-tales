@@ -420,7 +420,7 @@ describe("battle.battle_map", function()
             map.layers = layers
             -- fget returns 0 by default → terrain index 0 → movement_cost=1, solid=false
             local result = map:get_terrain(point.of(0, 0))
-            luassert.is_not_nil(result)
+            assert(result)
             luassert.are_equal(1, result.movement_cost)
             luassert.is_false(result.solid)
         end)
@@ -434,6 +434,7 @@ describe("battle.battle_map", function()
             _G.fget = function(_) return 0x1 end
             local result = map:get_terrain(point.of(0, 0))
             _G.fget = original_fget
+            assert(result)
             luassert.is_true(result.solid)
         end)
 
@@ -447,6 +448,7 @@ describe("battle.battle_map", function()
             _G.fget = function(_) return 0xD end
             local result = map:get_terrain(point.of(0, 0))
             _G.fget = original_fget
+            assert(result)
             luassert.is_true(result.solid)
             luassert.are_equal(5, result.movement_cost)
         end)
