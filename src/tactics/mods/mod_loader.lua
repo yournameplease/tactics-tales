@@ -63,7 +63,7 @@ end
 
 --- Load a dictionary of definitions by merging data from all registered mods.
 ---@param registered RegisteredMod[]
----@param get_path fun(mod: RegisteredMod): string|nil Returns path relative to mod root (no .lua extension).
+---@param get_path fun(mod: RegisteredMod): string? Returns path relative to mod root (no .lua extension).
 ---@param get_data? fun(spec: table<string, any>): table<any, any> Extracts the relevant subtable; defaults to returning the whole spec.
 ---@return table<any, any>
 local function load_mod_map(registered, get_path, get_data)
@@ -94,7 +94,7 @@ end
 
 --- Load a single value by taking the most recently declared entry from all registered mods.
 ---@param registered RegisteredMod[]
----@param get_path fun(mod: RegisteredMod): string|nil Returns path relative to mod root (no .lua extension).
+---@param get_path fun(mod: RegisteredMod): string? Returns path relative to mod root (no .lua extension).
 ---@param get_data fun(spec: table<string, any>): any Extracts the relevant value from the included file.
 ---@return any
 local function load_mod_val(registered, get_path, get_data)

@@ -150,8 +150,8 @@ function NestedMenuNode:refresh_focus()
 end
 
 --- Claim focus, updating the focused index to match the child that initiated the claim.
----@param _selection MenuMouseSelection|nil
----@param child MenuNode|nil
+---@param _selection MenuMouseSelection?
+---@param child MenuNode?
 function NestedMenuNode:claim_focus(_selection, child)
     self.has_focus = true
     if child ~= nil then
@@ -208,7 +208,7 @@ function NestedMenuNode:serialize()
 end
 
 --- Restore the focused index and child states from serialized data.
----@param state SerializedMenuState|nil
+---@param state SerializedMenuState?
 ---@param data table<string, any>
 function NestedMenuNode:deserialize(state, data)
     if state ~= nil and state.type == "list" then
@@ -230,7 +230,7 @@ function NestedMenuNode:recompute(game_ctx, menu_ctx)
 end
 
 --- Build a NestedMenuNode from this definition.
----@param parent MenuNode|nil
+---@param parent MenuNode?
 ---@param game_ctx GameContext
 ---@param menu_ctx MenuContext
 ---@param menu_state MenuState

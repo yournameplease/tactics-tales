@@ -74,7 +74,7 @@ function UIContextManager:enrich()
         self.game_context:enrich()
     end
 
-    ---@type UIContext|nil
+    ---@type UIContext?
     local primary_context
     if self.battle_context ~= nil then
         primary_context = self.battle_context

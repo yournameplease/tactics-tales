@@ -209,7 +209,7 @@ function BattleHarness:emitted(event_type)
 end
 
 --- Return the battle result string ("VICTORY" or "DEFEAT"), or nil if battle is ongoing.
----@return string|nil
+---@return string?
 function BattleHarness:battle_result()
     return self._battle_result
 end

@@ -384,7 +384,7 @@ Binary string length; 24 bytes
 51 52 53 54 55 56 57 58                            QRSTUVWX
 ```
 ]]
----@param callback fun(obj:any):string|nil
+---@param callback fun(obj:any):string?
 function luassert:add_formatter(callback) end
 
 ---@param fmtr function

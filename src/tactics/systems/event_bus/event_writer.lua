@@ -22,7 +22,7 @@ end
 
 --- Emit `event_name` with `args` on the underlying bus.
 ---@param event_name GameEvent Event to emit.
----@param args EventArgs|nil Arguments forwarded to each listener.
+---@param args EventArgs? Arguments forwarded to each listener.
 function EventWriter:emit(event_name, args)
     self.bus:emit(event_name, args)
 end

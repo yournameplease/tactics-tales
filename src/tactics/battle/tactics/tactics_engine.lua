@@ -271,7 +271,7 @@ end
 
 --- Spawn all units and optionally play a slide-in animation from the given direction.
 ---@param units UnitSpawnData[]
----@param anim UnitSpawnAnimation|nil
+---@param anim UnitSpawnAnimation?
 ---@param blocked_behavior UnitSpawnBlockedBehavior
 function TacticsEngine:spawn_all(units, anim, blocked_behavior)
     local spawned = {}
@@ -749,7 +749,7 @@ end
 ---@param tile_x integer
 ---@param tile_y integer
 ---@param min_distance integer
----@param max_distance integer|nil Defaults to `min_distance`.
+---@param max_distance integer? Defaults to `min_distance`.
 ---@return Array2D
 function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance

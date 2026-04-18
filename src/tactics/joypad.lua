@@ -49,8 +49,8 @@
 ---@class InputService
 ---@field current_input InputMethod The currently active input method.
 ---@field private actions InputActions Persistent action state table updated each frame.
----@field private previous_input InputMethod|nil The active input method from the previous frame.
----@field private mouse_prev Mouse|nil The mouse state from the previous frame, or nil on the first frame.
+---@field private previous_input InputMethod? The active input method from the previous frame.
+---@field private mouse_prev Mouse? The mouse state from the previous frame, or nil on the first frame.
 local InputService = {}
 InputService.__index = InputService
 

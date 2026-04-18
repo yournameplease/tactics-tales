@@ -32,7 +32,7 @@ local item = {
 ---@param sprite_data ItemSpriteData
 ---@param equipment_effects EquipmentEffect[]
 ---@param appearance_overrides any
----@param weapon Weapon|nil
+---@param weapon Weapon?
 ---@return Item
 function item.new(id, name, item_type, slots, equip_slot, sprite_data, equipment_effects, appearance_overrides, weapon)
     ---@type Item
