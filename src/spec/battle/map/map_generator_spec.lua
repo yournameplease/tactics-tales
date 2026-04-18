@@ -28,6 +28,7 @@ end
 ---@return fun()
 local function stub_fetch(result)
     local original = _G.fetch
+    ---@diagnostic disable-next-line: duplicate-set-field
     _G.fetch = function(_) return result end
     return function() _G.fetch = original end
 end

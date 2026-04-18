@@ -19,6 +19,7 @@ function map_fetch_interceptor.new()
     self._registry = {}
     self._original_fetch = _G.fetch
 
+    ---@diagnostic disable-next-line: duplicate-set-field
     _G.fetch = function(path)
         local data = self._registry[path]
         if data ~= nil then
