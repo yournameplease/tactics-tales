@@ -8,7 +8,7 @@
 local UnitDeathResult = {}
 
 ---@class StoryChapterResult
----@field battle_id string
+---@field battle_id BattleId
 ---@field turns_taken integer
 ---@field result BattleEndResult
 ---@field units_lost UnitDeathResult[]

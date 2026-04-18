@@ -38,7 +38,7 @@ local battle_manager = {
 
 --- Create and initialize a new BattleManager for the given battle.
 ---@param chapter integer
----@param battle_id string
+---@param battle_id BattleId
 ---@param story_config StoryConfig
 ---@param game_data GameData
 ---@param char_man CharacterManager
