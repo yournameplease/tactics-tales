@@ -30,11 +30,11 @@ local MapLayers = {}
 ---@class BattleMap
 ---@field width integer
 ---@field height integer
----@field units_by_id table<integer, BattleUnit> Active units keyed by ID.
+---@field units_by_id table<UnitId, BattleUnit> Active units keyed by ID.
 ---@field units_by_x_y Array2D<BattleUnit> Active units keyed by tile position.
 ---@field dead_units BattleUnit[] Units that have been killed this battle.
----@field interactions_by_unit_id table<integer, table<integer, UnitInteractionHook>>
----@field interactions_by_x_y Array2D<table<TileDistance, table<integer, TileInteractionHook>>>
+---@field interactions_by_unit_id table<UnitId, table<ScriptId, UnitInteractionHook>>
+---@field interactions_by_x_y Array2D<table<TileDistance, table<ScriptId, TileInteractionHook>>>
 ---@field tile_labels table<string, Point[]> Points grouped by semantic tile label.
 ---@field layers MapLayers Sprite layers making up the map.
 ---@field metadata MapMetadata Spawn point and event metadata.
@@ -220,7 +220,7 @@ function BattleMap:spawn_unit(unit, tile)
 end
 
 --- Remove the unit with the given ID from the map.
----@param unit_id integer
+---@param unit_id UnitId
 function BattleMap:remove_unit(unit_id)
     local unit = self.units_by_id[unit_id]
     assert(unit.id ~= nil)
@@ -307,7 +307,7 @@ end
 
 
 --- Return all enemy units in weapon range of `unit_id` from `tile`.
----@param unit_id integer
+---@param unit_id UnitId
 ---@param tile Point
 ---@return BattleUnit[]
 function BattleMap:get_targets_in_range(unit_id, tile)
@@ -357,7 +357,7 @@ function BattleMap:get_all_units()
 end
 
 --- Remove all registered interactions for `script_id` from the map.
----@param script_id integer
+---@param script_id ScriptId
 function BattleMap:unregister_interaction(script_id)
     self.interactions_by_x_y:foreachpoint(function(_, i)
         for _, interactions in pairs(i) do
@@ -372,7 +372,7 @@ end
 
 --- Register a tile interaction triggered when a unit is at or adjacent to `tile`.
 ---@param tile Point
----@param script_id integer
+---@param script_id ScriptId
 ---@param interaction_text string Prompt shown to the player.
 ---@param interaction_distance TileDistance
 function BattleMap:register_tile_interaction(tile, script_id, interaction_text, interaction_distance)
@@ -399,7 +399,7 @@ end
 
 --- Register a unit interaction triggered when a unit is adjacent to `unit`.
 ---@param unit BattleUnit
----@param script_id integer
+---@param script_id ScriptId
 ---@param interaction_text string Prompt shown to the player.
 function BattleMap:register_unit_interaction(unit, script_id, interaction_text)
     log.debug("Registering unit interaction: ", unit, script_id)

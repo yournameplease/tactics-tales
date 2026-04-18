@@ -7,6 +7,7 @@ local targeting = require("src.tactics.character.items.object.weapon").targeting
 local lists = require("src.tactics.util.lists")
 
 ---@alias Side "player"|"enemy"|"neutral"
+---@alias CharacterId integer Unique persistent ID of a Character instance.
 
 ---@alias CharacterAppearanceKey "head"|"hair"|"skin"|"hair_color"|"body_class"|"beard"|"eyes"|"eyewear"|"headwear"
 
@@ -33,7 +34,7 @@ local CharacterStats = {}
 
 --- Serializable snapshot of a character, used for save/load.
 ---@class SerializedCharacter
----@field id integer
+---@field id CharacterId
 ---@field name string
 ---@field appearance CharacterAppearance
 ---@field stats CharacterStats
@@ -43,7 +44,7 @@ local SerializedCharacter = {}
 
 --- A persistent game character with inventory and derived appearance.
 ---@class Character
----@field id integer
+---@field id CharacterId
 ---@field name string
 ---@field appearance CharacterAppearance Base appearance before equipment overrides.
 ---@field stats CharacterStats

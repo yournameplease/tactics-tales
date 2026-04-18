@@ -48,7 +48,7 @@ local RosterAddNode = {}
 
 ---@class BattleNode : StoryNode Starts a battle and branches on the outcome.
 ---@field type "battle"
----@field battle_id string ID of the battle definition to load.
+---@field battle_id BattleId ID of the battle definition to load.
 ---@field next_node_victory NodeId Node to jump to if the player wins.
 ---@field next_node_failure NodeId Node to jump to if the player loses.
 local BattleNode = {}
