@@ -14,3 +14,6 @@ tactics.p64/lib
 .claude
 
 docs/todos/
+/luacov.report.html
+/luacov.report.out
+/luacov.stats.out
