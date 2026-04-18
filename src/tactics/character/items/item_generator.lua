@@ -6,8 +6,8 @@ local item_mod = require("src.tactics.character.items.object.item")
 local item_generator = {}
 
 --- Create a Weapon from a WeaponDefinition by inheriting its fields via metatable.
----@param def WeaponDefinition|nil
----@return Weapon|nil
+---@param def WeaponDefinition?
+---@return Weapon?
 local function generate_weapon(def)
     if def == nil then
         return nil

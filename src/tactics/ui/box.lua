@@ -452,7 +452,7 @@ function box.floating(node, x, y)
 end
 
 --- Create a spacer element that absorbs free space in flex layouts.
----@param grow integer|nil Defaults to 1.
+---@param grow integer? Defaults to 1.
 ---@return UIElement
 function box.spacer(grow)
     return box.builder("spacer")

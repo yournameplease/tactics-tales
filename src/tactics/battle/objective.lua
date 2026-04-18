@@ -118,7 +118,7 @@ local battle_objectives = {
 }
 
 --- Create a Rout victory condition: win when all enemies are defeated.
----@param text string|nil Display text for the objective.
+---@param text string? Display text for the objective.
 ---@return VictoryCondition
 function battle_objectives.rout(text)
     ---@type Rout
@@ -127,7 +127,7 @@ function battle_objectives.rout(text)
 end
 
 --- Create a DefeatTagged victory condition: win when all enemies with the given tag are defeated.
----@param text string|nil Display text for the objective.
+---@param text string? Display text for the objective.
 ---@param tag string Tag identifying the enemies that must be defeated.
 ---@return VictoryCondition
 function battle_objectives.defeat_tagged(text, tag)
@@ -137,7 +137,7 @@ function battle_objectives.defeat_tagged(text, tag)
 end
 
 --- Create a Survive victory condition: win when the turn limit is reached.
----@param text string|nil Display text for the objective.
+---@param text string? Display text for the objective.
 ---@return VictoryCondition
 function battle_objectives.survive(text)
     ---@type Survive
@@ -146,7 +146,7 @@ function battle_objectives.survive(text)
 end
 
 --- Create an Escape victory condition: win when all player units have left the map.
----@param text string|nil Display text for the objective.
+---@param text string? Display text for the objective.
 ---@return VictoryCondition
 function battle_objectives.escape(text)
     ---@type Escape
@@ -155,7 +155,7 @@ function battle_objectives.escape(text)
 end
 
 --- Create an AllPlayersDie failure condition: lose when all player units are defeated.
----@param text string|nil Display text for the failure condition.
+---@param text string? Display text for the failure condition.
 ---@return FailureCondition
 function battle_objectives.all_players_die(text)
     ---@type AllPlayersDie
@@ -164,7 +164,7 @@ function battle_objectives.all_players_die(text)
 end
 
 --- Create a TaggedPlayerDies failure condition: lose when any player unit with the given tag is killed.
----@param text string|nil Display text for the failure condition.
+---@param text string? Display text for the failure condition.
 ---@param tag string Tag identifying the player unit(s) that must survive.
 ---@return FailureCondition
 function battle_objectives.tagged_player_dies(text, tag)
@@ -174,7 +174,7 @@ function battle_objectives.tagged_player_dies(text, tag)
 end
 
 --- Create a TurnLimit failure condition: lose when the turn limit is exceeded.
----@param text string|nil Display text for the failure condition.
+---@param text string? Display text for the failure condition.
 ---@return FailureCondition
 function battle_objectives.turn_limit(text)
     ---@type TurnLimitCondition

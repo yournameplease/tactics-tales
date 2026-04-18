@@ -136,7 +136,7 @@ end
 
 --- Return terrain data for `tile`, or nil if the tile has no ground sprite.
 ---@param tile Point
----@return TerrainData|nil
+---@return TerrainData?
 function BattleMap:get_terrain(tile)
     local ground = self.layers.terrain.ground
     local back_wall = self.layers.terrain.back_wall
@@ -191,14 +191,14 @@ end
 
 --- Return the unit with the given ID, or nil.
 ---@param id integer
----@return BattleUnit|nil
+---@return BattleUnit?
 function BattleMap:get_unit_by_id(id)
     return self.units_by_id[id]
 end
 
 --- Return the unit occupying `tile`, or nil.
 ---@param tile Point
----@return BattleUnit|nil
+---@return BattleUnit?
 function BattleMap:get_at_tile(tile)
     if not self.units_by_x_y:is_point_in_range(tile) then
         return nil

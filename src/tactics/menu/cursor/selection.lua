@@ -118,7 +118,7 @@ function SelectionMenuNode:refresh_focus()
 end
 
 --- Claim focus for this node and propagate to parent.
----@param _selection MenuMouseSelection|nil
+---@param _selection MenuMouseSelection?
 ---@param _child MenuNode
 function SelectionMenuNode:claim_focus(_selection, _child)
     self.has_focus = true
@@ -164,7 +164,7 @@ function SelectionMenuNode:serialize()
 end
 
 --- Restore the selection from serialized data by matching option values.
----@param _state SerializedMenuState|nil
+---@param _state SerializedMenuState?
 ---@param data table<string, any>
 function SelectionMenuNode:deserialize(_state, data)
     local value = data[self.key]
@@ -184,7 +184,7 @@ function SelectionMenuNode:recompute(_game_ctx, _menu_ctx)
 end
 
 --- Build a SelectionMenuNode from this definition.
----@param parent MenuNode|nil
+---@param parent MenuNode?
 ---@param game_ctx GameContext
 ---@param menu_ctx MenuContext
 ---@param _menu_state MenuState

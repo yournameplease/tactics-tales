@@ -46,8 +46,8 @@ function Game:load_story(file_name)
 end
 
 --- Start a new story, either from scratch or from a save file.
----@param file_name string|nil Save file path, or nil for a new story.
----@param story_id StoryId|nil Story to start; defaults to the game's default story.
+---@param file_name string? Save file path, or nil for a new story.
+---@param story_id StoryId? Story to start; defaults to the game's default story.
 function Game:begin_story(file_name, story_id)
     local game_data = self.mod_loader:load_mod_data()
     if file_name == nil then -- unsaved story

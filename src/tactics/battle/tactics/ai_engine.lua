@@ -112,7 +112,7 @@ function AIEngine:compute_unit_ai(unit)
         max_move
     )
 
-    ---@type ShallowMovementOption|nil
+    ---@type ShallowMovementOption?
     local best_shallow_action = nil
     ---@type DeepMovementOption[]
     local deep_actions = {}
