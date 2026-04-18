@@ -245,7 +245,7 @@ end
 
 --- Recursively convert a MenuNode into a UIElement for the strip/block container style.
 ---@param node MenuNode
----@return UIElement|nil
+---@return UIElement?
 local function generate_menu_node_element(node)
 	if node.type == "grid" then
 		---@cast node NestedGridNode
@@ -293,7 +293,8 @@ local function generate_menu_node_element(node)
 			self:add(box.spacer(1))
 		end
 		for _,child in ipairs(node.children) do
-			self:add(generate_menu_node_element(child))
+			local element = generate_menu_node_element(child)
+			if element then self:add(element) end
 			if node.direction == "row" then
 				self:add(box.spacer(1))
 			end
@@ -317,7 +318,7 @@ end
 
 --- Recursively convert a MenuNode into a UIElement for the modal container style.
 ---@param node MenuNode
----@return UIElement|nil
+---@return UIElement?
 local function generate_menu_modal_element(node)
 	if node.type == "list" then
 		---@cast node NestedMenuNode
@@ -335,7 +336,8 @@ local function generate_menu_modal_element(node)
 		local self = builder:build()
 
 		for _,child in ipairs(node.children) do
-			self:add(generate_menu_node_element(child))
+			local element = generate_menu_node_element(child)
+			if element then self:add(element) end
 		end
 
 		return self

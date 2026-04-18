@@ -118,7 +118,7 @@ describe("tactics.character.character_manager", function()
             manager:persist_player(char)
 
             local found = manager:get_character(char.id)
-
+            assert(found)
             luassert.are_equal(char.id, found.id)
         end)
     end)

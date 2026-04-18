@@ -87,7 +87,7 @@ end
 
 --- Emit `event_name`, invoking all registered callbacks with `args`.
 ---@param event_name GameEvent Event to emit.
----@param args EventArgs|nil Arguments forwarded to each callback.
+---@param args EventArgs? Arguments forwarded to each callback.
 function EventBus:emit(event_name, args)
     log.debug("Received event", event_name)
     if args ~= nil then

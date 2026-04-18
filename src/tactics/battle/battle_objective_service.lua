@@ -8,12 +8,12 @@ local lists = require("src.tactics.util.lists")
 
 ---@class BattleFinishState
 ---@field finished boolean Whether the battle has ended.
----@field result BattleEndResult|nil Game event to emit on finish; nil when battle continues.
+---@field result? BattleEndResult Game event to emit on finish; nil when battle continues.
 local BattleFinishState = {}
 
 ---@class BattleObjectiveService Abstract interface for checking and displaying battle objectives.
 ---@field package battle_map table BattleMap used to inspect unit positions and deaths.
----@field package turn_limit integer|nil Maximum number of turns before the turn-limit condition triggers.
+---@field package turn_limit integer? Maximum number of turns before the turn-limit condition triggers.
 ---@field package victory_conditions VictoryCondition[] Active victory conditions to evaluate each turn.
 ---@field package failure_conditions FailureCondition[] Active failure conditions to evaluate each turn.
 local BattleObjectiveService = {}
@@ -23,9 +23,9 @@ local battle_objective_service = {}
 
 --- Create a new BattleObjectiveService with the given map, turn limit, and objective definitions.
 ---@param map table BattleMap — the current battle map used to inspect unit positions and deaths.
----@param turn_limit integer|nil Maximum turns; nil means no turn limit.
----@param victory_conditions VictoryConditionDef[]|nil Definitions to convert into active conditions.
----@param failure_conditions FailureConditionDef[]|nil Definitions to convert into active conditions.
+---@param turn_limit integer? Maximum turns; nil means no turn limit.
+---@param victory_conditions VictoryConditionDef[]? Definitions to convert into active conditions.
+---@param failure_conditions FailureConditionDef[]? Definitions to convert into active conditions.
 ---@return BattleObjectiveService
 function battle_objective_service.new(map, turn_limit, victory_conditions, failure_conditions)
     victory_conditions = victory_conditions or {}

@@ -19,7 +19,7 @@ function mock_filesystem.new()
         files = {},
     }, MockFilesystem)
 
-    include = function(path)
+    _G.include = function(path)
         local dir = self.files
         for word in string.gmatch(path, "[%a%.]+/") do
             local next_dir = dir[word]
@@ -35,7 +35,7 @@ function mock_filesystem.new()
         return dir[file_name]
     end
 
-    ls = function(path)
+    _G.ls = function(path)
         local dir = self.files
         for word in string.gmatch(path, "[%a%.]+") do
             local next_dir = dir[word]

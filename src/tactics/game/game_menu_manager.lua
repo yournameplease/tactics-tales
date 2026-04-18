@@ -25,7 +25,7 @@ local HANDLERS = {}
 ---@param _menu_data table<string, any>
 ---@param session_context MainMenuContext
 ---@param file StoryId
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["store_selected_save"] = function(_services, _menu_data, session_context, file)
     session_context.selected_file = file
     return nil
@@ -36,7 +36,7 @@ end
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param file string
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["begin_file"] = function(services, _menu_data, _session_context, file)
     services.handle_begin_story(file, services.default_story_id)
     return nil
@@ -47,7 +47,7 @@ end
 ---@param _menu_data table<string, any>
 ---@param session_context MainMenuContext
 ---@param _story_id StoryId
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["begin_file_from_context"] = function(services, _menu_data, session_context, _story_id)
     services.handle_begin_story(session_context.selected_file, services.default_story_id)
     return nil
@@ -58,7 +58,7 @@ end
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param file StoryId
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["load_story"] = function(services, _menu_data, _session_context, file)
     services.handle_load_story(file)
     return nil
@@ -69,7 +69,7 @@ end
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param story_id StoryId
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["begin_chapter"] = function(services, _menu_data, _session_context, story_id)
     services.handle_begin_story(nil, story_id)
     return nil
@@ -80,7 +80,7 @@ end
 ---@param menu_data DynamicConfig
 ---@param _session_context MainMenuContext
 ---@param _value any
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["set_options"] = function(services, menu_data, _session_context, _value)
     services.config_manager:store_config(menu_data)
     return nil
@@ -91,7 +91,7 @@ end
 ---@param _menu_data DynamicConfig
 ---@param _session_context MainMenuContext
 ---@param _value any
----@return MenuHandlerPostHandling|nil
+---@return MenuHandlerPostHandling?
 HANDLERS["reset_options"] = function(services, _menu_data, _session_context, _value)
     services.config_manager:reset_config()
     return nil

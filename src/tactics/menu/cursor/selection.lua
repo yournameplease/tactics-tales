@@ -16,8 +16,8 @@ local lists = require("src.tactics.util.lists")
 ---@field type "selection"
 ---@field i integer 1-based index of the currently selected option.
 ---@field options SelectionMenuOption[]
----@field label string|nil Optional label shown alongside the selection.
----@field key string|nil Key used when serializing the selected value into menu data.
+---@field label? string Optional label shown alongside the selection.
+---@field key? string Key used when serializing the selected value into menu data.
 ---@field direction SelectionDirection Axis along which joypad input moves the selection.
 ---@field wrap boolean When true, navigating past the end wraps to the beginning.
 local SelectionMenuNode = {}
@@ -25,8 +25,8 @@ SelectionMenuNode.__index = SelectionMenuNode
 
 ---@class SelectionMenuDefinition : MenuLeafDefinition
 ---@field type "selection"
----@field label string|nil
----@field key string|nil Serialization key for the selected value.
+---@field label? string
+---@field key? string Serialization key for the selected value.
 ---@field get_options fun(game_ctx: GameContext, menu_ctx: MenuContext): SelectionMenuOption[]
 ---@field wrap boolean
 ---@field direction SelectionDirection
@@ -118,7 +118,7 @@ function SelectionMenuNode:refresh_focus()
 end
 
 --- Claim focus for this node and propagate to parent.
----@param _selection MenuMouseSelection|nil
+---@param _selection MenuMouseSelection?
 ---@param _child MenuNode
 function SelectionMenuNode:claim_focus(_selection, _child)
     self.has_focus = true
@@ -164,7 +164,7 @@ function SelectionMenuNode:serialize()
 end
 
 --- Restore the selection from serialized data by matching option values.
----@param _state SerializedMenuState|nil
+---@param _state SerializedMenuState?
 ---@param data table<string, any>
 function SelectionMenuNode:deserialize(_state, data)
     local value = data[self.key]
@@ -184,7 +184,7 @@ function SelectionMenuNode:recompute(_game_ctx, _menu_ctx)
 end
 
 --- Build a SelectionMenuNode from this definition.
----@param parent MenuNode|nil
+---@param parent MenuNode?
 ---@param game_ctx GameContext
 ---@param menu_ctx MenuContext
 ---@param _menu_state MenuState

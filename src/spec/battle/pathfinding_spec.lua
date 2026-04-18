@@ -12,8 +12,8 @@ local point = require("src.tactics.util.point")
 --- get_at_tile_fn(x, y) should return a unit-shaped table or nil (optional).
 ---@param w integer
 ---@param h integer
----@param get_terrain_fn fun(x: integer, y: integer): table|nil
----@param get_at_tile_fn? fun(x: integer, y: integer): table|nil
+---@param get_terrain_fn fun(x: integer, y: integer): table?
+---@param get_at_tile_fn? fun(x: integer, y: integer): table?
 ---@return table
 local function make_mock_map(w, h, get_terrain_fn, get_at_tile_fn)
     local map = { width = w, height = h }

@@ -14,10 +14,10 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
----@field next_state string|nil Step to navigate to on select.
----@field final_step boolean|nil When true, finish the menu on select.
----@field go_back boolean|nil When true, go back on select.
----@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
+---@field next_state? string Step to navigate to on select.
+---@field final_step? boolean When true, finish the menu on select.
+---@field go_back? boolean When true, go back on select.
+---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 local ButtonCursor = {}
 ButtonCursor.__index = ButtonCursor
 
@@ -25,10 +25,10 @@ ButtonCursor.__index = ButtonCursor
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
----@field next_state string|nil Step to navigate to on select.
----@field final_step boolean|nil When true, finish the menu on select.
----@field go_back boolean|nil When true, go back on select.
----@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
+---@field next_state? string Step to navigate to on select.
+---@field final_step? boolean When true, finish the menu on select.
+---@field go_back? boolean When true, go back on select.
+---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 local ButtonDefinition = {}
 ButtonDefinition.__index = ButtonDefinition
 
@@ -79,7 +79,7 @@ function ButtonCursor:refresh_focus()
 end
 
 --- Claim focus for this button and propagate to parent.
----@param _selection MenuMouseSelection|nil
+---@param _selection MenuMouseSelection?
 ---@param _child MenuNode
 function ButtonCursor:claim_focus(_selection, _child)
     self.has_focus = true
@@ -141,7 +141,7 @@ function ButtonCursor:serialize()
 end
 
 --- Deserialize previously saved state (no-op for buttons).
----@param _state SerializedMenuState|nil
+---@param _state SerializedMenuState?
 ---@param _data table<string, any>
 function ButtonCursor:deserialize(_state, _data)
 end
@@ -153,7 +153,7 @@ function ButtonCursor:recompute(_game_ctx, _menu_ctx)
 end
 
 --- Build a ButtonCursor from this definition.
----@param parent MenuNode|nil
+---@param parent MenuNode?
 ---@param _game_ctx GameContext
 ---@param _menu_ctx MenuContext
 ---@param _menu_state MenuState

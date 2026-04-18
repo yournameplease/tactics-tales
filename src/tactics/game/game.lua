@@ -28,7 +28,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@field mod_loader ModLoader
 ---@field config_manager ConfigManager
 ---@field default_story StoryId
----@field story Story|nil
+---@field story? Story
 ---@field event_listener EventListener
 ---@field event_writer EventWriter
 ---@field music_player MusicPlayer

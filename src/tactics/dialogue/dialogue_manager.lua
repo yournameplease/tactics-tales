@@ -56,7 +56,7 @@ end
 --- Missing keys render as `default_value` when provided, otherwise as `[MISSING KEY: key]`.
 ---@param text string[]
 ---@param replacement_vars table<string,string>
----@param default_value string|nil
+---@param default_value string?
 ---@return string[]
 local function replace_text(text, replacement_vars, default_value)
     return lists.map(function(t)

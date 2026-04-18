@@ -496,7 +496,7 @@ describe("tactics.ui.box", function()
         ---@param y integer
         ---@param w integer
         ---@param h integer
-        ---@param hover_event table|nil
+        ---@param hover_event table?
         ---@return UIElement
         local function make_placed(id, x, y, w, h, hover_event)
             local elem = make_fixed(id, w, h)

@@ -318,7 +318,7 @@ function Story:submit_text(text)
 end
 
 --- Create and start a new story instance from the beginning.
----@param save_name? string
+---@param save_name string? Save file path, or nil for an unsaved story.
 ---@param story_id string
 ---@param game_data GameData
 ---@param story_config StoryConfig

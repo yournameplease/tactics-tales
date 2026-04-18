@@ -11,7 +11,7 @@
 ---@class TypeSchemaDefinition : SchemaDefinition
 ---@field type "type"
 ---@field pt_type string Lua type string as returned by `type()`.
----@field math_type string|nil Math subtype as returned by `math.type()`; nil if unconstrained.
+---@field math_type? string Math subtype as returned by `math.type()`; nil if unconstrained.
 
 ---@class DictionarySchemaDefinition : SchemaDefinition
 ---@field type "dictionary"

@@ -33,7 +33,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "navigate"
 ---@field next_step string Step to navigate to.
 
----@alias MenuHandler fun(services: GameContext, menu_data: table<string, any>, session_context: MenuContext, value: any): MenuHandlerPostHandling|nil
+---@alias MenuHandler fun(services: GameContext, menu_data: table<string, any>, session_context: MenuContext, value: any): MenuHandlerPostHandling?
 
 local menu_handler = {}
 
@@ -71,23 +71,23 @@ function menu_handler.then_move_cursor(pt)
 end
 
 ---@class ActiveMenuStep Active state for a single menu step.
----@field previous_step string|nil Step to return to on back.
----@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
+---@field previous_step? string Step to return to on back.
+---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 ---@field node MenuNode Active root node for this step.
----@field default_lmb string|nil Default command for left mouse button.
----@field default_rmb string|nil Default command for right mouse button.
----@field menu_actions MenuActions|nil Map from InputAction to MenuAction.
+---@field default_lmb? string Default command for left mouse button.
+---@field default_rmb? string Default command for right mouse button.
+---@field menu_actions? MenuActions Map from InputAction to MenuAction.
 local MenuStep = {}
 MenuStep.__index = MenuStep
 
 ---@class MenuStepDefinition Build spec for a single menu step.
----@field previous_step string|nil
----@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
+---@field previous_step? string
+---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 ---@field node MenuNodeDefinition Root node definition.
----@field default_lmb string|nil
----@field default_rmb string|nil
----@field initial_data (fun(game_ctx: GameContext, menu_ctx: MenuContext): table<string, any>)|nil
----@field menu_actions MenuActions|nil
+---@field default_lmb? string
+---@field default_rmb? string
+---@field initial_data (fun(game_ctx: GameContext, menu_ctx: MenuContext): table<string, any>)?
+---@field menu_actions? MenuActions
 local MenuStepDefinition = {}
 MenuStepDefinition.__index = MenuStepDefinition
 
@@ -190,16 +190,16 @@ end
 ---@field steps table<string, MenuStepDefinition> All step definitions keyed by step ID.
 
 ---@class MenuManagerSerializedMenu
----@field menu_id string|nil Active menu ID; nil when no menu is open.
----@field step string|nil Active step ID.
----@field node SerializedMenu|nil Serialized root node state.
+---@field menu_id? string Active menu ID; nil when no menu is open.
+---@field step? string Active step ID.
+---@field node? SerializedMenu Serialized root node state.
 
 ---@class MenuManager Abstract interface for menu managers.
 ---@field menu_definitions table<string, MenuDefinition>
 ---@field menu_handlers table<string, MenuHandler>
 ---@field menu_state MenuState
----@field menu_ctx MenuContext|nil
----@field menu_step ActiveMenuStep|nil Active step node and bindings; nil when no menu is open.
+---@field menu_ctx? MenuContext
+---@field menu_step? ActiveMenuStep Active step node and bindings; nil when no menu is open.
 ---@field selection_history SelectionHistory[]
 ---@field revision_count integer Incremented on every structural change; used by UI to detect dirty state.
 ---@field game_ctx GameContext
@@ -266,7 +266,7 @@ function BaseMenuManager:populate_menu_state(new_step)
 end
 
 --- Record the current step in history and advance to next_state.
----@param next_state string|nil Target step ID; nil is a no-op navigation.
+---@param next_state string? Target step ID; nil is a no-op navigation.
 function BaseMenuManager:handle_menu_advance(next_state)
     table.insert(self.selection_history, { step = self.menu_state.step })
 

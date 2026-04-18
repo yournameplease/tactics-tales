@@ -1,5 +1,5 @@
 local luassert = require("luassert")
-local music_player = require("tactics/music/music_player")
+local music_player = require("src.tactics.music.music_player")
 
 describe("tactics.music.music_player", function()
     local player
@@ -10,16 +10,16 @@ describe("tactics.music.music_player", function()
     before_each(function()
         player = music_player.new()
         music_calls = {}
-        original_music = music
-        original_stat = stat
-        music = function(n, fade_len, _ch_mask, _base_addr, offset)
+        original_music = _G.music
+        original_stat = _G.stat
+        _G.music = function(n, fade_len, _ch_mask, _base_addr, offset)
             table.insert(music_calls, { n = n, fade_len = fade_len, offset = offset })
         end
     end)
 
     after_each(function()
-        music = original_music
-        stat = original_stat
+        _G.music = original_music
+        _G.stat = original_stat
     end)
 
     describe("new", function()
@@ -44,7 +44,7 @@ describe("tactics.music.music_player", function()
 
     describe("push_music", function()
         it("should call music with the new track and offset", function()
-            stat = function(_) return 0 end
+            _G.stat = function(_) return 0 end
             player:push_music(7, 4)
             luassert.are_equal(1, #music_calls)
             luassert.are_equal(7, music_calls[1].n)
@@ -52,7 +52,7 @@ describe("tactics.music.music_player", function()
         end)
 
         it("should save the current playback position from stat(466)", function()
-            stat = function(id)
+            _G.stat = function(id)
                 if id == 466 then return 42 end
             end
             player:push_music(2, 0)

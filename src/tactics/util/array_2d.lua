@@ -85,7 +85,7 @@ end
 ---@generic V
 ---@param x integer
 ---@param y integer
----@param v V|nil Value to store at (x, y).
+---@param v V? Value to store at (x, y).
 function Array2D:set(x, y, v)
     assert(x >= 0 and y >= 0 and x < self.w and y < self.h)
     self.data[x + 1][y + 1] = v
@@ -94,7 +94,7 @@ end
 --- Set the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
----@param v V|nil Value to store at `p`.
+---@param v V? Value to store at `p`.
 function Array2D:set_point(p, v)
     self:set(p.x, p.y, v)
 end
