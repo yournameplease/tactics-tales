@@ -16,22 +16,11 @@ require("src.tactics.character.animation_data")
 ---@field type AnimationType
 ---@field playing boolean
 ---@field animated_object AnimatedSpriteData
+---@field tick fun(self: AnimationInstance)
+---@field get_sprite_frame_name fun(self: AnimationInstance, global_frame: integer): AnimationFrameName
+---@field get_animation_offset fun(self: AnimationInstance, global_frame: integer): Point
+---@field get_animation_facing fun(self: AnimationInstance, global_frame: integer): CardinalDirection
 local AnimationInstance = {}
-
-
-function AnimationInstance:tick() end
-
----@param global_frame integer
----@return AnimationFrameName
-function AnimationInstance:get_sprite_frame_name(global_frame) end
-
----@param global_frame integer
----@return Point
-function AnimationInstance:get_animation_offset(global_frame) end
-
----@param global_frame integer
----@return CardinalDirection
-function AnimationInstance:get_animation_facing(global_frame) end
 
 ---@class SpriteFrame
 ---@field sprite_name AnimationFrameName
