@@ -12,7 +12,7 @@ StatsService.__index = StatsService
 
 --- Begin a chapter result for the given battle ID, overwriting if one already exists
 ---@param id integer The chapter index
----@param battle_id string The battle id (from the current mod) 
+---@param battle_id BattleId The battle id (from the current mod)
 function StatsService:begin_chapter(
     id,
     battle_id

@@ -164,7 +164,7 @@ function BattleHarness:register_map_fetch(path, fetch_data)
 end
 
 --- Create and start a BattleManager for the named battle, then tick to idle.
----@param battle_id string
+---@param battle_id BattleId
 function BattleHarness:start_battle(battle_id)
     assert(not self._battle_manager, "start_battle() already called on this harness")
     local char_man = character_manager_mod.new(self._game_data)

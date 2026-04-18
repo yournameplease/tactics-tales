@@ -6,7 +6,7 @@
 local maps = require("src.tactics.util.maps")
 
 ---@class BattleUnit : DrawableCharacterInstance
----@field id integer
+---@field id UnitId
 ---@field tile Point Grid position on the battlefield.
 ---@field hp_current integer Current remaining hit points.
 ---@field side Side Which team this unit belongs to.
