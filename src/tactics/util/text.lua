@@ -91,6 +91,7 @@ end
 ---@return integer
 local function width_of(row)
     local w, _ = print(row, 0, -1000)
+    assert(w)
     return w
 end
 
