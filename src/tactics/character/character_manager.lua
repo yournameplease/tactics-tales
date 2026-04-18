@@ -16,13 +16,13 @@ local maps = require("src.tactics.util.maps")
 ---@class CharacterManager
 ---@field game_data table GameData used to generate characters.
 ---@field id_generator IdGenerator Generates unique character IDs.
----@field characters table<integer, Character> All known characters keyed by ID.
----@field player_ids integer[] Ordered list of IDs in the player roster.
+---@field characters table<CharacterId, Character> All known characters keyed by ID.
+---@field player_ids CharacterId[] Ordered list of IDs in the player roster.
 local CharacterManager = {}
 CharacterManager.__index = CharacterManager
 
 --- Retrieve a character by its unique ID.
----@param id integer
+---@param id CharacterId
 ---@return Character?
 function CharacterManager:get_character(id)
     return self.characters[id]
