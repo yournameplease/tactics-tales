@@ -18,7 +18,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@field default_story_id string the story_id to use if starting from main
 ---@field story_ids StoryId[] Available story IDs to present in the menu.
 ---@field stories table<StoryId, StoryDefinition> Available story IDs to present in the menu.
----@field handle_begin_story fun(save_id: string?, story_id: StoryId) Callback to start a new story.
+---@field handle_begin_story fun(save_id: string?, story_id: StoryId, config: table<string, string>) Callback to start a new story.
 ---@field handle_load_story fun(save_id: string) Callback to load an existing story save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
 ---@field config_manager ConfigManager
@@ -57,28 +57,14 @@ end
 --- Start a new story, either from scratch or from a save file.
 ---@param file_name string|nil Save file path, or nil for a new story.
 ---@param story_id StoryId Story to start; defaults to the game's default story.
-function Game:begin_story(file_name, story_id)
+---@param config table<string, string> 
+function Game:begin_story(file_name, story_id, config)
     local game_data = self.mod_loader:load_mod_data()
-    if file_name == nil then -- unsaved story
-        assert(story_id)
-        self.story = story.new(
-            nil,
-            story_id,
-            {}, -- TODO
-            game_data,
-            self.story_services_bundle.task_manager,
-            self.story_services_bundle.animation_manager,
-            self.story_services_bundle.event_bus,
-            self.music_player,
-            self.ui_context
-        )
-        return
-    end
 
     self.story = story.new(
         file_name,
         story_id,
-        {}, -- TODO
+        config,
         game_data,
         self.story_services_bundle.task_manager,
         self.story_services_bundle.animation_manager,
