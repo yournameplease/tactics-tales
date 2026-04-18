@@ -14,7 +14,7 @@ local colors = require("src.tactics.colors")
 
 ---@class DrawTargetManager
 ---@field package targets DrawTargetEntry[]
----@field package current_target DrawTargetEntry|nil
+---@field package current_target DrawTargetEntry?
 local DrawTargetManager = {}
 DrawTargetManager.__index = DrawTargetManager
 

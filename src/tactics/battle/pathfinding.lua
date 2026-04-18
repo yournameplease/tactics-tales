@@ -21,7 +21,7 @@ local lists = require("src.tactics.util.lists")
 
 ---@class ShortestPathEntry
 ---@field cost integer Total movement cost from start to this tile.
----@field prev Point|nil Previous tile in the shortest path, nil for the start tile.
+---@field prev? Point Previous tile in the shortest path, nil for the start tile.
 local ShortestPathEntry = {}
 
 ---@alias DistanceFunction fun(tile: Point): integer

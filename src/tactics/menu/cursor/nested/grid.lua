@@ -14,7 +14,7 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 
 ---@class NestedGridValue
 ---@field point Point
----@field path Point[]|nil Path from the anchor to the selected point.
+---@field path Point[]? Path from the anchor to the selected point.
 
 ---@class NestedGridChild
 ---@field filter fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): boolean Predicate; true means this child is active at position p.
@@ -25,12 +25,12 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field point Point Current cursor position (0-indexed).
 ---@field x_max integer Grid width in tiles.
 ---@field y_max integer Grid height in tiles.
----@field path Point[]|nil Pathfinding path from the anchor to the cursor position.
----@field legal_tiles userdata|nil Userdata bitmask of valid and reachable tiles.
----@field max_path_length integer|nil Maximum allowed path length.
+---@field path Point[]? Pathfinding path from the anchor to the cursor position.
+---@field legal_tiles? userdata Userdata bitmask of valid and reachable tiles.
+---@field max_path_length? integer Maximum allowed path length.
 ---@field children NestedGridChild[]
----@field text_array Array2D|nil Per-tile text overlay computed by text_function.
----@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)|nil
+---@field text_array? Array2D Per-tile text overlay computed by text_function.
+---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
 local NestedGridNode = {}
 NestedGridNode.__index = NestedGridNode
 
@@ -45,19 +45,19 @@ NestedGridChildDefinition.__index = NestedGridChildDefinition
 ---@field x_max integer
 ---@field y_max integer
 ---@field children NestedGridChildDefinition[]
----@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)|nil
----@field get_tile_highlights (fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata)|nil
----@field get_path_anchor (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)|nil
----@field get_max_path_length (fun(game_ctx: GameContext, menu_ctx: MenuContext): integer)|nil
----@field get_initial_point (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)|nil
+---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
+---@field get_tile_highlights (fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata)?
+---@field get_path_anchor (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
+---@field get_max_path_length (fun(game_ctx: GameContext, menu_ctx: MenuContext): integer)?
+---@field get_initial_point (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
 local NestedGridDefinition = {}
 NestedGridDefinition.__index = NestedGridDefinition
 
 ---@class SerializedNestedGridState : SerializedMenuState
 ---@field type "grid"
 ---@field point Point Cursor position at serialization time.
----@field path Point[]|nil Pathfinding path at serialization time.
----@field tile_highlights userdata|nil Legal-tile bitmask at serialization time.
+---@field path Point[]? Pathfinding path at serialization time.
+---@field tile_highlights? userdata Legal-tile bitmask at serialization time.
 
 local nested_grid = {
     NestedGridNode = NestedGridNode,
@@ -88,7 +88,7 @@ end
 ---@param p Point
 ---@param game_context GameContext
 ---@param menu_ctx MenuContext
----@return MenuNode|nil
+---@return MenuNode?
 function NestedGridNode:get_first_child(p, game_context, menu_ctx)
     for _, child in ipairs(self.children) do
         if child.filter(p, game_context, menu_ctx) then
@@ -222,7 +222,7 @@ function NestedGridNode:refresh_focus()
 end
 
 --- Claim focus, optionally moving the cursor to the mouse position.
----@param selection MenuMouseSelection|nil
+---@param selection MenuMouseSelection?
 ---@param _child MenuNode
 function NestedGridNode:claim_focus(selection, _child)
     self.has_focus = true
@@ -294,7 +294,7 @@ function NestedGridNode:serialize()
 end
 
 --- Restore the grid position, path, and child states from serialized data.
----@param state SerializedMenuState|nil
+---@param state SerializedMenuState?
 ---@param data table<string, any>
 function NestedGridNode:deserialize(state, data)
     if state ~= nil and state.type == "grid" then
@@ -323,7 +323,7 @@ function NestedGridNode:recompute(game_ctx, menu_ctx)
 end
 
 --- Build a NestedGridNode from this definition.
----@param parent MenuNode|nil
+---@param parent MenuNode?
 ---@param game_ctx GameContext
 ---@param menu_ctx MenuContext
 ---@param menu_state MenuState

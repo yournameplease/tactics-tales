@@ -27,9 +27,10 @@ end
 ---@param result table
 ---@return fun()
 local function stub_fetch(result)
-    local original = fetch
-    fetch = function(_) return result end
-    return function() fetch = original end
+    local original = _G.fetch
+    ---@diagnostic disable-next-line: duplicate-set-field
+    _G.fetch = function(_) return result end
+    return function() _G.fetch = original end
 end
 
 -- ---------------------------------------------------------------------------

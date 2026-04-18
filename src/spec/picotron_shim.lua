@@ -10,13 +10,14 @@ _G.DYNAMIC_CONFIG = {
     draw_target_debug = false,
     head_scale = 1,
     dialogue_speed = "normal",
+    input_group = "mouse_and_keyboard",
 }
 
 _G.DATP = ""
 
 -- logger
-require("tactics/debug")
-require("tactics/config")
+require("src.tactics.debug")
+require("src.tactics.config")
 
 -- Mock Userdata implementation
 ---@class MockUserdataState
@@ -125,6 +126,8 @@ MockUserdata_mt = {
     },
 }
 
+local _sprite_flags = {}
+
 local pt_shim = {
     menuitem       = function(_id_or_item, _label, _action) end,
     sfx            = function(_n, _channel, _offset, _length, _pan, _mix_volume) end,
@@ -171,9 +174,21 @@ local pt_shim = {
     clip           = function(_x, _y, _w, _h, _clip_previous) end,
     pset           = function(_x, _y, _col) end,
     pget           = function(_x, _y) return 0 end,
-    fget_one       = function(_n, _f) return false end,
-    fget           = function(_n) return 0 end,
-    fset           = function(_n, _f, _val) end,
+    fget           = function(n, f)
+        local flags = _sprite_flags[n] or 0
+        if f ~= nil then
+            return (flags >> f) & 1 == 1
+        end
+        return flags
+    end,
+    fset           = function(n, f, val)
+        local flags = _sprite_flags[n] or 0
+        if val then
+            _sprite_flags[n] = flags | (1 << f)
+        else
+            _sprite_flags[n] = flags & ~(1 << f)
+        end
+    end,
     cursor         = function(_x, _y, _col) end,
     color      = function(_col) end,
     camera     = function(_x, _y) return 0, 0 end,

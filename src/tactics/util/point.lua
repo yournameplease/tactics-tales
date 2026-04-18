@@ -1,6 +1,12 @@
 ---@brief
 --- Defines a 2D Point object and related vector math utilities.
 
+-- few stray typings:
+---@alias Angle number
+---@alias Path string
+---@alias CardinalDirection "up"|"down"|"left"|"right"
+
+
 ---@class Point
 ---@field x integer
 ---@field y integer

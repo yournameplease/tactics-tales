@@ -78,7 +78,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field text_object Text Cached text layout object.
 
 ---@class CacheInfo
----@field draw_target userdata|nil
+---@field draw_target? userdata
 ---@field static_layout boolean
 ---@field last_key any
 ---@field current_key fun(ctx: UIContextManager): any
@@ -452,7 +452,7 @@ function box.floating(node, x, y)
 end
 
 --- Create a spacer element that absorbs free space in flex layouts.
----@param grow integer|nil Defaults to 1.
+---@param grow integer? Defaults to 1.
 ---@return UIElement
 function box.spacer(grow)
     return box.builder("spacer")

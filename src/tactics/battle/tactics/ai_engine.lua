@@ -28,7 +28,7 @@ local ai_engine = {
 
 ---@class ShallowMovementOption One-turn move+attack candidate.
 ---@field destination Point Tile the AI unit would move to.
----@field target BattleUnit|nil Unit to attack, or nil if waiting.
+---@field target? BattleUnit Unit to attack, or nil if waiting.
 ---@field expected_kill boolean Whether this attack would kill the target.
 ---@field expected_self_kill boolean Whether the counterattack would kill the AI unit.
 ---@field expected_counterattack boolean Whether a counterattack is expected.
@@ -38,7 +38,7 @@ local ai_engine = {
 
 ---@class DeepMovementOption Multi-turn approach candidate.
 ---@field destination Point Tile from which the target could eventually be attacked.
----@field target BattleUnit|nil The unit being approached.
+---@field target? BattleUnit The unit being approached.
 
 --- Return true if shallow movement option `a` is strictly better than `b`.
 --- Priority: kill > no self-kill > no counterattack > damage > low self-damage > ally score.
@@ -112,7 +112,7 @@ function AIEngine:compute_unit_ai(unit)
         max_move
     )
 
-    ---@type ShallowMovementOption|nil
+    ---@type ShallowMovementOption?
     local best_shallow_action = nil
     ---@type DeepMovementOption[]
     local deep_actions = {}

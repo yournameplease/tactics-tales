@@ -38,7 +38,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 ---@class TextLine
 ---@field text string
----@field wrapped_lines string[]|nil Cached wrap result; nil means wrapping not yet computed.
+---@field wrapped_lines string[]? Cached wrap result; nil means wrapping not yet computed.
 
 ---@param lines string[]
 ---@return TextLine[]
@@ -91,6 +91,7 @@ end
 ---@return integer
 local function width_of(row)
     local w, _ = print(row, 0, -1000)
+    assert(w)
     return w
 end
 
@@ -241,7 +242,7 @@ local get_text_alignment_offset = {
 ---@param justify Justify
 ---@param color Color
 ---@param row_number integer 1-based display row index used to compute the y offset.
----@param line_count integer|nil Character limit for typewriter reveal; nil draws the full row.
+---@param line_count integer? Character limit for typewriter reveal; nil draws the full row.
 function TextImpl:draw_justified_text_row(row, x, y, justify, color, row_number, line_count)
     local x_offset = get_text_alignment_offset[justify](row, self.width or 0)
     local t_x = x + x_offset
@@ -262,7 +263,7 @@ end
 ---@param y integer
 ---@param color Color
 ---@param row_number integer 1-based display row index.
----@param line_count integer|nil Character limit for typewriter reveal; nil draws the full row.
+---@param line_count integer? Character limit for typewriter reveal; nil draws the full row.
 function TextImpl:draw_text_row(text_row, x, y, color, row_number, line_count)
     if self.align then
         -- split on "|"
@@ -308,7 +309,7 @@ end
 ---@param x integer
 ---@param y integer
 ---@param color Color
----@param line_counts integer[]|nil Per-paragraph character limit for typewriter-style reveals; nil draws the full text.
+---@param line_counts integer[]? Per-paragraph character limit for typewriter-style reveals; nil draws the full text.
 function TextImpl:draw(x, y, color, line_counts)
     -- profile("draw_text")
     self:calculate_wrapping()
@@ -334,7 +335,7 @@ end
 ---@param x integer
 ---@param y integer
 ---@param color Color
----@param line_count integer|nil Character limit for typewriter reveal; nil draws the full paragraph.
+---@param line_count integer? Character limit for typewriter reveal; nil draws the full paragraph.
 function TextImpl:draw_one(row_number, x, y, color, line_count)
     -- profile("draw_text")
     self:calculate_wrapping()

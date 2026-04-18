@@ -9,9 +9,9 @@ local game_ui_context = require("src.tactics.game.game_ui_context")
 require("src.tactics.ui.types")
 
 ---@class UIContextManager
----@field battle_context BattleUIContext|nil
----@field story_context StoryUIContext|nil
----@field game_context GameUIContext|nil
+---@field battle_context? BattleUIContext
+---@field story_context? StoryUIContext
+---@field game_context? GameUIContext
 ---@field layout UILayoutId
 local UIContextManager = {}
 UIContextManager.__index = UIContextManager
@@ -74,7 +74,7 @@ function UIContextManager:enrich()
         self.game_context:enrich()
     end
 
-    ---@type UIContext|nil
+    ---@type UIContext?
     local primary_context
     if self.battle_context ~= nil then
         primary_context = self.battle_context

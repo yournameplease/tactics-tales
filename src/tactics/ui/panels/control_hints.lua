@@ -73,7 +73,7 @@ end
 
 --- Build a row of glyphs (mouse + joypad sprites) for the given input action.
 ---@param input_label InputAction key
----@param text_color string|nil UITextColor for the separator text
+---@param text_color string? UITextColor for the separator text
 ---@return UIElement
 local function control_hint_glyphs(input_label, text_color)
     local row = box.builder("control_row_" .. input_label)
@@ -124,7 +124,7 @@ end
 
 --- Build a full control hint row with glyphs and a dynamic text label.
 ---@param input_label string InputAction key
----@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
+---@param menu_step_func fun(state: UIContextManager): ActiveMenuStep? Function returning the current menu step.
 ---@param default_hints DefaultHints Fallback hints when no menu step is active.
 ---@return UIElement
 local function control_hint_row(input_label, menu_step_func, default_hints)
@@ -170,7 +170,7 @@ end
 
 ---@param input_label string InputAction key
 ---@param message string Label text to display beside the glyph.
----@param text_color string|nil UITextColor for glyph and label text.
+---@param text_color string? UITextColor for glyph and label text.
 ---@return fun(ctx: UIContextManager): UIElement[]
 function generate_centered_control_hint_row(input_label, message, text_color)
     return function(_)
@@ -201,7 +201,7 @@ end
 --- Build a centered control hint row with a fixed message and optional text color.
 ---@param input_label string InputAction key
 ---@param message string Label text to display beside the glyph.
----@param text_color string|nil UITextColor for glyph and label text.
+---@param text_color string? UITextColor for glyph and label text.
 ---@return UIElement
 function control_hints.centered_control_hint_row(input_label, message, text_color)
     local self = box.builder("control_hints")
@@ -218,7 +218,7 @@ function control_hints.centered_control_hint_row(input_label, message, text_colo
     return self
 end
 
----@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
+---@param menu_step_func fun(state: UIContextManager): ActiveMenuStep? Function returning the current menu step.
 ---@param default_hints DefaultHints Fallback hints when no menu step is active.
 ---@return fun(ctx: UIContextManager): UIElement[]
 function control_hint_rows(menu_step_func, default_hints)
@@ -240,7 +240,7 @@ function control_hint_rows(menu_step_func, default_hints)
 end
 
 --- Build a control hints panel showing hints for all four input actions.
----@param menu_step_func fun(state: UIContextManager): MenuStep Function returning the current menu step.
+---@param menu_step_func fun(state: UIContextManager): ActiveMenuStep? Function returning the current menu step.
 ---@param default_hints DefaultHints Fallback hints when no menu step is active.
 ---@return UIElement
 function control_hints.new(menu_step_func, default_hints)

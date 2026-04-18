@@ -40,8 +40,8 @@ local keyboard_modes = {
 }
 
 ---@class KeyboardMenuContext : MenuContext
----@field keyboard_mode integer|nil 1-based index into keyboard_modes; nil means uninitialized.
----@field keyboard_content string|nil Text accumulated so far; nil means uninitialized.
+---@field keyboard_mode? integer 1-based index into keyboard_modes; nil means uninitialized.
+---@field keyboard_content? string Text accumulated so far; nil means uninitialized.
 
 --- Return the character at grid position p for the given keyboard context.
 ---@param p Point 0-indexed grid position.

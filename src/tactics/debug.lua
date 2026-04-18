@@ -2,6 +2,8 @@
 --- Contains a simple logging utility for printing debug messages
 --- based on log levels.
 
+---@alias LogLevel "NONE"|"ERROR"|"WARN"|"INFO"|"DEBUG"|"TRACE"
+
 ---@param level LogLevel
 ---@return boolean
 local function should_print(level)

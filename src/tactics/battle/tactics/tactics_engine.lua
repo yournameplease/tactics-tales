@@ -45,7 +45,7 @@ local ActiveBattleDialogue = {}
 ---@field chapter integer The current chapter.
 ---@field battle_is_blocked boolean Whether a coroutine is currently blocking battle input.
 ---@field tactics_locks table<integer, boolean> Set of active lock IDs preventing certain actions.
----@field active_point Point|nil
+---@field active_point? Point
 ---@field battle_map BattleMap
 ---@field character_manager CharacterManager
 ---@field music_player MusicPlayer
@@ -55,7 +55,7 @@ local ActiveBattleDialogue = {}
 ---@field event_writer EventWriter
 ---@field dialogue_manager DialogueManager
 ---@field dialogue_queue QueuedBattleDialogue[] Pending dialogues not yet displayed.
----@field active_dialogue ActiveBattleDialogue|nil Currently displayed dialogue, or nil if none.
+---@field active_dialogue? ActiveBattleDialogue Currently displayed dialogue, or nil if none.
 ---@field valid_tiles_by_unit table<integer, userdata> Cached reachable tile maps keyed by unit ID.
 ---@field marked_unit_tiles userdata Bitfield map of tiles threatened by marked enemy units.
 ---@field marked_unit_revision integer Incremented whenever the marked-unit set changes.
@@ -271,7 +271,7 @@ end
 
 --- Spawn all units and optionally play a slide-in animation from the given direction.
 ---@param units UnitSpawnData[]
----@param anim UnitSpawnAnimation|nil
+---@param anim UnitSpawnAnimation?
 ---@param blocked_behavior UnitSpawnBlockedBehavior
 function TacticsEngine:spawn_all(units, anim, blocked_behavior)
     local spawned = {}
@@ -749,7 +749,7 @@ end
 ---@param tile_x integer
 ---@param tile_y integer
 ---@param min_distance integer
----@param max_distance integer|nil Defaults to `min_distance`.
+---@param max_distance integer? Defaults to `min_distance`.
 ---@return Array2D
 function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance
