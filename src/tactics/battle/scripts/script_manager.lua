@@ -38,7 +38,7 @@ local UnitInteractionMessage = {}
 ---@field music_player MusicPlayer
 ---@field task_manager TaskManager
 ---@field active_scripts table<ScriptId, BattleScript>
----@field script_listeners table<ScriptId, integer>
+---@field script_listeners table<ScriptId, ListenerId>
 local ScriptManager = {}
 ScriptManager.__index = ScriptManager
 
