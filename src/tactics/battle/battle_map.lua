@@ -387,6 +387,7 @@ function BattleMap:register_tile_interaction(tile, script_id, interaction_text, 
     if interactions_at_point == nil then
         self.interactions_by_x_y:set_point(tile, {})
         interactions_at_point = self.interactions_by_x_y:get_point(tile)
+        assert(interactions_at_point)
     end
 
     if interactions_at_point[interaction_distance] == nil then

@@ -160,8 +160,11 @@ function BattleUIContext:enrich()
             end
 
             local ctx = self.battle_menu_manager.menu_ctx
-            if ctx["unit"] ~= nil then
-                self.acting_unit = ctx["unit"]
+            if ctx ~= nil then
+                local unit_from_ctx = ctx["unit"]
+                if unit_from_ctx ~= nil then
+                    self.acting_unit = unit_from_ctx
+                end
             end
         end
     end
