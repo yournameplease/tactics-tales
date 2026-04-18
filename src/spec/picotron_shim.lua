@@ -16,8 +16,8 @@ _G.DYNAMIC_CONFIG = {
 _G.DATP = ""
 
 -- logger
-require("tactics/debug")
-require("tactics/config")
+require("src.tactics.debug")
+require("src.tactics.config")
 
 -- Mock Userdata implementation
 ---@class MockUserdataState

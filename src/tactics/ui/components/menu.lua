@@ -293,7 +293,8 @@ local function generate_menu_node_element(node)
 			self:add(box.spacer(1))
 		end
 		for _,child in ipairs(node.children) do
-			self:add(generate_menu_node_element(child))
+			local element = generate_menu_node_element(child)
+			if element then self:add(element) end
 			if node.direction == "row" then
 				self:add(box.spacer(1))
 			end
@@ -335,7 +336,8 @@ local function generate_menu_modal_element(node)
 		local self = builder:build()
 
 		for _,child in ipairs(node.children) do
-			self:add(generate_menu_node_element(child))
+			local element = generate_menu_node_element(child)
+			if element then self:add(element) end
 		end
 
 		return self

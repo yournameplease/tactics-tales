@@ -148,7 +148,8 @@ end
 -- back in to story class?
 --- Remove the topmost node (expected to be a chapter header) and store its values in chapter_text / chapter_number.
 function StoryPage:clear_chapter_header()
-    local chapter_header_node = self.nodes[#self.nodes] ---@type RenderedChapterHeader
+    local chapter_header_node = self.nodes[#self.nodes]
+    ---@cast chapter_header_node RenderedChapterHeader
     self.chapter_text = chapter_header_node.text
     self.chapter_number = chapter_header_node.number
     table.remove(self.nodes)
@@ -161,7 +162,8 @@ end
 
 --- Mark the topmost text node as fully rendered (all characters visible).
 function StoryPage:finish_text()
-    local text_node = self.nodes[#self.nodes] ---@type RenderedText
+    local text_node = self.nodes[#self.nodes]
+    ---@cast text_node RenderedText
     text_node.text.characters_rendered = #text_node.text.text
 end
 
