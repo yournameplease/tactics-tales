@@ -50,10 +50,12 @@ end
 ---@param unit BattleUnit
 ---@param animated_position Point
 ---@param draw_target_manager DrawTargetManager
+---@param ui_theme UITheme
 local function draw_unit(
     unit,
     animated_position,
-    draw_target_manager
+    draw_target_manager,
+    ui_theme
 )
     local unit_tile = unit.tile
 
@@ -77,7 +79,7 @@ local function draw_unit(
 
     local draw_point = world_point + FOOT_GROUND_ANCHOR
 
-    CharacterRenderer.draw_health_bar(unit, draw_point, true, true)
+    CharacterRenderer.draw_health_bar(unit, draw_point, true, true, ui_theme)
     CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, look_direction)
 
     -- TODO: these should check objective instead    
@@ -296,7 +298,7 @@ local function draw_tactics_map(
         -- profile("draw_map_rows_decorations")
         -- profile("draw_map_rows_units")
         local animated_point = point.of(next_x, next_z)
-        draw_unit(unit, animated_point, draw_target_manager)
+        draw_unit(unit, animated_point, draw_target_manager, _ui_theme)
         -- profile("draw_map_rows_units")
     end
     draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)

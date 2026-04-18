@@ -52,7 +52,10 @@ function ui_manager.new()
         COLOR_INTERIOR_TEXT = 21,
         COLOR_TRIM = 9,
         COLOR_PAGE_DECOR = 24,
-        COLOR_CLEAR = 20
+        COLOR_CLEAR = 20,
+        COLOR_SIDE = 16,
+        COLOR_HP_BORDER = 21,
+        COLOR_HP_SPENT = 15,
     }
 
     self.draw_target_manager = draw_target_manager.new()

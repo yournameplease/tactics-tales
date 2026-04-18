@@ -10,5 +10,7 @@
 ---@field COLOR_TRIM Color
 ---@field COLOR_PAGE_DECOR Color
 ---@field COLOR_CLEAR Color
+---@field COLOR_HP_BORDER Color
+---@field COLOR_HP_SPENT Color
 
 return {}

@@ -416,7 +416,8 @@ end
 --- Internal: draw the health bar widget centred on `draw_point`.
 ---@param unit BattleUnit
 ---@param draw_point Point
-local function draw_health_bar(unit, draw_point)
+---@param theme UITheme
+local function draw_health_bar(unit, draw_point, theme)
     local hp_current = unit.hp_current
     local hp_max = unit.character.stats.hp_max
     local cell_width = math.floor((MAX_HEALTH_BAR_WIDTH - 1) / hp_max)
@@ -428,17 +429,13 @@ local function draw_health_bar(unit, draw_point)
 
     local x = draw_point.x - (width >> 1)
     local y = draw_point.y - 2
-    local COLOR_SIDE = 16
-    -- TODO: get this from UI theme
-    local COLOR_BORDER = 21
-    local COLOR_SPENT = 15
-    rrectfill(x, y, width, height, 1, COLOR_BORDER)
-    rrectfill(x + 1, y + 1, width - 2, height - 2, 0, COLOR_SPENT)
-    rrectfill(x + 1, y + 1, current_width - 2, height - 2, 0, COLOR_SIDE)
+    rrectfill(x, y, width, height, 1, theme.COLOR_HP_BORDER)
+    rrectfill(x + 1, y + 1, width - 2, height - 2, 0, theme.COLOR_HP_SPENT)
+    rrectfill(x + 1, y + 1, current_width - 2, height - 2, 0, COLOR_SIDE_1)
     if cell_width > 1 then
         for i = 1, hp_max - 1 do
             local x_bar = x + i * cell_width
-            line(x_bar, y, x_bar, y + height - 1, COLOR_BORDER)
+            line(x_bar, y, x_bar, y + height - 1, theme.COLOR_HP_BORDER)
         end
     end
 end
@@ -448,7 +445,8 @@ end
 ---@param draw_point Point Screen-space draw origin.
 ---@param set_pal boolean Whether to apply palette swaps around the health bar draw.
 ---@param apply_animation boolean Whether to apply the animation frame offset.
-function character_renderer.draw_health_bar(unit, draw_point, set_pal, apply_animation)
+---@param theme UITheme
+function character_renderer.draw_health_bar(unit, draw_point, set_pal, apply_animation, theme)
     local animation_frame = get_animation_frame(unit)
     local offset = animation_frame.offset
     if not apply_animation then
@@ -459,7 +457,7 @@ function character_renderer.draw_health_bar(unit, draw_point, set_pal, apply_ani
         set_palette(unit, true, nil)
     end
     local health_bar_anchor = draw_point + offset + point.of(2, -16)
-    draw_health_bar(unit, health_bar_anchor)
+    draw_health_bar(unit, health_bar_anchor, theme)
 
     if set_pal then
         pal()
