@@ -2,6 +2,7 @@
 --- Manages the main game menu, including the title screen,
 --- chapter select, and options menus.
 
+local maps = require("src.tactics.util.maps")
 local lists = require("src.tactics.util.lists")
 local menu_manager = require("src.tactics.menu.menu_manager")
 local step_definition = menu_manager.definition.step
@@ -37,7 +38,7 @@ end
 ---@param file string
 ---@return MenuHandlerPostHandling|nil
 HANDLERS["begin_file"] = function(services, _menu_data, _session_context, file)
-    services.handle_begin_story(file, nil)
+    services.handle_begin_story(file, services.default_story_id)
     return nil
 end
 
@@ -48,7 +49,7 @@ end
 ---@param _story_id StoryId
 ---@return MenuHandlerPostHandling|nil
 HANDLERS["begin_file_from_context"] = function(services, _menu_data, session_context, _story_id)
-    services.handle_begin_story(session_context.selected_file, nil)
+    services.handle_begin_story(session_context.selected_file, services.default_story_id)
     return nil
 end
 
@@ -152,7 +153,8 @@ local MENU_DATA = {
                                 b = b:handle_action("select", "store_selected_save")
                                     :advance_to("CONFIRM_FILE")
                             else
-                                b = b:handle_action("select", "begin_file")
+                                b = b:handle_action("select", "store_selected_save")
+                                    :advance_to("STORY_CONFIG")
                             end
                             table.insert(options, b)
                         end
@@ -175,17 +177,16 @@ local MENU_DATA = {
                             :with_text("Confirm overwrite " .. ctx.selected_file .. "?"))
                         table.insert(options, button.builder("confirm_overwrite")
                             :with_text("Confirm")
-                            :handle_action("select", "begin_file_from_context")
-                            :as_final_step())
+                            :advance_to("STORY_CONFIG"))
                         table.insert(options, button.builder("no_overwrite")
-                            :advance_to("NEW_FILE")
+                            :advance_to("NEW_FILE_SELECT")
                             :with_text("Back"))
 
                         return options
                     end
                 )
             )
-            :with_previous_step("NEW_FILE")
+            :with_previous_step("NEW_FILE_SELECT")
             :with_action("BUTTON_A", { command = "select", description = "Select"})
             :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["LOAD_FILE_SELECT"] = step_definition.of_node(
@@ -210,6 +211,48 @@ local MENU_DATA = {
                 )
             )
             :with_previous_step("MAIN_MENU")
+            :with_action("BUTTON_A", { command = "select", description = "Select"})
+            :with_action("BUTTON_B", { command = "back", description = "Back"}),
+            ["STORY_CONFIG"] = step_definition.of_node(
+                list.column(
+                    "confirm_file",
+                    function(msb, ctx)
+                        ---@cast msb GameMenuContext
+                        ---@cast ctx MainMenuContext
+                        local options = {}
+
+                        local story_id = msb.default_story_id
+                        local definition = msb.stories[story_id]
+                        local config = definition.config
+
+                        if config then
+                            for _,opt in pairs(config) do
+                                local config_options = lists.map(function(o)
+                                    return o.value
+                                end)(opt.options)
+                                
+                                local b = selection.row(opt.key)
+                                    :with_key(opt.key)
+                                    :with_label(opt.name)
+                                    :with_static_options(config_options)
+
+                                table.insert(options, b)
+                            end
+                        end
+                        
+                        table.insert(options, button.builder("confirm_begin")
+                            :with_text("Begin")
+                            :handle_action("select", "begin_file_from_context")
+                            :as_final_step())
+                        table.insert(options, button.builder("no_begin")
+                            :advance_to("NEW_FILE_SELECT")
+                            :with_text("Back"))
+
+                        return options
+                    end
+                )
+            )
+            :with_previous_step("NEW_FILE_SELECT")
             :with_action("BUTTON_A", { command = "select", description = "Select"})
             :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["CHAPTER_SELECT"] = step_definition.of_node(
@@ -324,7 +367,7 @@ local MENU_DATA = {
 --- Create a new GameMenuManager for the main game menu.
 ---@param ctx GameMenuContext
 ---@param bus EventBus
----@return MenuManager
+---@return GameMenuManager
 function game_menu_manager.new(ctx, bus)
     return menu_manager.new(
         MENU_DATA,

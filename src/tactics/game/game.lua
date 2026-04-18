@@ -17,6 +17,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@class GameMenuContext : GameContext
 ---@field default_story_id string the story_id to use if starting from main
 ---@field story_ids StoryId[] Available story IDs to present in the menu.
+---@field stories table<StoryId, StoryDefinition> Available story IDs to present in the menu.
 ---@field handle_begin_story fun(save_id: string?, story_id: StoryId) Callback to start a new story.
 ---@field handle_load_story fun(save_id: string) Callback to load an existing story save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
@@ -141,11 +142,8 @@ function game.new(
     mod_loader:register_mod("tt_fantasy_demo_story")
     local game_data = mod_loader:load_mod_data()
 
-    local story_ids = game_data.stories.story_select
-
     ---@type Game
     local self = setmetatable({}, Game)
-    self.default_story = game_data.stories.default_story
     self.mod_loader = mod_loader
     self.config_manager = config_manager
 
@@ -153,8 +151,11 @@ function game.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
+    ---@type GameMenuContext
     local game_menu_ctx = {
-        story_ids = story_ids,
+        default_story_id = game_data.stories.default_story,
+        story_ids = game_data.stories.story_select,
+        stories = game_data.stories.data,
         config_manager = self.config_manager,
         get_game_saves = save_system.list_saves,
         handle_begin_story = function(file, id) self:begin_story(file, id) end,
