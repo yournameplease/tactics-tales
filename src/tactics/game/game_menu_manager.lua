@@ -31,25 +31,19 @@ HANDLERS["store_selected_save"] = function(_services, _menu_data, session_contex
     return nil
 end
 
---- Begin a story from the given file name directly.
----@param services GameMenuContext
----@param _menu_data table<string, any>
----@param _session_context MainMenuContext
----@param file string
----@return MenuHandlerPostHandling?
-HANDLERS["begin_file"] = function(services, _menu_data, _session_context, file)
-    services.handle_begin_story(file, services.default_story_id)
-    return nil
-end
-
 --- Begin a story using the file name stored in session context.
 ---@param services GameMenuContext
----@param _menu_data table<string, any>
+---@param menu_data table<string, string>
 ---@param session_context MainMenuContext
----@param _story_id StoryId
+---@param _value string
 ---@return MenuHandlerPostHandling?
-HANDLERS["begin_file_from_context"] = function(services, _menu_data, session_context, _story_id)
-    services.handle_begin_story(session_context.selected_file, services.default_story_id)
+HANDLERS["begin_file_from_context"] = function(
+    services,
+    menu_data,
+    session_context,
+    _value
+)
+    services.handle_begin_story(session_context.selected_file, services.default_story_id, menu_data)
     return nil
 end
 
@@ -71,7 +65,7 @@ end
 ---@param story_id StoryId
 ---@return MenuHandlerPostHandling?
 HANDLERS["begin_chapter"] = function(services, _menu_data, _session_context, story_id)
-    services.handle_begin_story(nil, story_id)
+    services.handle_begin_story(nil, story_id, {}) -- TODO: Config?  Or default config?
     return nil
 end
 
