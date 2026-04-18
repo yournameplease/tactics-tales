@@ -96,7 +96,7 @@ function Story:handle_new_node()
     elseif node_definition.type == 'chapter_header' then
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.active_dialogue = self.dialogue_manager:create_dialogue(
-            {"test"}, -- todo: make this empty lol
+            {},
             {
                 auto_advance = false,
             },
