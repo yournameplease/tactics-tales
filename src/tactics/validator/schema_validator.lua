@@ -146,6 +146,14 @@ local function validate(data, schema, memory, path)
                         add_deep_errors(field_errors)
                     end
                 end
+            elseif schema.type == "factory" then
+                ---@cast schema FactorySchemaDefinition
+                if type(data) ~= "function" then
+                    is_valid = false
+                    add_local_errors({
+                        "Field expected factory (function) but received a " .. type(data)
+                    })
+                end
             elseif schema.type == "reference" then
                 ---@cast schema ReferenceSchemaDefinition
                 if type(data) == "table" or type(data) == "function" then

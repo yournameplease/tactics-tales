@@ -124,7 +124,7 @@ local battle_spec = s.record({
     scripts = s.list(s.record({})), -- Scripts are too complex to define statically
 })
 
-local battles_spec = s.dictionary(s.string(), battle_spec)
+local battles_spec = s.dictionary(s.string(), s.factory())
 
 -- Schemas for `stories`
 local story_node_spec = s.record({
