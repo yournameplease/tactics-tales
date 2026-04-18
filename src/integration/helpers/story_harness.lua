@@ -26,7 +26,7 @@ local TICK_LIMIT = 1000
 ---@field _game_data table
 ---@field _complete boolean
 ---@field _emitted table<string, table<string, any>[]>
----@field _story table|nil
+---@field _story? table
 ---@field _interceptor MapFetchInterceptor
 local StoryHarness = {}
 StoryHarness.__index = StoryHarness

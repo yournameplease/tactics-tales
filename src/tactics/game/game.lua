@@ -19,7 +19,7 @@ local event_writer = require("src.tactics.systems.event_bus.event_writer")
 ---@field mod_loader ModLoader
 ---@field config_manager ConfigManager
 ---@field default_story StoryId
----@field story Story|nil
+---@field story? Story
 ---@field event_listener EventListener
 ---@field event_writer EventWriter
 ---@field music_player MusicPlayer

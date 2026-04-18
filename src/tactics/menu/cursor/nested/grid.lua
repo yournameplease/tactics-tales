@@ -26,10 +26,10 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field x_max integer Grid width in tiles.
 ---@field y_max integer Grid height in tiles.
 ---@field path Point[]|nil Pathfinding path from the anchor to the cursor position.
----@field legal_tiles userdata|nil Userdata bitmask of valid and reachable tiles.
----@field max_path_length integer|nil Maximum allowed path length.
+---@field legal_tiles? userdata Userdata bitmask of valid and reachable tiles.
+---@field max_path_length? integer Maximum allowed path length.
 ---@field children NestedGridChild[]
----@field text_array Array2D|nil Per-tile text overlay computed by text_function.
+---@field text_array? Array2D Per-tile text overlay computed by text_function.
 ---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)|nil
 local NestedGridNode = {}
 NestedGridNode.__index = NestedGridNode
@@ -57,7 +57,7 @@ NestedGridDefinition.__index = NestedGridDefinition
 ---@field type "grid"
 ---@field point Point Cursor position at serialization time.
 ---@field path Point[]|nil Pathfinding path at serialization time.
----@field tile_highlights userdata|nil Legal-tile bitmask at serialization time.
+---@field tile_highlights? userdata Legal-tile bitmask at serialization time.
 
 local nested_grid = {
     NestedGridNode = NestedGridNode,

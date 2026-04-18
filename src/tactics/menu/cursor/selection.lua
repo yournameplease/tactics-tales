@@ -16,8 +16,8 @@ local lists = require("src.tactics.util.lists")
 ---@field type "selection"
 ---@field i integer 1-based index of the currently selected option.
 ---@field options SelectionMenuOption[]
----@field label string|nil Optional label shown alongside the selection.
----@field key string|nil Key used when serializing the selected value into menu data.
+---@field label? string Optional label shown alongside the selection.
+---@field key? string Key used when serializing the selected value into menu data.
 ---@field direction SelectionDirection Axis along which joypad input moves the selection.
 ---@field wrap boolean When true, navigating past the end wraps to the beginning.
 local SelectionMenuNode = {}
@@ -25,8 +25,8 @@ SelectionMenuNode.__index = SelectionMenuNode
 
 ---@class SelectionMenuDefinition : MenuLeafDefinition
 ---@field type "selection"
----@field label string|nil
----@field key string|nil Serialization key for the selected value.
+---@field label? string
+---@field key? string Serialization key for the selected value.
 ---@field get_options fun(game_ctx: GameContext, menu_ctx: MenuContext): SelectionMenuOption[]
 ---@field wrap boolean
 ---@field direction SelectionDirection

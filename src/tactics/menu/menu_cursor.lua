@@ -27,9 +27,9 @@
 ---@field type "call_handler"
 ---@field handler string Handler ID to invoke.
 ---@field value any Typically the value of the button that triggered the signal.
----@field then_navigate_to string|nil Step to navigate to after the handler runs.
----@field then_finish boolean|nil When true, finish the menu after the handler.
----@field then_back boolean|nil When true, go back after the handler.
+---@field then_navigate_to? string Step to navigate to after the handler runs.
+---@field then_finish? boolean When true, finish the menu after the handler.
+---@field then_back? boolean When true, go back after the handler.
 
 ---@alias MenuLeafType "selection"|"button"
 
@@ -42,15 +42,15 @@
 ---@field children table<string, SerializedMenuState> Serialized states keyed by child node ID.
 
 ---@class SerializedMenu Complete serialized state of one menu node and its descendants.
----@field state SerializedMenuState|nil Structural state; nil for leaf nodes with no position.
+---@field state? SerializedMenuState Structural state; nil for leaf nodes with no position.
 ---@field data table<string, any> Flat key-value data contributed by leaf nodes.
 
 ---@class MenuNode Abstract base for all menu node instances.
 ---@field id string Unique node identifier within the menu.
----@field parent MenuNode|nil Parent node; nil for the root.
+---@field parent? MenuNode Parent node; nil for the root.
 ---@field has_focus boolean
 ---@field type string Discriminant: "button", "selection", "list", or "grid".
----@field value any|nil Value field used by button nodes and injected by grids.
+---@field value? any Value field used by button nodes and injected by grids.
 ---@field update_joy fun(self: MenuNode, joy: Joypad, commands: string[], menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
 ---@field update_mouse fun(self: MenuNode, mouse: Mouse, selection: MenuMouseSelection, menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
 ---@field handle_command fun(self: MenuNode, command: string, menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
@@ -81,8 +81,8 @@
 ---@class MenuMouseSelection Abstract base for mouse hover targets.
 ---@field type CursorType
 ---@field node MenuNode The node under the cursor.
----@field on_lmb_command string|nil Command issued on left-click.
----@field on_rmb_command string|nil Command issued on right-click.
+---@field on_lmb_command? string Command issued on left-click.
+---@field on_rmb_command? string Command issued on right-click.
 
 ---@class GridMouseSelection : MenuMouseSelection
 ---@field type "grid"
@@ -95,7 +95,7 @@
 
 ---@class LeafMouseSelection : MenuMouseSelection
 ---@field type "leaf"
----@field i integer|nil
+---@field i? integer
 
 local menu_signal = {}
 

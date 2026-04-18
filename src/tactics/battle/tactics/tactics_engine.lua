@@ -45,7 +45,7 @@ local ActiveBattleDialogue = {}
 ---@field chapter integer The current chapter.
 ---@field battle_is_blocked boolean Whether a coroutine is currently blocking battle input.
 ---@field tactics_locks table<integer, boolean> Set of active lock IDs preventing certain actions.
----@field active_point Point|nil
+---@field active_point? Point
 ---@field battle_map BattleMap
 ---@field character_manager CharacterManager
 ---@field music_player MusicPlayer
@@ -55,7 +55,7 @@ local ActiveBattleDialogue = {}
 ---@field event_writer EventWriter
 ---@field dialogue_manager DialogueManager
 ---@field dialogue_queue QueuedBattleDialogue[] Pending dialogues not yet displayed.
----@field active_dialogue ActiveBattleDialogue|nil Currently displayed dialogue, or nil if none.
+---@field active_dialogue? ActiveBattleDialogue Currently displayed dialogue, or nil if none.
 ---@field valid_tiles_by_unit table<integer, userdata> Cached reachable tile maps keyed by unit ID.
 ---@field marked_unit_tiles userdata Bitfield map of tiles threatened by marked enemy units.
 ---@field marked_unit_revision integer Incremented whenever the marked-unit set changes.

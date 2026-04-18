@@ -9,7 +9,7 @@ local battle_objectives = require("src.tactics.battle.objective")
 
 ---@class VictoryConditionDef Abstract base for all victory condition definitions loaded from mod data.
 ---@field type VictoryConditionType
----@field text string|nil Display text shown to the player describing the objective.
+---@field text? string Display text shown to the player describing the objective.
 local VictoryCondition = {}
 
 ---@class RoutDef : VictoryConditionDef Victory by defeating all enemy units.
@@ -33,7 +33,7 @@ local Escape = {}
 
 ---@class FailureConditionDef Abstract base for all failure condition definitions loaded from mod data.
 ---@field type FailureConditionType
----@field text string|nil Display text shown to the player describing the failure condition.
+---@field text? string Display text shown to the player describing the failure condition.
 local FailureCondition = {}
 
 ---@class TaggedPlayerDiesDef : FailureConditionDef Failure if any player unit with the given tag is killed.
