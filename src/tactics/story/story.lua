@@ -26,14 +26,17 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node RenderedStoryNode
 
+---@alias StoryConfig table<string, string> 
+
 ---@class Story
 ---@field package battle_count integer
 ---@field package story_definition StoryDefinition
+---@field package story_config StoryConfig
 ---@field package game_data GameData
 ---@field package idle_animation AnimatedSpriteData
 ---@field package customized_character Character
 ---@field package text_input string
----@field package save_name string
+---@field package save_name? string
 ---@field package story_id string
 ---@field package story_page StoryPage
 ---@field package story_memory StoryMemory
@@ -119,6 +122,7 @@ function Story:handle_new_node()
         self.battle_manager = battle_manager.new(
             self.battle_count,
             battle_id,
+            self.story_config,
             self.game_data,
             self.character_manager,
             self.battle_services_bundle.task_manager,
@@ -317,13 +321,24 @@ end
 ---@param save_name string? Save file path, or nil for an unsaved story.
 ---@param story_id string
 ---@param game_data GameData
+---@param story_config StoryConfig
 ---@param task_manager TaskManager
 ---@param animation_manager AnimationManager
 ---@param event_bus EventBus
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
 ---@return Story
-function story.new(save_name, story_id, game_data, task_manager, animation_manager, event_bus, music_player, ui_context)
+function story.new(
+    save_name,
+    story_id,
+    story_config,
+    game_data,
+    task_manager,
+    animation_manager,
+    event_bus,
+    music_player,
+    ui_context
+)
     assert(game_data.stories.data[story_id] ~= nil)
 
     ---@type Story
@@ -334,6 +349,7 @@ function story.new(save_name, story_id, game_data, task_manager, animation_manag
 
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
+    self.story_config = story_config
 
     self.character_manager = character_manager.new(game_data)
 
@@ -398,6 +414,7 @@ function story.load(save_name, game_data, task_manager, animation_manager, event
     local self = story.new(
         save_name,
         save_data.story_id,
+        save_data.story_config,
         game_data,
         task_manager,
         animation_manager,

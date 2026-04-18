@@ -4,15 +4,24 @@
 
 local story = require("src.tactics.story.story")
 local game_menu_manager = require("src.tactics.game.game_menu_manager")
-local game_menu_context = require("src.tactics.game.game_menu_context")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
+local save_system = require("src.tactics.save.save_system")
 
 ---@class StoryServicesBundle Services needed to create a story.
 ---@field task_manager TaskManager
 ---@field animation_manager AnimationManager
 ---@field event_bus EventBus
+
+---@class GameMenuContext : GameContext
+---@field default_story_id string the story_id to use if starting from main
+---@field story_ids StoryId[] Available story IDs to present in the menu.
+---@field stories table<StoryId, StoryDefinition> Available story IDs to present in the menu.
+---@field handle_begin_story fun(save_id: string?, story_id: StoryId) Callback to start a new story.
+---@field handle_load_story fun(save_id: string) Callback to load an existing story save.
+---@field get_game_saves fun(): string[] Returns list of existing save IDs.
+---@field config_manager ConfigManager
 
 ---@class Game
 ---@field menu_manager GameMenuManager
@@ -46,8 +55,8 @@ function Game:load_story(file_name)
 end
 
 --- Start a new story, either from scratch or from a save file.
----@param file_name string? Save file path, or nil for a new story.
----@param story_id StoryId? Story to start; defaults to the game's default story.
+---@param file_name string|nil Save file path, or nil for a new story.
+---@param story_id StoryId Story to start; defaults to the game's default story.
 function Game:begin_story(file_name, story_id)
     local game_data = self.mod_loader:load_mod_data()
     if file_name == nil then -- unsaved story
@@ -55,6 +64,7 @@ function Game:begin_story(file_name, story_id)
         self.story = story.new(
             nil,
             story_id,
+            {}, -- TODO
             game_data,
             self.story_services_bundle.task_manager,
             self.story_services_bundle.animation_manager,
@@ -65,11 +75,10 @@ function Game:begin_story(file_name, story_id)
         return
     end
 
-    story_id = story_id or self.default_story
-
     self.story = story.new(
         file_name,
         story_id,
+        {}, -- TODO
         game_data,
         self.story_services_bundle.task_manager,
         self.story_services_bundle.animation_manager,
@@ -133,11 +142,8 @@ function game.new(
     mod_loader:register_mod("tt_fantasy_demo_story")
     local game_data = mod_loader:load_mod_data()
 
-    local story_ids = game_data.stories.story_select
-
     ---@type Game
     local self = setmetatable({}, Game)
-    self.default_story = game_data.stories.default_story
     self.mod_loader = mod_loader
     self.config_manager = config_manager
 
@@ -145,12 +151,16 @@ function game.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
-    local game_menu_ctx = game_menu_context.new(
-        story_ids,
-        function(file, id) self:begin_story(file, id) end,
-        function(file) self:load_story(file) end,
-        self.config_manager
-    )
+    ---@type GameMenuContext
+    local game_menu_ctx = {
+        default_story_id = game_data.stories.default_story,
+        story_ids = game_data.stories.story_select,
+        stories = game_data.stories.data,
+        config_manager = self.config_manager,
+        get_game_saves = save_system.list_saves,
+        handle_begin_story = function(file, id) self:begin_story(file, id) end,
+        handle_load_story = function(file) self:load_story(file) end,
+    }
     self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 

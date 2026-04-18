@@ -39,6 +39,7 @@ local battle_manager = {
 --- Create and initialize a new BattleManager for the given battle.
 ---@param chapter integer
 ---@param battle_id string
+---@param story_config StoryConfig
 ---@param game_data GameData
 ---@param char_man CharacterManager
 ---@param task_manager TaskManager
@@ -50,6 +51,7 @@ local battle_manager = {
 function battle_manager.new(
     chapter,
     battle_id,
+    story_config,
     game_data,
     char_man,
     task_manager,
@@ -64,7 +66,7 @@ function battle_manager.new(
     self.character_manager = char_man
     self.music_player = music_player
 
-    local battle_def = game_data.battles[battle_id]
+    local battle_def = game_data.battles[battle_id](story_config)
     local map_def = game_data.maps[battle_def.map_id]
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
 

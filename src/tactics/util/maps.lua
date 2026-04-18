@@ -17,6 +17,18 @@ function maps.set(values)
     return out
 end
 
+--- Returns true if any key in the map is present
+---@generic K
+---@generic V
+---@param m table<K, V> Elements to include in the set.
+---@return boolean
+function maps.any_value(m)
+    for _, _ in ipairs(m) do
+        return true
+    end
+    return false
+end
+
 --- Return a new table with the same keys, each value transformed by `fn`.
 ---@generic K, From, To
 ---@param m table<K, From> Source table to transform.

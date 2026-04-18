@@ -7,6 +7,8 @@
 ---@field deployment_tiles_tag string TileLabel identifying the tiles where player units are placed at battle start.
 local BattleDeploymentDefinition = {}
 
+---@alias BattleDefinitionFactory fun(StoryConfig): BattleDefinition
+
 ---@class BattleDefinition
 ---@field map_id string ID of the map used for this battle.
 ---@field music integer Music track ID played during this battle.

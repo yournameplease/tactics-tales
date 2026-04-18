@@ -9,7 +9,7 @@
 ---@class GameData
 ---@field loaded_mods table<string, boolean> Set of mod names that have been loaded.
 ---@field maps table<string, MapDefinition>
----@field battles table<string, BattleDefinition>
+---@field battles table<string, BattleDefinitionFactory>
 ---@field stories StoryData
 ---@field characters table<string, CharacterTemplate>
 ---@field items table<string, ItemDefinition>
