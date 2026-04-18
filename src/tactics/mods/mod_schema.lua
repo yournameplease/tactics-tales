@@ -2,6 +2,8 @@
 --- Specification for game mods.
 --- Note that reference fields may be provided by dependent mods as well.
 --- Used for mod validation.
+--- Certain segments of mod data, such as battles, primarily use factory functions
+--- and are excluded from static schema checking
 
 --- TODO: this was mostly AI generated, some cleanup is still needed
 
@@ -82,49 +84,7 @@ local character_template_spec = s.record({
 })
 local characters_spec = s.dictionary(s.string(), character_template_spec)
 
--- Schemas for `battles`
-local objective_spec = s.record({
-    type = s.string(),
-    text = s.optional(s.string()),
-    tag = s.optional(s.string()),
-})
-
-local character_source_spec = s.record({
-    type = s.string(),
-    template = s.optional(s.reference("characters")),
-})
-
-local ai_spec = s.record({
-    move = s.string(),
-    target_sides = s.list(s.string()),
-    exclude_tags = s.optional(s.list(s.string())),
-})
-
-local battle_spawn_spec = s.record({
-    character_source = character_source_spec,
-    side = s.string(),
-    movement_side = s.optional(s.string()),
-    tile = s.string(), -- Should be a reference to a tile_label key
-    ai = s.optional(ai_spec),
-    tags = s.optional(s.list(s.string())),
-})
-
-local battle_deployment_spec = s.record({
-    deployment_tiles_tag = s.string(), -- Should be a reference to a tile_label key
-})
-
-local battle_spec = s.record({
-    map_id = s.reference("maps"),
-    tile_labels = s.dictionary(s.string(), s.list(s.integer())),
-    turn_limit = s.optional(s.integer()),
-    victory_conditions = s.list(objective_spec),
-    failure_conditions = s.list(objective_spec),
-    units = s.list(battle_spawn_spec),
-    deployment = s.optional(battle_deployment_spec),
-    scripts = s.list(s.record({})), -- Scripts are too complex to define statically
-})
-
-local battles_spec = s.dictionary(s.string(), battle_spec)
+local battles_spec = s.dictionary(s.string(), s.factory())
 
 -- Schemas for `stories`
 local story_node_spec = s.record({
