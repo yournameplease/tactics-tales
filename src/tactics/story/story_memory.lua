@@ -16,7 +16,7 @@
 
 ---@class CharacterMemoryEntry : StoryMemoryEntry
 ---@field type "character"
----@field character_id integer
+---@field character_id CharacterId
 ---@field text string
 
 ---@alias SerializedStoryMemory table<string, StoryMemoryEntry>
@@ -106,7 +106,7 @@ function story_memory.text(text)
 end
 
 --- Create a character memory entry.
----@param character_id integer
+---@param character_id CharacterId
 ---@return StoryMemoryEntry
 function story_memory.character(character_id)
     ---@type CharacterMemoryEntry
