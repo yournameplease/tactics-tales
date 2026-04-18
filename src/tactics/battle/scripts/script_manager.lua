@@ -17,14 +17,14 @@ local lists = require("src.tactics.util.lists")
 local ScriptContext = {}
 
 ---@class TileInteractionMessage
----@field script_id integer
+---@field script_id ScriptId
 ---@field source_unit BattleUnit
 ---@field source_tile Point
 ---@field target_tile Point
 local TileInteractionMessage = {}
 
 ---@class UnitInteractionMessage
----@field script_id integer
+---@field script_id ScriptId
 ---@field source_unit BattleUnit
 ---@field source_tile Point
 ---@field target_unit BattleUnit
@@ -37,8 +37,8 @@ local UnitInteractionMessage = {}
 ---@field event_listener EventListener
 ---@field music_player MusicPlayer
 ---@field task_manager TaskManager
----@field active_scripts table<integer, BattleScript>
----@field script_listeners table<integer, integer>
+---@field active_scripts table<ScriptId, BattleScript>
+---@field script_listeners table<ScriptId, integer>
 local ScriptManager = {}
 ScriptManager.__index = ScriptManager
 
@@ -108,7 +108,7 @@ function ScriptManager:resolve_tile_selector(selector, ctx)
 end
 
 --- Deactivate a script and remove its event listener and interaction registration.
----@param script_id integer
+---@param script_id ScriptId
 function ScriptManager:remove_script(script_id)
     if self.active_scripts[script_id] then
         self.event_listener:remove(self.script_listeners[script_id])
