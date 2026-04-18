@@ -6,7 +6,7 @@
 local BattleUnit = require("src.tactics.battle.tactics.battle_unit").BattleUnit
 
 ---@class VictoryCondition Abstract base for all active (runtime) victory condition instances.
----@field text string|nil Display text describing the objective.
+---@field text? string Display text describing the objective.
 ---@field check fun(self: VictoryCondition, battle_map: table, turn_limit_exceeded: boolean): boolean
 local VictoryCondition = {}
 
@@ -65,7 +65,7 @@ function Escape:check(battle_map, _turn_limit_exceeded)
 end
 
 ---@class FailureCondition Abstract base for all active (runtime) failure condition instances.
----@field text string|nil Display text describing the failure condition.
+---@field text? string Display text describing the failure condition.
 ---@field check fun(self: FailureCondition, battle_map: table, turn_limit_exceeded: boolean): boolean
 local FailureCondition = {}
 

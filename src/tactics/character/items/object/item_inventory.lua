@@ -8,7 +8,7 @@ local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
 
 ---@class EffectDescription
----@field name string|nil
+---@field name? string
 ---@field description string
 local EffectDescription = {}
 
@@ -20,7 +20,7 @@ local ItemDescription = {}
 ---@class InventoryItem
 ---@field item Item
 ---@field _current_slot integer Slot index for this item (recalculated on any inventory change).
----@field equip_slot EquipSlot|nil Equip slot if currently equipped; nil otherwise.
+---@field equip_slot? EquipSlot Equip slot if currently equipped; nil otherwise.
 local InventoryItem = {}
 
 ---@class ItemInventory

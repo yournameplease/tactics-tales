@@ -10,7 +10,7 @@
 ---@field slots integer Number of inventory slots this item occupies.
 ---@field equip_slot EquipSlot Slot this item occupies when equipped.
 ---@field sprite_data ItemSpriteData Visual data used when rendering the item.
----@field weapon Weapon|nil Weapon stats; present only for weapon-type items.
+---@field weapon? Weapon Weapon stats; present only for weapon-type items.
 ---@field equipment_effects EquipmentEffect[] Passive bonuses granted when this item is equipped.
 ---@field appearance_overrides any
 local Item = {}

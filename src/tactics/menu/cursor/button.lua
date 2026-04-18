@@ -14,9 +14,9 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
----@field next_state string|nil Step to navigate to on select.
----@field final_step boolean|nil When true, finish the menu on select.
----@field go_back boolean|nil When true, go back on select.
+---@field next_state? string Step to navigate to on select.
+---@field final_step? boolean When true, finish the menu on select.
+---@field go_back? boolean When true, go back on select.
 ---@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
 local ButtonCursor = {}
 ButtonCursor.__index = ButtonCursor
@@ -25,9 +25,9 @@ ButtonCursor.__index = ButtonCursor
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
----@field next_state string|nil Step to navigate to on select.
----@field final_step boolean|nil When true, finish the menu on select.
----@field go_back boolean|nil When true, go back on select.
+---@field next_state? string Step to navigate to on select.
+---@field final_step? boolean When true, finish the menu on select.
+---@field go_back? boolean When true, go back on select.
 ---@field handlers table<string, string>|nil Map from MenuCommand to MenuHandlerId.
 local ButtonDefinition = {}
 ButtonDefinition.__index = ButtonDefinition

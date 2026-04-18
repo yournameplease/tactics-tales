@@ -89,8 +89,8 @@ end
 ---@field _game_data table
 ---@field _interceptor MapFetchInterceptor
 ---@field _emitted table<string, table[]>
----@field _battle_result string|nil
----@field _battle_manager BattleManager|nil
+---@field _battle_result? string
+---@field _battle_manager? BattleManager
 local BattleHarness = {}
 BattleHarness.__index = BattleHarness
 
