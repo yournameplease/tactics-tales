@@ -10,7 +10,7 @@
         "addons"
     ],
     "workspace.userThirdParty": ["addons"],
-    "workspace.ignoreDir": ["build", "tactics.p64", ".git"],
+    "workspace.ignoreDir": ["addons", "tactics.p64", ".git"],
     "runtime.version": "Lua 5.4",
     "diagnostics.disable": [
         "trailing-space",
