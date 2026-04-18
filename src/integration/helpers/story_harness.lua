@@ -99,6 +99,7 @@ function StoryHarness:start_story(story_id)
     self._story = story_mod.new(
         nil,
         story_id,
+        {},
         self._game_data,
         self._task_manager,
         self._animation_manager,

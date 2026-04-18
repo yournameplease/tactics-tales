@@ -2,7 +2,7 @@
 --- Defines the functions and data structures used to build
 --- validation schemas.
 
----@alias SchemaDefinitionType "type"|"dictionary"|"list"|"record"|"reference"
+---@alias SchemaDefinitionType "type"|"dictionary"|"list"|"record"|"reference"|"factory"
 
 ---@class SchemaDefinition Abstract base for all schema definitions.
 ---@field type SchemaDefinitionType Discriminator for the schema variant.
@@ -29,6 +29,9 @@
 ---@class ReferenceSchemaDefinition : SchemaDefinition
 ---@field type "reference"
 ---@field path string[] Dot-separated path segments used to look up the referenced value.
+
+---@class FactorySchemaDefinition : SchemaDefinition
+---@field type "factory"
 
 local schema_definition = {}
 
@@ -126,6 +129,17 @@ function schema_definition.list(element)
         type = "list",
         optional = false,
         element = element,
+    }
+    return self
+end
+
+--- Create a schema that requires a function (factory).
+---@return SchemaDefinition
+function schema_definition.factory()
+    ---@type FactorySchemaDefinition
+    local self = {
+        type = "factory",
+        optional = false,
     }
     return self
 end

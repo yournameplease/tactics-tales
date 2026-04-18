@@ -171,6 +171,7 @@ function BattleHarness:start_battle(battle_id)
     self._battle_manager = battle_manager_mod.new(
         1,
         battle_id,
+        {},
         self._game_data,
         char_man,
         self._task_manager,
