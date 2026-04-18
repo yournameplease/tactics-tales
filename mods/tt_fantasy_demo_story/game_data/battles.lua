@@ -104,6 +104,21 @@ end
 
 local BATTLE_DATA = {
     ["bandit_village"] = function(story_config)
+        local turn_limits = {
+            easy = nil,
+            normal = 15,
+            hard = 10,
+        }
+        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+
+        local failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+        }
+        if turn_limit then
+            table.insert(failure_conditions, objectives.turn_limit())
+        end
+
+        
         return {
             map_id = "bandit_village",
             music = 0,
@@ -121,14 +136,11 @@ local BATTLE_DATA = {
                 ["player_archer"] = { 0x09 },
                 ["player_armor"] = { 0x0A },
             },
-            turn_limit = 15,
+            turn_limit = turn_limit,
             victory_conditions = {
                 objectives.defeat_tagged("boss", "Defeat bandit leader")
             },
-            failure_conditions = {
-                objectives.turn_limit(),
-                objectives.tagged_unit_dies("hero"),
-            },
+            failure_conditions = failure_conditions,
             units = {
                 { side = "enemy", character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },

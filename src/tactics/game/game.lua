@@ -144,7 +144,7 @@ function game.new(
         stories = game_data.stories.data,
         config_manager = self.config_manager,
         get_game_saves = save_system.list_saves,
-        handle_begin_story = function(file, id) self:begin_story(file, id) end,
+        handle_begin_story = function(file, id, config) self:begin_story(file, id, config) end,
         handle_load_story = function(file) self:load_story(file) end,
     }
     self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)

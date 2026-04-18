@@ -99,7 +99,7 @@ function Story:handle_new_node()
     elseif node_definition.type == 'chapter_header' then
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.active_dialogue = self.dialogue_manager:create_dialogue(
-            {},
+            {"deleteme"}, -- TODO: this breaks if empty
             {
                 auto_advance = false,
             },
@@ -350,6 +350,7 @@ function story.new(
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
     self.story_config = story_config
+    log.info("STORY_CONFIG: ", self.story_config)
 
     self.character_manager = character_manager.new(game_data)
 
