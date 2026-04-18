@@ -51,7 +51,7 @@ local function debug_print(level, ...)
         if type(v) == "string" then
             str = str .. v
         elseif v == nil then
-            str = str .. "<nil> , "
+            str = str .. "<nil>"
         else
             str = str .. tostring(v)
         end
