@@ -1,5 +1,5 @@
 local luassert = require("luassert")
-local music_player = require("tactics/music/music_player")
+local music_player = require("src.tactics.music.music_player")
 
 describe("tactics.music.music_player", function()
     local player
