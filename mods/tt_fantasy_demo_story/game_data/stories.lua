@@ -196,6 +196,55 @@ local STORIES = {
 	),
 	demo_story = {
 		starting_node = 'prologue',
+		config = {
+			turn_difficulty = {
+				name = "Turn difficulty",
+				options = {
+					{
+						name = "Easy",
+						value = "easy",
+					},
+					{
+						name = "Normal",
+						value = "normal",
+					},
+					{
+						name = "Hard",
+						value = "hard",
+					},
+				}
+			},
+			saving = {
+				name = "Save Behavior",
+				options = {
+					{
+						name = "Normal",
+						value = "ask",
+					},
+					{
+						name = "Ironman",
+						value = "ironman",
+					},
+					{
+						name = "Hardcore",
+						value = "hardcore",
+					},
+				}
+			},
+			deaths = {
+				name = "Death Behavior",
+				options = {
+					{
+						name = "Classic",
+						value = "classic",
+					},
+					{
+						name = "Casual",
+						value = "casual",
+					},
+				}
+			},
+		},
 		nodes = {
 			prologue = {
 				stories.chapter_header("Prologue"),
