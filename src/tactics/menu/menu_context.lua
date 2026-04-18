@@ -15,7 +15,7 @@
 ---@field item Item
 
 ---@class ScriptSelection
----@field script_id integer
+---@field script_id ScriptId
 ---@field target_unit BattleUnit
 ---@field target_tile Point
 

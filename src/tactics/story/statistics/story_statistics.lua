@@ -2,13 +2,13 @@
 --- Type definitions for story statistics and chapter results.
 
 ---@class UnitDeathResult
----@field unit_id integer
----@field attacker_id integer
+---@field unit_id UnitId
+---@field attacker_id UnitId
 ---@field turn_number integer
 local UnitDeathResult = {}
 
 ---@class StoryChapterResult
----@field battle_id string
+---@field battle_id BattleId
 ---@field turns_taken integer
 ---@field result BattleEndResult
 ---@field units_lost UnitDeathResult[]
