@@ -32,6 +32,7 @@ describe("tactics.menu.cursor.selection", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
         luassert.are_equal("A", node:get_selected_value())
 
         -- move right
@@ -71,6 +72,7 @@ describe("tactics.menu.cursor.selection", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
         luassert.are_equal("B", node:get_selected_value())
     end)
 
@@ -118,7 +120,7 @@ describe("tactics.menu.cursor.selection", function()
         -- advance to "C"
         manager:update(input_helper.joypad({ dxp = 1 }))
         manager:update(input_helper.joypad({ dxp = 1 }))
-        luassert.are_equal("C", manager.menu_step.node:get_selected_value())
+        luassert.are_equal("C", (manager.menu_step.node --[[@as SelectionMenuNode]]):get_selected_value())
 
         local ser = manager:serialize()
 
@@ -127,7 +129,7 @@ describe("tactics.menu.cursor.selection", function()
         manager2:set_menu("TEST_MENU")
         manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 
-        luassert.are_equal("C", manager2.menu_step.node:get_selected_value())
+        luassert.are_equal("C", (manager2.menu_step.node --[[@as SelectionMenuNode]]):get_selected_value())
     end)
 
     it("should cycle options using joypad vertical input when configured", function()
@@ -151,6 +153,7 @@ describe("tactics.menu.cursor.selection", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
         luassert.are_equal("A", node:get_selected_value())
 
         -- move down
@@ -179,6 +182,7 @@ describe("tactics.menu.cursor.selection", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
         luassert.are_equal("A", node:get_selected_value())
 
         -- increment
