@@ -117,7 +117,6 @@ local BATTLE_DATA = {
         if turn_limit then
             table.insert(failure_conditions, objectives.turn_limit())
         end
-
         
         return {
             map_id = "bandit_village",
@@ -207,6 +206,20 @@ local BATTLE_DATA = {
         }
     end,
     ["cultist_cave"] = function(story_config)
+        local turn_limits = {
+            easy = nil,
+            normal = 15,
+            hard = 10,
+        }
+        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+
+        local failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+        }
+        if turn_limit then
+            table.insert(failure_conditions, objectives.turn_limit())
+        end
+        
         return {
             map_id = "cultist_cave",
             music = 12,
@@ -235,14 +248,11 @@ local BATTLE_DATA = {
                 ["jailed_bandit"] = { 0x28 },
                 ["jailed_bandit_bro"] = { 0x29 },
             },
-            turn_limit = 15,
+            turn_limit = turn_limit,
             victory_conditions = {
                 objectives.escape(),
             },
-            failure_conditions = {
-                objectives.turn_limit(),
-                objectives.tagged_unit_dies("hero")
-            },
+            failure_conditions = failure_conditions,
             deployment = {
                 deployment_tiles_tag = "player_deployment",
             },
@@ -329,6 +339,20 @@ local BATTLE_DATA = {
         }
     end,
     ["fortress_town"] = function(story_config)
+        local turn_limits = {
+            easy = nil,
+            normal = 15,
+            hard = 10,
+        }
+        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+
+        local failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+        }
+        if turn_limit then
+            table.insert(failure_conditions, objectives.turn_limit())
+        end
+        
         return {
             map_id = "fortress_town",
             music = 0,
@@ -350,14 +374,11 @@ local BATTLE_DATA = {
                 ["monarch"] = { 0x29 },
                 ["counselor"] = { 0x29 }
             },
-            turn_limit = 15,
+            turn_limit = turn_limit,
             victory_conditions = {
                 objectives.defeat_tagged("boss", "Defeat bandit and militia leaders"),
             },
-            failure_conditions = {
-                objectives.turn_limit(),
-                objectives.tagged_unit_dies("hero")
-            },
+            failure_conditions = failure_conditions,
             deployment = {
                 deployment_tiles_tag = "player_deployment",
             },
@@ -433,6 +454,20 @@ local BATTLE_DATA = {
         }
     end,
     ["cliff_crossing"] = function(story_config)
+        local turn_limits = {
+            easy = nil,
+            normal = 15,
+            hard = 10,
+        }
+        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+
+        local failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+        }
+        if turn_limit then
+            table.insert(failure_conditions, objectives.turn_limit())
+        end
+        
         return {
             map_id = "cliff_crossing",
             music = 12,
@@ -449,14 +484,11 @@ local BATTLE_DATA = {
                 ["enemy_reinforce_sw_boss"] = { 0x02 },
                 ["escape_point"] = { 0x38 },
             },
-            turn_limit = 15,
+            turn_limit = turn_limit,
             victory_conditions = {
                 objectives.escape()
             },
-            failure_conditions = {
-                objectives.turn_limit(),
-                objectives.tagged_unit_dies("hero")
-            },
+            failure_conditions = failure_conditions,
             deployment = {
                 deployment_tiles_tag = "player_deployment",
             },
@@ -508,6 +540,21 @@ local BATTLE_DATA = {
         }
     end,
     ["castle_defense"] = function(story_config)
+        local turn_limits = {
+            easy = 10,
+            normal = 15,
+            hard = nil,
+        }
+        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+
+        local victory_conditions = {
+            objectives.survive(),
+            objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
+        }
+        if turn_limit then
+            table.insert(victory_conditions, objectives.survive())
+        end
+        
         return {
             map_id = "castle_defense",
             music = 0,
@@ -533,11 +580,8 @@ local BATTLE_DATA = {
                 ["counselor"] = { 0x21 },
                 ["friendly_militia"] = { 0x22 },
             },
-            turn_limit = 15,
-            victory_conditions = {
-                objectives.survive(),
-                objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
-            },
+            turn_limit = turn_limit,
+            victory_conditions = victory_conditions,
             failure_conditions = {
                 objectives.tagged_unit_dies("hero"),
                 objectives.tagged_unit_dies("monarch")
