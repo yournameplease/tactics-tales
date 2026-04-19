@@ -7,7 +7,7 @@ local lists = require("src.tactics.util.lists")
 require("src.tactics.character.animation_data")
 
 ---@class AnimatedSpriteData
----@field current_frame AnimationFrameData
+---@field current_frame? AnimationFrameData
 ---@field playing boolean
 
 ---@alias AnimationType "path" | "offset" | "global"
@@ -19,7 +19,7 @@ require("src.tactics.character.animation_data")
 ---@field tick fun(self: AnimationInstance)
 ---@field get_sprite_frame_name fun(self: AnimationInstance, global_frame: integer): AnimationFrameName
 ---@field get_animation_offset fun(self: AnimationInstance, global_frame: integer): Point
----@field get_animation_facing fun(self: AnimationInstance, global_frame: integer): CardinalDirection
+---@field get_animation_facing? fun(self: AnimationInstance, global_frame: integer): CardinalDirection
 local AnimationInstance = {}
 
 ---@class SpriteFrame

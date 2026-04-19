@@ -9,14 +9,14 @@ require("profiler")
 ---@alias InputGroup "mouse_and_keyboard"|"mouse_only"|"joy_only"
 
 ---@class DynamicConfig
----@field log_level LogLevel
----@field draw_flexbox_debug boolean
----@field draw_target_debug boolean
+---@field log_level? LogLevel
+---@field draw_flexbox_debug? boolean
+---@field draw_target_debug? boolean
 ---@field profile? boolean
----@field head_scale integer
----@field dialogue_speed DialogueSpeed
+---@field head_scale? integer
+---@field dialogue_speed? DialogueSpeed
 ---@field glyph_family? GlyphFamily
----@field input_group InputGroup
+---@field input_group? InputGroup
 
 ---@class ConfigManager
 ---@field package config DynamicConfig Merged view of user and default config.
