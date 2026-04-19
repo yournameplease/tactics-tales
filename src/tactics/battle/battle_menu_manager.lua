@@ -373,6 +373,7 @@ local MENU_DATA = {
                 grid.grid("select_swap_unit", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder("select_swap_unit")
@@ -381,6 +382,7 @@ local MENU_DATA = {
                     )
                     :with_child( -- marking for non-actable units
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
@@ -388,6 +390,7 @@ local MENU_DATA = {
                     )
                     :with_child( -- marking for non-units
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return not point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_unit")
@@ -395,6 +398,7 @@ local MENU_DATA = {
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -404,6 +408,7 @@ local MENU_DATA = {
                 grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
                         end,
                         button.builder("swap_units")
@@ -413,6 +418,7 @@ local MENU_DATA = {
                     )
                     :with_child( -- marking for non-actable units
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
@@ -420,6 +426,7 @@ local MENU_DATA = {
                     )
                     :with_tile_highlights(get_deployment_tiles)
                     :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -452,6 +459,7 @@ local MENU_DATA = {
                 grid.grid("select_acting_unit", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return point_is_available_player(point, msb.battle_map)
                         end,
                         button.builder("available_player")
@@ -461,6 +469,7 @@ local MENU_DATA = {
                     )
                     :with_child( -- marking for non-actable units
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_available_unit")
@@ -468,6 +477,7 @@ local MENU_DATA = {
                     )
                     :with_child( -- marking for non-units
                         function(point, msb, _ctx)
+                            ---@cast msb BattleMenuContext
                             return not point_is_any_unit(point, msb.battle_map)
                         end,
                         button.builder("non_unit")
@@ -480,6 +490,7 @@ local MENU_DATA = {
                     )
                     :with_tile_highlights(get_players_to_act_tiles)
                     :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -491,6 +502,8 @@ local MENU_DATA = {
                 grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point, msb, ctx)
+                            ---@cast msb BattleMenuContext
+                            ---@cast ctx BattleMainMenuContext
                             local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
                             return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
                                 and valid_tiles:get(point.x, point.y) ~= nil
@@ -502,6 +515,8 @@ local MENU_DATA = {
                     )
                     :with_child(
                         function(point, msb, ctx)
+                            ---@cast msb BattleMenuContext
+                            ---@cast ctx BattleMainMenuContext
                             local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
                             return point_is_enemy_unit(point, msb.battle_map)
                                 and valid_tiles:get(point.x, point.y) ~= nil
@@ -513,12 +528,15 @@ local MENU_DATA = {
                     )
                     :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
                     :with_path_length(function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
                         return ctx.acting_unit.unit.character.stats.movement
                     end)
                     :with_path_anchor(function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
                         return ctx.acting_unit.point:copy()
                     end)
                     :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
                         return services.tactics_engine.active_point
                     end)
                 )
@@ -529,6 +547,8 @@ local MENU_DATA = {
                 list.column(
                     "select_action",
                     function(msb, ctx)
+                        ---@cast msb BattleMenuContext
+                        ---@cast ctx BattleMainMenuContext
                         local options = {}
                         -- if target in range
                         if any_target_in_range(msb.battle_map, ctx) then -- TODO: global state
@@ -578,6 +598,8 @@ local MENU_DATA = {
                 grid.grid("select_target", MAP_WIDTH, MAP_HEIGHT)
                     :with_child(
                         function(point, msb, ctx)
+                            ---@cast msb BattleMenuContext
+                            ---@cast ctx BattleMainMenuContext
                             return validate_tile_is_in_unit_attack_range(
                                 msb.battle_map,
                                 ctx.acting_unit.unit,
@@ -590,15 +612,20 @@ local MENU_DATA = {
                             :advance_to("CONFIRM_ATTACK")
                     )
                     :with_tile_highlights(function(msb, ctx)
+                        ---@cast msb BattleMenuContext
+                        ---@cast ctx BattleMainMenuContext
                         return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit, ctx.destination.point)
                     end)
                     :with_path_length(function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
                         return ctx.acting_unit.unit.character.stats.movement
                     end)
                     :with_path_anchor(function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
                         return ctx.acting_unit.point:copy()
                     end)
                     :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
                         return services.tactics_engine.active_point
                     end)
                 )
