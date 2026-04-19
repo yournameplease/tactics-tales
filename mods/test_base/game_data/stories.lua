@@ -1,3 +1,4 @@
+---@return ModStoriesModule
 return {
     data = {
         -- Completes immediately on start. Baseline smoke test.

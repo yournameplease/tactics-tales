@@ -1,3 +1,4 @@
+---@return ModMapsModule
 return {
     -- 16×16 open arena used by battle integration tests.
     -- player_spawn: metatile 0x01 at (2, 7)
