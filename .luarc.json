@@ -4,6 +4,7 @@
     "workspace.library": [
         "types",
         "lib",
+        "mods",
         "addons/busted/library",
         "addons/luassert/library",
         "addons/luassert",

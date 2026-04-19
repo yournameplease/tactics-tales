@@ -1,5 +1,8 @@
 local effect = {}
 
+---@param amount number
+---@param defense_type string
+---@return EquipmentEffect
 function effect.increase_defense(
     amount,
     defense_type
@@ -11,6 +14,9 @@ function effect.increase_defense(
     }
 end
 
+---@param amount number
+---@param avoid_type string
+---@return EquipmentEffect
 function effect.increase_avoid(
     amount,
     avoid_type
@@ -22,6 +28,7 @@ function effect.increase_avoid(
     }
 end
 
+---@return ItemDefinition
 local function shield(name, sprite_id, slots, defense, avoid)
     local effects = {}
     if defense and defense ~= 0 then
@@ -45,6 +52,7 @@ local function shield(name, sprite_id, slots, defense, avoid)
     }
 end
 
+---@return ItemDefinition
 local function armor(name, slots, defense, avoid)
     local effects = {}
     if defense and defense ~= 0 then
@@ -68,6 +76,7 @@ local function armor(name, slots, defense, avoid)
 end
 
 
+---@type ModItemsModule
 local ITEM_DATA = {
     dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1 ),
     sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1 ),

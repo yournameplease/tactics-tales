@@ -1,4 +1,5 @@
-return {
+---@type ModStoriesModule
+local stories = {
     data = {
         -- Completes immediately on start. Baseline smoke test.
         simple_exit = {
@@ -58,3 +59,5 @@ return {
     default_story = "simple_exit",
     story_select  = { "simple_exit", "linear_text", "jump_flow" },
 }
+
+return stories

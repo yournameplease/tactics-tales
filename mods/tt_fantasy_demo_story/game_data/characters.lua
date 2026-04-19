@@ -393,4 +393,5 @@ local UNIT_TEMPLATES = {
 	},
 }
 
+---@return ModCharactersModule
 return UNIT_TEMPLATES

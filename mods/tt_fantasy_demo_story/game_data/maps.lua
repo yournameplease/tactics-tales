@@ -6,6 +6,7 @@ local function static_map(file)
     return static_definition
 end
 
+---@type ModMapsModule
 local MAP_DEFINITIONS = {
     bandit_village = static_map("map/bandit_village_2.map"),
     cultist_cave = static_map("map/cultist_cave.map"),
