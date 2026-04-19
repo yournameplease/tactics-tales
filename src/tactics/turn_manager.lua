@@ -19,6 +19,7 @@ local PHASE_ORDER = {
 ---@field turn integer Current turn number.
 ---@field chapter integer Current chapter number.
 ---@field phase integer Current phase index into PHASE_ORDER.
+---@field acting_side fun(self: TurnManager): Side Return the side currently acting.
 local TurnManager = {}
 TurnManager.__index = TurnManager
 
