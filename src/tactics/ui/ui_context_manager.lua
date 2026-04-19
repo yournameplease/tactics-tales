@@ -34,13 +34,16 @@ end
 function UIContextManager:register_ui_context(ctx)
     if getmetatable(ctx) == battle_ui_context.BattleUIContext then
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
-        self.battle_context = ctx --[[@as BattleUIContext]]
+        ---@cast ctx BattleUIContext
+        self.battle_context = ctx
     elseif getmetatable(ctx) == story_ui_context.StoryUIContext then
         assert(self.story_context == nil, "Attempt to register game context which was already registered!")
-        self.story_context = ctx --[[@as StoryUIContext]]
+        ---@cast ctx StoryUIContext
+        self.story_context = ctx
     elseif getmetatable(ctx) == game_ui_context.GameUIContext then
         assert(self.game_context == nil, "Attempt to register game context which was already registered!")
-        self.game_context = ctx --[[@as GameUIContext]]
+        ---@cast ctx GameUIContext
+        self.game_context = ctx
     else
         error("Unexpexted UI Context: " .. ctx.type)
     end

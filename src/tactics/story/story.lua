@@ -92,14 +92,14 @@ function Story:handle_new_node()
     local node_definition = self.current_node.definition
     log.debug("Handling new node: ", node_definition.type)
     if node_definition.type == 'jump' then
-        local node_definition = node_definition --[[@as JumpNode]]
+        ---@cast node_definition JumpNode
         self:jump_to_node(node_definition.next_node)
     elseif node_definition.type == 'set_memory' then
-        local node_definition = node_definition --[[@as SetMemoryNode]]
+        ---@cast node_definition SetMemoryNode
         self.story_memory:set(node_definition.key, story_memory.text(node_definition.value))
         self:advance_node()
     elseif node_definition.type == 'chapter_header' then
-        local node_definition = node_definition --[[@as ChapterHeader]]
+        ---@cast node_definition ChapterHeader
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {"deleteme"}, -- TODO: this breaks if empty
@@ -109,7 +109,7 @@ function Story:handle_new_node()
             {}
         )
     elseif node_definition.type == 'text' then
-        local node_definition = node_definition --[[@as StoryTextNode]]
+        ---@cast node_definition StoryTextNode
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {node_definition.text},
             {
@@ -120,7 +120,7 @@ function Story:handle_new_node()
         )
         self.story_page:add_text_line(self.active_dialogue)
     elseif node_definition.type == 'battle' then
-        local node_definition = node_definition --[[@as BattleNode]]
+        ---@cast node_definition BattleNode
         self.story_page:clear_page()
         self.battle_count = self.battle_count + 1
         local battle_id = node_definition.battle_id
@@ -140,7 +140,7 @@ function Story:handle_new_node()
         self.story_page:clear_page()
         self:advance_node()
     elseif node_definition.type == 'roster_add' then
-        local node_definition = node_definition --[[@as RosterAddNode]]
+        ---@cast node_definition RosterAddNode
         local created = self.character_manager:generate_character(
             node_definition.template,
             node_definition.tags or {}
@@ -148,7 +148,7 @@ function Story:handle_new_node()
         self.character_manager:persist_player(created)
         self:advance_node()
     elseif node_definition.type == 'character_customizer' then
-        local node_definition = node_definition --[[@as CharacterCustomizerNode]]
+        ---@cast node_definition CharacterCustomizerNode
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {"Customize your hero!"},
             {
@@ -172,7 +172,7 @@ function Story:handle_new_node()
             self.stats_service.story_results
         )
     elseif node_definition.type == 'text_input' then
-        local node_definition = node_definition --[[@as TextInputNode]]
+        ---@cast node_definition TextInputNode
         local key = node_definition.key
         local text = node_definition.text
         local mem = self.story_memory:get_as_map()
@@ -249,7 +249,7 @@ function Story:advance_node()
         self.story_page:finish_text()
     end
     if node_definition.type == 'character_customizer' then
-        local node_definition = node_definition --[[@as CharacterCustomizerNode]]
+        ---@cast node_definition CharacterCustomizerNode
         self.character_manager:persist_player(self.customized_character)
         self.story_memory:set(
             node_definition.key,
@@ -259,7 +259,7 @@ function Story:advance_node()
         self.menu_manager:clear_menu()
     end
     if node_definition.type == 'text_input' then
-        local node_definition = node_definition --[[@as TextInputNode]]
+        ---@cast node_definition TextInputNode
         self.story_memory:set(
             node_definition.key,
             story_memory.text(self.text_input)
