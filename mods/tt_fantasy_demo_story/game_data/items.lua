@@ -76,6 +76,7 @@ local function armor(name, slots, defense, avoid)
 end
 
 
+---@type ModItemsModule
 local ITEM_DATA = {
     dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1 ),
     sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1 ),
@@ -141,5 +142,4 @@ local ITEM_DATA = {
     ),
 }
 
----@return ModItemsModule
 return ITEM_DATA
