@@ -11,7 +11,7 @@ local CharacterRenderer = require("src.tactics.character.character_renderer")
 ---@class MapData
 ---@field map_width integer
 ---@field map_height integer
----@field menu_node MenuNode
+---@field menu_node? MenuNode
 
 local tactics_map = {}
 

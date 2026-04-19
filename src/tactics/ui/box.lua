@@ -109,7 +109,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field last_key any
 ---@field active boolean
 ---@field anchor Anchor
----@field anchor_node UIElement Cached anchor node to avoid repeated tree searches.
+---@field anchor_node? UIElement Cached anchor node to avoid repeated tree searches.
 
 ---@class UIElement
 ---@field id string Not necessarily unique; for debug help.
