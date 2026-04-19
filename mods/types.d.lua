@@ -9,7 +9,7 @@
 ---@field content ModContent
 
 ---@class ModContent
----@field maps? string    Relative path (no .lua) to the maps data file.
+---@field maps? string    Relative path (no .map) to the maps data file.
 ---@field battles? string
 ---@field stories? string
 ---@field characters? string

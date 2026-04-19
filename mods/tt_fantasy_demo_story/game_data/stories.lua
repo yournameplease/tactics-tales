@@ -399,8 +399,8 @@ local STORIES = {
 }
 
 
----@return ModStoriesModule
-return {
+---@type ModStoriesModule
+local stories = {
 	data = STORIES,
 	default_story = "demo_story",
 	story_select = {
@@ -414,3 +414,5 @@ return {
 		"model_room",
 	}
 }
+
+return stories
