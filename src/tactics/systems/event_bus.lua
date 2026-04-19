@@ -20,6 +20,7 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "TACTICS_UNIT_DEATH"
 ---| "TACTICS_INTERACTION"
 ---| "BATTLE_END"
+---| "BATTLE_END_VICTORY"
 ---| "GAME_EXIT_STORY"
 
 ---@class EventCallback
@@ -104,7 +105,7 @@ function EventBus:emit(event_name, args)
     local slots = self.listeners[event_name]
     if slots then
         for _, listener in ipairs(slots) do
-            listener.callback(args)
+            listener.callback(args or {})
         end
     end
 end
