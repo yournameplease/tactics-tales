@@ -10,7 +10,7 @@ local lists = require("src.tactics.util.lists")
 ---@field can_skip? boolean Allow pressing BUTTON_A to skip rendering the current row instantly.
 
 ---@class ActiveDialogue
----@field text string[] Lines of dialogue text (may be computed via __index for dynamic replacement).
+---@field text string[]? Lines of dialogue text (may be computed via __index for dynamic replacement).
 ---@field current_row integer Currently displayed row index (1-based).
 ---@field characters_rendered integer Non-whitespace characters rendered so far.
 ---@field timer? integer Current animation timer value (computed via __index metamethod).

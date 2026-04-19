@@ -60,7 +60,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field padding Padding
 
 ---@class MenuHandling
----@field hover_event MenuMouseSelection Return this event directly instead of calling get_selection_at.
+---@field hover_event? MenuMouseSelection Return this event directly instead of calling get_selection_at.
 ---@field get_selection_at fun(self: UIElement, lx: number, ly: number): MenuMouseSelection
 
 ---@class SpriteInfo

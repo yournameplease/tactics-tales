@@ -159,7 +159,7 @@ function AIEngine:compute_unit_ai(unit)
                     expected_counterattack = combat_result.possible_counterattack,
                     expected_damage = combat_result.expected_damage,
                     expected_self_damage = combat_result.expected_self_damage,
-                    ally_score = ally_score,
+                    ally_score = ally_score or 0,
                 }
 
                 if better_shallow_movement_option(shallow_action, best_shallow_action) then
