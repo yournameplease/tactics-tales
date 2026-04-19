@@ -7,8 +7,6 @@ local id_generator = require("src.tactics.util.id_generator")
 ---@alias EventArgs table<string, any>
 ---@alias ListenerId integer Unique subscription ID returned by EventBus:on.
 
--- TODO: distinguish commands (menu actions) from events?
-
 ---@alias GameEvent
 ---| "TACTICS_BEGIN_TURN"
 ---| "TACTICS_END_TURN"
@@ -20,7 +18,6 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "TACTICS_UNIT_DEATH"
 ---| "TACTICS_INTERACTION"
 ---| "BATTLE_END"
----| "BATTLE_END_VICTORY"
 ---| "GAME_EXIT_STORY"
 
 ---@class EventCallback

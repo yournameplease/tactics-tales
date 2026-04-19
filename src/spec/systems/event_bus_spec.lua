@@ -42,9 +42,9 @@ describe("tactics.systems.event_bus", function()
         it("should call all callbacks registered for the same event", function()
             local bus = event_bus.new()
             local count = 0
-            bus:on("BATTLE_END_VICTORY", function() count = count + 1 end)
-            bus:on("BATTLE_END_VICTORY", function() count = count + 1 end)
-            bus:emit("BATTLE_END_VICTORY", {})
+            bus:on("BATTLE_END", function() count = count + 1 end)
+            bus:on("BATTLE_END", function() count = count + 1 end)
+            bus:emit("BATTLE_END", {})
             luassert.are_equal(2, count)
         end)
 
