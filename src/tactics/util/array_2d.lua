@@ -94,7 +94,7 @@ end
 --- Set the value at point `p` (0-indexed).
 ---@generic V
 ---@param p Point
----@param v V? Value to store at `p`.
+---@param v V|nil Value to store at `p`.
 function Array2D:set_point(p, v)
     self:set(p.x, p.y, v)
 end

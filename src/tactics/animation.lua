@@ -406,7 +406,9 @@ function AnimationManager:create_walk_animation(
                 duration = DURATION_PER_TILE
             }
         }),
-        animated_object = { playing = true },
+        animated_object = {
+            playing = true,
+        },
         playing = true
     }
     add(self.active_animations, instance)
