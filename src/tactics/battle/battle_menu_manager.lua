@@ -668,7 +668,7 @@ function battle_menu_manager.new(ctx, bus)
         HANDLERS,
         ctx,
         bus
-    )
+    ) --[[@as BattleMenuManager]]
 end
 
 return battle_menu_manager

@@ -13,7 +13,7 @@
 ---@class MouseContext : InputContext
 ---@field type "mouse"
 ---@field mouse Mouse Raw mouse state for this frame.
----@field hovered MenuMouseSelection The menu element currently under the cursor.
+---@field hovered MenuMouseSelection? The menu element currently under the cursor.
 
 local input_context = {}
 
@@ -33,7 +33,7 @@ end
 
 --- Create an InputContext for a mouse frame.
 ---@param mouse Mouse Raw mouse state for this frame.
----@param hovered MenuMouseSelection The menu element currently under the cursor.
+---@param hovered MenuMouseSelection? The menu element currently under the cursor.
 ---@param actions InputActions Logical action states derived from mouse buttons.
 ---@return InputContext
 function input_context.mouse(mouse, hovered, actions)
@@ -52,7 +52,7 @@ end
 ---@generic Return
 ---@param ctx InputContext
 ---@param update_joy fun(joy: Joypad): Return Handler invoked when ctx is a joypad context.
----@param update_mouse fun(mouse: Mouse, hovered: MenuMouseSelection): Return Handler invoked when ctx is a mouse context.
+---@param update_mouse fun(mouse: Mouse, hovered: MenuMouseSelection?): Return Handler invoked when ctx is a mouse context.
 ---@return Return
 function input_context.handle_update(ctx, update_joy, update_mouse)
     if ctx.type == "joypad" then

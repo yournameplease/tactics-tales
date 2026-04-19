@@ -41,7 +41,7 @@ local function create_mock_userdata(width, height)
     end
     local ud = setmetatable({ x = 0, y = 0, z = 0 }, MockUserdata_mt)
     internal_data[ud] = { width = width, height = height, data = data }
-    return ud
+    return ud --[[@as userdata]]
 end
 
 ---@param a userdata

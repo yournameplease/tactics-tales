@@ -126,7 +126,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field children UIElement[]
 ---@field add fun(self: UIElement, child: UIElement): UIElement
 ---@field on_update fun(self: UIElement, ctx: UIContextManager)
----@field find_node_by_id fun(self: UIElement, id: string): UIElement
+---@field find_node_by_id fun(self: UIElement, id: string): UIElement?
 ---@field custom_draw fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
 ---@field draw fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
 ---@field draw_modal fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
@@ -820,7 +820,7 @@ end
 ---@param elem UIElement
 ---@param mx number
 ---@param my number
----@return MenuMouseSelection
+---@return MenuMouseSelection?
 function box.find_topmost_selection(elem, mx, my)
     for _, child in ipairs(elem.children) do
         local l = child.rect.x
@@ -852,7 +852,7 @@ end
 
 --- Find a node in this element's subtree by ID.
 ---@param id string
----@return UIElement
+---@return UIElement?
 function Box:find_node_by_id(id)
     if self.id == id then
         return self

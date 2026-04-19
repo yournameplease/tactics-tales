@@ -67,7 +67,7 @@ end
 --- checking active modals before the root layout.
 ---@param mx number
 ---@param my number
----@return MenuMouseSelection
+---@return MenuMouseSelection?
 function UIManager:get_mouse_selection(mx, my)
     local modals = self.current_layout.modals
 
