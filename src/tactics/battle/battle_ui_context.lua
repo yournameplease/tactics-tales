@@ -90,7 +90,7 @@ function BattleUIContext:enrich()
 
     if self.menu_revision ~= self.battle_menu_manager.revision_count then
         if root_node_state and root_node_state.type == "grid" then
-            local root_node_state = root_node_state --[[@as SerializedNestedGridState]]
+            ---@cast root_node_state SerializedNestedGridState
             log.debug("setting menu tile highlights", menu.step, menu.node)
             self.menu_tile_highlights = root_node_state.tile_highlights
             should_recalculate_highlights = true
@@ -110,7 +110,7 @@ function BattleUIContext:enrich()
     self.hovered_unit = nil
 
     if root_node_state and root_node_state.type == "grid" then
-        local root_node_state = root_node_state --[[@as SerializedNestedGridState]]
+        ---@cast root_node_state SerializedNestedGridState
         self.hovered_point = root_node_state.point
 
         if menu.step == "SELECT_UNIT" then
@@ -192,7 +192,7 @@ function BattleUIContext:enrich()
 
     -- todo
     if self.turn_manager:acting_side() == "player" and menu_ctx ~= nil then
-        local menu_ctx = menu_ctx --[[@as BattleMainMenuContext]]
+        ---@cast menu_ctx BattleMainMenuContext
         if menu_ctx.acting_unit ~= nil then
             self.acting_unit = menu_ctx.acting_unit.unit
         end

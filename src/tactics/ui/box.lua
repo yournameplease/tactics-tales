@@ -299,7 +299,8 @@ function UIBuilder:padding(padding)
     if type(padding) == "number" then
         self.def.layout.padding = layout.padding(padding)
     else
-        self.def.layout.padding = padding --[[@as PaddingOptions]]
+        ---@cast padding PaddingOptions
+        self.def.layout.padding = padding
     end
     return self
 end
