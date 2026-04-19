@@ -10,7 +10,7 @@ ScriptBuilder.__index = ScriptBuilder
 local script = {}
 script.unit = {}
 
----@param trigger table
+---@param trigger ScriptTrigger
 ---@return ScriptBuilder
 function script_builder.new(trigger)
   local self = setmetatable({
@@ -24,7 +24,7 @@ end
 
 -- script effects
 
----@param units table[]
+---@param units UnitSpawnData[]
 ---@param animation string?
 ---@return ScriptBuilder
 function ScriptBuilder:then_spawn_units(units, animation)
@@ -48,7 +48,7 @@ function ScriptBuilder:then_despawn_units(units)
 end
 
 ---@param unit UnitSelector
----@param text string
+---@param text string[]
 ---@return ScriptBuilder
 function ScriptBuilder:then_dialogue(unit, text)
 	add(self.effects, {
@@ -60,8 +60,8 @@ function ScriptBuilder:then_dialogue(unit, text)
 end
 
 ---@param unit_selector UnitSelector
----@param new_ai string?
----@param new_side string?
+---@param new_ai UnitAI?
+---@param new_side Side?
 ---@return ScriptBuilder
 function ScriptBuilder:then_modify_units(
 	unit_selector,
@@ -78,7 +78,7 @@ function ScriptBuilder:then_modify_units(
 end
 
 ---@param unit_selector UnitSelector
----@param new_side string
+---@param new_side Side
 ---@return ScriptBuilder
 function ScriptBuilder:then_change_side(
     unit_selector,
@@ -88,7 +88,7 @@ function ScriptBuilder:then_change_side(
 end
 
 ---@param unit_selector UnitSelector
----@param new_ai string
+---@param new_ai UnitAI
 ---@return ScriptBuilder
 function ScriptBuilder:then_change_ai(
     unit_selector,
@@ -110,7 +110,7 @@ function ScriptBuilder:then_recruit_unit(
 end
 
 ---@param tile_label string
----@param new_terrain string
+---@param new_terrain table<TerrainLocation, integer>
 ---@return ScriptBuilder
 function ScriptBuilder:then_modify_terrain(
 	tile_label,
@@ -178,8 +178,8 @@ end
 -- script triggers
 
 ---@param turn integer
----@param phase string
----@param repeating boolean?
+---@param phase TurnTriggerTime
+---@param repeating integer?
 ---@return ScriptBuilder
 function script.on_turn(turn, phase, repeating)
 	return script_builder.new({
@@ -199,7 +199,7 @@ function script.when_unit_dies(unit_label)
 	})
 end
 
----@param unit_specifier table
+---@param unit_specifier UnitSpecifier
 ---@param text string
 ---@return ScriptBuilder
 function script.on_unit_interaction(unit_specifier, text)
