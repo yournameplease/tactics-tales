@@ -399,6 +399,7 @@ local STORIES = {
 }
 
 
+---@return ModStoriesModule
 return {
 	data = STORIES,
 	default_story = "demo_story",

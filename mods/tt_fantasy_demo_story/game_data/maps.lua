@@ -16,4 +16,5 @@ local MAP_DEFINITIONS = {
     model_room = static_map("map/model_room.map"),
 }
 
+---@return ModMapsModule
 return MAP_DEFINITIONS

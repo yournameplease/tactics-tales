@@ -730,4 +730,5 @@ local BATTLE_DATA = {
     end
 }
 
+---@return ModBattlesModule
 return BATTLE_DATA
