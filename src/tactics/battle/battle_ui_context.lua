@@ -13,7 +13,7 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field tactics_engine TacticsEngine
 ---@field hovered_point Point
 ---@field hovered_path Point[]
----@field hovered_unit BattleUnit
+---@field hovered_unit BattleUnit?
 ---@field menu_tile_highlights userdata
 ---@field last_hovered_unit BattleUnit
 ---@field acting_unit BattleUnit
@@ -23,7 +23,7 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field dialogue_revision integer
 ---@field menu_revision integer
 ---@field marked_units_revision integer
----@field tile_highlighted_unit BattleUnit
+---@field tile_highlighted_unit BattleUnit?
 ---@field highlighted_tiles userdata
 local BattleUIContext = {}
 BattleUIContext.__index = BattleUIContext
