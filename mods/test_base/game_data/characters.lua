@@ -54,6 +54,7 @@ local DEFAULT = {
     parent_template = nil,
 }
 
+---@return ModCharactersModule
 return {
     default      = DEFAULT,
     test_fighter = { parent_template = "default", hp_max = 10, movement = 3, item_loadout = {} },

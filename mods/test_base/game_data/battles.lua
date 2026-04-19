@@ -3,6 +3,7 @@ local tile_labels = {
     ["enemy_spawn"]  = { 0x02 },
 }
 
+---@return ModBattlesModule
 return {
     -- Rout victory with no enemies: 0 enemies always satisfies rout.
     -- VICTORY on the first finish_player_turn().
