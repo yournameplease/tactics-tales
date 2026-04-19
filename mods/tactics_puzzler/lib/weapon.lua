@@ -4,30 +4,37 @@ local weapon = {
     range = {},
 }
 
+---@return EquipmentEffect
 function weapon.effect.long_reach()
     return {
         type = "long_reach"
     }
 end
 
+---@return EquipmentEffect
 function weapon.effect.shieldsplitter()
     return {
         type = "shieldsplitter"
     }
 end
 
+---@return EquipmentEffect
 function weapon.effect.armorkiller()
     return {
         type = "armorkiller"
     }
 end
 
+---@return EquipmentEffect
 function weapon.effect.shieldkiller()
     return {
         type = "shieldkiller"
     }
 end
 
+---@param min_range integer
+---@param max_range integer
+---@return Targeting
 function weapon.range.single_target(min_range, max_range)
     return {
         get_selection_tiles = function(origin, map)
@@ -35,22 +42,22 @@ function weapon.range.single_target(min_range, max_range)
             for x=-max_range,max_range do
                 for y=-max_range,max_range do
                     local p = origin + lib.point.of(x, y)
-                    local distance = lib.point.taxicab_distance(origin, p) 
+                    local distance = lib.point.taxicab_distance(origin, p)
                     if min_range <= distance and distance <= max_range
                         and map:tile_is_in_map(p)
                     then
                         add(out, p)
                     end
-                end 
+                end
             end
-            
+
             return out
         end,
         get_targets_for_selection = function(origin, selection, map)
             return { map:get_at_tile(selection) }
         end,
         is_target_valid = function(origin, selection, map)
-            local distance = lib.point.taxicab_distance(origin, selection) 
+            local distance = lib.point.taxicab_distance(origin, selection)
             return min_range <= distance and distance <= max_range
         end,
     }
@@ -67,6 +74,12 @@ local default_weapon = {
     targeting = weapon.range.single_target(1,1),
 }
 
+---@param name string
+---@param slots integer
+---@param equip_slot string
+---@param sprite_data table
+---@param data table
+---@return ItemDefinition
 function weapon.of(
     name,
     slots,
@@ -87,6 +100,13 @@ function weapon.of(
     }
 end
 
+---@param name string
+---@param sprite integer
+---@param damage integer
+---@param accuracy integer
+---@param slots integer
+---@param effects? EquipmentEffect[]
+---@return ItemDefinition
 function weapon.melee(
     name,
     sprite,
@@ -112,6 +132,13 @@ function weapon.melee(
     )
 end
 
+---@param name string
+---@param sprite integer
+---@param damage integer
+---@param accuracy integer
+---@param slots integer
+---@param effects? EquipmentEffect[]
+---@return ItemDefinition
 function weapon.two_handed(
     name,
     sprite,
@@ -139,6 +166,15 @@ function weapon.two_handed(
     )
 end
 
+---@param name string
+---@param sprite integer
+---@param damage integer
+---@param accuracy integer
+---@param min_range integer
+---@param max_range integer
+---@param slots integer
+---@param effects? EquipmentEffect[]
+---@return ItemDefinition
 function weapon.ranged(
     name,
     sprite,
@@ -155,7 +191,7 @@ function weapon.ranged(
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = lib.point.of(13,9) 
+            anchor = lib.point.of(13,9)
         },
         {
             name = name,
