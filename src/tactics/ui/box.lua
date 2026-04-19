@@ -61,7 +61,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 
 ---@class MenuHandling
 ---@field hover_event? MenuMouseSelection Return this event directly instead of calling get_selection_at.
----@field get_selection_at fun(self: UIElement, lx: number, ly: number): MenuMouseSelection
+---@field get_selection_at? fun(self: UIElement, lx: number, ly: number): MenuMouseSelection
 
 ---@class SpriteInfo
 ---@field s integer Sprite index.
@@ -132,6 +132,13 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field draw_modal fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
 ---@field recalculate fun(self: UIElement, depth: integer, x: integer, y: integer, w: integer, h: integer, state: UIContextManager, is_dirty: boolean)
 ---@field recalculate_modal fun(self: UIElement, state: UIContextManager, root: UIElement)
+---@field measure fun(self: UIElement, depth: integer, is_dirty: boolean)
+---@field apply_layout fun(self: UIElement, parent_x: integer, parent_y: integer, max_w: integer, max_h: integer, is_dirty: boolean)
+---@field post_layout fun(self: UIElement)
+---@field update fun(self: UIElement, ctx: UIContextManager)
+---@field compute_caching fun(self: UIElement, ctx: UIContextManager)
+---@field compute_children fun(self: UIElement, ctx: UIContextManager)
+---@field compute_text fun(self: UIElement)
 
 ---@class Box: UIElement
 local Box = {}
@@ -153,8 +160,24 @@ local anchor = {}
 
 local box = {}
 
+---@class UIElementDef
+---@field id string
+---@field layout LayoutOptions
+---@field style StyleOptions
+---@field menu_handling? MenuHandlingOptions
+---@field sprite? SpriteInfoOptions
+---@field text? TextInfoOptions
+---@field child_generator? ChildrenInfo
+---@field cacheable? CacheInfo
+---@field modal? ModalInfoOptions
+---@field rect? ComputedRectangle
+---@field data? any
+---@field children UIElement[]
+---@field on_update? fun(self: UIElement, ctx: UIContextManager)
+---@field custom_draw? fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
+
 ---@class UIBuilder
----@field def UIElement
+---@field def UIElementDef
 local UIBuilder = {}
 UIBuilder.__index = UIBuilder
 
@@ -175,6 +198,7 @@ end
 --- Build and return the configured UIElement.
 ---@return UIElement
 function UIBuilder:build()
+    ---@diagnostic disable-next-line: missing-fields
     self.def.rect = {}
 
     if self.def.layout.width == nil then
@@ -233,7 +257,7 @@ function UIBuilder:build()
         )
     end
 
-    return setmetatable(self.def, { __index = Box })
+    return setmetatable(self.def, { __index = Box }) --[[@as UIElement]]
 end
 
 --- Set the flex direction.
@@ -275,7 +299,7 @@ function UIBuilder:padding(padding)
     if type(padding) == "number" then
         self.def.layout.padding = layout.padding(padding)
     else
-        self.def.layout.padding = padding
+        self.def.layout.padding = padding --[[@as PaddingOptions]]
     end
     return self
 end
