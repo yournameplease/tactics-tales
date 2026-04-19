@@ -24,7 +24,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field node_id string
 ---@field node_step integer
 ---@field definition StoryNode
----@field rendered_node RenderedStoryNode
+---@field rendered_node? RenderedStoryNode
 
 ---@alias StoryConfig table<string, string> 
 
@@ -92,11 +92,14 @@ function Story:handle_new_node()
     local node_definition = self.current_node.definition
     log.debug("Handling new node: ", node_definition.type)
     if node_definition.type == 'jump' then
+        local node_definition = node_definition --[[@as JumpNode]]
         self:jump_to_node(node_definition.next_node)
     elseif node_definition.type == 'set_memory' then
+        local node_definition = node_definition --[[@as SetMemoryNode]]
         self.story_memory:set(node_definition.key, story_memory.text(node_definition.value))
         self:advance_node()
     elseif node_definition.type == 'chapter_header' then
+        local node_definition = node_definition --[[@as ChapterHeader]]
         self.story_page:add_chapter_header(node_definition.text, node_definition.chapter_number)
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {"deleteme"}, -- TODO: this breaks if empty
@@ -106,6 +109,7 @@ function Story:handle_new_node()
             {}
         )
     elseif node_definition.type == 'text' then
+        local node_definition = node_definition --[[@as StoryTextNode]]
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {node_definition.text},
             {
@@ -116,6 +120,7 @@ function Story:handle_new_node()
         )
         self.story_page:add_text_line(self.active_dialogue)
     elseif node_definition.type == 'battle' then
+        local node_definition = node_definition --[[@as BattleNode]]
         self.story_page:clear_page()
         self.battle_count = self.battle_count + 1
         local battle_id = node_definition.battle_id
@@ -135,6 +140,7 @@ function Story:handle_new_node()
         self.story_page:clear_page()
         self:advance_node()
     elseif node_definition.type == 'roster_add' then
+        local node_definition = node_definition --[[@as RosterAddNode]]
         local created = self.character_manager:generate_character(
             node_definition.template,
             node_definition.tags or {}
@@ -142,6 +148,7 @@ function Story:handle_new_node()
         self.character_manager:persist_player(created)
         self:advance_node()
     elseif node_definition.type == 'character_customizer' then
+        local node_definition = node_definition --[[@as CharacterCustomizerNode]]
         self.active_dialogue = self.dialogue_manager:create_dialogue(
             {"Customize your hero!"},
             {
@@ -165,6 +172,7 @@ function Story:handle_new_node()
             self.stats_service.story_results
         )
     elseif node_definition.type == 'text_input' then
+        local node_definition = node_definition --[[@as TextInputNode]]
         local key = node_definition.key
         local text = node_definition.text
         local mem = self.story_memory:get_as_map()
@@ -176,7 +184,7 @@ function Story:handle_new_node()
                 if mem[k] then return mem[k] end
 
                 if k == key then
-                    local ctx = self.menu_manager.menu_ctx
+                    local ctx = self.menu_manager.menu_ctx --[[@as KeyboardMenuContext?]]
                     if ctx then
                         return ctx.keyboard_content
                     end
@@ -241,6 +249,7 @@ function Story:advance_node()
         self.story_page:finish_text()
     end
     if node_definition.type == 'character_customizer' then
+        local node_definition = node_definition --[[@as CharacterCustomizerNode]]
         self.character_manager:persist_player(self.customized_character)
         self.story_memory:set(
             node_definition.key,
@@ -250,6 +259,7 @@ function Story:advance_node()
         self.menu_manager:clear_menu()
     end
     if node_definition.type == 'text_input' then
+        local node_definition = node_definition --[[@as TextInputNode]]
         self.story_memory:set(
             node_definition.key,
             story_memory.text(self.text_input)
@@ -282,7 +292,7 @@ end
 
 --- Handle a battle victory by tearing down the battle and jumping to the victory node.
 function Story:handle_battle_victory()
-    local node_definition = self.current_node.definition
+    local node_definition = self.current_node.definition --[[@as BattleNode]]
     assert(node_definition.type == 'battle')
     self.battle_manager:teardown()
     self:jump_to_node(node_definition.next_node_victory)
@@ -290,7 +300,7 @@ end
 
 --- Handle a battle defeat by tearing down the battle and jumping to the failure node.
 function Story:handle_battle_defeat()
-    local node_definition = self.current_node.definition
+    local node_definition = self.current_node.definition --[[@as BattleNode]]
     assert(node_definition.type == 'battle')
     self.battle_manager:teardown()
     self:jump_to_node(node_definition.next_node_failure)
@@ -299,7 +309,9 @@ end
 --- Apply the given appearance selections to the customized character and advance.
 ---@param appearance table<string, string>
 function Story:create_character(appearance)
-    self.customized_character.appearance = {}
+    ---@diagnostic disable-next-line: missing-fields
+    local new_appearance = {} --[[@as CharacterAppearance]]
+    self.customized_character.appearance = new_appearance
     for k, a in pairs(appearance) do
         log.debug("Setting character appearance", k, a)
         self.customized_character.appearance[k] = a
