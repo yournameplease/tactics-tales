@@ -18,7 +18,7 @@ local bm = require("src.tactics.battle.battle_map")
 ---@class AIEngine
 ---@field battle_map BattleMap The map this engine operates on.
 ---@field tactics_engine TacticsEngine Dispatcher for unit actions.
----@field task_manager TaskManager Coroutine runner for async action sequences.
+---@field task_manager TaskManager? Coroutine runner for async action sequences.
 local AIEngine = {}
 AIEngine.__index = AIEngine
 
@@ -252,7 +252,7 @@ end
 --- Create a new AIEngine.
 ---@param map BattleMap
 ---@param tactics TacticsEngine
----@param task_manager TaskManager
+---@param task_manager TaskManager?
 ---@return AIEngine
 function ai_engine.new(map, tactics, task_manager)
     ---@type AIEngine

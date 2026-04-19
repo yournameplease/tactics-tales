@@ -65,7 +65,7 @@ local function elementwise_op(a, b, op)
     else
         for y = 0, h - 1 do
             for x = 0, w - 1 do
-                state_res.data[y][x] = op(state_a.data[y][x], b)
+                state_res.data[y][x] = op(state_a.data[y][x], b --[[@as number]])
             end
         end
     end
