@@ -26,6 +26,8 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node? RenderedStoryNode
 
+---@class DeleteFileNode : StoryNode
+
 ---@alias StoryConfig table<string, string> 
 
 ---@class Story
@@ -224,6 +226,7 @@ function Story:handle_new_node()
         self.event_writer:emit("GAME_EXIT_STORY", {})
     elseif node_definition.type == 'save_game' then
         if self.save_name == nil then
+            log.debug("No save file configured, skipping save_game")
             self:advance_node()
         else
             local save_data = {
@@ -247,6 +250,14 @@ function Story:handle_new_node()
             )
             self.story_page:add_text_line(self.active_dialogue)
         end
+    elseif node_definition.type == 'delete_file' then
+        if self.save_name == nil then
+            log.debug("No save file configured, skipping delete_file")
+        else
+            log.debug("Deleting save file: ", self.save_name)
+            save_system.delete(self.save_name)
+        end
+        self:advance_node()
     else
         unexpected(node_definition.type)
     end
