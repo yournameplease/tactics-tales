@@ -26,8 +26,6 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node? RenderedStoryNode
 
----@class DeleteFileNode : StoryNode
-
 ---@alias StoryConfig table<string, string> 
 
 ---@class Story
