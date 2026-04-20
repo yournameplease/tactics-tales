@@ -21,9 +21,9 @@
 ---@class UnitSpawnData
 ---@field character_source CharacterSource
 ---@field side Side Which team this unit belongs to.
----@field movement_side string Movement team identifier; defaults to side.
----@field ai UnitAI AI behavior definition for this unit.
+---@field movement_side? string Movement team identifier; defaults to side.
+---@field ai? UnitAI AI behavior definition for this unit.
 ---@field tile TileLabel Tile label identifying the spawn location.
----@field tags string[] Tags for this unit; spawn tile tag is added automatically.
+---@field tags? string[] Tags for this unit; spawn tile tag is added automatically.
 
 return {}

@@ -100,14 +100,14 @@ function InputService:get_joypad()
         dxp = (btnp(1) and 1 or 0) - (btnp(0) and 1 or 0),
         dy  = (btn(3) and 1 or 0) - (btn(2) and 1 or 0),
         dyp = (btnp(3) and 1 or 0) - (btnp(2) and 1 or 0),
-        a   = btn(4),
-        ap  = btnp(4),
-        b   = btn(5),
-        bp  = btnp(5),
-        l   = btn(14),
-        lp  = btnp(14),
-        r   = btn(15),
-        rp  = btnp(15),
+        a   = btn(4) --[[@as boolean]],
+        ap  = btnp(4) --[[@as boolean]],
+        b   = btn(5) --[[@as boolean]],
+        bp  = btnp(5) --[[@as boolean]],
+        l   = btn(14) --[[@as boolean]],
+        lp  = btnp(14) --[[@as boolean]],
+        r   = btn(15) --[[@as boolean]],
+        rp  = btnp(15) --[[@as boolean]],
     }
     return joy
 end

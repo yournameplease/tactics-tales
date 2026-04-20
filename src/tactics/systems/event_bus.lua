@@ -7,8 +7,6 @@ local id_generator = require("src.tactics.util.id_generator")
 ---@alias EventArgs table<string, any>
 ---@alias ListenerId integer Unique subscription ID returned by EventBus:on.
 
--- TODO: distinguish commands (menu actions) from events?
-
 ---@alias GameEvent
 ---| "TACTICS_BEGIN_TURN"
 ---| "TACTICS_END_TURN"
@@ -104,7 +102,7 @@ function EventBus:emit(event_name, args)
     local slots = self.listeners[event_name]
     if slots then
         for _, listener in ipairs(slots) do
-            listener.callback(args)
+            listener.callback(args or {})
         end
     end
 end

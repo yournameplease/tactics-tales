@@ -368,7 +368,7 @@ function game_menu_manager.new(ctx, bus)
         HANDLERS,
         ctx,
         bus
-    )
+    ) --[[@as GameMenuManager]]
 end
 
 return game_menu_manager

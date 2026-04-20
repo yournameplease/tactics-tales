@@ -11,7 +11,7 @@ local CharacterRenderer = require("src.tactics.character.character_renderer")
 ---@class MapData
 ---@field map_width integer
 ---@field map_height integer
----@field menu_node MenuNode
+---@field menu_node? MenuNode
 
 local tactics_map = {}
 
@@ -298,7 +298,7 @@ local function draw_tactics_map(
         -- profile("draw_map_rows_decorations")
         -- profile("draw_map_rows_units")
         local animated_point = point.of(next_x, next_z)
-        draw_unit(unit, animated_point, draw_target_manager, _ui_theme)
+        draw_unit(unit --[[@as BattleUnit]], animated_point, draw_target_manager, _ui_theme)
         -- profile("draw_map_rows_units")
     end
     draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)

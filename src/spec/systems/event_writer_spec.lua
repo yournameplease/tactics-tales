@@ -9,8 +9,8 @@ describe("tactics.systems.event_bus.event_writer", function()
             local bus = event_bus.new()
             local writer = event_writer.new(bus)
             local called = false
-            bus:on("BATTLE_END_VICTORY", function() called = true end)
-            writer:emit("BATTLE_END_VICTORY", {})
+            bus:on("BATTLE_END", function() called = true end)
+            writer:emit("BATTLE_END", {})
             luassert.is_true(called)
         end)
 

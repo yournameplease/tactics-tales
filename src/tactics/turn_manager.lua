@@ -19,20 +19,16 @@ local PHASE_ORDER = {
 ---@field turn integer Current turn number.
 ---@field chapter integer Current chapter number.
 ---@field phase integer Current phase index into PHASE_ORDER.
+---@field package battle_map BattleMap
+---@field package tactics_engine TacticsEngine
+---@field package battle_objective_service BattleObjectiveService
+---@field package ai_engine AIEngine
+---@field package battle_menu_manager BattleMenuManager
+---@field package task_manager TaskManager
+---@field package event_listener EventListener
+---@field package event_writer EventWriter
 local TurnManager = {}
 TurnManager.__index = TurnManager
-
----@class TurnManagerImpl : TurnManager
----@field battle_map BattleMap
----@field tactics_engine TacticsEngine
----@field battle_objective_service BattleObjectiveService
----@field ai_engine AIEngine
----@field battle_menu_manager BattleMenuManager
----@field task_manager TaskManager
----@field event_listener EventListener
----@field event_writer EventWriter
-local TurnManagerImpl = {}
-TurnManagerImpl.__index = TurnManagerImpl
 
 local turn_manager = {
     TurnManager = TurnManager,
@@ -40,7 +36,7 @@ local turn_manager = {
 
 --- Return true if the battle is finished based on current objectives.
 ---@return boolean
-function TurnManagerImpl:check_objectives()
+function TurnManager:check_objectives()
     local battle_result = self.battle_objective_service:check_objectives(self.turn)
 
     if not battle_result.finished then
@@ -59,12 +55,12 @@ end
 
 --- Return the side that is currently acting.
 ---@return Side
-function TurnManagerImpl:acting_side()
+function TurnManager:acting_side()
     return PHASE_ORDER[self.phase].side
 end
 
 --- Advance to the next turn, emitting turn events and refreshing units.
-function TurnManagerImpl:advance_turn()
+function TurnManager:advance_turn()
     self.event_writer:emit("TACTICS_END_TURN", {
         turn = self.turn
     })
@@ -81,7 +77,7 @@ function TurnManagerImpl:advance_turn()
 end
 
 --- Advance to the next phase, running AI or showing player menu as appropriate.
-function TurnManagerImpl:advance_phase()
+function TurnManager:advance_phase()
     self.task_manager:start_routine(function()
         self.battle_menu_manager:clear_menu()
         self.event_writer:emit("TACTICS_END_PHASE", {
@@ -122,7 +118,7 @@ function TurnManagerImpl:advance_phase()
 end
 
 --- Tear down event listeners for this turn manager.
-function TurnManagerImpl:teardown()
+function TurnManager:teardown()
     self.event_listener:teardown()
 end
 
@@ -146,8 +142,8 @@ function turn_manager.new(
     task_mgr,
     battle_menu_mgr
 )
-    ---@type TurnManagerImpl
-    local self = setmetatable({}, TurnManagerImpl)
+    ---@type TurnManager
+    local self = setmetatable({}, TurnManager)
 
     self.chapter = chapter
     self.turn = 1

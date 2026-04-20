@@ -44,7 +44,7 @@ end
 
 --- Return a curried function that maps a table's values using `fn`.
 ---@generic K, From, To
----@param fn fun(k: K, v: From): To Transform applied to each key-value pair.
+---@param fn fun(k: `K`, v: `From`): To Transform applied to each key-value pair.
 ---@return fun(m: table<K, From>): table<K, To>
 function maps.map(fn)
     return function(m)
