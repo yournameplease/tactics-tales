@@ -126,7 +126,7 @@ describe("mod_loader", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.is_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
         end)
     end)
 end)
