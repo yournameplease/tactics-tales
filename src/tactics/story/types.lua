@@ -5,7 +5,7 @@
 ---@alias StoryId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"
+---@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"
 
 ---@class StoryNode Abstract base for all story node variants.
 ---@field type StoryNodeType
@@ -14,6 +14,10 @@ local StoryNode = {}
 ---@class NewPageNode : StoryNode Advances to a new story page.
 ---@field type "new_page"
 local NewPageNode = {}
+
+---@class AdvanceNode : StoryNode Immediately advances to the next node.
+---@field type "advance"
+local AdvanceNode = {}
 
 ---@class ChapterHeader : StoryNode Displays a chapter title card.
 ---@field type "chapter_header"
@@ -105,6 +109,7 @@ local story_node = {
     GameResultsNode = GameResultsNode,
     JumpNode = JumpNode,
     NewPageNode = NewPageNode,
+    AdvanceNode = AdvanceNode,
     RosterAddNode = RosterAddNode,
     CharacterCustomizerNode = CharacterCustomizerNode,
     TextInputNode = TextInputNode,

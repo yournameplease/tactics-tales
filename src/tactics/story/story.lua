@@ -218,6 +218,8 @@ function Story:handle_new_node()
             -- false
         )
         self.story_page:add_text_input_menu(key, self.active_dialogue)
+    elseif node_definition.type == 'advance' then
+        self:advance_node()
     elseif node_definition.type == 'exit_story' then
         self.event_writer:emit("GAME_EXIT_STORY", {})
     elseif node_definition.type == 'save_game' then

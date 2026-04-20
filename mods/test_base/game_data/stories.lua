@@ -37,6 +37,17 @@ local stories = {
             },
         },
 
+        -- Advance node then exit. Tests that advance completes without any confirm().
+        advance_and_exit = {
+            starting_node = "main",
+            nodes = {
+                main = {
+                    { type = "advance" },
+                    { type = "exit_story" },
+                },
+            },
+        },
+
         -- Battle node then exit. Tests the story↔battle boundary.
         -- Uses rout_no_enemies: VICTORY on first finish_player_turn().
         battle_and_exit = {
