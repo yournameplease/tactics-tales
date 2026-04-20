@@ -35,16 +35,25 @@ local book_box = row:add(book.book_box(150, 200, 15))
 row:add(box.spacer(1))
 
 book_box:add(box.spacer(1))
-book_box:add(box.builder("title_text")
-    :text{
-        content = { "Tactics Tales" },
-        draw_properties = {
-            justify = 'center',
-            wrap = 'no_wrap'
-        },
-        text_color = "trim"
+
+local title_row = box.builder("title_row")
+    :direction("row")
+    :container("strip")
+    :build()
+title_row:add(box.spacer(1))
+title_row:add(box.builder("title_text")
+    :layout{
+        height = 32,
+        width = 64,
+    }
+    :sprite{
+        s = 5,
     }
     :build())
+title_row:add(box.spacer(1))
+
+book_box:add(title_row)
+
 book_box:add(box.spacer(2))
 book_box:add(control_hints.centered_control_hint_row(
     "BUTTON_A",
