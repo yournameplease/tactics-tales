@@ -10,10 +10,10 @@ check:
 	$(LLS) --check=$(CURDIR)
 
 ut:
-	busted src/ --exclude-tags='it'
+	busted src/ mod_spec/ --exclude-tags='it'
 
 it:
 	busted src/ --tags='it'
 
 test:
-	busted src/
+	busted src/ mod_spec/
