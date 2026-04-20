@@ -60,10 +60,24 @@ local story = {
     Story = Story,
 }
 
+---@param node_source StoryNode|StoryNodeFactory
+---@return StoryNode
+function Story:resolve_node_source(node_source)
+    if type(node_source) == "function" then
+        ---@cast node_source StoryNodeFactory
+        return node_source(self.story_config)
+    else
+        ---@cast node_source StoryNode
+        return node_source
+    end
+end
+
 --- Jump the story to the first step of the named node.
 ---@param node_id string
 function Story:jump_to_node(node_id)
-    local node_definition = self.story_definition.nodes[node_id][1]
+    local node_source = self.story_definition.nodes[node_id][1]
+    local node_definition = self:resolve_node_source(node_source)
+    
     self.current_node = {
         node_id = node_id,
         node_step = 1,
@@ -76,7 +90,9 @@ end
 ---@param node_id string
 ---@param node_step integer
 function Story:jump_to_node_step(node_id, node_step)
-    local node_definition = self.story_definition.nodes[node_id][node_step]
+    local node_source = self.story_definition.nodes[node_id][node_step]
+    local node_definition = self:resolve_node_source(node_source)
+    
     self.current_node = {
         node_id = node_id,
         node_step = node_step,
@@ -281,7 +297,7 @@ function Story:advance_node()
         self.story_page:add_text_line(dialogue)
     end
     self.current_node.node_step = self.current_node.node_step + 1
-    self.current_node.definition = self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step]
+    self.current_node.definition = self:resolve_node_source(self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step])
     self:handle_new_node()
 end
 

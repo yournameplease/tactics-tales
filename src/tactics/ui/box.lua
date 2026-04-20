@@ -2,11 +2,8 @@
 --- The core UI element, implementing a flexbox-like layout system for arranging
 --- child elements in rows or columns.
 
-local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.ui.theme")
 local colors = require("src.tactics.colors")
-local MenuMouseSelection = require("src.tactics.menu.menu_cursor").mouse_selection.MenuMouseSelection
-local DrawTargetManager = require("src.tactics.draw.draw_target_manager").DrawTargetManager
 local text = require("src.tactics.util.text")
 
 -- Note: this class is a bit of a mess with inheritance
