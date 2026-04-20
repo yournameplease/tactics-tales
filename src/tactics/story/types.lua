@@ -83,11 +83,12 @@ local TextInputNode = {}
 ---@field next_node NodeId Node to jump to.
 local JumpNode = {}
 
----@alias StoryConfigDefinition table<string, StoryConfigDefinitionEntry>
- 
+---@alias StoryConfigDefinition StoryConfigDefinitionEntry[]
+
 ---@class StoryConfigDefinitionEntry
----@field name string 
----@field description string 
+---@field key string
+---@field name string
+---@field description? string
 ---@field options StoryConfigOption[]
 
 ---@class StoryConfigOption

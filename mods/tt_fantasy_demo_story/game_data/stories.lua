@@ -197,7 +197,8 @@ local STORIES = {
 	demo_story = {
 		starting_node = 'prologue',
 		config = {
-			turn_difficulty = {
+			{
+				key = "turn_difficulty",
 				name = "Turn difficulty",
 				options = {
 					{
@@ -214,7 +215,8 @@ local STORIES = {
 					},
 				}
 			},
-			saving = {
+			{
+				key = "saving",
 				name = "Save Behavior",
 				options = {
 					{
@@ -231,7 +233,8 @@ local STORIES = {
 					},
 				}
 			},
-			deaths = {
+			{
+				key = "deaths",
 				name = "Death Behavior",
 				options = {
 					{
