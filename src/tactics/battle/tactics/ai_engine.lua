@@ -252,7 +252,7 @@ end
 --- Create a new AIEngine.
 ---@param map BattleMap
 ---@param tactics TacticsEngine
----@param task_manager TaskManager?
+---@param task_manager TaskManager
 ---@return AIEngine
 function ai_engine.new(map, tactics, task_manager)
     ---@type AIEngine
