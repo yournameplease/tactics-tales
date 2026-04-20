@@ -94,12 +94,13 @@ end
 
 --- Create and start the named story, then tick to idle.
 ---@param story_id string
-function StoryHarness:start_story(story_id)
+---@param config? table
+function StoryHarness:start_story(story_id, config)
     assert(not self._story, "start_story() has already been called on this harness")
     self._story = story_mod.new(
         nil,
         story_id,
-        {},
+        config or {},
         self._game_data,
         self._task_manager,
         self._animation_manager,

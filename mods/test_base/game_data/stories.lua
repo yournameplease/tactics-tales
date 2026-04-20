@@ -37,6 +37,23 @@ local stories = {
             },
         },
 
+        -- Function node branches on config.show_text: text node if true, advance node otherwise.
+        config_branch = {
+            starting_node = "main",
+            nodes = {
+                main = {
+                    function(config)
+                        if config.show_text then
+                            return { type = "text", text = "Config text." }
+                        else
+                            return { type = "advance" }
+                        end
+                    end,
+                    { type = "exit_story" },
+                },
+            },
+        },
+
         -- Advance node then exit. Tests that advance completes without any confirm().
         advance_and_exit = {
             starting_node = "main",
