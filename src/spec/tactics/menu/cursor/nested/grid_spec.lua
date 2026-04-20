@@ -33,6 +33,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedGridNode
         luassert.are_equal(0, node.point.x)
         luassert.are_equal(0, node.point.y)
 
@@ -130,6 +131,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedGridNode
         luassert.are_equal(3, node.point.x)
         luassert.are_equal(4, node.point.y)
     end)
@@ -167,6 +169,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
+        ---@cast node NestedGridNode
         luassert.are_same({ point.of(0, 0) }, node.path)
 
         -- move right
@@ -215,6 +218,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         manager:update(input_helper.joypad({ dyp = 1 }))
 
         local node = manager.menu_step.node
+        ---@cast node NestedGridNode
         luassert.are_equal(2, node.point.x)
         luassert.are_equal(1, node.point.y)
         luassert.are_equal(4, #node.path)
@@ -228,6 +232,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         manager2.menu_step.node:deserialize(serialized.node.state, serialized.node.data)
 
         local node2 = manager2.menu_step.node
+        ---@cast node2 NestedGridNode
         luassert.are_equal(2, node2.point.x)
         luassert.are_equal(1, node2.point.y)
         luassert.are_same(node.path, node2.path)

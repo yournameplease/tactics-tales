@@ -108,7 +108,7 @@ local function load_static(definition, tile_labels)
         end
     end
 
-    local map = battle_map.new(metatiles_layer:width(), metatiles_layer:height(), labels)
+    local map = battle_map.new(metatiles_layer:width() --[[@as integer]], metatiles_layer:height() --[[@as integer]], labels)
     map.layers = layers
     map.metadata = {
         player_spawners = {},
@@ -124,7 +124,7 @@ end
 ---@return BattleMap
 function map_generator.load_map(definition, labels)
     if definition.type == "static" then
-        return load_static(definition, labels)
+        return load_static(definition --[[@as StaticMapDefinition]], labels)
     else
         error("unknown map type")
     end

@@ -75,6 +75,9 @@ function sgn(n) end
 --- Calculates the arctangent of dx/dy formed by the vector on the unit circle.
 --- The result is adjusted to represent the full circle.
 --- [View Online](https://pico-8.fandom.com/wiki/Atan2)
+--- @param dx number
+--- @param dy number
+--- @return Angle
 function atan2(dx, dy) end
 
 --- Calculates the sin of an angle

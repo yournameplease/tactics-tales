@@ -81,7 +81,7 @@ end
 function NestedGridChildDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
     return setmetatable({
         child = self.child:to_cursor(parent, game_ctx, menu_ctx, menu_state)
-    }, { __index = self })
+    }, { __index = self }) --[[@as NestedGridChild]]
 end
 
 --- Return the first child whose filter matches position p.

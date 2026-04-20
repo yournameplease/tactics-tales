@@ -577,6 +577,7 @@ describe("tactics.ui.box", function()
                 current_key = function(_) return key end,
                 generate_children = function(_) return { make_fixed("x", 5, 5) } end,
             }
+            ---@diagnostic disable-next-line: missing-fields
             elem:compute_children({})
             luassert.are_equal(original_children, elem.children)
         end)
@@ -589,6 +590,7 @@ describe("tactics.ui.box", function()
                 current_key = function(_) return 2 end,
                 generate_children = function(_) return { new_child } end,
             }
+            ---@diagnostic disable-next-line: missing-fields
             elem:compute_children({})
             luassert.are_equal(1, #elem.children)
             luassert.are_equal(new_child, elem.children[1])
@@ -602,6 +604,7 @@ describe("tactics.ui.box", function()
                 current_key = function(_) return 2 end,
                 generate_children = function(_) return {} end,
             }
+            ---@diagnostic disable-next-line: missing-fields
             elem:compute_children({})
             luassert.is_true(elem.cacheable.dirty_layout)
         end)
@@ -613,6 +616,7 @@ describe("tactics.ui.box", function()
                 current_key = function(_) return 42 end,
                 generate_children = function(_) return {} end,
             }
+            ---@diagnostic disable-next-line: missing-fields
             elem:compute_children({})
             luassert.are_equal(42, elem.child_generator.last_key)
         end)
@@ -626,6 +630,7 @@ describe("tactics.ui.box", function()
                 current_key = function(_) return key end,
                 generate_children = function(_) return {} end,
             }
+            ---@diagnostic disable-next-line: missing-fields
             elem:compute_children({})
             luassert.is_false(elem.cacheable.dirty_layout)
         end)

@@ -93,7 +93,7 @@ function _update()
     if user_input.active_method == "joypad" then
         input_ctx = input_context.joypad(user_input.joypad, user_input.actions)
     elseif user_input.active_method == "mouse" then
-        ---@type MenuMouseSelection
+        ---@type MenuMouseSelection?
         local hovered
         if user_input.mouse ~= nil then
             hovered = ui_manager:get_mouse_selection(user_input.mouse.mx, user_input.mouse.my)

@@ -101,9 +101,11 @@ local function build_combat_double(unit)
     for _slot, item in pairs(equipped_items) do
         for _, eff in ipairs(item.equipment_effects) do
             if eff.type == "increase_defense" then
-                double.defense[eff.defense_type] = (double.defense[eff.defense_type] or 0) + eff.amount
+                local def_eff = eff --[[@as IncreaseDefenseEffect]]
+                double.defense[def_eff.defense_type] = (double.defense[def_eff.defense_type] or 0) + def_eff.amount
             elseif eff.type == "increase_avoid" then
-                double.avoid[eff.avoid_type] = (double.avoid[eff.avoid_type] or 0) + eff.amount
+                local avoid_eff = eff --[[@as IncreaseAvoidEffect]]
+                double.avoid[avoid_eff.avoid_type] = (double.avoid[avoid_eff.avoid_type] or 0) + avoid_eff.amount
             else
                 unexpected(eff.type)
             end
@@ -265,6 +267,8 @@ function combat_calculator.preview_combat(attacker_unit, defender_unit, attacker
     ---@type CombatPreviewResult
     local result = {
         steps = {},
+        possible_kill = false,
+        possible_self_kill = false,
         possible_counterattack = false,
         expected_damage = 0,
         expected_self_damage = 0,

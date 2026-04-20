@@ -41,7 +41,7 @@ local function create_mock_userdata(width, height)
     end
     local ud = setmetatable({ x = 0, y = 0, z = 0 }, MockUserdata_mt)
     internal_data[ud] = { width = width, height = height, data = data }
-    return ud
+    return ud --[[@as userdata]]
 end
 
 ---@param a userdata
@@ -65,7 +65,7 @@ local function elementwise_op(a, b, op)
     else
         for y = 0, h - 1 do
             for x = 0, w - 1 do
-                state_res.data[y][x] = op(state_a.data[y][x], b)
+                state_res.data[y][x] = op(state_a.data[y][x], b --[[@as number]])
             end
         end
     end

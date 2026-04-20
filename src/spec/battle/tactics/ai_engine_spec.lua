@@ -1,6 +1,7 @@
 local luassert = require("luassert")
 local ai_engine = require("src.tactics.battle.tactics.ai_engine")
 local point = require("src.tactics.util.point")
+local tasks = require("src.tactics.systems.tasks")
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -157,7 +158,7 @@ describe("ai_engine", function()
             local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
             local enemy   = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -171,7 +172,7 @@ describe("ai_engine", function()
             local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
             local enemy   = make_unit({ id = 2, tile = point.of(4, 0), side = "player", hp = 10 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 5, 5), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 5, 5), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -183,7 +184,7 @@ describe("ai_engine", function()
         it("waits in place when no targets exist", function()
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -200,7 +201,7 @@ describe("ai_engine", function()
             local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 1,   hp_max = 10, weapons = {} })
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999, weapons = {} })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -218,7 +219,7 @@ describe("ai_engine", function()
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
                                         weapons = {} })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -237,7 +238,7 @@ describe("ai_engine", function()
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
                                         weapons = {} })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -256,7 +257,7 @@ describe("ai_engine", function()
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
                                         weapons = {}, items = { make_armor_item(999) } })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, nil)
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -275,7 +276,7 @@ describe("ai_engine", function()
             })
             local enemy = make_unit({ id = 2, tile = point.of(0, 2), side = "player", hp = 10 })
             local spy   = make_tactics_spy()
-            local engine = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, nil)
+            local engine = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 

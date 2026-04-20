@@ -128,6 +128,7 @@ function ScriptManager:register_script(script)
     local trigger = script.trigger
 
     if trigger.type == "turn" then
+        ---@cast trigger Turn
         local event_by_offset = {
             ["before"] = "TACTICS_BEGIN_PHASE",
             ["after"] = "TACTICS_END_PHASE",
@@ -159,6 +160,7 @@ function ScriptManager:register_script(script)
             end
         end
     elseif trigger.type == "unit_death" then
+        ---@cast trigger UnitDeath
         event = "TACTICS_UNIT_DEATH"
         filter = function(ctx)
             local defender = ctx.defender
@@ -210,6 +212,7 @@ function ScriptManager:register_script(script)
     for _, effect in ipairs(script.effects) do
         local fn
         if effect.type == "spawn_units" then
+            ---@cast effect SpawnUnits
             fn = function(_ctx)
                 log.debug("Handling SpawnUnits effect.")
                 self.tactics_engine:spawn_all(
@@ -219,6 +222,7 @@ function ScriptManager:register_script(script)
                 )
             end
         elseif effect.type == "modify_units" then
+            ---@cast effect ModifyUnits
             fn = function(ctx)
                 log.debug("Handling ModifyUnits effect.")
                 self.tactics_engine:modify_units(
@@ -230,6 +234,7 @@ function ScriptManager:register_script(script)
                 )
             end
         elseif effect.type == "recruit_units" then
+            ---@cast effect RecruitUnits
             fn = function(ctx)
                 log.debug("Handling RecruitUnits effect.")
                 self.tactics_engine:recruit_units(
@@ -237,6 +242,7 @@ function ScriptManager:register_script(script)
                 )
             end
         elseif effect.type == "modify_terrain" then
+            ---@cast effect ModifyTerrain
             fn = function(_ctx)
                 log.debug("Handling ModifyTerrain effect.")
                 self.battle_map:update_terrain(
@@ -245,6 +251,7 @@ function ScriptManager:register_script(script)
                 )
             end
         elseif effect.type == "dialogue" then
+            ---@cast effect Dialogue
             fn = function(ctx)
                 log.debug("Handling Dialogue effect.")
                 local units = self:resolve_unit_selector(effect.unit, ctx)
@@ -252,12 +259,14 @@ function ScriptManager:register_script(script)
                 self.tactics_engine:start_dialogue(units[1], effect.text)
             end
         elseif effect.type == "despawn_units" then
+            ---@cast effect DespawnUnits
             fn = function(ctx)
                 log.debug("Handling DespawnUnit effect.")
                 local units = self:resolve_unit_selector(effect.units, ctx)
                 self.tactics_engine:despawn_unit(units)
             end
         elseif effect.type == "play_sound" then
+            ---@cast effect PlaySound
             fn = function(_ctx)
                 log.debug("Handling PlaySound effect.")
                 local SFX_MAP = {
@@ -269,6 +278,7 @@ function ScriptManager:register_script(script)
                 end
             end
         elseif effect.type == "remove_script" then
+            ---@cast effect RemoveScript
             fn = function(_ctx)
                 log.debug("Handling RemoveScript effect.")
                 for script_id, s in pairs(self.active_scripts) do
@@ -278,6 +288,7 @@ function ScriptManager:register_script(script)
                 end
             end
         elseif effect.type == "play_music" then
+            ---@cast effect PlayMusic
             fn = function(_ctx)
                 log.debug("Handling PlayMusic effect.")
                 local MUSIC_MAP = {
@@ -369,6 +380,7 @@ function script_manager.new(scripts, bus, music_player, map, tactics, task_manag
 
         local trigger = script.trigger
         if trigger.type == "unit_interaction" then
+            ---@cast trigger UnitInteraction
             local units = self:resolve_unit_specifier(trigger.unit_specifier)
             for _, unit in ipairs(units) do
                 self.battle_map:register_unit_interaction(
@@ -378,6 +390,7 @@ function script_manager.new(scripts, bus, music_player, map, tactics, task_manag
                 )
             end
         elseif trigger.type == "tile_interaction" then
+            ---@cast trigger TileInteraction
             local tiles = self:resolve_tile_specifier(trigger.tile_specifier)
             for _, tile in ipairs(tiles) do
                 self.battle_map:register_tile_interaction(

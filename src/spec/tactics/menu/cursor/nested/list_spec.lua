@@ -160,11 +160,11 @@ describe("tactics.menu.cursor.nested.list", function()
             -- navigate to index 3
             manager:update(input_helper.joypad({ dyp = 1 }))
             manager:update(input_helper.joypad({ dyp = 1 }))
-            luassert.are_equal(3, manager.menu_step.node.i)
+            luassert.are_equal(3, (manager.menu_step.node --[[@as NestedMenuNode]]).i)
 
             local ser = manager:serialize()
             luassert.are_equal("list", ser.node.state.type)
-            luassert.are_equal(3, ser.node.state.i)
+            luassert.are_equal(3, (ser.node.state --[[@as SerializedNestedMenuNodeState]]).i)
         end)
 
         it("should deserialize the focused index", function()
@@ -191,14 +191,14 @@ describe("tactics.menu.cursor.nested.list", function()
             -- navigate to index 2 and serialize
             manager:update(input_helper.joypad({ dyp = 1 }))
             local ser = manager:serialize()
-            luassert.are_equal(2, ser.node.state.i)
+            luassert.are_equal(2, (ser.node.state --[[@as SerializedNestedMenuNodeState]]).i)
 
             -- create a new manager and deserialize
             local manager2 = menu_manager.new(menu_defs, {}, ctx, bus)
             manager2:set_menu("TEST_MENU")
             manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 
-            luassert.are_equal(2, manager2.menu_step.node.i)
+            luassert.are_equal(2, (manager2.menu_step.node --[[@as NestedMenuNode]]).i)
         end)
 
         it("should round-trip a list containing selection children", function()
@@ -231,10 +231,10 @@ describe("tactics.menu.cursor.nested.list", function()
             local node = manager.menu_step.node
             ---@cast node NestedMenuNode
             luassert.are_equal(2, node.i)
-            luassert.are_equal("blue", node.children[2]:get_selected_value())
+            luassert.are_equal("blue", (node.children[2] --[[@as SelectionMenuNode]]):get_selected_value())
 
             local ser = manager:serialize()
-            luassert.are_equal(2, ser.node.state.i)
+            luassert.are_equal(2, (ser.node.state --[[@as SerializedNestedMenuNodeState]]).i)
             luassert.are_equal("blue", ser.node.data["color"])
 
             -- new manager, restore
@@ -245,7 +245,7 @@ describe("tactics.menu.cursor.nested.list", function()
             local node2 = manager2.menu_step.node
             ---@cast node2 NestedMenuNode
             luassert.are_equal(2, node2.i)
-            luassert.are_equal("blue", node2.children[2]:get_selected_value())
+            luassert.are_equal("blue", (node2.children[2] --[[@as SelectionMenuNode]]):get_selected_value())
         end)
     end)
 end)

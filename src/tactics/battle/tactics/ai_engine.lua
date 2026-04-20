@@ -18,7 +18,7 @@ local bm = require("src.tactics.battle.battle_map")
 ---@class AIEngine
 ---@field battle_map BattleMap The map this engine operates on.
 ---@field tactics_engine TacticsEngine Dispatcher for unit actions.
----@field task_manager TaskManager Coroutine runner for async action sequences.
+---@field task_manager TaskManager? Coroutine runner for async action sequences.
 local AIEngine = {}
 AIEngine.__index = AIEngine
 
@@ -159,7 +159,7 @@ function AIEngine:compute_unit_ai(unit)
                     expected_counterattack = combat_result.possible_counterattack,
                     expected_damage = combat_result.expected_damage,
                     expected_self_damage = combat_result.expected_self_damage,
-                    ally_score = ally_score,
+                    ally_score = ally_score or 0,
                 }
 
                 if better_shallow_movement_option(shallow_action, best_shallow_action) then
