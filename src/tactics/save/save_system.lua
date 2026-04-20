@@ -71,4 +71,12 @@ function save_system.load(name)
 	return fetch(path)
 end
 
+--- Delete the save file for the given slot name.
+---@param name string Save slot name.
+function save_system.delete(name)
+	local path = SAVE_PATH .. name .. ".pod"
+	log.debug("Deleting save: ", name, path)
+	rm(path)
+end
+
 return save_system
