@@ -5,7 +5,7 @@
 ---@alias StoryId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"
+---@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"
 
 ---@class StoryNode Abstract base for all story node variants.
 ---@field type StoryNodeType
@@ -39,6 +39,10 @@ local SetMemoryNode = {}
 ---@class SaveGameNode : StoryNode Triggers a save at this point in the story.
 ---@field type "save_game"
 local SaveGameNode = {}
+
+---@class DeleteFileNode : StoryNode Deletes the current save file and advances.
+---@field type "delete_file"
+local DeleteFileNode = {}
 
 ---@class ExitStoryNode : StoryNode Exits the current story.
 ---@field type "exit_story"
