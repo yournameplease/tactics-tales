@@ -63,6 +63,9 @@ end
 ---@return table<integer, Item>
 function ItemInventory:get_items_by_slot()
     return maps.map(
+        ---@param _ integer
+        ---@param i InventoryItem
+        ---@return Item
         function(_, i)
             return i.item
         end
@@ -79,6 +82,9 @@ end
 ---@return table<EquipSlot, Item>
 function ItemInventory:get_equipped_items()
     return maps.map(
+        ---@param _ EquipSlot
+        ---@param i InventoryItem
+        ---@return Item
         function(_, i)
             return i.item
         end

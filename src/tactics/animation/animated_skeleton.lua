@@ -20,10 +20,10 @@ local point = require("src.tactics.util.point")
 ---@field anchors table<string, Point>
 
 ---@class SkeletonNodeDefinition
----@field parent string
+---@field parent? string
 ---@field sprite integer
----@field scale_x integer
----@field scale_y integer
+---@field scale_x? integer
+---@field scale_y? integer
 ---@field sprite_back integer
 ---@field root PointRecord
 ---@field anchors table<string, PointRecord>
