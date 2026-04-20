@@ -207,7 +207,7 @@ end
 
 ---@class AnimationFrameData
 ---@field frame AnimationFrameName
----@field facing CardinalDirection -- nillable
+---@field facing? CardinalDirection
 ---@field offset Point
 
 ---@alias OffsetAnimationId

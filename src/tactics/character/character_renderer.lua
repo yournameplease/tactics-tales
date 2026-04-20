@@ -353,6 +353,14 @@ function character_renderer.draw(
     local DRAW_TARGET_D = point.of(15, 31)
 
     local current_frame = drawable_unit.animation_data.current_frame
+    if not current_frame then
+        log.warn("No current frame, defaulting to idle_1.")
+        current_frame = {
+            frame = "idle_1",
+            facing = nil,
+            offset = point.of(0, 0)
+        }
+    end
 
     -- update facing
     do
