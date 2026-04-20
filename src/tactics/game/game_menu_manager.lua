@@ -220,13 +220,13 @@ local MENU_DATA = {
                         local config = definition.config
 
                         if config then
-                            for key,opt in pairs(config) do
+                            for _, opt in ipairs(config) do
                                 local config_options = lists.map(function(o)
                                     return o.value
                                 end)(opt.options)
-                                
-                                local b = selection.row(key)
-                                    :with_key(key)
+
+                                local b = selection.row(opt.key)
+                                    :with_key(opt.key)
                                     :with_label(opt.name)
                                     :with_static_options(config_options)
 
