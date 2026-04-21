@@ -13,6 +13,7 @@ describe("save_system", function()
         end)
         it("should call rm with the correct path", function()
             save_system.delete("my_save")
+            ---@diagnostic disable-next-line: undefined-field
             luassert.spy(rm_spy).was_called_with("/appdata/tactics_tales/saves/my_save.pod")
         end)
     end)
