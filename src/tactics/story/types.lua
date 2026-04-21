@@ -96,10 +96,11 @@ local JumpNode = {}
 ---@field value string
 
 ---@alias StoryNodeFactory fun(StoryConfig): StoryNode
+---@alias StoryNodeSource StoryNode | StoryNode[] | (fun(StoryConfig): StoryNodeSource)
 
 ---@class StoryDefinition
 ---@field config? StoryConfigDefinition
----@field nodes table<NodeId, (StoryNode|StoryNodeFactory)[]> Maps each node ID to a sequence of nodes played in order.
+---@field nodes table<NodeId, StoryNodeSource> Maps each node ID to a sequence of nodes played in order.
 ---@field starting_node NodeId ID of the first node played when the story begins.
 local StoryDefinition = {}
 
