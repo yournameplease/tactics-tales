@@ -62,6 +62,7 @@ end
 --- Return a map of slot index to item.
 ---@return table<integer, Item>
 function ItemInventory:get_items_by_slot()
+    ---@diagnostic disable-next-line
     return maps.map(
         ---@param _ integer
         ---@param i InventoryItem
@@ -81,6 +82,7 @@ end
 --- Return a map of equip slot to equipped item.
 ---@return table<EquipSlot, Item>
 function ItemInventory:get_equipped_items()
+    ---@diagnostic disable-next-line
     return maps.map(
         ---@param _ EquipSlot
         ---@param i InventoryItem
