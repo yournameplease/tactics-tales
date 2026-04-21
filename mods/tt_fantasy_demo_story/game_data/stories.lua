@@ -231,10 +231,11 @@ local STORIES = {
 				key = "saving",
 				name = "Save Behavior",
 				options = {
-					{
-						name = "Normal",
-						value = "ask",
-					},
+					---TODO: Disabling "ask" mode for now, this would need a "choice" story node
+					-- {
+					-- 	name = "Normal",
+					-- 	value = "ask",
+					-- },
 					{
 						name = "Ironman",
 						value = "ironman",
