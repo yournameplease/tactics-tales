@@ -72,12 +72,27 @@ function Story:resolve_node_source(node_source)
     end
 end
 
+--- Normalize a StoryNodeSource to a StoryNode[] for sequential access.
+---@param source StoryNodeSource
+---@return StoryNode[]
+function Story:resolve_to_array(source)
+    if type(source) == "function" then
+        return self:resolve_to_array(source(self.story_config))
+    elseif source[1] ~= nil then
+        ---@cast source StoryNode[]
+        return source
+    else
+        ---@cast source StoryNode
+        return { source }
+    end
+end
+
 --- Jump the story to the first step of the named node.
 ---@param node_id string
 function Story:jump_to_node(node_id)
-    local node_source = self.story_definition.nodes[node_id][1]
-    local node_definition = self:resolve_node_source(node_source)
-    
+    local steps = self:resolve_to_array(self.story_definition.nodes[node_id])
+    local node_definition = self:resolve_node_source(steps[1])
+
     self.current_node = {
         node_id = node_id,
         node_step = 1,
@@ -90,8 +105,8 @@ end
 ---@param node_id string
 ---@param node_step integer
 function Story:jump_to_node_step(node_id, node_step)
-    local node_source = self.story_definition.nodes[node_id][node_step]
-    local node_definition = self:resolve_node_source(node_source)
+    local steps = self:resolve_to_array(self.story_definition.nodes[node_id])
+    local node_definition = self:resolve_node_source(steps[node_step])
     
     self.current_node = {
         node_id = node_id,
@@ -308,7 +323,8 @@ function Story:advance_node()
         self.story_page:add_text_line(dialogue)
     end
     self.current_node.node_step = self.current_node.node_step + 1
-    self.current_node.definition = self:resolve_node_source(self.story_definition.nodes[self.current_node.node_id][self.current_node.node_step])
+    local steps = self:resolve_to_array(self.story_definition.nodes[self.current_node.node_id])
+    self.current_node.definition = self:resolve_node_source(steps[self.current_node.node_step])
     self:handle_new_node()
 end
 
