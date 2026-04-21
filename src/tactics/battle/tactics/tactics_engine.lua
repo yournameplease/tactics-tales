@@ -43,6 +43,7 @@ local ActiveBattleDialogue = {}
 ---@class TacticsEngine
 ---@field turn integer The current turn.  Set by TurnManager.
 ---@field chapter integer The current chapter.
+---@field battle_config BattleConfig
 ---@field battle_is_blocked boolean Whether a coroutine is currently blocking battle input.
 ---@field tactics_locks table<integer, boolean> Set of active lock IDs preventing certain actions.
 ---@field active_point? Point
@@ -70,6 +71,7 @@ local tactics_engine = {
 
 --- Construct a new TacticsEngine bound to the given battle services.
 ---@param chapter integer
+---@param battle_config BattleConfig
 ---@param map BattleMap
 ---@param character_mgr CharacterManager
 ---@param task_manager TaskManager
@@ -79,6 +81,7 @@ local tactics_engine = {
 ---@return TacticsEngine
 function tactics_engine.new(
     chapter,
+    battle_config,
     map,
     character_mgr,
     task_manager,
@@ -93,6 +96,7 @@ function tactics_engine.new(
     self.battle_is_blocked = false
     self.tactics_locks = {}
 
+    self.battle_config = battle_config
     self.battle_map = map
     self.character_manager = character_mgr
     self.music_player = music_player
@@ -124,6 +128,11 @@ end
 ---@param lock_id integer
 function TacticsEngine:remove_lock(lock_id)
     self.tactics_locks[lock_id] = nil
+end
+
+---@return boolean
+function TacticsEngine:is_permadeath()
+    return self.battle_config.permadeath
 end
 
 -- Normalize path to offsets from first tile and multiply by tile scale.
@@ -479,7 +488,9 @@ function TacticsEngine:kill_unit(defender, attacker)
     end
     self.battle_is_blocked = false
 
-    defender:die()
+    if self:is_permadeath() then
+        defender:die()
+    end
     self.battle_map:kill_unit(defender)
     if played_music then
         self.music_player:resume_music(1000)

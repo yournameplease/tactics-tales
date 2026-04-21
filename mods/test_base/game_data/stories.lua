@@ -1,9 +1,16 @@
+local function battle_config(params)
+    return {
+        permadeath = params.permadeath or true 
+    }
+end
+
 ---@type ModStoriesModule
 local stories = {
     data = {
         -- Completes immediately on start. Baseline smoke test.
         simple_exit = {
             starting_node = "exit",
+            battle_config = battle_config{},
             nodes = {
                 exit = {
                     { type = "exit_story" },
@@ -14,6 +21,7 @@ local stories = {
         -- Two text nodes then exit. Tests that confirm() advances through sequential text.
         linear_text = {
             starting_node = "main",
+            battle_config = battle_config{},
             nodes = {
                 main = {
                     { type = "text", text = "First line." },
@@ -26,6 +34,7 @@ local stories = {
         -- Jump from start node to a named target. Tests jump routing.
         jump_flow = {
             starting_node = "start",
+            battle_config = battle_config{},
             nodes = {
                 start = {
                     { type = "jump", next_node = "jump_target" },
@@ -40,6 +49,7 @@ local stories = {
         -- Function node branches on config.show_text: text node if true, advance node otherwise.
         config_branch = {
             starting_node = "main",
+            battle_config = battle_config{},
             nodes = {
                 main = {
                     function(config)
@@ -57,6 +67,7 @@ local stories = {
         -- Advance node then exit. Tests that advance completes without any confirm().
         advance_and_exit = {
             starting_node = "main",
+            battle_config = battle_config{},
             nodes = {
                 main = {
                     { type = "advance" },
@@ -68,6 +79,7 @@ local stories = {
         -- delete_file node then exit. Tests that delete_file advances without a confirm().
         delete_file_and_exit = {
             starting_node = "main",
+            battle_config = battle_config{},
             nodes = {
                 main = {
                     { type = "delete_file" },
@@ -80,6 +92,7 @@ local stories = {
         -- Uses rout_no_enemies: VICTORY on first finish_player_turn().
         battle_and_exit = {
             starting_node = "the_battle",
+            battle_config = battle_config{},
             nodes = {
                 the_battle = {
                     { type = "battle", battle_id = "rout_no_enemies",
