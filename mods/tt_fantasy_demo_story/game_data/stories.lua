@@ -28,6 +28,18 @@ function stories.save_game()
 	}
 end
 
+function stories.delete_file()
+	return {
+		type = 'delete_file',
+	}
+end
+
+function stories.advance()
+	return {
+		type = 'advance',
+	}
+end
+
 function stories.exit_story()
 	return {
 		type = 'exit_story',
@@ -395,6 +407,11 @@ local STORIES = {
 				stories.new_page(),
 				stories.chapter_header("Game Over"),
 				stories.story_text("Try again.  I believe in you!"),
+				lib.libs.story.config_branch(
+					function(c) return c.saving == "hardcore" end,
+					stories.delete_file(),
+					stories.advance()
+				),
 				stories.exit_story(),
 			},
 		}
@@ -403,7 +420,7 @@ local STORIES = {
 
 
 ---@type ModStoriesModule
-local stories = {
+local stories_mod = {
 	data = STORIES,
 	default_story = "demo_story",
 	story_select = {
@@ -418,4 +435,4 @@ local stories = {
 	}
 }
 
-return stories
+return stories_mod
