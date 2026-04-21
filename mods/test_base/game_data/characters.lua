@@ -57,8 +57,9 @@ local DEFAULT = {
 ---@type ModCharactersModule
 local characters = {
     default      = DEFAULT,
-    test_fighter = { parent_template = "default", hp_max = 10, movement = 3, item_loadout = {} },
-    test_enemy   = { parent_template = "default", hp_max = 1,  movement = 2, item_loadout = {} },
+    test_fighter     = { parent_template = "default", hp_max = 10, movement = 3, item_loadout = {} },
+    test_enemy       = { parent_template = "default", hp_max = 1,  movement = 2, item_loadout = {} },
+    test_armed_enemy = { parent_template = "default", hp_max = 1,  movement = 2, item_loadout = { "test_sword" } },
 }
 
 return characters
