@@ -88,6 +88,25 @@ local stories = {
             },
         },
 
+        -- Parameterised by story_config.permadeath. Enemy kills player on first finish_player_turn().
+        -- permadeath=false: character stays in roster. permadeath=true: character removed from roster.
+        close_combat = {
+            starting_node = "the_battle",
+            battle_config = function(story_config)
+                return { permadeath = story_config.permadeath }
+            end,
+            nodes = {
+                the_battle = {
+                    { type = "battle", battle_id = "close_combat",
+                      next_node_victory = "after",
+                      next_node_failure = "after" },
+                },
+                after = {
+                    { type = "exit_story" },
+                },
+            },
+        },
+
         -- Battle node then exit. Tests the story↔battle boundary.
         -- Uses rout_no_enemies: VICTORY on first finish_player_turn().
         battle_and_exit = {
