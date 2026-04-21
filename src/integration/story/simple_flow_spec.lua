@@ -76,6 +76,38 @@ describe("story flow #it", function()
         end)
     end)
 
+    describe("single_node_source", function()
+        it("should complete when node entry is a bare StoryNode (not wrapped in array)", function()
+            local h = story_harness.new({
+                stories = {
+                    single_node_source = {
+                        starting_node = "start",
+                        nodes = {
+                            start = { type = "exit_story" },
+                        },
+                    },
+                },
+            })
+            h:start_story("single_node_source")
+            luassert.is_true(h:is_complete())
+        end)
+
+        it("should complete when node entry is a top-level factory function", function()
+            local h = story_harness.new({
+                stories = {
+                    top_level_factory = {
+                        starting_node = "start",
+                        nodes = {
+                            start = function(_) return { type = "exit_story" } end,
+                        },
+                    },
+                },
+            })
+            h:start_story("top_level_factory")
+            luassert.is_true(h:is_complete())
+        end)
+    end)
+
     describe("config_branch", function()
         it("should require a confirm when show_text is true", function()
             local h = story_harness.new()

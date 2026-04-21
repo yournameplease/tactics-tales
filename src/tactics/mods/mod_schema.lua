@@ -86,28 +86,9 @@ local characters_spec = s.dictionary(s.string(), character_template_spec)
 
 local battles_spec = s.dictionary(s.string(), s.factory())
 
--- Schemas for `stories`
-local story_node_spec = s.record({
-    type = s.string(),
-    text = s.optional(s.string()),
-    chapter_number = s.optional(s.integer()),
-    template = s.optional(s.reference("characters")),
-    tags = s.optional(s.list(s.string())),
-    battle_id = s.optional(s.reference("battles")),
-    next_node_victory = s.optional(s.string()), -- ref to node
-    next_node_failure = s.optional(s.string()), -- ref to node
-    key = s.optional(s.string()),
-    name_key = s.optional(s.string()), -- ref to memory
-    -- `value` field for set_memory is not validated as it can be any type.
-    next_node = s.optional(s.string()), -- ref to node
-})
-
-local story_definition_spec = s.record({
-    starting_node = s.string(), -- ref to node key
-    nodes = s.dictionary(s.string(), s.list(story_node_spec)),
-})
-
-local stories_data_spec = s.dictionary(s.string(), story_definition_spec)
+-- Story nodes can contain factory functions (StoryNodeFactory), so deep
+-- validation is not possible here. Accept any table, like battles_spec.
+local stories_data_spec = s.dictionary(s.string(), s.record({}))
 
 local stories_spec = s.record({
     data = stories_data_spec,
