@@ -544,15 +544,21 @@ local BATTLE_DATA = {
         local turn_limits = {
             easy = 10,
             normal = 15,
-            hard = nil,
+            hard = 15,
         }
-        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+        local turn_difficulty = story_config.turn_difficulty or "normal"
+        local turn_limit = turn_limits[turn_difficulty]
 
         local victory_conditions = {
-            objectives.survive(),
             objectives.defeat_tagged("boss", "Defeat all enemy leaders"),
         }
-        if turn_limit then
+        local failure_conditions = {
+            objectives.tagged_unit_dies("hero"),
+            objectives.tagged_unit_dies("monarch")
+        }
+        if turn_difficulty == "hard" then
+            table.insert(failure_conditions, objectives.turn_limit())
+        else
             table.insert(victory_conditions, objectives.survive())
         end
         
@@ -583,10 +589,7 @@ local BATTLE_DATA = {
             },
             turn_limit = turn_limit,
             victory_conditions = victory_conditions,
-            failure_conditions = {
-                objectives.tagged_unit_dies("hero"),
-                objectives.tagged_unit_dies("monarch")
-            },
+            failure_conditions = failure_conditions,
             deployment = {
                 deployment_tiles_tag = "player_deployment",
             },
