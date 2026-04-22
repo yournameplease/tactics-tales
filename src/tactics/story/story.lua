@@ -32,6 +32,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package battle_count integer
 ---@field package story_definition StoryDefinition
 ---@field package story_config StoryConfig
+---@field package battle_config BattleConfig
 ---@field package game_data GameData
 ---@field package idle_animation AnimatedSpriteData
 ---@field package customized_character Character
@@ -159,6 +160,7 @@ function Story:handle_new_node()
             self.battle_count,
             battle_id,
             self.story_config,
+            self.battle_config,
             self.game_data,
             self.character_manager,
             self.battle_services_bundle.task_manager,
@@ -405,7 +407,13 @@ function story.new(
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
     self.story_config = story_config
-    log.info("STORY_CONFIG: ", self.story_config)
+
+    if type(self.story_definition.battle_config) == "function" then
+        self.battle_config = self.story_definition.battle_config(story_config)
+    else
+        ---@diagnostic disable-next-line
+        self.battle_config = self.story_definition.battle_config
+    end
 
     self.character_manager = character_manager.new(game_data)
 

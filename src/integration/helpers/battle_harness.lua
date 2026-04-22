@@ -165,13 +165,15 @@ end
 
 --- Create and start a BattleManager for the named battle, then tick to idle.
 ---@param battle_id BattleId
-function BattleHarness:start_battle(battle_id)
+---@param battle_config BattleConfig
+function BattleHarness:start_battle(battle_id, battle_config)
     assert(not self._battle_manager, "start_battle() already called on this harness")
     local char_man = character_manager_mod.new(self._game_data)
     self._battle_manager = battle_manager_mod.new(
         1,
         battle_id,
         {},
+        battle_config,
         self._game_data,
         char_man,
         self._task_manager,

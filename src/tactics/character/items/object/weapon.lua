@@ -58,7 +58,7 @@ local none_targeting = {
 ---@field type WeaponType
 ---@field body_type WeaponBodyType Determines which body sprite variant is shown when equipped.
 ---@field targeting Targeting
----@field effects WeaponEffect[] Combat properties granted by this weapon.
+---@field effects? WeaponEffect[] Combat properties granted by this weapon.
 local Weapon = {}
 
 -- Equipment effects

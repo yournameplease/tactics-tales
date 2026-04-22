@@ -88,6 +88,13 @@ function story_harness.new(overrides)
             [0x02] = { { x = 13, y = 7 } },
         })
     )
+    self._interceptor:register(
+        "map/test_close_arena.map",
+        battle_harness.build_map_fetch(16, 16, {
+            [0x01] = { { x = 7, y = 15 } },
+            [0x02] = { { x = 8, y = 15 } },
+        })
+    )
 
     return self
 end
@@ -116,6 +123,7 @@ end
 function StoryHarness:tick_to_idle()
     local ticks = 0
     repeat
+        self._animation_manager:tick()
         self._task_manager:update_tasks()
         ticks = ticks + 1
         if ticks >= TICK_LIMIT then
@@ -167,6 +175,13 @@ end
 ---@return table[]
 function StoryHarness:emitted(event_type)
     return self._emitted[event_type] or {}
+end
+
+--- Return the living characters in the player roster.
+---@return Character[]
+function StoryHarness:player_roster()
+    assert(self._story, "start_story() has not been called")
+    return self._story.character_manager:get_player_roster()
 end
 
 --- Register a mock fetch response for a map path.

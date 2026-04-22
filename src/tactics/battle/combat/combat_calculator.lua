@@ -61,19 +61,21 @@ local function build_attack_double(weapon)
         ignored_defenses = {},
         ignored_avoids = {},
     }
-    for _, eff in ipairs(weapon.effects) do
-        if eff.type == "long_reach" then
-            double.long_reach = true
-        elseif eff.type == "shieldsplitter" then
-            double.shieldsplitter = true
-        elseif eff.type == "armorkiller" then
-            double.ignored_defenses["ARMOR"] = true
-            double.ignored_avoids["ARMOR"] = true
-        elseif eff.type == "shieldkiller" then
-            double.ignored_defenses["SHIELD"] = true
-            double.ignored_avoids["SHIELD"] = true
-        else
-            unexpected(eff.type)
+    if weapon.effects then
+        for _, eff in ipairs(weapon.effects) do
+            if eff.type == "long_reach" then
+                double.long_reach = true
+            elseif eff.type == "shieldsplitter" then
+                double.shieldsplitter = true
+            elseif eff.type == "armorkiller" then
+                double.ignored_defenses["ARMOR"] = true
+                double.ignored_avoids["ARMOR"] = true
+            elseif eff.type == "shieldkiller" then
+                double.ignored_defenses["SHIELD"] = true
+                double.ignored_avoids["SHIELD"] = true
+            else
+                unexpected(eff.type)
+            end
         end
     end
     return double
@@ -99,15 +101,17 @@ local function build_combat_double(unit)
 
     local equipped_items = unit.character.inventory:get_equipped_items()
     for _slot, item in pairs(equipped_items) do
-        for _, eff in ipairs(item.equipment_effects) do
-            if eff.type == "increase_defense" then
-                local def_eff = eff --[[@as IncreaseDefenseEffect]]
-                double.defense[def_eff.defense_type] = (double.defense[def_eff.defense_type] or 0) + def_eff.amount
-            elseif eff.type == "increase_avoid" then
-                local avoid_eff = eff --[[@as IncreaseAvoidEffect]]
-                double.avoid[avoid_eff.avoid_type] = (double.avoid[avoid_eff.avoid_type] or 0) + avoid_eff.amount
-            else
-                unexpected(eff.type)
+        if item.equipment_effects then
+            for _, eff in ipairs(item.equipment_effects) do
+                if eff.type == "increase_defense" then
+                    local def_eff = eff --[[@as IncreaseDefenseEffect]]
+                    double.defense[def_eff.defense_type] = (double.defense[def_eff.defense_type] or 0) + def_eff.amount
+                elseif eff.type == "increase_avoid" then
+                    local avoid_eff = eff --[[@as IncreaseAvoidEffect]]
+                    double.avoid[avoid_eff.avoid_type] = (double.avoid[avoid_eff.avoid_type] or 0) + avoid_eff.amount
+                else
+                    unexpected(eff.type)
+                end
             end
         end
     end
