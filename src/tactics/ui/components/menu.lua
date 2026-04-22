@@ -409,14 +409,17 @@ local function find_focused_description(node)
 	if not node.has_focus then return {} end
 	if node.type == "list" then
 		---@cast node NestedMenuNode
-		for _, child in ipairs(node.children) do
+		local child = node:get_selected_child()
+		if child then
 			local desc = find_focused_description(child)
 			if desc then return desc end
 		end
 	elseif node.type == "button" then
+		-- log.debug("hello button", node.id)
 		---@cast node ButtonCursor
 		return {node.description}
 	elseif node.type == "selection" then
+		-- log.debug("hello selection", node.id)
 		---@cast node SelectionMenuNode
 		return {node.description, node:get_selected_description()}
 	end
@@ -428,7 +431,8 @@ end
 ---@return UIElement
 function menu.menu_description(node)
 	return box.builder("menu_description")
-		:layout{ width = "fit_content" }
+		:direction"col"
+		:container"panel"
 		:text{
 			content = { "" },
 			draw_properties = { wrap = "wrap" },
@@ -437,6 +441,32 @@ function menu.menu_description(node)
 			self.text.content = find_focused_description(node) or {""}
 		end)
 		:build()
+end
+
+--- Return a child-generator function that wraps the menu node in a modal element.
+---@param menu_cursor_func fun(state: table): MenuNode
+---@return fun(state: table): UIElement[]
+local function generate_menu_description_children(menu_cursor_func)
+	return function(state)
+		local node = menu_cursor_func(state)
+
+		return {menu.menu_description(node)}
+	end
+end
+
+--- Build a generic modal menu container that regenerates its children when the revision key changes.
+---@param menu_revision_func fun(state: table): integer
+---@param menu_cursor_func fun(state: table): MenuNode
+---@return UIElement
+function menu.generic_menu_description(menu_revision_func, menu_cursor_func)
+	return box.builder("menu_description_container")
+	:direction("col")
+	:container("panel")
+	:child_generator{
+		current_key = menu_revision_func,
+		generate_children = generate_menu_description_children(menu_cursor_func)
+	}
+	:build()
 end
 
 return menu
