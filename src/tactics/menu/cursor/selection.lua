@@ -11,12 +11,14 @@ local lists = require("src.tactics.util.lists")
 ---@class SelectionMenuOption
 ---@field text string Display label.
 ---@field value any The value this option represents.
+---@field description? string Optional human-readable description.
 
 ---@class SelectionMenuNode : MenuLeaf
 ---@field type "selection"
 ---@field i integer 1-based index of the currently selected option.
 ---@field options SelectionMenuOption[]
 ---@field label? string Optional label shown alongside the selection.
+---@field description? string Optional human-readable description for the node.
 ---@field key? string Key used when serializing the selected value into menu data.
 ---@field direction SelectionDirection Axis along which joypad input moves the selection.
 ---@field wrap boolean When true, navigating past the end wraps to the beginning.
@@ -48,6 +50,12 @@ end
 ---@return string
 function SelectionMenuNode:get_selected_text()
     return self.options[self.i].text
+end
+
+--- Return the description of the currently selected option, or nil if none.
+---@return string?
+function SelectionMenuNode:get_selected_description()
+    return self.options[self.i].description
 end
 
 --- Advance the selection by one step, wrapping or clamping as configured.

@@ -165,6 +165,34 @@ describe("tactics.menu.cursor.selection", function()
         luassert.are_equal("A", node:get_selected_value())
     end)
 
+    it("should return description of currently selected option", function()
+        local menu_defs = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        selection.row("test_sel")
+                            :with_precomputed_options({
+                                { text = "A", value = "a", description = "Option A desc" },
+                                { text = "B", value = "b" },
+                            })
+                            :with_wrap(false)
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
+        luassert.are_equal("Option A desc", node:get_selected_description())
+
+        node:increment_selection()
+        luassert.is_nil(node:get_selected_description())
+    end)
+
     it("should handle increment/decrement commands directly", function()
         local menu_defs = {
             ["TEST_MENU"] = {
