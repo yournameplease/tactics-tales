@@ -2,7 +2,6 @@
 --- Manages the main game menu, including the title screen,
 --- chapter select, and options menus.
 
-local maps = require("src.tactics.util.maps")
 local lists = require("src.tactics.util.lists")
 local menu_manager = require("src.tactics.menu.menu_manager")
 local step_definition = menu_manager.definition.step
@@ -228,6 +227,7 @@ local MENU_DATA = {
                                 local b = selection.row(opt.key)
                                     :with_key(opt.key)
                                     :with_label(opt.name)
+                                    :with_description(opt.description)
                                     :with_static_options(config_options)
 
                                 table.insert(options, b)
@@ -283,49 +283,59 @@ local MENU_DATA = {
                                 table.insert(options, selection.row("log_level")
                                     :with_label("Log Level")
                                     :with_key("log_level")
-                                    :with_static_options({"ERROR", "WARNING", "INFO", "DEBUG", "TRACE"}))
+                                    :with_static_option("ERROR",   "ERROR",   "")
+                                    :with_static_option("WARNING", "WARNING", "")
+                                    :with_static_option("INFO",    "INFO",    "")
+                                    :with_static_option("DEBUG",   "DEBUG",   "")
+                                    :with_static_option("TRACE",   "TRACE",   ""))
                                 table.insert(options, selection.row("draw_flexbox_debug")
                                     :with_label("Draw Flexbox Debug")
                                     :with_key("draw_flexbox_debug")
-                                    :with_yes_no_options())
+                                    :with_description("")
+                                    :with_static_option("YES", true,  "")
+                                    :with_static_option("NO",  false, ""))
                                 table.insert(options, selection.row("profile")
                                     :with_label("Profiler")
                                     :with_key("profile")
-                                    :with_yes_no_options())
+                                    :with_description("")
+                                    :with_static_option("YES", true,  "")
+                                    :with_static_option("NO",  false, ""))
                                 table.insert(options, selection.row("head_scale")
                                     :with_label("Head Scale")
                                     :with_key("head_scale")
-                                    :with_static_options({1, 2, 3, 0.75, 0}))
+                                    :with_description("")
+                                    :with_static_option("Normal",    1,    "")
+                                    :with_static_option("Large",    2,    "")
+                                    :with_static_option("Huge",    3,    "")
+                                    :with_static_option("Small", 0.75, "")
+                                    :with_static_option("Headless",    0,    ""))
                                 table.insert(options, selection.row("dialogue_speed")
                                     :with_label("Text Speed")
                                     :with_key("dialogue_speed")
-                                    :with_static_options({
-                                        "very_slow",
-                                        "slow",
-                                        "normal",
-                                        "fast",
-                                        "very_fast",
-                                        "instant",
-                                    }))
+                                    :with_description("")
+                                    :with_static_option("Very Slow", "very_slow", "")
+                                    :with_static_option("Slow",      "slow",      "")
+                                    :with_static_option("Normal",    "normal",    "")
+                                    :with_static_option("Fast",      "fast",      "")
+                                    :with_static_option("Very Fast", "very_fast", "")
+                                    :with_static_option("Instant",   "instant",   ""))
                                 table.insert(options, selection.row("glyph_family")
                                     :with_label("Glyphs")
                                     :with_key("glyph_family")
-                                    :with_static_options({
-                                        "keyboard",
-                                        "picotron",
-                                        "snes",
-                                        "nintendo",
-                                        "xbox",
-                                        "playstation",
-                                    }))
+                                    :with_description("Glyphs to display for joypad inputs")
+                                    :with_static_option("Keyboard",    "keyboard",    "")
+                                    :with_static_option("Picotron",    "picotron",    "")
+                                    :with_static_option("SNES",        "snes",        "")
+                                    :with_static_option("Nintendo",    "nintendo",    "")
+                                    :with_static_option("Xbox",        "xbox",        "")
+                                    :with_static_option("PlayStation", "playstation", ""))
                                 table.insert(options, selection.row("input_group")
                                     :with_label("Input Mode")
                                     :with_key("input_group")
-                                    :with_static_options({
-                                        "mouse_and_keyboard",
-                                        "mouse_only",
-                                        "joy_only",
-                                    }))
+                                    :with_description("Limit to specific input modes")
+                                    :with_static_option("Mouse and Joypad", "mouse_and_keyboard", "Allows either mouse or joypad (including keyboard)")
+                                    :with_static_option("Mouse Only",         "mouse_only",         "Mouse controls only")
+                                    :with_static_option("Joypad Only",           "joy_only",           "Joypad/keyboard controls only"))
                                 return options
                             end))
 
