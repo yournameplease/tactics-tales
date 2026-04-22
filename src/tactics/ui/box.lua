@@ -237,6 +237,7 @@ function UIBuilder:build()
 
     if self.def.layout.width == "fit_content"
         and (self.def.text and self.def.text.draw_properties.wrap ~= "no_wrap") then
+        log.error(self.def.id, "wrapping fails")
         error("auto_width must use no_wrap")
     end
 
