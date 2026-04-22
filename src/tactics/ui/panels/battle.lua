@@ -4,10 +4,7 @@ local box = require("src.tactics.ui.box")
 local book = require("src.tactics.ui.decoration.book")
 local character_ui = require("src.tactics.ui.panels.portrait_box")
 require("src.tactics.character.items.object.item")
-local UIContextManager = require("src.tactics.ui.ui_context_manager").UIContextManager
 require("src.tactics.character.items.object.item_inventory")
-local battle_unit = require("src.tactics.battle.tactics.battle_unit")
-local BattleUnit = battle_unit.BattleUnit
 local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
 
 local battle = {}
@@ -77,8 +74,8 @@ function battle.battle_summary()
                 justify = "center",
             },
         }
-        :on_update(function(self, state)
-            self.text.content = state.battle_context.objective_text
+        :on_update(function(s, state)
+            s.text.content = state.battle_context.objective_text
         end)
         :build())
 
@@ -191,6 +188,16 @@ function battle.unit_inventory()
             local items = u.character.inventory:get_item_descriptions()
 
             local out = {}
+
+            if u.tags["hero"] then
+                table.insert(out, "Hero: Game over if slain.")
+            end
+            if u.tags["monarch"] then
+                table.insert(out, "Monarch: Game over if slain.")
+            end
+            if u.tags["boss"] then
+                table.insert(out, "Boss: Kill all bosses to win the chapter.")
+            end
 
             for _, d in ipairs(items) do
                 if d.name then
