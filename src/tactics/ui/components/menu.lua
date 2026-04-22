@@ -404,9 +404,9 @@ function menu.generic_menu_modal(menu_revision_func, menu_cursor_func)
 end
 
 ---@param node MenuNode
----@return string?
+---@return string[]
 local function find_focused_description(node)
-	if not node.has_focus then return nil end
+	if not node.has_focus then return {} end
 	if node.type == "list" then
 		---@cast node NestedMenuNode
 		for _, child in ipairs(node.children) do
@@ -415,10 +415,10 @@ local function find_focused_description(node)
 		end
 	elseif node.type == "button" then
 		---@cast node ButtonCursor
-		return node.description
+		return {node.description}
 	elseif node.type == "selection" then
 		---@cast node SelectionMenuNode
-		return node:get_selected_description() or node.description
+		return {node.description, node:get_selected_description()}
 	end
 end
 
@@ -434,7 +434,7 @@ function menu.menu_description(node)
 			draw_properties = { wrap = "wrap" },
 		}
 		:on_update(function(self, _state)
-			self.text.content[1] = find_focused_description(node) or ""
+			self.text.content = find_focused_description(node) or {""}
 		end)
 		:build()
 end
