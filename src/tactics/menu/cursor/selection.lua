@@ -32,6 +32,7 @@ SelectionMenuNode.__index = SelectionMenuNode
 ---@field get_options fun(game_ctx: GameContext, menu_ctx: MenuContext): SelectionMenuOption[]
 ---@field wrap boolean
 ---@field direction SelectionDirection
+---@field description? string Optional human-readable description for the node.
 local SelectionMenuDefinition = {}
 SelectionMenuDefinition.__index = SelectionMenuDefinition
 
@@ -231,6 +232,14 @@ function SelectionMenuDefinition:with_label(label)
     return self
 end
 
+--- Set the human-readable description for this selection node.
+---@param description string
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_description(description)
+    self.description = description
+    return self
+end
+
 --- Set the serialization key for the selected value.
 ---@param key string
 ---@return SelectionMenuDefinition
@@ -279,6 +288,22 @@ function SelectionMenuDefinition:with_static_options(options)
             return { text = tostring(o), value = o }
         end)(options)
     end
+    return self
+end
+
+--- Append a single named option with a description, building the list incrementally.
+---@param text string Display label.
+---@param value any The value this option represents.
+---@param description string Human-readable description for this option.
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_static_option(text, value, description)
+    if not self._option_list then
+        self._option_list = {}
+        self.get_options = function(_game_ctx, _menu_ctx)
+            return self._option_list
+        end
+    end
+    table.insert(self._option_list, { text = text, value = value, description = description })
     return self
 end
 
