@@ -14,6 +14,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
+---@field description? string Optional human-readable description.
 ---@field next_state? string Step to navigate to on select.
 ---@field final_step? boolean When true, finish the menu on select.
 ---@field go_back? boolean When true, go back on select.
@@ -25,6 +26,7 @@ ButtonCursor.__index = ButtonCursor
 ---@field type "button"
 ---@field text string Button label.
 ---@field value any Value passed to handlers on activation.
+---@field description? string Optional human-readable description.
 ---@field next_state? string Step to navigate to on select.
 ---@field final_step? boolean When true, finish the menu on select.
 ---@field go_back? boolean When true, go back on select.
