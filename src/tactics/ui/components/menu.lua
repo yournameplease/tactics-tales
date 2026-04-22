@@ -3,11 +3,8 @@
 --- UIElement hierarchies used by the box layout engine.
 
 local box = require("src.tactics.ui.box")
-local nested_list = require("src.tactics.menu.cursor.nested.list")
-local nested_grid = require("src.tactics.menu.cursor.nested.grid")
 local point = require("src.tactics.util.point")
 local menu_mouse_selection = require("src.tactics.menu.menu_cursor").mouse_selection
-local button = require("src.tactics.menu.cursor.button")
 
 local menu = {}
 
@@ -404,6 +401,42 @@ function menu.generic_menu_modal(menu_revision_func, menu_cursor_func)
 		generate_children = generate_menu_modal_root_children(menu_cursor_func)
 	}
 	:build()
+end
+
+---@param node MenuNode
+---@return string?
+local function find_focused_description(node)
+	if not node.has_focus then return nil end
+	if node.type == "list" then
+		---@cast node NestedMenuNode
+		for _, child in ipairs(node.children) do
+			local desc = find_focused_description(child)
+			if desc then return desc end
+		end
+	elseif node.type == "button" then
+		---@cast node ButtonCursor
+		return node.description
+	elseif node.type == "selection" then
+		---@cast node SelectionMenuNode
+		return node:get_selected_description() or node.description
+	end
+end
+
+--- Build a text box that shows the description of the currently focused
+--- menu node, updating automatically as focus changes.
+---@param node MenuNode
+---@return UIElement
+function menu.menu_description(node)
+	return box.builder("menu_description")
+		:layout{ width = "fit_content" }
+		:text{
+			content = { "" },
+			draw_properties = { wrap = "wrap" },
+		}
+		:on_update(function(self, _state)
+			self.text.content[1] = find_focused_description(node) or ""
+		end)
+		:build()
 end
 
 return menu
