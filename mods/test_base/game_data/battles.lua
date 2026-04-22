@@ -48,6 +48,24 @@ local battles = {
             scripts = {},
         }
     end,
+    -- Close-combat: armed enemy adjacent to player, all_players_die failure condition.
+    -- DEFEAT on first finish_player_turn() — enemy attacks and kills the player unit.
+    -- Used by permadeath tests; battle_config.permadeath controls character persistence.
+    close_combat = function(_story_config)
+        return {
+            map_id    = "test_close_arena",
+            tile_labels = tile_labels,
+            victory_conditions = {},
+            failure_conditions = { { type = "all_players_die" } },
+            units = {
+                { side = "player", character_source = { type = "template", template = "test_fighter" },
+                  tile = "player_spawn" },
+                { side = "enemy",  character_source = { type = "template", template = "test_armed_enemy" },
+                  tile = "enemy_spawn", ai = { move = "zero", target_sides = { "player" } } },
+            },
+            scripts = {},
+        }
+    end,
 }
 
 return battles

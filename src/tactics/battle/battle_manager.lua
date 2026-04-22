@@ -13,6 +13,9 @@ local battle_objective_service = require("src.tactics.battle.battle_objective_se
 local battle_menu_context = require("src.tactics.battle.battle_menu_context")
 local script_manager = require("src.tactics.battle.scripts.script_manager")
 
+---@class BattleConfig
+---@field permadeath boolean
+
 ---@class BattleManager Abstract interface for a battle instance.
 ---@field teardown fun(self: BattleManager) Tear down all battle services and unregister UI.
 ---@field update fun(self: BattleManager, input: InputContext) Process one frame of battle input and logic.
@@ -40,6 +43,7 @@ local battle_manager = {
 ---@param chapter integer
 ---@param battle_id BattleId
 ---@param story_config StoryConfig
+---@param battle_config BattleConfig
 ---@param game_data GameData
 ---@param char_man CharacterManager
 ---@param task_manager TaskManager
@@ -52,6 +56,7 @@ function battle_manager.new(
     chapter,
     battle_id,
     story_config,
+    battle_config,
     game_data,
     char_man,
     task_manager,
@@ -72,6 +77,7 @@ function battle_manager.new(
 
     self.tactics_engine = tactics_engine.new(
         chapter,
+        battle_config,
         self.battle_map,
         self.character_manager,
         task_manager,
