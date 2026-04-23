@@ -638,6 +638,46 @@ describe("tactics.ui.box", function()
     end)
 
     -- -----------------------------------------------------------------------
+    describe("Box:mark_dirty_layout", function()
+
+        it("sets dirty_layout to true on self", function()
+            local elem = make_fixed("e", 10, 10)
+            elem.cacheable.dirty_layout = false
+            elem:mark_dirty_layout()
+            luassert.is_true(elem.cacheable.dirty_layout)
+        end)
+
+        it("bubbles dirty_layout to parent", function()
+            local parent = make_fit("parent")
+            local child = make_fixed("child", 10, 10)
+            -- Set parent ref manually to isolate mark_dirty_layout from add()
+            child.parent = parent
+            parent.cacheable.dirty_layout = false
+            child:mark_dirty_layout()
+            luassert.is_true(parent.cacheable.dirty_layout)
+        end)
+
+        it("bubbles dirty_layout transitively to grandparent", function()
+            local grandparent = make_fit("grandparent")
+            local parent = make_fit("parent")
+            local child = make_fixed("child", 10, 10)
+            parent.parent = grandparent
+            child.parent = parent
+            grandparent.cacheable.dirty_layout = false
+            child:mark_dirty_layout()
+            luassert.is_true(grandparent.cacheable.dirty_layout)
+        end)
+
+        it("does not error when called on a root node with no parent", function()
+            local root = make_fixed("root", 10, 10)
+            luassert.has_no.error(function()
+                root:mark_dirty_layout()
+            end)
+        end)
+
+    end)
+
+    -- -----------------------------------------------------------------------
     describe("box.spacer", function()
 
         it("creates an element with flex_grow = 1 by default", function()
