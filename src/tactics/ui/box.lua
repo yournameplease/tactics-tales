@@ -497,6 +497,7 @@ end
 ---@param child UIElement
 ---@return UIElement
 function Box:add(child)
+    child.parent = self
     table.insert(self.children, child)
     return child
 end

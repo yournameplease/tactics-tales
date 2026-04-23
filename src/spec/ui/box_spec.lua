@@ -217,6 +217,13 @@ describe("tactics.ui.box", function()
             luassert.are_equal(child, parent.children[1])
         end)
 
+        it("sets child.parent to the parent element", function()
+            local parent = make_fit("parent")
+            local child = make_fixed("child", 10, 10)
+            parent:add(child)
+            luassert.are_equal(parent, child.parent)
+        end)
+
     end)
 
     -- -----------------------------------------------------------------------
