@@ -119,9 +119,11 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field child_generator ChildrenInfo
 ---@field cacheable CacheInfo
 ---@field modal ModalInfo
+---@field parent UIElement? nil for the root node and modal roots
 ---@field data any Custom data for complex elements.
 ---@field children UIElement[]
 ---@field add fun(self: UIElement, child: UIElement): UIElement
+---@field mark_dirty_layout fun(self: UIElement)
 ---@field on_update fun(self: UIElement, ctx: UIContextManager)
 ---@field find_node_by_id fun(self: UIElement, id: string): UIElement?
 ---@field custom_draw fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
@@ -497,6 +499,16 @@ end
 function Box:add(child)
     table.insert(self.children, child)
     return child
+end
+
+--- Mark this element's layout dirty and propagate upward to all ancestors.
+-- Future optimization: stop early when all ancestors have fixed numeric
+-- width and height, since a fixed-size ancestor's measured rect won't change.
+function Box:mark_dirty_layout()
+    self.cacheable.dirty_layout = true
+    if self.parent then
+        self.parent:mark_dirty_layout()
+    end
 end
 
 --- The first pass of the layout system. It calculates the
