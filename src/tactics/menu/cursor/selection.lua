@@ -11,12 +11,14 @@ local lists = require("src.tactics.util.lists")
 ---@class SelectionMenuOption
 ---@field text string Display label.
 ---@field value any The value this option represents.
+---@field description? string Optional human-readable description.
 
 ---@class SelectionMenuNode : MenuLeaf
 ---@field type "selection"
 ---@field i integer 1-based index of the currently selected option.
 ---@field options SelectionMenuOption[]
 ---@field label? string Optional label shown alongside the selection.
+---@field description? string Optional human-readable description for the node.
 ---@field key? string Key used when serializing the selected value into menu data.
 ---@field direction SelectionDirection Axis along which joypad input moves the selection.
 ---@field wrap boolean When true, navigating past the end wraps to the beginning.
@@ -30,6 +32,7 @@ SelectionMenuNode.__index = SelectionMenuNode
 ---@field get_options fun(game_ctx: GameContext, menu_ctx: MenuContext): SelectionMenuOption[]
 ---@field wrap boolean
 ---@field direction SelectionDirection
+---@field description? string Optional human-readable description for the node.
 local SelectionMenuDefinition = {}
 SelectionMenuDefinition.__index = SelectionMenuDefinition
 
@@ -48,6 +51,12 @@ end
 ---@return string
 function SelectionMenuNode:get_selected_text()
     return self.options[self.i].text
+end
+
+--- Return the description of the currently selected option, or nil if none.
+---@return string?
+function SelectionMenuNode:get_selected_description()
+    return self.options[self.i].description
 end
 
 --- Advance the selection by one step, wrapping or clamping as configured.
@@ -223,6 +232,14 @@ function SelectionMenuDefinition:with_label(label)
     return self
 end
 
+--- Set the human-readable description for this selection node.
+---@param description string
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_description(description)
+    self.description = description
+    return self
+end
+
 --- Set the serialization key for the selected value.
 ---@param key string
 ---@return SelectionMenuDefinition
@@ -271,6 +288,49 @@ function SelectionMenuDefinition:with_static_options(options)
             return { text = tostring(o), value = o }
         end)(options)
     end
+    return self
+end
+
+---@class StaticOptionInput
+---@field value any The value this option represents.
+---@field text? string Display label.
+---@field description? string Human-readable description for this option.
+
+--- Append a single named option with a description, building the list incrementally.
+---@param option StaticOptionInput
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_static_option(option)
+    if not self._option_list then
+        self._option_list = {}
+        self.get_options = function(_game_ctx, _menu_ctx)
+            return self._option_list
+        end
+    end
+    table.insert(self._option_list, {
+        text = option.text or option.value,
+        value = option.value,
+        description = option.description,
+    })
+    return self
+end
+
+--- Append a single named option with a description, building the list incrementally.
+---@param value any The value this option represents.
+---@param text? string Display label.
+---@param description? string Human-readable description for this option.
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_static_option_flat(value, text, description)
+    if not self._option_list then
+        self._option_list = {}
+        self.get_options = function(_game_ctx, _menu_ctx)
+            return self._option_list
+        end
+    end
+    table.insert(self._option_list, {
+        value = value,
+        text = text or value,
+        description = description,
+    })
     return self
 end
 
