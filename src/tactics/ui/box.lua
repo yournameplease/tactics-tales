@@ -1068,7 +1068,8 @@ function Box:recalculate_modal(state, root)
             self.modal.active = false
         else
             self.modal.active = true
-            self.children = { node }
+            self.children = {}
+            self:add(node)
             self.modal.anchor = new_anchor
             self.modal.anchor_node = root:find_node_by_id(new_anchor.target)
         end
