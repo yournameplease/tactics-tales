@@ -40,8 +40,7 @@ content:add(menu.generic_menu_box(
 content:add(menu.generic_menu_description(
     ---@param state UIContextManager
     function(state)
-        return rnd()
-        -- return state.game_context.menu_manager.revision_count
+        return state.game_context.menu_manager.revision_count
     end,
     ---@param state UIContextManager
     function(state)
