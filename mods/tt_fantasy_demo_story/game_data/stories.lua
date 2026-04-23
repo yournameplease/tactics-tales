@@ -1,5 +1,14 @@
 local stories = {}
 
+---@param config BattleConfigInput
+---@return fun(StoryConfig): BattleConfig
+local function static_battle_config(config)
+	return function()
+		return {
+			permadeath = config.permadeath or true
+		}
+	end
+end
 
 function stories.new_page()
 	return {
@@ -123,6 +132,9 @@ function stories.chapter_debug(
 
 	return {
 		starting_node = 'intro',
+		battle_config = static_battle_config{
+			permadeath = true,
+		},
 		nodes = {
 			intro = intro_node,
 			victory = {
@@ -279,6 +291,13 @@ local STORIES = {
 				}
 			},
 		},
+		battle_config = function(config)
+			local permadeath = config.deaths ~= "casual"
+
+			return {
+				permadeath = permadeath,
+			}
+		end,
 		nodes = {
 			prologue = {
 				stories.chapter_header("Prologue"),
