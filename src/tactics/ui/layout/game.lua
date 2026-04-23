@@ -37,6 +37,8 @@ content:add(menu.generic_menu_box(
         return node
     end))
 
+content:add(box.spacer(1))
+
 content:add(menu.generic_menu_description(
     ---@param state UIContextManager
     function(state)
