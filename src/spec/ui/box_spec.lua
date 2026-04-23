@@ -642,6 +642,21 @@ describe("tactics.ui.box", function()
             luassert.is_false(elem.cacheable.dirty_layout)
         end)
 
+        it("marks parent dirty_layout when key changes", function()
+            local parent = make_fit("parent")
+            local child = make_fit("child")
+            parent:add(child)
+            parent.cacheable.dirty_layout = false
+            child.child_generator = {
+                last_key = 1,
+                current_key = function(_) return 2 end,
+                generate_children = function(_) return {} end,
+            }
+            ---@diagnostic disable-next-line: missing-fields
+            child:compute_children({})
+            luassert.is_true(parent.cacheable.dirty_layout)
+        end)
+
     end)
 
     -- -----------------------------------------------------------------------

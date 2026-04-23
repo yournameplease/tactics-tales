@@ -936,7 +936,7 @@ function Box:compute_children(state)
         if current_key ~= self.child_generator.last_key then
             self.children = self.child_generator.generate_children(state)
             self.child_generator.last_key = current_key
-            self.cacheable.dirty_layout = true
+            self:mark_dirty_layout()
         end
     end
     for _, child in ipairs(self.children) do
