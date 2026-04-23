@@ -415,11 +415,9 @@ local function find_focused_description(node)
 			if desc then return desc end
 		end
 	elseif node.type == "button" then
-		-- log.debug("hello button", node.id)
 		---@cast node ButtonCursor
 		return {node.description}
 	elseif node.type == "selection" then
-		-- log.debug("hello selection", node.id)
 		---@cast node SelectionMenuNode
 		return {node.description, node:get_selected_description()}
 	end
