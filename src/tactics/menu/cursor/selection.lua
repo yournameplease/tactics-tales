@@ -291,19 +291,46 @@ function SelectionMenuDefinition:with_static_options(options)
     return self
 end
 
+---@class StaticOptionInput
+---@field value any The value this option represents.
+---@field text? string Display label.
+---@field description? string Human-readable description for this option.
+
 --- Append a single named option with a description, building the list incrementally.
----@param text string Display label.
----@param value any The value this option represents.
----@param description string Human-readable description for this option.
+---@param option StaticOptionInput
 ---@return SelectionMenuDefinition
-function SelectionMenuDefinition:with_static_option(text, value, description)
+function SelectionMenuDefinition:with_static_option(option)
     if not self._option_list then
         self._option_list = {}
         self.get_options = function(_game_ctx, _menu_ctx)
             return self._option_list
         end
     end
-    table.insert(self._option_list, { text = text, value = value, description = description })
+    table.insert(self._option_list, {
+        text = option.text or option.value,
+        value = option.value,
+        description = option.description,
+    })
+    return self
+end
+
+--- Append a single named option with a description, building the list incrementally.
+---@param value any The value this option represents.
+---@param text? string Display label.
+---@param description? string Human-readable description for this option.
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_static_option_flat(value, text, description)
+    if not self._option_list then
+        self._option_list = {}
+        self.get_options = function(_game_ctx, _menu_ctx)
+            return self._option_list
+        end
+    end
+    table.insert(self._option_list, {
+        value = value,
+        text = text or value,
+        description = description,
+    })
     return self
 end
 
