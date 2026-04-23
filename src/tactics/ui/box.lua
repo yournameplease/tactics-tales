@@ -119,9 +119,11 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field child_generator ChildrenInfo
 ---@field cacheable CacheInfo
 ---@field modal ModalInfo
+---@field parent UIElement? nil for the root node and modal roots
 ---@field data any Custom data for complex elements.
 ---@field children UIElement[]
 ---@field add fun(self: UIElement, child: UIElement): UIElement
+---@field mark_dirty_layout fun(self: UIElement)
 ---@field on_update fun(self: UIElement, ctx: UIContextManager)
 ---@field find_node_by_id fun(self: UIElement, id: string): UIElement?
 ---@field custom_draw fun(self: UIElement, ctx: UIContextManager, dtm: DrawTargetManager, theme: UITheme)
@@ -237,6 +239,7 @@ function UIBuilder:build()
 
     if self.def.layout.width == "fit_content"
         and (self.def.text and self.def.text.draw_properties.wrap ~= "no_wrap") then
+        log.error(self.def.id, "wrapping fails")
         error("auto_width must use no_wrap")
     end
 
@@ -494,8 +497,19 @@ end
 ---@param child UIElement
 ---@return UIElement
 function Box:add(child)
+    child.parent = self
     table.insert(self.children, child)
     return child
+end
+
+--- Mark this element's layout dirty and propagate upward to all ancestors.
+-- Future optimization: stop early when all ancestors have fixed numeric
+-- width and height, since a fixed-size ancestor's measured rect won't change.
+function Box:mark_dirty_layout()
+    self.cacheable.dirty_layout = true
+    if self.parent then
+        self.parent:mark_dirty_layout()
+    end
 end
 
 --- The first pass of the layout system. It calculates the
@@ -922,7 +936,7 @@ function Box:compute_children(state)
         if current_key ~= self.child_generator.last_key then
             self.children = self.child_generator.generate_children(state)
             self.child_generator.last_key = current_key
-            self.cacheable.dirty_layout = true
+            self:mark_dirty_layout()
         end
     end
     for _, child in ipairs(self.children) do
@@ -1054,7 +1068,8 @@ function Box:recalculate_modal(state, root)
             self.modal.active = false
         else
             self.modal.active = true
-            self.children = { node }
+            self.children = {}
+            self:add(node)
             self.modal.anchor = new_anchor
             self.modal.anchor_node = root:find_node_by_id(new_anchor.target)
         end

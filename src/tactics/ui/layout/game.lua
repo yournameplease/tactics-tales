@@ -19,7 +19,12 @@ left:add(control_hints.new(
     {}
 ))
 
-local content = menu.generic_menu_box(
+local content = box.builder("menu_content")
+    :direction"col"
+    :container"panel"
+    :build()
+
+content:add(menu.generic_menu_box(
     ---@param state UIContextManager
     function(state)
         return state.game_context.menu_manager.revision_count
@@ -30,7 +35,22 @@ local content = menu.generic_menu_box(
         local node = root_node
         assert(node)
         return node
-    end)
+    end))
+
+content:add(box.spacer(1))
+
+content:add(menu.generic_menu_description(
+    ---@param state UIContextManager
+    function(state)
+        return state.game_context.menu_manager.revision_count
+    end,
+    ---@param state UIContextManager
+    function(state)
+        local root_node = state.game_context.menu_manager.menu_step.node
+        local node = root_node
+        assert(node)
+        return node
+    end))
 local right = book.titled_page(content)
 
 layouts["TITLED_MENU_PAGE"] = {
