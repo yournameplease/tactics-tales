@@ -419,8 +419,25 @@ local function find_focused_description(node)
 		return {node.description}
 	elseif node.type == "selection" then
 		---@cast node SelectionMenuNode
-		return {node.description, node:get_selected_description()}
+		local description = node.description
+		local name = node:get_selected_text()
+		local selection_description = node:get_selected_description()
+
+		local out = {}
+		if description then
+			table.insert(out, description)
+		end
+		if selection_description and #selection_description > 0 then
+			if name and selection_description then
+				table.insert(out, name..": "..selection_description)
+			else
+				table.insert(out, selection_description)
+			end
+		end
+		return out
 	end
+
+	return {}
 end
 
 --- Build a text box that shows the description of the currently focused
@@ -429,8 +446,11 @@ end
 ---@return UIElement
 function menu.menu_description(node)
 	return box.builder("menu_description")
-		:direction"col"
-		:container"panel"
+		:layout{
+			dir = "col",
+			width = "fill",
+			height = 100,
+		}
 		:text{
 			content = { "" },
 			draw_properties = { wrap = "wrap" },
