@@ -117,8 +117,14 @@ function stories.jump(next_node)
 	}
 end
 
+---@param roster_units string[]
+---@param name string
+---@param text string
+---@param battle_id BattleId
+---@return BattleDefinition
 function stories.chapter_debug(
 	roster_units,
+	name,
 	text,
 	battle_id
 )
@@ -132,6 +138,8 @@ function stories.chapter_debug(
 
 	return {
 		starting_node = 'intro',
+		name = name,
+		description = text or "A single chapter.",
 		battle_config = static_battle_config{
 			permadeath = true,
 		},
@@ -152,6 +160,7 @@ end
 local STORIES = {
 	bandit_village = stories.chapter_debug(
 		{},
+		"Chapter 1: Bandit Village",
 		"A young hero finds their village under attack by bandits!",
 		"bandit_village"
 	),
@@ -164,6 +173,7 @@ local STORIES = {
 			"child_axe",
 			"child_bow"
 		},
+		"Chapter 2: Cultist Cave",
 		"The heros find a cave where cultists keep prisoners for sacrifice.",
 		"cultist_cave"
 	),
@@ -179,6 +189,7 @@ local STORIES = {
 			"militia_spearman",
 			"bandit_nerd",
 		},
+		"Chapter 3: Fortress Town",
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
 	),
@@ -196,6 +207,7 @@ local STORIES = {
 			"child_greatsword",
 			"village_axe",
 		},
+		"Chapter 4: Cliff Crossing",
 		"An unlikely alliance was guarding the cliffside.",
 		"cliff_crossing"
 	),
@@ -213,21 +225,26 @@ local STORIES = {
 			"child_greatsword",
 			"village_axe",
 		},
+		"Chapter 5: Castle Defense",
 		"A three-way alliance is storming the capitol.",
 		"castle_defense"
 	),
 	demo_playground = stories.chapter_debug(
 		{},
 		"Playground",
+		"Various characters to assist in debugging.",
 		"playground"
 	),
 	model_room = stories.chapter_debug(
 		{},
 		"Model Room",
+		"A lot of randomly generated characters.",
 		"model_room"
 	),
 	demo_story = {
 		starting_node = 'prologue',
+		name = 'Tactics Tales Fantasy',
+		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
 		config = {
 			{
 				key = "turn_difficulty",
