@@ -53,7 +53,7 @@
 ---@class CharacterCustomizerNode : StoryNode Lets the player customise a character; stores results in story memory.
 ---@field type "character_customizer"
 ---@field key string Story memory key where the selected character is stored.
----@field name_key string Story memory key where the chosen character name is stored.
+---@field name_key? string Story memory key where the chosen character name is stored.
 
 ---@class GameResultsNode : StoryNode Displays the end-of-game results screen.
 ---@field type "game_results"
@@ -62,6 +62,11 @@
 ---@field type "text_input"
 ---@field text string Prompt text shown above the input field.
 ---@field key string Story memory key where the entered text is stored.
+
+---@class StoryNodeHandler
+---@field enter fun(story: Story, node: StoryNode)
+---@field exit? fun(story: Story, node: StoryNode)
+---@field update? fun(story: Story, input: InputContext)
 
 -- TODO: conditional jumps
 ---@class JumpNode : StoryNode Unconditionally jumps to another node.
