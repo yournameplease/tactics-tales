@@ -7,7 +7,7 @@ return {
 
   -- ASCII printable range (32–127) for Picotron output
   -- Space (32) is not in the spritesheet; a blank glyph is substituted automatically
-  p8_chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  p8_chars = "                 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
 
   base_width  = 8,
   height      = 16,

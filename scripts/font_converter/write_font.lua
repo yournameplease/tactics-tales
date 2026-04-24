@@ -10,7 +10,7 @@ function M.write(bitmap_bytes, width_bytes, config)
     0,--config.y_offset,
     0x03,  -- flags: variable-width + picotron default bit
     2,  -- tab width
-    0 -- unused
+    #width_bytes  -- glyph count
   }
 
   local all_bytes = {}

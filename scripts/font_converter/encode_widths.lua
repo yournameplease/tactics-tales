@@ -5,7 +5,7 @@ function M.encode(char_widths, config)
   local base = config.base_width
   local deltas = {}
 
-  for code = 32, 127 do
+  for code = 16, 127 do
     local ch = string.char(code)
     local w = char_widths[ch] or base
     local delta = w - base
