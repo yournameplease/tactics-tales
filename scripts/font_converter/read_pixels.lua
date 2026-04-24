@@ -57,7 +57,6 @@ function M.read(config)
     return raw:byte(offset) or 0
   end
 
-  local dh = config.descender_height or 0
   local descender_set = {}
   if config.descender_chars then
     utf8_chars(config.descender_chars, function(ch) descender_set[ch] = true end)
@@ -83,7 +82,7 @@ function M.read(config)
     local sheet_row = math.floor(idx / cols)
     local px0 = sheet_col * bw
     local py0 = sheet_row * bh
-    local eff_sy = descender_set[ch] and (sy + dh) or sy
+    local eff_sy = descender_set[ch] and (sy + 1) or sy
 
     local pixels = {}
     for y = 0, SLICE - 1 do
