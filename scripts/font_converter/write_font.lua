@@ -3,11 +3,14 @@ local M = {}
 
 function M.write(bitmap_bytes, width_bytes, config)
   local header = {
-    8,
-    8,
-    config.x_offset,
-    config.y_offset,
+    8,--width < 128
+    8,--width >=128
+    8,--height
+    0,--config.x_offset,
+    0,--config.y_offset,
     0x03,  -- flags: variable-width + picotron default bit
+    2,  -- tab width
+    0 -- unused
   }
 
   local all_bytes = {}

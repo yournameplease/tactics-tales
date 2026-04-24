@@ -15,7 +15,7 @@ end
 
 local glyph_w = bytes[1]
 local glyph_h = bytes[2]
-local HEADER         = 5
+local HEADER         = 8
 local COLS           = 16
 local bytes_per_glyph = math.ceil(glyph_w / 8) * glyph_h
 local num_glyphs      = tonumber(arg[2]) or 95  -- default: ASCII 32-126
