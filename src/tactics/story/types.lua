@@ -90,6 +90,8 @@
 
 ---@class StoryDefinition
 ---@field config? StoryConfigDefinition
+---@field name? string
+---@field description? string
 ---@field battle_config BattleConfig|fun(StoryConfig): BattleConfig
 ---@field nodes table<NodeId, StoryNodeSource> Maps each node ID to a sequence of nodes played in order.
 ---@field starting_node NodeId ID of the first node played when the story begins.

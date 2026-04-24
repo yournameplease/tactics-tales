@@ -260,8 +260,10 @@ local MENU_DATA = {
                         local options = {}
 
                         for _, story_id in ipairs(msb.story_ids) do
+                            local def = msb.stories[story_id]
                             table.insert(options, button.builder("begin_story_" .. story_id)
-                                :with_text(story_id)
+                                :with_text(def.name)
+                                :with_description(def.description)
                                 :with_value(story_id)
                                 :handle_action("select", "begin_chapter"))
                         end

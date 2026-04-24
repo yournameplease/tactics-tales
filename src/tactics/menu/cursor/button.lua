@@ -225,6 +225,14 @@ function ButtonDefinition:with_text(text)
     return self
 end
 
+--- Set the button description.
+---@param description string
+---@return ButtonDefinition
+function ButtonDefinition:with_description(description)
+    self.description = description
+    return self
+end
+
 --- Set the value passed to handlers on activation.
 ---@param value any
 ---@return ButtonDefinition
