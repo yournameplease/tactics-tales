@@ -35,6 +35,7 @@ function M.read(config)
   local bh = config.height
   local sx = config.slice_x_offset or 0
   local sy = config.slice_y_offset or 0
+  local ah = config.ascender_height or 0
   local SLICE = 8
 
   local handle = io.popen(string.format("magick identify -format '%%w %%h' %q", png))
@@ -82,7 +83,7 @@ function M.read(config)
     local sheet_row = math.floor(idx / cols)
     local px0 = sheet_col * bw
     local py0 = sheet_row * bh
-    local eff_sy = descender_set[ch] and (sy + 1) or sy
+    local eff_sy = descender_set[ch] and (sy + ah) or sy
 
     local pixels = {}
     for y = 0, SLICE - 1 do

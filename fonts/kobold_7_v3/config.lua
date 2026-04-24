@@ -20,7 +20,7 @@ return {
   descender_chars  = "gjpqy",
 
   slice_x_offset = 0,
-  slice_y_offset = 6,
+  slice_y_offset = 5,
 
   output_font = "kobold.font",
 
