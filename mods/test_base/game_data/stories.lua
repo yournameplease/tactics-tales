@@ -76,6 +76,18 @@ local stories = {
             },
         },
 
+        -- Nested list of advance node then exit. Tests that advance completes without any confirm().
+        list_advance_and_exit = {
+            starting_node = "main",
+            battle_config = battle_config{},
+            nodes = {
+                main = {{
+                    { type = "advance" },
+                    { type = "exit_story" },
+                }},
+            },
+        },
+
         -- delete_file node then exit. Tests that delete_file advances without a confirm().
         delete_file_and_exit = {
             starting_node = "main",
