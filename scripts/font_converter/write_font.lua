@@ -3,8 +3,8 @@ local M = {}
 
 function M.write(bitmap_bytes, width_bytes, config)
   local header = {
-    config.base_width,
-    config.height,
+    8,
+    8,
     config.x_offset,
     config.y_offset,
     0x03,  -- flags: variable-width + picotron default bit
@@ -13,6 +13,7 @@ function M.write(bitmap_bytes, width_bytes, config)
   local out = assert(io.open(config.output_font, "wb"),
     "Cannot open output: " .. config.output_font)
 
+  out:write("--[[pod]]")
   for _, b in ipairs(header) do
     out:write(string.char(b))
   end

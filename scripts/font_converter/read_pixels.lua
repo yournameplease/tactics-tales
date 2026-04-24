@@ -33,6 +33,9 @@ function M.read(config)
   local png = config.source_png
   local bw = config.base_width
   local bh = config.height
+  local sx = config.slice_x_offset or 0
+  local sy = config.slice_y_offset or 0
+  local SLICE = 8
 
   local handle = io.popen(string.format("magick identify -format '%%w %%h' %q", png))
   local dims = handle:read("*l")
@@ -62,9 +65,9 @@ function M.read(config)
     if idx == nil then
       io.stderr:write(string.format("Warning: %q not in sheet_chars, using blank glyph\n", ch))
       local pixels = {}
-      for y = 0, bh - 1 do
+      for y = 0, SLICE - 1 do
         pixels[y] = {}
-        for x = 0, bw - 1 do pixels[y][x] = false end
+        for x = 0, SLICE - 1 do pixels[y][x] = false end
       end
       glyphs[ch] = pixels
       return
@@ -76,10 +79,10 @@ function M.read(config)
     local py0 = sheet_row * bh
 
     local pixels = {}
-    for y = 0, bh - 1 do
+    for y = 0, SLICE - 1 do
       pixels[y] = {}
-      for x = 0, bw - 1 do
-        pixels[y][x] = get_alpha(px0 + x, py0 + y) > 0
+      for x = 0, SLICE - 1 do
+        pixels[y][x] = get_alpha(px0 + sx + x, py0 + sy + y) > 0
       end
     end
     glyphs[ch] = pixels

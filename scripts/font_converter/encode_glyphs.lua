@@ -12,8 +12,8 @@ local function utf8_chars(s, fn)
 end
 
 function M.encode(glyphs, config)
-  local bw = config.base_width
-  local bh = config.height
+  local bw = 8
+  local bh = 8
   local bitmap_bytes = {}
 
   utf8_chars(config.p8_chars, function(ch)

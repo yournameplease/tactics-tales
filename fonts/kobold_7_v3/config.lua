@@ -14,6 +14,9 @@ return {
   x_offset    = 0,
   y_offset    = 0,
 
+  slice_x_offset = 0,
+  slice_y_offset = 5,
+
   output_font = "kobold.font",
 
   manual_widths = {},
