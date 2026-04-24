@@ -14,6 +14,11 @@ return {
   x_offset    = 0,
   y_offset    = 0,
 
+  x_height        = 5,
+  ascender_height = 2,
+  descender_height = 2,
+  descender_chars  = "gjpqy",
+
   slice_x_offset = 0,
   slice_y_offset = 5,
 

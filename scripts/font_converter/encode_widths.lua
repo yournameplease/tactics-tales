@@ -5,6 +5,13 @@ function M.encode(char_widths, config)
   local base = config.base_width
   local deltas = {}
 
+  local descender_set = {}
+  if config.descender_chars then
+    for i = 1, #config.descender_chars do
+      descender_set[config.descender_chars:sub(i, i)] = true
+    end
+  end
+
   for code = 16, 255 do
     local ch = string.char(code)
     local w = char_widths[ch] or base
@@ -16,8 +23,10 @@ function M.encode(char_widths, config)
       io.stderr:write(string.format("Warning: char %q width delta %d clamped to -4\n", ch, delta))
       delta = -4
     end
-    -- 3-bit two's complement: 0..3 = +0..+3, 4..7 = -4..-1
-    deltas[code] = delta >= 0 and delta or (delta + 8)
+    -- bits 2-0: 3-bit two's complement width delta; bit 3: 1 = non-descender (draws 1px higher)
+    local nibble = delta >= 0 and delta or (delta + 8)
+    if not descender_set[ch] then nibble = nibble | 8 end
+    deltas[code] = nibble
   end
 
   local width_bytes = {}
