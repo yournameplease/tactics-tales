@@ -17,3 +17,4 @@ docs/todos/
 /luacov.report.html
 /luacov.report.out
 /luacov.stats.out
+*.font
