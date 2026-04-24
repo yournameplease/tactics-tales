@@ -5,7 +5,7 @@ function M.encode(char_widths, config)
   local base = config.base_width
   local deltas = {}
 
-  for code = 16, 127 do
+  for code = 16, 255 do
     local ch = string.char(code)
     local w = char_widths[ch] or base
     local delta = w - base
@@ -21,7 +21,7 @@ function M.encode(char_widths, config)
   end
 
   local width_bytes = {}
-  for code = 32, 126, 2 do
+  for code = 16, 256, 2 do
     local lo = deltas[code]     or 0
     local hi = deltas[code + 1] or 0
     table.insert(width_bytes, lo | (hi << 4))
