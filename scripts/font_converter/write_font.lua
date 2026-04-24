@@ -10,24 +10,23 @@ function M.write(bitmap_bytes, width_bytes, config)
     0x03,  -- flags: variable-width + picotron default bit
   }
 
-  local out = assert(io.open(config.output_font, "wb"),
+  local all_bytes = {}
+  for _, b in ipairs(header) do table.insert(all_bytes, b) end
+  for _, b in ipairs(width_bytes) do table.insert(all_bytes, b) end
+  for _, b in ipairs(bitmap_bytes) do table.insert(all_bytes, b) end
+
+  local hex_parts = {}
+  for _, b in ipairs(all_bytes) do
+    hex_parts[#hex_parts + 1] = string.format("%02x", b)
+  end
+  local hex = table.concat(hex_parts)
+
+  local out = assert(io.open(config.output_font, "w"),
     "Cannot open output: " .. config.output_font)
-
-  out:write("--[[pod]]")
-  for _, b in ipairs(header) do
-    out:write(string.char(b))
-  end
-  for _, b in ipairs(bitmap_bytes) do
-    out:write(string.char(b))
-  end
-  for _, b in ipairs(width_bytes) do
-    out:write(string.char(b))
-  end
-
+  out:write('--[[pod]]userdata("u8",2048,"hex:' .. hex .. '")')
   out:close()
 
-  local total = #header + #bitmap_bytes + #width_bytes
-  print(string.format("Done. Wrote %d bytes to %s", total, config.output_font))
+  print(string.format("Done. Wrote %d bytes to %s", #all_bytes, config.output_font))
 end
 
 return M
