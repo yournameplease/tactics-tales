@@ -73,7 +73,15 @@
 ---@field type "jump"
 ---@field next_node NodeId Node to jump to.
 
----@alias StoryConfigDefinition StoryConfigDefinitionEntry[]
+---@class StoryConfigDefinition
+---@field options StoryConfigDefinitionEntry[]
+---@field presets? StoryConfigPreset[]
+---@field default_preset? string
+
+---@class StoryConfigPreset
+---@field key string
+---@field name string
+---@field values table<string, string>
 
 ---@class StoryConfigDefinitionEntry
 ---@field key string
