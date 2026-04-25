@@ -239,67 +239,87 @@ local STORIES = {
 		name = 'Tactics Tales Fantasy',
 		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
 		config = {
-			{
-				key = "turn_difficulty",
-				name = "Turn difficulty",
-				description = "How much time you are given to complete chapters. Exceeding the turn limit will result in a failure.",
-				options = {
-					{
-						name = "Easy",
-						value = "easy",
-						description = "Most chapters will have no turn limit."
-					},
-					{
-						name = "Normal",
-						value = "normal",
-						description = "Chapters will have a reasonable turn limit.",
-					},
-					{
-						name = "Hard",
-						value = "hard",
-						description = "Chapters will have difficult turn limits. Good for repeat playthroughs."
-					},
-				}
+			options = {
+				{
+					key = "turn_difficulty",
+					name = "Turn difficulty",
+					description = "How much time you are given to complete chapters. Exceeding the turn limit will result in a failure.",
+					options = {
+						{
+							name = "Easy",
+							value = "easy",
+							description = "Most chapters will have no turn limit."
+						},
+						{
+							name = "Normal",
+							value = "normal",
+							description = "Chapters will have a reasonable turn limit.",
+						},
+						{
+							name = "Hard",
+							value = "hard",
+							description = "Chapters will have difficult turn limits. Good for repeat playthroughs."
+						},
+					}
+				},
+				{
+					key = "saving",
+					name = "Save Behavior",
+					description = "How to handle saving after a battle ends.",
+					options = {
+						---TODO: Disabling "ask" mode for now, this would need a "choice" story node
+						-- {
+						-- 	name = "Normal",
+						-- 	value = "ask",
+						-- },
+						{
+							name = "Ironman",
+							value = "ironman",
+							description = "Save after the end of each battle.",
+						},
+						{
+							name = "Hardcore",
+							value = "hardcore",
+							description = "Save after the end of each battle. Delete the file on defeat.",
+						},
+					}
+				},
+				{
+					key = "deaths",
+					name = "Death Behavior",
+					description = "How to handle player unit deaths.",
+					options = {
+						{
+							name = "Classic",
+							value = "classic",
+							description = "Units will die permanently.",
+						},
+						{
+							name = "Casual",
+							value = "casual",
+							description = "Units will retreat and return in the next chapter.",
+						},
+					}
+				},
 			},
-			{
-				key = "saving",
-				name = "Save Behavior",
-				description = "How to handle saving after a battle ends.",
-				options = {
-					---TODO: Disabling "ask" mode for now, this would need a "choice" story node
-					-- {
-					-- 	name = "Normal",
-					-- 	value = "ask",
-					-- },
-					{
-						name = "Ironman",
-						value = "ironman",
-						description = "Save after the end of each battle.",
-					},
-					{
-						name = "Hardcore",
-						value = "hardcore",
-						description = "Save after the end of each battle. Delete the file on defeat.",
-					},
-				}
+			presets = {
+				{
+					key = "easy",
+					name = "Easy",
+					values = { turn_difficulty = "easy", saving = "ironman", deaths = "casual" },
+				},
+				{
+					key = "normal",
+					name = "Normal",
+					values = { turn_difficulty = "normal", saving = "ironman", deaths = "classic" },
+				},
+				{
+					key = "hard",
+					name = "Hard",
+					values = { turn_difficulty = "hard", saving = "hardcore", deaths = "classic" },
+				},
 			},
-			{
-				key = "deaths",
-				name = "Death Behavior",
-				description = "How to handle player unit deaths.",
-				options = {
-					{
-						name = "Classic",
-						value = "classic",
-						description = "Units will die permanently.",
-					},
-					{
-						name = "Casual",
-						value = "casual",
-						description = "Units will retreat and return in the next chapter.",
-					},
-				}
-			},
+			default_preset = "normal",
 		},
 		battle_config = function(config)
 			local permadeath = config.deaths ~= "casual"
