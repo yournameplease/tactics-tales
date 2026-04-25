@@ -157,6 +157,7 @@ function BattleUIContext:enrich()
     if root_node_state and root_node_state.type == "grid" then
         ---@cast root_node_state SerializedNestedGridState
         self.hovered_point = root_node_state.point
+            self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
 
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node_state.point

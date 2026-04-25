@@ -1,9 +1,10 @@
 ---
 id: TASK-12
 title: Drive camera from cursor movement and enemy turn events
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:34'
+updated_date: '2026-04-25 23:51'
 labels: []
 milestone: m-2
 dependencies:
@@ -30,10 +31,10 @@ Identify the exact update site by searching for where `hovered_point` is assigne
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Moving the cursor near a viewport edge causes camera_x/camera_y to update
-- [ ] #2 When an enemy begins its action the camera jumps to center within CAMERA_DEAD_ZONE_ENEMY tiles of that unit
-- [ ] #3 Camera never exceeds map bounds
-- [ ] #4 make test passes
+- [x] #1 Moving the cursor near a viewport edge causes camera_x/camera_y to update
+- [x] #2 When an enemy begins its action the camera jumps to center within CAMERA_DEAD_ZONE_ENEMY tiles of that unit
+- [x] #3 Camera never exceeds map bounds
+- [x] #4 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

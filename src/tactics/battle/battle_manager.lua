@@ -149,6 +149,9 @@ function battle_manager.new(
         self.turn_manager,
         self.battle_objective_service
     )
+    self.enemy_ai_engine.on_unit_action = function(unit)
+        battle_ui_ctx:move_camera(self.battle_map, unit.tile, STATIC_CONFIG.CAMERA_DEAD_ZONE_ENEMY)
+    end
     self.ui_context = ui_context
     self.ui_context:register_ui_context(battle_ui_ctx)
 
