@@ -221,4 +221,103 @@ describe("tactics.menu.cursor.selection", function()
         node:handle_command("decrement_selection", { metadata = {} }, ctx)
         luassert.are_equal("A", node:get_selected_value())
     end)
+
+    it("on_change: joypad input calls handler and re-deserializes menu from returned data", function()
+        local handler_calls = {}
+        local handlers = {
+            my_handler = function(_gc, menu_data, _mc, value)
+                table.insert(handler_calls, { value = value, data = menu_data })
+                return menu_manager.menu_handler.then_deserialize({ other_key = "injected_" .. value })
+            end
+        }
+
+        local menu_defs = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        selection.row("test_sel")
+                            :with_key("sel_key")
+                            :with_static_options({"A", "B", "C"})
+                            :with_wrap(true)
+                            :with_on_change("my_handler")
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
+        luassert.are_equal("A", node:get_selected_value())
+
+        -- move right: selection becomes B, handler called, menu re-deserialized
+        manager:update(input_helper.joypad({ dxp = 1 }))
+        luassert.are_equal(1, #handler_calls)
+        luassert.are_equal("B", handler_calls[1].value)
+
+        -- move left: selection becomes A, handler called again
+        manager:update(input_helper.joypad({ dxp = -1 }))
+        luassert.are_equal(2, #handler_calls)
+        luassert.are_equal("A", handler_calls[2].value)
+    end)
+
+    it("on_change: handle_command calls handler and re-deserializes", function()
+        local handler_calls = {}
+        local handlers = {
+            my_handler = function(_gc, _menu_data, _mc, value)
+                table.insert(handler_calls, value)
+                return menu_manager.menu_handler.then_deserialize({ other_key = "injected" })
+            end
+        }
+
+        local menu_defs = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        selection.row("test_sel")
+                            :with_key("sel_key")
+                            :with_static_options({"A", "B", "C"})
+                            :with_on_change("my_handler")
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        -- trigger via handle_command directly through joypad button
+        local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
+        local sig = node:handle_command("increment_selection", { metadata = {} }, ctx)
+        luassert.are_equal("on_change", sig.type)
+        luassert.are_equal("my_handler", sig.handler)
+        luassert.are_equal("B", sig.value)
+    end)
+
+    it("on_change: without on_change set, joypad input returns consumed as before", function()
+        local menu_defs = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        selection.row("test_sel")
+                            :with_static_options({"A", "B", "C"})
+                    )
+                }
+            }
+        }
+
+        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        manager:set_menu("TEST_MENU")
+
+        local node = manager.menu_step.node
+        ---@cast node SelectionMenuNode
+        local sig = node:handle_command("increment_selection", { metadata = {} }, ctx)
+        luassert.are_equal("consumed", sig.type)
+    end)
 end)

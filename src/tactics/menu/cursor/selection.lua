@@ -22,6 +22,7 @@ local lists = require("src.tactics.util.lists")
 ---@field key? string Key used when serializing the selected value into menu data.
 ---@field direction SelectionDirection Axis along which joypad input moves the selection.
 ---@field wrap boolean When true, navigating past the end wraps to the beginning.
+---@field on_change? string Handler ID invoked whenever the selection changes.
 local SelectionMenuNode = {}
 SelectionMenuNode.__index = SelectionMenuNode
 
@@ -33,6 +34,7 @@ SelectionMenuNode.__index = SelectionMenuNode
 ---@field wrap boolean
 ---@field direction SelectionDirection
 ---@field description? string Optional human-readable description for the node.
+---@field on_change? string Handler ID invoked whenever the selection changes.
 local SelectionMenuDefinition = {}
 SelectionMenuDefinition.__index = SelectionMenuDefinition
 
@@ -89,17 +91,21 @@ function SelectionMenuNode:update_joy(joy, _commands, _menu_ctx, _game_ctx)
     if self.direction == "vertical" then
         if joy.dyp == 1 then
             self:increment_selection()
+            if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
             return menu_signal.consumed()
         elseif joy.dyp == -1 then
             self:decrement_selection()
+            if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
             return menu_signal.consumed()
         end
     elseif self.direction == "horizontal" then
         if joy.dxp == 1 then
             self:increment_selection()
+            if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
             return menu_signal.consumed()
         elseif joy.dxp == -1 then
             self:decrement_selection()
+            if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
             return menu_signal.consumed()
         end
     end
@@ -144,10 +150,12 @@ end
 function SelectionMenuNode:handle_command(command, _menu_ctx, _game_ctx)
     if command == "increment_selection" then
         self:increment_selection()
+        if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
         return menu_signal.consumed()
     end
     if command == "decrement_selection" then
         self:decrement_selection()
+        if self.on_change then return menu_signal.on_change(self.on_change, self:get_selected_value()) end
         return menu_signal.consumed()
     end
     return menu_signal.ignored()
@@ -331,6 +339,14 @@ function SelectionMenuDefinition:with_static_option_flat(value, text, descriptio
         text = text or value,
         description = description,
     })
+    return self
+end
+
+--- Set a handler ID to be called whenever the selection changes.
+---@param handler_id string
+---@return SelectionMenuDefinition
+function SelectionMenuDefinition:with_on_change(handler_id)
+    self.on_change = handler_id
     return self
 end
 

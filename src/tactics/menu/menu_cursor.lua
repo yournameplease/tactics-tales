@@ -2,7 +2,7 @@
 --- Defines the core interfaces and types for menu cursors, which
 --- handle user navigation within a menu.
 
----@alias MenuSignalType "navigate"|"finish"|"call_handler"|"ignored"|"consumed"|"back"
+---@alias MenuSignalType "navigate"|"finish"|"call_handler"|"on_change"|"ignored"|"consumed"|"back"
 
 ---@class MenuSignal Abstract base for all menu signals.
 ---@field type MenuSignalType
@@ -30,6 +30,11 @@
 ---@field then_navigate_to? string Step to navigate to after the handler runs.
 ---@field then_finish? boolean When true, finish the menu after the handler.
 ---@field then_back? boolean When true, go back after the handler.
+
+---@class MenuSignalOnChange : MenuSignal
+---@field type "on_change"
+---@field handler string Handler ID to invoke.
+---@field value any The newly selected value.
 
 ---@alias MenuLeafType "selection"|"button"
 
@@ -147,6 +152,15 @@ function menu_signal.call_handler(handler, value)
         value = value,
     }
     return out
+end
+
+--- Create an "on_change" signal emitted when a selection widget changes value.
+---@param handler string Handler ID to invoke.
+---@param value any The newly selected value.
+---@return MenuSignalOnChange
+function menu_signal.on_change(handler, value)
+    ---@type MenuSignalOnChange
+    return { type = "on_change", handler = handler, value = value }
 end
 
 local mouse_selection = {}
