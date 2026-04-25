@@ -2,6 +2,15 @@
 --- A utility for loading and preparing battle maps from map files.
 --- It processes map layers and generates the final BattleMap object.
 
+---@alias MapGenerationType "static"|"procgen"
+
+---@class MapDefinition Abstract base for all map definition variants.
+---@field type MapGenerationType
+
+---@class StaticMapDefinition : MapDefinition
+---@field type "static"
+---@field file string Path to the static map file.
+
 local point = require("src.tactics.util.point")
 local battle_map = require("src.tactics.battle.battle_map")
 
