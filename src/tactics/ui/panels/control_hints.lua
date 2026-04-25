@@ -129,8 +129,11 @@ end
 ---@return UIElement
 local function control_hint_row(input_label, menu_step_func, default_hints)
     local row = box.builder("control_row_" .. input_label)
-        :direction("row")
-        :container("strip")
+        :layout{
+            dir = "row",
+            width = "fill",
+            height = 10,
+        }
         :build()
 
     row:add(control_hint_glyphs(input_label, nil))
