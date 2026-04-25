@@ -440,6 +440,20 @@ function BaseMenuManager:update(input)
         elseif signal.type == "navigate" then
             ---@cast signal MenuSignalNavigate
             self:handle_menu_advance(signal.target)
+        elseif signal.type == "on_change" then
+            ---@cast signal MenuSignalOnChange
+            local handler = self.menu_handlers[signal.handler]
+            assert(handler ~= nil, "Bad handler for id " .. signal.handler)
+            local handler_res = handler(
+                self.game_ctx,
+                self:serialize().node.data,
+                self.menu_ctx,
+                signal.value
+            )
+            assert(handler_res ~= nil and handler_res.type == "deserialize",
+                "on_change handler must return menu_handler.then_deserialize(...)")
+            ---@cast handler_res MenuHandlerDeserialize
+            self.menu_step.node:deserialize(nil, handler_res.data)
         elseif signal.type == "finish" then
             self:clear_menu()
         elseif signal.type == "call_handler" then
