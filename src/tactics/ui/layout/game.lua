@@ -39,7 +39,20 @@ content:add(menu.generic_menu_box(
 
 content:add(box.spacer(1))
 
-content:add(menu.generic_menu_description(
+local description_container = content:add(box.builder("description_container")
+    :layout{
+        direction = "col",
+        height = 100,
+        width = "fill",
+        padding = box.layout.padding(8),
+    }
+    :style{
+        decoration = "border",
+        decoration_padding = 5,
+    }
+    :build())
+
+description_container:add(menu.generic_menu_description(
     ---@param state UIContextManager
     function(state)
         return state.game_context.menu_manager.revision_count

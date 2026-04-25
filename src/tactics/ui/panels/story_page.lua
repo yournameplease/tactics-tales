@@ -88,11 +88,16 @@ local function unit_results_section(unit_display)
     local row = box.builder("unit_results")
         :direction("row")
         :container("strip")
+        :padding(8)
+        :style{
+            decoration = "border",
+            decoration_padding = 5,
+        }
         :build()
 
     local drawable = unit_display.drawable
-    ---@type "default"|"paper"
-    local palette = nil
+
+    local palette = "paper"
     row:add(character_ui.portrait_box(function(_) return drawable end, palette))
 
     local stats = box.builder("unit_stats")
