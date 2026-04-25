@@ -127,8 +127,6 @@ local stories = {
             },
         },
     },
-    default_story = "simple_exit",
-    story_select  = { "simple_exit", "linear_text", "jump_flow" },
 }
 
 return stories
