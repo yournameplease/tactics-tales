@@ -53,6 +53,14 @@ function StatsService:record_recruitment(unit_id, chapter)
     self.story_results.chapter_recruited[unit_id] = chapter
 end
 
+--- Increment combat counts for both participants of a combat exchange.
+---@param data UnitCombatPayload
+function StatsService:record_combat(data)
+    local combats = self.story_results.unit_combats
+    combats[data.attacker_id] = (combats[data.attacker_id] or 0) + 1
+    combats[data.defender_id] = (combats[data.defender_id] or 0) + 1
+end
+
 --- Record the end of a battle into the appropriate chapter result.
 ---@param data BattleEndPayload
 function StatsService:record_battle_end(data)
@@ -84,6 +92,7 @@ function stats_service.new(event_bus)
         },
         chapter_results = {},
         chapter_recruited = {},
+        unit_combats = {},
     }
 
     self.event_listener = event_listener.new(event_bus)
@@ -96,6 +105,9 @@ function stats_service.new(event_bus)
     end)
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(data)
         self:begin_chapter(data.chapter, data.battle_id)
+    end)
+    self.event_listener:on("UNIT_COMBAT", function(data)
+        self:record_combat(data)
     end)
 
     return self

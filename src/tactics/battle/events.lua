@@ -16,4 +16,9 @@
 ---@field turn_number integer Battle turn on which the battle ended.
 ---@field result BattleEndResult Whether the battle was a victory or defeat.
 
+---@class UnitCombatPayload
+---@field attacker_id UnitId
+---@field defender_id UnitId
+---@field chapter integer
+
 return {}

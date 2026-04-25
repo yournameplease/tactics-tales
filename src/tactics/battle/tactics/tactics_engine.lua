@@ -672,6 +672,12 @@ function TacticsEngine:do_combat(attacker, defender)
 
     local combat_result = combat_calculator.compute_combat(attacker, defender, self.battle_map)
 
+    self.event_writer:emit("UNIT_COMBAT", {
+        attacker_id = attacker.id,
+        defender_id = defender.id,
+        chapter = self.chapter,
+    })
+
     for i, combat_step in ipairs(combat_result.steps) do
         log.debug("Combat step: ", i)
         self:apply_combat_step(combat_step)
