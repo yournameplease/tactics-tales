@@ -500,17 +500,6 @@ local STORIES = {
 ---@type ModStoriesModule
 local stories_mod = {
 	data = STORIES,
-	default_story = "demo_story",
-	story_select = {
-		"demo_story",
-		"bandit_village",
-		"cultist_cave",
-		"fortress_town",
-		"cliff_crossing",
-		"castle_defense",
-		"demo_playground",
-		"model_room",
-	}
 }
 
 return stories_mod

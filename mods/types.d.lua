@@ -14,6 +14,8 @@
 ---@field stories? string
 ---@field characters? string
 ---@field items? string
+---@field story_select? string[]  Ordered list of story IDs shown in Chapter Select. Defaults to all stories.
+---@field default_story? string   Story ID used when starting a new file. Required on at least one mod.
 
 -- Returned by game_data/maps.lua
 ---@alias ModMapsModule table<string, MapDefinition>
@@ -30,5 +32,3 @@
 -- Returned by game_data/stories.lua
 ---@class ModStoriesModule
 ---@field data table<string, StoryDefinition>
----@field default_story string
----@field story_select string[]
