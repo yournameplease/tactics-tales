@@ -12,10 +12,7 @@ local tactics_modal = require("src.tactics.ui.modal.tactics")
 local layouts = {}
 
 local battle_summary = battle.battle_summary()
-local map = tactics_map.new(
-    STATIC_CONFIG.MAP_WIDTH,
-    STATIC_CONFIG.MAP_HEIGHT
-)
+local map = tactics_map.new()
 
 ---@type ModalLayout[]
 local modals = {
