@@ -37,13 +37,6 @@ function stories.save_game()
 	}
 end
 
-function stories.save_and_notify()
-	return {stories.save_game(), stories.story_text("Progress saved.")}
-end
-
-function stories.save_silently()
-	return stories.save_game()
-end
 
 function stories.delete_file()
 	return {
@@ -319,7 +312,8 @@ local STORIES = {
 			},
 			ch_1_v = {
 				stories.new_page(),
-				stories.save_and_notify(),
+				stories.save_game(),
+			stories.story_text("Progress saved."),
 				stories.new_page(),
 				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
 				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
@@ -332,7 +326,7 @@ local STORIES = {
 				stories.jump('game_over'),
 			},
 			ch_2_intro = {
-				stories.save_silently(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.chapter_header("Those Who Act in the Shadows", 2),
 
@@ -345,7 +339,8 @@ local STORIES = {
 			},
 			ch_2_v = {
 				stories.new_page(),
-				stories.save_and_notify(),
+				stories.save_game(),
+			stories.story_text("Progress saved."),
 				stories.new_page(),
 				stories.story_text("The heroes managed to escape the cave."),
 				stories.story_text("Future encounters may not afford such stealthy encounters."),
@@ -357,7 +352,7 @@ local STORIES = {
 				stories.jump('game_over'),
 			},
 			ch_3_intro = {
-				stories.save_silently(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.chapter_header("", 3),
 
@@ -371,7 +366,8 @@ local STORIES = {
 			},
 			ch_3_v = {
 				stories.new_page(),
-				stories.save_and_notify(),
+				stories.save_game(),
+			stories.story_text("Progress saved."),
 				stories.new_page(),
 
 				stories.story_text("Clearly, bandit influence ran deep here."),
@@ -385,7 +381,7 @@ local STORIES = {
 				stories.jump('game_over'),
 			},
 			ch_4_intro = {
-				stories.save_silently(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.chapter_header("Unlikely Alliance", 4),
 
@@ -400,7 +396,8 @@ local STORIES = {
 			},
 			ch_4_v = {
 				stories.new_page(),
-				stories.save_and_notify(),
+				stories.save_game(),
+			stories.story_text("Progress saved."),
 				stories.new_page(),
 
 				stories.story_text("Clearly, bandit influence ran deep here."),
@@ -414,7 +411,7 @@ local STORIES = {
 				stories.jump('game_over'),
 			},
 			ch_5_intro = {
-				stories.save_silently(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.chapter_header("Last Stand", 5),
 
@@ -428,7 +425,8 @@ local STORIES = {
 			},
 			ch_5_v = {
 				stories.new_page(),
-				stories.save_and_notify(),
+				stories.save_game(),
+			stories.story_text("Progress saved."),
 				stories.new_page(),
 
 				stories.jump('victory'),
@@ -439,7 +437,7 @@ local STORIES = {
 				stories.jump('game_over'),
 			},
 			victory = {
-				stories.save_silently(),
+				stories.save_game(),
 				stories.new_page(),
 				stories.chapter_header("Victory"),
 				stories.story_text("Congratulations!"),
