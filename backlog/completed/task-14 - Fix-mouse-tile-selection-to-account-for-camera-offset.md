@@ -1,9 +1,10 @@
 ---
 id: TASK-14
 title: Fix mouse tile selection to account for camera offset
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:34'
+updated_date: '2026-04-25 23:55'
 labels: []
 milestone: m-2
 dependencies:
@@ -25,9 +26,9 @@ Files to modify:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Clicking a tile at the right edge of a scrolled viewport selects the correct map tile
-- [ ] #2 Clicking outside the map area returns nil
-- [ ] #3 make test passes
+- [x] #1 Clicking a tile at the right edge of a scrolled viewport selects the correct map tile
+- [x] #2 Clicking outside the map area returns nil
+- [x] #3 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

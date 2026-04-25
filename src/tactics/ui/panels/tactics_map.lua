@@ -10,6 +10,10 @@ local CharacterRenderer = require("src.tactics.character.character_renderer")
 
 ---@class MapData
 ---@field menu_node? MenuNode
+---@field camera_x? integer
+---@field camera_y? integer
+---@field map_width? integer
+---@field map_height? integer
 
 local tactics_map = {}
 
@@ -329,17 +333,21 @@ local function get_selection_at(
 )
     ---@type MapData
     local data = self.data
-    local tx = flr(lx / TILE_WIDTH)
-    local ty = flr(ly / TILE_HEIGHT)
+    local cam_x = data.camera_x or 0
+    local cam_y = data.camera_y or 0
+    local tx = flr((lx + cam_x) / TILE_WIDTH)
+    local ty = flr((ly + cam_y) / TILE_HEIGHT)
 
     if data.menu_node then
-        if tx >= 0 and tx < VIEWPORT_WIDTH
-            and ty >= 0 and ty < VIEWPORT_HEIGHT
+        local map_w = data.map_width or VIEWPORT_WIDTH
+        local map_h = data.map_height or VIEWPORT_HEIGHT
+        if tx >= 0 and tx < map_w
+            and ty >= 0 and ty < map_h
         then
             return mouse_menu_selection.grid(
                 tx, ty,
                 data.menu_node,
-                "select", "menu") -- this probably needs update
+                "select", "menu")
         end
     end
     return nil
@@ -379,6 +387,10 @@ function tactics_map.new()
         local data = self.data
         local menu_step = state.battle_context.battle_menu_manager.menu_step
         data.menu_node = menu_step and menu_step.node or nil
+        data.camera_x = state.battle_context.camera_x
+        data.camera_y = state.battle_context.camera_y
+        data.map_width = state.battle_context.battle_map.width
+        data.map_height = state.battle_context.battle_map.height
     end)
     :build()
 
