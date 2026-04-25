@@ -71,6 +71,16 @@ function CharacterManager:get_player_roster()
     )(self.player_ids)
 end
 
+--- Return all characters in the player roster, including those marked dead.
+---@return Character[]
+function CharacterManager:get_full_roster()
+    return fp.pipeline_1(
+        lists.map(
+            maps.get_at(self.characters)
+        )
+    )(self.player_ids)
+end
+
 --- Release resources held by the manager.
 function CharacterManager:teardown()
 end
