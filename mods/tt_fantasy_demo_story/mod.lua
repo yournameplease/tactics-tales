@@ -13,8 +13,9 @@ return {
     characters = "game_data/characters",
     items = "game_data/items",
     default_story = "demo_story",
+    -- I should probably move this to the config param
+    -- default_story = "convention_demo",
     story_select = {
-      "demo_story",
       "bandit_village",
       "cultist_cave",
       "fortress_town",
