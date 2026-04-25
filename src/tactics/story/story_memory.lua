@@ -27,7 +27,6 @@
 ---@field get_as_map fun(self: StoryMemory): StoryMemoryMap Flatten all entries into a string-to-string map for template substitution.
 ---@field serialize fun(self: StoryMemory): SerializedStoryMemory Serialize all entries to a plain table.
 ---@field deserialize fun(self: StoryMemory, data: SerializedStoryMemory) Load entries from a serialized table.
-local StoryMemory = {}
 
 ---@class StoryMemoryImpl : StoryMemory
 ---@field global table<string, StoryMemoryEntry> Internal store of all memory entries.
@@ -89,7 +88,6 @@ function StoryMemoryImpl:deserialize(data)
 end
 
 local story_memory = {
-    StoryMemory = StoryMemory,
     SerializedStoryMemory = nil,
 }
 

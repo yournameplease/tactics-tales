@@ -28,17 +28,14 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@class NewUnitProperties
 ---@field new_side Side
 ---@field new_ai UnitAI
-local NewUnitProperties = {}
 
 ---@class QueuedBattleDialogue
 ---@field speaking_unit BattleUnit
 ---@field text string[]
-local QueuedBattleDialogue = {}
 
 ---@class ActiveBattleDialogue
 ---@field speaking_unit BattleUnit
 ---@field dialogue ActiveDialogue
-local ActiveBattleDialogue = {}
 
 ---@class TacticsEngine
 ---@field turn integer The current turn.  Set by TurnManager.
@@ -65,7 +62,6 @@ local TacticsEngine = {}
 TacticsEngine.__index = TacticsEngine
 
 local tactics_engine = {
-    ActiveBattleDialogue = ActiveBattleDialogue,
     TacticsEngine = TacticsEngine,
 }
 

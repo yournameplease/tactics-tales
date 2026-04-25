@@ -14,14 +14,12 @@ local lists = require("src.tactics.util.lists")
 ---@field source_tile Point
 ---@field target_tile Point
 ---@field turn_number integer
-local ScriptContext = {}
 
 ---@class TileInteractionMessage
 ---@field script_id ScriptId
 ---@field source_unit BattleUnit
 ---@field source_tile Point
 ---@field target_tile Point
-local TileInteractionMessage = {}
 
 ---@class UnitInteractionMessage
 ---@field script_id ScriptId
@@ -29,7 +27,6 @@ local TileInteractionMessage = {}
 ---@field source_tile Point
 ---@field target_unit BattleUnit
 ---@field target_tile Point
-local UnitInteractionMessage = {}
 
 ---@class ScriptManager
 ---@field battle_map BattleMap

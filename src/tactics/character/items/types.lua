@@ -11,8 +11,6 @@
 ---@class ItemSpriteData
 ---@field sprite integer Sprite index used to render the item.
 ---@field anchor PointRecord Sprite-space anchor point for positioning the item visually.
-local ItemSpriteData = {}
 
 return {
-    ItemSpriteData = ItemSpriteData,
 }

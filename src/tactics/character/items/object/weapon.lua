@@ -34,7 +34,6 @@ local ShieldkillerEffect = {}
 ---@field get_selection_tiles fun(origin: Point, map: BattleMap): Point[] Returns tiles the player can select as attack targets.
 ---@field get_targets_for_selection fun(origin: Point, selection: Point, map: BattleMap): BattleUnit[] Returns units hit when a selection tile is chosen.
 ---@field is_target_valid fun(origin: Point, selection: Point, map: BattleMap): boolean Returns whether the selected tile is a valid attack target.
-local Targeting = {}
 
 ---@type Targeting
 local none_targeting = {
@@ -67,7 +66,6 @@ local Weapon = {}
 
 ---@class EquipmentEffect
 ---@field type EquipmentEffectType
-local EquipmentEffect = {}
 
 --- Defense category for equipment bonuses. "TRUE" is reserved and not yet implemented.
 ---@alias DefenseType "ARMOR"|"SHIELD"|"OTHER"|"TRUE"
@@ -76,7 +74,6 @@ local EquipmentEffect = {}
 ---@field type "increase_defense"
 ---@field amount integer Amount by which incoming damage is reduced.
 ---@field defense_type DefenseType
-local IncreaseDefenseEffect = {}
 
 --- Avoid category for equipment bonuses. "TRUE" is reserved and not yet implemented.
 ---@alias AvoidType "ARMOR"|"SHIELD"|"OTHER"|"TRUE"
@@ -104,7 +101,6 @@ local effect_description = {
 }
 
 local effect = {
-    IncreaseDefenseEffect = IncreaseDefenseEffect,
     IncreaseAvoidEffect   = IncreaseAvoidEffect,
     LongReachEffect       = LongReachEffect,
     ShieldsplitterEffect  = ShieldsplitterEffect,
@@ -131,10 +127,8 @@ end
 local weapon = {
     Weapon          = Weapon,
     WeaponEffect    = WeaponEffect,
-    EquipmentEffect = EquipmentEffect,
     targeting = {
         none     = none_targeting,
-        Targeting = Targeting,
     },
     effect = effect,
 }

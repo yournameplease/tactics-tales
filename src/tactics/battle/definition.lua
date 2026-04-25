@@ -5,7 +5,6 @@
 
 ---@class BattleDeploymentDefinition
 ---@field deployment_tiles_tag string TileLabel identifying the tiles where player units are placed at battle start.
-local BattleDeploymentDefinition = {}
 
 ---@alias BattleDefinitionFactory fun(StoryConfig): BattleDefinition
 
@@ -19,11 +18,8 @@ local BattleDeploymentDefinition = {}
 ---@field deployment BattleDeploymentDefinition Defines where player units are placed at battle start.
 ---@field units UnitSpawnData[] Units that are spawned when the battle begins.
 ---@field scripts BattleScript[] Scripts that define event-driven behaviour for this battle.
-local BattleDefinition = {}
 
 local battle_definition = {
-    BattleDefinition = BattleDefinition,
-    BattleDeploymentDefinition = BattleDeploymentDefinition,
 }
 
 return battle_definition
