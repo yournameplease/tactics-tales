@@ -56,6 +56,12 @@ function stories.exit_story()
 	}
 end
 
+function stories.game_results()
+	return {
+		type = 'game_results',
+	}
+end
+
 function stories.roster_add(template, tags)
 	return {
 		type = 'roster_add',
@@ -140,10 +146,12 @@ function stories.chapter_debug(
 			intro = intro_node,
 			victory = {
 				stories.story_text("You Win!"),
+				stories.game_results(),
 				stories.exit_story(),
 			},
 			defeat = {
 				stories.story_text("You Lose..."),
+				stories.game_results(),
 				stories.exit_story(),
 			},
 		}
