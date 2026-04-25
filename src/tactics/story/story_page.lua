@@ -26,6 +26,8 @@ local character = require("src.tactics.character.object.character")
 ---@field section GameResultsSection Which section of results is being displayed.
 ---@field page integer Current page index within the section.
 ---@field results StoryResults
+---@field chapter_pages GameResultsChapterDisplay[]
+---@field unit_pages GameResultsUnitDisplay[]
 
 ---@class RenderedTextInput : RenderedStoryNode Player text-entry prompt.
 ---@field type "text_input"
@@ -55,14 +57,18 @@ end
 
 --- Create a game results node showing the first page of chapter results.
 ---@param results StoryResults
+---@param chapter_pages GameResultsChapterDisplay[]
+---@param unit_pages GameResultsUnitDisplay[]
 ---@return RenderedStoryNode
-function rendered_story_node.game_results(results)
+function rendered_story_node.game_results(results, chapter_pages, unit_pages)
     ---@type RenderedGameResults
     local node = {
         type = 'game_results',
         section = 'chapters',
         page = 1,
         results = results,
+        chapter_pages = chapter_pages,
+        unit_pages = unit_pages,
     }
     return node
 end
@@ -183,10 +189,12 @@ function StoryPage:add_character_customization_menu(base_character, key, anim)
     table.insert(self.nodes, node)
 end
 
---- Append a game results node.
+--- Append a game results node with pre-built display data.
 ---@param results StoryResults
-function StoryPage:add_game_results(results)
-    local node = rendered_story_node.game_results(results)
+---@param chapter_pages GameResultsChapterDisplay[]
+---@param unit_pages GameResultsUnitDisplay[]
+function StoryPage:add_game_results(results, chapter_pages, unit_pages)
+    local node = rendered_story_node.game_results(results, chapter_pages, unit_pages)
     table.insert(self.nodes, node)
 end
 

@@ -27,11 +27,98 @@ describe("node handlers #it", function()
             luassert.is_false(h:is_complete())
         end)
 
-        it("advances after one confirm", function()
+        it("advances after one confirm when no chapters and no roster", function()
             local h = story_harness.new(single_node_story({ type = "game_results" }))
             h:start_story("test")
             h:confirm()
             luassert.is_true(h:is_complete())
+        end)
+
+        it("pre-builds unit_pages for roster units including dead", function()
+            local story_def = {
+                starting_node = "start",
+                nodes = {
+                    start = {
+                        { type = "chapter_header", text = "Ch 1", chapter_number = 1 },
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "game_results" },
+                        { type = "exit_story" },
+                    },
+                },
+            }
+            local h = story_harness.new({ stories = { test = story_def } })
+            h:start_story("test")
+            h:confirm() -- advance past chapter_header
+            -- Now on game_results node: 0 chapter pages, 2 unit pages
+            local node = h:game_results_node()
+            luassert.is_not_nil(node)
+            ---@cast node RenderedGameResults
+            luassert.are_equal(2, #node.unit_pages)
+            luassert.are_equal("chapters", node.section)
+            luassert.are_equal(1, node.page)
+        end)
+
+        it("transitions from chapters to units section on confirm", function()
+            local story_def = {
+                starting_node = "start",
+                nodes = {
+                    start = {
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "game_results" },
+                        { type = "exit_story" },
+                    },
+                },
+            }
+            local h = story_harness.new({ stories = { test = story_def } })
+            h:start_story("test")
+            -- 0 chapter pages, 1 unit page: first confirm → units section
+            h:confirm()
+            local node = h:game_results_node()
+            luassert.is_not_nil(node)
+            ---@cast node RenderedGameResults
+            luassert.are_equal("units", node.section)
+            luassert.are_equal(1, node.page)
+        end)
+
+        it("advances on confirm from last unit page", function()
+            local story_def = {
+                starting_node = "start",
+                nodes = {
+                    start = {
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "game_results" },
+                        { type = "exit_story" },
+                    },
+                },
+            }
+            local h = story_harness.new({ stories = { test = story_def } })
+            h:start_story("test")
+            h:confirm() -- chapters → units
+            h:confirm() -- last unit page → advance
+            luassert.is_true(h:is_complete())
+        end)
+
+        it("unit_pages include chapter_recruited from chapter_header", function()
+            local story_def = {
+                starting_node = "start",
+                nodes = {
+                    start = {
+                        { type = "chapter_header", text = "Ch 3", chapter_number = 3 },
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "game_results" },
+                        { type = "exit_story" },
+                    },
+                },
+            }
+            local h = story_harness.new({ stories = { test = story_def } })
+            h:start_story("test")
+            h:confirm() -- advance past chapter_header
+            local node = h:game_results_node()
+            luassert.is_not_nil(node)
+            ---@cast node RenderedGameResults
+            luassert.are_equal(1, #node.unit_pages)
+            luassert.are_equal(3, node.unit_pages[1].chapter_recruited)
         end)
     end)
 

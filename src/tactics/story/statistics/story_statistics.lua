@@ -6,6 +6,20 @@
 ---@field attacker_id UnitId
 ---@field turn_number integer
 
+---@class GameResultsChapterDisplay
+---@field chapter_number integer
+---@field battle_id BattleId
+---@field result BattleEndResult
+---@field turns_taken integer
+---@field units_lost_names string[]
+
+---@class GameResultsUnitDisplay
+---@field drawable DrawableCharacter
+---@field name string
+---@field chapter_recruited integer?
+---@field combats integer
+---@field kills integer
+
 ---@class StoryChapterResult
 ---@field battle_id BattleId
 ---@field turns_taken integer
