@@ -17,6 +17,7 @@ require("profiler")
 ---@field dialogue_speed? DialogueSpeed
 ---@field glyph_family? GlyphFamily
 ---@field input_group? InputGroup
+---@field demo_mode? boolean
 
 ---@class ConfigManager
 ---@field package config DynamicConfig Merged view of user and default config.
