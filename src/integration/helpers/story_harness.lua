@@ -191,6 +191,19 @@ function StoryHarness:story_results()
     return self._story.stats_service.story_results
 end
 
+--- Return the topmost RenderedGameResults node, or nil if the top node is not game_results.
+---@return RenderedGameResults?
+function StoryHarness:game_results_node()
+    assert(self._story, "start_story() has not been called")
+    local nodes = self._story.story_page.nodes
+    local top = nodes[#nodes]
+    if top and top.type == "game_results" then
+        ---@cast top RenderedGameResults
+        return top
+    end
+    return nil
+end
+
 --- Register a mock fetch response for a map path.
 ---@param path string
 ---@param fetch_data table

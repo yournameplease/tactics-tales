@@ -4,6 +4,8 @@
 local save_system = require("src.tactics.save.save_system")
 local battle_manager_module = require("src.tactics.battle.battle_manager")
 local story_memory = require("src.tactics.story.story_memory")
+local drawable_character = require("src.tactics.story.drawable_character")
+local character = require("src.tactics.character.object.character")
 
 ---@param story Story
 ---@param input InputContext
@@ -263,14 +265,76 @@ local HANDLERS = {
 
     game_results = {
         enter = function(story)
-            story.story_page:add_game_results(story.stats_service.story_results)
-            story.active_dialogue = story.dialogue_manager:create_dialogue(
-                {""},
-                { auto_advance = false },
-                {}
-            )
+            local results = story.stats_service.story_results
+
+            -- Build chapter display pages
+            local chapter_pages = {}
+            for i, chapter_result in pairs(results.chapter_results) do
+                local units_lost_names = {}
+                for _, death in ipairs(chapter_result.units_lost) do
+                    local char = story.character_manager:get_character(death.unit_id)
+                    table.insert(units_lost_names, char and char.name or "Unknown")
+                end
+                chapter_pages[i] = {
+                    chapter_number = i,
+                    battle_id = chapter_result.battle_id,
+                    result = chapter_result.result,
+                    turns_taken = chapter_result.turns_taken,
+                    units_lost_names = units_lost_names,
+                }
+            end
+
+            -- Build unit display pages
+            local full_roster = story.character_manager:get_full_roster()
+            local unit_pages = {}
+            for _, unit in ipairs(full_roster) do
+                local kills = 0
+                for _, chapter_result in pairs(results.chapter_results) do
+                    for _, death in ipairs(chapter_result.units_lost) do
+                        if death.attacker_id == unit.id then
+                            kills = kills + 1
+                        end
+                    end
+                end
+                local drawable = drawable_character.create_drawable_unit(
+                    unit, "player", character.facing.of("left")
+                )
+                drawable.animation_data = story.idle_animation
+                table.insert(unit_pages, {
+                    drawable = drawable,
+                    name = unit.name,
+                    chapter_recruited = results.chapter_recruited[unit.id],
+                    combats = results.unit_combats[unit.id] or 0,
+                    kills = kills,
+                })
+            end
+
+            story.story_page:add_game_results(results, chapter_pages, unit_pages)
         end,
-        update = dialogue_update,
+        update = function(story, input)
+            if not input.actions["BUTTON_A"].pressed then return end
+            local node = story.story_page.nodes[#story.story_page.nodes]
+            ---@cast node RenderedGameResults
+            if node.section == "chapters" then
+                if node.page < #node.chapter_pages then
+                    node.page = node.page + 1
+                    story.story_page.story_revision = story.story_page.story_revision + 1
+                elseif #node.unit_pages > 0 then
+                    node.section = "units"
+                    node.page = 1
+                    story.story_page.story_revision = story.story_page.story_revision + 1
+                else
+                    story:advance_node()
+                end
+            else
+                if node.page < #node.unit_pages then
+                    node.page = node.page + 1
+                    story.story_page.story_revision = story.story_page.story_revision + 1
+                else
+                    story:advance_node()
+                end
+            end
+        end,
     },
 }
 
