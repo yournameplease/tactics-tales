@@ -4,6 +4,7 @@
 
 local lists = require("src.tactics.util.lists")
 local menu_manager = require("src.tactics.menu.menu_manager")
+local menu_handler = menu_manager.menu_handler
 local step_definition = menu_manager.definition.step
 local list = require("src.tactics.menu.cursor.nested.list")
 local button = require("src.tactics.menu.cursor.button")
@@ -42,8 +43,57 @@ HANDLERS["begin_file_from_context"] = function(
     session_context,
     _value
 )
-    services.handle_begin_story(session_context.selected_file, services.default_story_id, menu_data)
+    local config = {}
+    for k, v in pairs(menu_data) do
+        if k ~= "_preset" then config[k] = v end
+    end
+    services.handle_begin_story(session_context.selected_file, services.default_story_id, config)
     return nil
+end
+
+--- Apply a preset to all option values when the preset row changes.
+---@param services GameMenuContext
+---@param menu_data table<string, any>
+---@param _ctx MainMenuContext
+---@param value string
+---@return MenuHandlerPostHandling
+HANDLERS["apply_preset"] = function(services, menu_data, _ctx, value)
+    if value == "custom" then
+        return menu_handler.then_deserialize(menu_data)
+    end
+    local config = services.stories[services.default_story_id].config
+    local data = { _preset = value }
+    for k, v in pairs(menu_data) do data[k] = v end
+    for _, p in ipairs(config.presets) do
+        if p.key == value then
+            for k, v in pairs(p.values) do data[k] = v end
+        end
+    end
+    return menu_handler.then_deserialize(data)
+end
+
+--- Sync the preset row to "custom" or a matching preset key after an option changes.
+---@param services GameMenuContext
+---@param menu_data table<string, any>
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+HANDLERS["sync_preset_from_options"] = function(services, menu_data, _ctx, _value)
+    local config = services.stories[services.default_story_id].config
+    local matched = "custom"
+    if config and config.presets then
+        for _, p in ipairs(config.presets) do
+            local match = true
+            for k, v in pairs(p.values) do
+                if menu_data[k] ~= v then match = false; break end
+            end
+            if match then matched = p.key; break end
+        end
+    end
+    local data = {}
+    for k, v in pairs(menu_data) do data[k] = v end
+    data._preset = matched
+    return menu_handler.then_deserialize(data)
 end
 
 --- Load an existing story save by file name.
@@ -219,11 +269,24 @@ local MENU_DATA = {
                         local config = definition.config
 
                         if config then
-                            for _, opt in ipairs(config) do
+                            if config.presets then
+                                local preset_row = selection.row("_preset")
+                                    :with_key("_preset")
+                                    :with_label("Difficulty")
+                                    :with_on_change("apply_preset")
+                                for _, p in ipairs(config.presets) do
+                                    preset_row = preset_row:with_static_option{ value = p.key, text = p.name }
+                                end
+                                preset_row = preset_row:with_static_option{ value = "custom", text = "Custom" }
+                                table.insert(options, preset_row)
+                            end
+
+                            for _, opt in ipairs(config.options) do
                                 local b = selection.row(opt.key)
                                     :with_key(opt.key)
                                     :with_label(opt.name)
                                     :with_description(opt.description)
+                                    :with_on_change("sync_preset_from_options")
 
                                 for _,o in ipairs(opt.options) do
                                     b = b:with_static_option{
@@ -236,7 +299,7 @@ local MENU_DATA = {
                                 table.insert(options, b)
                             end
                         end
-                        
+
                         table.insert(options, button.builder("confirm_begin")
                             :with_text("Begin")
                             :handle_action("select", "begin_file_from_context")
@@ -250,6 +313,20 @@ local MENU_DATA = {
                 )
             )
             :with_previous_step("NEW_FILE_SELECT")
+            :with_initial_data(function(msb, _ctx)
+                ---@cast msb GameMenuContext
+                local def = msb.stories[msb.default_story_id]
+                local config = def and def.config
+                if not config or not config.presets or not config.default_preset then return {} end
+                local preset_key = config.default_preset
+                local data = { _preset = preset_key }
+                for _, p in ipairs(config.presets) do
+                    if p.key == preset_key then
+                        for k, v in pairs(p.values) do data[k] = v end
+                    end
+                end
+                return data
+            end)
             :with_action("BUTTON_A", { command = "select", description = "Select"})
             :with_action("BUTTON_B", { command = "back", description = "Back"}),
             ["CHAPTER_SELECT"] = step_definition.of_node(
