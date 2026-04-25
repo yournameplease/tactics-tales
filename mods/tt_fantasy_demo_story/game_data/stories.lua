@@ -158,6 +158,90 @@ function stories.chapter_debug(
 	}
 end
 
+local GENERIC_CONFIG = {
+	options = {
+		{
+			key = "turn_difficulty",
+			name = "Turn difficulty",
+			description = "How much time you are given to complete chapters. Exceeding the turn limit will result in a failure.",
+			options = {
+				{
+					name = "Easy",
+					value = "easy",
+					description = "Most chapters will have no turn limit."
+				},
+				{
+					name = "Normal",
+					value = "normal",
+					description = "Chapters will have a reasonable turn limit.",
+				},
+				{
+					name = "Hard",
+					value = "hard",
+					description = "Chapters will have difficult turn limits. Good for repeat playthroughs."
+				},
+			}
+		},
+		{
+			key = "saving",
+			name = "Save Behavior",
+			description = "How to handle saving after a battle ends.",
+			options = {
+				---TODO: Disabling "ask" mode for now, this would need a "choice" story node
+				-- {
+				-- 	name = "Normal",
+				-- 	value = "ask",
+				-- },
+				{
+					name = "Ironman",
+					value = "ironman",
+					description = "Save after the end of each battle.",
+				},
+				{
+					name = "Hardcore",
+					value = "hardcore",
+					description = "Save after the end of each battle. Delete the file on defeat.",
+				},
+			}
+		},
+		{
+			key = "deaths",
+			name = "Death Behavior",
+			description = "How to handle player unit deaths.",
+			options = {
+				{
+					name = "Classic",
+					value = "classic",
+					description = "Units will die permanently.",
+				},
+				{
+					name = "Casual",
+					value = "casual",
+					description = "Units will retreat and return in the next chapter.",
+				},
+			}
+		},
+	},
+	presets = {
+		{
+			key = "easy",
+			name = "Easy",
+			values = { turn_difficulty = "easy", saving = "ironman", deaths = "casual" },
+		},
+		{
+			key = "normal",
+			name = "Normal",
+			values = { turn_difficulty = "normal", saving = "ironman", deaths = "classic" },
+		},
+		{
+			key = "hard",
+			name = "Hard",
+			values = { turn_difficulty = "hard", saving = "hardcore", deaths = "classic" },
+		},
+	},
+	default_preset = "normal",
+}
+
 local STORIES = {
 	bandit_village = stories.chapter_debug(
 		{},
@@ -242,93 +326,55 @@ local STORIES = {
 		"A lot of randomly generated characters.",
 		"model_room"
 	),
+	convention_demo = {
+		starting_node = 'prologue',
+		name = 'Tactics Tales Fantasy',
+		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
+		config = GENERIC_CONFIG,
+		battle_config = static_battle_config{
+			permadeath = true,
+		},
+		nodes = {
+			prologue = {
+				stories.chapter_header("Tactics Tales"),
+				stories.text_input("This is the story of ${hero_name}", "hero_name"),
+				stories.set_memory("hero_village", "Herovillageton"),
+				stories.character_customizer("hero", "hero_name"),
+				stories.jump('ch_1_intro'),
+			},
+			ch_1_intro = {
+				stories.new_page(),
+
+				stories.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+				stories.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
+				stories.story_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
+				stories.story_text("Prepare for battle!"),
+
+				stories.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
+			},
+			ch_1_v = {
+				stories.new_page(),
+				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
+				stories.story_text("But you'll need to play the full game to see that!"),
+				stories.story_text("Check it out at \nyour-name-please.itch.io/tactics-tales!"),
+				stories.exit_story(),
+			},
+			ch_1_f = {
+				stories.new_page(),
+				stories.story_text("${hero.name} and the visiting militia were no match for the bandits."),
+				stories.story_text("${hero_village} would find itself under bandit rule for years to come."),
+				stories.story_text("Try again for a victory. I believe in you!"),
+				stories.story_text("Or, play the full game at \nyour-name-please.itch.io/tactics-tales!"),
+				stories.exit_story(),
+			},
+		},
+	},
 	demo_story = {
 		starting_node = 'prologue',
 		name = 'Tactics Tales Fantasy',
 		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
-		config = {
-			options = {
-				{
-					key = "turn_difficulty",
-					name = "Turn difficulty",
-					description = "How much time you are given to complete chapters. Exceeding the turn limit will result in a failure.",
-					options = {
-						{
-							name = "Easy",
-							value = "easy",
-							description = "Most chapters will have no turn limit."
-						},
-						{
-							name = "Normal",
-							value = "normal",
-							description = "Chapters will have a reasonable turn limit.",
-						},
-						{
-							name = "Hard",
-							value = "hard",
-							description = "Chapters will have difficult turn limits. Good for repeat playthroughs."
-						},
-					}
-				},
-				{
-					key = "saving",
-					name = "Save Behavior",
-					description = "How to handle saving after a battle ends.",
-					options = {
-						---TODO: Disabling "ask" mode for now, this would need a "choice" story node
-						-- {
-						-- 	name = "Normal",
-						-- 	value = "ask",
-						-- },
-						{
-							name = "Ironman",
-							value = "ironman",
-							description = "Save after the end of each battle.",
-						},
-						{
-							name = "Hardcore",
-							value = "hardcore",
-							description = "Save after the end of each battle. Delete the file on defeat.",
-						},
-					}
-				},
-				{
-					key = "deaths",
-					name = "Death Behavior",
-					description = "How to handle player unit deaths.",
-					options = {
-						{
-							name = "Classic",
-							value = "classic",
-							description = "Units will die permanently.",
-						},
-						{
-							name = "Casual",
-							value = "casual",
-							description = "Units will retreat and return in the next chapter.",
-						},
-					}
-				},
-			},
-			presets = {
-				{
-					key = "easy",
-					name = "Easy",
-					values = { turn_difficulty = "easy", saving = "ironman", deaths = "casual" },
-				},
-				{
-					key = "normal",
-					name = "Normal",
-					values = { turn_difficulty = "normal", saving = "ironman", deaths = "classic" },
-				},
-				{
-					key = "hard",
-					name = "Hard",
-					values = { turn_difficulty = "hard", saving = "hardcore", deaths = "classic" },
-				},
-			},
-			default_preset = "normal",
-		},
+		config = GENERIC_CONFIG,
 		battle_config = function(config)
 			local permadeath = config.deaths ~= "casual"
 
@@ -358,7 +404,7 @@ local STORIES = {
 			ch_1_v = {
 				stories.new_page(),
 				stories.save_game(),
-			stories.story_text("Progress saved."),
+				stories.story_text("Progress saved."),
 				stories.new_page(),
 				stories.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
 				stories.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
