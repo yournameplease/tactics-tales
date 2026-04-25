@@ -2,7 +2,7 @@ LUA_SRC = $(shell find src/ -type f -name '*.lua')
 
 LLS = lua-language-server
 
-.PHONY: all check ut it test
+.PHONY: all check ut it test coverage
 
 all: check test
 
@@ -17,3 +17,7 @@ it:
 
 test:
 	busted src/ mod_spec/
+
+coverage:
+	busted src/ mod_spec/ --helper=busted_coverage_setup.lua
+	luacov
