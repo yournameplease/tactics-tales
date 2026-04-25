@@ -71,6 +71,13 @@ function CharacterManager:get_player_roster()
     )(self.player_ids)
 end
 
+--- True if the roster contains character
+---@param character_id CharacterId
+---@return boolean
+function CharacterManager:is_player(character_id)
+    return self.characters[character_id] ~= nil
+end
+
 --- Return all characters in the player roster, including those marked dead.
 ---@return Character[]
 function CharacterManager:get_full_roster()

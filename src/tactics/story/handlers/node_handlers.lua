@@ -272,8 +272,10 @@ local HANDLERS = {
             for i, chapter_result in pairs(results.chapter_results) do
                 local units_lost_names = {}
                 for _, death in ipairs(chapter_result.units_lost) do
-                    local char = story.character_manager:get_character(death.unit_id)
-                    table.insert(units_lost_names, char and char.name or "Unknown")
+                    if story.character_manager:is_player(death.unit_id) then
+                        local char = story.character_manager:get_character(death.unit_id)
+                        table.insert(units_lost_names, char and char.name or "Unknown")
+                    end
                 end
                 chapter_pages[i] = {
                     chapter_number = i,
