@@ -11,6 +11,17 @@ return {
     battles = "game_data/battles",
     stories = "game_data/stories",
     characters = "game_data/characters",
-    items = "game_data/items"
+    items = "game_data/items",
+    default_story = "demo_story",
+    story_select = {
+      "demo_story",
+      "bandit_village",
+      "cultist_cave",
+      "fortress_town",
+      "cliff_crossing",
+      "castle_defense",
+      "demo_playground",
+      "model_room",
+    },
   },
 }

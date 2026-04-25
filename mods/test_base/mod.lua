@@ -5,10 +5,12 @@ return {
     version = "0.1.0",
     dependendcies = {},
     content = {
-        maps       = "game_data/maps",
-        battles    = "game_data/battles",
-        stories    = "game_data/stories",
-        characters = "game_data/characters",
-        items      = "game_data/items",
+        maps           = "game_data/maps",
+        battles        = "game_data/battles",
+        stories        = "game_data/stories",
+        characters     = "game_data/characters",
+        items          = "game_data/items",
+        default_story  = "simple_exit",
+        story_select   = { "simple_exit", "linear_text", "jump_flow" },
     },
 }

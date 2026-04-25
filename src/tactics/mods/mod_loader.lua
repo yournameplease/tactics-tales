@@ -92,37 +92,6 @@ local function load_mod_map(registered, get_path, get_data)
     )
 end
 
---- Load a single value by taking the most recently declared entry from all registered mods.
----@param registered RegisteredMod[]
----@param get_path fun(mod: RegisteredMod): string? Returns path relative to mod root (no .lua extension).
----@param get_data fun(spec: table<string, any>): any Extracts the relevant value from the included file.
----@return any
-local function load_mod_val(registered, get_path, get_data)
-    get_data = get_data or function(spec)
-        return spec
-    end
-
-    local values = fp.pipeline_5(
-        lists.map(function(mod)
-            if get_path(mod) == nil then
-                return ""
-            end
-            return "mods/" .. mod.path .. "/" .. get_path(mod) .. ".lua"
-        end),
-        lists.filter(fp.not_empty),
-        lists.map(function(path)
-            log.debug("Including "..path)
-            return include(path)
-        end),
-        lists.map(function(spec)
-            return get_data(spec)
-        end),
-        lists.filter(fp.not_nil)
-    )(registered)
-
-    -- get most recently declared value
-    return lists.do_reverse(values)[1] or error("No mod data found for a value.")
-end
 
 --- Set up the shared sandbox table available to mod scripts as `lib`.
 -- TODO: consider safer approaches?
@@ -181,22 +150,36 @@ function ModLoader:load_mod_data()
         nil
     )
     log.debug("Loading stories...")
+    local story_data = load_mod_map(
+        self.registered,
+        function(mod) return mod.spec.content.stories end,
+        function(spec) return spec.data end
+    )
+
+    local story_select = nil
+    local default_story = nil
+    for _, mod in ipairs(self.registered) do
+        if mod.spec.content.story_select ~= nil then
+            story_select = mod.spec.content.story_select
+        end
+        if mod.spec.content.default_story ~= nil then
+            default_story = mod.spec.content.default_story
+        end
+    end
+    if story_select == nil then
+        story_select = {}
+        for id in pairs(story_data) do
+            table.insert(story_select, id)
+        end
+    end
+    if default_story == nil then
+        error("No default_story defined in any mod's content")
+    end
+
     game_data.stories = {
-        data = load_mod_map(
-            self.registered,
-            function(mod) return mod.spec.content.stories end,
-            function(spec) return spec.data end
-        ),
-        default_story = load_mod_val(
-            self.registered,
-            function(mod) return mod.spec.content.stories end,
-            function(spec) return spec.default_story end
-        ),
-        story_select = load_mod_val(
-            self.registered,
-            function(mod) return mod.spec.content.stories end,
-            function(spec) return spec.story_select end
-        )
+        data = story_data,
+        default_story = default_story,
+        story_select = story_select,
     }
     log.debug("Loading characters...")
     game_data.characters = load_mod_map(
