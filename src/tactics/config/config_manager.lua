@@ -34,6 +34,7 @@ local DEFAULT_CONFIG = {
 	dialogue_speed = "normal",
 	glyph_family = "keyboard",
 	input_group = "mouse_and_keyboard",
+	demo_mode = false,
 }
 
 local config_manager = {}
@@ -41,6 +42,10 @@ local config_manager = {}
 --- Persist new config to disk and apply profiler settings.
 ---@param new_config DynamicConfig
 function ConfigManager:store_config(new_config)
+	-- workaround to ensure demo mode is present
+	-- i'd rather require it's editable only via pod,
+	-- but the default pod editor doesn't let you add a new field
+	new_config.demo_mode = false
 	self.user_config = new_config
 	store("/appdata/tactics_tales/config.pod", new_config, nil)
 
