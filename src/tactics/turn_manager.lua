@@ -46,7 +46,7 @@ function TurnManager:check_objectives()
         log.debug("Battle finished!")
         self.event_writer:emit("BATTLE_END", {
             chapter = self.chapter,
-            turn = self.turn,
+            turn_number = self.turn,
             result = battle_result.result,
         })
         return true
