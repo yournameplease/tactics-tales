@@ -46,6 +46,13 @@ function StatsService:record_death(data)
     })
 end
 
+--- Record the chapter in which a unit was recruited.
+---@param unit_id UnitId
+---@param chapter integer
+function StatsService:record_recruitment(unit_id, chapter)
+    self.story_results.chapter_recruited[unit_id] = chapter
+end
+
 --- Record the end of a battle into the appropriate chapter result.
 ---@param data BattleEndPayload
 function StatsService:record_battle_end(data)
@@ -76,6 +83,7 @@ function stats_service.new(event_bus)
             units_lost = 0,
         },
         chapter_results = {},
+        chapter_recruited = {},
     }
 
     self.event_listener = event_listener.new(event_bus)

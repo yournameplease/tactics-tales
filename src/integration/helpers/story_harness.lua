@@ -184,6 +184,13 @@ function StoryHarness:player_roster()
     return self._story.character_manager:get_player_roster()
 end
 
+--- Return the current StoryResults from the story's stats service.
+---@return StoryResults
+function StoryHarness:story_results()
+    assert(self._story, "start_story() has not been called")
+    return self._story.stats_service.story_results
+end
+
 --- Register a mock fetch response for a map path.
 ---@param path string
 ---@param fetch_data table

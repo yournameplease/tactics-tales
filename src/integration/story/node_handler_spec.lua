@@ -75,4 +75,27 @@ describe("node handlers #it", function()
             luassert.are_equal("hello", h:memory("greeting").text)
         end)
     end)
+
+    describe("roster_add", function()
+        it("records the current chapter number for the recruited unit", function()
+            local story_def = {
+                starting_node = "start",
+                nodes = {
+                    start = {
+                        { type = "chapter_header", text = "Chapter 2", chapter_number = 2 },
+                        { type = "roster_add", template = "test_fighter" },
+                        { type = "exit_story" },
+                    },
+                },
+            }
+            local h = story_harness.new({ stories = { test = story_def } })
+            h:start_story("test")
+            h:confirm() -- advance past chapter_header
+            local results = h:story_results()
+            local recruited = results.chapter_recruited
+            local unit_id = next(recruited)
+            luassert.is_not_nil(unit_id)
+            luassert.are_equal(2, recruited[unit_id])
+        end)
+    end)
 end)

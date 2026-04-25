@@ -20,5 +20,6 @@
 ---@class StoryResults
 ---@field statistics StoryStatistics
 ---@field chapter_results table<integer, StoryChapterResult>
+---@field chapter_recruited table<UnitId, integer>
 
 return {}
