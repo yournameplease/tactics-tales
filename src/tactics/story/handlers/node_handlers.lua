@@ -60,6 +60,7 @@ local HANDLERS = {
                 node.tags or {}
             )
             story.character_manager:persist_player(created)
+            story.stats_service:record_recruitment(created.id, story.story_page.chapter_number)
             story:advance_node()
         end,
     },

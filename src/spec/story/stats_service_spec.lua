@@ -1,0 +1,37 @@
+local luassert = require("luassert")
+local event_bus_mod = require("src.tactics.systems.event_bus")
+local stats_service_mod = require("src.tactics.story.statistics.stats_service")
+
+local function new_service()
+    return stats_service_mod.new(event_bus_mod.new())
+end
+
+describe("tactics.story.statistics.stats_service", function()
+    describe("record_recruitment", function()
+        it("records the chapter for a recruited unit", function()
+            local svc = new_service()
+            svc:record_recruitment(42, 3)
+            luassert.are_equal(3, svc.story_results.chapter_recruited[42])
+        end)
+
+        it("records multiple units independently", function()
+            local svc = new_service()
+            svc:record_recruitment(1, 1)
+            svc:record_recruitment(2, 2)
+            luassert.are_equal(1, svc.story_results.chapter_recruited[1])
+            luassert.are_equal(2, svc.story_results.chapter_recruited[2])
+        end)
+
+        it("overwrites a previous recruitment entry for the same unit", function()
+            local svc = new_service()
+            svc:record_recruitment(5, 1)
+            svc:record_recruitment(5, 2)
+            luassert.are_equal(2, svc.story_results.chapter_recruited[5])
+        end)
+
+        it("chapter_recruited starts empty", function()
+            local svc = new_service()
+            luassert.are_same({}, svc.story_results.chapter_recruited)
+        end)
+    end)
+end)
