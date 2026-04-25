@@ -9,14 +9,12 @@ local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selec
 local CharacterRenderer = require("src.tactics.character.character_renderer")
 
 ---@class MapData
----@field map_width integer
----@field map_height integer
 ---@field menu_node? MenuNode
 
 local tactics_map = {}
 
-local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
-local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
+local VIEWPORT_WIDTH = STATIC_CONFIG.VIEWPORT_WIDTH
+local VIEWPORT_HEIGHT = STATIC_CONFIG.VIEWPORT_HEIGHT
 local TILE_WIDTH = STATIC_CONFIG.TILE_WIDTH
 local TILE_HEIGHT = STATIC_CONFIG.TILE_HEIGHT
 local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
@@ -60,29 +58,13 @@ local function draw_unit(
     local unit_tile = unit.tile
 
     local world_point = unit_tile * TILE_SIZE
-    local look_direction = nil
-    -- local cursor_tile = get_cursor_tile(ctx)
-    -- Disabled looking as it's a bit annoyoing to look at
-    -- local cursor_tile = get_cursor_tile(ctx)
-    -- if cursor_tile ~= nil then
-    --     if point.taxicab_distance(cursor_tile, unit_tile) <= 2
-    --         or (ctx.acting_unit ~= nil and ctx.acting_unit.id == unit.id)
-    --     then
-    --         local delta = cursor_tile.x - unit_tile.x
-    --         if delta > 0 then
-    --             look_direction = "right"
-    --         elseif delta < 0 then
-    --             look_direction = "left"
-    --         end
-    --     end
-    -- end
 
     local draw_point = world_point + FOOT_GROUND_ANCHOR
 
     CharacterRenderer.draw_health_bar(unit, draw_point, true, true, ui_theme)
-    CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, look_direction)
+    CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, nil)
 
-    -- TODO: these should check objective instead    
+    -- TODO: these should check objective instead
     local animated_sprite_point = animated_position + ICON_ANCHOR
 	if unit.tags["hero"] then
 		spr(128, animated_sprite_point.x, animated_sprite_point.y)
@@ -180,33 +162,30 @@ end
 
 
 --- Draw front/back/mid map layers between z_0 and z_1
----@param self UIElement
 ---@param layers MapLayers
 ---@param z_0 integer
 ---@param z_1 integer
-local function draw_map_decorations(self, layers, z_0, z_1)
-    ---@type MapData
-    local data = self.data
-
+---@param tile_ox integer First visible tile column
+---@param px integer Sub-tile pixel x shift
+---@param camera_y integer Camera top-edge in world pixels
+---@param draw_w integer Horizontal tile count to draw
+local function draw_map_decorations(layers, z_0, z_1, tile_ox, px, camera_y, draw_w)
     local layer_wall_back = layers.terrain.back_wall
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
 
-    -- local y_0 = flr(z_0 / t_y)
-    -- local y_1 = flr(z_1 / t_y)
     for z=z_0,z_1 do
-        --this is kinda dumb
         if z % TILE_HEIGHT == 0 then
             local y = flr(z / TILE_HEIGHT)
-            map(layer_wall_back, 0, y, 0, (y - 1) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            map(layer_wall_back, tile_ox, y, px, (y - 1) * TILE_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == HALF_HEIGHT then
             local y = flr(z / TILE_HEIGHT)
-            map(layer_wall_mid, 0, y, 0, (y) * TILE_HEIGHT - HALF_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            map(layer_wall_mid, tile_ox, y, px, y * TILE_HEIGHT - HALF_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == 0 then
             local y = flr(z / TILE_HEIGHT)
-            map(layer_wall_front, 0, y, 0, (y) * TILE_HEIGHT, data.map_width, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            map(layer_wall_front, tile_ox, y, px, y * TILE_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
         end
     end
 end
@@ -227,13 +206,20 @@ local function draw_tactics_map(
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
 
-    ---@type MapData
-    local data = self.data
-
     local draw_cursor =
         state.game_context.input_service.current_input == "joypad"
-    
+
     local battle_map = state.battle_context.battle_map
+    local camera_x = state.battle_context.camera_x
+    local camera_y = state.battle_context.camera_y
+
+    -- Tile and sub-tile offsets for camera scrolling
+    local tile_ox = flr(camera_x / TILE_WIDTH)
+    local tile_oy = flr(camera_y / TILE_HEIGHT)
+    local px = -(camera_x % TILE_WIDTH)
+    local py = -(camera_y % TILE_HEIGHT)
+    local draw_w = VIEWPORT_WIDTH + 1
+    local draw_h = VIEWPORT_HEIGHT + 1
 
     local ud_width = self.rect.c_w
     -- to top of screen
@@ -245,13 +231,26 @@ local function draw_tactics_map(
 
     -- draw row-by row, top to bottom aka back to front
 
-    -- pre-compute actor animations for z-ordering
-    local unit_positions = compute_animated_unit_positions(battle_map)
+    -- pre-compute actor animations for z-ordering; cull units outside viewport
+    local vis_min_x = camera_x - TILE_WIDTH
+    local vis_max_x = camera_x + VIEWPORT_WIDTH * TILE_WIDTH + TILE_WIDTH
+    local vis_min_y = camera_y - TILE_HEIGHT
+    local vis_max_y = camera_y + VIEWPORT_HEIGHT * TILE_HEIGHT + TILE_HEIGHT
+
+    local all_positions = compute_animated_unit_positions(battle_map)
+    local unit_positions = {}
+    for _, u in ipairs(all_positions) do
+        if u.point.x >= vis_min_x and u.point.x <= vis_max_x
+            and u.point.y >= vis_min_y and u.point.y <= vis_max_y
+        then
+            table.insert(unit_positions, u)
+        end
+    end
 
     local sorted_units = userdata("i16", 3, #unit_positions)
     for i,u in ipairs(unit_positions) do
-        sorted_units:set(0,i-1, u.point.y)
-        sorted_units:set(1,i-1, u.point.x)
+        sorted_units:set(0,i-1, u.point.y - camera_y)
+        sorted_units:set(1,i-1, u.point.x - camera_x)
         sorted_units:set(2,i-1, u.id)
     end
     sorted_units:sort()
@@ -266,61 +265,51 @@ local function draw_tactics_map(
 
     -- draw ground
     profile("draw_ground")
-    
-    map(layer_ground, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    map(state.battle_context.highlighted_tiles, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
-    
-    map(layer_path, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+    map(layer_ground, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+
+    map(state.battle_context.highlighted_tiles, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+
+    map(layer_path, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
     -- TODO: this is better with transparency
     if draw_cursor and cursor_tile ~= nil then
-        local c_x = cursor_tile.x * TILE_SIZE.x
-        local c_y = cursor_tile.y * TILE_SIZE.y
+        local c_x = cursor_tile.x * TILE_SIZE.x - camera_x
+        local c_y = cursor_tile.y * TILE_SIZE.y - camera_y
         spr(CURSOR_SPRITE, c_x, c_y)
     end
     profile("draw_ground")
     profile("draw_map_pre_rows")
-    
+
     profile("draw_map_rows")
-    local prev_z = 0
+    local prev_z = camera_y
     for i=0,#unit_positions-1 do
-        -- profile("draw_map_rows_get_unit")
         local unit_id = sorted_units:get(2, i)
         local unit = battle_map:get_unit_by_id(unit_id)
-        local next_z = sorted_units:get(0, i)
+        local next_z = sorted_units:get(0, i) + camera_y
         local next_x = sorted_units:get(1, i)
-        -- profile("draw_map_rows_get_unit")
-        -- profile("draw_map_rows_decorations")
         if next_z > prev_z then
-            draw_map_decorations(self, layers, prev_z, next_z)
+            draw_map_decorations(layers, prev_z, next_z, tile_ox, px, camera_y, draw_w)
             prev_z = next_z
         end
-        -- profile("draw_map_rows_decorations")
-        -- profile("draw_map_rows_units")
-        local animated_point = point.of(next_x, next_z)
+        local animated_point = point.of(next_x, next_z - camera_y)
         draw_unit(unit --[[@as BattleUnit]], animated_point, draw_target_manager, _ui_theme)
-        -- profile("draw_map_rows_units")
     end
-    draw_map_decorations(self, layers, prev_z, MAP_HEIGHT * TILE_SIZE.y)
-    
+    draw_map_decorations(layers, prev_z, battle_map.height * TILE_SIZE.y, tile_ox, px, camera_y, draw_w)
+
     profile("draw_map_rows")
 
     profile("draw_map_post_rows")
     local layer_ceiling = layers.terrain.ceiling
     if layer_ceiling ~= nil then
-        map(layer_ceiling, 0, 0, 0, 0, data.map_width, data.map_height, nil, TILE_SIZE.x, TILE_SIZE.y)
+        map(layer_ceiling, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
     end
 
     if cursor_tile ~= nil then
-        local x = cursor_tile.x * TILE_SIZE.x
-        local y = cursor_tile.y * TILE_SIZE.y
+        local x = cursor_tile.x * TILE_SIZE.x - camera_x
+        local y = cursor_tile.y * TILE_SIZE.y - camera_y
         if draw_cursor then
             spr(CURSOR_SPRITE, x, y) -- TODO: remove if transparency added?
         end
-
-        -- if cursor is list_cursor.ListMenuNode<string> then
-        --     draw_floating_menu(x, y, cursor)
-        -- end
     end
 
     draw_target_manager:draw(draw_x, draw_y)
@@ -344,8 +333,8 @@ local function get_selection_at(
     local ty = flr(ly / TILE_HEIGHT)
 
     if data.menu_node then
-        if tx >= 0 and tx < MAP_WIDTH
-            and ty >= 0 and ty < MAP_HEIGHT
+        if tx >= 0 and tx < VIEWPORT_WIDTH
+            and ty >= 0 and ty < VIEWPORT_HEIGHT
         then
             return mouse_menu_selection.grid(
                 tx, ty,
@@ -357,18 +346,13 @@ local function get_selection_at(
 end
 
 ---comment
----@param map_width integer
----@param map_height integer
 ---@return UIElement
-function tactics_map.new(map_width, map_height)
-    local c_w = map_width * TILE_SIZE.x
-    local c_h = map_height * TILE_SIZE.y
+function tactics_map.new()
+    local c_w = VIEWPORT_WIDTH * TILE_SIZE.x
+    local c_h = VIEWPORT_HEIGHT * TILE_SIZE.y
 
     ---@type MapData
-    local map_data = {
-        map_width = map_width,
-        map_height = map_height,
-    }
+    local map_data = {}
 
     local self = box.builder("tactics_map")
     :data(map_data)

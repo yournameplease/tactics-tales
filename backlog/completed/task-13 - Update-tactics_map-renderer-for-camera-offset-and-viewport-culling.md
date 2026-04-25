@@ -1,9 +1,10 @@
 ---
 id: TASK-13
 title: Update tactics_map renderer for camera offset and viewport culling
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:34'
+updated_date: '2026-04-25 23:54'
 labels: []
 milestone: m-2
 dependencies:
@@ -36,12 +37,12 @@ Replace all remaining references to `MAP_WIDTH`/`MAP_HEIGHT` locals with `VIEWPO
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A 16x16 map renders identically to before (no visual regression)
-- [ ] #2 On a larger map, only tiles within the viewport are drawn
-- [ ] #3 Units outside the viewport are not rendered
-- [ ] #4 Wall decorations render correctly at all camera positions
-- [ ] #5 Panel pixel dimensions are unchanged (still 16x16 tiles)
-- [ ] #6 make test passes
+- [x] #1 A 16x16 map renders identically to before (no visual regression)
+- [x] #2 On a larger map, only tiles within the viewport are drawn
+- [x] #3 Units outside the viewport are not rendered
+- [x] #4 Wall decorations render correctly at all camera positions
+- [x] #5 Panel pixel dimensions are unchanged (still 16x16 tiles)
+- [x] #6 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
