@@ -1,9 +1,10 @@
 ---
 id: TASK-10
 title: Replace MAP_WIDTH/MAP_HEIGHT static config with VIEWPORT_WIDTH/VIEWPORT_HEIGHT
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:33'
+updated_date: '2026-04-25 23:49'
 labels: []
 milestone: m-2
 dependencies: []
@@ -26,10 +27,10 @@ Any file that currently reads `STATIC_CONFIG.MAP_WIDTH` or `STATIC_CONFIG.MAP_HE
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 STATIC_CONFIG no longer has MAP_WIDTH or MAP_HEIGHT fields
-- [ ] #2 STATIC_CONFIG has VIEWPORT_WIDTH = 16 and VIEWPORT_HEIGHT = 16
-- [ ] #3 STATIC_CONFIG has CAMERA_DEAD_ZONE_PLAYER, CAMERA_DEAD_ZONE_ENEMY, CAMERA_EDGE_SCROLL_BORDER, CAMERA_EDGE_SCROLL_SPEED with sensible defaults (2, 6, 20, 2)
-- [ ] #4 Project still builds and tests pass (make test)
+- [x] #1 STATIC_CONFIG no longer has MAP_WIDTH or MAP_HEIGHT fields
+- [x] #2 STATIC_CONFIG has VIEWPORT_WIDTH = 16 and VIEWPORT_HEIGHT = 16
+- [x] #3 STATIC_CONFIG has CAMERA_DEAD_ZONE_PLAYER, CAMERA_DEAD_ZONE_ENEMY, CAMERA_EDGE_SCROLL_BORDER, CAMERA_EDGE_SCROLL_SPEED with sensible defaults (2, 6, 20, 2)
+- [x] #4 Project still builds and tests pass (make test)
 <!-- AC:END -->
 
 ## Definition of Done
