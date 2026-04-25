@@ -8,7 +8,6 @@ local BattleUnit = require("src.tactics.battle.tactics.battle_unit").BattleUnit
 ---@class VictoryCondition Abstract base for all active (runtime) victory condition instances.
 ---@field text? string Display text describing the objective.
 ---@field check fun(self: VictoryCondition, battle_map: table, turn_limit_exceeded: boolean): boolean
-local VictoryCondition = {}
 
 ---@class Rout : VictoryCondition Victory by defeating all enemy units.
 local Rout = {}
@@ -67,7 +66,6 @@ end
 ---@class FailureCondition Abstract base for all active (runtime) failure condition instances.
 ---@field text? string Display text describing the failure condition.
 ---@field check fun(self: FailureCondition, battle_map: table, turn_limit_exceeded: boolean): boolean
-local FailureCondition = {}
 
 ---@class AllPlayersDie : FailureCondition Failure if all player units are defeated.
 local AllPlayersDie = {}
@@ -113,8 +111,6 @@ function TurnLimit:check(_battle_map, turn_limit_exceeded)
 end
 
 local battle_objectives = {
-    VictoryCondition = VictoryCondition,
-    FailureCondition = FailureCondition,
 }
 
 --- Create a Rout victory condition: win when all enemies are defeated.

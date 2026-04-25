@@ -10,48 +10,37 @@ local battle_objectives = require("src.tactics.battle.objective")
 ---@class VictoryConditionDef Abstract base for all victory condition definitions loaded from mod data.
 ---@field type VictoryConditionType
 ---@field text? string Display text shown to the player describing the objective.
-local VictoryCondition = {}
 
 ---@class RoutDef : VictoryConditionDef Victory by defeating all enemy units.
 ---@field type "rout"
-local Rout = {}
 
 ---@class DefeatTaggedDef : VictoryConditionDef Victory by defeating all units bearing a specific tag.
 ---@field type "defeat_tagged"
 ---@field tag string Tag identifying the units that must all be defeated.
-local DefeatTagged = {}
 
 ---@class SurviveDef : VictoryConditionDef Victory by surviving until the turn limit is reached.
 ---@field type "survive"
-local Survive = {}
 
 ---@class EscapeDef : VictoryConditionDef Victory when all player units have left the map.
 ---@field type "escape"
-local Escape = {}
 
 ---@alias FailureConditionType "tagged_unit_dies"|"all_players_die"|"turn_limit"
 
 ---@class FailureConditionDef Abstract base for all failure condition definitions loaded from mod data.
 ---@field type FailureConditionType
 ---@field text? string Display text shown to the player describing the failure condition.
-local FailureCondition = {}
 
 ---@class TaggedPlayerDiesDef : FailureConditionDef Failure if any player unit with the given tag is killed.
 ---@field type "tagged_unit_dies"
 ---@field tag string Tag identifying the player unit(s) that must survive.
-local TaggedPlayerDies = {}
 
 ---@class AllPlayersDieDef : FailureConditionDef Failure if all player units are defeated.
 ---@field type "all_players_die"
-local AllPlayersDie = {}
 
 ---@class TurnLimitDef : FailureConditionDef Failure if the battle exceeds its turn limit.
 ---@field type "turn_limit"
-local TurnLimit = {}
 
 local battle_objective_definition = {
-    VictoryCondition = VictoryCondition,
-    FailureCondition = FailureCondition,
 }
 
 --- Convert a victory condition definition into an active VictoryCondition instance.

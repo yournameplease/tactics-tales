@@ -11,7 +11,6 @@ local lists = require("src.tactics.util.lists")
 ---@field story_memory StoryMemory
 ---@field roster Character[]
 ---@field stats StoryResults
-local GameSaveData = {}
 
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
@@ -22,7 +21,6 @@ local GameSaveData = {}
 ---@field story_memory SerializedStoryMemory
 ---@field roster SerializedCharacter[]
 ---@field stats StoryResults
-local SerializedGameSaveData = {}
 
 local save_system = {}
 

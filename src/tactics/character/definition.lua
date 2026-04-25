@@ -8,25 +8,21 @@
 --- Abstract base for all attribute option types.
 ---@class AttributeOptions
 ---@field type AttributeDefinitionType Discriminator for the option variant.
-local AttributeOptions = {}
 
 --- An attribute option that picks uniformly from a list of values.
 ---@class ListOptions : AttributeOptions
 ---@field type "list"
 ---@field options string[] Candidate values to pick from.
-local ListOptions = {}
 
 --- An attribute option that picks from values with explicit weights.
 ---@class WeightedOptions : AttributeOptions
 ---@field type "weighted"
 ---@field options table<string, integer> Map of value → relative weight.
-local WeightedOptions = {}
 
 --- An attribute option that always returns a single fixed value.
 ---@class StaticOption : AttributeOptions
 ---@field type "static"
 ---@field option string The fixed value returned.
-local StaticOption = {}
 
 --- Template describing how to generate a character of a given archetype.
 ---@class CharacterTemplate
@@ -49,9 +45,5 @@ local StaticOption = {}
 local CharacterTemplate = {}
 
 return {
-    AttributeOptions = AttributeOptions,
-    ListOptions = ListOptions,
-    WeightedOptions = WeightedOptions,
-    StaticOption = StaticOption,
     CharacterTemplate = CharacterTemplate,
 }

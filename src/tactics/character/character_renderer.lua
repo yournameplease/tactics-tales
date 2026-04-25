@@ -49,7 +49,6 @@ local NECK_ROOT = { x = 9, y = 8 }
 ---@class AnimationFrame
 ---@field offset Point Pixel offset for this frame's animation position.
 ---@field node SkeletonNodeDefinition Skeleton node data for this frame.
-local AnimationFrame = {}
 
 ---@alias LookDirection "left"|"right"
 

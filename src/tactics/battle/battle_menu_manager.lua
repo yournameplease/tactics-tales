@@ -91,7 +91,6 @@ end
 
 ---@class BattlePreparationsContext : MenuContext
 ---@field swap_source Point
-local BattlePreparationsContext = {}
 
 ---@param msb BattleMenuContext
 ---@param _ctx BattleMainMenuContext

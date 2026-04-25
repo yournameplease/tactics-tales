@@ -13,14 +13,12 @@
 ---@field weapon? Weapon Weapon stats; present only for weapon-type items.
 ---@field equipment_effects EquipmentEffect[] Passive bonuses granted when this item is equipped.
 ---@field appearance_overrides any
-local Item = {}
 
 ---@class ItemImpl : Item
 local ItemImpl = {}
 ItemImpl.__index = ItemImpl
 
 local item = {
-    Item = Item,
 }
 
 --- Create a new Item instance.

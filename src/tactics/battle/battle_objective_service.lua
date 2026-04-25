@@ -9,7 +9,6 @@ local lists = require("src.tactics.util.lists")
 ---@class BattleFinishState
 ---@field finished boolean Whether the battle has ended.
 ---@field result? BattleEndResult Game event to emit on finish; nil when battle continues.
-local BattleFinishState = {}
 
 ---@class BattleObjectiveService Abstract interface for checking and displaying battle objectives.
 ---@field package battle_map table BattleMap used to inspect unit positions and deaths.

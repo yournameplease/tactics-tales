@@ -30,7 +30,6 @@ local CharacterAppearance = {}
 ---@field hp_max integer Maximum hit points.
 ---@field movement integer Movement range in tiles per turn.
 ---@field def integer Defence value subtracted from incoming damage.
-local CharacterStats = {}
 
 --- Serializable snapshot of a character, used for save/load.
 ---@class SerializedCharacter
@@ -40,7 +39,6 @@ local CharacterStats = {}
 ---@field stats CharacterStats
 ---@field inventory string[] Ordered list of item IDs in the inventory slots.
 ---@field tags table<string, boolean> Set of string tags (e.g. "player", "enemy").
-local SerializedCharacter = {}
 
 --- A persistent game character with inventory and derived appearance.
 ---@class Character
@@ -170,16 +168,12 @@ end
 ---@field animation_data AnimatedSpriteData Active animation state.
 ---@field sprites table<AnimationFrameName, table<FacingVertical, userdata>> Pre-rendered sprites keyed by frame and vertical facing.
 ---@field character Character The underlying persistent character.
-local DrawableCharacterInstance = {}
 
 local character = {
     facing = facing,
     Facing = Facing,
     CharacterAppearance = CharacterAppearance,
-    CharacterStats = CharacterStats,
     Character = Character,
-    SerializedCharacter = SerializedCharacter,
-    DrawableCharacterInstance = DrawableCharacterInstance,
 }
 
 return character

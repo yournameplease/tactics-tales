@@ -10,18 +10,15 @@ local maps = require("src.tactics.util.maps")
 ---@class EffectDescription
 ---@field name? string
 ---@field description string
-local EffectDescription = {}
 
 ---@class ItemDescription
 ---@field name string
 ---@field effects EffectDescription[]
-local ItemDescription = {}
 
 ---@class InventoryItem
 ---@field item Item
 ---@field _current_slot integer Slot index for this item (recalculated on any inventory change).
 ---@field equip_slot? EquipSlot Equip slot if currently equipped; nil otherwise.
-local InventoryItem = {}
 
 ---@class ItemInventory
 ---@field package items InventoryItem[]

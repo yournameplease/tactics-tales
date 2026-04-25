@@ -6,32 +6,27 @@
 --- Abstract base for all named sprite data entries.
 ---@class NamedSpriteData
 ---@field name string Display name shown in menus.
-local NamedSpriteData = {}
 
 --- A named colour drawn from the Picotron palette.
 ---@class NamedColor : NamedSpriteData
 ---@field name string
 ---@field color integer Picotron palette index.
-local NamedColor = {}
 
 --- A named sprite with optional front/back variants.
 ---@class SpriteData : NamedSpriteData
 ---@field name string
 ---@field sprite? integer Sprite index for the front-facing frame.
 ---@field back_sprite? integer Sprite index for the back-facing frame.
-local SpriteData = {}
 
 --- Skin colour entry; stores two palette indices for highlight and shadow.
 ---@class SkinColorData : NamedSpriteData
 ---@field name string
 ---@field colors integer[] Two-element array: [highlight_color, shadow_color].
-local SkinColorData = {}
 
 --- Body class entry; maps a body style to its sprite ID prefix.
 ---@class BodyClassData : NamedSpriteData
 ---@field name string
 ---@field id_prefix string Prefix used to look up animation data keys.
-local BodyClassData = {}
 
 --- Headwear entry; controls which facial features are drawn beneath it.
 ---@class HeadwearSpriteData : NamedSpriteData
@@ -41,7 +36,6 @@ local BodyClassData = {}
 ---@field draw_eyewear boolean Whether eyewear is drawn when this headwear is equipped.
 ---@field sprite? integer Front-facing sprite index.
 ---@field back_sprite? integer Back-facing sprite index.
-local HeadwearSpriteData = {}
 
 -- Names from https://picotron.fandom.com/wiki/Palette
 ---@type table<string, NamedColor>
@@ -678,11 +672,6 @@ local customization_options = {
 }
 
 return {
-    NamedSpriteData = NamedSpriteData,
-    NamedColor = NamedColor,
-    SpriteData = SpriteData,
-    SkinColorData = SkinColorData,
-    HeadwearSpriteData = HeadwearSpriteData,
 
     COLOR_NAMES = COLOR_NAMES,
 

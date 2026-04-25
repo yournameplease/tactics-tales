@@ -24,10 +24,8 @@ local WeaponDefinition = {}
 ---@field weapon_definition WeaponDefinition|nil Weapon stats; present only for weapon-type items.
 ---@field equipment_effects EquipmentEffect[] Effects granted when this item is equipped.
 ---@field appearance_overrides CharacterAppearance
-local ItemDefinition = {}
 
 local item_definition = {
-    ItemDefinition = ItemDefinition,
     WeaponDefinition = WeaponDefinition,
 }
 

@@ -19,7 +19,6 @@ local script_manager = require("src.tactics.battle.scripts.script_manager")
 ---@class BattleManager Abstract interface for a battle instance.
 ---@field teardown fun(self: BattleManager) Tear down all battle services and unregister UI.
 ---@field update fun(self: BattleManager, input: InputContext) Process one frame of battle input and logic.
-local BattleManager = {}
 
 ---@class BattleManagerImpl : BattleManager
 ---@field battle_map BattleMap
@@ -36,7 +35,6 @@ local BattleManagerImpl = {}
 BattleManagerImpl.__index = BattleManagerImpl
 
 local battle_manager = {
-    BattleManager = BattleManager,
 }
 
 --- Create and initialize a new BattleManager for the given battle.

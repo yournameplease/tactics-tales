@@ -41,7 +41,6 @@ local BODY_BACK_OFFSET = 4
 ---@field sprite_offset integer Offset added to the base sprite index for this frame.
 ---@field anchors table<string, PointRecord> Named attachment points (e.g. "head", "main_hand").
 ---@field root PointRecord Root anchor for positioning the node.
-local BaseAnimationNode = {}
 
 --- Full animation data for a single body animation name: one SkeletonNodeDefinition per frame.
 ---@alias AnimationBodyByFrame table<AnimationFrameName, SkeletonNodeDefinition>

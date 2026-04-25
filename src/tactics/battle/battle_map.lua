@@ -21,7 +21,6 @@ local lists = require("src.tactics.util.lists")
 ---@class MapLayers
 ---@field metatiles userdata Metatile layer used for semantic tile labeling.
 ---@field terrain table<TerrainLocation, userdata> Per-layer terrain sprite data.
-local MapLayers = {}
 
 ---@class MapMetadata
 ---@field player_spawners table<integer, Point> Indexed spawner positions for player units.
@@ -43,7 +42,6 @@ BattleMap.__index = BattleMap
 
 local battle_map = {
     BattleMap = BattleMap,
-    MapLayers = MapLayers,
 }
 
 local TERRAIN_DATA = {
