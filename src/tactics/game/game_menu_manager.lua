@@ -20,6 +20,30 @@ local game_menu_manager = {}
 ---@type table<string, MenuHandler>
 local HANDLERS = {}
 
+--- Advance from the title screen: go to main menu, or auto-start the default story in demo mode.
+---@param services GameMenuContext
+---@param _menu_data table<string, any>
+---@param _session_context MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling?
+HANDLERS["title_advance"] = function(services, _menu_data, _session_context, _value)
+    if not DYNAMIC_CONFIG.demo_mode then
+        return menu_handler.then_navigate("MAIN_MENU")
+    end
+    local def = services.stories[services.default_story_id]
+    local config = {}
+    if def and def.config and def.config.default_preset and def.config.presets then
+        for _, p in ipairs(def.config.presets) do
+            if p.key == def.config.default_preset then
+                for k, v in pairs(p.values) do config[k] = v end
+                break
+            end
+        end
+    end
+    services.handle_begin_story(nil, services.default_story_id, config)
+    return nil
+end
+
 --- Store the selected save file name in session context for the overwrite confirmation step.
 ---@param _services GameMenuContext
 ---@param _menu_data table<string, any>
@@ -148,7 +172,7 @@ local MENU_DATA = {
             ["TITLE_SCREEN"] = step_definition.of_node(
                 button.builder("to_main_menu")
                 :with_text("Main Menu")
-                :advance_to("MAIN_MENU")
+                :handle_action("select", "title_advance")
             )
             :with_default_lmb("select")
             :with_action("BUTTON_A", { command = "select", description = "Start"}),
