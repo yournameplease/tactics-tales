@@ -124,6 +124,10 @@ function config_manager.new()
 		end
 	})
 
+	self:set_master_volume(DYNAMIC_CONFIG.master_volume)
+	self:set_music_volume(DYNAMIC_CONFIG.music_volume)
+	self:set_sfx_volume(DYNAMIC_CONFIG.sfx_volume)
+
 	return self
 end
 
