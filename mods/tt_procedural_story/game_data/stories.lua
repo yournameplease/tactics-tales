@@ -35,7 +35,7 @@
 --   used_encounter_templates   — Space-separated list of encounter template IDs
 --                                used so far this run, for duplicate avoidance.
 
-local archetypes = require("game_data/archetypes")
+local archetypes = include("mods/tt_procedural_story/game_data/archetypes.lua")
 
 -- Build the option list for the archetype selection node from the archetype
 -- definitions table so that the story data stays in sync automatically.
