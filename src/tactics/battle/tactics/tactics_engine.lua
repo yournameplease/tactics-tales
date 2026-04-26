@@ -622,9 +622,9 @@ function TacticsEngine:apply_combat_step(step)
     local attack_animation = self.animation_manager:create_animation("BUMP", direction)
     attacker.animation_data = attack_animation
     if step.is_hit then
-        sfx(8)
+        sfx(8, nil, nil, nil, nil, (DYNAMIC_CONFIG.master_volume * DYNAMIC_CONFIG.sfx_volume) / 100)
     else
-        sfx(9)
+        sfx(9, nil, nil, nil, nil, (DYNAMIC_CONFIG.master_volume * DYNAMIC_CONFIG.sfx_volume) / 100)
         local dodge_animation = self.animation_manager:create_animation("DODGE", direction + 0.25)
         defender.animation_data = dodge_animation
         while dodge_animation.playing do

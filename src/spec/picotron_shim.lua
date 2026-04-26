@@ -11,6 +11,9 @@ _G.DYNAMIC_CONFIG = {
     head_scale = 1,
     dialogue_speed = "normal",
     input_group = "mouse_and_keyboard",
+    master_volume = 10,
+    music_volume = 10,
+    sfx_volume = 10,
 }
 
 _G.DATP = ""
