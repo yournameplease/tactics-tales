@@ -240,12 +240,14 @@ local HANDLERS = {
             ---@cast node SelectOptionNode
             story.story_menu_context.selection_options = node.options
             story.menu_manager:set_menu("MENU_SELECT_OPTION")
+            story.story_page:add_select_option_menu(node.options)
         end,
         exit = function(story, node)
             ---@cast node SelectOptionNode
             story.story_memory:set(node.memory_key, story_memory.text(story.selected_option))
             story.selected_option = nil
             story.menu_manager:clear_menu()
+            story.story_page:pop()
         end,
         update = function(story, input)
             story.menu_manager:update(input)
