@@ -391,6 +391,29 @@ function tactics_map.new()
         data.camera_y = state.battle_context.camera_y
         data.map_width = state.battle_context.battle_map.width
         data.map_height = state.battle_context.battle_map.height
+
+        if state.game_context.input_service.current_input == "mouse" then
+            local m = state.game_context.input_service:get_mouse()
+            local lx = m.mx - self.rect.c_x
+            local ly = m.my - self.rect.c_y
+            local vp_w = VIEWPORT_WIDTH * TILE_WIDTH
+            local vp_h = VIEWPORT_HEIGHT * TILE_HEIGHT
+            local border = STATIC_CONFIG.CAMERA_EDGE_SCROLL_BORDER
+            local speed = STATIC_CONFIG.CAMERA_EDGE_SCROLL_SPEED
+            local bctx = state.battle_context
+
+            if lx >= 0 and lx < border then
+                bctx.camera_x = bctx.camera_x - speed
+            elseif lx >= vp_w - border and lx < vp_w then
+                bctx.camera_x = bctx.camera_x + speed
+            end
+            if ly >= 0 and ly < border then
+                bctx.camera_y = bctx.camera_y - speed
+            elseif ly >= vp_h - border and ly < vp_h then
+                bctx.camera_y = bctx.camera_y + speed
+            end
+            bctx:clamp_camera(bctx.battle_map)
+        end
     end)
     :build()
 
