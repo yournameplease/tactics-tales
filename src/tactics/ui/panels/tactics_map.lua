@@ -51,19 +51,18 @@ end
 ---comment
 ---@param unit BattleUnit
 ---@param animated_position Point
+---@param camera Point
 ---@param draw_target_manager DrawTargetManager
 ---@param ui_theme UITheme
 local function draw_unit(
     unit,
     animated_position,
+    camera,
     draw_target_manager,
     ui_theme
 )
-    local unit_tile = unit.tile
-
-    local world_point = unit_tile * TILE_SIZE
-
-    local draw_point = world_point + FOOT_GROUND_ANCHOR
+    local world_point = unit.tile * TILE_SIZE
+    local draw_point = world_point + FOOT_GROUND_ANCHOR - camera
 
     CharacterRenderer.draw_health_bar(unit, draw_point, true, true, ui_theme)
     CharacterRenderer.draw(unit, draw_point, draw_target_manager, true, true, true, nil)
@@ -296,7 +295,8 @@ local function draw_tactics_map(
             prev_z = next_z
         end
         local animated_point = point.of(next_x, next_z - camera_y)
-        draw_unit(unit --[[@as BattleUnit]], animated_point, draw_target_manager, _ui_theme)
+        local camera = point.of(camera_x, camera_y)
+        draw_unit(unit --[[@as BattleUnit]], animated_point, camera, draw_target_manager, _ui_theme)
     end
     draw_map_decorations(layers, prev_z, battle_map.height * TILE_SIZE.y, tile_ox, px, camera_y, draw_w)
 
