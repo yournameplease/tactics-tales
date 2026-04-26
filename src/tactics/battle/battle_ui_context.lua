@@ -27,6 +27,7 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field highlighted_tiles userdata
 ---@field camera_x integer Camera left edge in world pixels
 ---@field camera_y integer Camera top edge in world pixels
+---@field input_service InputService
 local BattleUIContext = {}
 BattleUIContext.__index = BattleUIContext
 
@@ -58,8 +59,9 @@ end
 ---@param tactics_engine TacticsEngine
 ---@param turn_manager TurnManager
 ---@param battle_objective_service BattleObjectiveService
+---@param input_service InputService
 ---@return BattleUIContext
-function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service)
+function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service, input_service)
     ---@type BattleUIContext
     local self = setmetatable({ type = "battle" }, BattleUIContext)
 
@@ -77,6 +79,7 @@ function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_ma
     self.highlighted_tiles = userdata("i16", self.battle_map.width, self.battle_map.height)
     self.camera_x = 0
     self.camera_y = 0
+    self.input_service = input_service
     return self
 end
 
@@ -157,7 +160,9 @@ function BattleUIContext:enrich()
     if root_node_state and root_node_state.type == "grid" then
         ---@cast root_node_state SerializedNestedGridState
         self.hovered_point = root_node_state.point
-        self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
+        if self.input_service.current_input == "joypad" then
+            self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
+        end
 
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node_state.point

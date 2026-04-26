@@ -49,6 +49,7 @@ local battle_manager = {
 ---@param event_bus EventBus
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
+---@param input_service InputService
 ---@return BattleManager
 function battle_manager.new(
     chapter,
@@ -61,7 +62,8 @@ function battle_manager.new(
     animation_manager,
     event_bus,
     music_player,
-    ui_context
+    ui_context,
+    input_service
 )
     log.debug("Starting battle: "..battle_id)
     ---@type BattleManagerImpl
@@ -149,7 +151,8 @@ function battle_manager.new(
         self.battle_menu_manager,
         self.tactics_engine,
         self.turn_manager,
-        self.battle_objective_service
+        self.battle_objective_service,
+        input_service
     )
     self.enemy_ai_engine.on_unit_action = function(unit)
         battle_ui_ctx:move_camera(self.battle_map, unit.tile, STATIC_CONFIG.CAMERA_DEAD_ZONE_ENEMY)

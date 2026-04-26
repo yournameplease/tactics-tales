@@ -113,7 +113,8 @@ function StoryHarness:start_story(story_id, config)
         self._animation_manager,
         self._event_bus,
         self._music_player,
-        self._ui_context
+        self._ui_context,
+        { current_input = "joypad" }
     )
     self:tick_to_idle()
 end
