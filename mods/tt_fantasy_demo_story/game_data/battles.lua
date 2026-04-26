@@ -734,22 +734,4 @@ local BATTLE_DATA = {
     end
 }
 
-BATTLE_DATA["test_large"] = function(_story_config)
-    return {
-        map_id = "test_large",
-        tile_labels = {
-            ["player_spawn"] = { 0x01 },
-            ["enemy_spawn"]  = { 0x02 },
-        },
-        turn_limit = nil,
-        victory_conditions = { objectives.rout() },
-        failure_conditions = {},
-        units = {
-            { side = "player", character_source = character_source.template("village_hero"),   tile = "player_spawn" },
-            { side = "enemy",  character_source = character_source.template("bandit_axe"), ai = ai.move_two, tile = "enemy_spawn" },
-        },
-        scripts = {}
-    }
-end
-
 return BATTLE_DATA

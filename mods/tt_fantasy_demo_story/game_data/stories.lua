@@ -327,13 +327,6 @@ local STORIES = {
 		"model_room"
 	),
 	convention_demo = {
-	test_large = stories.chapter_debug(
-		{},
-		"Large Map Test",
-		"A 32x32 flat map for testing camera scrolling.",
-		"test_large"
-	),
-	demo_story = {
 		starting_node = 'prologue',
 		name = 'Tactics Tales Fantasy',
 		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
