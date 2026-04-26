@@ -1,10 +1,10 @@
 ---
 id: TASK-18
 title: 'Engine: add generic selection story node'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-26 20:08'
+updated_date: '2026-04-26 22:42'
 labels: []
 milestone: m-3
 dependencies: []
@@ -22,16 +22,16 @@ Hot areas: `src/tactics/story/types.lua`, `src/tactics/story/handlers/node_handl
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 New story node type exists for config-phase selection
-- [ ] #2 Node accepts a list of options (each with id, name, description) and a memory_key to write to
-- [ ] #3 Player is shown each option's name and description
-- [ ] #4 Chosen option ID is written to the specified story memory key
-- [ ] #5 Works within the existing config node flow
-- [ ] #6 Engine has no knowledge of archetypes or what the options mean
+- [x] #1 New story node type exists for config-phase selection
+- [x] #2 Node accepts a list of options (each with id, name, description) and a memory_key to write to
+- [x] #3 Player is shown each option's name and description
+- [x] #4 Chosen option ID is written to the specified story memory key
+- [x] #5 Works within the existing config node flow
+- [x] #6 Engine has no knowledge of archetypes or what the options mean
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->

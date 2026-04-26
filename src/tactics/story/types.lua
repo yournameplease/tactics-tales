@@ -5,7 +5,7 @@
 ---@alias StoryId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"
+---@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"|"select_option"
 
 ---@class StoryNode Abstract base for all story node variants.
 ---@field type StoryNodeType
@@ -62,6 +62,16 @@
 ---@field type "text_input"
 ---@field text string Prompt text shown above the input field.
 ---@field key string Story memory key where the entered text is stored.
+
+---@class SelectOptionEntry A single selectable option presented to the player.
+---@field id string Option identifier written to story memory when chosen.
+---@field name string Display name shown in the option list.
+---@field description string Description shown alongside the option name.
+
+---@class SelectOptionNode : StoryNode Presents a list of named options and stores the chosen ID in story memory.
+---@field type "select_option"
+---@field options SelectOptionEntry[] Ordered list of options to display.
+---@field memory_key string Story memory key where the chosen option ID is stored.
 
 ---@class StoryNodeHandler
 ---@field enter fun(story: Story, node: StoryNode)

@@ -76,6 +76,21 @@ local stories = {
             },
         },
 
+        -- select_option node: shows two options, stores chosen ID in memory, then exits.
+        option_select_and_exit = {
+            starting_node = "main",
+            battle_config = battle_config{},
+            nodes = {
+                main = {
+                    { type = "select_option", memory_key = "chosen", options = {
+                        { id = "warrior", name = "Warrior", description = "A melee fighter." },
+                        { id = "mage", name = "Mage", description = "A magic user." },
+                    }},
+                    { type = "exit_story" },
+                },
+            },
+        },
+
         -- delete_file node then exit. Tests that delete_file advances without a confirm().
         delete_file_and_exit = {
             starting_node = "main",

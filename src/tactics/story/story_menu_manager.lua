@@ -131,6 +131,12 @@ HANDLERS["submit_text"] = function(services, _menu_data, session_context, _value
     return nil
 end
 
+HANDLERS["select_option"] = function(services, _menu_data, _session_context, value)
+    ---@cast services StoryMenuServices
+    services.handle_select_option(value)
+    return nil
+end
+
 maps.add_all(HANDLERS, menu_keyboard.handlers)
 
 ---@type table<string, MenuDefinition>
@@ -145,6 +151,29 @@ local MENU_DATA = {
         initial_step = "KEYBOARD",
         steps = {
             ["KEYBOARD"] = menu_keyboard.step("submit_text"),
+        }
+    },
+    ["MENU_SELECT_OPTION"] = {
+        initial_step = "OPTION_LIST",
+        steps = {
+            ["OPTION_LIST"] = step_definition.of_node(
+                list.column(
+                    "select_option_list",
+                    function(game_ctx, _ctx)
+                        ---@cast game_ctx StoryMenuServices
+                        local children = {}
+                        for _, opt in ipairs(game_ctx.selection_options) do
+                            table.insert(children, button.builder(opt.id)
+                                :with_text(opt.name)
+                                :with_description(opt.description)
+                                :with_value(opt.id)
+                                :handle_action("select", "select_option"))
+                        end
+                        return children
+                    end
+                )
+            )
+            :with_action("BUTTON_A", { command = "select", description = "Select" }),
         }
     },
 }
