@@ -450,10 +450,10 @@ function BaseMenuManager:update(input)
                 self.menu_ctx,
                 signal.value
             )
-            assert(handler_res ~= nil and handler_res.type == "deserialize",
-                "on_change handler must return menu_handler.then_deserialize(...)")
-            ---@cast handler_res MenuHandlerDeserialize
-            self.menu_step.node:deserialize(nil, handler_res.data)
+            if handler_res and handler_res.type == "deserialize" then
+                ---@cast handler_res MenuHandlerDeserialize
+                self.menu_step.node:deserialize(nil, handler_res.data)
+            end
         elseif signal.type == "finish" then
             self:clear_menu()
         elseif signal.type == "call_handler" then

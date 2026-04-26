@@ -271,7 +271,7 @@ function ScriptManager:register_script(script)
                 }
                 local sound = SFX_MAP[effect.sound_id]
                 if sound ~= nil then
-                    sfx(sound, nil, nil, nil, nil, (DYNAMIC_CONFIG.master_volume * DYNAMIC_CONFIG.sfx_volume) / 100)
+                    sfx(sound)
                 end
             end
         elseif effect.type == "remove_script" then
