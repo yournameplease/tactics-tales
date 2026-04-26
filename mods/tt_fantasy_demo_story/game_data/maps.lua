@@ -15,15 +15,6 @@ local MAP_DEFINITIONS = {
     castle_defense = static_map("map/castle_defense.map"),
     playground = static_map("map/playground.map"),
     model_room = static_map("map/model_room.map"),
-    test_large = {
-        type = "flat",
-        width = 32,
-        height = 32,
-        spawn_metatiles = {
-            [0x01] = { x = 2,  y = 15 },
-            [0x02] = { x = 28, y = 15 },
-        },
-    },
 }
 
 return MAP_DEFINITIONS
