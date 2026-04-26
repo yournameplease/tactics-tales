@@ -64,6 +64,24 @@ function ConfigManager:reset_config()
 	self:store_config({})
 end
 
+--- Poke the system master volume register. volume is 0-10; 0x40 = 100%.
+---@param volume integer
+function ConfigManager:set_master_volume(volume)
+	poke(0x5538, math.floor(volume * 0x40 / 10))
+end
+
+--- Poke the system music volume register. volume is 0-10; 0x40 = 100%.
+---@param volume integer
+function ConfigManager:set_music_volume(volume)
+	poke(0x5539, math.floor(volume * 0x40 / 10))
+end
+
+--- Poke the system sfx volume register. volume is 0-10; 0x40 = 100%.
+---@param volume integer
+function ConfigManager:set_sfx_volume(volume)
+	poke(0x553a, math.floor(volume * 0x40 / 10))
+end
+
 --- Apply volume settings immediately without persisting to disk.
 ---@param master_volume integer
 ---@param music_volume integer
@@ -72,6 +90,9 @@ function ConfigManager:apply_volume(master_volume, music_volume, sfx_volume)
 	self.user_config.master_volume = master_volume
 	self.user_config.music_volume = music_volume
 	self.user_config.sfx_volume = sfx_volume
+	self:set_master_volume(master_volume)
+	self:set_music_volume(music_volume)
+	self:set_sfx_volume(sfx_volume)
 end
 
 --- Create a new ConfigManager, loading any saved user config from disk.
