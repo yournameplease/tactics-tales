@@ -1,9 +1,10 @@
 ---
 id: TASK-16
 title: Implement mouse edge-scroll camera movement
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:34'
+updated_date: '2026-04-26 00:02'
 labels: []
 milestone: m-2
 dependencies:
@@ -29,10 +30,10 @@ Files to modify:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Moving the mouse to within CAMERA_EDGE_SCROLL_BORDER px of the right edge scrolls camera_x right each frame
-- [ ] #2 Scrolling stops at map boundary
-- [ ] #3 Edge scroll does not trigger during joypad input
-- [ ] #4 make test passes
+- [x] #1 Moving the mouse to within CAMERA_EDGE_SCROLL_BORDER px of the right edge scrolls camera_x right each frame
+- [x] #2 Scrolling stops at map boundary
+- [x] #3 Edge scroll does not trigger during joypad input
+- [x] #4 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
