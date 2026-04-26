@@ -91,8 +91,8 @@ local TILE_H = STATIC_CONFIG.TILE_HEIGHT
 ---@param target_tile Point
 ---@param dead_zone integer Tiles from edge to keep target inside
 function BattleUIContext:move_camera(battle_map, target_tile, dead_zone)
-    local px = target_tile.x * TILE_W + TILE_W // 2
-    local py = target_tile.y * TILE_H + TILE_H // 2
+    local px = target_tile.x * TILE_W
+    local py = target_tile.y * TILE_H
 
     local dz_px = dead_zone * TILE_W
     local dz_py = dead_zone * TILE_H
@@ -157,7 +157,7 @@ function BattleUIContext:enrich()
     if root_node_state and root_node_state.type == "grid" then
         ---@cast root_node_state SerializedNestedGridState
         self.hovered_point = root_node_state.point
-            self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
+        self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
 
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node_state.point
