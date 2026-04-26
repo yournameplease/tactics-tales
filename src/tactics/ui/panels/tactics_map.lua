@@ -394,8 +394,8 @@ function tactics_map.new()
 
         if state.game_context.input_service.current_input == "mouse" then
             local m = state.game_context.input_service:get_mouse()
-            local lx = m.mx - self.rect.c_x
-            local ly = m.my - self.rect.c_y
+            local lx = m.mx - (self.rect.c_x or 0)
+            local ly = m.my - (self.rect.c_y or 0)
             local vp_w = VIEWPORT_WIDTH * TILE_WIDTH
             local vp_h = VIEWPORT_HEIGHT * TILE_HEIGHT
             local border = STATIC_CONFIG.CAMERA_EDGE_SCROLL_BORDER
