@@ -25,6 +25,9 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field marked_units_revision integer
 ---@field tile_highlighted_unit BattleUnit?
 ---@field highlighted_tiles userdata
+---@field camera_x integer Camera left edge in world pixels
+---@field camera_y integer Camera top edge in world pixels
+---@field input_service InputService
 local BattleUIContext = {}
 BattleUIContext.__index = BattleUIContext
 
@@ -56,8 +59,9 @@ end
 ---@param tactics_engine TacticsEngine
 ---@param turn_manager TurnManager
 ---@param battle_objective_service BattleObjectiveService
+---@param input_service InputService
 ---@return BattleUIContext
-function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service)
+function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service, input_service)
     ---@type BattleUIContext
     local self = setmetatable({ type = "battle" }, BattleUIContext)
 
@@ -73,7 +77,51 @@ function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_ma
     self.acting_unit = nil
 
     self.highlighted_tiles = userdata("i16", self.battle_map.width, self.battle_map.height)
+    self.camera_x = 0
+    self.camera_y = 0
+    self.input_service = input_service
     return self
+end
+
+local VIEWPORT_W = STATIC_CONFIG.VIEWPORT_WIDTH
+local VIEWPORT_H = STATIC_CONFIG.VIEWPORT_HEIGHT
+local TILE_W = STATIC_CONFIG.TILE_WIDTH
+local TILE_H = STATIC_CONFIG.TILE_HEIGHT
+
+--- Move camera so target_tile stays within dead_zone tiles of viewport edges. Snaps immediately.
+-- TODO: add smooth interpolation in a future pass
+---@param battle_map BattleMap
+---@param target_tile Point
+---@param dead_zone integer Tiles from edge to keep target inside
+function BattleUIContext:move_camera(battle_map, target_tile, dead_zone)
+    local px = target_tile.x * TILE_W
+    local py = target_tile.y * TILE_H
+
+    local dz_px = dead_zone * TILE_W
+    local dz_py = dead_zone * TILE_H
+
+    if px < self.camera_x + dz_px then
+        self.camera_x = px - dz_px
+    elseif px > self.camera_x + (VIEWPORT_W - dead_zone) * TILE_W then
+        self.camera_x = px - (VIEWPORT_W - dead_zone) * TILE_W
+    end
+
+    if py < self.camera_y + dz_py then
+        self.camera_y = py - dz_py
+    elseif py > self.camera_y + (VIEWPORT_H - dead_zone) * TILE_H then
+        self.camera_y = py - (VIEWPORT_H - dead_zone) * TILE_H
+    end
+
+    self:clamp_camera(battle_map)
+end
+
+--- Clamp current camera position to valid map bounds.
+---@param battle_map BattleMap
+function BattleUIContext:clamp_camera(battle_map)
+    local max_x = (battle_map.width - VIEWPORT_W) * TILE_W
+    local max_y = (battle_map.height - VIEWPORT_H) * TILE_H
+    self.camera_x = math.max(0, math.min(self.camera_x, max_x))
+    self.camera_y = math.max(0, math.min(self.camera_y, max_y))
 end
 
 --- Refresh all derived UI fields from the current battle state.
@@ -112,6 +160,9 @@ function BattleUIContext:enrich()
     if root_node_state and root_node_state.type == "grid" then
         ---@cast root_node_state SerializedNestedGridState
         self.hovered_point = root_node_state.point
+        if self.input_service.current_input == "joypad" then
+            self:move_camera(self.battle_map, self.hovered_point, STATIC_CONFIG.CAMERA_DEAD_ZONE_PLAYER)
+        end
 
         if menu.step == "SELECT_UNIT" then
             local selection_point = root_node_state.point

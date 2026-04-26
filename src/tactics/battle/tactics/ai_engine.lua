@@ -12,6 +12,7 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field battle_map BattleMap The map this engine operates on.
 ---@field tactics_engine TacticsEngine Dispatcher for unit actions.
 ---@field task_manager TaskManager? Coroutine runner for async action sequences.
+---@field on_unit_action (fun(unit: BattleUnit): nil)? Called when a unit begins its AI action.
 local AIEngine = {}
 AIEngine.__index = AIEngine
 
@@ -71,6 +72,9 @@ end
 --- If no actions are possible, the unit will wait.
 ---@param unit BattleUnit The AI-controlled unit to act.
 function AIEngine:compute_unit_ai(unit)
+    if self.on_unit_action then
+        self.on_unit_action(unit)
+    end
     local ai = unit.unit_ai
 
     local max_move

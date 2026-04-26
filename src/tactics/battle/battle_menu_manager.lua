@@ -14,8 +14,7 @@ local button = require("src.tactics.menu.cursor.button")
 local BattleMenuManager = {}
 BattleMenuManager.__index = BattleMenuManager
 
-local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
-local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
+
 
 ---@param point Point
 ---@param map BattleMap
@@ -364,12 +363,13 @@ HANDLERS["handle_interaction"] = function(services, _menu_data, session_context,
     return nil
 end
 
-local MENU_DATA = {
+local function make_menu_data(map_width, map_height)
+return {
     ["MENU_DEPLOYMENT"] = {
         initial_step = "SELECT_SWAP_UNIT",
         steps = {
             ["SELECT_SWAP_UNIT"] = step_definition.of_node(
-                grid.grid("select_swap_unit", MAP_WIDTH, MAP_HEIGHT)
+                grid.grid("select_swap_unit", map_width, map_height)
                     :with_child(
                         function(point, msb, _ctx)
                             ---@cast msb BattleMenuContext
@@ -404,7 +404,7 @@ local MENU_DATA = {
                 :with_action("BUTTON_A", { command = "select", description = "Select Unit" })
                 :with_action("BUTTON_B", { command = "menu", description = "Menu" }),
             ["SELECT_SWAP_TARGET"] = step_definition.of_node(
-                grid.grid("select_swap_target", MAP_WIDTH, MAP_HEIGHT)
+                grid.grid("select_swap_target", map_width, map_height)
                     :with_child(
                         function(point, msb, _ctx)
                             ---@cast msb BattleMenuContext
@@ -455,7 +455,7 @@ local MENU_DATA = {
         initial_step = "SELECT_UNIT",
         steps = {
             ["SELECT_UNIT"] = step_definition.of_node(
-                grid.grid("select_acting_unit", MAP_WIDTH, MAP_HEIGHT)
+                grid.grid("select_acting_unit", map_width, map_height)
                     :with_child(
                         function(point, msb, _ctx)
                             ---@cast msb BattleMenuContext
@@ -498,7 +498,7 @@ local MENU_DATA = {
                 :with_action("SHOULDER_L", { command = "cycle_left", description = "Previous Unit" })
                 :with_action("SHOULDER_R", { command = "cycle_right", description = "Next Unit" }),
             ["SELECT_DESTINATION"] = step_definition.of_node(
-                grid.grid("select_destination", MAP_WIDTH, MAP_HEIGHT)
+                grid.grid("select_destination", map_width, map_height)
                     :with_child(
                         function(point, msb, ctx)
                             ---@cast msb BattleMenuContext
@@ -594,7 +594,7 @@ local MENU_DATA = {
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["SELECT_TARGET"] = step_definition.of_node(
-                grid.grid("select_target", MAP_WIDTH, MAP_HEIGHT)
+                grid.grid("select_target", map_width, map_height)
                     :with_child(
                         function(point, msb, ctx)
                             ---@cast msb BattleMenuContext
@@ -679,6 +679,7 @@ local MENU_DATA = {
         }
     }
 }
+end
 
 local battle_menu_manager = {
     BattleMenuManager = BattleMenuManager
@@ -690,7 +691,7 @@ local battle_menu_manager = {
 ---@return BattleMenuManager
 function battle_menu_manager.new(ctx, bus)
     return menu_manager.new(
-        MENU_DATA,
+        make_menu_data(ctx.battle_map.width, ctx.battle_map.height),
         HANDLERS,
         ctx,
         bus

@@ -18,9 +18,6 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
 
-local MAP_WIDTH = STATIC_CONFIG.MAP_WIDTH
-local MAP_HEIGHT = STATIC_CONFIG.MAP_HEIGHT
-
 local TILE_WIDTH = STATIC_CONFIG.TILE_WIDTH
 local TILE_HEIGHT = STATIC_CONFIG.TILE_HEIGHT
 local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
@@ -254,7 +251,7 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
                     unexpected(character_source.type)
                 end
                 if unit_character ~= nil then
-                    local facing_r = spawn_point.x <= (MAP_WIDTH >> 1)
+                    local facing_r = spawn_point.x <= (self.battle_map.width >> 1)
                     local unit = battle_unit.spawn_unit(
                         unit_character,
                         spawn_point,
@@ -291,9 +288,9 @@ function TacticsEngine:spawn_all(units, anim, blocked_behavior)
             if anim == "from_north" then
                 offset = unit.tile.y + 1
             elseif anim == "from_south" then
-                offset = MAP_HEIGHT - unit.tile.y
+                offset = self.battle_map.height - unit.tile.y
             elseif anim == "from_east" then
-                offset = MAP_WIDTH - unit.tile.x
+                offset = self.battle_map.width - unit.tile.x
             elseif anim == "from_west" then
                 offset = unit.tile.x + 1
             else
@@ -749,7 +746,7 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
 
     local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
 
-    local tiles = userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+    local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
 
     for _, t in ipairs(tiles_in_distance) do
         tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
@@ -767,10 +764,12 @@ end
 function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
     max_distance = max_distance or min_distance
 
-    local reachable = array_2d.new(MAP_WIDTH, MAP_HEIGHT, false)
+    local map_w = self.battle_map.width
+    local map_h = self.battle_map.height
+    local reachable = array_2d.new(map_w, map_h, false)
     for x = -max_distance, max_distance do
         local map_x = x + tile_x
-        if map_x >= 0 and map_x < MAP_WIDTH then
+        if map_x >= 0 and map_x < map_w then
             local abs_x = abs(x)
             local min_y_abs = math.max(0, min_distance - abs_x)
             local max_y_abs = max_distance - abs_x
@@ -778,13 +777,13 @@ function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_di
             if max_y_abs >= min_y_abs then
                 for y = -max_y_abs, -min_y_abs do
                     local map_y = y + tile_y
-                    if map_y >= 0 and map_y < MAP_HEIGHT then
+                    if map_y >= 0 and map_y < map_h then
                         reachable:set(map_x, map_y, true)
                     end
                 end
                 for y = min_y_abs, max_y_abs do
                     local map_y = y + tile_y
-                    if map_y >= 0 and map_y < MAP_HEIGHT then
+                    if map_y >= 0 and map_y < map_h then
                         reachable:set(map_x, map_y, true)
                     end
                 end
@@ -812,7 +811,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(unit)
         movement
     )
 
-    local tiles = userdata("u8", MAP_WIDTH, MAP_HEIGHT)
+    local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
 
     reachable_tiles:foreach(function(x, y, reachable)
         if reachable then
