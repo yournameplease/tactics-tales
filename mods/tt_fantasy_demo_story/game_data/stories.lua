@@ -541,11 +541,16 @@ local STORIES = {
 				stories.story_text("Try again.  I believe in you!"),
 				lib.libs.story.config_branch(
 					function(c) return c.saving == "hardcore" end,
-					{stories.delete_file(), stories.story_text("File deleted.")},
+					stories.jump("delete_file"),
 					stories.advance()
 				),
 				stories.exit_story(),
 			},
+			delete_file = {
+				stories.delete_file(),
+				stories.story_text("File deleted."),
+				stories.exit_story(),
+			}
 		}
 	}
 }

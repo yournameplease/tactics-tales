@@ -166,6 +166,7 @@ function game.new(
 
     self.event_listener:on("GAME_EXIT_STORY", function()
         self:exit_story()
+        self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)
 
     return self
