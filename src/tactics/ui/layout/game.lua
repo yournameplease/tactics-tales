@@ -42,7 +42,7 @@ content:add(box.spacer(1))
 local description_container = content:add(box.builder("description_container")
     :layout{
         direction = "col",
-        height = 100,
+        height = 80,
         width = "fill",
         padding = box.layout.padding(8),
     }
