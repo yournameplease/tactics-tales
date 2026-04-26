@@ -1,0 +1,16 @@
+local function static_map(file)
+    return { type = "static", file = file }
+end
+
+---@type ModMapsModule
+local MAP_DEFINITIONS = {
+    bandit_village  = static_map("map/bandit_village_2.map"),
+    cultist_cave    = static_map("map/cultist_cave.map"),
+    fortress_town   = static_map("map/fortress_town.map"),
+    cliff_crossing  = static_map("map/cliff_crossing.map"),
+    castle_defense  = static_map("map/castle_defense.map"),
+    playground      = static_map("map/playground.map"),
+    model_room      = static_map("map/model_room.map"),
+}
+
+return MAP_DEFINITIONS

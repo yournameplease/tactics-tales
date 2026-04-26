@@ -11,6 +11,6 @@ return {
         characters     = "game_data/characters",
         items          = "game_data/items",
         default_story  = "simple_exit",
-        story_select   = { "simple_exit", "linear_text", "jump_flow" },
+        story_select   = { "simple_exit", "linear_text", "jump_flow", "option_select_and_exit" },
     },
 }

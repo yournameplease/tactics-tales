@@ -235,6 +235,23 @@ local HANDLERS = {
         update = text_input_update,
     },
 
+    select_option = {
+        enter = function(story, node)
+            ---@cast node SelectOptionNode
+            story.story_menu_context.selection_options = node.options
+            story.menu_manager:set_menu("MENU_SELECT_OPTION")
+        end,
+        exit = function(story, node)
+            ---@cast node SelectOptionNode
+            story.story_memory:set(node.memory_key, story_memory.text(story.selected_option))
+            story.selected_option = nil
+            story.menu_manager:clear_menu()
+        end,
+        update = function(story, input)
+            story.menu_manager:update(input)
+        end,
+    },
+
     -- ── Battle (event-driven; only enter is needed) ──────────────────────
 
     battle = {

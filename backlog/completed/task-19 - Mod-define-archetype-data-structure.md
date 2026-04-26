@@ -1,10 +1,10 @@
 ---
 id: TASK-19
 title: 'Mod: define archetype data structure'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-26 20:08'
+updated_date: '2026-04-26 22:42'
 labels: []
 milestone: m-3
 dependencies: []
@@ -20,15 +20,15 @@ Design the archetype data table shape in the mod. Archetypes are a mod-level con
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Archetype table shape is defined and documented
-- [ ] #2 Slots are ordered and tagged beat or filler
-- [ ] #3 Filler pool weights declared at archetype level with optional per-slot overrides
-- [ ] #4 Recruitment rate is configurable per archetype
-- [ ] #5 A worked example archetype exists in test_base or a new test mod
+- [x] #1 Archetype table shape is defined and documented
+- [x] #2 Slots are ordered and tagged beat or filler
+- [x] #3 Filler pool weights declared at archetype level with optional per-slot overrides
+- [x] #4 Recruitment rate is configurable per archetype
+- [x] #5 A worked example archetype exists in test_base or a new test mod
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->

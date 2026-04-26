@@ -37,6 +37,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package idle_animation AnimatedSpriteData
 ---@field package customized_character Character
 ---@field package text_input string
+---@field package selected_option string?
 ---@field package save_name? string
 ---@field package story_id string
 ---@field package story_page StoryPage
@@ -186,6 +187,13 @@ function Story:submit_text(text)
     self:advance_node()
 end
 
+--- Store the chosen option ID and advance the node.
+---@param option_id string
+function Story:select_option(option_id)
+    self.selected_option = option_id
+    self:advance_node()
+end
+
 --- Create and start a new story instance from the beginning.
 ---@param save_name string? Save file path, or nil for an unsaved story.
 ---@param story_id string
@@ -238,7 +246,8 @@ function story.new(
 
     self.story_menu_context = story_menu_context.new(
         function(appearance) self:create_character(appearance) end,
-        function(text) self:submit_text(text) end
+        function(text) self:submit_text(text) end,
+        function(option_id) self:select_option(option_id) end
     )
     self.story_memory = story_memory.new(self.character_manager)
     self.story_page = story_page.story_page(self.story_memory)
