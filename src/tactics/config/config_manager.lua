@@ -18,6 +18,9 @@ require("profiler")
 ---@field glyph_family? GlyphFamily
 ---@field input_group? InputGroup
 ---@field demo_mode? boolean
+---@field master_volume? integer 0-10
+---@field music_volume? integer 0-10
+---@field sfx_volume? integer 0-10
 
 ---@class ConfigManager
 ---@field package config DynamicConfig Merged view of user and default config.
@@ -35,6 +38,9 @@ local DEFAULT_CONFIG = {
 	glyph_family = "keyboard",
 	input_group = "mouse_and_keyboard",
 	demo_mode = false,
+	master_volume = 10,
+	music_volume = 10,
+	sfx_volume = 10,
 }
 
 local config_manager = {}
@@ -56,6 +62,16 @@ end
 --- Reset config to defaults by storing an empty override table.
 function ConfigManager:reset_config()
 	self:store_config({})
+end
+
+--- Apply volume settings immediately without persisting to disk.
+---@param master_volume integer
+---@param music_volume integer
+---@param sfx_volume integer
+function ConfigManager:apply_volume(master_volume, music_volume, sfx_volume)
+	self.user_config.master_volume = master_volume
+	self.user_config.music_volume = music_volume
+	self.user_config.sfx_volume = sfx_volume
 end
 
 --- Create a new ConfigManager, loading any saved user config from disk.

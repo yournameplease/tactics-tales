@@ -164,6 +164,21 @@ HANDLERS["reset_options"] = function(services, _menu_data, _session_context, _va
     return nil
 end
 
+--- Apply volume settings immediately without persisting.
+---@param services GameMenuContext
+---@param menu_data DynamicConfig
+---@param _session_context MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling?
+HANDLERS["apply_volume"] = function(services, menu_data, _session_context, _value)
+    services.config_manager:apply_volume(
+        menu_data.master_volume,
+        menu_data.music_volume,
+        menu_data.sfx_volume
+    )
+    return nil
+end
+
 ---@type table<string, MenuDefinition>
 local MENU_DATA = {
     ["MENU_MAIN_MENU"] = {
@@ -442,6 +457,21 @@ local MENU_DATA = {
                                     :with_static_option_flat("mouse_and_keyboard", "Mouse and Joypad", "Allows either mouse or joypad (including keyboard)")
                                     :with_static_option_flat("mouse_only", "Mouse Only", "Mouse controls only")
                                     :with_static_option_flat("joy_only", "Joypad Only", "Joypad/keyboard controls only"))
+                                table.insert(options, selection.row("master_volume")
+                                    :with_label("Master Volume")
+                                    :with_key("master_volume")
+                                    :with_static_options({0,1,2,3,4,5,6,7,8,9,10})
+                                    :with_on_change("apply_volume"))
+                                table.insert(options, selection.row("music_volume")
+                                    :with_label("Music Volume")
+                                    :with_key("music_volume")
+                                    :with_static_options({0,1,2,3,4,5,6,7,8,9,10})
+                                    :with_on_change("apply_volume"))
+                                table.insert(options, selection.row("sfx_volume")
+                                    :with_label("SFX Volume")
+                                    :with_key("sfx_volume")
+                                    :with_static_options({0,1,2,3,4,5,6,7,8,9,10})
+                                    :with_on_change("apply_volume"))
                                 return options
                             end))
 
