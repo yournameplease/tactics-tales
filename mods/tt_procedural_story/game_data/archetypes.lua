@@ -12,8 +12,7 @@
 --     .slots           ArchetypeSlot[]   Ordered sequence of battle slots for the run.
 --     .filler_pool     table<string,int> Encounter template IDs → relative weights.
 --                                        Used for every filler slot unless overridden.
---     .recruitment_rate number           Fraction of defeated enemies available for
---                                        recruitment per battle (0–1 range).
+--     .recruitment_rate number           Expected number of recruitable units per chapter.
 --
 --   ArchetypeSlot
 --     .type          "beat"|"filler"   "beat" = scripted encounter; "filler" = drawn
@@ -33,7 +32,7 @@
 ---@field description string Description shown on the archetype selection screen.
 ---@field slots ArchetypeSlot[] Ordered sequence of battle slots for the run.
 ---@field filler_pool table<string, integer> Weighted pool of filler encounter template IDs.
----@field recruitment_rate number Fraction of defeated enemies available for recruitment (0–1).
+---@field recruitment_rate number Expected number of recruitable units per chapter.
 
 -- ---------------------------------------------------------------------------
 -- Worked example: the "Warband" archetype
@@ -65,7 +64,7 @@ local archetypes = {
             hold_the_line = 1,
         },
 
-        recruitment_rate = 0.4,
+        recruitment_rate = 2,
     },
 }
 
