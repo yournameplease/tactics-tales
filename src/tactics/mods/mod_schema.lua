@@ -13,7 +13,7 @@ local maps_spec = s.dictionary(
 	s.string(),
 	s.record({
 		type = s.string(),
-		file = s.string(),
+		file = s.optional(s.string()),
 	})
 )
 

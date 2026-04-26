@@ -2,7 +2,7 @@
 --- A utility for loading and preparing battle maps from map files.
 --- It processes map layers and generates the final BattleMap object.
 
----@alias MapGenerationType "static"|"procgen"
+---@alias MapGenerationType "static"|"procgen"|"flat"
 
 ---@class MapDefinition Abstract base for all map definition variants.
 ---@field type MapGenerationType
@@ -10,6 +10,12 @@
 ---@class StaticMapDefinition : MapDefinition
 ---@field type "static"
 ---@field file string Path to the static map file.
+
+---@class FlatMapDefinition : MapDefinition
+---@field type "flat"
+---@field width integer Map width in tiles.
+---@field height integer Map height in tiles.
+---@field spawn_metatiles table<integer, {x: integer, y: integer}>? Metatile value → tile position for label resolution.
 
 local point = require("src.tactics.util.point")
 local battle_map = require("src.tactics.battle.battle_map")
@@ -78,19 +84,11 @@ local function apply_default_walls(map_layers)
     end
 end
 
---- Load a static map from disk, apply post-processing, and build the BattleMap.
----@param definition StaticMapDefinition
----@param tile_labels table<string, integer[]> Metatile indices grouped by label name.
----@return BattleMap
-local function load_static(definition, tile_labels)
-    local map_fetch = fetch(DATP .. definition.file)
-
-    local layers = as_map(map_fetch)
-
-    apply_checkerboard(layers)
-    apply_default_walls(layers)
-
-    local metatiles_layer = layers.metatiles
+--- Build a labels table from a metatile layer and tile_labels mapping.
+---@param metatiles_layer userdata
+---@param tile_labels table<string, integer[]>
+---@return table<string, Point[]>
+local function build_labels(metatiles_layer, tile_labels)
     local labels_by_metatile = {}
     for label, metatiles in pairs(tile_labels) do
         for _, metatile in ipairs(metatiles) do
@@ -116,6 +114,23 @@ local function load_static(definition, tile_labels)
             end
         end
     end
+    return labels
+end
+
+--- Load a static map from disk, apply post-processing, and build the BattleMap.
+---@param definition StaticMapDefinition
+---@param tile_labels table<string, integer[]> Metatile indices grouped by label name.
+---@return BattleMap
+local function load_static(definition, tile_labels)
+    local map_fetch = fetch(DATP .. definition.file)
+
+    local layers = as_map(map_fetch)
+
+    apply_checkerboard(layers)
+    apply_default_walls(layers)
+
+    local metatiles_layer = layers.metatiles
+    local labels = build_labels(metatiles_layer, tile_labels)
 
     local map = battle_map.new(metatiles_layer:width() --[[@as integer]], metatiles_layer:height() --[[@as integer]], labels)
     map.layers = layers
@@ -127,6 +142,39 @@ local function load_static(definition, tile_labels)
     return map
 end
 
+--- Generate a flat blank map of the given dimensions, with optional metatile spawn markers.
+---@param definition FlatMapDefinition
+---@param tile_labels table<string, integer[]>
+---@return BattleMap
+local function load_flat(definition, tile_labels)
+    local w = definition.width
+    local h = definition.height
+
+    local metatiles = userdata("u16", w, h)
+    if definition.spawn_metatiles then
+        for metatile, pos in pairs(definition.spawn_metatiles) do
+            metatiles:set(pos.x, pos.y, BASE_METATILE + metatile)
+        end
+    end
+
+    local layers = {
+        metatiles = metatiles,
+        terrain = {
+            ceiling  = nil,
+            ground     = userdata("u8", w, h),
+            back_wall  = userdata("u8", w, h),
+            mid_wall   = userdata("u8", w, h),
+            front_wall = userdata("u8", w, h),
+        }
+    }
+
+    local labels = build_labels(metatiles, tile_labels)
+    local map = battle_map.new(w, h, labels)
+    map.layers = layers
+    map.metadata = { player_spawners = {}, enemy_spawners = {} }
+    return map
+end
+
 --- Load and return a BattleMap from the given map definition and label mapping.
 ---@param definition MapDefinition Map definition specifying type and source file.
 ---@param labels table<string, integer[]> Metatile indices grouped by label name.
@@ -134,6 +182,8 @@ end
 function map_generator.load_map(definition, labels)
     if definition.type == "static" then
         return load_static(definition --[[@as StaticMapDefinition]], labels)
+    elseif definition.type == "flat" then
+        return load_flat(definition --[[@as FlatMapDefinition]], labels)
     else
         error("unknown map type")
     end
