@@ -164,6 +164,17 @@ HANDLERS["reset_options"] = function(services, _menu_data, _session_context, _va
     return nil
 end
 
+--- Apply glyph family immediately without persisting.
+---@param services GameMenuContext
+---@param menu_data DynamicConfig
+---@param _session_context MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling?
+HANDLERS["apply_glyph_family"] = function(services, menu_data, _session_context, _value)
+    services.config_manager:apply_glyph_family(menu_data.glyph_family)
+    return nil
+end
+
 --- Apply volume settings immediately without persisting.
 ---@param services GameMenuContext
 ---@param menu_data DynamicConfig
@@ -449,7 +460,8 @@ local MENU_DATA = {
                                     :with_static_option_flat("snes", "SNES")
                                     :with_static_option_flat("nintendo", "Nintendo")
                                     :with_static_option_flat("xbox", "Xbox")
-                                    :with_static_option_flat("playstation", "PlayStation"))
+                                    :with_static_option_flat("playstation", "PlayStation")
+                                    :with_on_change("apply_glyph_family"))
                                 table.insert(options, selection.row("input_group")
                                     :with_label("Input Mode")
                                     :with_key("input_group")
