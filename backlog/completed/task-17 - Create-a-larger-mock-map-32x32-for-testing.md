@@ -1,9 +1,10 @@
 ---
 id: TASK-17
 title: Create a larger mock map (32x32) for testing
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-25 21:35'
+updated_date: '2026-04-26 00:05'
 labels: []
 milestone: m-2
 dependencies:
@@ -26,10 +27,10 @@ The map only needs to be functional enough to load and scroll — artistic quali
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The demo story contains a battle that loads the 32x32 map
-- [ ] #2 The map loads without errors
-- [ ] #3 Camera scrolling can be exercised by moving the cursor to map edges
-- [ ] #4 make test passes
+- [x] #1 The demo story contains a battle that loads the 32x32 map
+- [x] #2 The map loads without errors
+- [x] #3 Camera scrolling can be exercised by moving the cursor to map edges
+- [x] #4 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
