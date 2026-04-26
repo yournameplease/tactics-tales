@@ -5,7 +5,7 @@
 local drawable_character = require("src.tactics.story.drawable_character")
 local character = require("src.tactics.character.object.character")
 
----@alias RenderedStoryNodeType "text"|"character_customization"|"text_input"|"chapter_header"|"game_results"
+---@alias RenderedStoryNodeType "text"|"character_customization"|"text_input"|"chapter_header"|"game_results"|"select_option"
 
 ---@class RenderedStoryNode Abstract base for all rendered story nodes.
 ---@field type RenderedStoryNodeType
@@ -33,6 +33,10 @@ local character = require("src.tactics.character.object.character")
 ---@field type "text_input"
 ---@field key string Memory key where the entered text will be stored.
 ---@field text? ActiveDialogue Prompt shown above the input; set only when constructed via add_text_input_menu.
+
+---@class RenderedSelectOption : RenderedStoryNode Option picker menu.
+---@field type "select_option"
+---@field options SelectOptionEntry[] Options to display.
 
 ---@class RenderedChapterHeader : RenderedStoryNode Chapter title card.
 ---@field type "chapter_header"
@@ -102,6 +106,18 @@ function rendered_story_node.character_customization(base_character, key, anim)
         ),
     }
     node.character.animation_data = anim
+    return node
+end
+
+--- Create a select option node for presenting a list of choices.
+---@param options SelectOptionEntry[]
+---@return RenderedStoryNode
+function rendered_story_node.select_option(options)
+    ---@type RenderedSelectOption
+    local node = {
+        type = 'select_option',
+        options = options,
+    }
     return node
 end
 
@@ -195,6 +211,13 @@ end
 ---@param unit_pages GameResultsUnitDisplay[]
 function StoryPage:add_game_results(results, chapter_pages, unit_pages)
     local node = rendered_story_node.game_results(results, chapter_pages, unit_pages)
+    table.insert(self.nodes, node)
+end
+
+--- Append a select option node.
+---@param options SelectOptionEntry[]
+function StoryPage:add_select_option_menu(options)
+    local node = rendered_story_node.select_option(options)
     table.insert(self.nodes, node)
 end
 

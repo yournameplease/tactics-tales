@@ -239,6 +239,19 @@ local function compute_children(state)
                 function(_) return 1 end,
                 function(_) return root_node end
             )
+        elseif n.type == "select_option" then
+            ---@cast n RenderedSelectOption
+            child = box.builder("select_option_menu")
+                :direction("col")
+                :container("block")
+                :build()
+            local root_node = state.story_context.menu_manager.menu_step.node
+            if root_node.type == "list" then
+                child:add(menu_ui.generic_menu_box(
+                    function(_) return 1 end,
+                    function(_) return root_node end
+                ))
+            end
         else
             unexpected(n.type)
         end
