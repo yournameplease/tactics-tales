@@ -82,6 +82,12 @@ function ConfigManager:set_sfx_volume(volume)
 	poke(0x553a, math.floor(volume * 0x40 / 10))
 end
 
+--- Apply glyph family immediately without persisting to disk.
+---@param glyph_family GlyphFamily
+function ConfigManager:apply_glyph_family(glyph_family)
+	self.user_config.glyph_family = glyph_family
+end
+
 --- Apply volume settings immediately without persisting to disk.
 ---@param master_volume integer
 ---@param music_volume integer
