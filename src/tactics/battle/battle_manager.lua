@@ -63,6 +63,7 @@ function battle_manager.new(
     music_player,
     ui_context
 )
+    log.debug("Starting battle: "..battle_id)
     ---@type BattleManagerImpl
     local self = setmetatable({}, BattleManagerImpl)
 
@@ -72,6 +73,7 @@ function battle_manager.new(
     local battle_def = game_data.battles[battle_id](story_config)
     local map_def = game_data.maps[battle_def.map_id]
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
+    log.debug("Generated battle map with size "..self.battle_map.width.."x"..self.battle_map.height..".")
 
     self.tactics_engine = tactics_engine.new(
         chapter,
