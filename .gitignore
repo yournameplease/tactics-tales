@@ -12,6 +12,9 @@ tactics.p64/src/
 tactics.p64/lib/
 tactics.p64/mods/
 
+**/.info.pod
+!tactics.p64/.info.pod
+
 .claude
 
 docs/todos/
