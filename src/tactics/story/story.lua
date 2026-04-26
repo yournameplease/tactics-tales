@@ -54,6 +54,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package music_player MusicPlayer
 ---@field package battle_services_bundle BattleServicesBundle
 ---@field package ui_context UIContextManager
+---@field package input_service InputService
 local Story = {}
 Story.__index = Story
 
@@ -195,6 +196,7 @@ end
 ---@param event_bus EventBus
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
+---@param input_service InputService
 ---@return Story
 function story.new(
     save_name,
@@ -205,7 +207,8 @@ function story.new(
     animation_manager,
     event_bus,
     music_player,
-    ui_context
+    ui_context,
+    input_service
 )
     assert(game_data.stories.data[story_id] ~= nil)
 
@@ -257,6 +260,7 @@ function story.new(
 
     self.ui_context = ui_context
     self.ui_context:register_ui_context(story_ui_ctx)
+    self.input_service = input_service
 
     self.event_listener:on("BATTLE_END", function(payload)
         if payload.result == "VICTORY" then
@@ -280,7 +284,7 @@ end
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
 ---@return Story
-function story.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context)
+function story.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context, input_service)
     local save_data = save_system.load(save_name)
     assert(save_data, "File failed to load!")
 
@@ -295,7 +299,8 @@ function story.load(save_name, game_data, task_manager, animation_manager, event
         animation_manager,
         event_bus,
         music_player,
-        ui_context
+        ui_context,
+        input_service
     )
 
     self.character_manager.id_generator.id_count = save_data.character_id_count

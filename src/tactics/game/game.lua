@@ -34,6 +34,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@field music_player MusicPlayer
 ---@field ui_context UIContextManager
 ---@field story_services_bundle StoryServicesBundle
+---@field input_service InputService
 local Game = {}
 Game.__index = Game
 
@@ -50,7 +51,8 @@ function Game:load_story(file_name)
         self.story_services_bundle.animation_manager,
         self.story_services_bundle.event_bus,
         self.music_player,
-        self.ui_context
+        self.ui_context,
+        self.input_service
     )
 end
 
@@ -70,7 +72,8 @@ function Game:begin_story(file_name, story_id, config)
         self.story_services_bundle.animation_manager,
         self.story_services_bundle.event_bus,
         self.music_player,
-        self.ui_context
+        self.ui_context,
+        self.input_service
     )
 end
 
@@ -156,6 +159,7 @@ function game.new(
         event_bus = event_bus,
     }
 
+    self.input_service = input_service
     local game_ui_ctx = game_ui_context.new(event_bus, self.menu_manager, input_service)
     self.ui_context = ui_context
     self.ui_context:register_ui_context(game_ui_ctx)

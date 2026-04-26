@@ -253,7 +253,8 @@ local HANDLERS = {
                 story.battle_services_bundle.animation_manager,
                 story.battle_services_bundle.event_bus,
                 story.music_player,
-                story.ui_context
+                story.ui_context,
+                story.input_service
             )
         end,
         update = function(story, input)

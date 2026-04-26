@@ -180,7 +180,8 @@ function BattleHarness:start_battle(battle_id, battle_config)
         self._animation_manager,
         self._event_bus,
         self._music_player,
-        self._ui_context
+        self._ui_context,
+        { current_input = "joypad" }
     )
     self:tick_to_idle()
 end
