@@ -402,17 +402,19 @@ function tactics_map.new()
             local speed = STATIC_CONFIG.CAMERA_EDGE_SCROLL_SPEED
             local bctx = state.battle_context
 
-            if lx >= 0 and lx < border then
-                bctx.camera_x = bctx.camera_x - speed
-            elseif lx >= vp_w - border and lx < vp_w then
-                bctx.camera_x = bctx.camera_x + speed
+            if bctx then
+                if lx >= 0 and lx < border then
+                    bctx.camera_x = bctx.camera_x - speed
+                elseif lx >= vp_w - border and lx < vp_w then
+                    bctx.camera_x = bctx.camera_x + speed
+                end
+                if ly >= 0 and ly < border then
+                    bctx.camera_y = bctx.camera_y - speed
+                elseif ly >= vp_h - border and ly < vp_h then
+                    bctx.camera_y = bctx.camera_y + speed
+                end
+                bctx:clamp_camera(bctx.battle_map)
             end
-            if ly >= 0 and ly < border then
-                bctx.camera_y = bctx.camera_y - speed
-            elseif ly >= vp_h - border and ly < vp_h then
-                bctx.camera_y = bctx.camera_y + speed
-            end
-            bctx:clamp_camera(bctx.battle_map)
         end
     end)
     :build()
