@@ -45,6 +45,7 @@
 ---@field name string
 ---@field tiers FactionTier[]
 ---@field fallbacks table<FactionSlotTag, FactionSlotTag>
+---@field recruitable string[] Slot tags (excluding enemy_commander) available for recruitment.
 
 ---@class FactionsModule
 ---@field factions table<string, FactionDefinition>
