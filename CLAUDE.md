@@ -7,11 +7,7 @@ Tactics Tales is a Picotron tactics-RPG game written in Lua. The game is designe
 ## Commands
 
 ```bash
-make all        # clean, build, and test
-make test       # build and run all tests (unit + integration)
-make ut         # build and run unit tests only (excludes --tags='it')
-make it         # build and run integration tests only (--tags='it')
-make clean      # remove build/ artifacts
+make test
 ```
 
 Tests use the [Busted](https://lunarmodules.github.io/busted/) test runner. Run a single spec file:

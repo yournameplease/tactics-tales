@@ -1,10 +1,10 @@
 ---
 id: TASK-21
 title: 'Engine: seedable RNG class and story runner integration'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-26 20:08'
+updated_date: '2026-04-27 00:07'
 labels: []
 milestone: m-4
 dependencies: []
@@ -28,17 +28,17 @@ Hot areas: `src/tactics/util/random.lua`, story runner (story execution manageme
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 random.new(seed) returns an independent RNG instance with its own state
-- [ ] #2 Instance API matches existing random module (rndi, choose_random_from_list, etc.)
-- [ ] #3 Story seed is auto-generated at run start and persisted in save data
-- [ ] #4 Battle seed is derived deterministically from story_seed + battle_index
-- [ ] #5 Both RNG instances are accessible via StoryConfig in factory functions
-- [ ] #6 Loading a save and re-running produces identical future sequences
-- [ ] #7 Existing global RNG usage is unaffected
+- [x] #1 random.new(seed) returns an independent RNG instance with its own state
+- [x] #2 Instance API matches existing random module (rndi, choose_random_from_list, etc.)
+- [x] #3 Story seed is auto-generated at run start and persisted in save data
+- [x] #4 Battle seed is derived deterministically from story_seed + battle_index
+- [x] #5 Both RNG instances are accessible via StoryConfig in factory functions
+- [x] #6 Loading a save and re-running produces identical future sequences
+- [x] #7 Existing global RNG usage is unaffected
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
