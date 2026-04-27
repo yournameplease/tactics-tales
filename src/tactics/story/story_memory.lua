@@ -100,7 +100,7 @@ local story_memory = {
 
 --- Create a text memory entry.
 ---@param text string
----@return StoryMemoryEntry
+---@return TextMemoryEntry
 function story_memory.text(text)
     ---@type TextMemoryEntry
     local entry = {
@@ -112,7 +112,7 @@ end
 
 --- Create a character memory entry.
 ---@param character_id CharacterId
----@return StoryMemoryEntry
+---@return CharacterMemoryEntry
 function story_memory.character(character_id)
     ---@type CharacterMemoryEntry
     local entry = {
@@ -129,7 +129,7 @@ end
 function story_memory.map(entries)
     ---@type MapMemoryEntry
     local entry = {
-        type    = "map",
+        type = "map",
         entries = entries,
     }
     return entry
