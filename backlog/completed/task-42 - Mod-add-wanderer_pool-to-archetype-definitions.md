@@ -1,9 +1,10 @@
 ---
 id: TASK-42
 title: 'Mod: add wanderer_pool to archetype definitions'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-27 13:41'
+updated_date: '2026-04-27 13:56'
 labels: []
 milestone: m-6
 dependencies: []

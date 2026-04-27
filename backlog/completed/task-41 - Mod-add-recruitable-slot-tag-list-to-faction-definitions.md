@@ -1,9 +1,10 @@
 ---
 id: TASK-41
 title: 'Mod: add recruitable slot-tag list to faction definitions'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-27 13:41'
+updated_date: '2026-04-27 13:56'
 labels: []
 milestone: m-6
 dependencies: []
