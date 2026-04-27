@@ -27,9 +27,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node? RenderedStoryNode
 
----@class StoryConfig : table<string, string>
----@field story_rng RngInstance?
----@field battle_rng RngInstance?
+---@alias StoryConfig table<string, string>
 
 ---@class Story
 ---@field package battle_count integer
@@ -52,6 +50,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package current_node ActiveNode
 ---@field package story_seed integer Seed used to derive battle-level RNG seeds.
 ---@field package story_rng RngInstance Story-level RNG instance.
+---@field package rng_context StoryRngContext RNG context passed to all factory functions.
 ---@field package battle_manager BattleManager
 ---@field package dialogue_manager DialogueManager
 ---@field package active_dialogue ActiveDialogue
@@ -73,7 +72,7 @@ local story = {
 function Story:resolve_node_source(node_source)
     if type(node_source) == "function" then
         ---@cast node_source StoryNodeFactory
-        return node_source(self.story_config)
+        return node_source(self.story_config, self.rng_context)
     else
         ---@cast node_source StoryNode
         return node_source
@@ -85,7 +84,7 @@ end
 ---@return StoryNode[]
 function Story:resolve_to_array(source)
     if type(source) == "function" then
-        return self:resolve_to_array(source(self.story_config))
+        return self:resolve_to_array(source(self.story_config, self.rng_context))
     elseif source[1] ~= nil then
         ---@cast source StoryNode[]
         return source
@@ -233,16 +232,14 @@ function story.new(
 
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
+    self.story_config = story_config
 
-    -- Build runtime config: copy string values then attach story-level RNG.
     self.story_seed = math.max(1, math.floor(rnd(0x7FFFFFFF)))
     self.story_rng = random.new(self.story_seed)
-    self.story_config = {}
-    for k, v in pairs(story_config) do self.story_config[k] = v end
-    self.story_config.story_rng = self.story_rng
+    self.rng_context = { story_rng = self.story_rng }
 
     if type(self.story_definition.battle_config) == "function" then
-        self.battle_config = self.story_definition.battle_config(story_config)
+        self.battle_config = self.story_definition.battle_config(story_config, self.rng_context)
     else
         ---@diagnostic disable-next-line
         self.battle_config = self.story_definition.battle_config

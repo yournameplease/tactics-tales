@@ -132,11 +132,6 @@ local HANDLERS = {
                 log.debug("No save file configured, skipping save_game")
                 story:advance_node()
             else
-                -- Extract only string config values (strip RNG instances).
-                local config_values = {}
-                for k, v in pairs(story.story_config) do
-                    if type(v) == "string" then config_values[k] = v end
-                end
                 local save_data = {
                     character_id_generator = story.character_manager.id_generator,
                     story_id = story.story_id,
@@ -145,7 +140,7 @@ local HANDLERS = {
                     story_memory = story.story_memory,
                     roster = story.character_manager:get_player_roster(),
                     stats = story.stats_service.story_results,
-                    story_config = config_values,
+                    story_config = story.story_config,
                     story_seed = story.story_seed,
                     story_rng_state = story.story_rng:get_state(),
                 }
@@ -270,13 +265,14 @@ local HANDLERS = {
             ---@cast node BattleNode
             story.story_page:clear_page()
             story.battle_count = story.battle_count + 1
-            -- Derive a deterministic battle-level seed and attach to config.
+            -- Derive a deterministic battle-level seed and attach to rng_context.
             local battle_seed = story.story_seed * 31 + story.battle_count
-            story.story_config.battle_rng = random.new(battle_seed)
+            story.rng_context.battle_rng = random.new(battle_seed)
             story.battle_manager = battle_manager_module.new(
                 story.battle_count,
                 node.battle_id,
                 story.story_config,
+                story.rng_context,
                 story.battle_config,
                 story.game_data,
                 story.character_manager,
