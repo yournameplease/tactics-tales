@@ -3,6 +3,7 @@
 --- handles transitions between story and battle, and manages story state.
 
 local save_system = require("src.tactics.save.save_system")
+local random = require("src.tactics.util.random")
 local HANDLERS = require("src.tactics.story.handlers.node_handlers")
 local story_menu_manager = require("src.tactics.story.story_menu_manager")
 local character_manager = require("src.tactics.character.character_manager")
@@ -26,7 +27,9 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node? RenderedStoryNode
 
----@alias StoryConfig table<string, string> 
+---@class StoryConfig : table<string, string>
+---@field story_rng RngInstance?
+---@field battle_rng RngInstance?
 
 ---@class Story
 ---@field package battle_count integer
@@ -47,6 +50,8 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package menu_manager MenuManager
 ---@field package stats_service StatsService
 ---@field package current_node ActiveNode
+---@field package story_seed integer Seed used to derive battle-level RNG seeds.
+---@field package story_rng RngInstance Story-level RNG instance.
 ---@field package battle_manager BattleManager
 ---@field package dialogue_manager DialogueManager
 ---@field package active_dialogue ActiveDialogue
@@ -228,7 +233,13 @@ function story.new(
 
     self.story_definition = game_data.stories.data[self.story_id]
     self.game_data = game_data
-    self.story_config = story_config
+
+    -- Build runtime config: copy string values then attach story-level RNG.
+    self.story_seed = math.max(1, math.floor(rnd(0x7FFFFFFF)))
+    self.story_rng = random.new(self.story_seed)
+    self.story_config = {}
+    for k, v in pairs(story_config) do self.story_config[k] = v end
+    self.story_config.story_rng = self.story_rng
 
     if type(self.story_definition.battle_config) == "function" then
         self.battle_config = self.story_definition.battle_config(story_config)
@@ -311,6 +322,10 @@ function story.load(save_name, game_data, task_manager, animation_manager, event
         ui_context,
         input_service
     )
+
+    -- Restore RNG state so future sequences are identical to the saved point.
+    if save_data.story_seed then self.story_seed = save_data.story_seed end
+    if save_data.story_rng_state then self.story_rng:set_state(save_data.story_rng_state) end
 
     self.character_manager.id_generator.id_count = save_data.character_id_count
     self.story_memory:deserialize(save_data.story_memory)
