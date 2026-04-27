@@ -2,13 +2,13 @@
 --- A key-value store for story variables, allowing data to be
 --- persisted and used across different story nodes.
 
----@alias StoryMemoryEntryType "text"|"character"
+---@alias StoryMemoryEntryType "text"|"character"|"map"
 
 ---@alias StoryMemoryMap table<string, string>
 
 ---@class StoryMemoryEntry
 ---@field type StoryMemoryEntryType
----@field text string Human-readable representation of the entry.
+---@field text? string Human-readable representation of the entry.
 
 ---@class TextMemoryEntry : StoryMemoryEntry
 ---@field type "text"
@@ -18,6 +18,10 @@
 ---@field type "character"
 ---@field character_id CharacterId
 ---@field text string
+
+---@class MapMemoryEntry : StoryMemoryEntry
+---@field type "map"
+---@field entries table<string, string>
 
 ---@alias SerializedStoryMemory table<string, StoryMemoryEntry>
 
@@ -55,12 +59,15 @@ function StoryMemoryImpl:get_as_map()
     local out = {}
     for k, e in pairs(self.global) do
         if e.type == "text" then
+            ---@cast e TextMemoryEntry
             out[k] = e.text
         elseif e.type == "character" then
             ---@cast e CharacterMemoryEntry
             local character = self.character_manager:get_character(e.character_id)
             assert(character ~= nil)
             out[k .. ".name"] = character.name
+        elseif e.type == "map" then
+            -- Map entries are programmatic data; intentionally excluded from template substitution.
         else
             error("unexpected entry type: " .. tostring(e.type))
         end
@@ -93,7 +100,7 @@ local story_memory = {
 
 --- Create a text memory entry.
 ---@param text string
----@return StoryMemoryEntry
+---@return TextMemoryEntry
 function story_memory.text(text)
     ---@type TextMemoryEntry
     local entry = {
@@ -105,13 +112,25 @@ end
 
 --- Create a character memory entry.
 ---@param character_id CharacterId
----@return StoryMemoryEntry
+---@return CharacterMemoryEntry
 function story_memory.character(character_id)
     ---@type CharacterMemoryEntry
     local entry = {
         type = "character",
         character_id = character_id,
         text = "[Character " .. character_id .. "]",
+    }
+    return entry
+end
+
+--- Create a map memory entry (string-to-string table, for structured run state).
+---@param entries table<string, string>
+---@return MapMemoryEntry
+function story_memory.map(entries)
+    ---@type MapMemoryEntry
+    local entry = {
+        type = "map",
+        entries = entries,
     }
     return entry
 end

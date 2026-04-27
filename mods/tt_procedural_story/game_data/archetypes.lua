@@ -33,6 +33,8 @@
 ---@field slots ArchetypeSlot[] Ordered sequence of battle slots for the run.
 ---@field filler_pool table<string, integer> Weighted pool of filler encounter template IDs.
 ---@field recruitment_rate number Expected number of recruitable units per chapter.
+---@field faction_pool table<string, integer> Weighted pool of eligible faction IDs for enemy selection.
+---@field bias "prefer_novel"|"prefer_dominant" How appearance counts skew faction weights.
 
 -- ---------------------------------------------------------------------------
 -- Worked example: the "Warband" archetype
@@ -65,6 +67,9 @@ local archetypes = {
         },
 
         recruitment_rate = 2,
+
+        faction_pool     = { bandits = 1, cultists = 1, militia = 1 },
+        bias             = "prefer_novel",
     },
 }
 

@@ -32,3 +32,20 @@
 -- Returned by game_data/stories.lua
 ---@class ModStoriesModule
 ---@field data table<string, StoryDefinition>
+
+---@alias FactionSlotTag "enemy_infantry"|"enemy_commander"|"enemy_tank"|"enemy_ranged"
+
+---@class FactionTier
+---@field enemy_infantry? string
+---@field enemy_commander? string
+---@field enemy_tank? string
+---@field enemy_ranged? string
+
+---@class FactionDefinition
+---@field name string
+---@field tiers FactionTier[]
+---@field fallbacks table<FactionSlotTag, FactionSlotTag>
+
+---@class FactionsModule
+---@field factions table<string, FactionDefinition>
+---@field resolve_slot fun(faction: FactionDefinition, tier_index: integer, slot_tag: FactionSlotTag): string?
