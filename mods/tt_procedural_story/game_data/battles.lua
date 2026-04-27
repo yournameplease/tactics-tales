@@ -23,9 +23,9 @@ function objectives.tagged_unit_dies(tag)
 end
 
 local ai <const> = {
-    move_two      = { move = "two",      target_sides = { "player" } },
-    move_one      = { move = "one",      target_sides = { "player" } },
-    stationary    = { move = "zero",     target_sides = { "player" } },
+    move_two      = { move = "two",      target_sides = { "player", "neutral" } },
+    move_one      = { move = "one",      target_sides = { "player", "neutral" } },
+    stationary    = { move = "zero",     target_sides = { "player", "neutral" } },
 }
 
 local function get_faction(story_config)
