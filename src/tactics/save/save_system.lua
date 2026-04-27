@@ -5,7 +5,7 @@ local lists = require("src.tactics.util.lists")
 ---@class GameSaveData
 ---@field character_id_generator IdGenerator
 ---@field story_id string
----@field story_config table<string, string>
+---@field story_config StoryConfig
 ---@field story_node_id string
 ---@field story_node_step integer
 ---@field story_memory StoryMemory
@@ -17,7 +17,7 @@ local lists = require("src.tactics.util.lists")
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
 ---@field story_id StoryId
----@field story_config table<string, string>
+---@field story_config StoryConfig
 ---@field story_node_id string
 ---@field story_node_step integer
 ---@field story_memory SerializedStoryMemory
