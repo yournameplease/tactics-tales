@@ -8,7 +8,7 @@
 
 ---@class StoryMemoryEntry
 ---@field type StoryMemoryEntryType
----@field text string Human-readable representation of the entry.
+---@field text? string Human-readable representation of the entry.
 
 ---@class TextMemoryEntry : StoryMemoryEntry
 ---@field type "text"
@@ -59,6 +59,7 @@ function StoryMemoryImpl:get_as_map()
     local out = {}
     for k, e in pairs(self.global) do
         if e.type == "text" then
+            ---@cast e TextMemoryEntry
             out[k] = e.text
         elseif e.type == "character" then
             ---@cast e CharacterMemoryEntry
