@@ -20,9 +20,10 @@
 --   base_difficulty            — Numeric difficulty level (as string).
 --                                Derived from story config at run start.
 --
---   faction_appearance_counts  — Serialised counts of how many times each
---                                faction has appeared (format: "id:n id:n …").
---                                Used to avoid over-repeating a single faction.
+--   faction_appearance_counts  — Map entry (MapMemoryEntry) tracking how many
+--                                times each faction has been selected (id → count
+--                                as string).  Written by select_faction each time
+--                                choose_next_story_beat picks a faction.
 --
 --   recruitment_quota_credits  — Accumulated fractional recruitment credits
 --                                (stored as a decimal string).  Credits >= 1
