@@ -2,7 +2,7 @@
 --- A key-value store for story variables, allowing data to be
 --- persisted and used across different story nodes.
 
----@alias StoryMemoryEntryType "text"|"character"|"map"
+---@alias StoryMemoryEntryType "text"|"character"|"map"|"list"
 
 ---@alias StoryMemoryMap table<string, string>
 
@@ -22,6 +22,10 @@
 ---@class MapMemoryEntry : StoryMemoryEntry
 ---@field type "map"
 ---@field entries table<string, string>
+
+---@class ListMemoryEntry : StoryMemoryEntry
+---@field type "list"
+---@field values string[]
 
 ---@alias SerializedStoryMemory table<string, StoryMemoryEntry>
 
@@ -68,6 +72,8 @@ function StoryMemoryImpl:get_as_map()
             out[k .. ".name"] = character.name
         elseif e.type == "map" then
             -- Map entries are programmatic data; intentionally excluded from template substitution.
+        elseif e.type == "list" then
+            -- List entries are programmatic data; intentionally excluded from template substitution.
         else
             error("unexpected entry type: " .. tostring(e.type))
         end
@@ -131,6 +137,18 @@ function story_memory.map(entries)
     local entry = {
         type = "map",
         entries = entries,
+    }
+    return entry
+end
+
+--- Create a list memory entry (ordered string array, for structured run state).
+---@param values string[]
+---@return ListMemoryEntry
+function story_memory.list(values)
+    ---@type ListMemoryEntry
+    local entry = {
+        type = "list",
+        values = values,
     }
     return entry
 end

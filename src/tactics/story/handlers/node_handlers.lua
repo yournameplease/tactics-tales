@@ -48,6 +48,14 @@ local HANDLERS = {
         end,
     },
 
+    set_memory_list = {
+        enter = function(story, node)
+            ---@cast node SetMemoryListNode
+            story.story_memory:set(node.key, story_memory.list(node.values))
+            story:advance_node()
+        end,
+    },
+
     new_page = {
         enter = function(story)
             story.story_page:clear_page()
