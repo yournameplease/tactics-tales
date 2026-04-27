@@ -1,10 +1,10 @@
 ---
 id: TASK-27
 title: 'Mod: faction-tagged spawn slots and battle parameterization'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-26 20:08'
+updated_date: '2026-04-27 02:25'
 labels: []
 milestone: m-5
 dependencies: []
@@ -15,15 +15,18 @@ ordinal: 3000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Entirely mod Lua. Battle factories already receive StoryConfig. Encounter templates declare unit spawn points using faction tag names (e.g. "enemy_infantry") instead of hardcoded character templates. The battle factory reads faction_id from story memory, looks up the faction's tag-to-template mapping, and resolves character templates. faction_id is also readable by battle scripts from story memory for dialogue or behavior branching. Existing static battles are unaffected.
+Entirely mod Lua. `mods/tt_procedural_story/game_data/battles.lua` loads factions via `include()`, defines a `resolve_slot(faction, tier_index, slot_tag)` helper that selects the template from the correct tier (clamping to last tier if index exceeds length) and applies `faction.fallbacks` when a slot is absent. Encounter templates (filler battles) use this helper to build `character_source.template(...)` entries, reading `faction_id` and `base_difficulty` from `story_config.memory`. Existing static battles in `tt_fantasy_demo_story` are unaffected.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Encounter templates use faction tag names for enemy spawn slots
-- [ ] #2 Battle factory reads faction_id from story memory and resolves tags to templates
-- [ ] #3 faction_id is accessible in battle scripts via story memory
-- [ ] #4 Existing static battles are unaffected
+- [x] #1 resolve_slot helper defined in tt_procedural_story/game_data/battles.lua
+- [x] #2 resolve_slot applies faction.fallbacks when slot absent from tier
+- [x] #3 resolve_slot clamps to last tier when tier_index exceeds tier count
+- [x] #4 Encounter templates use faction slot tags resolved at runtime via resolve_slot
+- [x] #5 faction_id is readable by battle scripts via story_config.memory
+- [x] #6 Existing static battles in tt_fantasy_demo_story are unaffected
+- [x] #7 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
