@@ -2,7 +2,7 @@
 --- A key-value store for story variables, allowing data to be
 --- persisted and used across different story nodes.
 
----@alias StoryMemoryEntryType "text"|"character"
+---@alias StoryMemoryEntryType "text"|"character"|"map"
 
 ---@alias StoryMemoryMap table<string, string>
 
@@ -18,6 +18,10 @@
 ---@field type "character"
 ---@field character_id CharacterId
 ---@field text string
+
+---@class MapMemoryEntry : StoryMemoryEntry
+---@field type "map"
+---@field entries table<string, string>
 
 ---@alias SerializedStoryMemory table<string, StoryMemoryEntry>
 
@@ -61,6 +65,8 @@ function StoryMemoryImpl:get_as_map()
             local character = self.character_manager:get_character(e.character_id)
             assert(character ~= nil)
             out[k .. ".name"] = character.name
+        elseif e.type == "map" then
+            -- Map entries are programmatic data; intentionally excluded from template substitution.
         else
             error("unexpected entry type: " .. tostring(e.type))
         end
@@ -112,6 +118,18 @@ function story_memory.character(character_id)
         type = "character",
         character_id = character_id,
         text = "[Character " .. character_id .. "]",
+    }
+    return entry
+end
+
+--- Create a map memory entry (string-to-string table, for structured run state).
+---@param entries table<string, string>
+---@return MapMemoryEntry
+function story_memory.map(entries)
+    ---@type MapMemoryEntry
+    local entry = {
+        type    = "map",
+        entries = entries,
     }
     return entry
 end

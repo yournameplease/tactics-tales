@@ -51,6 +51,20 @@ describe("tactics.story.story_memory", function()
         end)
     end)
 
+    describe("map", function()
+        it("should create an entry with type 'map'", function()
+            local entry = story_memory.map({ foo = "bar" })
+            luassert.are_equal("map", entry.type)
+        end)
+
+        it("should store the entries table", function()
+            local entry = story_memory.map({ foo = "bar", baz = "qux" })
+            ---@cast entry MapMemoryEntry
+            luassert.are_equal("bar", entry.entries.foo)
+            luassert.are_equal("qux", entry.entries.baz)
+        end)
+    end)
+
     describe("set and get", function()
         it("should retrieve an entry that was set", function()
             local mem = story_memory.new(make_character_manager(1, "Alice"))
@@ -116,6 +130,13 @@ describe("tactics.story.story_memory", function()
                 mem:get_as_map()
             end)
         end)
+
+        it("should not include map entries in the output", function()
+            local mem = story_memory.new(make_character_manager(1, "Alice"))
+            mem:set("counts", story_memory.map({ bandits = "2" }))
+            local map = mem:get_as_map()
+            luassert.is_nil(map["counts"])
+        end)
     end)
 
     describe("serialize", function()
@@ -172,6 +193,20 @@ describe("tactics.story.story_memory", function()
 
             -- Assert
             luassert.are_equal("from mem1", map["line"])
+        end)
+
+        it("should round-trip a map entry through serialize and deserialize", function()
+            local mem1 = story_memory.new(make_character_manager(1, "Alice"))
+            mem1:set("counts", story_memory.map({ bandits = "2", cultists = "0" }))
+            local saved = mem1:serialize()
+
+            local mem2 = story_memory.new(make_character_manager(1, "Alice"))
+            mem2:deserialize(saved)
+            local entry = mem2:get("counts")
+            luassert.is_not_nil(entry)
+            ---@cast entry MapMemoryEntry
+            luassert.are_equal("2", entry.entries.bandits)
+            luassert.are_equal("0", entry.entries.cultists)
         end)
     end)
 end)
