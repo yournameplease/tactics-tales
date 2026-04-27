@@ -5,7 +5,7 @@
 ---@alias StoryId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"|"select_option"
+---@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"set_memory_list"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"|"select_option"
 
 ---@class StoryNode Abstract base for all story node variants.
 ---@field type StoryNodeType
@@ -29,6 +29,11 @@
 ---@field type "set_memory"
 ---@field key string Story memory key to set.
 ---@field value string Value to store at the given key.
+
+---@class SetMemoryListNode : StoryNode Writes a list of values into story memory.
+---@field type "set_memory_list"
+---@field key string Story memory key to set.
+---@field values string[] List of values to store at the given key.
 
 ---@class SaveGameNode : StoryNode Triggers a save at this point in the story.
 ---@field type "save_game"
