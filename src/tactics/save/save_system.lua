@@ -11,6 +11,8 @@ local lists = require("src.tactics.util.lists")
 ---@field story_memory StoryMemory
 ---@field roster Character[]
 ---@field stats StoryResults
+---@field story_seed integer
+---@field story_rng_state integer
 
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
@@ -21,6 +23,8 @@ local lists = require("src.tactics.util.lists")
 ---@field story_memory SerializedStoryMemory
 ---@field roster SerializedCharacter[]
 ---@field stats StoryResults
+---@field story_seed integer
+---@field story_rng_state integer
 
 local save_system = {}
 
@@ -44,6 +48,8 @@ function save_system.save(name, data)
 			return c:serialize()
 		end)(data.roster),
 		stats = data.stats,
+		story_seed = data.story_seed,
+		story_rng_state = data.story_rng_state,
 	}
 
 	local path = SAVE_PATH .. name .. ".pod"

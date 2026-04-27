@@ -103,13 +103,17 @@
 ---@field name string
 ---@field value string
 
----@alias StoryNodeFactory fun(StoryConfig): StoryNode
----@alias StoryNodeSource StoryNode | StoryNode[] | (fun(StoryConfig): StoryNodeSource)
+---@class StoryRngContext Runtime RNG instances threaded alongside StoryConfig into factories.
+---@field story_rng RngInstance Story-level RNG, persisted across saves.
+---@field battle_rng RngInstance? Battle-level RNG, set fresh before each battle.
+
+---@alias StoryNodeFactory fun(StoryConfig, StoryRngContext): StoryNode
+---@alias StoryNodeSource StoryNode | StoryNode[] | (fun(StoryConfig, StoryRngContext): StoryNodeSource)
 
 ---@class StoryDefinition
 ---@field config? StoryConfigDefinition
 ---@field name? string
 ---@field description? string
----@field battle_config BattleConfig|fun(StoryConfig): BattleConfig
+---@field battle_config BattleConfig|fun(StoryConfig, StoryRngContext): BattleConfig
 ---@field nodes table<NodeId, StoryNodeSource> Maps each node ID to a sequence of nodes played in order.
 ---@field starting_node NodeId ID of the first node played when the story begins.

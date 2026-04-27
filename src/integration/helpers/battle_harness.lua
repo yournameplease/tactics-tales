@@ -173,6 +173,7 @@ function BattleHarness:start_battle(battle_id, battle_config)
         1,
         battle_id,
         {},
+        nil,
         battle_config,
         self._game_data,
         char_man,

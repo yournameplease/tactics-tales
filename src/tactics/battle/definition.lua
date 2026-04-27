@@ -6,7 +6,7 @@
 ---@class BattleDeploymentDefinition
 ---@field deployment_tiles_tag string TileLabel identifying the tiles where player units are placed at battle start.
 
----@alias BattleDefinitionFactory fun(StoryConfig): BattleDefinition
+---@alias BattleDefinitionFactory fun(StoryConfig, StoryRngContext): BattleDefinition
 
 ---@class BattleDefinition
 ---@field map_id string ID of the map used for this battle.
