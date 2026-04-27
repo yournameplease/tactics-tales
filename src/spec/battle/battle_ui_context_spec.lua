@@ -24,8 +24,8 @@ describe("BattleUIContext camera", function()
     describe("initial state", function()
         it("camera_x and camera_y are 0", function()
             local ctx, _ = make_ctx(VW, VH)
-            assert.equals(0, ctx.camera_x)
-            assert.equals(0, ctx.camera_y)
+            assert.are_equal(0, ctx.camera_x)
+            assert.are_equal(0, ctx.camera_y)
         end)
     end)
 
@@ -35,8 +35,8 @@ describe("BattleUIContext camera", function()
             ctx.camera_x = 0
             ctx.camera_y = 0
             ctx:clamp_camera(map)
-            assert.equals(0, ctx.camera_x)
-            assert.equals(0, ctx.camera_y)
+            assert.are_equal(0, ctx.camera_x)
+            assert.are_equal(0, ctx.camera_y)
         end)
 
         it("clamps negative camera to 0", function()
@@ -44,8 +44,8 @@ describe("BattleUIContext camera", function()
             ctx.camera_x = -10
             ctx.camera_y = -5
             ctx:clamp_camera(map)
-            assert.equals(0, ctx.camera_x)
-            assert.equals(0, ctx.camera_y)
+            assert.are_equal(0, ctx.camera_x)
+            assert.are_equal(0, ctx.camera_y)
         end)
 
         it("clamps camera past max to max", function()
@@ -55,8 +55,8 @@ describe("BattleUIContext camera", function()
             ctx.camera_x = max_x + 999
             ctx.camera_y = max_y + 999
             ctx:clamp_camera(map)
-            assert.equals(max_x, ctx.camera_x)
-            assert.equals(max_y, ctx.camera_y)
+            assert.are_equal(max_x, ctx.camera_x)
+            assert.are_equal(max_y, ctx.camera_y)
         end)
     end)
 
@@ -67,8 +67,8 @@ describe("BattleUIContext camera", function()
             ctx.camera_x = 0
             ctx.camera_y = 0
             ctx:move_camera(map, point.of(4, 4), 2)
-            assert.equals(0, ctx.camera_x)
-            assert.equals(0, ctx.camera_y)
+            assert.are_equal(0, ctx.camera_x)
+            assert.are_equal(0, ctx.camera_y)
         end)
 
         it("moves camera right when tile exits right dead zone", function()
@@ -100,8 +100,8 @@ describe("BattleUIContext camera", function()
             ctx.camera_x = 0
             ctx.camera_y = 0
             ctx:move_camera(map, point.of(0, 0), 3)
-            assert.equals(0, ctx.camera_x)
-            assert.equals(0, ctx.camera_y)
+            assert.are_equal(0, ctx.camera_x)
+            assert.are_equal(0, ctx.camera_y)
         end)
 
         it("clamps camera to max when tile is at far edge of large map", function()
@@ -113,8 +113,8 @@ describe("BattleUIContext camera", function()
             ctx:move_camera(map, point.of(VW + map_extra - 1, VH + map_extra - 1), 2)
             local max_x = map_extra * TW
             local max_y = map_extra * TH
-            assert.equals(max_x, ctx.camera_x)
-            assert.equals(max_y, ctx.camera_y)
+            assert.are_equal(max_x, ctx.camera_x)
+            assert.are_equal(max_y, ctx.camera_y)
         end)
     end)
 end)
