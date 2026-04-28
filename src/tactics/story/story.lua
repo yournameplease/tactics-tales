@@ -258,6 +258,10 @@ function story.new(
         function(option_id) self:select_option(option_id) end
     )
     self.story_memory = story_memory.new(self.character_manager)
+    -- Expose live memory to all factory functions (node and battle factories).
+    -- Story-level factories use story_config.memory:get()/set(); the plain
+    -- story_config fields (e.g. permadeath) are still accessible via __index.
+    self.story_config = setmetatable({ memory = self.story_memory }, { __index = story_config })
     self.story_page = story_page.story_page(self.story_memory)
     self.menu_manager = story_menu_manager.new(
         self.story_menu_context,
