@@ -238,6 +238,17 @@ function BattleUIContext:enrich()
             end
             self.layout = "COMBAT_PREVIEW"
             self.last_hovered_unit = unit
+
+            local attack_points = confirm_ctx.valid_attack_points
+            if attack_points and #attack_points > 0 then
+                self.menu_tile_highlights = self.battle_map:get_tiles_userdata_by("u8", function(p)
+                    for _, ap in ipairs(attack_points) do
+                        if ap == p then return HIGHLIGHT.IS_REACHABLE end
+                    end
+                    return 0
+                end)
+                should_recalculate_highlights = true
+            end
         end
     end
 
