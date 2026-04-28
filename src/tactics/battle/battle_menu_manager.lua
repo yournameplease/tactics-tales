@@ -9,6 +9,7 @@ local step_definition = menu_manager.definition.step
 local list = require("src.tactics.menu.cursor.nested.list")
 local grid = require("src.tactics.menu.cursor.nested.grid")
 local button = require("src.tactics.menu.cursor.button")
+local point = require("src.tactics.util.point")
 
 ---@class BattleMenuManager : MenuManager
 local BattleMenuManager = {}
@@ -292,10 +293,28 @@ end
 HANDLERS["move_and_store_attack_unit"] = function(services, _menu_data, session_context, value)
     local target_point = value.point
     local acting_unit = session_context.acting_unit.unit
-
-    -- follow the path backwards to get the first valid attack source
     local targeting = acting_unit.character:get_weapon_targeting()
 
+    -- collect all tiles in movement range that can attack the target
+    local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
+    local valid_attack_points = {}
+    for x = 0, services.battle_map.width - 1 do
+        for y = 0, services.battle_map.height - 1 do
+            local tile_data = valid_tiles:get(x, y)
+            if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+                local p = point.of(x, y)
+                local occupant = services.battle_map:get_at_tile(p)
+                if (occupant == nil or occupant.id == acting_unit.id)
+                    and targeting.is_target_valid(p, target_point, services.battle_map)
+                then
+                    table.insert(valid_attack_points, p)
+                end
+            end
+        end
+    end
+    session_context.valid_attack_points = valid_attack_points
+
+    -- follow the path backwards to get the first valid attack source
     local destination_point = value.path[#value.path]
     local valid_destination = false
     for i = #value.path, 1, -1 do
@@ -308,15 +327,20 @@ HANDLERS["move_and_store_attack_unit"] = function(services, _menu_data, session_
         end
     end
 
+    local trimmed_path
     if not valid_destination then
-        return menu_manager.menu_handler.then_dont_navigate()
-    end
-
-    local trimmed_path = {}
-    for i, p in ipairs(value.path) do
-        trimmed_path[i] = p
-        if p == destination_point then
-            break
+        if #valid_attack_points == 0 then
+            return menu_manager.menu_handler.then_dont_navigate()
+        end
+        destination_point = valid_attack_points[1]
+        trimmed_path = { destination_point }
+    else
+        trimmed_path = {}
+        for i, p in ipairs(value.path) do
+            trimmed_path[i] = p
+            if p == destination_point then
+                break
+            end
         end
     end
 
