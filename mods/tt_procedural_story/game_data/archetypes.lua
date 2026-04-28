@@ -26,6 +26,7 @@
 ---@field type "beat"|"filler"
 ---@field beat_id? string Template ID used when type == "beat".
 ---@field pool_override? table<string, integer> Per-slot filler weight overrides.
+---@field forced_join? string Character template ID to force-add after the battle (no prompt, no quota cost).
 
 ---@class ArchetypeDefinition
 ---@field name string Display name for the archetype selection screen.
@@ -52,7 +53,7 @@ local archetypes = {
         description = "A balanced campaign: open with a scripted skirmish, close with a decisive siege, and fill the middle with varied encounters.",
 
         slots = {
-            { type = "beat",   beat_id = "opening_skirmish" },
+            { type = "beat",   beat_id = "opening_skirmish", forced_join = "bandit_goon" },
             { type = "filler" },
             { type = "filler", pool_override = { skirmish = 3, ambush = 1 } },
             { type = "filler" },

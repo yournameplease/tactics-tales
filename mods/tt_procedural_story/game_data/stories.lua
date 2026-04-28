@@ -42,6 +42,7 @@ local archetypes_data    = include("mods/tt_procedural_story/game_data/archetype
 local faction_sel        = include("mods/tt_procedural_story/game_data/faction_selection.lua")
 local recruitment        = include("mods/tt_procedural_story/game_data/recruitment_quota.lua")
 local auto_rec           = include("mods/tt_procedural_story/game_data/auto_recruit.lua")
+local forced_join_mod    = include("mods/tt_procedural_story/game_data/forced_join.lua")
 local story_memory_mod   = include("src/tactics/story/story_memory.lua")
 
 -- Build the option list for the archetype selection node from the archetype
@@ -74,10 +75,9 @@ local function slot_template_id(archetype, slot, rng)
         return slot.beat_id
     end
     local pool = slot.pool_override or archetype.filler_pool
-    local keys = {}
-    for k in pairs(pool) do table.insert(keys, k) end
-    table.sort(keys)
-    return rng:choose_random_from_list(keys)
+
+    -- TODO: this can be non-deterministic with a map input
+    return rng:choose_random_from_list(pool)
 end
 
 ---@type ModStoriesModule
@@ -131,15 +131,23 @@ local stories = {
                       next_node_failure = "post_battle" },
                 },
 
-                -- Post-battle cleanup: auto_recruit → increment index → loop or exit.
+                -- Post-battle cleanup: forced_join → auto_recruit → increment index → loop or exit.
                 post_battle = {
-                    -- Step 1: process pending recruits and clear the list.
+                    -- Step 1: forced join if the slot declares one (no prompt, no quota cost).
+                    function(sc, _)
+                        local archetype = get_archetype(sc)
+                        local idx       = get_battle_index(sc)
+                        local slot      = archetype.slots[idx]
+                        return forced_join_mod.forced_join_node(slot)
+                    end,
+
+                    -- Step 2: process pending recruits and clear the list.
                     function(sc, _)
                         local text = auto_rec.auto_recruit_pending(sc.memory)
                         return { type = "text", text = text }
                     end,
 
-                    -- Step 2: increment battle_index; continue or exit.
+                    -- Step 3: increment battle_index; continue or exit.
                     function(sc, _)
                         local archetype = get_archetype(sc)
                         local idx       = get_battle_index(sc)
