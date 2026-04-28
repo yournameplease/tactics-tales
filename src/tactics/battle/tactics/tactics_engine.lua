@@ -749,7 +749,11 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
     local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
 
     for _, t in ipairs(tiles_in_distance) do
-        tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
+        local tile_unit = self.battle_map:get_at_tile(t)
+        -- TODO: extract a "can_attack" function
+        if (tile_unit and unit.side ~= tile_unit.side) then
+            tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
+        end
     end
 
     return tiles
