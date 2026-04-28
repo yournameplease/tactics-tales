@@ -263,6 +263,24 @@ HANDLERS["navigate_to_deployment_menu"] = function(_services, _menu_data, _sessi
     return menu_manager.menu_handler.then_navigate("DEPLOYMENT_MENU")
 end
 
+HANDLERS["cycle_attack_position"] = function(services, _menu_data, session_context, _value)
+    local points = session_context.valid_attack_points
+    if not points or #points < 2 then return nil end
+    local current = session_context.destination.point
+    local current_index = 1
+    for i, p in ipairs(points) do
+        if p == current then
+            current_index = i
+            break
+        end
+    end
+    local next_point = points[(current_index % #points) + 1]
+    services.tactics_engine:jump_unit_to_point(session_context.acting_unit.unit, next_point)
+    session_context.destination.point = next_point
+    services.tactics_engine.active_point = next_point
+    return menu_manager.menu_handler.then_recompute()
+end
+
 HANDLERS["wait_acting_unit"] = function(services, _menu_data, session_context, _value)
     services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
     return nil
@@ -674,12 +692,18 @@ return {
             ["CONFIRM_ATTACK"] = step_definition.of_node(
                 list.column(
                     "confirm_attack",
-                    function(_msb, _ctx)
+                    function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
                         local options = {}
                         table.insert(options, button.builder("attack")
                             :with_text("Attack")
                             :handle_action("select", "attack_unit")
                             :as_final_step())
+                        if ctx.valid_attack_points and #ctx.valid_attack_points > 1 then
+                            table.insert(options, button.builder("move")
+                                :with_text("Move")
+                                :handle_action("select", "cycle_attack_position"))
+                        end
                         table.insert(options, button.builder("cancel")
                             :with_text("Cancel")
                             :then_go_back())
