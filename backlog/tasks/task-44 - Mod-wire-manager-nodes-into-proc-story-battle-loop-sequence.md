@@ -1,9 +1,10 @@
 ---
 id: TASK-44
 title: 'Mod: wire manager nodes into proc story battle loop sequence'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-27 13:41'
+updated_date: '2026-04-28 01:20'
 labels: []
 milestone: m-6
 dependencies:

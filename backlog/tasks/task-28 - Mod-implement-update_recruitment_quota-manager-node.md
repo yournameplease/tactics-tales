@@ -1,10 +1,10 @@
 ---
 id: TASK-28
 title: 'Mod: implement update_recruitment_quota manager node'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-27 13:40'
+updated_date: '2026-04-28 01:00'
 labels: []
 milestone: m-6
 dependencies:

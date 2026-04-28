@@ -1,10 +1,10 @@
 ---
 id: TASK-30
 title: 'Mod: add turncoat recruit slot and interaction script to skirmish template'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:12'
-updated_date: '2026-04-27 13:40'
+updated_date: '2026-04-28 01:14'
 labels: []
 milestone: m-6
 dependencies:
