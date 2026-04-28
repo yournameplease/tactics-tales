@@ -40,7 +40,8 @@ local function weighted_pick(rng, weights)
         total = total + w
         table.insert(candidates, { id = id, weight = w })
     end
-    table.sort(candidates, function(a, b) return a.id < b.id end)
+
+    -- TODO: this can be non-deterministic without sorting
     local roll = rng:rndi(total)
     local cumulative = 0
     for _, c in ipairs(candidates) do
