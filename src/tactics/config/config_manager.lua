@@ -34,12 +34,12 @@ local DEFAULT_CONFIG = {
 	draw_target_debug = false,
 	profile = false,
 	head_scale = 1,
-	dialogue_speed = "normal",
+	dialogue_speed = "very_fast",
 	glyph_family = "keyboard",
 	input_group = "mouse_and_keyboard",
 	demo_mode = false,
 	master_volume = 10,
-	music_volume = 10,
+	music_volume = 7,
 	sfx_volume = 10,
 }
 
