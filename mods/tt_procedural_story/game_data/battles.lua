@@ -1,6 +1,8 @@
 local factions_mod = include("mods/tt_procedural_story/game_data/factions.lua")
 local factions_data = factions_mod.factions
 local resolve_slot  = factions_mod.resolve_slot
+local script_lib    = include("mods/base/lib/script.lua")
+local script        = script_lib.script
 
 local character_source = {}
 
@@ -28,20 +30,60 @@ local ai <const> = {
     stationary    = { move = "zero",     target_sides = { "player", "neutral" } },
 }
 
+local function mem_text(story_config, key)
+    local mem = story_config.memory
+    if not mem then return nil end
+    local entry = mem:get(key)
+    return entry and entry.text
+end
+
+local function mem_list(story_config, key)
+    local mem = story_config.memory
+    if not mem then return {} end
+    local entry = mem:get(key)
+    if not entry then return {} end
+    ---@cast entry ListMemoryEntry
+    return entry.values
+end
+
 local function get_faction(story_config)
-    local faction_id = story_config.memory and story_config.memory.faction_id
+    local faction_id = mem_text(story_config, "faction_id")
     return factions_data[faction_id] or factions_data["bandits"]
 end
 
 local function get_tier(story_config)
-    return tonumber(story_config.memory and story_config.memory.base_difficulty) or 1
+    return tonumber(mem_text(story_config, "base_difficulty")) or 1
 end
 
 ---@type ModBattlesModule
 local battles = {
-    ["skirmish"] = function(story_config)
-        local faction = get_faction(story_config)
-        local tier    = get_tier(story_config)
+    ["skirmish"] = function(story_config, rng_context)
+        local faction  = get_faction(story_config)
+        local tier     = get_tier(story_config)
+        local pending  = mem_list(story_config, "pending_recruits")
+
+        local has_turncoat = false
+        for _, v in ipairs(pending) do
+            if v == "turncoat_enemy" then has_turncoat = true; break end
+        end
+
+        local recruit_unit_entry
+        local recruit_scripts = {}
+        if has_turncoat then
+            local rng = rng_context and rng_context.battle_rng
+            local slot = rng and rng:choose_random_from_list(faction.recruitable) or faction.recruitable[1]
+            local template = resolve_slot(faction, tier, slot)
+            recruit_unit_entry = { side = "enemy", character_source = character_source.template(template), ai = ai.stationary, tile = "recruit_slot", tags = { "turncoat" } }
+            table.insert(recruit_scripts,
+                script.on_talk("turncoat")
+                    :then_dialogue(script.unit.target(), { "[turncoat] Turncoat joins the player." })
+                    :then_recruit_unit(script.unit.target())
+                    :as_one_shot()
+            )
+        else
+            recruit_unit_entry = { side = "enemy", character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two, tile = "recruit_slot" }
+        end
+
         return {
             map_id = "playground",
             music  = 0,
@@ -51,6 +93,7 @@ local battles = {
                 ["enemy_inf_b"]       = { 0x11 },
                 ["enemy_tank_a"]      = { 0x12 },
                 ["enemy_cmdr"]        = { 0x13 },
+                ["recruit_slot"]      = { 0x20 },
             },
             victory_conditions = { objectives.rout() },
             failure_conditions = { objectives.tagged_unit_dies("hero") },
@@ -60,8 +103,9 @@ local battles = {
                 { side = "enemy",  character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")),  ai = ai.move_two,   tile = "enemy_inf_b" },
                 { side = "enemy",  character_source = character_source.template(resolve_slot(faction, tier, "enemy_tank")),      ai = ai.move_one,   tile = "enemy_tank_a" },
                 { side = "enemy",  character_source = character_source.template(resolve_slot(faction, tier, "enemy_commander")), ai = ai.stationary, tile = "enemy_cmdr", tags = { "boss" } },
+                recruit_unit_entry,
             },
-            scripts = {},
+            scripts = recruit_scripts,
         }
     end,
 }

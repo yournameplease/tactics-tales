@@ -276,10 +276,14 @@ local HANDLERS = {
             -- Derive a deterministic battle-level seed and attach to rng_context.
             local battle_seed = story.story_seed * 31 + story.battle_count
             story.rng_context.battle_rng = random.new(battle_seed)
+            local sc_with_memory = setmetatable(
+                { memory = story.story_memory },
+                { __index = story.story_config }
+            )
             story.battle_manager = battle_manager_module.new(
                 story.battle_count,
                 node.battle_id,
-                story.story_config,
+                sc_with_memory,
                 story.rng_context,
                 story.battle_config,
                 story.game_data,
