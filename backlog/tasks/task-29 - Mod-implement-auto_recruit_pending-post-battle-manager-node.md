@@ -1,10 +1,10 @@
 ---
 id: TASK-29
 title: 'Mod: implement auto_recruit_pending post-battle manager node'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-26 19:11'
-updated_date: '2026-04-27 13:40'
+updated_date: '2026-04-28 01:10'
 labels: []
 milestone: m-6
 dependencies:
