@@ -10,6 +10,7 @@ local list = require("src.tactics.menu.cursor.nested.list")
 local grid = require("src.tactics.menu.cursor.nested.grid")
 local button = require("src.tactics.menu.cursor.button")
 local point = require("src.tactics.util.point")
+local pathfinding = require("src.tactics.battle.pathfinding")
 
 ---@class BattleMenuManager : MenuManager
 local BattleMenuManager = {}
@@ -332,8 +333,23 @@ HANDLERS["move_and_store_attack_unit"] = function(services, _menu_data, session_
         if #valid_attack_points == 0 then
             return menu_manager.menu_handler.then_dont_navigate()
         end
+        local cursor_point = value.path[#value.path]
         destination_point = valid_attack_points[1]
-        trimmed_path = { destination_point }
+        local best_dist = math.abs(destination_point.x - cursor_point.x) + math.abs(destination_point.y - cursor_point.y)
+        for i = 2, #valid_attack_points do
+            local p = valid_attack_points[i]
+            local d = math.abs(p.x - cursor_point.x) + math.abs(p.y - cursor_point.y)
+            if d < best_dist then
+                best_dist = d
+                destination_point = p
+            end
+        end
+        trimmed_path = pathfinding.extend_path_to_point(
+            { session_context.acting_unit.point:copy() },
+            destination_point,
+            acting_unit.character.stats.movement,
+            valid_tiles
+        )
     else
         trimmed_path = {}
         for i, p in ipairs(value.path) do
