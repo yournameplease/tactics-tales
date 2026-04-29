@@ -39,7 +39,7 @@ local DEFAULT_CONFIG = {
 	input_group = "mouse_and_keyboard",
 	demo_mode = false,
 	master_volume = 10,
-	music_volume = 7,
+	music_volume = 5,
 	sfx_volume = 10,
 }
 
