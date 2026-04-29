@@ -131,7 +131,7 @@ local BATTLE_DATA = {
                 ["bandit_miniboss_gate"] = { 0x1A },
                 ["bandit_miniboss_l"] = { 0x1B },
                 ["bandit_miniboss_r"] = { 0x1C },
-                ["player_captain"] = { 0x0B },
+                ["player_captain"] = { 0x20 },
                 ["player_spearman"] = { 0x08 },
                 ["player_archer"] = { 0x09 },
                 ["player_armor"] = { 0x0A },
@@ -147,12 +147,19 @@ local BATTLE_DATA = {
                 { side = "enemy", character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
+                { side = "neutral", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary, tile = "player_captain" },
                 { side = "player", character_source = character_source.player_roster(), tile = "player_deployment" },
             },
             scripts = {
+                script.on_talk("player_captain")
+                    :then_play_music("recruit")
+                    :then_dialogue(script_unit.tagged("player_captain"), {"I already called for reinforcements.", "Let me attack that bandit.", "My spear avoids counterattacks."})
+                    :then_recruit_unit(script_unit.tagged("player_captain"))
+                    :then_resume_music()
+                    :as_one_shot(),
                 script.on_turn(2, phase.before_player)
                     :then_spawn_units({
-                        { side = "player", character_source = character_source.template("militia_spear_captain"), tile = "player_captain" },
+                        -- { side = "player", character_source = character_source.template("militia_spear_captain"), tile = "player_captain" },
                         { side = "player", character_source = character_source.template("militia_spearman"), tile = "player_spearman" },
                         { side = "player", character_source = character_source.template("militia_archer"), tile = "player_archer" },
                         { side = "player", character_source = character_source.template("militia_armor"), tile = "player_armor" },
@@ -161,12 +168,8 @@ local BATTLE_DATA = {
                 )
                 :then_play_music("recruit")
                 :then_dialogue(script_unit.tagged("player_captain"), {
-                    "Just like I told you all, bandits!",
-                    "Remember your training!",
-                    "Spears and bows can soften enemies",
-                    "while avoiding counterattacks.",
-                    "Shields can be shattered by axes.",
-                    "Defeat their leader to save this village!"
+                    "My reinforcements have arrived!",
+                    "Defeat the leader to save this village!"
                 })
                 :then_resume_music(),
                 script.on_turn(3, phase.after_enemy, 3)
