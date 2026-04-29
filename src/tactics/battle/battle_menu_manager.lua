@@ -630,7 +630,7 @@ return {
                                 :as_final_step())
                         end
 
-                        if msb.tutorial_mode then
+                        if not msb.tutorial_mode then
                             table.insert(options, button.builder("wait")
                                 :with_text("Wait")
                                 :handle_action("select", "wait_acting_unit")
@@ -722,7 +722,7 @@ return {
                     function(msb, _ctx)
                         ---@cast msb BattleMenuContext
                         local options = {}
-                        if msb.tutorial_mode then
+                        if not msb.tutorial_mode then
                             table.insert(options, button.builder("end_turn")
                                 :with_text("End Turn")
                                 :handle_action("select", "end_turn"))
