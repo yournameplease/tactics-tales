@@ -132,6 +132,7 @@ function battle_manager.new(
         begin_battle,
         function() event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {}) end
     )
+    self.script_manager.battle_menu_ctx = battle_menu_ctx
     self.battle_menu_manager = battle_menu_manager.new(
         battle_menu_ctx,
         event_bus

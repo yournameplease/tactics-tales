@@ -97,6 +97,18 @@ function ScriptBuilder:then_change_ai(
     return self:then_modify_units(unit_selector, new_ai, nil)
 end
 
+---@param active boolean
+---@return ScriptBuilder
+function ScriptBuilder:then_set_tutorial(
+    active
+)
+	add(self.effects, {
+		type = "set_tutorial_mode",
+		active = active,
+	})
+	return self
+end
+
 ---@param unit_selector UnitSelector
 ---@return ScriptBuilder
 function ScriptBuilder:then_recruit_unit(

@@ -151,6 +151,10 @@ local BATTLE_DATA = {
                 { side = "player", character_source = character_source.player_roster(), tile = "player_deployment" },
             },
             scripts = {
+                script.on_turn(1, phase.before_player)
+                    :then_set_tutorial(true),
+                script.on_turn(1, phase.after_player)
+                    :then_set_tutorial(false),
                 script.on_talk("player_captain")
                     :then_play_music("recruit")
                     :then_dialogue(script_unit.tagged("player_captain"), {"I already called for reinforcements.", "Let me attack that bandit.", "My spear avoids counterattacks."})
