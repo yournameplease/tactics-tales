@@ -251,7 +251,7 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
                     unexpected(character_source.type)
                 end
                 if unit_character ~= nil then
-                    local facing_r = spawn_point.x <= (self.battle_map.width >> 1)
+                    local facing_r = spawn_point.x <= (self.battle_map.width >> 1)-2
                     local unit = battle_unit.spawn_unit(
                         unit_character,
                         spawn_point,
