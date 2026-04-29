@@ -78,7 +78,7 @@
 ---@field interaction_text string Prompt text shown to the player.
 ---@field interaction_distance TileDistance How close a unit must be to trigger the interaction.
 
----@alias ScriptEffectType "spawn_units"|"modify_units"|"recruit_units"|"modify_terrain"|"dialogue"|"despawn_units"|"play_sound"|"play_music"|"remove_script"
+---@alias ScriptEffectType "spawn_units"|"modify_units"|"recruit_units"|"modify_terrain"|"dialogue"|"despawn_units"|"play_sound"|"play_music"|"remove_script"|"set_tutorial_mode"
 
 ---@class ScriptEffect Abstract base for script effects.
 ---@field type ScriptEffectType
@@ -127,6 +127,10 @@
 ---@class RemoveScript : ScriptEffect
 ---@field type "remove_script"
 ---@field tag string Tag identifying the script to remove.
+
+---@class SetTutorialMode : ScriptEffect
+---@field type "set_tutorial_mode"
+---@field enabled boolean Whether to enable or disable tutorial mode.
 
 ---@class BattleScript
 ---@field id integer

@@ -630,10 +630,12 @@ return {
                                 :as_final_step())
                         end
 
-                        table.insert(options, button.builder("wait")
-                            :with_text("Wait")
-                            :handle_action("select", "wait_acting_unit")
-                            :as_final_step())
+                        if msb.tutorial_mode then
+                            table.insert(options, button.builder("wait")
+                                :with_text("Wait")
+                                :handle_action("select", "wait_acting_unit")
+                                :as_final_step())
+                        end
 
                         table.insert(options, button.builder("cancel")
                             :with_text("Cancel")
@@ -717,11 +719,14 @@ return {
             ["TURN_MENU"] = step_definition.of_node(
                 list.column(
                     "turn_menu",
-                    function(_msb, _ctx)
+                    function(msb, _ctx)
+                        ---@cast msb BattleMenuContext
                         local options = {}
-                        table.insert(options, button.builder("end_turn")
-                            :with_text("End Turn")
-                            :handle_action("select", "end_turn"))
+                        if msb.tutorial_mode then
+                            table.insert(options, button.builder("end_turn")
+                                :with_text("End Turn")
+                                :handle_action("select", "end_turn"))
+                        end
                         table.insert(options, button.builder("mark_all_units")
                             :with_text("Mark All Enemies")
                             :handle_action("select", "mark_all_units")

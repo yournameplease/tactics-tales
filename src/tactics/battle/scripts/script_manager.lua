@@ -34,6 +34,7 @@ local lists = require("src.tactics.util.lists")
 ---@field event_listener EventListener
 ---@field music_player MusicPlayer
 ---@field task_manager TaskManager
+---@field battle_menu_ctx BattleMenuContext
 ---@field active_scripts table<ScriptId, BattleScript>
 ---@field script_listeners table<ScriptId, ListenerId>
 local ScriptManager = {}
@@ -283,6 +284,12 @@ function ScriptManager:register_script(script)
                         self:remove_script(script_id)
                     end
                 end
+            end
+        elseif effect.type == "set_tutorial_mode" then
+            ---@cast effect SetTutorialMode
+            fn = function(_ctx)
+                log.debug("Handling SetTutorialMode effect.")
+                self.battle_menu_ctx.tutorial_mode = effect.enabled
             end
         elseif effect.type == "play_music" then
             ---@cast effect PlayMusic

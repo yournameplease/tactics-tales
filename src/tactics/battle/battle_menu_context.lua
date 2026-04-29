@@ -10,6 +10,7 @@
 ---@field tactics_engine TacticsEngine
 ---@field handle_start_battle fun() Callback invoked when the player starts the battle.
 ---@field handle_end_turn fun() Callback invoked when the player ends their turn.
+---@field tutorial_mode boolean When true, hides Wait and End Turn to force scripted actions.
 local BattleMenuContext = {}
 BattleMenuContext.__index = BattleMenuContext
 
@@ -30,6 +31,7 @@ function battle_menu_context.new(map, tactics, deployment_tiles_tag, handle_star
     self.deployment_tiles_tag = deployment_tiles_tag
     self.handle_start_battle = handle_start_battle
     self.handle_end_turn = handle_end_turn
+    self.tutorial_mode = false
     return self
 end
 
