@@ -88,7 +88,17 @@
 ---@field attacker_tag? string If set, only fire when the original attacker has this tag.
 ---@field defender_tag? string If set, only fire when the original defender has this tag.
 
----@alias ScriptEffectType "spawn_units"|"modify_units"|"recruit_units"|"modify_terrain"|"dialogue"|"despawn_units"|"play_sound"|"play_music"|"remove_script"|"set_tutorial_mode"
+---@alias ScriptEffectType
+---| "spawn_units"
+---| "modify_units"
+---| "recruit_units"
+---| "modify_terrain"
+---| "dialogue"
+---| "despawn_units"
+---| "play_sound"
+---| "play_music"
+---| "remove_script"
+---| "set_tutorial_mode"
 
 ---@class ScriptEffect Abstract base for script effects.
 ---@field type ScriptEffectType

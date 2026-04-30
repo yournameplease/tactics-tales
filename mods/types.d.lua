@@ -33,7 +33,10 @@
 ---@class ModStoriesModule
 ---@field data table<string, StoryDefinition>
 
----@alias FactionSlotTag "enemy_infantry"|"enemy_commander"|"enemy_tank"|"enemy_ranged"
+---@alias FactionSlotTag "enemy_infantry"
+---| "enemy_commander"
+---| "enemy_tank"
+---| "enemy_ranged"
 
 ---@class FactionTier
 ---@field enemy_infantry? string
