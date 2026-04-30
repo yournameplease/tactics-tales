@@ -337,7 +337,7 @@ local STORIES = {
 		nodes = {
 			prologue = {
 				stories.chapter_header("Tactics Tales"),
-				stories.text_input("This is the story of ${hero_name}", "hero_name"),
+				stories.text_input("(MOUSE/JOYPAD ONLY, SORRY NO KEYBOARD YET.) This is the story of ${hero_name}.", "hero_name"),
 				stories.set_memory("hero_village", "Herovillageton"),
 				stories.character_customizer("hero", "hero_name"),
 				stories.jump('ch_1_intro'),

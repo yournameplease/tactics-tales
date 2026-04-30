@@ -31,7 +31,7 @@ function battle_menu_context.new(map, tactics, deployment_tiles_tag, handle_star
     self.deployment_tiles_tag = deployment_tiles_tag
     self.handle_start_battle = handle_start_battle
     self.handle_end_turn = handle_end_turn
-    self.tutorial_mode = false
+    self.tutorial_mode = true
     return self
 end
 
