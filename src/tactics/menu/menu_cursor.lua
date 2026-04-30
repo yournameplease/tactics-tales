@@ -9,6 +9,7 @@
 
 ---@class MenuSignalBack : MenuSignal
 ---@field type "back"
+---@field target? string Step to back all the way to, if provided.
 
 ---@class MenuSignalConsumed : MenuSignal
 ---@field type "consumed"
@@ -30,6 +31,7 @@
 ---@field then_navigate_to? string Step to navigate to after the handler runs.
 ---@field then_finish? boolean When true, finish the menu after the handler.
 ---@field then_back? boolean When true, go back after the handler.
+---@field then_back_to? string When set, go back to this named step after the handler.
 
 ---@class MenuSignalOnChange : MenuSignal
 ---@field type "on_change"
@@ -105,9 +107,10 @@
 local menu_signal = {}
 
 --- Create a "back" signal to navigate to the previous step.
----@return MenuSignal
-function menu_signal.back()
-    return { type = "back" }
+---@param target? string Step to back all the way to; if nil, goes back one step.
+---@return MenuSignalBack
+function menu_signal.back(target)
+    return { type = "back", target = target }
 end
 
 --- Create a "consumed" signal indicating input was handled but produced no action.

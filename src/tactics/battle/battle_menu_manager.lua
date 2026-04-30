@@ -639,7 +639,7 @@ return {
 
                         table.insert(options, button.builder("cancel")
                             :with_text("Cancel")
-                            :then_go_back())
+                            :then_go_back_to("SELECT_UNIT"))
                         --- currently disabled as items aren't mechanically interesting yet
                         -- table.insert(options, {
                         --     text = "Items",
