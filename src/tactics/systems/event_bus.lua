@@ -18,6 +18,8 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "TACTICS_UNIT_DEATH"
 ---| "TACTICS_INTERACTION"
 ---| "UNIT_COMBAT"
+---| "BEFORE_COMBAT"
+---| "BEFORE_COUNTERATTACK"
 ---| "BATTLE_END"
 ---| "GAME_EXIT_STORY"
 

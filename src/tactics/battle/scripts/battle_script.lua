@@ -46,7 +46,7 @@
 ---@class TriggerTargetTileSelector : TileSelector
 ---@field type "trigger_target"
 
----@alias ScriptTriggerType "turn"|"unit_death"|"unit_interaction"|"tile_interaction"
+---@alias ScriptTriggerType "turn"|"unit_death"|"unit_interaction"|"tile_interaction"|"before_combat"|"before_counterattack"
 
 ---@class ScriptTrigger Abstract base for script triggers.
 ---@field type ScriptTriggerType
@@ -77,6 +77,16 @@
 ---@field tile_specifier TileSpecifier Identifies the tile that must be interacted with.
 ---@field interaction_text string Prompt text shown to the player.
 ---@field interaction_distance TileDistance How close a unit must be to trigger the interaction.
+
+---@class BeforeCombat : ScriptTrigger
+---@field type "before_combat"
+---@field attacker_tag? string If set, only fire when the attacker has this tag.
+---@field defender_tag? string If set, only fire when the defender has this tag.
+
+---@class BeforeCounterattack : ScriptTrigger
+---@field type "before_counterattack"
+---@field attacker_tag? string If set, only fire when the original attacker has this tag.
+---@field defender_tag? string If set, only fire when the original defender has this tag.
 
 ---@alias ScriptEffectType "spawn_units"|"modify_units"|"recruit_units"|"modify_terrain"|"dialogue"|"despawn_units"|"play_sound"|"play_music"|"remove_script"|"set_tutorial_mode"
 

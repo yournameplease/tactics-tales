@@ -453,6 +453,8 @@ end
 ---@param unit BattleUnit
 ---@param target BattleUnit
 function TacticsEngine:attack_unit(unit, target)
+    self.event_writer:emit("BEFORE_COMBAT", { attacker = unit, defender = target })
+    self:yield_while_in_script()
     self.battle_is_blocked = true
     self:do_combat(unit, target)
 
@@ -679,6 +681,10 @@ function TacticsEngine:do_combat(attacker, defender)
 
     for i, combat_step in ipairs(combat_result.steps) do
         log.debug("Combat step: ", i)
+        if combat_step.attacker.id ~= attacker.id then
+            self.event_writer:emit("BEFORE_COUNTERATTACK", { attacker = attacker, defender = defender })
+            self:yield_while_in_script()
+        end
         self:apply_combat_step(combat_step)
     end
 
