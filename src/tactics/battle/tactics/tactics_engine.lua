@@ -761,7 +761,20 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
     for _, t in ipairs(tiles_in_distance) do
         local tile_unit = self.battle_map:get_at_tile(t)
         -- TODO: extract a "can_attack" function
-        if (tile_unit and unit.side ~= tile_unit.side) then
+        if unit:is_player() then
+            if tile_unit ~= nil then
+                if tile_unit.side == "enemy" then
+                    tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
+                elseif tile_unit.side == "neutral" then
+                    local interactions = self.battle_map.interactions_by_unit_id[tile_unit.id]
+                    if interactions ~= nil
+                        and next(interactions) ~= nil
+                    then
+                        tiles:set(t.x, t.y, HIGHLIGHT.IS_VALID)
+                    end
+                end
+            end
+        else
             tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
         end
     end
