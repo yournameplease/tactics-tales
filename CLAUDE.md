@@ -16,6 +16,20 @@ Tests use the [Busted](https://lunarmodules.github.io/busted/) test runner. Run 
 busted build/spec/path/to/file_spec.lua
 ```
 
+## Agent skills
+
+### Issue tracker
+
+Tasks are tracked in Backlog.md via MCP. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage roles are applied as Backlog.md labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo — one `CONTEXT.md` at the root. See `docs/agents/domain.md`.
+
 <!-- BACKLOG.MD MCP GUIDELINES START -->
 
 <CRITICAL_INSTRUCTION>
