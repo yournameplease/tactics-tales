@@ -321,6 +321,18 @@ local function draw_tactics_map(
     end
 
     draw_target_manager:draw(draw_x, draw_y)
+
+    local banner = state.battle_context.tactics_engine.phase_banner
+    if banner then
+        local sw = STATIC_CONFIG.SCREEN_WIDTH
+        local sh = STATIC_CONFIG.SCREEN_HEIGHT
+        local bw, bh = 160, 24
+        local bx = (sw - bw) / 2
+        local by = (sh - bh) / 2
+        rectfill(bx, by, bx + bw, by + bh, 0)
+        print(banner.text, bx + 8, by + 8, 7)
+    end
+
     profile("draw_map_post_rows")
     profile("tactics_map_draw")
 end

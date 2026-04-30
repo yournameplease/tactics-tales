@@ -55,6 +55,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@field marked_unit_tiles userdata Bitfield map of tiles threatened by marked enemy units.
 ---@field marked_unit_revision integer Incremented whenever the marked-unit set changes.
 ---@field dialogue_revision integer Incremented whenever the active dialogue changes.
+---@field phase_banner {text: string, frames_remaining: integer}? Active phase banner, or nil if none.
 local TacticsEngine = {}
 TacticsEngine.__index = TacticsEngine
 
@@ -105,6 +106,7 @@ function tactics_engine.new(
     self.marked_unit_revision = 0
     self.marked_unit_tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
     self.dialogue_revision = 0
+    self.phase_banner = nil
 
     return self
 end
@@ -879,10 +881,24 @@ function TacticsEngine:invalidate_tiles_for_point(p)
     end
 end
 
+--- Show a phase banner with the given text for PHASE_BANNER_DURATION frames.
+---@param text string
+function TacticsEngine:show_phase_banner(text)
+    self.phase_banner = { text = text, frames_remaining = STATIC_CONFIG.PHASE_BANNER_DURATION }
+    self.battle_is_blocked = true
+end
+
 --- Advance dialogue state each frame.
 ---@param input InputContext
 function TacticsEngine:update(input)
     self:update_dialogue(input)
+    if self.phase_banner ~= nil then
+        self.phase_banner.frames_remaining = self.phase_banner.frames_remaining - 1
+        if self.phase_banner.frames_remaining <= 0 then
+            self.phase_banner = nil
+            self.battle_is_blocked = false
+        end
+    end
 end
 
 return tactics_engine
