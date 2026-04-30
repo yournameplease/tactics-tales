@@ -2,9 +2,15 @@
 --- Provides an input service for handling joypad and mouse input and
 --- mapping them to game actions.
 
----@alias InputAction "BUTTON_A"|"BUTTON_B"|"SHOULDER_L"|"SHOULDER_R"
+---@alias InputAction
+---| "BUTTON_A"
+---| "BUTTON_B"
+---| "SHOULDER_L"
+---| "SHOULDER_R"
 
----@alias InputMethod "mouse"|"joypad"
+---@alias InputMethod
+---| "mouse"
+---| "joypad"
 
 ---@class InputActionState
 ---@field held boolean Whether the action button is currently held down.
