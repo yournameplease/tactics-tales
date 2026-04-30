@@ -147,7 +147,7 @@ local BATTLE_DATA = {
                 { side = "enemy", character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
-                { side = "neutral", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary, tile = "player_captain" },
+                { side = "neutral", movement_side = "player", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary, tile = "player_captain" },
                 { side = "player", character_source = character_source.player_roster(), tile = "player_deployment" },
             },
             scripts = {
