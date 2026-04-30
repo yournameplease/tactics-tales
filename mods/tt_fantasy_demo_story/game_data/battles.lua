@@ -150,11 +150,19 @@ local BATTLE_DATA = {
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
                 { side = "neutral", movement_side = "player", character_source = character_source.template("militia_spear_captain"), ai = ai.stationary, tile = "player_captain" },
-                { side = "player", character_source = character_source.player_roster(), tile = "player_deployment" },
             },
             scripts = {
                 script.on_turn(1, phase.before_player)
-                    :then_set_tutorial(true),
+                    :then_set_tutorial(true)
+                    :then_spawn_units({
+                        { side = "player", character_source = character_source.player_roster(), tile = "player_deployment" }
+                    },
+                    "from_west"
+                )
+                :then_dialogue(script_unit.tagged("player_captain"), {
+                    "Help me save this village!",
+                    "Come talk to me!",
+                }),
                 script.on_turn(1, phase.after_player)
                     :then_set_tutorial(false),
                 script.on_talk("player_captain")
