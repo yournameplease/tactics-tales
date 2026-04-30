@@ -249,6 +249,28 @@ function script.on_tile_interaction(tile_tag, text)
   })
 end
 
+---@param attacker_tag? string
+---@param defender_tag? string
+---@return ScriptBuilder
+function script.before_combat(attacker_tag, defender_tag)
+    return script_builder.new({
+        type = "before_combat",
+        attacker_tag = attacker_tag,
+        defender_tag = defender_tag,
+    })
+end
+
+---@param attacker_tag? string
+---@param defender_tag? string
+---@return ScriptBuilder
+function script.before_counterattack(attacker_tag, defender_tag)
+    return script_builder.new({
+        type = "before_counterattack",
+        attacker_tag = attacker_tag,
+        defender_tag = defender_tag,
+    })
+end
+
 ---@param tile_tag string
 ---@param text string
 ---@return ScriptBuilder
