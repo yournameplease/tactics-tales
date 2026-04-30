@@ -243,7 +243,7 @@ function BattleUIContext:enrich()
             if attack_points and #attack_points > 0 then
                 self.menu_tile_highlights = self.battle_map:get_tiles_userdata_by("u8", function(p)
                     for _, ap in ipairs(attack_points) do
-                        if ap == p then return HIGHLIGHT.IS_REACHABLE end
+                        if ap == p then return HIGHLIGHT.IS_VALID end
                     end
                     return 0
                 end)
@@ -317,7 +317,7 @@ function BattleUIContext:enrich()
                 elseif t & HIGHLIGHT.IS_MARKED ~= 0 then
                     spr = 13
                 elseif t & HIGHLIGHT.IS_VALID ~= 0 then
-                    spr = 10 -- generic menu
+                    spr = 14 -- generic menu
                 end
                 self.highlighted_tiles:set(x, y, spr)
             end
