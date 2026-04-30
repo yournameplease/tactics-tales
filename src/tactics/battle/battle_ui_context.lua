@@ -304,7 +304,9 @@ function BattleUIContext:enrich()
                 local t = tile_highlights:get(x, y)
 
                 local spr = 0
-                if t & HIGHLIGHT.IS_REACHABLE ~= 0 then
+                if t & HIGHLIGHT.IS_INTERACTION_DESTINATION ~= 0 then
+                    spr = 14
+                elseif t & HIGHLIGHT.IS_REACHABLE ~= 0 then
                     spr = 10
                 elseif t & HIGHLIGHT.IS_INTERACTION ~= 0 then
                     spr = 15

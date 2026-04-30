@@ -819,12 +819,20 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(unit)
 
     reachable_tiles:foreach(function(x, y, reachable)
         if reachable then
+            local p = point.of(x, y)
             local tile = tiles:get(x, y)
             tile = tile | HIGHLIGHT.IS_VALID
             tile = tile | HIGHLIGHT.IS_REACHABLE
+
+            local has_attack = #self.battle_map:get_targets_in_range(unit.id, p) > 0
+            local has_interaction = #self.battle_map:get_nearby_interactions(p) > 0
+            if has_attack or has_interaction then
+                tile = tile | HIGHLIGHT.IS_INTERACTION_DESTINATION
+            end
+
             tiles:set(x, y, tile)
 
-            local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, point.of(x, y))
+            local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, p)
             tiles = tiles | ((tiles_in_attack_range & HIGHLIGHT.IS_VALID) << 1)
         end
     end)
