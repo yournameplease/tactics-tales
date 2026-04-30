@@ -126,6 +126,7 @@ local BATTLE_DATA = {
                 ["player_deployment"] = { 0x00 },
                 ["bandit_boss"] = { 0x1E },
                 ["bandit_goon"] = { 0x11 },
+                ["bandit_first_goon"] = { 0x13 },
                 ["bandit_reinforce_l"] = { 0x18 },
                 ["bandit_reinforce_r"] = { 0x19 },
                 ["bandit_miniboss_gate"] = { 0x1A },
@@ -144,6 +145,7 @@ local BATTLE_DATA = {
             units = {
                 { side = "enemy", character_source = character_source.template("bandit_boss"), ai = ai.stationary, tile = "bandit_boss", tags = { "boss" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_goon" },
+                { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.move_two, tile = "bandit_first_goon" },
                 { side = "enemy", character_source = character_source.template("bandit_guard"), ai = ai.stationary, tile = "bandit_miniboss_gate" },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_l", tags = { "spawn_child_bow" } },
                 { side = "enemy", character_source = character_source.template("bandit_goon"), ai = ai.stationary, tile = "bandit_miniboss_r", tags = { "spawn_child_axe" } },
@@ -188,6 +190,18 @@ local BATTLE_DATA = {
                     },
                     "from_east"
                 ),
+                script.before_combat("player_captain", "bandit_first_goon")
+                    :then_dialogue(script_unit.source(), {"First, I attack with my spear."})
+                    :as_one_shot(),
+                script.before_counterattack("player_captain", "bandit_first_goon")
+                    :then_dialogue(script_unit.source(), {"My long spear avoids counterattacks!"})
+                    :as_one_shot(),
+                script.before_combat("bandit_first_goon", "player_captain")
+                    :then_dialogue(script_unit.target(), {"Now they attack me."})
+                    :as_one_shot(),
+                script.before_counterattack("bandit_first_goon", "player_captain")
+                    :then_dialogue(script_unit.target(), {"I survived, so I can counterattack!"})
+                    :as_one_shot(),
                 script.when_unit_dies("bandit_miniboss_gate")
                     :then_modify_terrain("bandit_miniboss_gate", {["mid_wall"] = 0}),
                 script.when_unit_dies("spawn_child_bow")
