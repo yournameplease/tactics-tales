@@ -8,6 +8,15 @@ local event_writer = require("src.tactics.systems.event_bus.event_writer")
 ---@class Phase
 ---@field side Side
 
+local SIDE_LABEL = { player = "Player", enemy = "Enemy", neutral = "Ally" }
+
+---@param turn integer
+---@param side Side
+---@return string
+local function phase_banner_text(turn, side)
+    return "Turn " .. turn .. ": " .. SIDE_LABEL[side] .. " Phase"
+end
+
 ---@type Phase[]
 local PHASE_ORDER = {
     { side = "player" },
@@ -69,6 +78,10 @@ function TurnManager:advance_turn()
         self.turn = self.turn + 1
         self.tactics_engine.turn = self.turn
         self.tactics_engine:refresh_all_units()
+        self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, "player"))
+        for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
+        self.tactics_engine.phase_banner = nil
+        self.tactics_engine.battle_is_blocked = false
         self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
         self.event_writer:emit("TACTICS_BEGIN_TURN", {
             turn = self.turn
@@ -106,6 +119,10 @@ function TurnManager:advance_phase()
         end)
         -- skip phases for empty sides
         if #side_units > 0 then
+            self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, self:acting_side()))
+            for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
+            self.tactics_engine.phase_banner = nil
+            self.tactics_engine.battle_is_blocked = false
             if self:acting_side() ~= "player" then
                 self.ai_engine:handle_one_unit_action(self:acting_side())
             else
@@ -160,15 +177,21 @@ function turn_manager.new(
     self.event_writer = event_writer.new(bus)
 
     self.event_listener:on("TACTICS_BEGIN_BATTLE", function(_)
-        self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
-        self.event_writer:emit("TACTICS_BEGIN_PHASE", {
-            turn = self.turn,
-            side = PHASE_ORDER[1].side,
-        })
-        self.event_writer:emit("TACTICS_BEGIN_TURN", {
-            turn = self.turn,
-            side = PHASE_ORDER[1].side,
-        })
+        self.task_manager:start_routine(function()
+            self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, PHASE_ORDER[1].side))
+            for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
+            self.tactics_engine.phase_banner = nil
+            self.tactics_engine.battle_is_blocked = false
+            self.battle_menu_manager:set_menu("MENU_PLAYER_TURN")
+            self.event_writer:emit("TACTICS_BEGIN_PHASE", {
+                turn = self.turn,
+                side = PHASE_ORDER[1].side,
+            })
+            self.event_writer:emit("TACTICS_BEGIN_TURN", {
+                turn = self.turn,
+                side = PHASE_ORDER[1].side,
+            })
+        end)
     end)
 
     self.event_listener:on("TACTICS_UNIT_END_ACTION", function()
