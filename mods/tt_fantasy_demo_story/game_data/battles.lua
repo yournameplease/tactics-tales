@@ -194,10 +194,10 @@ local BATTLE_DATA = {
                     :then_dialogue(script_unit.source(), {"First, I attack with my spear."})
                     :as_one_shot(),
                 script.before_counterattack("player_captain", "bandit_first_goon")
-                    :then_dialogue(script_unit.source(), {"My long spear avoids counterattacks!"})
+                    :then_dialogue(script_unit.source(), {"My long spear avoids counter- attacks!"})
                     :as_one_shot(),
                 script.before_combat("bandit_first_goon", "player_captain")
-                    :then_dialogue(script_unit.target(), {"Now they attack me."})
+                    :then_dialogue(script_unit.target(), {"They attack me now."})
                     :as_one_shot(),
                 script.before_counterattack("bandit_first_goon", "player_captain")
                     :then_dialogue(script_unit.target(), {"I survived, so I can counterattack!"})
