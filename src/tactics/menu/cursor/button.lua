@@ -18,6 +18,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field next_state? string Step to navigate to on select.
 ---@field final_step? boolean When true, finish the menu on select.
 ---@field go_back? boolean When true, go back on select.
+---@field go_back_to? string When set, go back to this named step on select.
 ---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 local ButtonCursor = {}
 ButtonCursor.__index = ButtonCursor
@@ -30,6 +31,7 @@ ButtonCursor.__index = ButtonCursor
 ---@field next_state? string Step to navigate to on select.
 ---@field final_step? boolean When true, finish the menu on select.
 ---@field go_back? boolean When true, go back on select.
+---@field go_back_to? string When set, go back to this named step on select.
 ---@field handlers table<string, string>? Map from MenuCommand to MenuHandlerId.
 local ButtonDefinition = {}
 ButtonDefinition.__index = ButtonDefinition
@@ -105,6 +107,8 @@ function ButtonCursor:handle_command(command, _menu_ctx, _game_ctx)
                 signal.then_finish = true
             elseif self.next_state then
                 signal.then_navigate_to = self.next_state
+            elseif self.go_back_to then
+                signal.then_back_to = self.go_back_to
             elseif self.go_back then
                 signal.then_back = true
             end
@@ -117,6 +121,8 @@ function ButtonCursor:handle_command(command, _menu_ctx, _game_ctx)
             return menu_signal.finish()
         elseif self.next_state ~= nil then
             return menu_signal.navigate(self.next_state)
+        elseif self.go_back_to then
+            return menu_signal.back(self.go_back_to)
         elseif self.go_back then
             return menu_signal.back()
         end
@@ -195,6 +201,14 @@ end
 ---@return ButtonDefinition
 function ButtonDefinition:then_go_back()
     self.go_back = true
+    return self
+end
+
+--- Configure the button to go back to a named step on select.
+---@param step string Target step ID to return to.
+---@return ButtonDefinition
+function ButtonDefinition:then_go_back_to(step)
+    self.go_back_to = step
     return self
 end
 

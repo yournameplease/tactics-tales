@@ -275,24 +275,65 @@ function BaseMenuManager:handle_menu_advance(next_state)
     end
 end
 
---- Navigate back to the previous step, pruning history accordingly.
-function BaseMenuManager:handle_menu_back()
-    local previous_step = self.menu_definitions[self.menu_state.menu_id]
-        .steps[self.menu_state.step]
-        .previous_step
+--- Navigate back, optionally all the way to a named step, firing back handlers along the way.
+---@param target_step? string If provided, keep backing up until this step is reached.
+function BaseMenuManager:handle_menu_back(target_step)
+    local menu_def = self.menu_definitions[self.menu_state.menu_id]
+    local previous_step = menu_def.steps[self.menu_state.step].previous_step
 
     if previous_step == nil then
         return
     end
-    log.debug("Backing out of " .. self.menu_state.menu_id .. " to " .. previous_step)
+
+    if target_step == nil then
+        log.debug("Backing out of " .. self.menu_state.menu_id .. " to " .. previous_step)
+        while #self.selection_history > 0 and
+            self.selection_history[#self.selection_history].step ~= previous_step do
+            self.selection_history[#self.selection_history] = nil
+        end
+        if #self.selection_history > 0 then
+            self.selection_history[#self.selection_history] = nil
+        end
+        self:populate_menu_state(previous_step)
+        return
+    end
+
+    -- Verify target_step is reachable by following the previous_step chain.
+    local reachable = false
+    local check = previous_step
+    while check ~= nil do
+        if check == target_step then
+            reachable = true
+            break
+        end
+        check = menu_def.steps[check] and menu_def.steps[check].previous_step
+    end
+    assert(reachable, "target_step '" .. target_step .. "' is not reachable from '" .. self.menu_state.step .. "'")
+
+    log.debug("Backing out of " .. self.menu_state.menu_id .. " to " .. target_step)
+
+    -- Walk the previous_step chain, firing each intermediate step's back handler.
+    local current = previous_step
+    while current ~= target_step do
+        local step_def = menu_def.steps[current]
+        local handler_id = step_def.handlers and step_def.handlers["back"]
+        if handler_id then
+            local handler = self.menu_handlers[handler_id]
+            assert(handler ~= nil, "Bad handler for id " .. handler_id)
+            log.debug("Calling back handler for intermediate step: " .. current)
+            handler(self.game_ctx, self:serialize().node.data, self.menu_ctx, nil)
+        end
+        current = step_def.previous_step
+    end
+
     while #self.selection_history > 0 and
-        self.selection_history[#self.selection_history].step ~= previous_step do
+        self.selection_history[#self.selection_history].step ~= target_step do
         self.selection_history[#self.selection_history] = nil
     end
     if #self.selection_history > 0 then
         self.selection_history[#self.selection_history] = nil
     end
-    self:populate_menu_state(previous_step)
+    self:populate_menu_state(target_step)
 end
 
 --- Close the active menu and reset all state.
@@ -424,6 +465,7 @@ function BaseMenuManager:update(input)
                 end
             end
         elseif signal.type == "back" then
+            ---@cast signal MenuSignalBack
             local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
             if handler_id then
                 local handler = self.menu_handlers[handler_id]
@@ -436,7 +478,7 @@ function BaseMenuManager:update(input)
                     nil
                 )
             end
-            self:handle_menu_back()
+            self:handle_menu_back(signal.target)
         elseif signal.type == "navigate" then
             ---@cast signal MenuSignalNavigate
             self:handle_menu_advance(signal.target)
@@ -508,7 +550,7 @@ function BaseMenuManager:update(input)
                     self:handle_menu_advance(signal.then_navigate_to)
                 end
             end
-            if signal.then_back then
+            if signal.then_back or signal.then_back_to then
                 local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
                 if handler_id then
                     local back_handler = self.menu_handlers[handler_id]
@@ -521,7 +563,7 @@ function BaseMenuManager:update(input)
                         nil
                     )
                 end
-                self:handle_menu_back()
+                self:handle_menu_back(signal.then_back_to)
             end
         else
             error("unexpected signal type: " .. tostring(signal.type))
