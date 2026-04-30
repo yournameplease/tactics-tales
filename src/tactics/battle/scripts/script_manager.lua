@@ -201,6 +201,18 @@ function ScriptManager:register_script(script)
                     target_tile = msg.target_tile,
                 }
         end
+    elseif trigger.type == "before_combat" or trigger.type == "before_counterattack" then
+        ---@cast trigger BeforeCombat|BeforeCounterattack
+        event = trigger.type == "before_combat" and "BEFORE_COMBAT" or "BEFORE_COUNTERATTACK"
+        filter = function(msg)
+            if trigger.attacker_tag ~= nil and not msg.attacker.tags[trigger.attacker_tag] then
+                return false, nil
+            end
+            if trigger.defender_tag ~= nil and not msg.defender.tags[trigger.defender_tag] then
+                return false, nil
+            end
+            return true, { source_unit = msg.attacker, target_unit = msg.defender }
+        end
     else
         unexpected(script.trigger.type)
     end
