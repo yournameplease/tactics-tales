@@ -286,7 +286,9 @@ function BattleUIContext:enrich()
         local hover_unit_highlights
         local menu_highlights
         if should_highlight_hovered_unit then
-            hover_unit_highlights = self.hovered_unit and self.tactics_engine:get_valid_tiles_for_unit(self.hovered_unit)
+            local u = self.hovered_unit
+            local already_acted = u and u:is_player() and u.has_acted
+            hover_unit_highlights = (u and not already_acted) and self.tactics_engine:get_valid_tiles_for_unit(u)
         end
         menu_highlights = self.menu_tile_highlights
 
