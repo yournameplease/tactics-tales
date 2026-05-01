@@ -9,10 +9,10 @@ describe("story flow #it", function()
             luassert.is_true(h:is_complete())
         end)
 
-        it("should emit GAME_EXIT_STORY", function()
+        it("should emit GAME_EXIT_CAMPAIGN", function()
             local h = campaign_harness.new()
             h:start_campaign("simple_exit")
-            luassert.are_equal(1, #h:emitted("GAME_EXIT_STORY"))
+            luassert.are_equal(1, #h:emitted("GAME_EXIT_CAMPAIGN"))
         end)
     end)
 

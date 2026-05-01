@@ -21,7 +21,7 @@ local id_generator = require("src.tactics.util.id_generator")
 ---| "BEFORE_COMBAT"
 ---| "BEFORE_COUNTERATTACK"
 ---| "BATTLE_END"
----| "GAME_EXIT_STORY"
+---| "GAME_EXIT_CAMPAIGN"
 
 ---@class EventCallback
 ---@field id ListenerId Unique subscription ID used to remove this callback.
