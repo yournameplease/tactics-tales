@@ -59,7 +59,7 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Rout" } },
                 { { type = "all_players_die", text = "Survive" } }
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_false(result.finished)
             luassert.is_nil(result.result)
         end)
@@ -70,7 +70,7 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Rout" } },
                 {}
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("VICTORY", result.result)
         end)
@@ -81,7 +81,7 @@ describe("tactics.battle.battle_objective_service", function()
                 {},
                 { { type = "all_players_die", text = "Survive" } }
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("DEFEAT", result.result)
         end)
@@ -93,7 +93,7 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Rout" } },
                 { { type = "all_players_die", text = "Survive" } }
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("DEFEAT", result.result)
         end)
@@ -105,9 +105,11 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "turn_limit", text = "Turn limit" } }
             )
             -- turn 5 is not exceeded (> 5 is false)
-            luassert.is_false(svc:check_objectives(5).finished)
+            svc:set_turn(5)
+            luassert.is_false(svc:check_objectives().finished)
             -- turn 6 exceeds the limit
-            local result = svc:check_objectives(6)
+            svc:set_turn(6)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("DEFEAT", result.result)
         end)
@@ -118,8 +120,10 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "survive", text = "Survive 5 turns" } },
                 {}
             )
-            luassert.is_false(svc:check_objectives(5).finished)
-            local result = svc:check_objectives(6)
+            svc:set_turn(5)
+            luassert.is_false(svc:check_objectives().finished)
+            svc:set_turn(6)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("VICTORY", result.result)
         end)
@@ -131,7 +135,7 @@ describe("tactics.battle.battle_objective_service", function()
                 {}
             )
             -- enemy without "boss" tag → tagged enemies = 0 → victory triggers
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("VICTORY", result.result)
         end)
@@ -142,7 +146,7 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "defeat_tagged", text = "Defeat the boss", tag = "boss" } },
                 {}
             )
-            luassert.is_false(svc:check_objectives(1).finished)
+            luassert.is_false(svc:check_objectives().finished)
         end)
 
         it("tagged_player_dies triggers when a tagged player is in dead list", function()
@@ -151,7 +155,7 @@ describe("tactics.battle.battle_objective_service", function()
                 {},
                 { { type = "tagged_unit_dies", text = "Protect the VIP", tag = "vip" } }
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("DEFEAT", result.result)
         end)
@@ -162,14 +166,14 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "escape", text = "Escape" } },
                 {}
             )
-            local result = svc:check_objectives(1)
+            local result = svc:check_objectives()
             luassert.is_true(result.finished)
             luassert.are_equal("VICTORY", result.result)
         end)
 
     end)
 
-    describe("get_objective_text", function()
+    describe("objective_text", function()
 
         it("returns empty table when no conditions have text", function()
             local map = make_map({}, {})
@@ -177,8 +181,7 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout" } },
                 {}
             )
-            local out = svc:get_objective_text(1)
-            luassert.are_equal(0, #out)
+            luassert.are_equal(0, #svc.objective_text)
         end)
 
         it("returns victory condition text", function()
@@ -187,9 +190,8 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Defeat all enemies" } },
                 {}
             )
-            local out = svc:get_objective_text(1)
-            luassert.are_equal(1, #out)
-            luassert.are_equal("Defeat all enemies", out[1])
+            luassert.are_equal(1, #svc.objective_text)
+            luassert.are_equal("Defeat all enemies", svc.objective_text[1])
         end)
 
         it("prefixes entries after the first with 'or '", function()
@@ -199,10 +201,9 @@ describe("tactics.battle.battle_objective_service", function()
                   { type = "escape", text = "Escape" } },
                 {}
             )
-            local out = svc:get_objective_text(1)
-            luassert.are_equal(2, #out)
-            luassert.are_equal("Defeat all enemies", out[1])
-            luassert.are_equal("or Escape", out[2])
+            luassert.are_equal(2, #svc.objective_text)
+            luassert.are_equal("Defeat all enemies", svc.objective_text[1])
+            luassert.are_equal("or Escape", svc.objective_text[2])
         end)
 
         it("inserts turn counter at position 1 when a turn limit is set", function()
@@ -211,12 +212,12 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Defeat all enemies" } },
                 {}
             )
-            local out = svc:get_objective_text(3)
+            svc:set_turn(3)
             -- "or" prefix is applied before the turn counter is inserted, so the
             -- single condition text keeps no prefix and the counter is index 1.
-            luassert.are_equal(2, #out)
-            luassert.are_equal("Turn 3/10", out[1])
-            luassert.are_equal("Defeat all enemies", out[2])
+            luassert.are_equal(2, #svc.objective_text)
+            luassert.are_equal("Turn 3/10", svc.objective_text[1])
+            luassert.are_equal("Defeat all enemies", svc.objective_text[2])
         end)
 
         it("prefixes condition texts after the first with 'or ' when turn limit present", function()
@@ -226,11 +227,11 @@ describe("tactics.battle.battle_objective_service", function()
                   { type = "escape", text = "Escape" } },
                 {}
             )
-            local out = svc:get_objective_text(3)
-            luassert.are_equal(3, #out)
-            luassert.are_equal("Turn 3/10", out[1])
-            luassert.are_equal("Defeat all enemies", out[2])
-            luassert.are_equal("or Escape", out[3])
+            svc:set_turn(3)
+            luassert.are_equal(3, #svc.objective_text)
+            luassert.are_equal("Turn 3/10", svc.objective_text[1])
+            luassert.are_equal("Defeat all enemies", svc.objective_text[2])
+            luassert.are_equal("or Escape", svc.objective_text[3])
         end)
 
         it("omits turn counter when no turn limit is set", function()
@@ -239,9 +240,9 @@ describe("tactics.battle.battle_objective_service", function()
                 { { type = "rout", text = "Defeat all enemies" } },
                 {}
             )
-            local out = svc:get_objective_text(3)
-            luassert.are_equal(1, #out)
-            luassert.are_equal("Defeat all enemies", out[1])
+            svc:set_turn(3)
+            luassert.are_equal(1, #svc.objective_text)
+            luassert.are_equal("Defeat all enemies", svc.objective_text[1])
         end)
 
     end)

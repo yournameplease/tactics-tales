@@ -326,8 +326,7 @@ function BattleUIContext:enrich()
 
     self.active_dialogue = self.tactics_engine.active_dialogue
 
-    -- todo: cache
-    self.objective_text = self.battle_objective_service:get_objective_text(self.turn_manager.turn)
+    self.objective_text = self.battle_objective_service.objective_text
 end
 
 return battle_ui_context
