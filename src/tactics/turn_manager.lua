@@ -46,7 +46,7 @@ local turn_manager = {
 --- Return true if the battle is finished based on current objectives.
 ---@return boolean
 function TurnManager:check_objectives()
-    local battle_result = self.battle_objective_service:check_objectives(self.turn)
+    local battle_result = self.battle_objective_service:check_objectives()
 
     if not battle_result.finished then
         log.debug("Battle still ongoing")
@@ -77,6 +77,7 @@ function TurnManager:advance_turn()
         self.phase = 1
         self.turn = self.turn + 1
         self.tactics_engine.turn = self.turn
+        self.battle_objective_service:set_turn(self.turn)
         self.tactics_engine:refresh_all_units()
         self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, "player"))
         for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
