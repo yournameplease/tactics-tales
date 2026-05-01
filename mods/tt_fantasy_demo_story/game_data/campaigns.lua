@@ -433,7 +433,7 @@ local STORIES = {
 			},
 			ch_1_v = {
 				campaigns.new_page(),
-				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
 				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 				campaigns.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
@@ -460,7 +460,7 @@ local STORIES = {
 			},
 			ch_2_v = {
 				campaigns.new_page(),
-				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
 				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 				campaigns.story_text("The heroes managed to escape the cave."),
@@ -487,7 +487,7 @@ local STORIES = {
 			},
 			ch_3_v = {
 				campaigns.new_page(),
-				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
 				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
@@ -517,7 +517,7 @@ local STORIES = {
 			},
 			ch_4_v = {
 				campaigns.new_page(),
-				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
 				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
@@ -546,7 +546,7 @@ local STORIES = {
 			},
 			ch_5_v = {
 				campaigns.new_page(),
-				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
 				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
