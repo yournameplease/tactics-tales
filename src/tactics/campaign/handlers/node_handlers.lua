@@ -1,5 +1,5 @@
--- Handlers access Story @field package fields; Story fields are package-scoped to
--- src/tactics/story/ but handlers live in the subdirectory handlers/.
+-- Handlers access Story @field package fields; Campaign fields are package-scoped to
+-- src/tactics/campaign/ but handlers live in the subdirectory handlers/.
 ---@diagnostic disable: invisible
 local save_system = require("src.tactics.save.save_system")
 local random = require("src.tactics.util.random")
@@ -8,7 +8,7 @@ local campaign_state = require("src.tactics.campaign.campaign_state")
 local drawable_character = require("src.tactics.campaign.drawable_character")
 local character = require("src.tactics.character.object.character")
 
----@param story Story
+---@param campaign Campaign
 ---@param input InputContext
 local function dialogue_update(campaign, input)
     campaign.dialogue_manager:update(input)
@@ -18,7 +18,7 @@ local function dialogue_update(campaign, input)
     end
 end
 
----@param story Story
+---@param campaign Campaign
 ---@param input InputContext
 local function text_input_update(campaign, input)
     campaign.dialogue_manager:update(input)
