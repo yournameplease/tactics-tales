@@ -171,7 +171,7 @@ describe("tt_procedural_story.stories proc_story", function()
             luassert.are_equal("battle_loop", node.next_node)
         end)
 
-        it("returns exit_story when all slots are done", function()
+        it("returns exit_campaign when all slots are done", function()
             -- warband has 6 slots; battle_index=6 means the last slot just ran
             local mem = make_mem()
             mem:set("archetype_id", campaign_state.text("warband"))

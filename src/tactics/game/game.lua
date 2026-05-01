@@ -164,8 +164,8 @@ function game.new(
     self.ui_context = ui_context
     self.ui_context:register_ui_context(game_ui_ctx)
 
-    self.event_listener:on("GAME_EXIT_STORY", function()
-        self:exit_story()
+    self.event_listener:on("GAME_EXIT_CAMPAIGN", function()
+        self:exit_campaign()
         self.menu_manager:set_menu("MENU_MAIN_MENU")
     end)
 

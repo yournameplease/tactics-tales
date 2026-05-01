@@ -3,7 +3,7 @@ local luassert = require("luassert")
 local campaign_harness = require("src.integration.helpers.campaign_harness")
 
 describe("node handlers #it", function()
-    -- Helper: inline story ending with exit_story after the given nodes
+    -- Helper: inline story ending with exit_campaign after the given nodes
     local function single_node_story(node)
         return {
             campaigns = {

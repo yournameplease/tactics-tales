@@ -71,7 +71,7 @@ function campaign_harness.new(overrides)
             self._emitted[event_type] = {}
         end
         table.insert(self._emitted[event_type], args or {})
-        if event_type == "GAME_EXIT_STORY" then
+        if event_type == "GAME_EXIT_CAMPAIGN" then
             self._complete = true
         end
         return original_emit(bus, event_type, args)
@@ -150,7 +150,7 @@ function CampaignHarness:dpad(dx, dy)
     self:tick_to_idle()
 end
 
---- Return true if the story has reached exit_story.
+--- Return true if the story has reached exit_campaign.
 ---@return boolean
 function CampaignHarness:is_complete()
     return self._complete

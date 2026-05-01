@@ -107,7 +107,7 @@ local HANDLERS = {
 
     exit_campaign = {
         enter = function(campaign)
-            campaign.event_writer:emit("GAME_EXIT_STORY", {})
+            campaign.event_writer:emit("GAME_EXIT_CAMPAIGN", {})
         end,
     },
 

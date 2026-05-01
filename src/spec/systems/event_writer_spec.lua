@@ -20,8 +20,8 @@ describe("tactics.systems.event_bus.event_writer", function()
             ---@class DummyWriterMessage
             ---@field reason integer
             local received = nil
-            bus:on("GAME_EXIT_STORY", function(args) received = args end)
-            writer:emit("GAME_EXIT_STORY", { reason = "done" })
+            bus:on("GAME_EXIT_CAMPAIGN", function(args) received = args end)
+            writer:emit("GAME_EXIT_CAMPAIGN", { reason = "done" })
             luassert.are_equal("done", received.reason)
         end)
     end)

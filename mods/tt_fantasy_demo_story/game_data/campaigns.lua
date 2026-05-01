@@ -50,9 +50,9 @@ function campaigns.advance()
 	}
 end
 
-function campaigns.exit_story()
+function campaigns.exit_campaign()
 	return {
-		type = 'exit_story',
+		type = 'exit_campaign',
 	}
 end
 
@@ -162,12 +162,12 @@ function campaigns.chapter_debug(
 			victory = {
 				campaigns.story_text("You Win!"),
 				campaigns.game_results(),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 			defeat = {
 				campaigns.story_text("You Lose..."),
 				campaigns.game_results(),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 		}
 	}
@@ -373,7 +373,7 @@ local STORIES = {
 				campaigns.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
 				campaigns.story_text("But you'll need to play the full game to see that!"),
 				campaigns.story_text("Check it out at \nyour-name-please.itch.io/tactics-tales!"),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 			ch_1_f = {
 				campaigns.new_page(),
@@ -381,7 +381,7 @@ local STORIES = {
 				campaigns.story_text("${hero_village} would find itself under bandit rule for years to come."),
 				campaigns.story_text("Try again for a victory. I believe in you!"),
 				campaigns.story_text("Or, play the full game at \nyour-name-please.itch.io/tactics-tales!"),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 		},
 	},
@@ -405,7 +405,7 @@ local STORIES = {
 			save_ask = {
 				campaigns.select_option({
 					{ id = "save", name = "Save", description = "Save your progress." },
-					{ id = "skip", name = "Skip", description = "Continue without saving." },
+					{ id = "skip", name = "Don't Save", description = "Continue without saving." },
 				}, "save_choice"),
 				lib.libs.story.memory_branch(
 					function(c, s) return s["save_choice"] == "save" end,
@@ -563,7 +563,7 @@ local STORIES = {
 				campaigns.chapter_header("Victory"),
 				campaigns.story_text("Congratulations!"),
 				campaigns.story_text("Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 			game_over = {
 				campaigns.new_page(),
@@ -574,12 +574,12 @@ local STORIES = {
 					campaigns.jump("delete_file"),
 					campaigns.advance()
 				),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			},
 			delete_file = {
 				campaigns.delete_file(),
 				campaigns.story_text("File deleted."),
-				campaigns.exit_story(),
+				campaigns.exit_campaign(),
 			}
 		}
 	}
