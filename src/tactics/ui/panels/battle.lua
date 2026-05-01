@@ -196,7 +196,7 @@ function battle.unit_inventory()
                 table.insert(out, "\014Monarch:\015 Game over if slain.")
             end
             if u.tags["boss"] then
-                table.insert(out, "\014Boss:\015 Kill all bosses to win the chapter.")
+                table.insert(out, "\014Boss:\015 Defeat all bosses to win the chapter.")
             end
 
             for _, d in ipairs(items) do
@@ -205,9 +205,9 @@ function battle.unit_inventory()
                 end
                 if d.effects then
                     for _, e in ipairs(d.effects) do
-                        if e.name and e.description then
+                        if e.should_display_name and e.name and e.description then
                             table.insert(out, "> " .. e.name .. ": " .. e.description)
-                        elseif e.name then
+                        elseif e.should_display_name and e.name then
                             table.insert(out, "> " .. e.name)
                         elseif e.description then
                             table.insert(out, "> " .. e.description)

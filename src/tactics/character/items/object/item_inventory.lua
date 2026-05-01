@@ -9,7 +9,8 @@ local maps = require("src.tactics.util.maps")
 
 ---@class EffectDescription
 ---@field name? string
----@field description string
+---@field description? string
+---@field should_display_name? boolean
 
 ---@class ItemDescription
 ---@field name string
@@ -229,11 +230,11 @@ function ItemInventory:get_item_descriptions()
             effects = {},
         }
         if item.weapon and item.weapon.effects then
-            local effects = item.weapon.effects
-            for _, eff in ipairs(effects) do
+            for _, eff in ipairs(item.weapon.effects) do
                 table.insert(description.effects, {
                     name        = wpn.effect.effect_name[eff.type],
                     description = wpn.effect.effect_description[eff.type],
+                    should_display_name = wpn.effect.effect_should_display_name[eff.type],
                 })
             end
         end

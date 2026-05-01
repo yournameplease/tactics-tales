@@ -96,18 +96,22 @@ local effect_name = {
 local effect_description = {
     ["long_reach"]     = "Cannot be countered unless defender also has Long Reach.",
     ["shieldsplitter"] = "Destroys shields.  (Not implemented)",
-    ["armorkiller"]    = "Ignores armor bonuses.",
-    ["shieldkiller"]   = "Ignores shield bonuses.",
+    ["armorkiller"]    = "Ignores armor.",
+    ["shieldkiller"]   = "Ignores shields.",
+}
+
+---@type table<WeaponEffectType, boolean>
+local effect_should_display_name = {
+    ["long_reach"]     = true,
+    ["shieldsplitter"] = false,
+    ["armorkiller"]    = false,
+    ["shieldkiller"]   = false,
 }
 
 local effect = {
-    IncreaseAvoidEffect   = IncreaseAvoidEffect,
-    LongReachEffect       = LongReachEffect,
-    ShieldsplitterEffect  = ShieldsplitterEffect,
-    ArmorkillerEffect     = ArmorkillerEffect,
-    ShieldkillerEffect    = ShieldkillerEffect,
-    effect_name           = effect_name,
-    effect_description    = effect_description,
+    effect_name                = effect_name,
+    effect_description         = effect_description,
+    effect_should_display_name = effect_should_display_name,
 }
 
 --- Return a player-facing description string for an equipment effect.
