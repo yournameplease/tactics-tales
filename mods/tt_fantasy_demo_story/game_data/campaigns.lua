@@ -123,6 +123,14 @@ function campaigns.detour(target)
 	}
 end
 
+function campaigns.select_option(options, memory_key)
+	return {
+		type = 'select_option',
+		options = options,
+		memory_key = memory_key,
+	}
+end
+
 ---@param roster_units string[]
 ---@param name string
 ---@param text string
@@ -194,11 +202,11 @@ local GENERIC_CONFIG = {
 			name = "Save Behavior",
 			description = "How to handle saving after a battle ends.",
 			options = {
-				---TODO: Disabling "ask" mode for now, this would need a "choice" node
-				-- {
-				-- 	name = "Normal",
-				-- 	value = "ask",
-				-- },
+				{
+					name = "Normal",
+					value = "ask",
+					description = "After each victory, choose whether to save.",
+				},
 				{
 					name = "Ironman",
 					value = "ironman",
@@ -233,7 +241,7 @@ local GENERIC_CONFIG = {
 		{
 			key = "easy",
 			name = "Easy",
-			values = { turn_difficulty = "easy", saving = "ironman", deaths = "casual" },
+			values = { turn_difficulty = "easy", saving = "ask", deaths = "casual" },
 		},
 		{
 			key = "normal",
@@ -390,6 +398,21 @@ local STORIES = {
 			}
 		end,
 		nodes = {
+			save_auto = {
+				campaigns.save_game(),
+				campaigns.story_text("Progress saved."),
+			},
+			save_ask = {
+				campaigns.select_option({
+					{ id = "save", name = "Save", description = "Save your progress." },
+					{ id = "skip", name = "Skip", description = "Continue without saving." },
+				}, "save_choice"),
+				lib.libs.story.memory_branch(
+					function(c, s) return s["save_choice"] == "save" end,
+					campaigns.detour("save_auto"),
+					campaigns.advance()
+				),
+			},
 			prologue = {
 				campaigns.chapter_header("Prologue"),
 				campaigns.text_input("This is the story of ${hero_name}", "hero_name"),
@@ -410,8 +433,8 @@ local STORIES = {
 			},
 			ch_1_v = {
 				campaigns.new_page(),
-				campaigns.save_game(),
-				campaigns.story_text("Progress saved."),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 				campaigns.story_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
 				campaigns.story_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
@@ -437,8 +460,8 @@ local STORIES = {
 			},
 			ch_2_v = {
 				campaigns.new_page(),
-				campaigns.save_game(),
-			campaigns.story_text("Progress saved."),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 				campaigns.story_text("The heroes managed to escape the cave."),
 				campaigns.story_text("Future encounters may not afford such stealthy encounters."),
@@ -464,8 +487,8 @@ local STORIES = {
 			},
 			ch_3_v = {
 				campaigns.new_page(),
-				campaigns.save_game(),
-			campaigns.story_text("Progress saved."),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
 				campaigns.story_text("Clearly, bandit influence ran deep here."),
@@ -494,8 +517,8 @@ local STORIES = {
 			},
 			ch_4_v = {
 				campaigns.new_page(),
-				campaigns.save_game(),
-			campaigns.story_text("Progress saved."),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
 				campaigns.story_text("Clearly, bandit influence ran deep here."),
@@ -523,8 +546,8 @@ local STORIES = {
 			},
 			ch_5_v = {
 				campaigns.new_page(),
-				campaigns.save_game(),
-			campaigns.story_text("Progress saved."),
+				lib.libs.story.config_branch(function(c) return c.deaths == "classic" end, campaigns.story_text("${stats.current.units_lost} of your units fell in combat."), campaigns.advance()),
+				lib.libs.story.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
 				campaigns.new_page(),
 
 				campaigns.jump('victory'),
