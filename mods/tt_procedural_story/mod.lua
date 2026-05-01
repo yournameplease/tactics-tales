@@ -9,9 +9,9 @@ return {
     content = {
         maps     = "game_data/maps",
         battles  = "game_data/battles",
-        stories  = "game_data/stories",
+        campaigns       = "game_data/campaigns",
         -- items and characters inherited from tt_fantasy_demo_story
-        default_story = "proc_story",
-        story_select  = { "proc_story" },
+        default_campaign = "proc_story",
+        campaign_select  = { "proc_story" },
     },
 }

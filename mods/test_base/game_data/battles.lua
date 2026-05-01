@@ -7,7 +7,7 @@ local tile_labels = {
 local battles = {
     -- Rout victory with no enemies: 0 enemies always satisfies rout.
     -- VICTORY on the first finish_player_turn().
-    rout_no_enemies = function(_story_config)
+    rout_no_enemies = function(_campaign_config)
         return {
             map_id           = "test_arena",
             tile_labels      = tile_labels,
@@ -20,7 +20,7 @@ local battles = {
 
     -- Rout victory with one player unit present.
     -- VICTORY on the first finish_player_turn().
-    rout_with_player = function(_story_config)
+    rout_with_player = function(_campaign_config)
         return {
             map_id           = "test_arena",
             tile_labels      = tile_labels,
@@ -35,7 +35,7 @@ local battles = {
 
     -- Turn-limit defeat: turn_limit = 1, so turn 2 (reached after 2× finish_player_turn) triggers DEFEAT.
     -- First finish_player_turn ends turn 1 (1 > 1 = false). Second advances to turn 2 (2 > 1 = true → DEFEAT).
-    turn_limit_defeat = function(_story_config)
+    turn_limit_defeat = function(_campaign_config)
         return {
             map_id           = "test_arena",
             tile_labels      = tile_labels,
@@ -51,7 +51,7 @@ local battles = {
     -- Close-combat: armed enemy adjacent to player, all_players_die failure condition.
     -- DEFEAT on first finish_player_turn() — enemy attacks and kills the player unit.
     -- Used by permadeath tests; battle_config.permadeath controls character persistence.
-    close_combat = function(_story_config)
+    close_combat = function(_campaign_config)
         return {
             map_id    = "test_close_arena",
             tile_labels = tile_labels,

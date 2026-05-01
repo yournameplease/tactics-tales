@@ -40,7 +40,7 @@ local battle_manager = {
 --- Create and initialize a new BattleManager for the given battle.
 ---@param chapter integer
 ---@param battle_id BattleId
----@param story_config StoryConfig
+---@param campaign_config CampaignConfig
 ---@param rng_context StoryRngContext?
 ---@param battle_config BattleConfig
 ---@param game_data GameData
@@ -55,7 +55,7 @@ local battle_manager = {
 function battle_manager.new(
     chapter,
     battle_id,
-    story_config,
+    campaign_config,
     rng_context,
     battle_config,
     game_data,
@@ -74,7 +74,7 @@ function battle_manager.new(
     self.character_manager = char_man
     self.music_player = music_player
 
-    local battle_def = game_data.battles[battle_id](story_config, rng_context)
+    local battle_def = game_data.battles[battle_id](campaign_config, rng_context)
     local map_def = game_data.maps[battle_def.map_id]
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
     log.debug("Generated battle map with size "..self.battle_map.width.."x"..self.battle_map.height..".")

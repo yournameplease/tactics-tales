@@ -30,7 +30,7 @@ HANDLERS["title_advance"] = function(services, _menu_data, _session_context, _va
     if not DYNAMIC_CONFIG.demo_mode then
         return menu_handler.then_navigate("MAIN_MENU")
     end
-    local def = services.stories[services.default_campaign_id]
+    local def = services.campaigns[services.default_campaign_id]
     local config = {}
     if def and def.config and def.config.default_preset and def.config.presets then
         for _, p in ipairs(def.config.presets) do
@@ -85,7 +85,7 @@ HANDLERS["apply_preset"] = function(services, menu_data, _ctx, value)
     if value == "custom" then
         return menu_handler.then_deserialize(menu_data)
     end
-    local config = services.stories[services.default_campaign_id].config
+    local config = services.campaigns[services.default_campaign_id].config
     local data = { _preset = value }
     for k, v in pairs(menu_data) do data[k] = v end
     for _, p in ipairs(config.presets) do
@@ -103,7 +103,7 @@ end
 ---@param _value any
 ---@return MenuHandlerPostHandling
 HANDLERS["sync_preset_from_options"] = function(services, menu_data, _ctx, _value)
-    local config = services.stories[services.default_campaign_id].config
+    local config = services.campaigns[services.default_campaign_id].config
     local matched = "custom"
     if config and config.presets then
         for _, p in ipairs(config.presets) do
@@ -315,7 +315,7 @@ local MENU_DATA = {
                         local options = {}
 
                         local campaign_id = msb.default_campaign_id
-                        local definition = msb.stories[campaign_id]
+                        local definition = msb.campaigns[campaign_id]
                         local config = definition.config
 
                         if config then
@@ -365,7 +365,7 @@ local MENU_DATA = {
             :with_previous_step("NEW_FILE_SELECT")
             :with_initial_data(function(msb, _ctx)
                 ---@cast msb GameMenuContext
-                local def = msb.stories[msb.default_campaign_id]
+                local def = msb.campaigns[msb.default_campaign_id]
                 local config = def and def.config
                 if not config or not config.presets or not config.default_preset then return {} end
                 local preset_key = config.default_preset
@@ -386,8 +386,8 @@ local MENU_DATA = {
                         ---@cast msb GameMenuContext
                         local options = {}
 
-                        for _, campaign_id in ipairs(msb.story_ids) do
-                            local def = msb.stories[campaign_id]
+                        for _, campaign_id in ipairs(msb.campaign_ids) do
+                            local def = msb.campaigns[campaign_id]
                             table.insert(options, button.builder("begin_campaign_" .. campaign_id)
                                 :with_text(def.name)
                                 :with_description(def.description)

@@ -4,27 +4,27 @@ local lists = require("src.tactics.util.lists")
 
 ---@class GameSaveData
 ---@field character_id_generator IdGenerator
----@field story_id string
+---@field campaign_id string
 ---@field campaign_config CampaignConfig
----@field story_node_id string
----@field story_node_step integer
+---@field campaign_node_id string
+---@field campaign_node_step integer
 ---@field campaign_state CampaignState
 ---@field roster Character[]
 ---@field stats StoryResults
 ---@field campaign_seed integer
----@field story_rng_state integer
+---@field campaign_rng_state integer
 
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
 ---@field campaign_id CampaignId
 ---@field campaign_config CampaignConfig
----@field story_node_id string
----@field story_node_step integer
+---@field campaign_node_id string
+---@field campaign_node_step integer
 ---@field campaign_state SerializedCampaignState
 ---@field roster SerializedCharacter[]
 ---@field stats StoryResults
 ---@field campaign_seed integer
----@field story_rng_state integer
+---@field campaign_rng_state integer
 
 local save_system = {}
 
@@ -39,17 +39,17 @@ function save_system.save(name, data)
 	---@type SerializedGameSaveData
 	local serialized_data = {
 		character_id_count = data.character_id_generator.id_count,
-		story_id = data.story_id,
-		story_node_id = data.story_node_id,
-		story_config = data.story_config,
-		story_node_step = data.story_node_step,
+		campaign_id = data.campaign_id,
+		campaign_node_id = data.campaign_node_id,
+		campaign_config = data.campaign_config,
+		campaign_node_step = data.campaign_node_step,
 		campaign_state = data.campaign_state:serialize(),
 		roster = lists.map(function(c)
 			return c:serialize()
 		end)(data.roster),
 		stats = data.stats,
-		story_seed = data.story_seed,
-		story_rng_state = data.story_rng_state,
+		campaign_seed = data.campaign_seed,
+		campaign_rng_state = data.campaign_rng_state,
 	}
 
 	local path = SAVE_PATH .. name .. ".pod"

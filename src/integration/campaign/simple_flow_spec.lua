@@ -79,11 +79,11 @@ describe("story flow #it", function()
     describe("single_node_source", function()
         it("should complete when node entry is a bare StoryNode (not wrapped in array)", function()
             local h = campaign_harness.new({
-                stories = {
+            campaigns = {
                     single_node_source = {
                         starting_node = "start",
                         nodes = {
-                            start = { type = "exit_story" },
+                            start = { type = "exit_campaign" },
                         },
                     },
                 },
@@ -94,11 +94,11 @@ describe("story flow #it", function()
 
         it("should complete when node entry is a top-level factory function", function()
             local h = campaign_harness.new({
-                stories = {
+            campaigns = {
                     top_level_factory = {
                         starting_node = "start",
                         nodes = {
-                            start = function(_) return { type = "exit_story" } end,
+                            start = function(_) return { type = "exit_campaign" } end,
                         },
                     },
                 },

@@ -104,13 +104,13 @@ end
 
 ---@type ModBattlesModule
 local BATTLE_DATA = {
-    ["bandit_village"] = function(story_config)
+    ["bandit_village"] = function(campaign_config)
         local turn_limits = {
             easy = nil,
             normal = 15,
             hard = 10,
         }
-        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+        local turn_limit = turn_limits[campaign_config.turn_difficulty or "normal"]
 
         local failure_conditions = {
             objectives.tagged_unit_dies("hero"),
@@ -235,13 +235,13 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["cultist_cave"] = function(story_config)
+    ["cultist_cave"] = function(campaign_config)
         local turn_limits = {
             easy = nil,
             normal = 15,
             hard = 10,
         }
-        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+        local turn_limit = turn_limits[campaign_config.turn_difficulty or "normal"]
 
         local failure_conditions = {
             objectives.tagged_unit_dies("hero"),
@@ -368,13 +368,13 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["fortress_town"] = function(story_config)
+    ["fortress_town"] = function(campaign_config)
         local turn_limits = {
             easy = nil,
             normal = 15,
             hard = 10,
         }
-        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+        local turn_limit = turn_limits[campaign_config.turn_difficulty or "normal"]
 
         local failure_conditions = {
             objectives.tagged_unit_dies("hero"),
@@ -483,13 +483,13 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["cliff_crossing"] = function(story_config)
+    ["cliff_crossing"] = function(campaign_config)
         local turn_limits = {
             easy = nil,
             normal = 15,
             hard = 10,
         }
-        local turn_limit = turn_limits[story_config.turn_difficulty or "normal"]
+        local turn_limit = turn_limits[campaign_config.turn_difficulty or "normal"]
 
         local failure_conditions = {
             objectives.tagged_unit_dies("hero"),
@@ -569,13 +569,13 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["castle_defense"] = function(story_config)
+    ["castle_defense"] = function(campaign_config)
         local turn_limits = {
             easy = 10,
             normal = 15,
             hard = 15,
         }
-        local turn_difficulty = story_config.turn_difficulty or "normal"
+        local turn_difficulty = campaign_config.turn_difficulty or "normal"
         local turn_limit = turn_limits[turn_difficulty]
 
         local victory_conditions = {
@@ -679,7 +679,7 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["playground"] = function(story_config)
+    ["playground"] = function(campaign_config)
         return {
             map_id = "playground",
             tile_labels = {
@@ -730,7 +730,7 @@ local BATTLE_DATA = {
             }
         }
     end,
-    ["model_room"] = function(story_config)
+    ["model_room"] = function(campaign_config)
         return {
             map_id = "model_room",
             tile_labels = {

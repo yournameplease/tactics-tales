@@ -94,7 +94,7 @@ local HANDLERS = {
         end,
     },
 
-    exit_story = {
+    exit_campaign = {
         enter = function(campaign)
             campaign.event_writer:emit("GAME_EXIT_STORY", {})
         end,
@@ -142,13 +142,13 @@ local HANDLERS = {
             else
                 local save_data = {
                     character_id_generator = campaign.character_manager.id_generator,
-                    story_id = campaign.campaign_id,
-                    story_node_id = campaign.current_node.node_id,
-                    story_node_step = campaign.current_node.node_step + 1,
+                    campaign_id = campaign.campaign_id,
+                    campaign_node_id = campaign.current_node.node_id,
+                    campaign_node_step = campaign.current_node.node_step + 1,
                     campaign_state = campaign.campaign_state,
                     roster = campaign.character_manager:get_player_roster(),
                     stats = campaign.stats_service.story_results,
-                    story_config = campaign.campaign_config,
+                    campaign_config = campaign.campaign_config,
                     campaign_seed = campaign.campaign_seed,
                     campaign_rng_state = campaign.campaign_rng:get_state(),
                 }

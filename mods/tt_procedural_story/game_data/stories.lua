@@ -154,7 +154,7 @@ local stories = {
                         local new_idx   = idx + 1
                         sc.memory:set("battle_index", campaign_state_mod.text(tostring(new_idx)))
                         if new_idx > #archetype.slots then
-                            return { type = "exit_story" }
+                            return { type = "exit_campaign" }
                         else
                             return { type = "jump", next_node = "battle_loop" }
                         end

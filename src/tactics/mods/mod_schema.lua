@@ -88,12 +88,12 @@ local battles_spec = s.dictionary(s.string(), s.factory())
 
 -- Story nodes can contain factory functions (StoryNodeFactory), so deep
 -- validation is not possible here. Accept any table, like battles_spec.
-local stories_data_spec = s.dictionary(s.string(), s.record({}))
+local campaigns_data_spec = s.dictionary(s.string(), s.record({}))
 
-local stories_spec = s.record({
-    data = stories_data_spec,
-    default_story = s.reference("stories.data"),
-    story_select = s.list(s.reference("stories.data")),
+local campaigns_spec = s.record({
+    data = campaigns_data_spec,
+    default_campaign = s.reference("campaigns.data"),
+    campaign_select = s.list(s.reference("campaigns.data")),
 })
 
 local game_data_schema = s.record({
@@ -103,7 +103,7 @@ local game_data_schema = s.record({
 	),
 	maps = maps_spec,
 	battles = battles_spec,
-	stories = stories_spec,
+	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
 })
@@ -111,7 +111,7 @@ local game_data_schema = s.record({
 return {
 	maps = maps_spec,
 	battles = battles_spec,
-	stories = stories_spec,
+	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
 	final_schema = game_data_schema,

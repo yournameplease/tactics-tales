@@ -222,7 +222,7 @@ function campaign.new(
     ui_context,
     input_service
 )
-    assert(game_data.stories.data[campaign_id] ~= nil)
+    assert(game_data.campaigns.data[campaign_id] ~= nil)
 
     ---@type Campaign
     local self = setmetatable({}, Campaign)
@@ -230,7 +230,7 @@ function campaign.new(
     self.campaign_id = campaign_id
     self.save_name = save_name
 
-    self.campaign_definition = game_data.stories.data[self.campaign_id]
+    self.campaign_definition = game_data.campaigns.data[self.campaign_id]
     self.game_data = game_data
     self.campaign_config = campaign_config
 
@@ -325,8 +325,8 @@ function campaign.load(save_name, game_data, task_manager, animation_manager, ev
     )
 
     -- Restore RNG state so future sequences are identical to the saved point.
-    if save_data.story_seed then self.campaign_seed = save_data.story_seed end
-    if save_data.story_rng_state then self.campaign_rng:set_state(save_data.story_rng_state) end
+    if save_data.campaign_seed then self.campaign_seed = save_data.campaign_seed end
+    if save_data.campaign_rng_state then self.campaign_rng:set_state(save_data.campaign_rng_state) end
 
     self.character_manager.id_generator.id_count = save_data.character_id_count
     self.campaign_state:deserialize(save_data.campaign_state)
@@ -336,7 +336,7 @@ function campaign.load(save_name, game_data, task_manager, animation_manager, ev
     end
     self.stats_service.story_results = save_data.stats
 
-    self:jump_to_node_step(save_data.story_node_id, save_data.story_node_step)
+    self:jump_to_node_step(save_data.campaign_node_id, save_data.campaign_node_step)
 
     return self
 end
