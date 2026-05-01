@@ -377,9 +377,19 @@ function BaseMenuManager:update(input)
             while peektext() do
                 text = text .. readtext()
             end
-            local handler = self.menu_handlers[self.menu_step.keyboard_handler]
-            assert(handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
-            allow_joypad = handler(self.game_ctx, self:serialize().node.data, self.menu_ctx, text) == true
+            local menu_data = self:serialize().node.data
+            local focused = self.menu_step.node:get_focused_leaves(self.menu_ctx, self.game_ctx)
+            for _, leaf in ipairs(focused) do
+                if leaf.keyboard_handler then
+                    local leaf_handler = self.menu_handlers[leaf.keyboard_handler]
+                    if leaf_handler then
+                        leaf_handler(self.game_ctx, menu_data, self.menu_ctx, text)
+                    end
+                end
+            end
+            local step_handler = self.menu_handlers[self.menu_step.keyboard_handler]
+            assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
+            allow_joypad = step_handler(self.game_ctx, menu_data, self.menu_ctx) == true
         end
 
         if not allow_joypad then return end

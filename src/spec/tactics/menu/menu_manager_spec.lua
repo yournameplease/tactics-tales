@@ -81,21 +81,23 @@ describe("tactics.menu.menu_manager", function()
         luassert.are_equal(0, #manager.selection_history)
     end)
 
-    it("keyboard_handler receives concatenated text from peektext/readtext", function()
+    it("handle_keyboard on button receives concatenated text from peektext/readtext", function()
         local received_text
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        button.builder("btn1"):with_text("key")
-                    ):with_keyboard_handler("record_text"),
+                        button.builder("btn1"):with_text("key"):handle_keyboard("record_text")
+                    ):with_keyboard_handler("noop_handler"),
                 }
             }
         }
         local handlers = {
             record_text = function(_svc, _data, _ctx, text)
                 received_text = text
+            end,
+            noop_handler = function(_svc, _data, _ctx)
                 return nil
             end,
         }
@@ -107,6 +109,36 @@ describe("tactics.menu.menu_manager", function()
         manager:update(input_helper.joypad({}))
 
         luassert.are_equal("hi", received_text)
+    end)
+
+    it("button without handle_keyboard does not receive text", function()
+        local received_text
+        local menu_defs = {
+            ["TEST_MENU"] = {
+                initial_step = "STEP_1",
+                steps = {
+                    ["STEP_1"] = menu_manager.definition.step.of_node(
+                        button.builder("btn1"):with_text("key")
+                    ):with_keyboard_handler("noop_handler"),
+                }
+            }
+        }
+        local handlers = {
+            record_text = function(_svc, _data, _ctx, text)
+                received_text = text
+            end,
+            noop_handler = function(_svc, _data, _ctx)
+                return nil
+            end,
+        }
+
+        mock_text_input({"h", "i"})
+
+        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        manager:set_menu("TEST_MENU")
+        manager:update(input_helper.joypad({}))
+
+        luassert.is_nil(received_text)
     end)
 
     it("keyboard_handler returning nil suppresses joypad input", function()

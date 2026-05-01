@@ -219,6 +219,14 @@ function ButtonDefinition:as_final_step()
     return self
 end
 
+--- Register a handler ID to receive physical keyboard text when this button is focused.
+---@param handler string MenuHandlerId called with the typed text string.
+---@return ButtonDefinition
+function ButtonDefinition:handle_keyboard(handler)
+    self.keyboard_handler = handler
+    return self
+end
+
 --- Register a handler ID for a specific command.
 ---@param command string MenuCommand value.
 ---@param handler string MenuHandlerId to invoke when the command fires.
