@@ -112,8 +112,8 @@
 ---@field story_rng RngInstance Story-level RNG, persisted across saves.
 ---@field battle_rng RngInstance? Battle-level RNG, set fresh before each battle.
 
----@alias StoryNodeFactory fun(StoryConfig, StoryRngContext): StoryNode
----@alias StoryNodeSource StoryNode | StoryNode[] | (fun(StoryConfig, StoryRngContext): StoryNodeSource)
+---@alias StoryNodeFactory fun(config: StoryConfig, rng: StoryRngContext, state: table<string, string>): StoryNode
+---@alias StoryNodeSource StoryNode | StoryNode[] | (fun(config: StoryConfig, rng: StoryRngContext, state: table<string, string>): StoryNodeSource)
 
 ---@class CampaignDefinition
 ---@field config? StoryConfigDefinition
