@@ -61,7 +61,7 @@ function battle.battle_summary()
 
     self:add(
         book.title{
-            content = {"BATTLE"}
+            content = {"\014BATTLE"}
         })
     self:add(
         box.builder("battle_conditions")
