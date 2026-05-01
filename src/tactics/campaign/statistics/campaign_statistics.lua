@@ -25,6 +25,7 @@
 ---@field turns_taken integer
 ---@field result BattleEndResult
 ---@field units_lost UnitDeathResult[]
+---@field deaths_by_side table<Side, integer>
 
 ---@class CampaignStatistics
 ---@field turns_taken integer

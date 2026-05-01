@@ -19,6 +19,7 @@ function StatsService:begin_chapter(
 )
     self.story_results.chapter_results[id] = {
         units_lost = {},
+        deaths_by_side = { player = 0, enemy = 0, neutral = 0 },
         turns_taken = 0,
         battle_id = battle_id,
         result = "VICTORY"
@@ -44,6 +45,10 @@ function StatsService:record_death(data)
         attacker_id = data.attacker and data.attacker.id,
         turn_number = data.turn_number,
     })
+    local side = data.defender.side
+    if side then
+        chapter_results.deaths_by_side[side] = (chapter_results.deaths_by_side[side] or 0) + 1
+    end
 end
 
 --- Record the chapter in which a unit was recruited.
