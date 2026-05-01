@@ -74,7 +74,6 @@ end
 
 HANDLERS["type_character"] = function(_services, _menu_data, session_context, value)
     ---@cast session_context KeyboardMenuContext
-    ---@cast value NestedGridValue
     if session_context.keyboard_mode == nil then
         session_context.keyboard_mode = 1
     end
@@ -82,19 +81,19 @@ HANDLERS["type_character"] = function(_services, _menu_data, session_context, va
         session_context.keyboard_content = ""
     end
 
-    local char = get_key_at_coordinates(value.point, session_context)
+    local char
+    if type(value) == "string" then
+        char = value
+    else
+        ---@cast value NestedGridValue
+        char = get_key_at_coordinates(value.point, session_context)
+    end
     session_context.keyboard_content = session_context.keyboard_content .. char
 
     return nil
 end
 
-HANDLERS["type_text"] = function(_services, _menu_data, session_context, value)
-    ---@cast session_context KeyboardMenuContext
-    ---@cast value string
-    if session_context.keyboard_content == nil then
-        session_context.keyboard_content = ""
-    end
-    session_context.keyboard_content = session_context.keyboard_content .. value
+HANDLERS["type_text"] = function(_services, _menu_data, _session_context)
     return nil
 end
 
@@ -134,6 +133,7 @@ function menu_keyboard.step(submit)
                         button.builder("keyboard_key")
                             :with_text("key")
                             :handle_action("select", "type_character")
+                            :handle_keyboard("type_character")
                     )
                     :with_text_function(function(pt_arg, _services, ctx)
                         ---@cast ctx KeyboardMenuContext
