@@ -199,12 +199,12 @@ end
 ---@param self UIElement
 ---@param state UIContextManager
 ---@param draw_target_manager DrawTargetManager
----@param _ui_theme UITheme
+---@param ui_theme UITheme
 local function draw_tactics_map(
     self,
     state,
     draw_target_manager,
-    _ui_theme
+    ui_theme
 )
     profile("tactics_map_draw")
     profile("draw_map_pre_rows")
@@ -300,7 +300,7 @@ local function draw_tactics_map(
         end
         local animated_point = point.of(next_x, next_z - camera_y)
         local camera = point.of(camera_x, camera_y)
-        draw_unit(unit --[[@as BattleUnit]], animated_point, camera, draw_target_manager, _ui_theme)
+        draw_unit(unit --[[@as BattleUnit]], animated_point, camera, draw_target_manager, ui_theme)
     end
     draw_map_decorations(layers, prev_z, battle_map.height * TILE_SIZE.y, tile_ox, px, camera_y, draw_w)
 
@@ -324,13 +324,19 @@ local function draw_tactics_map(
 
     local banner = state.battle_context.tactics_engine.phase_banner
     if banner then
-        local sw = STATIC_CONFIG.SCREEN_WIDTH
-        local sh = STATIC_CONFIG.SCREEN_HEIGHT
+        -- todo: move to a proper flexbox
+        local sw = self.rect.c_w
+        local sh = self.rect.c_h
         local bw, bh = 160, 24
-        local bx = (sw - bw) / 2
-        local by = (sh - bh) / 2
-        rectfill(bx, by, bx + bw, by + bh, 0)
-        print(banner.text, bx + 8, by + 8, 7)
+        local bx = (sw - bw) / 2 + self.rect.c_x
+        local by = (sh - bh) / 2 + self.rect.c_y
+        
+        local c1 = ui_theme.COLOR_INTERIOR
+        local c2 = ui_theme.COLOR_PAGE_DECOR
+        local c3 = ui_theme.COLOR_INTERIOR_TEXT
+        rectfill(bx, by, bx + bw, by + bh, c1)
+        rect(bx+1, by+1, bx + bw - 1, by + bh - 1, c2)
+        print(banner.text, bx + 8, by + 8, c3)
     end
 
     profile("draw_map_post_rows")
