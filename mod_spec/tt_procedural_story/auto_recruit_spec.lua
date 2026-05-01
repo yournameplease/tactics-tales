@@ -3,17 +3,17 @@ local luassert = require("luassert")
 local auto_recruit       = require("tt_procedural_story.game_data.auto_recruit")
 local auto_recruit_pending = auto_recruit.auto_recruit_pending
 
-local story_memory = require("src.tactics.story.story_memory")
+local campaign_state = require("src.tactics.campaign.campaign_state")
 
 local function make_mem()
-    return story_memory.new({ get_character = function() return nil end })
+    return campaign_state.new({ get_character = function() return nil end })
 end
 
 describe("tt_procedural_story.auto_recruit", function()
     describe("auto_recruit_pending", function()
         it("clears pending_recruits in story memory", function()
             local mem = make_mem()
-            mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+            mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
             auto_recruit_pending(mem)
             local entry = mem:get("pending_recruits")
             ---@cast entry ListMemoryEntry
@@ -22,7 +22,7 @@ describe("tt_procedural_story.auto_recruit", function()
 
         it("writes an empty list entry (not nil) after clearing", function()
             local mem = make_mem()
-            mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+            mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
             auto_recruit_pending(mem)
             local entry = mem:get("pending_recruits")
             luassert.is_not_nil(entry)
@@ -31,7 +31,7 @@ describe("tt_procedural_story.auto_recruit", function()
 
         it("returns a debug text line containing the pending types", function()
             local mem = make_mem()
-            mem:set("pending_recruits", story_memory.list({ "turncoat_enemy", "turncoat_enemy" }))
+            mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy", "turncoat_enemy" }))
             local text = auto_recruit_pending(mem)
             luassert.is_truthy(text:find("%[auto_recruit%]"))
             luassert.is_truthy(text:find("turncoat_enemy"))
@@ -39,7 +39,7 @@ describe("tt_procedural_story.auto_recruit", function()
 
         it("debug text shows 'none' when pending list is empty", function()
             local mem = make_mem()
-            mem:set("pending_recruits", story_memory.list({}))
+            mem:set("pending_recruits", campaign_state.list({}))
             local text = auto_recruit_pending(mem)
             luassert.is_truthy(text:find("none"))
         end)

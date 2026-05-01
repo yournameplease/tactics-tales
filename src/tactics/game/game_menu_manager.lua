@@ -30,7 +30,7 @@ HANDLERS["title_advance"] = function(services, _menu_data, _session_context, _va
     if not DYNAMIC_CONFIG.demo_mode then
         return menu_handler.then_navigate("MAIN_MENU")
     end
-    local def = services.stories[services.default_story_id]
+    local def = services.stories[services.default_campaign_id]
     local config = {}
     if def and def.config and def.config.default_preset and def.config.presets then
         for _, p in ipairs(def.config.presets) do
@@ -40,7 +40,7 @@ HANDLERS["title_advance"] = function(services, _menu_data, _session_context, _va
             end
         end
     end
-    services.handle_begin_story(nil, services.default_story_id, config)
+    services.handle_begin_campaign(nil, services.default_campaign_id, config)
     return nil
 end
 
@@ -48,7 +48,7 @@ end
 ---@param _services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param session_context MainMenuContext
----@param file StoryId
+---@param file CampaignId
 ---@return MenuHandlerPostHandling?
 HANDLERS["store_selected_save"] = function(_services, _menu_data, session_context, file)
     session_context.selected_file = file
@@ -71,7 +71,7 @@ HANDLERS["begin_file_from_context"] = function(
     for k, v in pairs(menu_data) do
         if k ~= "_preset" then config[k] = v end
     end
-    services.handle_begin_story(session_context.selected_file, services.default_story_id, config)
+    services.handle_begin_campaign(session_context.selected_file, services.default_campaign_id, config)
     return nil
 end
 
@@ -85,7 +85,7 @@ HANDLERS["apply_preset"] = function(services, menu_data, _ctx, value)
     if value == "custom" then
         return menu_handler.then_deserialize(menu_data)
     end
-    local config = services.stories[services.default_story_id].config
+    local config = services.stories[services.default_campaign_id].config
     local data = { _preset = value }
     for k, v in pairs(menu_data) do data[k] = v end
     for _, p in ipairs(config.presets) do
@@ -103,7 +103,7 @@ end
 ---@param _value any
 ---@return MenuHandlerPostHandling
 HANDLERS["sync_preset_from_options"] = function(services, menu_data, _ctx, _value)
-    local config = services.stories[services.default_story_id].config
+    local config = services.stories[services.default_campaign_id].config
     local matched = "custom"
     if config and config.presets then
         for _, p in ipairs(config.presets) do
@@ -124,10 +124,10 @@ end
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
----@param file StoryId
+---@param file CampaignId
 ---@return MenuHandlerPostHandling?
-HANDLERS["load_story"] = function(services, _menu_data, _session_context, file)
-    services.handle_load_story(file)
+HANDLERS["load_campaign"] = function(services, _menu_data, _session_context, file)
+    services.handle_load_campaign(file)
     return nil
 end
 
@@ -135,10 +135,10 @@ end
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
----@param story_id StoryId
+---@param campaign_id CampaignId
 ---@return MenuHandlerPostHandling?
-HANDLERS["begin_chapter"] = function(services, _menu_data, _session_context, story_id)
-    services.handle_begin_story(nil, story_id, {}) -- TODO: Config?  Or default config?
+HANDLERS["begin_chapter"] = function(services, _menu_data, _session_context, campaign_id)
+    services.handle_begin_campaign(nil, campaign_id, {}) -- TODO: Config?  Or default config?
     return nil
 end
 
@@ -208,10 +208,10 @@ local MENU_DATA = {
                     function(_msb, _ctx)
                         local options = {}
 
-                        table.insert(options, button.builder("begin_story")
+                        table.insert(options, button.builder("begin_campaign")
                             :with_text("New Game")
                             :advance_to("NEW_FILE_SELECT"))
-                        table.insert(options, button.builder("load_story")
+                        table.insert(options, button.builder("load_campaign")
                             :with_text("Load Game")
                             :advance_to("LOAD_FILE_SELECT"))
                         table.insert(options, button.builder("to_chapter_select")
@@ -294,7 +294,7 @@ local MENU_DATA = {
                             local b = button.builder(file_name)
                                 :with_text(file_name)
                                 :with_value(file_name)
-                                :handle_action("select", "load_story")
+                                :handle_action("select", "load_campaign")
 
                             table.insert(options, b)
                         end
@@ -314,8 +314,8 @@ local MENU_DATA = {
                         ---@cast ctx MainMenuContext
                         local options = {}
 
-                        local story_id = msb.default_story_id
-                        local definition = msb.stories[story_id]
+                        local campaign_id = msb.default_campaign_id
+                        local definition = msb.stories[campaign_id]
                         local config = definition.config
 
                         if config then
@@ -365,7 +365,7 @@ local MENU_DATA = {
             :with_previous_step("NEW_FILE_SELECT")
             :with_initial_data(function(msb, _ctx)
                 ---@cast msb GameMenuContext
-                local def = msb.stories[msb.default_story_id]
+                local def = msb.stories[msb.default_campaign_id]
                 local config = def and def.config
                 if not config or not config.presets or not config.default_preset then return {} end
                 local preset_key = config.default_preset
@@ -386,12 +386,12 @@ local MENU_DATA = {
                         ---@cast msb GameMenuContext
                         local options = {}
 
-                        for _, story_id in ipairs(msb.story_ids) do
-                            local def = msb.stories[story_id]
-                            table.insert(options, button.builder("begin_story_" .. story_id)
+                        for _, campaign_id in ipairs(msb.story_ids) do
+                            local def = msb.stories[campaign_id]
+                            table.insert(options, button.builder("begin_campaign_" .. campaign_id)
                                 :with_text(def.name)
                                 :with_description(def.description)
-                                :with_value(story_id)
+                                :with_value(campaign_id)
                                 :handle_action("select", "begin_chapter"))
                         end
 

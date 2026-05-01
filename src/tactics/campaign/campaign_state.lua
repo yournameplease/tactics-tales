@@ -2,64 +2,64 @@
 --- A key-value store for story variables, allowing data to be
 --- persisted and used across different story nodes.
 
----@alias StoryMemoryEntryType "text"|"character"|"map"|"list"
+---@alias CampaignStateEntryType "text"|"character"|"map"|"list"
 
----@alias StoryMemoryMap table<string, string>
+---@alias CampaignStateMap table<string, string>
 
----@class StoryMemoryEntry
----@field type StoryMemoryEntryType
+---@class CampaignStateEntry
+---@field type CampaignStateEntryType
 ---@field text? string Human-readable representation of the entry.
 
----@class TextMemoryEntry : StoryMemoryEntry
+---@class TextMemoryEntry : CampaignStateEntry
 ---@field type "text"
 ---@field text string
 
----@class CharacterMemoryEntry : StoryMemoryEntry
+---@class CharacterMemoryEntry : CampaignStateEntry
 ---@field type "character"
 ---@field character_id CharacterId
 ---@field text string
 
----@class MapMemoryEntry : StoryMemoryEntry
+---@class MapMemoryEntry : CampaignStateEntry
 ---@field type "map"
 ---@field entries table<string, string>
 
----@class ListMemoryEntry : StoryMemoryEntry
+---@class ListMemoryEntry : CampaignStateEntry
 ---@field type "list"
 ---@field values string[]
 
----@alias SerializedStoryMemory table<string, StoryMemoryEntry>
+---@alias SerializedCampaignState table<string, CampaignStateEntry>
 
----@class StoryMemory Abstract interface; use story_memory.new() to get an implementation.
----@field set fun(self: StoryMemory, key: string, entry: StoryMemoryEntry) Store an entry under the given key.
----@field get fun(self: StoryMemory, key: string): StoryMemoryEntry? Retrieve a stored entry by key.
----@field get_as_map fun(self: StoryMemory): StoryMemoryMap Flatten all entries into a string-to-string map for template substitution.
----@field serialize fun(self: StoryMemory): SerializedStoryMemory Serialize all entries to a plain table.
----@field deserialize fun(self: StoryMemory, data: SerializedStoryMemory) Load entries from a serialized table.
+---@class CampaignState Abstract interface; use campaign_state.new() to get an implementation.
+---@field set fun(self: CampaignState, key: string, entry: CampaignStateEntry) Store an entry under the given key.
+---@field get fun(self: CampaignState, key: string): CampaignStateEntry? Retrieve a stored entry by key.
+---@field get_as_map fun(self: CampaignState): CampaignStateMap Flatten all entries into a string-to-string map for template substitution.
+---@field serialize fun(self: CampaignState): SerializedCampaignState Serialize all entries to a plain table.
+---@field deserialize fun(self: CampaignState, data: SerializedCampaignState) Load entries from a serialized table.
 
----@class StoryMemoryImpl : StoryMemory
----@field global table<string, StoryMemoryEntry> Internal store of all memory entries.
+---@class CampaignStateImpl : CampaignState
+---@field global table<string, CampaignStateEntry> Internal store of all memory entries.
 ---@field character_manager CharacterManager
-local StoryMemoryImpl = {}
-StoryMemoryImpl.__index = StoryMemoryImpl
+local CampaignStateImpl = {}
+CampaignStateImpl.__index = CampaignStateImpl
 
 --- Store an entry under the given key.
 ---@param key string
----@param entry StoryMemoryEntry
-function StoryMemoryImpl:set(key, entry)
+---@param entry CampaignStateEntry
+function CampaignStateImpl:set(key, entry)
     self.global[key] = entry
 end
 
 --- Retrieve a stored entry by key.
 ---@param key string
----@return StoryMemoryEntry?
-function StoryMemoryImpl:get(key)
+---@return CampaignStateEntry?
+function CampaignStateImpl:get(key)
     return self.global[key]
 end
 
 --- Flatten all entries into a string-to-string map for template substitution.
----@return StoryMemoryMap
-function StoryMemoryImpl:get_as_map()
-    ---@type StoryMemoryMap
+---@return CampaignStateMap
+function CampaignStateImpl:get_as_map()
+    ---@type CampaignStateMap
     local out = {}
     for k, e in pairs(self.global) do
         if e.type == "text" then
@@ -82,9 +82,9 @@ function StoryMemoryImpl:get_as_map()
 end
 
 --- Serialize all entries to a plain table.
----@return SerializedStoryMemory
-function StoryMemoryImpl:serialize()
-    ---@type SerializedStoryMemory
+---@return SerializedCampaignState
+function CampaignStateImpl:serialize()
+    ---@type SerializedCampaignState
     local out = {}
     for k, e in pairs(self.global) do
         out[k] = e
@@ -93,21 +93,21 @@ function StoryMemoryImpl:serialize()
 end
 
 --- Load entries from a serialized table.
----@param data SerializedStoryMemory
-function StoryMemoryImpl:deserialize(data)
+---@param data SerializedCampaignState
+function CampaignStateImpl:deserialize(data)
     for k, e in pairs(data) do
         self.global[k] = e
     end
 end
 
-local story_memory = {
-    SerializedStoryMemory = nil,
+local campaign_state = {
+    SerializedCampaignState = nil,
 }
 
 --- Create a text memory entry.
 ---@param text string
 ---@return TextMemoryEntry
-function story_memory.text(text)
+function campaign_state.text(text)
     ---@type TextMemoryEntry
     local entry = {
         type = "text",
@@ -119,7 +119,7 @@ end
 --- Create a character memory entry.
 ---@param character_id CharacterId
 ---@return CharacterMemoryEntry
-function story_memory.character(character_id)
+function campaign_state.character(character_id)
     ---@type CharacterMemoryEntry
     local entry = {
         type = "character",
@@ -132,7 +132,7 @@ end
 --- Create a map memory entry (string-to-string table, for structured run state).
 ---@param entries table<string, string>
 ---@return MapMemoryEntry
-function story_memory.map(entries)
+function campaign_state.map(entries)
     ---@type MapMemoryEntry
     local entry = {
         type = "map",
@@ -144,7 +144,7 @@ end
 --- Create a list memory entry (ordered string array, for structured run state).
 ---@param values string[]
 ---@return ListMemoryEntry
-function story_memory.list(values)
+function campaign_state.list(values)
     ---@type ListMemoryEntry
     local entry = {
         type = "list",
@@ -153,16 +153,16 @@ function story_memory.list(values)
     return entry
 end
 
---- Create a new StoryMemory backed by the given character manager.
+--- Create a new CampaignState backed by the given character manager.
 ---@param character_manager CharacterManager
----@return StoryMemory
-function story_memory.new(character_manager)
-    ---@type StoryMemoryImpl
+---@return CampaignState
+function campaign_state.new(character_manager)
+    ---@type CampaignStateImpl
     local self = setmetatable({
         global = {},
         character_manager = character_manager,
-    }, StoryMemoryImpl)
+    }, CampaignStateImpl)
     return self
 end
 
-return story_memory
+return campaign_state

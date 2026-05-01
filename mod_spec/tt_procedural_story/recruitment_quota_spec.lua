@@ -3,11 +3,11 @@ local luassert = require("luassert")
 local recruitment_quota      = require("tt_procedural_story.game_data.recruitment_quota")
 local update_recruitment_quota = recruitment_quota.update_recruitment_quota
 
-local story_memory = require("src.tactics.story.story_memory")
+local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
 local function make_mem()
-    return story_memory.new({ get_character = function() return nil end })
+    return campaign_state.new({ get_character = function() return nil end })
 end
 
 local function make_archetype(rate)

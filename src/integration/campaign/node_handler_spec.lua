@@ -1,6 +1,6 @@
 -- src/integration/story/node_handler_spec.lua
 local luassert = require("luassert")
-local story_harness = require("src.integration.helpers.story_harness")
+local campaign_harness = require("src.integration.helpers.campaign_harness")
 
 describe("node handlers #it", function()
     -- Helper: inline story ending with exit_story after the given nodes
@@ -22,14 +22,14 @@ describe("node handlers #it", function()
 
     describe("game_results", function()
         it("does not advance without confirm", function()
-            local h = story_harness.new(single_node_story({ type = "game_results" }))
-            h:start_story("test")
+            local h = campaign_harness.new(single_node_story({ type = "game_results" }))
+            h:start_campaign("test")
             luassert.is_false(h:is_complete())
         end)
 
         it("advances after one confirm when no chapters and no roster", function()
-            local h = story_harness.new(single_node_story({ type = "game_results" }))
-            h:start_story("test")
+            local h = campaign_harness.new(single_node_story({ type = "game_results" }))
+            h:start_campaign("test")
             h:confirm()
             luassert.is_true(h:is_complete())
         end)
@@ -47,8 +47,8 @@ describe("node handlers #it", function()
                     },
                 },
             }
-            local h = story_harness.new({ stories = { test = story_def } })
-            h:start_story("test")
+            local h = campaign_harness.new({ stories = { test = story_def } })
+            h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             -- Now on game_results node: 0 chapter pages, 2 unit pages
             local node = h:game_results_node()
@@ -70,8 +70,8 @@ describe("node handlers #it", function()
                     },
                 },
             }
-            local h = story_harness.new({ stories = { test = story_def } })
-            h:start_story("test")
+            local h = campaign_harness.new({ stories = { test = story_def } })
+            h:start_campaign("test")
             -- 0 chapter pages, 1 unit page: first confirm → units section
             h:confirm()
             local node = h:game_results_node()
@@ -92,8 +92,8 @@ describe("node handlers #it", function()
                     },
                 },
             }
-            local h = story_harness.new({ stories = { test = story_def } })
-            h:start_story("test")
+            local h = campaign_harness.new({ stories = { test = story_def } })
+            h:start_campaign("test")
             h:confirm() -- chapters → units
             h:confirm() -- last unit page → advance
             luassert.is_true(h:is_complete())
@@ -111,8 +111,8 @@ describe("node handlers #it", function()
                     },
                 },
             }
-            local h = story_harness.new({ stories = { test = story_def } })
-            h:start_story("test")
+            local h = campaign_harness.new({ stories = { test = story_def } })
+            h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             local node = h:game_results_node()
             luassert.is_not_nil(node)
@@ -124,40 +124,40 @@ describe("node handlers #it", function()
 
     describe("chapter_header", function()
         it("does not advance without confirm", function()
-            local h = story_harness.new(single_node_story({
+            local h = campaign_harness.new(single_node_story({
                 type = "chapter_header", text = "Chapter 1", chapter_number = 1,
             }))
-            h:start_story("test")
+            h:start_campaign("test")
             luassert.is_false(h:is_complete())
         end)
 
         it("advances after one confirm", function()
-            local h = story_harness.new(single_node_story({
+            local h = campaign_harness.new(single_node_story({
                 type = "chapter_header", text = "Chapter 1", chapter_number = 1,
             }))
-            h:start_story("test")
+            h:start_campaign("test")
             h:confirm()
             luassert.is_true(h:is_complete())
         end)
     end)
 
     describe("save_game", function()
-        -- TODO: StoryHarness:start_story does not accept a save_name parameter.
+        -- TODO: StoryHarness:start_campaign does not accept a save_name parameter.
         -- Add harness support and a "does not auto-advance when save_name is configured" test.
         it("auto-advances when no save_name is configured", function()
-            -- story_harness does not configure a save_name by default
-            local h = story_harness.new(single_node_story({ type = "save_game" }))
-            h:start_story("test")
+            -- campaign_harness does not configure a save_name by default
+            local h = campaign_harness.new(single_node_story({ type = "save_game" }))
+            h:start_campaign("test")
             luassert.is_true(h:is_complete())
         end)
     end)
 
     describe("set_memory", function()
         it("auto-advances and writes value to memory", function()
-            local h = story_harness.new(single_node_story(
+            local h = campaign_harness.new(single_node_story(
                 { type = "set_memory", key = "greeting", value = "hello" }
             ))
-            h:start_story("test")
+            h:start_campaign("test")
             luassert.is_true(h:is_complete())
             luassert.are_equal("hello", h:memory("greeting").text)
         end)
@@ -175,8 +175,8 @@ describe("node handlers #it", function()
                     },
                 },
             }
-            local h = story_harness.new({ stories = { test = story_def } })
-            h:start_story("test")
+            local h = campaign_harness.new({ stories = { test = story_def } })
+            h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             local results = h:story_results()
             local recruited = results.chapter_recruited

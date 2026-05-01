@@ -157,13 +157,13 @@ function ModLoader:load_mod_data()
     )
 
     local story_select = nil
-    local default_story = nil
+    local default_campaign = nil
     for _, mod in ipairs(self.registered) do
         if mod.spec.content.story_select ~= nil then
             story_select = mod.spec.content.story_select
         end
         if mod.spec.content.default_story ~= nil then
-            default_story = mod.spec.content.default_story
+            default_campaign = mod.spec.content.default_story
         end
     end
     if story_select == nil then
@@ -172,13 +172,13 @@ function ModLoader:load_mod_data()
             table.insert(story_select, id)
         end
     end
-    if default_story == nil then
-        error("No default_story defined in any mod's content")
+    if default_campaign == nil then
+        error("No default_campaign defined in any mod's content")
     end
 
     game_data.stories = {
         data = story_data,
-        default_story = default_story,
+        default_story = default_campaign,
         story_select = story_select,
     }
     log.debug("Loading characters...")

@@ -2,9 +2,9 @@
 --- Defines the main GameData record that aggregates all loaded mod data.
 
 ---@class StoryData
----@field data table<StoryId, StoryDefinition> Map of story ID to definition.
----@field default_story StoryId The story loaded by default.
----@field story_select StoryId[] Ordered list of story IDs for selection.
+---@field data table<CampaignId, CampaignDefinition> Map of story ID to definition.
+---@field default_story CampaignId The story loaded by default.
+---@field story_select CampaignId[] Ordered list of story IDs for selection.
 ---@field battle_config fun(StoryConfig): BattleConfig
 
 ---@class GameData

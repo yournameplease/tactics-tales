@@ -10,8 +10,8 @@
 local StoryMenuServices = {}
 StoryMenuServices.__index = StoryMenuServices
 
-local story_menu_context = {
-    StoryMenuContext = StoryMenuServices,
+local campaign_menu_context = {
+    CampaignMenuContext = StoryMenuServices,
 }
 
 --- Create a new story menu context with the given callbacks.
@@ -19,7 +19,7 @@ local story_menu_context = {
 ---@param handle_submit_text fun(text: string)
 ---@param handle_select_option fun(option_id: string)
 ---@return StoryMenuServices
-function story_menu_context.new(handle_create_character, handle_submit_text, handle_select_option)
+function campaign_menu_context.new(handle_create_character, handle_submit_text, handle_select_option)
     ---@type StoryMenuServices
     local self = setmetatable({}, StoryMenuServices)
     self.handle_create_character = handle_create_character
@@ -28,4 +28,4 @@ function story_menu_context.new(handle_create_character, handle_submit_text, han
     return self
 end
 
-return story_menu_context
+return campaign_menu_context

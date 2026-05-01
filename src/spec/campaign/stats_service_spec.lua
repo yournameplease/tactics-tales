@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 local event_bus_mod = require("src.tactics.systems.event_bus")
-local stats_service_mod = require("src.tactics.story.statistics.stats_service")
+local stats_service_mod = require("src.tactics.campaign.statistics.stats_service")
 
 local function new_service()
     return stats_service_mod.new(event_bus_mod.new())

@@ -4,14 +4,14 @@
 
 local save_system = require("src.tactics.save.save_system")
 local random = require("src.tactics.util.random")
-local HANDLERS = require("src.tactics.story.handlers.node_handlers")
-local story_menu_manager = require("src.tactics.story.story_menu_manager")
+local HANDLERS = require("src.tactics.campaign.handlers.node_handlers")
+local campaign_menu_manager = require("src.tactics.campaign.campaign_menu_manager")
 local character_manager = require("src.tactics.character.character_manager")
-local stats_service = require("src.tactics.story.statistics.stats_service")
-local story_menu_context = require("src.tactics.story.story_menu_context")
-local story_ui_context = require("src.tactics.story.story_ui_context")
-local story_page = require("src.tactics.story.story_page")
-local story_memory = require("src.tactics.story.story_memory")
+local stats_service = require("src.tactics.campaign.statistics.stats_service")
+local campaign_menu_context = require("src.tactics.campaign.campaign_menu_context")
+local campaign_ui_context = require("src.tactics.campaign.campaign_ui_context")
+local campaign_page = require("src.tactics.campaign.campaign_page")
+local campaign_state = require("src.tactics.campaign.campaign_state")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
@@ -27,12 +27,12 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition StoryNode
 ---@field rendered_node? RenderedStoryNode
 
----@alias StoryConfig table<string, string>
+---@alias CampaignConfig table<string, string>
 
----@class Story
+---@class Campaign
 ---@field package battle_count integer
----@field package story_definition StoryDefinition
----@field package story_config StoryConfig
+---@field package campaign_definition CampaignDefinition
+---@field package campaign_config CampaignConfig
 ---@field package battle_config BattleConfig
 ---@field package game_data GameData
 ---@field package idle_animation AnimatedSpriteData
@@ -40,17 +40,17 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package text_input string
 ---@field package selected_option string?
 ---@field package save_name? string
----@field package story_id string
----@field package story_page StoryPage
----@field package story_memory StoryMemory
+---@field package campaign_id string
+---@field package campaign_page CampaignPage
+---@field package campaign_state CampaignState
 ---@field package character_manager CharacterManager
----@field package story_menu_context StoryMenuServices
+---@field package campaign_menu_context CampaignMenuServices
 ---@field package menu_manager MenuManager
 ---@field package stats_service StatsService
 ---@field package current_node ActiveNode
----@field package story_seed integer Seed used to derive battle-level RNG seeds.
----@field package story_rng RngInstance Story-level RNG instance.
----@field package rng_context StoryRngContext RNG context passed to all factory functions.
+---@field package campaign_seed integer Seed used to derive battle-level RNG seeds.
+---@field package campaign_rng RngInstance Campaign-level RNG instance.
+---@field package rng_context CampaignRngContext RNG context passed to all factory functions.
 ---@field package battle_manager BattleManager
 ---@field package dialogue_manager DialogueManager
 ---@field package active_dialogue ActiveDialogue
@@ -60,19 +60,19 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package battle_services_bundle BattleServicesBundle
 ---@field package ui_context UIContextManager
 ---@field package input_service InputService
-local Story = {}
-Story.__index = Story
+local Campaign = {}
+Campaign.__index = Campaign
 
-local story = {
-    Story = Story,
+local campaign = {
+    Campaign = Campaign,
 }
 
 ---@param node_source StoryNode|StoryNodeFactory
 ---@return StoryNode
-function Story:resolve_node_source(node_source)
+function Campaign:resolve_node_source(node_source)
     if type(node_source) == "function" then
         ---@cast node_source StoryNodeFactory
-        return node_source(self.story_config, self.rng_context)
+        return node_source(self.campaign_config, self.rng_context)
     else
         ---@cast node_source StoryNode
         return node_source
@@ -82,9 +82,9 @@ end
 --- Normalize a StoryNodeSource to a StoryNode[] for sequential access.
 ---@param source StoryNodeSource
 ---@return StoryNode[]
-function Story:resolve_to_array(source)
+function Campaign:resolve_to_array(source)
     if type(source) == "function" then
-        return self:resolve_to_array(source(self.story_config, self.rng_context))
+        return self:resolve_to_array(source(self.campaign_config, self.rng_context))
     elseif source[1] ~= nil then
         ---@cast source StoryNode[]
         return source
@@ -96,8 +96,8 @@ end
 
 --- Jump the story to the first step of the named node.
 ---@param node_id string
-function Story:jump_to_node(node_id)
-    local steps = self:resolve_to_array(self.story_definition.nodes[node_id])
+function Campaign:jump_to_node(node_id)
+    local steps = self:resolve_to_array(self.campaign_definition.nodes[node_id])
     local node_definition = self:resolve_node_source(steps[1])
 
     self.current_node = {
@@ -111,8 +111,8 @@ end
 --- Jump the story to a specific step within the named node.
 ---@param node_id string
 ---@param node_step integer
-function Story:jump_to_node_step(node_id, node_step)
-    local steps = self:resolve_to_array(self.story_definition.nodes[node_id])
+function Campaign:jump_to_node_step(node_id, node_step)
+    local steps = self:resolve_to_array(self.campaign_definition.nodes[node_id])
     local node_definition = self:resolve_node_source(steps[node_step])
     
     self.current_node = {
@@ -126,34 +126,34 @@ end
 --- The core of the story progression logic. Acts as a state machine that
 --- interprets the current story node and triggers the corresponding action,
 --- such as showing dialogue, starting a battle, or modifying story memory.
-function Story:handle_new_node()
+function Campaign:handle_new_node()
     local node = self.current_node.definition
     log.debug("Handling new node: ", node.type)
     local h = assert(HANDLERS[node.type], "Unknown node type: " .. tostring(node.type))
     h.enter(self, node)
-    self.story_page.story_revision = self.story_page.story_revision + 1
+    self.campaign_page.story_revision = self.campaign_page.story_revision + 1
 end
 
 --- Advances the story to the next node in the sequence. Performs cleanup
 --- from the previous node, increments the node counter, and calls
 --- `handle_new_node` to process the newly active node.
-function Story:advance_node()
+function Campaign:advance_node()
     local node = self.current_node.definition
     local h = HANDLERS[node.type]
     if h and h.exit then h.exit(self, node) end
     self.current_node.node_step = self.current_node.node_step + 1
-    local steps = self:resolve_to_array(self.story_definition.nodes[self.current_node.node_id])
+    local steps = self:resolve_to_array(self.campaign_definition.nodes[self.current_node.node_id])
     self.current_node.definition = self:resolve_node_source(steps[self.current_node.node_step])
     self:handle_new_node()
 end
 
 --- Advance to the next story node after text has been read.
-function Story:advance_text()
+function Campaign:advance_text()
     self:advance_node()
 end
 
 --- Handle a battle victory by tearing down the battle and jumping to the victory node.
-function Story:handle_battle_victory()
+function Campaign:handle_battle_victory()
     local node_definition = self.current_node.definition --[[@as BattleNode]]
     assert(node_definition.type == 'battle')
     self.battle_manager:teardown()
@@ -161,7 +161,7 @@ function Story:handle_battle_victory()
 end
 
 --- Handle a battle defeat by tearing down the battle and jumping to the failure node.
-function Story:handle_battle_defeat()
+function Campaign:handle_battle_defeat()
     local node_definition = self.current_node.definition --[[@as BattleNode]]
     assert(node_definition.type == 'battle')
     self.battle_manager:teardown()
@@ -170,7 +170,7 @@ end
 
 --- Apply the given appearance selections to the customized character and advance.
 ---@param appearance table<string, string>
-function Story:create_character(appearance)
+function Campaign:create_character(appearance)
     ---@diagnostic disable-next-line: missing-fields
     local new_appearance = {} --[[@as CharacterAppearance]]
     self.customized_character.appearance = new_appearance
@@ -183,7 +183,7 @@ end
 
 --- Store submitted text input in memory and advance the node.
 ---@param text string
-function Story:submit_text(text)
+function Campaign:submit_text(text)
     if text == nil or #text == 0 then
         return
     end
@@ -193,27 +193,27 @@ end
 
 --- Store the chosen option ID and advance the node.
 ---@param option_id string
-function Story:select_option(option_id)
+function Campaign:select_option(option_id)
     self.selected_option = option_id
     self:advance_node()
 end
 
 --- Create and start a new story instance from the beginning.
 ---@param save_name string? Save file path, or nil for an unsaved story.
----@param story_id string
+---@param campaign_id string
 ---@param game_data GameData
----@param story_config StoryConfig
+---@param campaign_config CampaignConfig
 ---@param task_manager TaskManager
 ---@param animation_manager AnimationManager
 ---@param event_bus EventBus
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
 ---@param input_service InputService
----@return Story
-function story.new(
+---@return Campaign
+function campaign.new(
     save_name,
-    story_id,
-    story_config,
+    campaign_id,
+    campaign_config,
     game_data,
     task_manager,
     animation_manager,
@@ -222,27 +222,27 @@ function story.new(
     ui_context,
     input_service
 )
-    assert(game_data.stories.data[story_id] ~= nil)
+    assert(game_data.stories.data[campaign_id] ~= nil)
 
-    ---@type Story
-    local self = setmetatable({}, Story)
+    ---@type Campaign
+    local self = setmetatable({}, Campaign)
     self.battle_count = 0
-    self.story_id = story_id
+    self.campaign_id = campaign_id
     self.save_name = save_name
 
-    self.story_definition = game_data.stories.data[self.story_id]
+    self.campaign_definition = game_data.stories.data[self.campaign_id]
     self.game_data = game_data
-    self.story_config = story_config
+    self.campaign_config = campaign_config
 
-    self.story_seed = math.max(1, math.floor(rnd(0x7FFFFFFF)))
-    self.story_rng = random.new(self.story_seed)
-    self.rng_context = { story_rng = self.story_rng }
+    self.campaign_seed = math.max(1, math.floor(rnd(0x7FFFFFFF)))
+    self.campaign_rng = random.new(self.campaign_seed)
+    self.rng_context = { campaign_rng = self.campaign_rng }
 
-    if type(self.story_definition.battle_config) == "function" then
-        self.battle_config = self.story_definition.battle_config(story_config, self.rng_context)
+    if type(self.campaign_definition.battle_config) == "function" then
+        self.battle_config = self.campaign_definition.battle_config(campaign_config, self.rng_context)
     else
         ---@diagnostic disable-next-line
-        self.battle_config = self.story_definition.battle_config
+        self.battle_config = self.campaign_definition.battle_config
     end
 
     self.character_manager = character_manager.new(game_data)
@@ -252,19 +252,19 @@ function story.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
-    self.story_menu_context = story_menu_context.new(
+    self.campaign_menu_context = campaign_menu_context.new(
         function(appearance) self:create_character(appearance) end,
         function(text) self:submit_text(text) end,
         function(option_id) self:select_option(option_id) end
     )
-    self.story_memory = story_memory.new(self.character_manager)
+    self.campaign_state = campaign_state.new(self.character_manager)
     -- Expose live memory to all factory functions (node and battle factories).
-    -- Story-level factories use story_config.memory:get()/set(); the plain
-    -- story_config fields (e.g. permadeath) are still accessible via __index.
-    self.story_config = setmetatable({ memory = self.story_memory }, { __index = story_config })
-    self.story_page = story_page.story_page(self.story_memory)
-    self.menu_manager = story_menu_manager.new(
-        self.story_menu_context,
+    -- Campaign-level factories use campaign_config.memory:get()/set(); the plain
+    -- campaign_config fields (e.g. permadeath) are still accessible via __index.
+    self.campaign_config = setmetatable({ memory = self.campaign_state }, { __index = campaign_config })
+    self.campaign_page = campaign_page.new(self.campaign_state)
+    self.menu_manager = campaign_menu_manager.new(
+        self.campaign_menu_context,
         event_bus
     )
     self.stats_service = stats_service.new(event_bus)
@@ -277,7 +277,7 @@ function story.new(
         event_bus = event_bus,
     }
 
-    local story_ui_ctx = story_ui_context.new(self.story_page, self.menu_manager)
+    local story_ui_ctx = campaign_ui_context.new(self.campaign_page, self.menu_manager)
 
     self.ui_context = ui_context
     self.ui_context:register_ui_context(story_ui_ctx)
@@ -291,7 +291,7 @@ function story.new(
         end
     end)
 
-    self:jump_to_node(self.story_definition.starting_node)
+    self:jump_to_node(self.campaign_definition.starting_node)
 
     return self
 end
@@ -304,17 +304,17 @@ end
 ---@param event_bus EventBus
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
----@return Story
-function story.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context, input_service)
+---@return Campaign
+function campaign.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context, input_service)
     local save_data = save_system.load(save_name)
     assert(save_data, "File failed to load!")
 
     --TODO: battle count
 
-    local self = story.new(
+    local self = campaign.new(
         save_name,
-        save_data.story_id,
-        save_data.story_config,
+        save_data.campaign_id,
+        save_data.campaign_config,
         game_data,
         task_manager,
         animation_manager,
@@ -325,11 +325,11 @@ function story.load(save_name, game_data, task_manager, animation_manager, event
     )
 
     -- Restore RNG state so future sequences are identical to the saved point.
-    if save_data.story_seed then self.story_seed = save_data.story_seed end
-    if save_data.story_rng_state then self.story_rng:set_state(save_data.story_rng_state) end
+    if save_data.story_seed then self.campaign_seed = save_data.story_seed end
+    if save_data.story_rng_state then self.campaign_rng:set_state(save_data.story_rng_state) end
 
     self.character_manager.id_generator.id_count = save_data.character_id_count
-    self.story_memory:deserialize(save_data.story_memory)
+    self.campaign_state:deserialize(save_data.campaign_state)
     for _, character_data in ipairs(save_data.roster) do
         local c = self.character_manager:load_character(character_data)
         self.character_manager:persist_player(c)
@@ -343,7 +343,7 @@ end
 
 --- Process one update tick of the story, handling input for the active node type.
 ---@param input InputContext
-function Story:update(input)
+function Campaign:update(input)
     local h = HANDLERS[self.current_node.definition.type]
     if h and h.update then
         h.update(self, input)
@@ -351,10 +351,10 @@ function Story:update(input)
 end
 
 --- Tear down the story, releasing resources and unregistering contexts.
-function Story:teardown()
+function Campaign:teardown()
     self.character_manager:teardown()
-    self.ui_context:unregister_ui_context("story")
+    self.ui_context:unregister_ui_context("campaign")
     self.event_listener:teardown()
 end
 
-return story
+return campaign

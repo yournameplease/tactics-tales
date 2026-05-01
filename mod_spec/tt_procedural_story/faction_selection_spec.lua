@@ -4,11 +4,11 @@ local faction_selection = require("tt_procedural_story.game_data.faction_selecti
 local select_faction    = faction_selection.select_faction
 local compute_weights   = faction_selection.compute_weights
 
-local story_memory = require("src.tactics.story.story_memory")
+local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
 local function make_mem()
-    return story_memory.new({ get_character = function() return nil end })
+    return campaign_state.new({ get_character = function() return nil end })
 end
 
 describe("tt_procedural_story.faction_selection", function()

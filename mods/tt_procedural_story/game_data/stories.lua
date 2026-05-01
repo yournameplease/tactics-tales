@@ -43,7 +43,7 @@ local faction_sel        = include("mods/tt_procedural_story/game_data/faction_s
 local recruitment        = include("mods/tt_procedural_story/game_data/recruitment_quota.lua")
 local auto_rec           = include("mods/tt_procedural_story/game_data/auto_recruit.lua")
 local forced_join_mod    = include("mods/tt_procedural_story/game_data/forced_join.lua")
-local story_memory_mod   = include("src/tactics/story/story_memory.lua")
+local campaign_state_mod   = include("src/tactics/campaign/campaign_state.lua")
 
 -- Build the option list for the archetype selection node from the archetype
 -- definitions table so that the story data stays in sync automatically.
@@ -121,7 +121,7 @@ local stories = {
                     function(sc, rng)
                         local archetype   = get_archetype(sc)
                         local faction_id  = faction_sel.select_faction(archetype, sc.memory, rng.story_rng)
-                        sc.memory:set("faction_id", story_memory_mod.text(faction_id))
+                        sc.memory:set("faction_id", campaign_state_mod.text(faction_id))
                         return { type = "text", text = "[faction] Selected: " .. faction_id }
                     end,
 
@@ -152,7 +152,7 @@ local stories = {
                         local archetype = get_archetype(sc)
                         local idx       = get_battle_index(sc)
                         local new_idx   = idx + 1
-                        sc.memory:set("battle_index", story_memory_mod.text(tostring(new_idx)))
+                        sc.memory:set("battle_index", campaign_state_mod.text(tostring(new_idx)))
                         if new_idx > #archetype.slots then
                             return { type = "exit_story" }
                         else
