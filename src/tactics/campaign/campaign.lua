@@ -72,7 +72,7 @@ local campaign = {
 function Campaign:resolve_node_source(node_source)
     if type(node_source) == "function" then
         ---@cast node_source StoryNodeFactory
-        return node_source(self.campaign_config, self.rng_context)
+        return node_source(self.campaign_config, self.rng_context, self.campaign_state:get_as_map())
     else
         ---@cast node_source StoryNode
         return node_source
@@ -84,7 +84,7 @@ end
 ---@return StoryNode[]
 function Campaign:resolve_to_array(source)
     if type(source) == "function" then
-        return self:resolve_to_array(source(self.campaign_config, self.rng_context))
+        return self:resolve_to_array(source(self.campaign_config, self.rng_context, self.campaign_state:get_as_map()))
     elseif source[1] ~= nil then
         ---@cast source StoryNode[]
         return source
