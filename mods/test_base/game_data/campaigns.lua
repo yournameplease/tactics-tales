@@ -91,6 +91,40 @@ local campaigns = {
             },
         },
 
+        -- Detour from main to sub then returns; used for detour node type tests.
+        detour_basic = {
+            starting_node = "main",
+            battle_config = battle_config{},
+            nodes = {
+                main = {
+                    { type = "detour", target = "sub" },
+                    { type = "exit_campaign" },
+                },
+                sub = {
+                    { type = "advance" },
+                },
+            },
+        },
+
+        -- Nested detour: main → mid → inner → back through mid → back to main.
+        detour_nested = {
+            starting_node = "main",
+            battle_config = battle_config{},
+            nodes = {
+                main = {
+                    { type = "detour", target = "mid" },
+                    { type = "exit_campaign" },
+                },
+                mid = {
+                    { type = "detour", target = "inner" },
+                    { type = "advance" },
+                },
+                inner = {
+                    { type = "advance" },
+                },
+            },
+        },
+
         -- delete_file node then exit. Tests that delete_file advances without a confirm().
         delete_file_and_exit = {
             starting_node = "main",

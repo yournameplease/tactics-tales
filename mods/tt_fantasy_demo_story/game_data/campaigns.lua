@@ -116,6 +116,13 @@ function campaigns.jump(next_node)
 	}
 end
 
+function campaigns.detour(target)
+	return {
+		type = 'detour',
+		target = target,
+	}
+end
+
 ---@param roster_units string[]
 ---@param name string
 ---@param text string
@@ -187,7 +194,7 @@ local GENERIC_CONFIG = {
 			name = "Save Behavior",
 			description = "How to handle saving after a battle ends.",
 			options = {
-				---TODO: Disabling "ask" mode for now, this would need a "choice" story node
+				---TODO: Disabling "ask" mode for now, this would need a "choice" node
 				-- {
 				-- 	name = "Normal",
 				-- 	value = "ask",
