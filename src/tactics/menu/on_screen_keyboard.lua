@@ -88,6 +88,16 @@ HANDLERS["type_character"] = function(_services, _menu_data, session_context, va
     return nil
 end
 
+HANDLERS["type_text"] = function(_services, _menu_data, session_context, value)
+    ---@cast session_context KeyboardMenuContext
+    ---@cast value string
+    if session_context.keyboard_content == nil then
+        session_context.keyboard_content = ""
+    end
+    session_context.keyboard_content = session_context.keyboard_content .. value
+    return nil
+end
+
 HANDLERS["delete_character"] = function(_services, _menu_data, session_context, _value)
     ---@cast session_context KeyboardMenuContext
     if session_context.keyboard_mode == nil then
@@ -150,6 +160,7 @@ function menu_keyboard.step(submit)
             end
         )
     )
+    :with_keyboard_handler("type_text")
     :with_action("BUTTON_A", { command = "select", description = "Select" })
     :with_action("BUTTON_B", { command = "back",   description = "Back" })
 end
