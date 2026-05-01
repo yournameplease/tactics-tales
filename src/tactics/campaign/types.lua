@@ -5,7 +5,7 @@
 ---@alias CampaignId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias CampaignNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"set_memory_list"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_campaign"|"delete_file"|"select_option"
+---@alias CampaignNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"set_memory_list"|"jump"|"detour"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_campaign"|"delete_file"|"select_option"
 
 ---@class StoryNode Abstract base for all story node variants.
 ---@field type CampaignNodeType
@@ -87,6 +87,10 @@
 ---@class JumpNode : StoryNode Unconditionally jumps to another node.
 ---@field type "jump"
 ---@field next_node NodeId Node to jump to.
+
+---@class DetourNode : StoryNode Jumps to a named node, executes it fully, then returns to the step after the detour.
+---@field type "detour"
+---@field target NodeId Node to execute before returning.
 
 ---@class StoryConfigDefinition
 ---@field options StoryConfigDefinitionEntry[]

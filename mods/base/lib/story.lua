@@ -28,4 +28,10 @@ function story.memory_branch(predicate, node_if_true, node_if_false)
     end
 end
 
+---@param target string
+---@return DetourNode
+function story.detour(target)
+    return { type = "detour", target = target }
+end
+
 return { story = story }

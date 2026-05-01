@@ -40,6 +40,17 @@ local HANDLERS = {
         end,
     },
 
+    detour = {
+        enter = function(campaign, node)
+            ---@cast node DetourNode
+            table.insert(campaign.return_stack, {
+                node_id = campaign.current_node.node_id,
+                node_step = campaign.current_node.node_step + 1,
+            })
+            campaign:jump_to_node(node.target)
+        end,
+    },
+
     set_memory = {
         enter = function(campaign, node)
             ---@cast node SetMemoryNode

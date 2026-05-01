@@ -60,6 +60,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package battle_services_bundle BattleServicesBundle
 ---@field package ui_context UIContextManager
 ---@field package input_service InputService
+---@field package return_stack {node_id: string, node_step: integer}[]
 local Campaign = {}
 Campaign.__index = Campaign
 
@@ -143,6 +144,11 @@ function Campaign:advance_node()
     if h and h.exit then h.exit(self, node) end
     self.current_node.node_step = self.current_node.node_step + 1
     local steps = self:resolve_to_array(self.campaign_definition.nodes[self.current_node.node_id])
+    if steps[self.current_node.node_step] == nil and #self.return_stack > 0 then
+        local ret = table.remove(self.return_stack)
+        self:jump_to_node_step(ret.node_id, ret.node_step)
+        return
+    end
     self.current_node.definition = self:resolve_node_source(steps[self.current_node.node_step])
     self:handle_new_node()
 end
@@ -229,6 +235,7 @@ function campaign.new(
     self.battle_count = 0
     self.campaign_id = campaign_id
     self.save_name = save_name
+    self.return_stack = {}
 
     self.campaign_definition = game_data.campaigns.data[self.campaign_id]
     self.game_data = game_data
