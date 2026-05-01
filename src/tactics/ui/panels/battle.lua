@@ -129,7 +129,7 @@ function battle.unit_info()
             if not u then
                 self.text.content = { "No Unit Selected" }
             else
-                self.text.content = { u.character.name }
+                self.text.content = { "\014" .. u.character.name }
             end
         end)
         :build())
@@ -190,18 +190,18 @@ function battle.unit_inventory()
             local out = {}
 
             if u.tags["hero"] then
-                table.insert(out, "Hero: Game over if slain.")
+                table.insert(out, "\014Hero:\015 Game over if slain.")
             end
             if u.tags["monarch"] then
-                table.insert(out, "Monarch: Game over if slain.")
+                table.insert(out, "\014Monarch:\015 Game over if slain.")
             end
             if u.tags["boss"] then
-                table.insert(out, "Boss: Kill all bosses to win the chapter.")
+                table.insert(out, "\014Boss:\015 Kill all bosses to win the chapter.")
             end
 
             for _, d in ipairs(items) do
                 if d.name then
-                    table.insert(out, d.name)
+                    table.insert(out, "\014"..d.name)
                 end
                 if d.effects then
                     for _, e in ipairs(d.effects) do
