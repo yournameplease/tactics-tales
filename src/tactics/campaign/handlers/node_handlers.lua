@@ -132,10 +132,12 @@ local HANDLERS = {
     text = {
         enter = function(campaign, node)
             ---@cast node StoryTextNode
+            local map = campaign.campaign_state:get_as_map()
+            for k, v in pairs(campaign.stats_service:get_as_map()) do map[k] = v end
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
                 {node.text},
                 { can_skip = true, auto_advance = false },
-                campaign.campaign_state:get_as_map()
+                map
             )
             campaign.campaign_page:add_text_line(campaign.active_dialogue)
         end,

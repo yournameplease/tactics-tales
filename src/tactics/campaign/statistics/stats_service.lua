@@ -70,6 +70,28 @@ function StatsService:record_battle_end(data)
     chapter_results.result = data.result
 end
 
+--- Serialize chapter results into a flat string map for template substitution.
+--- Keys: stats.N.units_lost, stats.N.turns_taken, stats.current.units_lost, stats.current.turns_taken
+---@return table<string, string>
+function StatsService:get_as_map()
+    local out = {}
+    local chapter_results = self.story_results.chapter_results
+    local highest_idx = nil
+    for i, result in pairs(chapter_results) do
+        out["stats." .. i .. ".units_lost"] = tostring(#result.units_lost)
+        out["stats." .. i .. ".turns_taken"] = tostring(result.turns_taken)
+        if highest_idx == nil or i > highest_idx then
+            highest_idx = i
+        end
+    end
+    if highest_idx ~= nil then
+        local current = chapter_results[highest_idx]
+        out["stats.current.units_lost"] = tostring(#current.units_lost)
+        out["stats.current.turns_taken"] = tostring(current.turns_taken)
+    end
+    return out
+end
+
 --- Tear down event listeners.
 function StatsService:teardown()
     self.event_listener:teardown()
