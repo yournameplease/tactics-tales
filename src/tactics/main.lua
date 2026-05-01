@@ -57,6 +57,10 @@ function _init()
 
     -- bold font
     fetch(DATP .. "assets/fonts/lilwide/lilwide.font"):poke(0x5600)
+
+    -- custom joypad delays, until I add custom handling
+    poke(0x5f5c, 18)
+    poke(0x5f5d, 6)
     
     input = input_service.new()
     task_manager = tasks.task_manager()
