@@ -14,7 +14,7 @@ local SIDE_LABEL = { player = "Player", enemy = "Enemy", neutral = "Ally" }
 ---@param side Side
 ---@return string
 local function phase_banner_text(turn, side)
-    return "Turn " .. turn .. ": " .. SIDE_LABEL[side] .. " Phase"
+    return "\014Turn " .. turn .. ": " .. SIDE_LABEL[side] .. " Phase"
 end
 
 ---@type Phase[]
