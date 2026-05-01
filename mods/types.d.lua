@@ -31,7 +31,7 @@
 
 -- Returned by game_data/campaigns.lua
 ---@class ModStoriesModule
----@field data table<string, StoryDefinition>
+---@field data table<string, CampaignDefinition>
 
 ---@alias FactionSlotTag "enemy_infantry"
 ---| "enemy_commander"
