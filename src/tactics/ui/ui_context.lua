@@ -4,7 +4,7 @@
 
 require("src.tactics.ui.types")
 
----@alias UIContextType "battle"|"story"|"game"
+---@alias UIContextType "battle"|"campaign"|"game"
 
 ---@class UIContext
 ---@field type UIContextType

@@ -45,7 +45,7 @@
 ---@class StorySelectMenuContext : MenuContext
 ---@field metadata table<string, any>
 
----@class StoryMenuContext : MenuContext
+---@class CampaignMenuContext : MenuContext
 ---@field metadata table<string, any>
 ---@field character_customization CharacterCustomizationSelection
 

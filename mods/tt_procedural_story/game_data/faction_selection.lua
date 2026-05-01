@@ -1,4 +1,4 @@
-local story_memory_mod = include("src/tactics/story/story_memory.lua")
+local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 
 --- Compute adjusted selection weights from base pool, appearance counts, and bias.
 --- prefer_novel  multiplies each base weight by (max_count - count + 1),
@@ -54,7 +54,7 @@ local function weighted_pick(rng, weights)
 end
 
 --- Select a faction for the next battle and update faction_appearance_counts in memory.
---- Reads current counts from story_memory, applies archetype bias to compute weights,
+--- Reads current counts from campaign_state, applies archetype bias to compute weights,
 --- picks a faction via one story_rng roll, then writes the updated counts back.
 ---@param archetype ArchetypeDefinition
 ---@param mem StoryMemory
@@ -78,7 +78,7 @@ local function select_faction(archetype, mem, story_rng)
     for id, n in pairs(counts) do
         new_entries[id] = tostring(n)
     end
-    mem:set("faction_appearance_counts", story_memory_mod.map(new_entries))
+    mem:set("faction_appearance_counts", campaign_state_mod.map(new_entries))
 
     return selected
 end

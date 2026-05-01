@@ -2,13 +2,13 @@
 --- Defines the data structures for stories and their component nodes,
 --- such as text, battles, and jumps.
 
----@alias StoryId string
+---@alias CampaignId string
 ---@alias NodeId string Identifies a node within a story's node table.
 
----@alias StoryNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"set_memory_list"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_story"|"delete_file"|"select_option"
+---@alias CampaignNodeType "chapter_header"|"text"|"roster_add"|"battle"|"set_memory"|"set_memory_list"|"jump"|"new_page"|"advance"|"character_customizer"|"text_input"|"save_game"|"game_results"|"exit_campaign"|"delete_file"|"select_option"
 
 ---@class StoryNode Abstract base for all story node variants.
----@field type StoryNodeType
+---@field type CampaignNodeType
 
 ---@class NewPageNode : StoryNode Advances to a new story page.
 ---@field type "new_page"
@@ -42,7 +42,7 @@
 ---@field type "delete_file"
 
 ---@class ExitStoryNode : StoryNode Exits the current story.
----@field type "exit_story"
+---@field type "exit_campaign"
 
 ---@class RosterAddNode : StoryNode Adds a character to the player's roster.
 ---@field type "roster_add"
@@ -115,7 +115,7 @@
 ---@alias StoryNodeFactory fun(StoryConfig, StoryRngContext): StoryNode
 ---@alias StoryNodeSource StoryNode | StoryNode[] | (fun(StoryConfig, StoryRngContext): StoryNodeSource)
 
----@class StoryDefinition
+---@class CampaignDefinition
 ---@field config? StoryConfigDefinition
 ---@field name? string
 ---@field description? string

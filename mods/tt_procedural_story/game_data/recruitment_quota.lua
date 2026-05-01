@@ -1,4 +1,4 @@
-local story_memory_mod = include("src/tactics/story/story_memory.lua")
+local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 local battles_meta     = include("mods/tt_procedural_story/game_data/battles_meta.lua")
 
 --- Accumulate recruitment credits for this battle, roll pending recruit types,
@@ -33,8 +33,8 @@ local function update_recruitment_quota(archetype, mem, rng, template_id)
         end
     end
 
-    mem:set("recruitment_quota_credits", story_memory_mod.text(tostring(remainder)))
-    mem:set("pending_recruits", story_memory_mod.list(pending))
+    mem:set("recruitment_quota_credits", campaign_state_mod.text(tostring(remainder)))
+    mem:set("pending_recruits", campaign_state_mod.list(pending))
 
     local types_str = #pending > 0 and table.concat(pending, ", ") or "none"
     return string.format("[quota] Added %s credits. %d recruit(s) pending: %s.",

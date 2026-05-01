@@ -5,25 +5,25 @@ local lists = require("src.tactics.util.lists")
 ---@class GameSaveData
 ---@field character_id_generator IdGenerator
 ---@field story_id string
----@field story_config StoryConfig
+---@field campaign_config CampaignConfig
 ---@field story_node_id string
 ---@field story_node_step integer
----@field story_memory StoryMemory
+---@field campaign_state CampaignState
 ---@field roster Character[]
 ---@field stats StoryResults
----@field story_seed integer
+---@field campaign_seed integer
 ---@field story_rng_state integer
 
 ---@class SerializedGameSaveData
 ---@field character_id_count integer
----@field story_id StoryId
----@field story_config StoryConfig
+---@field campaign_id CampaignId
+---@field campaign_config CampaignConfig
 ---@field story_node_id string
 ---@field story_node_step integer
----@field story_memory SerializedStoryMemory
+---@field campaign_state SerializedCampaignState
 ---@field roster SerializedCharacter[]
 ---@field stats StoryResults
----@field story_seed integer
+---@field campaign_seed integer
 ---@field story_rng_state integer
 
 local save_system = {}
@@ -43,7 +43,7 @@ function save_system.save(name, data)
 		story_node_id = data.story_node_id,
 		story_config = data.story_config,
 		story_node_step = data.story_node_step,
-		story_memory = data.story_memory:serialize(),
+		campaign_state = data.campaign_state:serialize(),
 		roster = lists.map(function(c)
 			return c:serialize()
 		end)(data.roster),

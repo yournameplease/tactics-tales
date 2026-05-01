@@ -1,11 +1,11 @@
 local luassert = require("luassert")
 
 local battles_mod = require("tt_procedural_story.game_data.battles")
-local story_memory = require("src.tactics.story.story_memory")
+local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
 local function make_mem()
-    return story_memory.new({ get_character = function() return nil end })
+    return campaign_state.new({ get_character = function() return nil end })
 end
 
 local function make_sc(mem)
@@ -35,7 +35,7 @@ describe("tt_procedural_story.battles skirmish", function()
 
     it("spawns normal enemy at recruit_slot when no turncoat_enemy pending", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({}))
+        mem:set("pending_recruits", campaign_state.list({}))
         local def = skirmish(make_sc(mem))
         local unit = find_unit(def, "recruit_slot")
         luassert.is_not_nil(unit)
@@ -45,7 +45,7 @@ describe("tt_procedural_story.battles skirmish", function()
 
     it("spawns turncoat unit at recruit_slot when turncoat_enemy is pending", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+        mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
         local def = skirmish(make_sc(mem))
         local unit = find_unit(def, "recruit_slot")
         luassert.is_not_nil(unit)
@@ -59,14 +59,14 @@ describe("tt_procedural_story.battles skirmish", function()
 
     it("adds an interaction script when turncoat_enemy is pending", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+        mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
         local def = skirmish(make_sc(mem))
         luassert.is_true(#def.scripts > 0)
     end)
 
     it("has no interaction scripts when no turncoat_enemy is pending", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({}))
+        mem:set("pending_recruits", campaign_state.list({}))
         local def = skirmish(make_sc(mem))
         luassert.are_equal(0, #def.scripts)
     end)
@@ -80,7 +80,7 @@ describe("tt_procedural_story.battles skirmish", function()
 
     it("turncoat script has on_talk trigger for 'turncoat' tag", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+        mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
         local def = skirmish(make_sc(mem))
         local s = def.scripts[1]
         luassert.is_not_nil(s)
@@ -90,7 +90,7 @@ describe("tt_procedural_story.battles skirmish", function()
 
     it("turncoat script includes recruit_unit effect", function()
         local mem = make_mem()
-        mem:set("pending_recruits", story_memory.list({ "turncoat_enemy" }))
+        mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
         local def = skirmish(make_sc(mem))
         local s = def.scripts[1]
         local has_recruit = false

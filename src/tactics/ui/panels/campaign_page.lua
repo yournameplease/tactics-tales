@@ -138,12 +138,12 @@ end
 ---@param node RenderedGameResults
 ---@return UIElement
 local function game_results_page(node)
-    local page = box.builder("story_page")
+    local page = box.builder("campaign_page")
         :direction("col")
         :container("panel")
         :build()
 
-    local header_box = box.builder("story_page_header")
+    local header_box = box.builder("campaign_page_header")
         :direction("col")
         :container("block")
         :build()
@@ -157,7 +157,7 @@ local function game_results_page(node)
     header_box:add(book.section_divider(1))
     page:add(header_box)
 
-    local content_box = box.builder("story_page_content")
+    local content_box = box.builder("campaign_page_content")
         :direction("col")
         :container("block")
         :padding{t = 2, l = 2, r = 2}
@@ -193,7 +193,7 @@ end
 ---@param state UIContextManager
 ---@return UIElement[]
 local function compute_children(state)
-    local rendered_page = state.story_context.story_page
+    local rendered_page = state.campaign_context.campaign_page
     local nodes = rendered_page.nodes
 
     ---@type UIElement[]
@@ -218,7 +218,7 @@ local function compute_children(state)
                 :container("strip")
                 :build()
 
-            local root_node = state.story_context.menu_manager.menu_step.node
+            local root_node = state.campaign_context.menu_manager.menu_step.node
             if root_node.type == "list" then
                 child:add(menu_ui.generic_menu_box(
                     function(_) return 1 end,
@@ -234,7 +234,7 @@ local function compute_children(state)
             ---@cast n RenderedGameResults
             return {game_results_page(n)}
         elseif n.type == "text_input" then
-            local root_node = state.story_context.menu_manager.menu_step.node
+            local root_node = state.campaign_context.menu_manager.menu_step.node
             child = menu_ui.generic_menu_box(
                 function(_) return 1 end,
                 function(_) return root_node end
@@ -245,7 +245,7 @@ local function compute_children(state)
                 :direction("col")
                 :container("block")
                 :build()
-            local root_node = state.story_context.menu_manager.menu_step.node
+            local root_node = state.campaign_context.menu_manager.menu_step.node
             if root_node.type == "list" then
                 child:add(menu_ui.generic_menu_box(
                     function(_) return 1 end,
@@ -260,12 +260,12 @@ local function compute_children(state)
     end
 
     if is_chapter_header_page then
-        local page = box.builder("story_page")
+        local page = box.builder("campaign_page")
             :direction("col")
             :container("panel")
             :build()
         page:add(box.spacer(1))
-        local page_content_box = box.builder("story_page_header")
+        local page_content_box = box.builder("campaign_page_header")
             :direction("col")
             :container("block")
             :build()
@@ -277,12 +277,12 @@ local function compute_children(state)
 
         return {page}
     else
-        local page = box.builder("story_page")
+        local page = box.builder("campaign_page")
             :direction("col")
             :container("panel")
             :build()
         if rendered_page.chapter_text ~= nil then
-            local header_box = box.builder("story_page_header")
+            local header_box = box.builder("campaign_page_header")
                 :direction("col")
                 :container("block")
                 :build()
@@ -302,7 +302,7 @@ local function compute_children(state)
             header_box:add(book.section_divider(1))
             page:add(header_box)
         end
-        local page_content_box = box.builder("story_page_content")
+        local page_content_box = box.builder("campaign_page_content")
             :direction("col")
             :container("block")
             :padding{
@@ -326,14 +326,14 @@ end
 --- Create the story content panel, which regenerates its children when the story revision changes.
 ---@return UIElement
 function story_page_ui.new()
-    local content = box.builder("story_content")
+    local content = box.builder("campaign_content")
         :layout{
             width = "fill",
             height = "fill",
         }
         :child_generator{
             current_key = function(state)
-                return state.story_context.story_page.story_revision
+                return state.campaign_context.campaign_page.story_revision
             end,
             generate_children = compute_children,
         }

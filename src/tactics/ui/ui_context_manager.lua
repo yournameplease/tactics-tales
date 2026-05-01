@@ -4,13 +4,13 @@
 
 require("src.tactics.ui.ui_context")
 local battle_ui_context = require("src.tactics.battle.battle_ui_context")
-local story_ui_context = require("src.tactics.story.story_ui_context")
+local campaign_ui_context = require("src.tactics.campaign.campaign_ui_context")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 require("src.tactics.ui.types")
 
 ---@class UIContextManager
 ---@field battle_context? BattleUIContext
----@field story_context? StoryUIContext
+---@field campaign_context? CampaignUIContext
 ---@field game_context? GameUIContext
 ---@field layout UILayoutId
 local UIContextManager = {}
@@ -36,10 +36,10 @@ function UIContextManager:register_ui_context(ctx)
         assert(self.battle_context == nil, "Attempt to register battle context which was already registered!")
         ---@cast ctx BattleUIContext
         self.battle_context = ctx
-    elseif getmetatable(ctx) == story_ui_context.StoryUIContext then
-        assert(self.story_context == nil, "Attempt to register game context which was already registered!")
-        ---@cast ctx StoryUIContext
-        self.story_context = ctx
+    elseif getmetatable(ctx) == campaign_ui_context.CampaignUIContext then
+        assert(self.campaign_context == nil, "Attempt to register game context which was already registered!")
+        ---@cast ctx CampaignUIContext
+        self.campaign_context = ctx
     elseif getmetatable(ctx) == game_ui_context.GameUIContext then
         assert(self.game_context == nil, "Attempt to register game context which was already registered!")
         ---@cast ctx GameUIContext
@@ -56,9 +56,9 @@ function UIContextManager:unregister_ui_context(ctx_type)
         assert(self.battle_context ~= nil, "Attempt to unregister battle context which was not registered!")
         self.battle_context = nil
     end
-    if ctx_type == "story" then
-        assert(self.story_context ~= nil, "Attempt to unregister battle context which was not registered!")
-        self.story_context = nil
+    if ctx_type == "campaign" then
+        assert(self.campaign_context ~= nil, "Attempt to unregister battle context which was not registered!")
+        self.campaign_context = nil
     end
 end
 
@@ -70,8 +70,8 @@ function UIContextManager:enrich()
     if self.battle_context ~= nil then
         self.battle_context:enrich()
     end
-    if self.story_context ~= nil then
-        self.story_context:enrich()
+    if self.campaign_context ~= nil then
+        self.campaign_context:enrich()
     end
     if self.game_context ~= nil then
         self.game_context:enrich()
@@ -81,8 +81,8 @@ function UIContextManager:enrich()
     local primary_context
     if self.battle_context ~= nil then
         primary_context = self.battle_context
-    elseif self.story_context ~= nil then
-        primary_context = self.story_context
+    elseif self.campaign_context ~= nil then
+        primary_context = self.campaign_context
     elseif self.game_context ~= nil then
         primary_context = self.game_context
     end

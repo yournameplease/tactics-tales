@@ -1,4 +1,4 @@
-local story_memory_mod = include("src/tactics/story/story_memory.lua")
+local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 
 --- Process pending recruits after a battle and clear the pending list.
 --- Initial implementation logs the list for debugging only; actual roster
@@ -14,7 +14,7 @@ local function auto_recruit_pending(mem)
     end
 
     local list_str = #values > 0 and table.concat(values, ", ") or "none"
-    mem:set("pending_recruits", story_memory_mod.list({}))
+    mem:set("pending_recruits", campaign_state_mod.list({}))
 
     return string.format("[auto_recruit] Pending recruits processed: %s.", list_str)
 end

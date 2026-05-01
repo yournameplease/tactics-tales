@@ -2,7 +2,7 @@
 --- Defines the UI layout for a story page.
 
 local book = require("src.tactics.ui.decoration.book")
-local story_page = require("src.tactics.ui.panels.story_page")
+local campaign_page = require("src.tactics.ui.panels.campaign_page")
 local box = require("src.tactics.ui.box")
 local control_hints = require("src.tactics.ui.panels.control_hints")
 
@@ -11,7 +11,7 @@ left:add(box.spacer(1))
 left:add(control_hints.new(
     ---@param s UIContextManager
     function(s)
-        return s.story_context.menu_manager.menu_step
+        return s.campaign_context.menu_manager.menu_step
     end,
     {
         ["BUTTON_A"] = "Advance",
@@ -19,7 +19,7 @@ left:add(control_hints.new(
 ))
 
 local right = book.flex_page()
-right:add(story_page.new())
+right:add(campaign_page.new())
 
 local root = book.split_pages(left, right)
 

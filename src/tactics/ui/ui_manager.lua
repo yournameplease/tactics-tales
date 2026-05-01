@@ -8,7 +8,7 @@ local box = require("src.tactics.ui.box")
 local menu_validator = require("src.tactics.ui.validator")
 local tactics_layouts = require("src.tactics.ui.layout.tactics")
 local game_layouts = require("src.tactics.ui.layout.game")
-local story_page = require("src.tactics.ui.layout.story_page")
+local campaign_page = require("src.tactics.ui.layout.campaign_page")
 local title_screen = require("src.tactics.ui.layout.title_screen")
 
 ---@class UIManager
@@ -34,7 +34,7 @@ function ui_manager.new()
 
     maps.add_all(self.layouts, tactics_layouts)
     maps.add_all(self.layouts, game_layouts)
-    self.layouts["STORY_PAGE"] = story_page
+    self.layouts["CAMPAIGN_PAGE"] = campaign_page
     self.layouts["TITLE_SCREEN"] = title_screen
 
     -- Validate layouts

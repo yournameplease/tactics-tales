@@ -3,39 +3,39 @@
 --- system access to the current story state.
 
 require("src.tactics.ui.ui_context")
-require("src.tactics.story.story_page")
+require("src.tactics.campaign.campaign_page")
 require("src.tactics.menu.menu_manager")
 
----@class StoryUIContext : UIContext
----@field type "story"
----@field story_page StoryPage
+---@class CampaignUIContext : UIContext
+---@field type "campaign"
+---@field campaign_page CampaignPage
 ---@field menu_manager MenuManager
-local StoryUIContext = {}
-StoryUIContext.__index = StoryUIContext
+local CampaignUIContext = {}
+CampaignUIContext.__index = CampaignUIContext
 
-local story_ui_context = {
-    StoryUIContext = StoryUIContext,
+local campaign_ui_context = {
+    CampaignUIContext = CampaignUIContext,
 }
 
---- Create a new StoryUIContext for the given story page and menu manager.
----@param page StoryPage
+--- Create a new CampaignUIContext for the given story page and menu manager.
+---@param page CampaignPage
 ---@param menu_manager MenuManager
----@return StoryUIContext
-function story_ui_context.new(page, menu_manager)
-    ---@type StoryUIContext
+---@return CampaignUIContext
+function campaign_ui_context.new(page, menu_manager)
+    ---@type CampaignUIContext
     local self = setmetatable({
-        type = "story",
-    }, StoryUIContext)
+        type = "campaign",
+    }, CampaignUIContext)
 
-    self.story_page = page
+    self.campaign_page = page
     self.menu_manager = menu_manager
 
     return self
 end
 
 --- Enrich the context with layout and live character appearance data.
-function StoryUIContext:enrich()
-    self.layout = "STORY_PAGE"
+function CampaignUIContext:enrich()
+    self.layout = "CAMPAIGN_PAGE"
 
     local menu = self.menu_manager:serialize()
 
@@ -43,7 +43,7 @@ function StoryUIContext:enrich()
         ---@type table<string, string>
         local appearance = menu.node.data
 
-        local character_customizer_node = self.story_page.nodes[#self.story_page.nodes] --[[@as RenderedCharacterCustomization]]
+        local character_customizer_node = self.campaign_page.nodes[#self.campaign_page.nodes] --[[@as RenderedCharacterCustomization]]
 
         local drawable_character = character_customizer_node.character
         if drawable_character ~= nil then
@@ -63,4 +63,4 @@ function StoryUIContext:enrich()
     end
 end
 
-return story_ui_context
+return campaign_ui_context

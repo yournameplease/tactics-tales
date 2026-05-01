@@ -2,13 +2,13 @@
 --- Represents the current visible state of a story scene.
 --- It holds the collection of nodes (text, menus) to be rendered.
 
-local drawable_character = require("src.tactics.story.drawable_character")
+local drawable_character = require("src.tactics.campaign.drawable_character")
 local character = require("src.tactics.character.object.character")
 
----@alias RenderedStoryNodeType "text"|"character_customization"|"text_input"|"chapter_header"|"game_results"|"select_option"
+---@alias RenderedCampaignNodeType "text"|"character_customization"|"text_input"|"chapter_header"|"game_results"|"select_option"
 
 ---@class RenderedStoryNode Abstract base for all rendered story nodes.
----@field type RenderedStoryNodeType
+---@field type RenderedCampaignNodeType
 
 ---@class RenderedText : RenderedStoryNode Rendered dialogue line.
 ---@field type "text"
@@ -133,35 +133,35 @@ function rendered_story_node.text_input(key)
     return node
 end
 
----@class StoryPage The current story scene state.
+---@class CampaignPage The current story scene state.
 ---@field nodes RenderedStoryNode[] Ordered list of nodes currently visible on the page.
 ---@field chapter_text string Title text of the current chapter, set after clearing the header node.
 ---@field chapter_number integer Number of the current chapter, set after clearing the header node.
 ---@field story_revision integer Incremented each time the page content changes.
----@field story_memory StoryMemory
-local StoryPage = {}
-StoryPage.__index = StoryPage
+---@field campaign_state CampaignState
+local CampaignPage = {}
+CampaignPage.__index = CampaignPage
 
-local story_page = {
+local campaign_page = {
     rendered_story_node = rendered_story_node,
 }
 
---- Create a new StoryPage backed by the given story memory.
----@param story_mem StoryMemory
----@return StoryPage
-function story_page.story_page(story_mem)
+--- Create a new CampaignPage backed by the given story memory.
+---@param story_mem CampaignState
+---@return CampaignPage
+function campaign_page.new(story_mem)
     local self = setmetatable({
-        story_memory = story_mem,
+        campaign_state = story_mem,
         story_revision = 0,
         nodes = {},
-    }, StoryPage)
+    }, CampaignPage)
     return self
 end
 
 --- Append a chapter header node to the page.
 ---@param text string Chapter title text.
 ---@param number integer Chapter number.
-function StoryPage:add_chapter_header(text, number)
+function CampaignPage:add_chapter_header(text, number)
     local node = rendered_story_node.chapter_header(text, number)
     table.insert(self.nodes, node)
 end
@@ -169,7 +169,7 @@ end
 -- TODO: move all these constructors out of here,
 -- back in to story class?
 --- Remove the topmost node (expected to be a chapter header) and store its values in chapter_text / chapter_number.
-function StoryPage:clear_chapter_header()
+function CampaignPage:clear_chapter_header()
     local chapter_header_node = self.nodes[#self.nodes]
     ---@cast chapter_header_node RenderedChapterHeader
     self.chapter_text = chapter_header_node.text
@@ -178,12 +178,12 @@ function StoryPage:clear_chapter_header()
 end
 
 --- Remove the topmost node from the page.
-function StoryPage:pop()
+function CampaignPage:pop()
     table.remove(self.nodes)
 end
 
 --- Mark the topmost text node as fully rendered (all characters visible).
-function StoryPage:finish_text()
+function CampaignPage:finish_text()
     local text_node = self.nodes[#self.nodes]
     ---@cast text_node RenderedText
     text_node.text.characters_rendered = #text_node.text.text
@@ -191,7 +191,7 @@ end
 
 --- Append a text node for the given dialogue.
 ---@param dialogue ActiveDialogue
-function StoryPage:add_text_line(dialogue)
+function CampaignPage:add_text_line(dialogue)
     local node = rendered_story_node.text(dialogue)
     table.insert(self.nodes, node)
 end
@@ -200,7 +200,7 @@ end
 ---@param base_character Character Source character whose stats and appearance are used.
 ---@param key string Memory key for this character slot.
 ---@param anim AnimatedSpriteData Animation data to display for the character.
-function StoryPage:add_character_customization_menu(base_character, key, anim)
+function CampaignPage:add_character_customization_menu(base_character, key, anim)
     local node = rendered_story_node.character_customization(base_character, key, anim)
     table.insert(self.nodes, node)
 end
@@ -209,14 +209,14 @@ end
 ---@param results StoryResults
 ---@param chapter_pages GameResultsChapterDisplay[]
 ---@param unit_pages GameResultsUnitDisplay[]
-function StoryPage:add_game_results(results, chapter_pages, unit_pages)
+function CampaignPage:add_game_results(results, chapter_pages, unit_pages)
     local node = rendered_story_node.game_results(results, chapter_pages, unit_pages)
     table.insert(self.nodes, node)
 end
 
 --- Append a select option node.
 ---@param options SelectOptionEntry[]
-function StoryPage:add_select_option_menu(options)
+function CampaignPage:add_select_option_menu(options)
     local node = rendered_story_node.select_option(options)
     table.insert(self.nodes, node)
 end
@@ -224,7 +224,7 @@ end
 --- Append a prompt text node followed by a text input node.
 ---@param key string Memory key where the entered text will be stored.
 ---@param text ActiveDialogue Prompt dialogue shown above the input field.
-function StoryPage:add_text_input_menu(key, text)
+function CampaignPage:add_text_input_menu(key, text)
     local text_node = rendered_story_node.text(text)
     local input_node = rendered_story_node.text_input(key)
     table.insert(self.nodes, text_node)
@@ -232,8 +232,8 @@ function StoryPage:add_text_input_menu(key, text)
 end
 
 --- Remove all nodes from the page.
-function StoryPage:clear_page()
+function CampaignPage:clear_page()
     self.nodes = {}
 end
 
-return story_page
+return campaign_page

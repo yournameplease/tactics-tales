@@ -178,14 +178,14 @@ local MENU_DATA = {
     },
 }
 
-local story_menu_manager = {}
+local campaign_menu_manager = {}
 
 --- Create a new MenuManager configured for story sequences.
 ---@param ctx StoryMenuServices
 ---@param bus EventBus
 ---@return MenuManager
-function story_menu_manager.new(ctx, bus)
+function campaign_menu_manager.new(ctx, bus)
     return menu_manager.new(MENU_DATA, HANDLERS, ctx, bus)
 end
 
-return story_menu_manager
+return campaign_menu_manager
