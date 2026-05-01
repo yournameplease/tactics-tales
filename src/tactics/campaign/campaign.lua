@@ -60,7 +60,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package battle_services_bundle BattleServicesBundle
 ---@field package ui_context UIContextManager
 ---@field package input_service InputService
----@field package return_stack {node_id: string, node_step: integer}[]
+---@field return_stack {node_id: string, node_step: integer}[]
 local Campaign = {}
 Campaign.__index = Campaign
 
@@ -129,6 +129,15 @@ end
 --- such as showing dialogue, starting a battle, or modifying story memory.
 function Campaign:handle_new_node()
     local node = self.current_node.definition
+
+    local steps = self:resolve_to_array(self.campaign_definition.nodes[self.current_node.node_id])
+    if steps[self.current_node.node_step] == nil and #self.return_stack > 0 then
+        log.debug("popping return stack")
+        local ret = table.remove(self.return_stack)
+        self:jump_to_node_step(ret.node_id, ret.node_step)
+        return
+    end
+
     log.debug("Handling new node: ", node.type)
     local h = assert(HANDLERS[node.type], "Unknown node type: " .. tostring(node.type))
     h.enter(self, node)
@@ -144,11 +153,14 @@ function Campaign:advance_node()
     if h and h.exit then h.exit(self, node) end
     self.current_node.node_step = self.current_node.node_step + 1
     local steps = self:resolve_to_array(self.campaign_definition.nodes[self.current_node.node_id])
+    
     if steps[self.current_node.node_step] == nil and #self.return_stack > 0 then
+        log.debug("popping return stack")
         local ret = table.remove(self.return_stack)
         self:jump_to_node_step(ret.node_id, ret.node_step)
         return
     end
+
     self.current_node.definition = self:resolve_node_source(steps[self.current_node.node_step])
     self:handle_new_node()
 end
