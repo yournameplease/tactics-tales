@@ -760,22 +760,22 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
 
     for _, t in ipairs(tiles_in_distance) do
         local tile_unit = self.battle_map:get_at_tile(t)
+        local current = tiles:get(t.x, t.y)
         -- TODO: extract a "can_attack" function
         if unit:is_player() then
             if tile_unit ~= nil then
                 if tile_unit.side == "enemy" then
-                    tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
+                    tiles:set(t.x, t.y, current | HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
                 elseif tile_unit.side == "neutral" then
                     local interactions = self.battle_map.interactions_by_unit_id[tile_unit.id]
-                    if interactions ~= nil
-                        and next(interactions) ~= nil
-                    then
-                        tiles:set(t.x, t.y, HIGHLIGHT.IS_VALID)
-                    end
+                    if interactions and next(interactions) then
+                        tiles:set(t.x, t.y, current | HIGHLIGHT.IS_VALID)
+                    end 
                 end
             end
+            -- neutral units: interaction destination is handled via get_nearby_interactions
         else
-            tiles:set(t.x, t.y, HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
+            tiles:set(t.x, t.y, current | HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
         end
     end
 
@@ -856,7 +856,7 @@ function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(unit)
             tiles:set(x, y, tile)
 
             local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, p)
-            tiles = tiles | ((tiles_in_attack_range & HIGHLIGHT.IS_VALID) << 1)
+            tiles = tiles | tiles_in_attack_range
         end
     end)
 
