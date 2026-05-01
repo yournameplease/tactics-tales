@@ -88,6 +88,7 @@ MenuStep.__index = MenuStep
 ---@field default_rmb? string
 ---@field initial_data (fun(game_ctx: GameContext, menu_ctx: MenuContext): table<string, any>)?
 ---@field menu_actions? MenuActions
+---@field keyboard_handler? string MenuHandlerId called with concatenated text when peektext() is truthy. Returns true to also allow joypad this frame.
 local MenuStepDefinition = {}
 MenuStepDefinition.__index = MenuStepDefinition
 
@@ -137,6 +138,14 @@ function MenuStepDefinition:with_action(input, action)
         self.menu_actions = {}
     end
     self.menu_actions[input] = action
+    return self
+end
+
+--- Register a handler to receive real keyboard text input via peektext()/readtext().
+---@param handler_id string MenuHandlerId to invoke with concatenated text. Returns true to allow joypad the same frame.
+---@return MenuStepDefinition
+function MenuStepDefinition:with_keyboard_handler(handler_id)
+    self.keyboard_handler = handler_id
     return self
 end
 
@@ -362,6 +371,19 @@ end
 ---@param input InputContext
 function BaseMenuManager:update(input)
     if self.menu_step ~= nil then
+        local allow_joypad = true
+        if self.menu_step.keyboard_handler and peektext() then
+            local text = ""
+            while peektext() do
+                text = text .. readtext()
+            end
+            local handler = self.menu_handlers[self.menu_step.keyboard_handler]
+            assert(handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
+            allow_joypad = handler(self.game_ctx, self:serialize().node.data, self.menu_ctx, text) == true
+        end
+
+        if not allow_joypad then return end
+
         local signal = input_context.handle_update(
             input,
             function(joy)
