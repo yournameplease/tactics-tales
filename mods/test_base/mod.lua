@@ -7,10 +7,10 @@ return {
     content = {
         maps           = "game_data/maps",
         battles        = "game_data/battles",
-        stories        = "game_data/stories",
+        campaigns       = "game_data/campaigns",
         characters     = "game_data/characters",
         items          = "game_data/items",
-        default_story  = "simple_exit",
-        story_select   = { "simple_exit", "linear_text", "jump_flow", "option_select_and_exit" },
+        default_campaign = "simple_exit",
+        campaign_select  = { "simple_exit", "linear_text", "jump_flow", "option_select_and_exit" },
     },
 }

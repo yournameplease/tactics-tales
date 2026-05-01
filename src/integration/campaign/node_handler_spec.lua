@@ -6,13 +6,13 @@ describe("node handlers #it", function()
     -- Helper: inline story ending with exit_story after the given nodes
     local function single_node_story(node)
         return {
-            stories = {
+            campaigns = {
                 test = {
                     starting_node = "start",
                     nodes = {
                         start = {
                             node,
-                            { type = "exit_story" },
+                            { type = "exit_campaign" },
                         },
                     },
                 },
@@ -43,11 +43,11 @@ describe("node handlers #it", function()
                         { type = "roster_add", template = "test_fighter" },
                         { type = "roster_add", template = "test_fighter" },
                         { type = "game_results" },
-                        { type = "exit_story" },
+                        { type = "exit_campaign" },
                     },
                 },
             }
-            local h = campaign_harness.new({ stories = { test = story_def } })
+            local h = campaign_harness.new({ campaigns = { test = story_def } })
             h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             -- Now on game_results node: 0 chapter pages, 2 unit pages
@@ -66,11 +66,11 @@ describe("node handlers #it", function()
                     start = {
                         { type = "roster_add", template = "test_fighter" },
                         { type = "game_results" },
-                        { type = "exit_story" },
+                        { type = "exit_campaign" },
                     },
                 },
             }
-            local h = campaign_harness.new({ stories = { test = story_def } })
+            local h = campaign_harness.new({ campaigns = { test = story_def } })
             h:start_campaign("test")
             -- 0 chapter pages, 1 unit page: first confirm → units section
             h:confirm()
@@ -88,11 +88,11 @@ describe("node handlers #it", function()
                     start = {
                         { type = "roster_add", template = "test_fighter" },
                         { type = "game_results" },
-                        { type = "exit_story" },
+                        { type = "exit_campaign" },
                     },
                 },
             }
-            local h = campaign_harness.new({ stories = { test = story_def } })
+            local h = campaign_harness.new({ campaigns = { test = story_def } })
             h:start_campaign("test")
             h:confirm() -- chapters → units
             h:confirm() -- last unit page → advance
@@ -107,11 +107,11 @@ describe("node handlers #it", function()
                         { type = "chapter_header", text = "Ch 3", chapter_number = 3 },
                         { type = "roster_add", template = "test_fighter" },
                         { type = "game_results" },
-                        { type = "exit_story" },
+                        { type = "exit_campaign" },
                     },
                 },
             }
-            local h = campaign_harness.new({ stories = { test = story_def } })
+            local h = campaign_harness.new({ campaigns = { test = story_def } })
             h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             local node = h:game_results_node()
@@ -171,11 +171,11 @@ describe("node handlers #it", function()
                     start = {
                         { type = "chapter_header", text = "Chapter 2", chapter_number = 2 },
                         { type = "roster_add", template = "test_fighter" },
-                        { type = "exit_story" },
+                        { type = "exit_campaign" },
                     },
                 },
             }
-            local h = campaign_harness.new({ stories = { test = story_def } })
+            local h = campaign_harness.new({ campaigns = { test = story_def } })
             h:start_campaign("test")
             h:confirm() -- advance past chapter_header
             local results = h:story_results()

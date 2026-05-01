@@ -34,8 +34,8 @@ CampaignHarness.__index = CampaignHarness
 local campaign_harness = {}
 
 --- Create a new StoryHarness backed by the test_base mod.
---- Pass overrides.stories to merge inline story definitions on top of test_base.
----@param overrides? { stories?: table<string, any> }
+--- Pass overrides.campaigns to merge inline story definitions on top of test_base.
+---@param overrides? { campaigns?: table<string, any> }
 ---@return StoryHarness
 function campaign_harness.new(overrides)
     local self = setmetatable({}, CampaignHarness)
@@ -55,9 +55,9 @@ function campaign_harness.new(overrides)
     loader:register_mod("test_base")
     self._game_data = loader:load_mod_data()
 
-    if overrides and overrides.stories then
-        for id, story_def in pairs(overrides.stories) do
-            self._game_data.stories.data[id] = story_def
+    if overrides and overrides.campaigns then
+        for id, campaign_def in pairs(overrides.campaigns) do
+            self._game_data.campaigns.data[id] = campaign_def
         end
     end
 

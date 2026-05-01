@@ -30,15 +30,15 @@ local ai <const> = {
     stationary    = { move = "zero",     target_sides = { "player", "neutral" } },
 }
 
-local function mem_text(story_config, key)
-    local mem = story_config.memory
+local function mem_text(campaign_config, key)
+    local mem = campaign_config.memory
     if not mem then return nil end
     local entry = mem:get(key)
     return entry and entry.text
 end
 
-local function mem_list(story_config, key)
-    local mem = story_config.memory
+local function mem_list(campaign_config, key)
+    local mem = campaign_config.memory
     if not mem then return {} end
     local entry = mem:get(key)
     if not entry then return {} end
@@ -46,21 +46,21 @@ local function mem_list(story_config, key)
     return entry.values
 end
 
-local function get_faction(story_config)
-    local faction_id = mem_text(story_config, "faction_id")
+local function get_faction(campaign_config)
+    local faction_id = mem_text(campaign_config, "faction_id")
     return factions_data[faction_id] or factions_data["bandits"]
 end
 
-local function get_tier(story_config)
-    return tonumber(mem_text(story_config, "base_difficulty")) or 1
+local function get_tier(campaign_config)
+    return tonumber(mem_text(campaign_config, "base_difficulty")) or 1
 end
 
 ---@type ModBattlesModule
 local battles = {
-    ["skirmish"] = function(story_config, rng_context)
-        local faction  = get_faction(story_config)
-        local tier     = get_tier(story_config)
-        local pending  = mem_list(story_config, "pending_recruits")
+    ["skirmish"] = function(campaign_config, rng_context)
+        local faction  = get_faction(campaign_config)
+        local tier     = get_tier(campaign_config)
+        local pending  = mem_list(campaign_config, "pending_recruits")
 
         local has_turncoat = false
         for _, v in ipairs(pending) do

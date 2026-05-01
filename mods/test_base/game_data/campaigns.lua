@@ -5,7 +5,7 @@ local function battle_config(params)
 end
 
 ---@type ModStoriesModule
-local stories = {
+local campaigns = {
     data = {
         -- Completes immediately on start. Baseline smoke test.
         simple_exit = {
@@ -13,7 +13,7 @@ local stories = {
             battle_config = battle_config{},
             nodes = {
                 exit = {
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -26,7 +26,7 @@ local stories = {
                 main = {
                     { type = "text", text = "First line." },
                     { type = "text", text = "Second line." },
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -41,7 +41,7 @@ local stories = {
                 },
                 jump_target = {
                     { type = "text", text = "You jumped here." },
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -59,7 +59,7 @@ local stories = {
                             return { type = "advance" }
                         end
                     end,
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -71,7 +71,7 @@ local stories = {
             nodes = {
                 main = {
                     { type = "advance" },
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -86,7 +86,7 @@ local stories = {
                         { id = "warrior", name = "Warrior", description = "A melee fighter." },
                         { id = "mage", name = "Mage", description = "A magic user." },
                     }},
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -98,17 +98,17 @@ local stories = {
             nodes = {
                 main = {
                     { type = "delete_file" },
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
 
-        -- Parameterised by story_config.permadeath. Enemy kills player on first finish_player_turn().
+        -- Parameterised by campaign_config.permadeath. Enemy kills player on first finish_player_turn().
         -- permadeath=false: character stays in roster. permadeath=true: character removed from roster.
         close_combat = {
             starting_node = "the_battle",
-            battle_config = function(story_config)
-                return { permadeath = story_config.permadeath }
+            battle_config = function(campaign_config)
+                return { permadeath = campaign_config.permadeath }
             end,
             nodes = {
                 the_battle = {
@@ -117,7 +117,7 @@ local stories = {
                       next_node_failure = "after" },
                 },
                 after = {
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
@@ -134,14 +134,14 @@ local stories = {
                       next_node_failure = "after_defeat" },
                 },
                 after_victory = {
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
                 after_defeat = {
-                    { type = "exit_story" },
+                    { type = "exit_campaign" },
                 },
             },
         },
     },
 }
 
-return stories
+return campaigns

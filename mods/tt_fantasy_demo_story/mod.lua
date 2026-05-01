@@ -9,13 +9,13 @@ return {
   content = {
     maps = "game_data/maps",
     battles = "game_data/battles",
-    stories = "game_data/stories",
+    campaigns       = "game_data/campaigns",
     characters = "game_data/characters",
     items = "game_data/items",
-    default_story = "demo_story",
+    default_campaign = "demo_story",
     -- I should probably move this to the config param
-    -- default_story = "convention_demo",
-    story_select = {
+    -- default_campaign = "convention_demo",
+    campaign_select  = {
       "bandit_village",
       "cultist_cave",
       "fortress_town",

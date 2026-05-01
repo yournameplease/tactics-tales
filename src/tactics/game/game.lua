@@ -1,6 +1,6 @@
 ---@brief
 --- The top-level manager for the overall game state.
---- It manages the main menu and transitions into stories.
+--- It manages the main menu and transitions into campaigns.
 
 local campaign = require("src.tactics.campaign.campaign")
 local game_menu_manager = require("src.tactics.game.game_menu_manager")
@@ -17,7 +17,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@class GameMenuContext : GameContext
 ---@field default_campaign_id string the campaign_id to use if starting from main
 ---@field campaign_ids CampaignId[] Available story IDs to present in the menu.
----@field stories table<CampaignId, CampaignDefinition> Available story IDs to present in the menu.
+---@field campaigns table<CampaignId, CampaignDefinition> Available story IDs to present in the menu.
 ---@field handle_begin_campaign fun(save_id: string?, campaign_id: CampaignId, config: table<string, string>) Callback to start a new story.
 ---@field handle_load_campaign fun(save_id: string) Callback to load an existing story save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
@@ -142,9 +142,9 @@ function game.new(
 
     ---@type GameMenuContext
     local game_menu_ctx = {
-        default_campaign_id = game_data.stories.default_story,
-        story_ids = game_data.stories.story_select,
-        stories = game_data.stories.data,
+        default_campaign_id = game_data.campaigns.default_campaign,
+        campaign_ids = game_data.campaigns.campaign_select,
+        campaigns = game_data.campaigns.data,
         config_manager = self.config_manager,
         get_game_saves = save_system.list_saves,
         handle_begin_campaign = function(file, id, config) self:begin_campaign(file, id, config) end,

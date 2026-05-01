@@ -149,37 +149,37 @@ function ModLoader:load_mod_data()
         function(mod) return mod.spec.content.battles end,
         nil
     )
-    log.debug("Loading stories...")
+    log.debug("Loading campaigns...")
     local story_data = load_mod_map(
         self.registered,
-        function(mod) return mod.spec.content.stories end,
+        function(mod) return mod.spec.content.campaigns end,
         function(spec) return spec.data end
     )
 
-    local story_select = nil
+    local campaign_select = nil
     local default_campaign = nil
     for _, mod in ipairs(self.registered) do
-        if mod.spec.content.story_select ~= nil then
-            story_select = mod.spec.content.story_select
+        if mod.spec.content.campaign_select ~= nil then
+            campaign_select = mod.spec.content.campaign_select
         end
-        if mod.spec.content.default_story ~= nil then
-            default_campaign = mod.spec.content.default_story
+        if mod.spec.content.default_campaign ~= nil then
+            default_campaign = mod.spec.content.default_campaign
         end
     end
-    if story_select == nil then
-        story_select = {}
+    if campaign_select == nil then
+        campaign_select = {}
         for id in pairs(story_data) do
-            table.insert(story_select, id)
+            table.insert(campaign_select, id)
         end
     end
     if default_campaign == nil then
         error("No default_campaign defined in any mod's content")
     end
 
-    game_data.stories = {
+    game_data.campaigns = {
         data = story_data,
-        default_story = default_campaign,
-        story_select = story_select,
+        default_campaign = default_campaign,
+        campaign_select = campaign_select,
     }
     log.debug("Loading characters...")
     game_data.characters = load_mod_map(
