@@ -40,6 +40,7 @@
 ---@field selected_item ItemSelection
 ---@field metadata table<string, any>
 ---@field valid_attack_points Point[]? Valid positions from which the acting unit can attack the target.
+---@field stored_interaction InteractionHook? Single interaction selected via the SELECT_DESTINATION shortcut.
 
 ---@class StorySelectMenuContext : MenuContext
 ---@field metadata table<string, any>

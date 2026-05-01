@@ -128,6 +128,40 @@ local function get_tile_highlights_in_move_and_attack_range(msb, ctx)
     return msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
 end
 
+---@param target_point Point
+---@param valid_tiles userdata
+---@param acting_unit BattleUnit
+---@param map BattleMap
+---@return InteractionHook|nil
+local function get_single_unit_interaction(target_point, valid_tiles, acting_unit, map)
+    local target_unit = map:get_at_tile(target_point)
+    if target_unit == nil then return nil end
+    local neighbors = {
+        point.of(target_point.x - 1, target_point.y),
+        point.of(target_point.x + 1, target_point.y),
+        point.of(target_point.x, target_point.y - 1),
+        point.of(target_point.x, target_point.y + 1),
+    }
+    local found = nil
+    for _, p in ipairs(neighbors) do
+        local tile_data = valid_tiles:get(p.x, p.y)
+        if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+            local occupant = map:get_at_tile(p)
+            if occupant == nil or occupant.id == acting_unit.id then
+                for _, interaction in ipairs(map:get_nearby_interactions(p)) do
+                    if interaction.target_unit ~= nil
+                        and interaction.target_unit.id == target_unit.id
+                    then
+                        if found ~= nil then return nil end
+                        found = interaction
+                    end
+                end
+            end
+        end
+    end
+    return found
+end
+
 local HANDLERS = {}
 
 HANDLERS["select_swap_unit"] = function(services, _menu_data, session_context, value)
@@ -392,6 +426,51 @@ HANDLERS["move_and_store_attack_unit"] = function(services, _menu_data, session_
     return nil
 end
 
+HANDLERS["move_and_store_interaction_unit"] = function(services, _menu_data, session_context, value)
+    local target_point = value.point
+    local acting_unit = session_context.acting_unit.unit
+    local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
+    local neighbors = {
+        point.of(target_point.x - 1, target_point.y),
+        point.of(target_point.x + 1, target_point.y),
+        point.of(target_point.x, target_point.y - 1),
+        point.of(target_point.x, target_point.y + 1),
+    }
+    local dest_point = nil
+    local interaction = nil
+    local target_unit = services.battle_map:get_at_tile(target_point)
+    for _, p in ipairs(neighbors) do
+        local tile_data = valid_tiles:get(p.x, p.y)
+        if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+            local occupant = services.battle_map:get_at_tile(p)
+            if occupant == nil or occupant.id == acting_unit.id then
+                for _, iact in ipairs(services.battle_map:get_nearby_interactions(p)) do
+                    if iact.target_unit ~= nil and iact.target_unit.id == target_unit.id then
+                        dest_point = p
+                        interaction = iact
+                        break
+                    end
+                end
+            end
+        end
+        if dest_point then break end
+    end
+    if dest_point == nil then
+        return menu_manager.menu_handler.then_dont_navigate()
+    end
+    local path = pathfinding.extend_path_to_point(
+        { session_context.acting_unit.point:copy() },
+        dest_point,
+        acting_unit.character.stats.movement,
+        valid_tiles
+    )
+    session_context.destination = { point = dest_point, path = path }
+    session_context.stored_interaction = interaction
+    services.tactics_engine:handle_move_unit(acting_unit, dest_point, path)
+    services.tactics_engine.active_point = dest_point
+    return nil
+end
+
 HANDLERS["store_attack_unit"] = function(services, _menu_data, session_context, value)
     session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
     services.tactics_engine.active_point = value.point
@@ -583,6 +662,19 @@ return {
                             :handle_action("select", "move_and_store_attack_unit")
                             :advance_to("CONFIRM_ATTACK")
                     )
+                    :with_child(
+                        function(point, msb, ctx)
+                            ---@cast msb BattleMenuContext
+                            ---@cast ctx BattleMainMenuContext
+                            local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
+                            return get_single_unit_interaction(
+                                point, valid_tiles, ctx.acting_unit.unit, msb.battle_map
+                            ) ~= nil
+                        end,
+                        button.builder("interaction_unit")
+                            :handle_action("select", "move_and_store_interaction_unit")
+                            :advance_to("CONFIRM_INTERACTION")
+                    )
                     :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
                     :with_path_length(function(_msb, ctx)
                         ---@cast ctx BattleMainMenuContext
@@ -716,6 +808,27 @@ return {
                 :handle_action("back", "unmove_acting_unit")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
+            ["CONFIRM_INTERACTION"] = step_definition.of_node(
+                list.column(
+                    "confirm_interaction",
+                    function(_msb, ctx)
+                        ---@cast ctx BattleMainMenuContext
+                        local options = {}
+                        table.insert(options, button.builder("do_interaction")
+                            :with_text(ctx.stored_interaction.interaction_text)
+                            :with_value(ctx.stored_interaction)
+                            :handle_action("select", "handle_interaction")
+                            :as_final_step())
+                        table.insert(options, button.builder("cancel_interaction")
+                            :with_text("Cancel")
+                            :then_go_back())
+                        return options
+                    end)
+            )
+            :with_previous_step("SELECT_DESTINATION")
+            :handle_action("back", "unmove_acting_unit")
+            :with_action("BUTTON_A", { command = "select", description = "Select" })
+            :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["TURN_MENU"] = step_definition.of_node(
                 list.column(
                     "turn_menu",
