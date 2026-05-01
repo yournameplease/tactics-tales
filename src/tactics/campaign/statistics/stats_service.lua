@@ -84,6 +84,7 @@ function StatsService:get_as_map()
     local highest_idx = nil
     for i, result in pairs(chapter_results) do
         out["stats." .. i .. ".units_lost"] = tostring(#result.units_lost)
+        out["stats." .. i .. ".players_lost"] = tostring(result.deaths_by_side.player)
         out["stats." .. i .. ".turns_taken"] = tostring(result.turns_taken)
         if highest_idx == nil or i > highest_idx then
             highest_idx = i
@@ -92,6 +93,7 @@ function StatsService:get_as_map()
     if highest_idx ~= nil then
         local current = chapter_results[highest_idx]
         out["stats.current.units_lost"] = tostring(#current.units_lost)
+        out["stats.current.players_lost"] = tostring(current.deaths_by_side.player)
         out["stats.current.turns_taken"] = tostring(current.turns_taken)
     end
     return out
