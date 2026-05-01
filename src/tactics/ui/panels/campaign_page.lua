@@ -23,7 +23,7 @@ local function chapter_header_page(node)
                 height = "fit_content"
             }
             :text{
-                content = {"Chapter "..node.number},
+                content = {"\014Chapter "..node.number},
                 text_color = "light",
                 draw_properties = {
                     justify = "center",
@@ -287,12 +287,12 @@ local function compute_children(state)
                 :container("block")
                 :build()
             local num_text = rendered_page.chapter_number
-                and tostring(rendered_page.chapter_number)
+                and "\014"..tostring(rendered_page.chapter_number)
                 or ""
             local chapter_text = rendered_page.chapter_text
             header_box:add(box.builder("chapter_header_line")
                 :text{
-                    content = {num_text.."|"..chapter_text.."|"},
+                    content = {num_text.."|\014"..chapter_text.."\015|"},
                     text_color = "light",
                     draw_properties = {
                         align = true

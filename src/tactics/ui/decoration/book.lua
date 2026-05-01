@@ -108,7 +108,7 @@ function book.dynamic_title(text_function, text_info)
         box.builder("text")
         :text(text_info)
         :on_update(function(elem, state)
-            elem.text.content = { text_function(state) }
+            elem.text.content = { "\014"..text_function(state) }
         end)
         :build()
     )
