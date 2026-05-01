@@ -55,6 +55,9 @@ function _init()
     
     local config_mgr = config_manager.new()
 
+    -- bold font
+    fetch(DATP .. "assets/fonts/lilwide/lilwide.font"):poke(0x5600)
+    
     input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
