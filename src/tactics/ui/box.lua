@@ -959,6 +959,8 @@ function Box:compute_text()
         text_obj:set_height(self.rect.c_h)
         text_obj:set_lines(lines)
         text_obj:calculate_wrapping()
+        -- TODO: better
+        self:mark_dirty_layout()
     end
     for _, child in ipairs(self.children) do
         child:compute_text()

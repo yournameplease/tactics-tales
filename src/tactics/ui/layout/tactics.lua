@@ -27,8 +27,22 @@ local modals = {
 do
     local left = book.flex_page()
     left:add(battle_summary)
-    left:add(battle.unit_info())
-    left:add(battle.unit_inventory())
+    local unit_box = box.builder("unit_box")
+        :layout{
+            dir = "col",
+            gap = 4,
+            padding = box.layout.padding(4),
+            height = "fit_content",
+            width = "fill",
+        }
+        :style{
+            decoration = "border",
+            decoration_padding = 3,
+        }
+        :build()
+    unit_box:add(battle.unit_info())
+    unit_box:add(battle.unit_inventory())
+    left:add(unit_box)
     left:add(box.spacer(1))
     left:add(control_hints.new(
         ---@param s UIContextManager
