@@ -51,7 +51,7 @@ local function chapter_results_section(chapter)
         :container("block")
         :build()
 
-    root:add(book.title{content = {"Chapter "..chapter.chapter_number}})
+    root:add(book.title{content = {"\014Chapter "..chapter.chapter_number}})
 
     local result_label = chapter.result == "VICTORY" and "Victory" or "Defeat"
     root:add(box.builder("result_line")
@@ -105,7 +105,7 @@ local function unit_results_section(unit_display)
         :container("block")
         :build()
 
-    stats:add(book.title{content = {unit_display.name}})
+    stats:add(book.title{content = {"\014"..unit_display.name}})
 
     if unit_display.chapter_recruited ~= nil then
         stats:add(box.builder("unit_recruited")
@@ -149,7 +149,7 @@ local function game_results_page(node)
         :build()
     header_box:add(box.builder("chapter_header_line")
         :text{
-            content = {"|Results|"},
+            content = {"|\014Results|"},
             text_color = "light",
             draw_properties = {align = true},
         }
