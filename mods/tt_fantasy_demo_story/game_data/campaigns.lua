@@ -364,7 +364,7 @@ local STORIES = {
 
 				campaigns.story_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
 				campaigns.story_text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
-				campaigns.story_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
+				campaigns.story_text("${hero_village} had a sole militiaman, so ${hero.name} would need to help with the bandit threat."),
 				campaigns.story_text("Prepare for battle!"),
 
 				campaigns.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
