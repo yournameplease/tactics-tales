@@ -21,8 +21,8 @@ return {
       "fortress_town",
       "cliff_crossing",
       "castle_defense",
-      "demo_playground",
-      "model_room",
+      -- "demo_playground",
+      -- "model_room",
     },
   },
 }
