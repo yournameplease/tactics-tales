@@ -14,6 +14,7 @@ local maps = require("src.tactics.util.maps")
 
 ---@class ItemDescription
 ---@field name string
+---@field damage? integer
 ---@field effects EffectDescription[]
 
 ---@class InventoryItem
@@ -229,6 +230,9 @@ function ItemInventory:get_item_descriptions()
             name = item.name,
             effects = {},
         }
+        if item.weapon then
+            description.damage = item.weapon.damage
+        end
         if item.weapon and item.weapon.effects then
             for _, eff in ipairs(item.weapon.effects) do
                 table.insert(description.effects, {
