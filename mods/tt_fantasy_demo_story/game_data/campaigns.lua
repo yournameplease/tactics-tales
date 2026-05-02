@@ -202,11 +202,13 @@ local GENERIC_CONFIG = {
 			name = "Save Behavior",
 			description = "How to handle saving after a battle ends.",
 			options = {
-				{
-					name = "Normal",
-					value = "ask",
-					description = "After each victory, choose whether to save.",
-				},
+				-- TODO: we should change the flow to better handle this...
+				-- Maybe just add an ability to save and quit at any time.
+				-- {
+				-- 	name = "Normal",
+				-- 	value = "ask",
+				-- 	description = "After each victory, choose whether to save.",
+				-- },
 				{
 					name = "Ironman",
 					value = "ironman",
@@ -241,7 +243,7 @@ local GENERIC_CONFIG = {
 		{
 			key = "easy",
 			name = "Easy",
-			values = { turn_difficulty = "easy", saving = "ask", deaths = "casual" },
+			values = { turn_difficulty = "easy", saving = "ironman", deaths = "casual" },
 		},
 		{
 			key = "normal",
@@ -399,8 +401,7 @@ local STORIES = {
 		end,
 		nodes = {
 			save_auto = {
-				campaigns.save_game(),
-				campaigns.story_text("Progress saved."),
+				campaigns.save_game()
 			},
 			save_ask = {
 				campaigns.select_option({
