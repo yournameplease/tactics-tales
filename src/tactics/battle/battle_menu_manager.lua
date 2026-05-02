@@ -793,11 +793,12 @@ return {
                             :with_text("Attack")
                             :handle_action("select", "attack_unit")
                             :as_final_step())
-                        if ctx.valid_attack_points and #ctx.valid_attack_points > 1 then
-                            table.insert(options, button.builder("move")
-                                :with_text("Move")
-                                :handle_action("select", "cycle_attack_position"))
-                        end
+                        -- TODO: The UI here was confusing, so I disabled for now
+                        -- if ctx.valid_attack_points and #ctx.valid_attack_points > 1 then
+                        --     table.insert(options, button.builder("move")
+                        --         :with_text("Move")
+                        --         :handle_action("select", "cycle_attack_position"))
+                        -- end
                         table.insert(options, button.builder("cancel")
                             :with_text("Cancel")
                             :then_go_back())
