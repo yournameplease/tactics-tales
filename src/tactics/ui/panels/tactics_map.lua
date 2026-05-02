@@ -269,9 +269,10 @@ local function draw_tactics_map(
     -- draw ground
     profile("draw_ground")
 
-    local clip_w = VIEWPORT_WIDTH * TILE_WIDTH
-    local clip_h = VIEWPORT_HEIGHT * TILE_HEIGHT
-    clip(0, self.rect.c_y, clip_w, clip_h)
+    -- TODO: clipping is important for scrolling maps.  currently bugged
+    -- local clip_w = VIEWPORT_WIDTH * TILE_WIDTH
+    -- local clip_h = VIEWPORT_HEIGHT * TILE_HEIGHT
+    -- clip(0, self.rect.c_y, clip_w, clip_h)
     map(layer_ground, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
     map(state.battle_context.highlighted_tiles, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
