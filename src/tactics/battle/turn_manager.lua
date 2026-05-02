@@ -79,7 +79,6 @@ function TurnManager:advance_turn()
         self.tactics_engine.turn = self.turn
         self.battle_objective_service:set_turn(self.turn)
         self.tactics_engine:refresh_all_units()
-        self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, "player"))
         for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
         self.tactics_engine.phase_banner = nil
         self.tactics_engine.battle_is_blocked = false
