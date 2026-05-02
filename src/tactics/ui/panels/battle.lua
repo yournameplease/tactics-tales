@@ -134,23 +134,17 @@ function battle.unit_info()
     info_col:add(
         box.builder("unit_name")
         :text{
-            rows = 2,
+            rows = 1,
         }
         :on_update(function(self, state)
             local u = state.battle_context.last_hovered_unit
             if not u then
-                self.text.content = { "", "" }
+                self.text.content = { "" }
                 return
             end
-            local weapons = u.character.inventory:get_equipped_weapons()
 
-            local w_string = ""
-            if #weapons > 0 then
-                w_string = weapons[1].damage .. " damage"
-            end
             self.text.content = {
                 "HP: " .. u.hp_current .. "/" .. u.character.stats.hp_max,
-                w_string,
             }
         end)
         :build())
@@ -198,6 +192,9 @@ function battle.unit_inventory()
             for _, d in ipairs(items) do
                 if d.name then
                     table.insert(out, "\014"..d.name)
+                end
+                if d.damage then
+                    table.insert(out, "> "..d.damage.." damage")
                 end
                 if d.effects then
                     for _, e in ipairs(d.effects) do
