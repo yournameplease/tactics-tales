@@ -645,7 +645,7 @@ local BATTLE_DATA = {
                     :then_dialogue(
                         script_unit.tagged("counselor"),
                         {"Protect the monarch!", "Defeat enemy leaders to stop reinforcements."}),
-                script.on_turn(4, phase.after_enemy, 3)
+                script.on_turn(4, phase.after_enemy, 4)
                     :with_tags{"bandit_reinforcements"}
                     :then_spawn_units({
                         { side = "enemy", character_source = character_source.template("bandit_axe"), ai = ai.move_inf, tile = "bandit_reinforce" },
@@ -655,7 +655,7 @@ local BATTLE_DATA = {
                 script.when_unit_dies("bandit_boss")
                     :then_remove_scripts("bandit_reinforcements")
                     :as_one_shot(),
-                script.on_turn(4, phase.after_enemy, 3)
+                script.on_turn(6, phase.after_enemy, 4)
                     :with_tags{"cultist_reinforcements"}
                     :then_spawn_units({
                         { side = "enemy", character_source = character_source.template("cultist_guard"), ai = ai.move_inf, tile = "cultist_reinforce" },
@@ -665,7 +665,7 @@ local BATTLE_DATA = {
                 script.when_unit_dies("cultist_boss")
                     :then_remove_scripts("cultist_reinforcements")
                     :as_one_shot(),
-                script.on_turn(4, phase.after_enemy, 3)
+                script.on_turn(6, phase.after_enemy, 4)
                     :with_tags{"militia_reinforcements"}
                     :then_spawn_units({
                         { side = "enemy", character_source = character_source.template("militia_archer"), ai = ai.move_inf, tile = "militia_reinforce_a" },
