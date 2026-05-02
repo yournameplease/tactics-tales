@@ -550,7 +550,7 @@ return {
                         button.builder("swap_units")
                             :handle_action("select", "swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
-                            :as_final_step()
+                            -- :as_final_step()
                     )
                     :with_child( -- marking for non-actable units
                         function(point, msb, _ctx)
