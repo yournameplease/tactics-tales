@@ -190,6 +190,14 @@ HANDLERS["apply_volume"] = function(services, menu_data, _session_context, _valu
     return nil
 end
 
+---@param dest string
+---@return table
+local function nav_back(dest)
+    return list.row("options_navigation", function(_msb, _ctx)
+        return { button.builder("back"):with_text("Back"):advance_to(dest) }
+    end)
+end
+
 ---@type table<string, MenuDefinition>
 local MENU_DATA = {
     ["MENU_MAIN_MENU"] = {
@@ -252,6 +260,7 @@ local MENU_DATA = {
                             table.insert(options, b)
                         end
 
+                        table.insert(options, nav_back("MAIN_MENU"))
                         return options
                     end
                 )
@@ -299,6 +308,7 @@ local MENU_DATA = {
                             table.insert(options, b)
                         end
 
+                        table.insert(options, nav_back("MAIN_MENU"))
                         return options
                     end
                 )
@@ -395,6 +405,7 @@ local MENU_DATA = {
                                 :handle_action("select", "begin_chapter"))
                         end
 
+                        table.insert(options, nav_back("MAIN_MENU"))
                         return options
                     end
                 )
