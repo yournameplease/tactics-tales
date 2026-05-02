@@ -89,13 +89,9 @@ function battle.unit_info()
     :layout{
         dir = "row",
         gap = 4,
-        padding = box.layout.padding(4),
+        padding = box.layout.padding(0),
         height = "fit_content",
         width = "fill",
-    }
-    :style{
-        decoration = "border",
-        decoration_padding = 3,
     }
     :build()
 
