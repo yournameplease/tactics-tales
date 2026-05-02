@@ -77,6 +77,8 @@ end
 ---@field default_lmb? string Default command for left mouse button.
 ---@field default_rmb? string Default command for right mouse button.
 ---@field menu_actions? MenuActions Map from InputAction to MenuAction.
+---@field keyboard_handler? string
+---@field backspace_handler? string
 local MenuStep = {}
 MenuStep.__index = MenuStep
 
@@ -89,6 +91,7 @@ MenuStep.__index = MenuStep
 ---@field initial_data (fun(game_ctx: GameContext, menu_ctx: MenuContext): table<string, any>)?
 ---@field menu_actions? MenuActions
 ---@field keyboard_handler? string MenuHandlerId called with concatenated text when peektext() is truthy. Returns true to also allow joypad this frame.
+---@field backspace_handler? string MenuHandlerId called when keyp("backspace") is true.
 local MenuStepDefinition = {}
 MenuStepDefinition.__index = MenuStepDefinition
 
@@ -146,6 +149,13 @@ end
 ---@return MenuStepDefinition
 function MenuStepDefinition:with_keyboard_handler(handler_id)
     self.keyboard_handler = handler_id
+    return self
+end
+
+---@param handler_id string MenuHandlerId to invoke when keyp("backspace") is true.
+---@return MenuStepDefinition
+function MenuStepDefinition:with_backspace_handler(handler_id)
+    self.backspace_handler = handler_id
     return self
 end
 
@@ -390,6 +400,13 @@ function BaseMenuManager:update(input)
             local step_handler = self.menu_handlers[self.menu_step.keyboard_handler]
             assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
             allow_joypad = step_handler(self.game_ctx, menu_data, self.menu_ctx) == true
+        end
+
+        if self.menu_step.backspace_handler and keyp("backspace") then
+            local menu_data = self:serialize().node.data
+            local bs_handler = self.menu_handlers[self.menu_step.backspace_handler]
+            assert(bs_handler ~= nil, "Bad handler for id " .. self.menu_step.backspace_handler)
+            bs_handler(self.game_ctx, menu_data, self.menu_ctx)
         end
 
         if not allow_joypad then return end

@@ -161,6 +161,7 @@ function menu_keyboard.step(submit)
         )
     )
     :with_keyboard_handler("type_text")
+    :with_backspace_handler("delete_character")
     :with_action("BUTTON_A", { command = "select", description = "Select" })
     :with_action("BUTTON_B", { command = "back",   description = "Back" })
 end
