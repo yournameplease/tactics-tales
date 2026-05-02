@@ -251,8 +251,14 @@ function control_hints.new(menu_step_func, default_hints)
         :direction("col")
         :container("block")
         :child_generator{
-            current_key = function(_)
-                return DYNAMIC_CONFIG and DYNAMIC_CONFIG.input_group
+            current_key = function(c)
+                local layout = c.layout
+                -- return DYNAMIC_CONFIG
+                --     and (DYNAMIC_CONFIG.input_group .. "_" .. layout)
+                --     or layout
+                -- TODO: lazy temp fix
+                -- the normal check seems to fail, only on campaign pages
+                return rnd()
             end,
             generate_children = control_hint_rows(menu_step_func, default_hints)
         }
