@@ -33,7 +33,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "navigate"
 ---@field next_step string Step to navigate to.
 
----@alias MenuHandler fun(services: GameContext, menu_data: table<string, any>, session_context: MenuContext, value: any): MenuHandlerPostHandling?
+---@alias MenuHandler<TServices> fun(services: TServices, menu_data: table<string, any>, session_context: MenuContext, value: any): MenuHandlerPostHandling?
 
 local menu_handler = {}
 
@@ -215,7 +215,7 @@ end
 
 ---@class MenuManager Abstract interface for menu managers.
 ---@field menu_definitions table<string, MenuDefinition>
----@field menu_handlers table<string, MenuHandler>
+---@field menu_handlers table<string, MenuHandler<GameContext>>
 ---@field menu_state MenuState
 ---@field menu_ctx? MenuContext
 ---@field menu_step? ActiveMenuStep Active step node and bindings; nil when no menu is open.
@@ -242,7 +242,7 @@ local menu_manager = {
 
 --- Create a new MenuManager.
 ---@param menu_definitions table<string, MenuDefinition>
----@param menu_handlers table<string, MenuHandler>
+---@param menu_handlers table<string, MenuHandler<GameContext>>
 ---@param ctx GameContext
 ---@param bus EventBus
 ---@return MenuManager

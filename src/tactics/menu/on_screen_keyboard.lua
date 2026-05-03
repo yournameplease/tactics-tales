@@ -59,7 +59,7 @@ local function get_key_at_coordinates(p, session_context)
     return board[p.y + 1][p.x + 1]
 end
 
----@type table<string, MenuHandler>
+---@type table<string, MenuHandler<GameContext>>
 local HANDLERS = {}
 
 HANDLERS["change_keyboard_mode"] = function(_services, _menu_data, session_context, _value)
