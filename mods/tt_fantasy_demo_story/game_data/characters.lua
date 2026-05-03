@@ -1,19 +1,5 @@
 
-local options = {}
-
-function options.list(opts)
-	return {
-		type = "list",
-		options = opts
-	}
-end
-
-function options.weighted(opts)
-	return {
-		type = "weighted",
-		options = opts
-	}
-end
+local options = lib.libs.character.options
 
 local NATURAL_HAIR_COLORS = options.list{
 	"brown",
