@@ -196,6 +196,9 @@ function battle.unit_inventory()
                 if d.damage then
                     table.insert(out, "> "..d.damage.." damage")
                 end
+                if d.targeting_description then
+                    table.insert(out, "> "..d.targeting_description)
+                end
                 if d.effects then
                     for _, e in ipairs(d.effects) do
                         if e.should_display_name and e.name and e.description then
