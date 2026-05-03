@@ -238,6 +238,9 @@ local HANDLERS = {
                 true
             )
             campaign.campaign_page:add_text_input_menu(key, campaign.active_dialogue)
+            -- Weird hack to stop one (one still remains) "z" slipping into text entry
+            -- todo: get a real solution that addresses all of the z's
+            readtext(true)
         end,
         exit = function(campaign, node)
             ---@cast node TextInputNode
