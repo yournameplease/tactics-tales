@@ -185,32 +185,29 @@ end
 local DEPLOYMENT_HANDLERS = {}
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattlePreparationsContext
 ---@param value any
 ---@return nil
-function DEPLOYMENT_HANDLERS.mark_unit(services, _menu_data, _session_context, value)
+function DEPLOYMENT_HANDLERS.mark_unit(services, _session_context, value)
     services.tactics_engine:handle_mark_unit(value.point)
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattlePreparationsContext
 ---@param value any
 ---@return nil
-function DEPLOYMENT_HANDLERS.select_swap_unit(services, _menu_data, session_context, value)
+function DEPLOYMENT_HANDLERS.select_swap_unit(services, session_context, value)
     session_context.swap_source = value.point
     services.tactics_engine.active_point = value.point
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattlePreparationsContext
 ---@param value any
 ---@return MenuHandlerPostHandling
-function DEPLOYMENT_HANDLERS.swap_units(services, _menu_data, session_context, value)
+function DEPLOYMENT_HANDLERS.swap_units(services, session_context, value)
     services.tactics_engine:handle_swap_unit(
         session_context.swap_source,
         value.point
@@ -221,21 +218,19 @@ function DEPLOYMENT_HANDLERS.swap_units(services, _menu_data, session_context, v
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattlePreparationsContext
 ---@param _value any
 ---@return nil
-function DEPLOYMENT_HANDLERS.start_battle(services, _menu_data, _session_context, _value)
+function DEPLOYMENT_HANDLERS.start_battle(services, _session_context, _value)
     services.handle_start_battle()
     return nil
 end
 
 ---@param _services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattlePreparationsContext
 ---@param _value any
 ---@return MenuHandlerPostHandling
-function DEPLOYMENT_HANDLERS.navigate_to_deployment_menu(_services, _menu_data, _session_context, _value)
+function DEPLOYMENT_HANDLERS.navigate_to_deployment_menu(_services, _session_context, _value)
     return menu_manager.menu_handler.then_navigate("DEPLOYMENT_MENU")
 end
 
@@ -243,31 +238,28 @@ end
 local PLAYER_TURN_HANDLERS = {}
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.mark_unit(services, _menu_data, _session_context, value)
+function PLAYER_TURN_HANDLERS.mark_unit(services, _session_context, value)
     services.tactics_engine:handle_mark_unit(value.point)
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.end_turn(services, _menu_data, _session_context, _value)
+function PLAYER_TURN_HANDLERS.end_turn(services, _session_context, _value)
     services.handle_end_turn()
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param value any
 ---@return MenuHandlerPostHandling?
-function PLAYER_TURN_HANDLERS.cycle_next_unit(services, _menu_data, _session_context, value)
+function PLAYER_TURN_HANDLERS.cycle_next_unit(services, _session_context, value)
     local pt_val = value.point
     local next_unit = nil
 
@@ -296,11 +288,10 @@ function PLAYER_TURN_HANDLERS.cycle_next_unit(services, _menu_data, _session_con
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param value any
 ---@return MenuHandlerPostHandling?
-function PLAYER_TURN_HANDLERS.cycle_previous_unit(services, _menu_data, _session_context, value)
+function PLAYER_TURN_HANDLERS.cycle_previous_unit(services, _session_context, value)
     local pt_val = value.point
     local previous_unit = nil
 
@@ -329,11 +320,10 @@ function PLAYER_TURN_HANDLERS.cycle_previous_unit(services, _menu_data, _session
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.select_acting_unit(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.select_acting_unit(services, session_context, value)
     local unit = services.battle_map:get_at_tile(value.point)
     session_context.acting_unit = {
         unit = unit,
@@ -344,40 +334,36 @@ function PLAYER_TURN_HANDLERS.select_acting_unit(services, _menu_data, session_c
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.unmark_all_units(services, _menu_data, _session_context, _value)
+function PLAYER_TURN_HANDLERS.unmark_all_units(services, _session_context, _value)
     services.tactics_engine:handle_unmark_all_units()
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.mark_all_units(services, _menu_data, _session_context, _value)
+function PLAYER_TURN_HANDLERS.mark_all_units(services, _session_context, _value)
     services.tactics_engine:handle_mark_all_units()
     return nil
 end
 
 ---@param _services BattleMenuContext
----@param _menu_data any
 ---@param _session_context BattleMainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling
-function PLAYER_TURN_HANDLERS.navigate_to_turn_menu(_services, _menu_data, _session_context, _value)
+function PLAYER_TURN_HANDLERS.navigate_to_turn_menu(_services, _session_context, _value)
     return menu_manager.menu_handler.then_navigate("TURN_MENU")
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-function PLAYER_TURN_HANDLERS.cycle_attack_position(services, _menu_data, session_context, _value)
+function PLAYER_TURN_HANDLERS.cycle_attack_position(services, session_context, _value)
     local points = session_context.valid_attack_points
     if not points or #points < 2 then return nil end
     local current = session_context.destination.point
@@ -396,21 +382,19 @@ function PLAYER_TURN_HANDLERS.cycle_attack_position(services, _menu_data, sessio
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.wait_acting_unit(services, _menu_data, session_context, _value)
+function PLAYER_TURN_HANDLERS.wait_acting_unit(services, session_context, _value)
     services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.move_acting_unit(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.move_acting_unit(services, session_context, value)
     session_context.destination = {
         point = value.point,
         path = value.path,
@@ -425,11 +409,10 @@ function PLAYER_TURN_HANDLERS.move_acting_unit(services, _menu_data, session_con
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.unmove_acting_unit(services, _menu_data, session_context, _value)
+function PLAYER_TURN_HANDLERS.unmove_acting_unit(services, session_context, _value)
     services.tactics_engine:jump_unit_to_point(
         session_context.acting_unit.unit,
         session_context.acting_unit.point
@@ -439,11 +422,10 @@ function PLAYER_TURN_HANDLERS.unmove_acting_unit(services, _menu_data, session_c
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return MenuHandlerPostHandling?
-function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, session_context, value)
     local target_point = value.point
     local acting_unit = session_context.acting_unit.unit
     local targeting = acting_unit.character:get_weapon_targeting()
@@ -525,11 +507,10 @@ function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, _menu_data, s
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return MenuHandlerPostHandling?
-function PLAYER_TURN_HANDLERS.move_and_store_interaction_unit(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.move_and_store_interaction_unit(services, session_context, value)
     local target_point = value.point
     local acting_unit = session_context.acting_unit.unit
     local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
@@ -575,22 +556,20 @@ function PLAYER_TURN_HANDLERS.move_and_store_interaction_unit(services, _menu_da
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.store_attack_unit(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.store_attack_unit(services, session_context, value)
     session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
     services.tactics_engine.active_point = value.point
     return nil
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.attack_unit(services, _menu_data, session_context, _value)
+function PLAYER_TURN_HANDLERS.attack_unit(services, session_context, _value)
     services.tactics_engine:handle_attack_unit(
         session_context.acting_unit.unit,
         session_context.target_unit.unit
@@ -599,11 +578,10 @@ function PLAYER_TURN_HANDLERS.attack_unit(services, _menu_data, session_context,
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return nil
-function PLAYER_TURN_HANDLERS.attack_unit_at_tile(services, _menu_data, session_context, value)
+function PLAYER_TURN_HANDLERS.attack_unit_at_tile(services, session_context, value)
     local target_unit = services.battle_map:get_at_tile(value.point)
     services.tactics_engine:handle_attack_unit(
         session_context.acting_unit.unit,
@@ -613,11 +591,10 @@ function PLAYER_TURN_HANDLERS.attack_unit_at_tile(services, _menu_data, session_
 end
 
 ---@param services BattleMenuContext
----@param _menu_data any
 ---@param session_context BattleMainMenuContext
 ---@param interaction InteractionHook
 ---@return nil
-function PLAYER_TURN_HANDLERS.handle_interaction(services, _menu_data, session_context, interaction)
+function PLAYER_TURN_HANDLERS.handle_interaction(services, session_context, interaction)
     session_context.selected_script = {
         script_id = interaction.script_id,
         target_unit = interaction.target_unit,

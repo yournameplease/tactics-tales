@@ -23,7 +23,7 @@ describe("tactics.menu.cursor.button", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    ["test_handler"] = function(_gc, _md, _mc, value)
+                    ["test_handler"] = function(_gc, _mc, value)
                         handler_called = true
                         handler_value = value
                         return nil
@@ -132,11 +132,11 @@ describe("tactics.menu.cursor.button", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    ["select_h"] = function(_gc, _md, _mc, _v)
+                    ["select_h"] = function(_gc, _mc, _v)
                         select_called = true
                         return nil
                     end,
-                    ["menu_h"] = function(_gc, _md, _mc, _v)
+                    ["menu_h"] = function(_gc, _mc, _v)
                         menu_called = true
                         return nil
                     end
@@ -172,10 +172,10 @@ describe("tactics.menu.cursor.button", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    ["recompute_h"] = function(_gc, _md, _mc, _v)
+                    ["recompute_h"] = function(_gc, _mc, _v)
                         return menu_manager.menu_handler.then_recompute()
                     end,
-                    ["navigate_h"] = function(_gc, _md, _mc, _v)
+                    ["navigate_h"] = function(_gc, _mc, _v)
                         return menu_manager.menu_handler.then_navigate("STEP_2")
                     end
                 },

@@ -22,11 +22,10 @@ local HANDLERS = {}
 
 --- Advance from the title screen: go to main menu, or auto-start the default campaign in demo mode.
 ---@param services GameMenuContext
----@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-function HANDLERS.title_advance(services, _menu_data, _session_context, _value)
+function HANDLERS.title_advance(services, _session_context, _value)
     if not DYNAMIC_CONFIG.demo_mode then
         return menu_handler.then_navigate("MAIN_MENU")
     end
@@ -46,24 +45,22 @@ end
 
 --- Store the selected save file name in session context for the overwrite confirmation step.
 ---@param _services GameMenuContext
----@param _menu_data table<string, any>
 ---@param session_context MainMenuContext
 ---@param file CampaignId
 ---@return MenuHandlerPostHandling?
-function HANDLERS.store_selected_save(_services, _menu_data, session_context, file)
+function HANDLERS.store_selected_save(_services, session_context, file)
     session_context.selected_file = file
     return nil
 end
 
 --- Begin a campaign using the file name stored in session context.
 ---@param services GameMenuContext
----@param menu_data table<string, string>
 ---@param session_context MainMenuContext
----@param _value string
+---@param value table<string, string>
 ---@return MenuHandlerPostHandling?
-function HANDLERS.begin_file_from_context(services, menu_data, session_context, _value)
+function HANDLERS.begin_file_from_context(services, session_context, value)
     local config = {}
-    for k, v in pairs(menu_data) do
+    for k, v in pairs(value) do
         if k ~= "_preset" then config[k] = v end
     end
     services.handle_begin_campaign(session_context.selected_file, services.default_campaign_id, config)
@@ -72,18 +69,18 @@ end
 
 --- Apply a preset to all option values when the preset row changes.
 ---@param services GameMenuContext
----@param _menu_data table<string, any>
 ---@param _ctx MainMenuContext
----@param value string
+---@param value table<string, any>
 ---@return MenuHandlerPostHandling
-function HANDLERS.apply_preset(services, _menu_data, _ctx, value)
-    if value == "custom" then
+function HANDLERS.apply_preset(services, _ctx, value)
+    local preset_key = value._preset
+    if preset_key == "custom" then
         return nil
     end
     local config = services.campaigns[services.default_campaign_id].config
-    local data = { _preset = value }
+    local data = { _preset = preset_key }
     for _, p in ipairs(config.presets) do
-        if p.key == value then
+        if p.key == preset_key then
             for k, v in pairs(p.values) do data[k] = v end
         end
     end
@@ -92,94 +89,87 @@ end
 
 --- Sync the preset row to "custom" or a matching preset key after an option changes.
 ---@param services GameMenuContext
----@param menu_data table<string, any>
 ---@param _ctx MainMenuContext
----@param _value any
+---@param value table<string, any>
 ---@return MenuHandlerPostHandling
-function HANDLERS.sync_preset_from_options(services, menu_data, _ctx, _value)
+function HANDLERS.sync_preset_from_options(services, _ctx, value)
     local config = services.campaigns[services.default_campaign_id].config
     local matched = "custom"
     if config and config.presets then
         for _, p in ipairs(config.presets) do
             local match = true
             for k, v in pairs(p.values) do
-                if menu_data[k] ~= v then match = false; break end
+                if value[k] ~= v then match = false; break end
             end
             if match then matched = p.key; break end
         end
     end
     local data = {}
-    for k, v in pairs(menu_data) do data[k] = v end
+    for k, v in pairs(value) do data[k] = v end
     data._preset = matched
     return menu_handler.then_deserialize(data)
 end
 
 --- Load an existing campaign save by file name.
 ---@param services GameMenuContext
----@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param file CampaignId
 ---@return MenuHandlerPostHandling?
-function HANDLERS.load_campaign(services, _menu_data, _session_context, file)
+function HANDLERS.load_campaign(services, _session_context, file)
     services.handle_load_campaign(file)
     return nil
 end
 
 --- Begin a campaign chapter directly by campaign ID.
 ---@param services GameMenuContext
----@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param campaign_id CampaignId
 ---@return MenuHandlerPostHandling?
-function HANDLERS.begin_chapter(services, _menu_data, _session_context, campaign_id)
+function HANDLERS.begin_chapter(services, _session_context, campaign_id)
     services.handle_begin_campaign(nil, campaign_id, {}) -- TODO: Config?  Or default config?
     return nil
 end
 
 --- Persist the current options menu data to config.
 ---@param services GameMenuContext
----@param menu_data DynamicConfig
 ---@param _session_context MainMenuContext
----@param _value any
+---@param value DynamicConfig
 ---@return MenuHandlerPostHandling?
-function HANDLERS.set_options(services, menu_data, _session_context, _value)
-    services.config_manager:store_config(menu_data)
+function HANDLERS.set_options(services, _session_context, value)
+    services.config_manager:store_config(value)
     return nil
 end
 
 --- Reset config to defaults.
 ---@param services GameMenuContext
----@param _menu_data DynamicConfig
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-function HANDLERS.reset_options(services, _menu_data, _session_context, _value)
+function HANDLERS.reset_options(services, _session_context, _value)
     services.config_manager:reset_config()
     return nil
 end
 
 --- Apply glyph family immediately without persisting.
 ---@param services GameMenuContext
----@param menu_data DynamicConfig
 ---@param _session_context MainMenuContext
----@param _value any
+---@param value DynamicConfig
 ---@return MenuHandlerPostHandling?
-function HANDLERS.apply_glyph_family(services, menu_data, _session_context, _value)
-    services.config_manager:apply_glyph_family(menu_data.glyph_family)
+function HANDLERS.apply_glyph_family(services, _session_context, value)
+    services.config_manager:apply_glyph_family(value.glyph_family)
     return nil
 end
 
 --- Apply volume settings immediately without persisting.
 ---@param services GameMenuContext
----@param menu_data DynamicConfig
 ---@param _session_context MainMenuContext
----@param _value any
+---@param value DynamicConfig
 ---@return MenuHandlerPostHandling?
-function HANDLERS.apply_volume(services, menu_data, _session_context, _value)
+function HANDLERS.apply_volume(services, _session_context, value)
     services.config_manager:apply_volume(
-        menu_data.master_volume,
-        menu_data.music_volume,
-        menu_data.sfx_volume
+        value.master_volume,
+        value.music_volume,
+        value.sfx_volume
     )
     return nil
 end

@@ -61,11 +61,11 @@ describe("tactics.menu.cursor.nested.grid", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    ["h1"] = function(_gc, _md, _mc, _v)
+                    ["h1"] = function(_gc, _mc, _v)
                         button1_called = true
                         return nil
                     end,
-                    ["h2"] = function(_gc, _md, _mc, _v)
+                    ["h2"] = function(_gc, _mc, _v)
                         button2_called = true
                         return nil
                     end
@@ -245,11 +245,11 @@ describe("tactics.menu.cursor.nested.grid", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    ["action_h"] = function(_gc, _md, _mc, _v)
+                    ["action_h"] = function(_gc, _mc, _v)
                         action_called = true
                         return nil
                     end,
-                    ["cycle_h"] = function(_gc, _md, _mc, _v)
+                    ["cycle_h"] = function(_gc, _mc, _v)
                         cycle_called = true
                         return nil
                     end
