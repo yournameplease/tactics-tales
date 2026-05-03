@@ -72,17 +72,16 @@ end
 
 --- Apply a preset to all option values when the preset row changes.
 ---@param services GameMenuContext
----@param menu_data table<string, any>
+---@param _menu_data table<string, any>
 ---@param _ctx MainMenuContext
 ---@param value string
 ---@return MenuHandlerPostHandling
-function HANDLERS.apply_preset(services, menu_data, _ctx, value)
+function HANDLERS.apply_preset(services, _menu_data, _ctx, value)
     if value == "custom" then
-        return menu_handler.then_deserialize(menu_data)
+        return nil
     end
     local config = services.campaigns[services.default_campaign_id].config
     local data = { _preset = value }
-    for k, v in pairs(menu_data) do data[k] = v end
     for _, p in ipairs(config.presets) do
         if p.key == value then
             for k, v in pairs(p.values) do data[k] = v end
