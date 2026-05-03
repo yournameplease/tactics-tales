@@ -33,10 +33,10 @@ CampaignHarness.__index = CampaignHarness
 
 local campaign_harness = {}
 
---- Create a new StoryHarness backed by the test_base mod.
+--- Create a new CampaignHarness backed by the test_base mod.
 --- Pass overrides.campaigns to merge inline story definitions on top of test_base.
 ---@param overrides? { campaigns?: table<string, any> }
----@return StoryHarness
+---@return CampaignHarness
 function campaign_harness.new(overrides)
     local self = setmetatable({}, CampaignHarness)
 
