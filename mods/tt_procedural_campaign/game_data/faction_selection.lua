@@ -57,7 +57,7 @@ end
 --- Reads current counts from campaign_state, applies archetype bias to compute weights,
 --- picks a faction via one campaign_rng roll, then writes the updated counts back.
 ---@param archetype ArchetypeDefinition
----@param mem CampaignMemory
+---@param mem CampaignState
 ---@param campaign_rng RngInstance
 ---@return string faction_id
 local function select_faction(archetype, mem, campaign_rng)
