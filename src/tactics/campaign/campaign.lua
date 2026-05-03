@@ -1,6 +1,6 @@
 ---@brief
---- The main manager for a story instance. It processes story nodes,
---- handles transitions between story and battle, and manages story state.
+--- The main manager for a campaign instance. It processes campaign nodes,
+--- handles transitions between campaign and battle, and manages campaign state.
 
 local save_system = require("src.tactics.save.save_system")
 local random = require("src.tactics.util.random")
@@ -15,7 +15,7 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 
----@class StoryMenuServices : GameContext
+---@class CampaignMenuServices : GameContext
 ---@field character_appearance? table<string, string> Map from CharacterAppearanceKey to current value; set before opening the character creation menu.
 ---@field handle_create_character fun(appearance: table<string, string>) Callback invoked when the player confirms character creation.
 ---@field handle_submit_text fun(text: string) Callback invoked when the player submits text input.
@@ -30,8 +30,8 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@class ActiveNode
 ---@field node_id string
 ---@field node_step integer
----@field definition StoryNode
----@field rendered_node? RenderedStoryNode
+---@field definition CampaignNode
+---@field rendered_node? RenderedCampaignNode
 
 ---@alias CampaignConfig table<string, string>
 
@@ -50,7 +50,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package campaign_page CampaignPage
 ---@field package campaign_state CampaignState
 ---@field package character_manager CharacterManager
----@field package campaign_menu_context StoryMenuServices
+---@field package campaign_menu_context CampaignMenuServices
 ---@field package menu_manager MenuManager
 ---@field package stats_service StatsService
 ---@field package current_node ActiveNode
@@ -74,34 +74,34 @@ local campaign = {
     Campaign = Campaign,
 }
 
----@param node_source StoryNode|StoryNodeFactory
----@return StoryNode
+---@param node_source CampaignNode|CampaignNodeFactory
+---@return CampaignNode
 function Campaign:resolve_node_source(node_source)
     if type(node_source) == "function" then
-        ---@cast node_source StoryNodeFactory
+        ---@cast node_source CampaignNodeFactory
         return node_source(self.campaign_config, self.rng_context, self.campaign_state:get_as_map())
     else
-        ---@cast node_source StoryNode
+        ---@cast node_source CampaignNode
         return node_source
     end
 end
 
---- Normalize a StoryNodeSource to a StoryNode[] for sequential access.
----@param source StoryNodeSource
----@return StoryNode[]
+--- Normalize a CampaignNodeSource to a CampaignNode[] for sequential access.
+---@param source CampaignNodeSource
+---@return CampaignNode[]
 function Campaign:resolve_to_array(source)
     if type(source) == "function" then
         return self:resolve_to_array(source(self.campaign_config, self.rng_context, self.campaign_state:get_as_map()))
     elseif source[1] ~= nil then
-        ---@cast source StoryNode[]
+        ---@cast source CampaignNode[]
         return source
     else
-        ---@cast source StoryNode
+        ---@cast source CampaignNode
         return { source }
     end
 end
 
---- Jump the story to the first step of the named node.
+--- Jump the campaign to the first step of the named node.
 ---@param node_id string
 function Campaign:jump_to_node(node_id)
     local steps = self:resolve_to_array(self.campaign_definition.nodes[node_id])
@@ -115,7 +115,7 @@ function Campaign:jump_to_node(node_id)
     self:handle_new_node()
 end
 
---- Jump the story to a specific step within the named node.
+--- Jump the campaign to a specific step within the named node.
 ---@param node_id string
 ---@param node_step integer
 function Campaign:jump_to_node_step(node_id, node_step)
@@ -130,9 +130,9 @@ function Campaign:jump_to_node_step(node_id, node_step)
     self:handle_new_node()
 end
 
---- The core of the story progression logic. Acts as a state machine that
---- interprets the current story node and triggers the corresponding action,
---- such as showing dialogue, starting a battle, or modifying story memory.
+--- The core of the campaign progression logic. Acts as a state machine that
+--- interprets the current campaign node and triggers the corresponding action,
+--- such as showing dialogue, starting a battle, or modifying campaign memory.
 function Campaign:handle_new_node()
     local node = self.current_node.definition
 
@@ -147,10 +147,10 @@ function Campaign:handle_new_node()
     log.debug("Handling new node: ", node.type)
     local h = assert(HANDLERS[node.type], "Unknown node type: " .. tostring(node.type))
     h.enter(self, node)
-    self.campaign_page.story_revision = self.campaign_page.story_revision + 1
+    self.campaign_page.campaign_revision = self.campaign_page.campaign_revision + 1
 end
 
---- Advances the story to the next node in the sequence. Performs cleanup
+--- Advances the campaign to the next node in the sequence. Performs cleanup
 --- from the previous node, increments the node counter, and calls
 --- `handle_new_node` to process the newly active node.
 function Campaign:advance_node()
@@ -171,7 +171,7 @@ function Campaign:advance_node()
     self:handle_new_node()
 end
 
---- Advance to the next story node after text has been read.
+--- Advance to the next campaign node after text has been read.
 function Campaign:advance_text()
     self:advance_node()
 end
@@ -222,8 +222,8 @@ function Campaign:select_option(option_id)
     self:advance_node()
 end
 
---- Create and start a new story instance from the beginning.
----@param save_name string? Save file path, or nil for an unsaved story.
+--- Create and start a new campaign instance from the beginning.
+---@param save_name string? Save file path, or nil for an unsaved campaign.
 ---@param campaign_id string
 ---@param game_data GameData
 ---@param campaign_config CampaignConfig
@@ -277,7 +277,7 @@ function campaign.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
-    ---@type StoryMenuServices
+    ---@type CampaignMenuServices
     self.campaign_menu_context = {
         handle_create_character = function(appearance) self:create_character(appearance) end,
         handle_submit_text = function(text) self:submit_text(text) end,
@@ -303,10 +303,10 @@ function campaign.new(
         event_bus = event_bus,
     }
 
-    local story_ui_ctx = campaign_ui_context.new(self.campaign_page, self.menu_manager)
+    local campaign_ui_ctx = campaign_ui_context.new(self.campaign_page, self.menu_manager)
 
     self.ui_context = ui_context
-    self.ui_context:register_ui_context(story_ui_ctx)
+    self.ui_context:register_ui_context(campaign_ui_ctx)
     self.input_service = input_service
 
     self.event_listener:on("BATTLE_END", function(payload)
@@ -322,7 +322,7 @@ function campaign.new(
     return self
 end
 
---- Load a story instance from a saved game file.
+--- Load a campaign instance from a saved game file.
 ---@param save_name string
 ---@param game_data GameData
 ---@param task_manager TaskManager
@@ -360,14 +360,14 @@ function campaign.load(save_name, game_data, task_manager, animation_manager, ev
         local c = self.character_manager:load_character(character_data)
         self.character_manager:persist_player(c)
     end
-    self.stats_service.story_results = save_data.stats
+    self.stats_service.campaign_results = save_data.stats
 
     self:jump_to_node_step(save_data.campaign_node_id, save_data.campaign_node_step)
 
     return self
 end
 
---- Process one update tick of the story, handling input for the active node type.
+--- Process one update tick of the campaign, handling input for the active node type.
 ---@param input InputContext
 function Campaign:update(input)
     local h = HANDLERS[self.current_node.definition.type]
@@ -376,7 +376,7 @@ function Campaign:update(input)
     end
 end
 
---- Tear down the story, releasing resources and unregistering contexts.
+--- Tear down the campaign, releasing resources and unregistering contexts.
 function Campaign:teardown()
     self.character_manager:teardown()
     self.ui_context:unregister_ui_context("campaign")

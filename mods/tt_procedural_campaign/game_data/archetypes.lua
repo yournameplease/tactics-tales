@@ -1,4 +1,4 @@
--- Archetype definitions for the procedural story mod.
+-- Archetype definitions for the procedural campaign mod.
 --
 -- An archetype shapes the player's entire run: it dictates the sequence of
 -- encounters (beats vs. filler), the pool of filler encounters and their

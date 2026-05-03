@@ -1,4 +1,4 @@
-local factions_mod = include("mods/tt_procedural_story/game_data/factions.lua")
+local factions_mod = include("mods/tt_procedural_campaign/game_data/factions.lua")
 local factions_data = factions_mod.factions
 local resolve_slot  = factions_mod.resolve_slot
 local script_lib    = include("mods/base/lib/script.lua")

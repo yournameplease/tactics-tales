@@ -1,5 +1,5 @@
 ---@brief
---- Type definitions for story statistics and chapter results.
+--- Type definitions for campaign statistics and chapter results.
 
 ---@class UnitDeathResult
 ---@field unit_id UnitId
@@ -20,7 +20,7 @@
 ---@field combats integer
 ---@field kills integer
 
----@class StoryChapterResult
+---@class CampaignChapterResult
 ---@field battle_id BattleId
 ---@field turns_taken integer
 ---@field result BattleEndResult
@@ -32,9 +32,9 @@
 ---@field units_lost integer
 
 --- Stores events as well as pre-computed statistics.
----@class StoryResults
+---@class CampaignResults
 ---@field statistics CampaignStatistics
----@field chapter_results table<integer, StoryChapterResult>
+---@field chapter_results table<integer, CampaignChapterResult>
 ---@field chapter_recruited table<UnitId, integer>
 ---@field unit_combats table<UnitId, integer>
 

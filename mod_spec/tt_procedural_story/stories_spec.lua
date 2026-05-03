@@ -1,10 +1,10 @@
 local luassert = require("luassert")
 
-local stories_mod  = require("tt_procedural_story.game_data.stories")
+local stories_mod  = require("tt_procedural_campaign.game_data.stories")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
-local proc_story = stories_mod.data.proc_story
+local proc_campaign = stories_mod.data.proc_campaign
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })
@@ -15,12 +15,12 @@ local function make_sc(mem)
 end
 
 local function make_rng_ctx(seed)
-    return { story_rng = random.new(seed or 1) }
+    return { campaign_rng = random.new(seed or 1) }
 end
 
 -- Call a step factory at the given index within the named node.
 local function call_step(node_name, step_index, sc, rng_ctx)
-    local node_steps = proc_story.nodes[node_name]
+    local node_steps = proc_campaign.nodes[node_name]
     local step = node_steps[step_index]
     if type(step) == "function" then
         return step(sc, rng_ctx or make_rng_ctx())
@@ -28,29 +28,29 @@ local function call_step(node_name, step_index, sc, rng_ctx)
     return step
 end
 
-describe("tt_procedural_story.stories proc_story", function()
+describe("tt_procedural_campaign.stories proc_campaign", function()
     describe("node structure", function()
         it("has archetype_select node", function()
-            luassert.is_not_nil(proc_story.nodes.archetype_select)
+            luassert.is_not_nil(proc_campaign.nodes.archetype_select)
         end)
 
         it("has battle_loop node", function()
-            luassert.is_not_nil(proc_story.nodes.battle_loop)
+            luassert.is_not_nil(proc_campaign.nodes.battle_loop)
         end)
 
         it("has post_battle node", function()
-            luassert.is_not_nil(proc_story.nodes.post_battle)
+            luassert.is_not_nil(proc_campaign.nodes.post_battle)
         end)
 
         it("archetype_select jumps to battle_loop", function()
-            local nodes = proc_story.nodes.archetype_select
+            local nodes = proc_campaign.nodes.archetype_select
             local jump = nodes[#nodes]
             luassert.are_equal("jump", jump.type)
             luassert.are_equal("battle_loop", jump.next_node)
         end)
 
         it("archetype_select sets battle_index to 1", function()
-            local nodes = proc_story.nodes.archetype_select
+            local nodes = proc_campaign.nodes.archetype_select
             local found = false
             for _, n in ipairs(nodes) do
                 if n.type == "set_memory" and n.key == "battle_index" and n.value == "1" then
@@ -61,13 +61,13 @@ describe("tt_procedural_story.stories proc_story", function()
         end)
 
         it("battle_loop step 3 is a battle node for 'skirmish'", function()
-            local step = proc_story.nodes.battle_loop[3]
+            local step = proc_campaign.nodes.battle_loop[3]
             luassert.are_equal("battle", step.type)
             luassert.are_equal("skirmish", step.battle_id)
         end)
 
         it("battle victory routes to post_battle", function()
-            local step = proc_story.nodes.battle_loop[3]
+            local step = proc_campaign.nodes.battle_loop[3]
             luassert.are_equal("post_battle", step.next_node_victory)
         end)
     end)

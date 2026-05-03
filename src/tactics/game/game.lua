@@ -9,17 +9,17 @@ local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local save_system = require("src.tactics.save.save_system")
 
----@class CampaignServicesBundle Services needed to create a story.
+---@class CampaignServicesBundle Services needed to create a campaign.
 ---@field task_manager TaskManager
 ---@field animation_manager AnimationManager
 ---@field event_bus EventBus
 
 ---@class GameMenuContext : GameContext
 ---@field default_campaign_id string the campaign_id to use if starting from main
----@field campaign_ids CampaignId[] Available story IDs to present in the menu.
----@field campaigns table<CampaignId, CampaignDefinition> Available story IDs to present in the menu.
----@field handle_begin_campaign fun(save_id: string?, campaign_id: CampaignId, config: table<string, string>) Callback to start a new story.
----@field handle_load_campaign fun(save_id: string) Callback to load an existing story save.
+---@field campaign_ids CampaignId[] Available campaign IDs to present in the menu.
+---@field campaigns table<CampaignId, CampaignDefinition> Available campaign IDs to present in the menu.
+---@field handle_begin_campaign fun(save_id: string?, campaign_id: CampaignId, config: table<string, string>) Callback to start a new campaign.
+---@field handle_load_campaign fun(save_id: string) Callback to load an existing campaign save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
 ---@field config_manager ConfigManager
 
@@ -28,7 +28,7 @@ local save_system = require("src.tactics.save.save_system")
 ---@field mod_loader ModLoader
 ---@field config_manager ConfigManager
 ---@field default_campaign CampaignId
----@field campaign? Story
+---@field campaign? Campaign
 ---@field event_listener EventListener
 ---@field event_writer EventWriter
 ---@field music_player MusicPlayer
@@ -40,7 +40,7 @@ Game.__index = Game
 
 local game = {}
 
---- Load a story from a save file.
+--- Load a campaign from a save file.
 ---@param file_name string Save file path.
 function Game:load_campaign(file_name)
     local game_data = self.mod_loader:load_mod_data()
@@ -56,9 +56,9 @@ function Game:load_campaign(file_name)
     )
 end
 
---- Start a new story, either from scratch or from a save file.
----@param file_name string|nil Save file path, or nil for a new story.
----@param campaign_id CampaignId Story to start; defaults to the game's default story.
+--- Start a new campaign, either from scratch or from a save file.
+---@param file_name string|nil Save file path, or nil for a new campaign.
+---@param campaign_id CampaignId Campaign to start; defaults to the game's default campaign.
 ---@param config table<string, string> 
 function Game:begin_campaign(file_name, campaign_id, config)
     local game_data = self.mod_loader:load_mod_data()
@@ -84,7 +84,7 @@ function Game:set_config(config)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 end
 
---- Tear down the active story and return to the menu.
+--- Tear down the active campaign and return to the menu.
 function Game:exit_campaign()
     self.campaign:teardown()
     self.campaign = nil

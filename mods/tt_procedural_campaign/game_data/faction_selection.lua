@@ -55,12 +55,12 @@ end
 
 --- Select a faction for the next battle and update faction_appearance_counts in memory.
 --- Reads current counts from campaign_state, applies archetype bias to compute weights,
---- picks a faction via one story_rng roll, then writes the updated counts back.
+--- picks a faction via one campaign_rng roll, then writes the updated counts back.
 ---@param archetype ArchetypeDefinition
----@param mem StoryMemory
----@param story_rng RngInstance
+---@param mem CampaignMemory
+---@param campaign_rng RngInstance
 ---@return string faction_id
-local function select_faction(archetype, mem, story_rng)
+local function select_faction(archetype, mem, campaign_rng)
     local counts = {}
     local counts_entry = mem:get("faction_appearance_counts")
     if counts_entry then
@@ -71,7 +71,7 @@ local function select_faction(archetype, mem, story_rng)
     end
 
     local weights  = compute_weights(archetype.faction_pool, counts, archetype.bias)
-    local selected = weighted_pick(story_rng, weights)
+    local selected = weighted_pick(campaign_rng, weights)
 
     counts[selected] = (counts[selected] or 0) + 1
     local new_entries = {}

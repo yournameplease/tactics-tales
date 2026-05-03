@@ -12,7 +12,7 @@ return {
     campaigns       = "game_data/campaigns",
     characters = "game_data/characters",
     items = "game_data/items",
-    default_campaign = "demo_story",
+    default_campaign = "demo_campaign",
     -- I should probably move this to the config param
     -- default_campaign = "convention_demo",
     campaign_select  = {

@@ -10,7 +10,7 @@ local lists = require("src.tactics.util.lists")
 ---@field campaign_node_step integer
 ---@field campaign_state CampaignState
 ---@field roster Character[]
----@field stats StoryResults
+---@field stats CampaignResults
 ---@field campaign_seed integer
 ---@field campaign_rng_state integer
 
@@ -22,7 +22,7 @@ local lists = require("src.tactics.util.lists")
 ---@field campaign_node_step integer
 ---@field campaign_state SerializedCampaignState
 ---@field roster SerializedCharacter[]
----@field stats StoryResults
+---@field stats CampaignResults
 ---@field campaign_seed integer
 ---@field campaign_rng_state integer
 

@@ -21,8 +21,8 @@
 
 ---@alias MenuContextId "acting_unit"|"destination"|"target_unit"|"selected_item"
 
----@class StorySelection
----@field id string Story ID.
+---@class CampaignSelection
+---@field id string Campaign ID.
 
 ---@class CharacterCustomizationSelection
 ---@field appearance table<string, string> Map from CharacterAppearanceKey to chosen value.
@@ -42,7 +42,7 @@
 ---@field valid_attack_points Point[]? Valid positions from which the acting unit can attack the target.
 ---@field stored_interaction InteractionHook? Single interaction selected via the SELECT_DESTINATION shortcut.
 
----@class StorySelectMenuContext : MenuContext
+---@class CampaignSelectMenuContext : MenuContext
 ---@field metadata table<string, any>
 
 ---@class CampaignMenuContext : MenuContext

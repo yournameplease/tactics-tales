@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local faction_selection = require("tt_procedural_story.game_data.faction_selection")
+local faction_selection = require("tt_procedural_campaign.game_data.faction_selection")
 local select_faction    = faction_selection.select_faction
 local compute_weights   = faction_selection.compute_weights
 
@@ -11,7 +11,7 @@ local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })
 end
 
-describe("tt_procedural_story.faction_selection", function()
+describe("tt_procedural_campaign.faction_selection", function()
     describe("compute_weights", function()
         it("prefer_novel: all factions at zero count yield base weights", function()
             local w = compute_weights({ bandits = 2, cultists = 1 }, {}, "prefer_novel")

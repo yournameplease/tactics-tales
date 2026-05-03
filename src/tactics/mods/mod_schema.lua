@@ -86,7 +86,7 @@ local characters_spec = s.dictionary(s.string(), character_template_spec)
 
 local battles_spec = s.dictionary(s.string(), s.factory())
 
--- Story nodes can contain factory functions (StoryNodeFactory), so deep
+-- Campaign nodes can contain factory functions (CampaignNodeFactory), so deep
 -- validation is not possible here. Accept any table, like battles_spec.
 local campaigns_data_spec = s.dictionary(s.string(), s.record({}))
 

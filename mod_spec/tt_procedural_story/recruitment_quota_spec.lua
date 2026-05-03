@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local recruitment_quota      = require("tt_procedural_story.game_data.recruitment_quota")
+local recruitment_quota      = require("tt_procedural_campaign.game_data.recruitment_quota")
 local update_recruitment_quota = recruitment_quota.update_recruitment_quota
 
 local campaign_state = require("src.tactics.campaign.campaign_state")
@@ -14,7 +14,7 @@ local function make_archetype(rate)
     return { recruitment_rate = rate }
 end
 
-describe("tt_procedural_story.recruitment_quota", function()
+describe("tt_procedural_campaign.recruitment_quota", function()
     describe("update_recruitment_quota", function()
         it("accumulates credits by recruitment_rate each call", function()
             local mem = make_mem()

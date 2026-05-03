@@ -156,7 +156,7 @@ local campaigns = {
             },
         },
 
-        -- Battle node then exit. Tests the story↔battle boundary.
+        -- Battle node then exit. Tests the campaign↔battle boundary.
         -- Uses rout_no_enemies: VICTORY on first finish_player_turn().
         battle_and_exit = {
             starting_node = "the_battle",

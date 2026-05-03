@@ -1,11 +1,11 @@
 ---@brief
---- A service that manages story-wide statistics.
+--- A service that manages campaign-wide statistics.
 
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 
 --- Public interface for the stats service.
 ---@class StatsService
----@field story_results StoryResults
+---@field campaign_results CampaignResults
 ---@field package event_listener EventListener
 local StatsService = {}
 StatsService.__index = StatsService
@@ -17,7 +17,7 @@ function StatsService:begin_chapter(
     id,
     battle_id
 )
-    self.story_results.chapter_results[id] = {
+    self.campaign_results.chapter_results[id] = {
         units_lost = {},
         deaths_by_side = { player = 0, enemy = 0, neutral = 0 },
         turns_taken = 0,
@@ -28,11 +28,11 @@ end
 
 --- Return the chapter result for the given battle ID.
 ---@param id integer
----@return StoryChapterResult
+---@return CampaignChapterResult
 function StatsService:get_chapter(id)
-    assert(self.story_results.chapter_results[id])
+    assert(self.campaign_results.chapter_results[id])
 
-    return self.story_results.chapter_results[id]
+    return self.campaign_results.chapter_results[id]
 end
 
 --- Record a unit death event into the appropriate chapter result.
@@ -55,13 +55,13 @@ end
 ---@param unit_id UnitId
 ---@param chapter integer
 function StatsService:record_recruitment(unit_id, chapter)
-    self.story_results.chapter_recruited[unit_id] = chapter
+    self.campaign_results.chapter_recruited[unit_id] = chapter
 end
 
 --- Increment combat counts for both participants of a combat exchange.
 ---@param data UnitCombatPayload
 function StatsService:record_combat(data)
-    local combats = self.story_results.unit_combats
+    local combats = self.campaign_results.unit_combats
     combats[data.attacker_id] = (combats[data.attacker_id] or 0) + 1
     combats[data.defender_id] = (combats[data.defender_id] or 0) + 1
 end
@@ -80,7 +80,7 @@ end
 ---@return table<string, string>
 function StatsService:get_as_map()
     local out = {}
-    local chapter_results = self.story_results.chapter_results
+    local chapter_results = self.campaign_results.chapter_results
     local highest_idx = nil
     for i, result in pairs(chapter_results) do
         out["stats." .. i .. ".units_lost"] = tostring(#result.units_lost)
@@ -114,7 +114,7 @@ function stats_service.new(event_bus)
     local self = setmetatable({
     }, StatsService)
 
-    self.story_results = {
+    self.campaign_results = {
         statistics = {
             turns_taken = 0,
             units_lost = 0,

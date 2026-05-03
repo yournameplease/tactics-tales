@@ -1,6 +1,6 @@
 -- Procedural story mod — story definitions.
 --
--- Story memory key conventions
+-- Campaign memory key conventions
 -- ----------------------------
 -- All procedural run state lives in story memory so it is automatically
 -- persisted by the save_game node and restored on load.  Keys use snake_case
@@ -18,12 +18,12 @@
 --                                Incremented after each battle completes.
 --
 --   base_difficulty            — Numeric difficulty level (as string).
---                                Derived from story config at run start.
+--                                Derived from campaign config at run start.
 --
 --   faction_appearance_counts  — Map entry (MapMemoryEntry) tracking how many
 --                                times each faction has been selected (id → count
 --                                as string).  Written by select_faction each time
---                                choose_next_story_beat picks a faction.
+--                                choose_next_campaign_beat picks a faction.
 --
 --   faction_id                 — Text entry holding the faction chosen for the
 --                                current battle.  Written by select_faction before
@@ -38,11 +38,11 @@
 --                                update_recruitment_quota; cleared by
 --                                auto_recruit_pending after each battle.
 
-local archetypes_data    = include("mods/tt_procedural_story/game_data/archetypes.lua")
-local faction_sel        = include("mods/tt_procedural_story/game_data/faction_selection.lua")
-local recruitment        = include("mods/tt_procedural_story/game_data/recruitment_quota.lua")
-local auto_rec           = include("mods/tt_procedural_story/game_data/auto_recruit.lua")
-local forced_join_mod    = include("mods/tt_procedural_story/game_data/forced_join.lua")
+local archetypes_data    = include("mods/tt_procedural_campaign/game_data/archetypes.lua")
+local faction_sel        = include("mods/tt_procedural_campaign/game_data/faction_selection.lua")
+local recruitment        = include("mods/tt_procedural_campaign/game_data/recruitment_quota.lua")
+local auto_rec           = include("mods/tt_procedural_campaign/game_data/auto_recruit.lua")
+local forced_join_mod    = include("mods/tt_procedural_campaign/game_data/forced_join.lua")
 local campaign_state_mod   = include("src/tactics/campaign/campaign_state.lua")
 
 -- Build the option list for the archetype selection node from the archetype
@@ -83,8 +83,8 @@ end
 ---@type ModStoriesModule
 local stories = {
     data = {
-        proc_story = {
-            name        = "Procedural Story",
+        proc_campaign = {
+            name        = "Procedural Campaign",
             description = "A procedurally generated run.",
 
             battle_config = { permadeath = true },
@@ -92,7 +92,7 @@ local stories = {
             starting_node = "archetype_select",
 
             nodes = {
-                -- Player chooses an archetype; ID is stored in story memory.
+                -- Player chooses an archetype; ID is stored in campaign memory.
                 -- battle_index is initialised to 1 before the loop starts.
                 archetype_select = {
                     { type = "select_option",
@@ -111,16 +111,16 @@ local stories = {
                         local archetype = get_archetype(sc)
                         local idx       = get_battle_index(sc)
                         local slot      = archetype.slots[idx]
-                        local template  = slot_template_id(archetype, slot, rng.story_rng)
+                        local template  = slot_template_id(archetype, slot, rng.campaign_rng)
                         local text      = recruitment.update_recruitment_quota(
-                            archetype, sc.memory, rng.story_rng, template)
+                            archetype, sc.memory, rng.campaign_rng, template)
                         return { type = "text", text = text }
                     end,
 
                     -- Step 2: pick a faction and store it for the battle factory.
                     function(sc, rng)
                         local archetype   = get_archetype(sc)
-                        local faction_id  = faction_sel.select_faction(archetype, sc.memory, rng.story_rng)
+                        local faction_id  = faction_sel.select_faction(archetype, sc.memory, rng.campaign_rng)
                         sc.memory:set("faction_id", campaign_state_mod.text(faction_id))
                         return { type = "text", text = "[faction] Selected: " .. faction_id }
                     end,

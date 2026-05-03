@@ -1,5 +1,5 @@
 ---@brief
---- Manages the different UI contexts (battle, story, game) and provides
+--- Manages the different UI contexts (battle, campaign, game) and provides
 --- the correct, enriched context to the UI system.
 
 require("src.tactics.ui.ui_context")

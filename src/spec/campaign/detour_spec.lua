@@ -154,19 +154,19 @@ describe("nested detours", function()
 end)
 
 -- ---------------------------------------------------------------------------
--- story.detour helper (base/lib/story)
+-- campaign.detour helper (base/lib/campaign)
 -- ---------------------------------------------------------------------------
 
-describe("story.detour helper", function()
-    local story = require("base.lib.story").story
+describe("campaign.detour helper", function()
+    local campaign = require("base.lib.campaign").campaign
 
     it("returns a node with type 'detour'", function()
-        local node = story.detour("some_node")
+        local node = campaign.detour("some_node")
         luassert.are_equal("detour", node.type)
     end)
 
     it("sets the target field", function()
-        local node = story.detour("some_node")
+        local node = campaign.detour("some_node")
         luassert.are_equal("some_node", node.target)
     end)
 end)

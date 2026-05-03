@@ -47,7 +47,7 @@ function GameUIContext:enrich()
 			self.menu_title = "New File"
 		elseif self.menu_manager.menu_state.step == "CONFIRM_FILE" then
 			self.menu_title = "New File"
-		elseif self.menu_manager.menu_state.step == "STORY_CONFIG" then
+		elseif self.menu_manager.menu_state.step == "CAMPAIGN_CONFIG" then
 			self.menu_title = "New File"
 		elseif self.menu_manager.menu_state.step == "LOAD_FILE_SELECT" then
 			self.menu_title = "Load File"

@@ -1,5 +1,5 @@
 ---@brief
---- The main panel for rendering the content of a story page.
+--- The main panel for rendering the content of a campaign page.
 
 local box = require("src.tactics.ui.box")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")
@@ -7,7 +7,7 @@ local character_ui = require("src.tactics.ui.panels.portrait_box")
 local book = require("src.tactics.ui.decoration.book")
 local menu_ui = require("src.tactics.ui.components.menu")
 
-local story_page_ui = {}
+local campaign_page_ui = {}
 
 --- Build the chapter title card panel for a chapter header node.
 ---@param node RenderedChapterHeader
@@ -177,7 +177,7 @@ end
 --- Build a multi-line text panel for a text node.
 ---@param node RenderedText
 ---@return UIElement
-local function story_text_page(node)
+local function campaign_text_page(node)
     return dialogue_node.multi_line(
         node.text,
         {
@@ -189,7 +189,7 @@ local function story_text_page(node)
     )
 end
 
---- Generate the list of child UI elements for the current story page state.
+--- Generate the list of child UI elements for the current campaign page state.
 ---@param state UIContextManager
 ---@return UIElement[]
 local function compute_children(state)
@@ -210,7 +210,7 @@ local function compute_children(state)
             is_chapter_header_page = true
         elseif n.type == "text" then
             ---@cast n RenderedText
-            child = story_text_page(n)
+            child = campaign_text_page(n)
         elseif n.type == "character_customization" then
             ---@cast n RenderedCharacterCustomization
             child = box.builder("character_customizer")
@@ -323,9 +323,9 @@ local function compute_children(state)
     end
 end
 
---- Create the story content panel, which regenerates its children when the story revision changes.
+--- Create the campaign content panel, which regenerates its children when the campaign revision changes.
 ---@return UIElement
-function story_page_ui.new()
+function campaign_page_ui.new()
     local content = box.builder("campaign_content")
         :layout{
             width = "fill",
@@ -333,7 +333,7 @@ function story_page_ui.new()
         }
         :child_generator{
             current_key = function(state)
-                return state.campaign_context.campaign_page.story_revision
+                return state.campaign_context.campaign_page.campaign_revision
             end,
             generate_children = compute_children,
         }
@@ -342,4 +342,4 @@ function story_page_ui.new()
     return content
 end
 
-return story_page_ui
+return campaign_page_ui

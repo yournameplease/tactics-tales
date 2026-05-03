@@ -1,10 +1,10 @@
 local luassert = require("luassert")
 
-local factions_mod = require("tt_procedural_story.game_data.factions")
+local factions_mod = require("tt_procedural_campaign.game_data.factions")
 local factions     = factions_mod.factions
 local resolve_slot = factions_mod.resolve_slot
 
-describe("tt_procedural_story.factions", function()
+describe("tt_procedural_campaign.factions", function()
     describe("faction data", function()
         it("defines bandits, cultists, and militia", function()
             luassert.is_not_nil(factions.bandits)

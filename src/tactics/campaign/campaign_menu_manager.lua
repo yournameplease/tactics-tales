@@ -1,5 +1,5 @@
 ---@brief
---- Manages menus that appear during story sequences, such as
+--- Manages menus that appear during campaign sequences, such as
 --- the character customization screen.
 
 local random = require("src.tactics.util.random")
@@ -102,7 +102,7 @@ local function menu_definition_for_character_select()
                 return children
             end))
             :with_initial_data(function(services, _session_data)
-                ---@cast services StoryMenuServices
+                ---@cast services CampaignMenuServices
                 if services.character_appearance then
                     return services.character_appearance
                 end
@@ -111,7 +111,7 @@ local function menu_definition_for_character_select()
             :with_action("BUTTON_A", { command = "select", description = "Select" })
 end
 
----@alias CampaignMenuHandler MenuHandler<StoryMenuServices>
+---@alias CampaignMenuHandler MenuHandler<CampaignMenuServices>
 
 ---@type table<string, CampaignMenuHandler>
 local HANDLERS = {}
@@ -159,7 +159,7 @@ local MENU_DATA = {
                 list.column(
                     "select_option_list",
                     function(game_ctx, _ctx)
-                        ---@cast game_ctx StoryMenuServices
+                        ---@cast game_ctx CampaignMenuServices
                         local children = {}
                         for _, opt in ipairs(game_ctx.selection_options) do
                             table.insert(children, button.builder(opt.id)
@@ -179,8 +179,8 @@ local MENU_DATA = {
 
 local campaign_menu_manager = {}
 
---- Create a new MenuManager configured for story sequences.
----@param ctx StoryMenuServices
+--- Create a new MenuManager configured for campaign sequences.
+---@param ctx CampaignMenuServices
 ---@param bus EventBus
 ---@return MenuManager
 function campaign_menu_manager.new(ctx, bus)
