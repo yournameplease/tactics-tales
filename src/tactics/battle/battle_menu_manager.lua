@@ -771,6 +771,11 @@ return {
                             :handle_action("select", "attack_unit_at_tile")
                             :as_final_step()
                     )
+                    -- :with_common_child( -- unit cycling
+                    --     button.builder("cycle_units")
+                    --         :handle_action("cycle_left", "cycle_previous_target")
+                    --         :handle_action("cycle_right", "cycle_next_target")
+                    -- )
                     :with_tile_highlights(function(msb, ctx)
                         ---@cast msb BattleMenuContext
                         ---@cast ctx BattleMainMenuContext
@@ -792,6 +797,8 @@ return {
                 :with_previous_step("SELECT_ACTION")
                 :with_action("BUTTON_A", { command = "select", description = "Select Target" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
+                -- :with_action("SHOULDER_L", { command = "cycle_left", description = "Previous Target" })
+                -- :with_action("SHOULDER_R", { command = "cycle_right", description = "Next Target" }),
             ["CONFIRM_ATTACK"] = step_definition.of_node(
                 list.column(
                     "confirm_attack",
@@ -802,12 +809,6 @@ return {
                             :with_text("Attack")
                             :handle_action("select", "attack_unit")
                             :as_final_step())
-                        -- TODO: The UI here was confusing, so I disabled for now
-                        -- if ctx.valid_attack_points and #ctx.valid_attack_points > 1 then
-                        --     table.insert(options, button.builder("move")
-                        --         :with_text("Move")
-                        --         :handle_action("select", "cycle_attack_position"))
-                        -- end
                         table.insert(options, button.builder("cancel")
                             :with_text("Cancel")
                             :then_go_back())
