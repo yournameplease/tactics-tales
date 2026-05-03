@@ -17,16 +17,13 @@ local game_menu_manager = {}
 ---@class MainMenuContext : MenuContext
 ---@field selected_file string The save file name chosen by the player for overwrite confirmation.
 
----@type table<string, MenuHandler<GameMenuContext, MainMenuContext>>
-local HANDLERS = {}
-
 --- Advance from the title screen: go to main menu, or auto-start the default campaign in demo mode.
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-HANDLERS["title_advance"] = function(services, _menu_data, _session_context, _value)
+local function title_advance(services, _menu_data, _session_context, _value)
     if not DYNAMIC_CONFIG.demo_mode then
         return menu_handler.then_navigate("MAIN_MENU")
     end
@@ -50,7 +47,7 @@ end
 ---@param session_context MainMenuContext
 ---@param file CampaignId
 ---@return MenuHandlerPostHandling?
-HANDLERS["store_selected_save"] = function(_services, _menu_data, session_context, file)
+local function store_selected_save(_services, _menu_data, session_context, file)
     session_context.selected_file = file
     return nil
 end
@@ -61,12 +58,7 @@ end
 ---@param session_context MainMenuContext
 ---@param _value string
 ---@return MenuHandlerPostHandling?
-HANDLERS["begin_file_from_context"] = function(
-    services,
-    menu_data,
-    session_context,
-    _value
-)
+local function begin_file_from_context(services, menu_data, session_context, _value)
     local config = {}
     for k, v in pairs(menu_data) do
         if k ~= "_preset" then config[k] = v end
@@ -81,7 +73,7 @@ end
 ---@param _ctx MainMenuContext
 ---@param value string
 ---@return MenuHandlerPostHandling
-HANDLERS["apply_preset"] = function(services, menu_data, _ctx, value)
+local function apply_preset(services, menu_data, _ctx, value)
     if value == "custom" then
         return menu_handler.then_deserialize(menu_data)
     end
@@ -102,7 +94,7 @@ end
 ---@param _ctx MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling
-HANDLERS["sync_preset_from_options"] = function(services, menu_data, _ctx, _value)
+local function sync_preset_from_options(services, menu_data, _ctx, _value)
     local config = services.campaigns[services.default_campaign_id].config
     local matched = "custom"
     if config and config.presets then
@@ -126,7 +118,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param file CampaignId
 ---@return MenuHandlerPostHandling?
-HANDLERS["load_campaign"] = function(services, _menu_data, _session_context, file)
+local function load_campaign(services, _menu_data, _session_context, file)
     services.handle_load_campaign(file)
     return nil
 end
@@ -137,7 +129,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param campaign_id CampaignId
 ---@return MenuHandlerPostHandling?
-HANDLERS["begin_chapter"] = function(services, _menu_data, _session_context, campaign_id)
+local function begin_chapter(services, _menu_data, _session_context, campaign_id)
     services.handle_begin_campaign(nil, campaign_id, {}) -- TODO: Config?  Or default config?
     return nil
 end
@@ -148,7 +140,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-HANDLERS["set_options"] = function(services, menu_data, _session_context, _value)
+local function set_options(services, menu_data, _session_context, _value)
     services.config_manager:store_config(menu_data)
     return nil
 end
@@ -159,7 +151,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-HANDLERS["reset_options"] = function(services, _menu_data, _session_context, _value)
+local function reset_options(services, _menu_data, _session_context, _value)
     services.config_manager:reset_config()
     return nil
 end
@@ -170,7 +162,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-HANDLERS["apply_glyph_family"] = function(services, menu_data, _session_context, _value)
+local function apply_glyph_family(services, menu_data, _session_context, _value)
     services.config_manager:apply_glyph_family(menu_data.glyph_family)
     return nil
 end
@@ -181,7 +173,7 @@ end
 ---@param _session_context MainMenuContext
 ---@param _value any
 ---@return MenuHandlerPostHandling?
-HANDLERS["apply_volume"] = function(services, menu_data, _session_context, _value)
+local function apply_volume(services, menu_data, _session_context, _value)
     services.config_manager:apply_volume(
         menu_data.master_volume,
         menu_data.music_volume,
@@ -189,6 +181,21 @@ HANDLERS["apply_volume"] = function(services, menu_data, _session_context, _valu
     )
     return nil
 end
+
+---@type table<string, MenuHandler<GameMenuContext, MainMenuContext>>
+local HANDLERS = {
+    ["title_advance"] = title_advance,
+    ["store_selected_save"] = store_selected_save,
+    ["begin_file_from_context"] = begin_file_from_context,
+    ["apply_preset"] = apply_preset,
+    ["sync_preset_from_options"] = sync_preset_from_options,
+    ["load_campaign"] = load_campaign,
+    ["begin_chapter"] = begin_chapter,
+    ["set_options"] = set_options,
+    ["reset_options"] = reset_options,
+    ["apply_glyph_family"] = apply_glyph_family,
+    ["apply_volume"] = apply_volume,
+}
 
 ---@param dest string
 ---@return table

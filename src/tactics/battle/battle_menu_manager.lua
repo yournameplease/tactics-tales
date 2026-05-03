@@ -181,318 +181,470 @@ local function is_acting_unit_before(point)
     end
 end
 
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattlePreparationsContext
+---@param value any
+---@return nil
 local function mark_unit(services, _menu_data, _session_context, value)
     services.tactics_engine:handle_mark_unit(value.point)
     return nil
 end
 
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattlePreparationsContext
+---@param value any
+---@return nil
+local function select_swap_unit(services, _menu_data, session_context, value)
+    session_context.swap_source = value.point
+    services.tactics_engine.active_point = value.point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattlePreparationsContext
+---@param value any
+---@return MenuHandlerPostHandling
+local function swap_units(services, _menu_data, session_context, value)
+    services.tactics_engine:handle_swap_unit(
+        session_context.swap_source,
+        value.point
+    )
+    services.tactics_engine.active_point = value.point
+    session_context.swap_source = nil
+    return menu_manager.menu_handler.then_recompute()
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattlePreparationsContext
+---@param _value any
+---@return nil
+local function start_battle(services, _menu_data, _session_context, _value)
+    services.handle_start_battle()
+    return nil
+end
+
+---@param _services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattlePreparationsContext
+---@param _value any
+---@return MenuHandlerPostHandling
+local function navigate_to_deployment_menu(_services, _menu_data, _session_context, _value)
+    return menu_manager.menu_handler.then_navigate("DEPLOYMENT_MENU")
+end
+
 ---@type table<string, MenuHandler<BattleMenuContext, BattlePreparationsContext>>
 local DEPLOYMENT_HANDLERS = {
-    ["select_swap_unit"] = function(services, _menu_data, session_context, value)
-        session_context.swap_source = value.point
-        services.tactics_engine.active_point = value.point
-        return nil
-    end,
-    ["swap_units"] = function(services, _menu_data, session_context, value)
-        services.tactics_engine:handle_swap_unit(
-            session_context.swap_source,
-            value.point
-        )
-        services.tactics_engine.active_point = value.point
-        session_context.swap_source = nil
-        return menu_manager.menu_handler.then_recompute()
-    end,
-    ["start_battle"] = function(services, _menu_data, _session_context, _value)
-        services.handle_start_battle()
-        return nil
-    end,
-    ["navigate_to_deployment_menu"] = function(_services, _menu_data, _session_context, _value)
-        return menu_manager.menu_handler.then_navigate("DEPLOYMENT_MENU")
-    end,
+    ["select_swap_unit"] = select_swap_unit,
+    ["swap_units"] = swap_units,
+    ["start_battle"] = start_battle,
+    ["navigate_to_deployment_menu"] = navigate_to_deployment_menu,
     ["mark_unit"] = mark_unit,
 }
 
----@type table<string, MenuHandler<BattleMenuContext, BattleMainMenuContext>>
-local PLAYER_TURN_HANDLERS = {
-    ["end_turn"] = function(services, _menu_data, _session_context, _value)
-        services.handle_end_turn()
-        return nil
-    end,
-    ["cycle_next_unit"] = function(services, _menu_data, _session_context, value)
-        local pt_val = value.point
-        local next_unit = nil
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function end_turn(services, _menu_data, _session_context, _value)
+    services.handle_end_turn()
+    return nil
+end
 
-        log.debug("CYCLING NEXT UNIT")
-        local units_after = services.battle_map:get_units(is_acting_unit_after(pt_val))
-        for _, u in ipairs(units_after) do
-            if not next_unit or u.tile < next_unit.tile then
-                next_unit = u
-            end
-        end
-        if next_unit then
-            return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
-        end
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param value any
+---@return MenuHandlerPostHandling?
+local function cycle_next_unit(services, _menu_data, _session_context, value)
+    local pt_val = value.point
+    local next_unit = nil
 
-        local units_before = services.battle_map:get_units(is_acting_unit_before(pt_val))
-        for _, u in ipairs(units_before) do
-            if not next_unit or u.tile < next_unit.tile then
-                next_unit = u
-            end
+    log.debug("CYCLING NEXT UNIT")
+    local units_after = services.battle_map:get_units(is_acting_unit_after(pt_val))
+    for _, u in ipairs(units_after) do
+        if not next_unit or u.tile < next_unit.tile then
+            next_unit = u
         end
-        if next_unit then
-            return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
-        end
+    end
+    if next_unit then
+        return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
+    end
 
-        return nil
-    end,
-    ["cycle_previous_unit"] = function(services, _menu_data, _session_context, value)
-        local pt_val = value.point
-        local previous_unit = nil
+    local units_before = services.battle_map:get_units(is_acting_unit_before(pt_val))
+    for _, u in ipairs(units_before) do
+        if not next_unit or u.tile < next_unit.tile then
+            next_unit = u
+        end
+    end
+    if next_unit then
+        return menu_manager.menu_handler.then_move_cursor(next_unit.tile)
+    end
 
-        log.debug("CYCLING PREVIOUS UNIT")
-        local units_before = services.battle_map:get_units(is_acting_unit_before(pt_val))
-        for _, u in ipairs(units_before) do
-            if not previous_unit or u.tile > previous_unit.tile then
-                previous_unit = u
-            end
-        end
-        if previous_unit then
-            return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
-        end
+    return nil
+end
 
-        local units_after = services.battle_map:get_units(is_acting_unit_after(pt_val))
-        for _, u in ipairs(units_after) do
-            if not previous_unit or u.tile > previous_unit.tile then
-                previous_unit = u
-            end
-        end
-        if previous_unit then
-            return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
-        end
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param value any
+---@return MenuHandlerPostHandling?
+local function cycle_previous_unit(services, _menu_data, _session_context, value)
+    local pt_val = value.point
+    local previous_unit = nil
 
-        return nil
-    end,
-    ["select_acting_unit"] = function(services, _menu_data, session_context, value)
-        local unit = services.battle_map:get_at_tile(value.point)
-        session_context.acting_unit = {
-            unit = unit,
-            point = unit.tile:copy(),
-        }
-        services.tactics_engine.active_point = value.point
-        return nil
-    end,
-    ["mark_unit"] = mark_unit,
-    ["unmark_all_units"] = function(services, _menu_data, _session_context, _value)
-        services.tactics_engine:handle_unmark_all_units()
-        return nil
-    end,
-    ["mark_all_units"] = function(services, _menu_data, _session_context, _value)
-        services.tactics_engine:handle_mark_all_units()
-        return nil
-    end,
-    ["navigate_to_turn_menu"] = function(_services, _menu_data, _session_context, _value)
-        return menu_manager.menu_handler.then_navigate("TURN_MENU")
-    end,
-    ["cycle_attack_position"] = function(services, _menu_data, session_context, _value)
-        local points = session_context.valid_attack_points
-        if not points or #points < 2 then return nil end
-        local current = session_context.destination.point
-        local current_index = 1
-        for i, p in ipairs(points) do
-            if p == current then
-                current_index = i
-                break
-            end
+    log.debug("CYCLING PREVIOUS UNIT")
+    local units_before = services.battle_map:get_units(is_acting_unit_before(pt_val))
+    for _, u in ipairs(units_before) do
+        if not previous_unit or u.tile > previous_unit.tile then
+            previous_unit = u
         end
-        local next_point = points[(current_index % #points) + 1]
-        services.tactics_engine:jump_unit_to_point(session_context.acting_unit.unit, next_point)
-        session_context.destination.point = next_point
-        services.tactics_engine.active_point = next_point
-        return menu_manager.menu_handler.then_recompute()
-    end,
-    ["wait_acting_unit"] = function(services, _menu_data, session_context, _value)
-        services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
-        return nil
-    end,
-    ["move_acting_unit"] = function(services, _menu_data, session_context, value)
-        session_context.destination = {
-            point = value.point,
-            path = value.path,
-        }
-        services.tactics_engine:handle_move_unit(
-            session_context.acting_unit.unit,
-            session_context.destination.point,
-            session_context.destination.path
-        )
-        services.tactics_engine.active_point = value.point
-        return nil
-    end,
-    ["unmove_acting_unit"] = function(services, _menu_data, session_context, _value)
-        services.tactics_engine:jump_unit_to_point(
-            session_context.acting_unit.unit,
-            session_context.acting_unit.point
-        )
-        services.tactics_engine.active_point = session_context.acting_unit.point
-        return nil
-    end,
-    ["move_and_store_attack_unit"] = function(services, _menu_data, session_context, value)
-        local target_point = value.point
-        local acting_unit = session_context.acting_unit.unit
-        local targeting = acting_unit.character:get_weapon_targeting()
+    end
+    if previous_unit then
+        return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
+    end
 
-        local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
-        local valid_attack_points = {}
-        for x = 0, services.battle_map.width - 1 do
-            for y = 0, services.battle_map.height - 1 do
-                local tile_data = valid_tiles:get(x, y)
-                if tile_data ~= nil and tile_data & 0x1 ~= 0 then
-                    local p = point.of(x, y)
-                    local occupant = services.battle_map:get_at_tile(p)
-                    if (occupant == nil or occupant.id == acting_unit.id)
-                        and targeting.is_target_valid(p, target_point, services.battle_map)
-                    then
-                        table.insert(valid_attack_points, p)
-                    end
-                end
-            end
+    local units_after = services.battle_map:get_units(is_acting_unit_after(pt_val))
+    for _, u in ipairs(units_after) do
+        if not previous_unit or u.tile > previous_unit.tile then
+            previous_unit = u
         end
-        session_context.valid_attack_points = valid_attack_points
+    end
+    if previous_unit then
+        return menu_manager.menu_handler.then_move_cursor(previous_unit.tile)
+    end
 
-        local destination_point = value.path[#value.path]
-        local valid_destination = false
-        for i = #value.path, 1, -1 do
-            if targeting.is_target_valid(value.path[i], target_point, services.battle_map)
-                and services.battle_map:get_at_tile(value.path[i]) == nil
-            then
-                destination_point = value.path[i]
-                valid_destination = true
-                break
-            end
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+local function select_acting_unit(services, _menu_data, session_context, value)
+    local unit = services.battle_map:get_at_tile(value.point)
+    session_context.acting_unit = {
+        unit = unit,
+        point = unit.tile:copy(),
+    }
+    services.tactics_engine.active_point = value.point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function unmark_all_units(services, _menu_data, _session_context, _value)
+    services.tactics_engine:handle_unmark_all_units()
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function mark_all_units(services, _menu_data, _session_context, _value)
+    services.tactics_engine:handle_mark_all_units()
+    return nil
+end
+
+---@param _services BattleMenuContext
+---@param _menu_data any
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+local function navigate_to_turn_menu(_services, _menu_data, _session_context, _value)
+    return menu_manager.menu_handler.then_navigate("TURN_MENU")
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling?
+local function cycle_attack_position(services, _menu_data, session_context, _value)
+    local points = session_context.valid_attack_points
+    if not points or #points < 2 then return nil end
+    local current = session_context.destination.point
+    local current_index = 1
+    for i, p in ipairs(points) do
+        if p == current then
+            current_index = i
+            break
         end
+    end
+    local next_point = points[(current_index % #points) + 1]
+    services.tactics_engine:jump_unit_to_point(session_context.acting_unit.unit, next_point)
+    session_context.destination.point = next_point
+    services.tactics_engine.active_point = next_point
+    return menu_manager.menu_handler.then_recompute()
+end
 
-        local trimmed_path
-        if not valid_destination then
-            if #valid_attack_points == 0 then
-                return menu_manager.menu_handler.then_dont_navigate()
-            end
-            local cursor_point = value.path[#value.path]
-            destination_point = valid_attack_points[1]
-            local best_dist = math.abs(destination_point.x - cursor_point.x) + math.abs(destination_point.y - cursor_point.y)
-            for i = 2, #valid_attack_points do
-                local p = valid_attack_points[i]
-                local d = math.abs(p.x - cursor_point.x) + math.abs(p.y - cursor_point.y)
-                if d < best_dist then
-                    best_dist = d
-                    destination_point = p
-                end
-            end
-            trimmed_path = pathfinding.extend_path_to_point(
-                { session_context.acting_unit.point:copy() },
-                destination_point,
-                acting_unit.character.stats.movement,
-                valid_tiles
-            )
-        else
-            trimmed_path = {}
-            for i, p in ipairs(value.path) do
-                trimmed_path[i] = p
-                if p == destination_point then
-                    break
-                end
-            end
-        end
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function wait_acting_unit(services, _menu_data, session_context, _value)
+    services.tactics_engine:finish_unit_action(session_context.acting_unit.unit)
+    return nil
+end
 
-        session_context.destination = {
-            point = destination_point,
-            path = trimmed_path,
-        }
-        services.tactics_engine:handle_move_unit(
-            session_context.acting_unit.unit,
-            session_context.destination.point,
-            trimmed_path
-        )
-        session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
-        services.tactics_engine.active_point = destination_point
-        return nil
-    end,
-    ["move_and_store_interaction_unit"] = function(services, _menu_data, session_context, value)
-        local target_point = value.point
-        local acting_unit = session_context.acting_unit.unit
-        local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
-        local neighbors = {
-            point.of(target_point.x - 1, target_point.y),
-            point.of(target_point.x + 1, target_point.y),
-            point.of(target_point.x, target_point.y - 1),
-            point.of(target_point.x, target_point.y + 1),
-        }
-        local dest_point = nil
-        local interaction = nil
-        local target_unit = services.battle_map:get_at_tile(target_point)
-        for _, p in ipairs(neighbors) do
-            local tile_data = valid_tiles:get(p.x, p.y)
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+local function move_acting_unit(services, _menu_data, session_context, value)
+    session_context.destination = {
+        point = value.point,
+        path = value.path,
+    }
+    services.tactics_engine:handle_move_unit(
+        session_context.acting_unit.unit,
+        session_context.destination.point,
+        session_context.destination.path
+    )
+    services.tactics_engine.active_point = value.point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function unmove_acting_unit(services, _menu_data, session_context, _value)
+    services.tactics_engine:jump_unit_to_point(
+        session_context.acting_unit.unit,
+        session_context.acting_unit.point
+    )
+    services.tactics_engine.active_point = session_context.acting_unit.point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return MenuHandlerPostHandling?
+local function move_and_store_attack_unit(services, _menu_data, session_context, value)
+    local target_point = value.point
+    local acting_unit = session_context.acting_unit.unit
+    local targeting = acting_unit.character:get_weapon_targeting()
+
+    local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
+    local valid_attack_points = {}
+    for x = 0, services.battle_map.width - 1 do
+        for y = 0, services.battle_map.height - 1 do
+            local tile_data = valid_tiles:get(x, y)
             if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+                local p = point.of(x, y)
                 local occupant = services.battle_map:get_at_tile(p)
-                if occupant == nil or occupant.id == acting_unit.id then
-                    for _, iact in ipairs(services.battle_map:get_nearby_interactions(p)) do
-                        if iact.target_unit ~= nil and iact.target_unit.id == target_unit.id then
-                            dest_point = p
-                            interaction = iact
-                            break
-                        end
-                    end
+                if (occupant == nil or occupant.id == acting_unit.id)
+                    and targeting.is_target_valid(p, target_point, services.battle_map)
+                then
+                    table.insert(valid_attack_points, p)
                 end
             end
-            if dest_point then break end
         end
-        if dest_point == nil then
+    end
+    session_context.valid_attack_points = valid_attack_points
+
+    local destination_point = value.path[#value.path]
+    local valid_destination = false
+    for i = #value.path, 1, -1 do
+        if targeting.is_target_valid(value.path[i], target_point, services.battle_map)
+            and services.battle_map:get_at_tile(value.path[i]) == nil
+        then
+            destination_point = value.path[i]
+            valid_destination = true
+            break
+        end
+    end
+
+    local trimmed_path
+    if not valid_destination then
+        if #valid_attack_points == 0 then
             return menu_manager.menu_handler.then_dont_navigate()
         end
-        local path = pathfinding.extend_path_to_point(
+        local cursor_point = value.path[#value.path]
+        destination_point = valid_attack_points[1]
+        local best_dist = math.abs(destination_point.x - cursor_point.x) + math.abs(destination_point.y - cursor_point.y)
+        for i = 2, #valid_attack_points do
+            local p = valid_attack_points[i]
+            local d = math.abs(p.x - cursor_point.x) + math.abs(p.y - cursor_point.y)
+            if d < best_dist then
+                best_dist = d
+                destination_point = p
+            end
+        end
+        trimmed_path = pathfinding.extend_path_to_point(
             { session_context.acting_unit.point:copy() },
-            dest_point,
+            destination_point,
             acting_unit.character.stats.movement,
             valid_tiles
         )
-        session_context.destination = { point = dest_point, path = path }
-        session_context.stored_interaction = interaction
-        services.tactics_engine:handle_move_unit(acting_unit, dest_point, path)
-        services.tactics_engine.active_point = dest_point
-        return nil
-    end,
-    ["store_attack_unit"] = function(services, _menu_data, session_context, value)
-        session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
-        services.tactics_engine.active_point = value.point
-        return nil
-    end,
-    ["attack_unit"] = function(services, _menu_data, session_context, _value)
-        services.tactics_engine:handle_attack_unit(
-            session_context.acting_unit.unit,
-            session_context.target_unit.unit
-        )
-        return nil
-    end,
-    ["attack_unit_at_tile"] = function(services, _menu_data, session_context, value)
-        local target_unit = services.battle_map:get_at_tile(value.point)
-        services.tactics_engine:handle_attack_unit(
-            session_context.acting_unit.unit,
-            target_unit
-        )
-        return nil
-    end,
-    ["handle_interaction"] = function(services, _menu_data, session_context, interaction)
-        session_context.selected_script = {
-            script_id = interaction.script_id,
-            target_unit = interaction.target_unit,
-            target_tile = interaction.target_tile,
-        }
-        services.tactics_engine:handle_interaction(
-            interaction.script_id,
-            session_context.acting_unit.unit,
-            interaction.target_unit,
-            interaction.target_tile
-        )
-        return nil
-    end,
+    else
+        trimmed_path = {}
+        for i, p in ipairs(value.path) do
+            trimmed_path[i] = p
+            if p == destination_point then
+                break
+            end
+        end
+    end
+
+    session_context.destination = {
+        point = destination_point,
+        path = trimmed_path,
+    }
+    services.tactics_engine:handle_move_unit(
+        session_context.acting_unit.unit,
+        session_context.destination.point,
+        trimmed_path
+    )
+    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
+    services.tactics_engine.active_point = destination_point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return MenuHandlerPostHandling?
+local function move_and_store_interaction_unit(services, _menu_data, session_context, value)
+    local target_point = value.point
+    local acting_unit = session_context.acting_unit.unit
+    local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
+    local neighbors = {
+        point.of(target_point.x - 1, target_point.y),
+        point.of(target_point.x + 1, target_point.y),
+        point.of(target_point.x, target_point.y - 1),
+        point.of(target_point.x, target_point.y + 1),
+    }
+    local dest_point = nil
+    local interaction = nil
+    local target_unit = services.battle_map:get_at_tile(target_point)
+    for _, p in ipairs(neighbors) do
+        local tile_data = valid_tiles:get(p.x, p.y)
+        if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+            local occupant = services.battle_map:get_at_tile(p)
+            if occupant == nil or occupant.id == acting_unit.id then
+                for _, iact in ipairs(services.battle_map:get_nearby_interactions(p)) do
+                    if iact.target_unit ~= nil and iact.target_unit.id == target_unit.id then
+                        dest_point = p
+                        interaction = iact
+                        break
+                    end
+                end
+            end
+        end
+        if dest_point then break end
+    end
+    if dest_point == nil then
+        return menu_manager.menu_handler.then_dont_navigate()
+    end
+    local path = pathfinding.extend_path_to_point(
+        { session_context.acting_unit.point:copy() },
+        dest_point,
+        acting_unit.character.stats.movement,
+        valid_tiles
+    )
+    session_context.destination = { point = dest_point, path = path }
+    session_context.stored_interaction = interaction
+    services.tactics_engine:handle_move_unit(acting_unit, dest_point, path)
+    services.tactics_engine.active_point = dest_point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+local function store_attack_unit(services, _menu_data, session_context, value)
+    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
+    services.tactics_engine.active_point = value.point
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+local function attack_unit(services, _menu_data, session_context, _value)
+    services.tactics_engine:handle_attack_unit(
+        session_context.acting_unit.unit,
+        session_context.target_unit.unit
+    )
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+local function attack_unit_at_tile(services, _menu_data, session_context, value)
+    local target_unit = services.battle_map:get_at_tile(value.point)
+    services.tactics_engine:handle_attack_unit(
+        session_context.acting_unit.unit,
+        target_unit
+    )
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _menu_data any
+---@param session_context BattleMainMenuContext
+---@param interaction InteractionHook
+---@return nil
+local function handle_interaction(services, _menu_data, session_context, interaction)
+    session_context.selected_script = {
+        script_id = interaction.script_id,
+        target_unit = interaction.target_unit,
+        target_tile = interaction.target_tile,
+    }
+    services.tactics_engine:handle_interaction(
+        interaction.script_id,
+        session_context.acting_unit.unit,
+        interaction.target_unit,
+        interaction.target_tile
+    )
+    return nil
+end
+
+---@type table<string, MenuHandler<BattleMenuContext, BattleMainMenuContext>>
+local PLAYER_TURN_HANDLERS = {
+    ["end_turn"] = end_turn,
+    ["cycle_next_unit"] = cycle_next_unit,
+    ["cycle_previous_unit"] = cycle_previous_unit,
+    ["select_acting_unit"] = select_acting_unit,
+    ["mark_unit"] = mark_unit,
+    ["unmark_all_units"] = unmark_all_units,
+    ["mark_all_units"] = mark_all_units,
+    ["navigate_to_turn_menu"] = navigate_to_turn_menu,
+    ["cycle_attack_position"] = cycle_attack_position,
+    ["wait_acting_unit"] = wait_acting_unit,
+    ["move_acting_unit"] = move_acting_unit,
+    ["unmove_acting_unit"] = unmove_acting_unit,
+    ["move_and_store_attack_unit"] = move_and_store_attack_unit,
+    ["move_and_store_interaction_unit"] = move_and_store_interaction_unit,
+    ["store_attack_unit"] = store_attack_unit,
+    ["attack_unit"] = attack_unit,
+    ["attack_unit_at_tile"] = attack_unit_at_tile,
+    ["handle_interaction"] = handle_interaction,
 }
 
 local function make_menu_data(map_width, map_height)
