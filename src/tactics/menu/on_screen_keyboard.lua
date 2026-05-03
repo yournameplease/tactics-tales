@@ -66,7 +66,7 @@ end
 ---@type table<string, MenuHandler<GameContext, KeyboardMenuContext>>
 local HANDLERS = {}
 
-HANDLERS["change_keyboard_mode"] = function(_services, _menu_data, session_context, _value)
+HANDLERS["change_keyboard_mode"] = function(_services, session_context, _value)
     ---@cast session_context KeyboardMenuContext
     if session_context.keyboard_mode == nil then
         session_context.keyboard_mode = 1
@@ -76,7 +76,7 @@ HANDLERS["change_keyboard_mode"] = function(_services, _menu_data, session_conte
     return menu_manager.menu_handler.then_recompute()
 end
 
-HANDLERS["type_character"] = function(_services, _menu_data, session_context, value)
+HANDLERS["type_character"] = function(_services, session_context, value)
     ---@cast session_context KeyboardMenuContext
     if session_context.keyboard_mode == nil then
         session_context.keyboard_mode = 1
@@ -97,11 +97,11 @@ HANDLERS["type_character"] = function(_services, _menu_data, session_context, va
     return nil
 end
 
-HANDLERS["type_text"] = function(_services, _menu_data, _session_context)
+HANDLERS["type_text"] = function(_services, _session_context)
     return nil
 end
 
-HANDLERS["delete_character"] = function(_services, _menu_data, session_context, _value)
+HANDLERS["delete_character"] = function(_services, session_context, _value)
     ---@cast session_context KeyboardMenuContext
     if session_context.keyboard_mode == nil then
         session_context.keyboard_mode = 1

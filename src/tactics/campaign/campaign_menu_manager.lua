@@ -118,10 +118,10 @@ local MENU_DATA = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
         handlers = {
-            ["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
+            ["randomize_appearance"] = function(_services, _session_context, _value)
                 return menu_manager.menu_handler.then_deserialize(random_appearance())
             end,
-            ["create_character"] = function(services, _menu_data, _session_context, value)
+            ["create_character"] = function(services, _session_context, value)
                 services.handle_create_character(value)
                 return nil
             end,
@@ -133,7 +133,7 @@ local MENU_DATA = {
     ["MENU_TEXT_INPUT"] = {
         initial_step = "KEYBOARD",
         handlers = maps.merge(keyboard_bundle.handlers, {
-            ["submit_text"] = function(services, _menu_data, session_context, _value)
+            ["submit_text"] = function(services, session_context, _value)
                 ---@cast session_context KeyboardMenuContext
                 services.handle_submit_text(session_context.keyboard_content)
                 return nil
@@ -146,7 +146,7 @@ local MENU_DATA = {
     ["MENU_SELECT_OPTION"] = {
         initial_step = "OPTION_LIST",
         handlers = {
-            ["select_option"] = function(services, _menu_data, _session_context, value)
+            ["select_option"] = function(services, _session_context, value)
                 services.handle_select_option(value)
                 return nil
             end,

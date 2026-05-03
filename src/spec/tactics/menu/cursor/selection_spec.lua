@@ -229,9 +229,9 @@ describe("tactics.menu.cursor.selection", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    my_handler = function(_gc, menu_data, _mc, value)
-                        table.insert(handler_calls, { value = value, data = menu_data })
-                        return menu_manager.menu_handler.then_deserialize({ other_key = "injected_" .. value })
+                    my_handler = function(_gc, _mc, value)
+                        table.insert(handler_calls, { value = value })
+                        return menu_manager.menu_handler.then_deserialize({ other_key = "injected_" .. value.sel_key })
                     end
                 },
                 steps = {
@@ -256,12 +256,12 @@ describe("tactics.menu.cursor.selection", function()
         -- move right: selection becomes B, handler called, menu re-deserialized
         manager:update(input_helper.joypad({ dxp = 1 }))
         luassert.are_equal(1, #handler_calls)
-        luassert.are_equal("B", handler_calls[1].value)
+        luassert.are_equal("B", handler_calls[1].value.sel_key)
 
         -- move left: selection becomes A, handler called again
         manager:update(input_helper.joypad({ dxp = -1 }))
         luassert.are_equal(2, #handler_calls)
-        luassert.are_equal("A", handler_calls[2].value)
+        luassert.are_equal("A", handler_calls[2].value.sel_key)
     end)
 
     it("on_change: handle_command calls handler and re-deserializes", function()

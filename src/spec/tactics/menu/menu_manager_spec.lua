@@ -88,10 +88,10 @@ describe("tactics.menu.menu_manager", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    record_text = function(_svc, _data, _ctx, text)
+                    record_text = function(_svc, _ctx, text)
                         received_text = text
                     end,
-                    noop_handler = function(_svc, _data, _ctx)
+                    noop_handler = function(_svc, _ctx)
                         return nil
                     end,
                 },
@@ -118,10 +118,10 @@ describe("tactics.menu.menu_manager", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    record_text = function(_svc, _data, _ctx, text)
+                    record_text = function(_svc, _ctx, text)
                         received_text = text
                     end,
-                    noop_handler = function(_svc, _data, _ctx)
+                    noop_handler = function(_svc, _ctx)
                         return nil
                     end,
                 },
@@ -147,7 +147,7 @@ describe("tactics.menu.menu_manager", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    noop_handler = function(_svc, _data, _ctx, _text)
+                    noop_handler = function(_svc, _ctx, _text)
                         return nil
                     end,
                 },
@@ -177,7 +177,7 @@ describe("tactics.menu.menu_manager", function()
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
                 handlers = {
-                    passthrough_handler = function(_svc, _data, _ctx, _text)
+                    passthrough_handler = function(_svc, _ctx, _text)
                         return true
                     end,
                 },
