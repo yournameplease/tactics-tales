@@ -1,9 +1,10 @@
 ---
 id: TASK-59
 title: Remove menu_data from MenuHandler signature; pass form values via value
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-05-03 05:20'
+updated_date: '2026-05-03 18:23'
 labels:
   - cleanup
   - lua
