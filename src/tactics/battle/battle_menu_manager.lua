@@ -485,6 +485,15 @@ HANDLERS["attack_unit"] = function(services, _menu_data, session_context, _value
     return nil
 end
 
+HANDLERS["attack_unit_at_tile"] = function(services, _menu_data, session_context, value)
+    local target_unit = services.battle_map:get_at_tile(value.point)
+    services.tactics_engine:handle_attack_unit(
+        session_context.acting_unit.unit,
+        target_unit
+    )
+    return nil
+end
+
 HANDLERS["handle_interaction"] = function(services, _menu_data, session_context, interaction)
     session_context.selected_script = {
         script_id = interaction.script_id,
@@ -759,8 +768,8 @@ return {
                             )
                         end,
                         button.builder("attack_unit")
-                            :handle_action("select", "store_attack_unit")
-                            :advance_to("CONFIRM_ATTACK")
+                            :handle_action("select", "attack_unit_at_tile")
+                            :as_final_step()
                     )
                     :with_tile_highlights(function(msb, ctx)
                         ---@cast msb BattleMenuContext
