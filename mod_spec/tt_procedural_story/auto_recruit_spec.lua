@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local auto_recruit       = require("tt_procedural_story.game_data.auto_recruit")
+local auto_recruit       = require("tt_procedural_campaign.game_data.auto_recruit")
 local auto_recruit_pending = auto_recruit.auto_recruit_pending
 
 local campaign_state = require("src.tactics.campaign.campaign_state")
@@ -9,9 +9,9 @@ local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })
 end
 
-describe("tt_procedural_story.auto_recruit", function()
+describe("tt_procedural_campaign.auto_recruit", function()
     describe("auto_recruit_pending", function()
-        it("clears pending_recruits in story memory", function()
+        it("clears pending_recruits in campaign memory", function()
             local mem = make_mem()
             mem:set("pending_recruits", campaign_state.list({ "turncoat_enemy" }))
             auto_recruit_pending(mem)

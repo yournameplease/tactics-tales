@@ -1,5 +1,5 @@
 local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
-local battles_meta     = include("mods/tt_procedural_story/game_data/battles_meta.lua")
+local battles_meta     = include("mods/tt_procedural_campaign/game_data/battles_meta.lua")
 
 --- Accumulate recruitment credits for this battle, roll pending recruit types,
 --- and write the results back to story memory.
@@ -8,7 +8,7 @@ local battles_meta     = include("mods/tt_procedural_story/game_data/battles_met
 --- over multiple battles. Spent credits are deducted (only the remainder is saved).
 ---
 ---@param archetype ArchetypeDefinition
----@param mem StoryMemory
+---@param mem CampaignMemory
 ---@param rng RngInstance
 ---@param template_id string Encounter template for this battle; used to look up eligible recruit types.
 ---@return string debug_text

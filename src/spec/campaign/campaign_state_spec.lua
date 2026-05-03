@@ -20,7 +20,7 @@ local function make_character_manager(id, name)
     }
 end
 
-describe("tactics.story.campaign_state", function()
+describe("tactics.campaign.campaign_state", function()
     describe("text", function()
         it("should create an entry with type 'text'", function()
             local entry = campaign_state.text("hello")

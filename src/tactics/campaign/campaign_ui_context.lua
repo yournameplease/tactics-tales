@@ -1,6 +1,6 @@
 ---@brief
---- Provides the UI context for story scenes, giving the UI rendering
---- system access to the current story state.
+--- Provides the UI context for campaign scenes, giving the UI rendering
+--- system access to the current campaign state.
 
 require("src.tactics.ui.ui_context")
 require("src.tactics.campaign.campaign_page")
@@ -17,7 +17,7 @@ local campaign_ui_context = {
     CampaignUIContext = CampaignUIContext,
 }
 
---- Create a new CampaignUIContext for the given story page and menu manager.
+--- Create a new CampaignUIContext for the given campaign page and menu manager.
 ---@param page CampaignPage
 ---@param menu_manager MenuManager
 ---@return CampaignUIContext

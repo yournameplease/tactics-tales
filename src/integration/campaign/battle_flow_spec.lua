@@ -1,7 +1,7 @@
 local luassert = require("luassert")
 local campaign_harness = require("src.integration.helpers.campaign_harness")
 
-describe("story battle flow #it", function()
+describe("campaign battle flow #it", function()
     local h
 
     after_each(function()
@@ -31,14 +31,14 @@ describe("story battle flow #it", function()
         end)
     end)
 
-    describe("battle_and_exit story", function()
-        it("story is not complete before finish_player_turn", function()
+    describe("battle_and_exit campaign", function()
+        it("campaign is not complete before finish_player_turn", function()
             h = campaign_harness.new()
             h:start_campaign("battle_and_exit")
             luassert.is_false(h:is_complete())
         end)
 
-        it("story is complete after finish_player_turn (victory path)", function()
+        it("campaign is complete after finish_player_turn (victory path)", function()
             h = campaign_harness.new()
             h:start_campaign("battle_and_exit")
             h:finish_player_turn()

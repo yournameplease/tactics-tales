@@ -48,7 +48,7 @@ local battle_manager = {
 ---@param chapter integer
 ---@param battle_id BattleId
 ---@param campaign_config CampaignConfig
----@param rng_context StoryRngContext?
+---@param rng_context CampaignRngContext?
 ---@param battle_config BattleConfig
 ---@param game_data GameData
 ---@param char_man CharacterManager

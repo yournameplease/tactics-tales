@@ -3,7 +3,7 @@ local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 --- Process pending recruits after a battle and clear the pending list.
 --- Initial implementation logs the list for debugging only; actual roster
 --- integration (turncoat capture, wanderer fallback) is a future extension.
----@param mem StoryMemory
+---@param mem CampaignMemory
 ---@return string debug_text
 local function auto_recruit_pending(mem)
     local pending_entry = mem:get("pending_recruits")

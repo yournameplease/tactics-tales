@@ -1,5 +1,5 @@
 ---@brief
---- Defines the UI layout for a story page.
+--- Defines the UI layout for a campaign page.
 
 local box = require("src.tactics.ui.box")
 local dialogue_node = require("src.tactics.ui.components.dialogue_node")

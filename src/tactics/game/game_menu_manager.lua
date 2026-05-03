@@ -22,7 +22,7 @@ local game_menu_manager = {}
 ---@type table<string, GameMenuHandler>
 local HANDLERS = {}
 
---- Advance from the title screen: go to main menu, or auto-start the default story in demo mode.
+--- Advance from the title screen: go to main menu, or auto-start the default campaign in demo mode.
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
@@ -57,7 +57,7 @@ HANDLERS["store_selected_save"] = function(_services, _menu_data, session_contex
     return nil
 end
 
---- Begin a story using the file name stored in session context.
+--- Begin a campaign using the file name stored in session context.
 ---@param services GameMenuContext
 ---@param menu_data table<string, string>
 ---@param session_context MainMenuContext
@@ -122,7 +122,7 @@ HANDLERS["sync_preset_from_options"] = function(services, menu_data, _ctx, _valu
     return menu_handler.then_deserialize(data)
 end
 
---- Load an existing story save by file name.
+--- Load an existing campaign save by file name.
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
@@ -133,7 +133,7 @@ HANDLERS["load_campaign"] = function(services, _menu_data, _session_context, fil
     return nil
 end
 
---- Begin a story chapter directly by story ID.
+--- Begin a campaign chapter directly by campaign ID.
 ---@param services GameMenuContext
 ---@param _menu_data table<string, any>
 ---@param _session_context MainMenuContext
@@ -257,7 +257,7 @@ local MENU_DATA = {
                                     :advance_to("CONFIRM_FILE")
                             else
                                 b = b:handle_action("select", "store_selected_save")
-                                    :advance_to("STORY_CONFIG")
+                                    :advance_to("CAMPAIGN_CONFIG")
                             end
                             table.insert(options, b)
                         end
@@ -281,7 +281,7 @@ local MENU_DATA = {
                             :with_text("Confirm overwrite " .. ctx.selected_file .. "?"))
                         table.insert(options, button.builder("confirm_overwrite")
                             :with_text("Confirm")
-                            :advance_to("STORY_CONFIG"))
+                            :advance_to("CAMPAIGN_CONFIG"))
                         table.insert(options, button.builder("no_overwrite")
                             :advance_to("NEW_FILE_SELECT")
                             :with_text("Back"))
@@ -318,7 +318,7 @@ local MENU_DATA = {
             :with_previous_step("MAIN_MENU")
             :with_action("BUTTON_A", { command = "select", description = "Select"})
             :with_action("BUTTON_B", { command = "back", description = "Back"}),
-            ["STORY_CONFIG"] = step_definition.of_node(
+            ["CAMPAIGN_CONFIG"] = step_definition.of_node(
                 list.column(
                     "confirm_file",
                     function(msb, ctx)

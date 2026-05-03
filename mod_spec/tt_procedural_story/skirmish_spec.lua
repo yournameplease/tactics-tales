@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local battles_mod = require("tt_procedural_story.game_data.battles")
+local battles_mod = require("tt_procedural_campaign.game_data.battles")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
@@ -16,8 +16,8 @@ local function make_rng_ctx(seed)
     return { battle_rng = random.new(seed or 1) }
 end
 
-local function skirmish(story_config, rng_ctx)
-    return battles_mod["skirmish"](story_config, rng_ctx or make_rng_ctx())
+local function skirmish(campaign_config, rng_ctx)
+    return battles_mod["skirmish"](campaign_config, rng_ctx or make_rng_ctx())
 end
 
 local function find_unit(battle_def, tile)
@@ -26,7 +26,7 @@ local function find_unit(battle_def, tile)
     end
 end
 
-describe("tt_procedural_story.battles skirmish", function()
+describe("tt_procedural_campaign.battles skirmish", function()
     it("declares recruit_slot tile label", function()
         local sc = make_sc(make_mem())
         local def = skirmish(sc)
@@ -71,7 +71,7 @@ describe("tt_procedural_story.battles skirmish", function()
         luassert.are_equal(0, #def.scripts)
     end)
 
-    it("works when memory is absent from story_config", function()
+    it("works when memory is absent from campaign_config", function()
         local sc = {}
         luassert.has_no_error(function()
             skirmish(sc)

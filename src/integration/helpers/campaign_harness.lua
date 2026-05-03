@@ -1,7 +1,7 @@
 ---@brief
---- Test harness for story flow integration tests.
---- Wires up a system slice (Story + TaskManager + EventBus) and provides
---- a simple API for driving story flows and asserting on stable outcomes.
+--- Test harness for campaign flow integration tests.
+--- Wires up a system slice (Campaign + TaskManager + EventBus) and provides
+--- a simple API for driving campaign flows and asserting on stable outcomes.
 
 local tasks            = require("src.tactics.systems.tasks")
 local event_bus_mod    = require("src.tactics.systems.event_bus")
@@ -9,7 +9,7 @@ local animation        = require("src.tactics.animation")
 local ui_ctx_mgr       = require("src.tactics.ui.ui_context_manager")
 local music_player     = require("src.tactics.music.music_player")
 local mod_loader_mod   = require("src.tactics.mods.mod_loader")
-local story_mod        = require("src.tactics.campaign.campaign")
+local campaign_mod        = require("src.tactics.campaign.campaign")
 local input_helper     = require("src.spec.input.input_helper")
 local sprite_fixtures       = require("src.integration.helpers.sprite_fixtures")
 local map_fetch_interceptor = require("src.integration.helpers.map_fetch_interceptor")
@@ -26,7 +26,7 @@ local TICK_LIMIT = 1000
 ---@field _game_data table
 ---@field _complete boolean
 ---@field _emitted table<string, table<string, any>[]>
----@field _story? table
+---@field _campaign? table
 ---@field _interceptor MapFetchInterceptor
 local CampaignHarness = {}
 CampaignHarness.__index = CampaignHarness
@@ -34,7 +34,7 @@ CampaignHarness.__index = CampaignHarness
 local campaign_harness = {}
 
 --- Create a new CampaignHarness backed by the test_base mod.
---- Pass overrides.campaigns to merge inline story definitions on top of test_base.
+--- Pass overrides.campaigns to merge inline campaign definitions on top of test_base.
 ---@param overrides? { campaigns?: table<string, any> }
 ---@return CampaignHarness
 function campaign_harness.new(overrides)
@@ -77,9 +77,9 @@ function campaign_harness.new(overrides)
         return original_emit(bus, event_type, args)
     end
 
-    self._story = nil
+    self._campaign = nil
 
-    -- Install fetch interceptor so story nodes that start battles can load maps.
+    -- Install fetch interceptor so campaign nodes that start battles can load maps.
     self._interceptor = map_fetch_interceptor.new()
     self._interceptor:register(
         "map/test_arena.map",
@@ -99,12 +99,12 @@ function campaign_harness.new(overrides)
     return self
 end
 
---- Create and start the named story, then tick to idle.
+--- Create and start the named campaign, then tick to idle.
 ---@param campaign_id string
 ---@param config? table
 function CampaignHarness:start_campaign(campaign_id, config)
-    assert(not self._story, "start_campaign() has already been called on this harness")
-    self._story = story_mod.new(
+    assert(not self._campaign, "start_campaign() has already been called on this harness")
+    self._campaign = campaign_mod.new(
         nil,
         campaign_id,
         config or {},
@@ -133,42 +133,42 @@ function CampaignHarness:tick_to_idle()
     until self._task_manager:is_idle()
 end
 
---- Feed one BUTTON_A press frame to the story, then tick to idle.
+--- Feed one BUTTON_A press frame to the campaign, then tick to idle.
 function CampaignHarness:confirm()
     local input = input_helper.joypad({ a = true, ap = true })
-    self._story:update(input)
+    self._campaign:update(input)
     self:tick_to_idle()
 end
 
---- Feed one directional input frame to the story, then tick to idle.
+--- Feed one directional input frame to the campaign, then tick to idle.
 ---@param dx integer Horizontal direction (-1, 0, or 1)
 ---@param dy integer Vertical direction (-1, 0, or 1)
 function CampaignHarness:dpad(dx, dy)
     -- dxp/dyp mirror dx/dy: each dpad() call is a fresh pressed-this-frame signal.
     local input = input_helper.joypad({ dx = dx, dy = dy, dxp = dx, dyp = dy })
-    self._story:update(input)
+    self._campaign:update(input)
     self:tick_to_idle()
 end
 
---- Return true if the story has reached exit_campaign.
+--- Return true if the campaign has reached exit_campaign.
 ---@return boolean
 function CampaignHarness:is_complete()
     return self._complete
 end
 
---- Return the node id the story is currently at.
+--- Return the node id the campaign is currently at.
 ---@return string
 function CampaignHarness:current_node_id()
-    assert(self._story, "start_campaign() has not been called")
-    return self._story.current_node.node_id
+    assert(self._campaign, "start_campaign() has not been called")
+    return self._campaign.current_node.node_id
 end
 
 --- Return the CampaignState entry for key, or nil if not set.
 ---@param key string
 ---@return table?
 function CampaignHarness:memory(key)
-    assert(self._story, "start_campaign() has not been called")
-    return self._story.campaign_state:get(key)
+    assert(self._campaign, "start_campaign() has not been called")
+    return self._campaign.campaign_state:get(key)
 end
 
 --- Return all event payloads emitted for the given event type.
@@ -181,22 +181,22 @@ end
 --- Return the living characters in the player roster.
 ---@return Character[]
 function CampaignHarness:player_roster()
-    assert(self._story, "start_campaign() has not been called")
-    return self._story.character_manager:get_player_roster()
+    assert(self._campaign, "start_campaign() has not been called")
+    return self._campaign.character_manager:get_player_roster()
 end
 
---- Return the current StoryResults from the story's stats service.
----@return StoryResults
-function CampaignHarness:story_results()
-    assert(self._story, "start_campaign() has not been called")
-    return self._story.stats_service.story_results
+--- Return the current CampaignResults from the campaign's stats service.
+---@return CampaignResults
+function CampaignHarness:campaign_results()
+    assert(self._campaign, "start_campaign() has not been called")
+    return self._campaign.stats_service.campaign_results
 end
 
 --- Return the topmost RenderedGameResults node, or nil if the top node is not game_results.
 ---@return RenderedGameResults?
 function CampaignHarness:game_results_node()
-    assert(self._story, "start_campaign() has not been called")
-    local nodes = self._story.campaign_page.nodes
+    assert(self._campaign, "start_campaign() has not been called")
+    local nodes = self._campaign.campaign_page.nodes
     local top = nodes[#nodes]
     if top and top.type == "game_results" then
         ---@cast top RenderedGameResults
@@ -213,7 +213,7 @@ function CampaignHarness:register_map_fetch(path, fetch_data)
 end
 
 --- Emit TACTICS_FINISH_SIDE_ACTIONS (end the player turn) and tick to idle.
---- Only meaningful when a battle is active within the story.
+--- Only meaningful when a battle is active within the campaign.
 function CampaignHarness:finish_player_turn()
     self._event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {})
     self:tick_to_idle()

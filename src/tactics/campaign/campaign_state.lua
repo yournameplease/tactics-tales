@@ -1,6 +1,6 @@
 ---@brief
---- A key-value store for story variables, allowing data to be
---- persisted and used across different story nodes.
+--- A key-value store for campaign variables, allowing data to be
+--- persisted and used across different campaign nodes.
 
 ---@alias CampaignStateEntryType "text"|"character"|"map"|"list"
 

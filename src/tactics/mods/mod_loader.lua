@@ -150,7 +150,7 @@ function ModLoader:load_mod_data()
         nil
     )
     log.debug("Loading campaigns...")
-    local story_data = load_mod_map(
+    local campaign_data = load_mod_map(
         self.registered,
         function(mod) return mod.spec.content.campaigns end,
         function(spec) return spec.data end
@@ -168,7 +168,7 @@ function ModLoader:load_mod_data()
     end
     if campaign_select == nil then
         campaign_select = {}
-        for id in pairs(story_data) do
+        for id in pairs(campaign_data) do
             table.insert(campaign_select, id)
         end
     end
@@ -177,7 +177,7 @@ function ModLoader:load_mod_data()
     end
 
     game_data.campaigns = {
-        data = story_data,
+        data = campaign_data,
         default_campaign = default_campaign,
         campaign_select = campaign_select,
     }

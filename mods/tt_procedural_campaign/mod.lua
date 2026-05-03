@@ -1,6 +1,6 @@
 return {
-    id = "tt_procedural_story",
-    name = "Tactics Tales: Procedural Story",
+    id = "tt_procedural_campaign",
+    name = "Tactics Tales: Procedural Campaign",
     description = "A procedurally generated run built from archetype-driven encounter sequences.",
     version = "0.1.0",
 
@@ -11,7 +11,7 @@ return {
         battles  = "game_data/battles",
         campaigns       = "game_data/campaigns",
         -- items and characters inherited from tt_fantasy_demo_story
-        default_campaign = "proc_story",
-        campaign_select  = { "proc_story" },
+        default_campaign = "proc_campaign",
+        campaign_select  = { "proc_campaign" },
     },
 }

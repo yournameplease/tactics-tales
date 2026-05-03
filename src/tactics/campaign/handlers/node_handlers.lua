@@ -1,4 +1,4 @@
--- Handlers access Story @field package fields; Campaign fields are package-scoped to
+-- Handlers access Campaign @field package fields; Campaign fields are package-scoped to
 -- src/tactics/campaign/ but handlers live in the subdirectory handlers/.
 ---@diagnostic disable: invisible
 local save_system = require("src.tactics.save.save_system")
@@ -27,7 +27,7 @@ local function text_input_update(campaign, input)
     campaign.menu_manager:update(input)
 end
 
----@type table<CampaignNodeType, StoryNodeHandler>
+---@type table<CampaignNodeType, CampaignNodeHandler>
 local HANDLERS = {
 
     -- ── Logic-only / auto-advance ────────────────────────────────────────
@@ -130,7 +130,7 @@ local HANDLERS = {
 
     text = {
         enter = function(campaign, node)
-            ---@cast node StoryTextNode
+            ---@cast node CampaignTextNode
             local map = campaign.campaign_state:get_as_map()
             for k, v in pairs(campaign.stats_service:get_as_map()) do map[k] = v end
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
@@ -159,7 +159,7 @@ local HANDLERS = {
                     campaign_node_step = campaign.current_node.node_step + 1,
                     campaign_state = campaign.campaign_state,
                     roster = campaign.character_manager:get_player_roster(),
-                    stats = campaign.stats_service.story_results,
+                    stats = campaign.stats_service.campaign_results,
                     campaign_config = campaign.campaign_config,
                     campaign_seed = campaign.campaign_seed,
                     campaign_rng_state = campaign.campaign_rng:get_state(),
@@ -316,7 +316,7 @@ local HANDLERS = {
 
     game_results = {
         enter = function(campaign)
-            local results = campaign.stats_service.story_results
+            local results = campaign.stats_service.campaign_results
 
             -- Build chapter display pages
             local chapter_pages = {}
@@ -371,18 +371,18 @@ local HANDLERS = {
             if node.section == "chapters" then
                 if node.page < #node.chapter_pages then
                     node.page = node.page + 1
-                    campaign.campaign_page.story_revision = campaign.campaign_page.story_revision + 1
+                    campaign.campaign_page.campaign_revision = campaign.campaign_page.campaign_revision + 1
                 elseif #node.unit_pages > 0 then
                     node.section = "units"
                     node.page = 1
-                    campaign.campaign_page.story_revision = campaign.campaign_page.story_revision + 1
+                    campaign.campaign_page.campaign_revision = campaign.campaign_page.campaign_revision + 1
                 else
                     campaign:advance_node()
                 end
             else
                 if node.page < #node.unit_pages then
                     node.page = node.page + 1
-                    campaign.campaign_page.story_revision = campaign.campaign_page.story_revision + 1
+                    campaign.campaign_page.campaign_revision = campaign.campaign_page.campaign_revision + 1
                 else
                     campaign:advance_node()
                 end

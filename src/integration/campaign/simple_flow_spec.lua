@@ -1,7 +1,7 @@
 local luassert = require("luassert")
 local campaign_harness = require("src.integration.helpers.campaign_harness")
 
-describe("story flow #it", function()
+describe("campaign flow #it", function()
     describe("simple_exit", function()
         it("should complete immediately on start", function()
             local h = campaign_harness.new()
@@ -77,7 +77,7 @@ describe("story flow #it", function()
     end)
 
     describe("single_node_source", function()
-        it("should complete when node entry is a bare StoryNode (not wrapped in array)", function()
+        it("should complete when node entry is a bare CampaignNode (not wrapped in array)", function()
             local h = campaign_harness.new({
             campaigns = {
                     single_node_source = {

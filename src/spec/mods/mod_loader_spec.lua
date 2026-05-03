@@ -140,7 +140,7 @@ describe("mod_loader", function()
     end)
 
     describe("load_mod_data", function()
-        it("defaults campaign_select to all story ids when omitted from content", function()
+        it("defaults campaign_select to all campaign ids when omitted from content", function()
             -- Given
             make_fs_with_mod({ campaign_select = false })
             local loader = mod_loader.new()

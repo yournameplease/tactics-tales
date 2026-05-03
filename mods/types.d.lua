@@ -14,8 +14,8 @@
 ---@field campaigns? string
 ---@field characters? string
 ---@field items? string
----@field campaign_select? string[]  Ordered list of story IDs shown in Chapter Select. Defaults to all stories.
----@field default_campaign? string   Story ID used when starting a new file. Required on at least one mod.
+---@field campaign_select? string[]  Ordered list of campaign IDs shown in Chapter Select. Defaults to all stories.
+---@field default_campaign? string   Campaign ID used when starting a new file. Required on at least one mod.
 
 -- Returned by game_data/maps.lua
 ---@alias ModMapsModule table<string, MapDefinition>
