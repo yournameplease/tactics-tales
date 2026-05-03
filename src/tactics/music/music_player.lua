@@ -8,6 +8,11 @@ MusicPlayer.__index = MusicPlayer
 
 local music_player = {}
 
+---@return integer The current music volume, from 0 - 100%
+local function current_music_volume()
+    return DYNAMIC_CONFIG.music_volume * DYNAMIC_CONFIG.master_volume
+end
+
 --- Create and return a new MusicPlayer.
 ---@return MusicPlayer
 function music_player.new()
@@ -22,7 +27,9 @@ end
 ---@param offset integer
 function MusicPlayer:set_music(track, offset)
     self.current_track = track
-    music(track, nil, nil, nil, offset)
+    if current_music_volume() > 0 then
+        music(track, nil, nil, nil, offset)
+    end
 end
 
 --- Play a new track, saving the current playback position for later resume.
@@ -30,13 +37,17 @@ end
 ---@param offset integer
 function MusicPlayer:push_music(track, offset)
     self.current_offset = stat(466) or 0
-    music(track, nil, nil, nil, offset)
+    if current_music_volume() > 0 then
+        music(track, nil, nil, nil, offset)
+    end
 end
 
 --- Resume the previously playing track at its saved offset.
 ---@param fade_time integer
 function MusicPlayer:resume_music(fade_time)
-    music(self.current_track, fade_time, nil, nil, self.current_offset)
+    if current_music_volume() > 0 then
+        music(self.current_track, fade_time, nil, nil, self.current_offset)
+    end
 end
 
 --- Stop all music.
