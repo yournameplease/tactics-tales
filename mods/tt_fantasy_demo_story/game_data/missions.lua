@@ -28,7 +28,7 @@ local function escape(tile_tag)
 end
 
 
----@type ModBattlesModule
+---@type ModMissionsModule
 local BATTLE_DATA = {
     ["bandit_village"] = function(campaign_config)
         local turn_limits = {

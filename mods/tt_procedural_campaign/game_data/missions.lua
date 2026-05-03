@@ -39,7 +39,7 @@ local function get_tier(campaign_config)
     return tonumber(mem_text(campaign_config, "base_difficulty")) or 1
 end
 
----@type ModBattlesModule
+---@type ModMissionsModule
 local battles = {
     ["skirmish"] = function(campaign_config, rng_context)
         local faction  = get_faction(campaign_config)

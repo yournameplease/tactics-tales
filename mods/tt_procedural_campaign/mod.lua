@@ -8,7 +8,7 @@ return {
 
     content = {
         maps     = "game_data/maps",
-        battles  = "game_data/battles",
+        missions = "game_data/missions",
         campaigns       = "game_data/campaigns",
         -- items and characters inherited from tt_fantasy_demo_story
         default_campaign = "proc_campaign",

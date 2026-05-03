@@ -81,7 +81,7 @@ function battle_manager.new(
     self.character_manager = char_man
     self.music_player = music_player
 
-    local battle_def = game_data.battles[battle_id](campaign_config, rng_context)
+    local battle_def = game_data.missions[battle_id](campaign_config, rng_context)
     local map_def = game_data.maps[battle_def.map_id]
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels)
     log.debug("Generated battle map with size "..self.battle_map.width.."x"..self.battle_map.height..".")

@@ -135,7 +135,7 @@ end
 ---@param name string
 ---@param text string
 ---@param battle_id BattleId
----@return BattleDefinition
+---@return MissionDefinition
 function campaigns.chapter_debug(
 	roster_units,
 	name,
