@@ -3,9 +3,10 @@ id: TASK-64
 title: >-
   Align battle/mission terminology — rename BattleDefinition to
   MissionDefinition
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-03 19:24'
+updated_date: '2026-05-03 23:06'
 labels: []
 milestone: m-12
 dependencies: []
@@ -20,11 +21,11 @@ The domain model defines **Mission** as "the authored setup for a single battle,
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 mod_schema.lua uses 'missions' key
-- [ ] #2 game_data.lua GameData type uses missions field
-- [ ] #3 All mods renamed game_data/battles.lua to game_data/missions.lua (or key updated)
-- [ ] #4 LuaCATS types updated throughout
-- [ ] #5 Tests pass
+- [x] #1 mod_schema.lua uses 'missions' key
+- [x] #2 game_data.lua GameData type uses missions field
+- [x] #3 All mods renamed game_data/battles.lua to game_data/missions.lua (or key updated)
+- [x] #4 LuaCATS types updated throughout
+- [x] #5 Tests pass
 <!-- AC:END -->
 
 ## Definition of Done

@@ -1,9 +1,10 @@
 ---
 id: TASK-65
 title: Add base/lib/battle.lua — shared battle data factories
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-03 19:24'
+updated_date: '2026-05-03 19:54'
 labels: []
 milestone: m-12
 dependencies: []
@@ -18,15 +19,15 @@ Three mods independently redefine `character_source.template()`, `character_sour
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 base/lib/battle.lua (or equivalent) registered in mod sandbox
-- [ ] #2 character_source, victory, failure constructors available via lib.libs.battle
-- [ ] #3 AI preset table standardized and shared
-- [ ] #4 Local copies removed from all mods
-- [ ] #5 Tests pass
+- [x] #1 base/lib/battle.lua (or equivalent) registered in mod sandbox
+- [x] #2 character_source, victory, failure constructors available via lib.libs.battle
+- [x] #3 AI preset table standardized and shared
+- [x] #4 Local copies removed from all mods
+- [x] #5 Tests pass
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->

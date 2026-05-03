@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local battles_mod = require("tt_procedural_campaign.game_data.battles")
+local battles_mod = require("tt_procedural_campaign.game_data.missions")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
@@ -26,7 +26,7 @@ local function find_unit(battle_def, tile)
     end
 end
 
-describe("tt_procedural_campaign.battles skirmish", function()
+describe("tt_procedural_campaign.missions skirmish", function()
     it("declares recruit_slot tile label", function()
         local sc = make_sc(make_mem())
         local def = skirmish(sc)
