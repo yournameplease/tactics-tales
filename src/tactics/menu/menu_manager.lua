@@ -564,7 +564,7 @@ function BaseMenuManager:update(input)
                 self.game_ctx,
                 self:serialize().node.data,
                 self.menu_ctx,
-                signal.value
+                signal.value ~= nil and signal.value or ser.node.data
             )
             if handler_res then
                 if handler_res.type == "navigate" then

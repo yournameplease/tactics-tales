@@ -121,8 +121,8 @@ local MENU_DATA = {
             ["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
                 return menu_manager.menu_handler.then_deserialize(random_appearance())
             end,
-            ["create_character"] = function(services, menu_data, _session_context, _value)
-                services.handle_create_character(menu_data)
+            ["create_character"] = function(services, _menu_data, _session_context, value)
+                services.handle_create_character(value)
                 return nil
             end,
         },
