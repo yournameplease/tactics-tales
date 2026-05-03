@@ -13,6 +13,9 @@ local point = require("src.tactics.util.point")
 local pathfinding = require("src.tactics.battle.pathfinding")
 
 ---@class BattleMenuManager : MenuManager
+
+---@alias BattleMenuHandler MenuHandler<BattleMenuContext>
+
 local BattleMenuManager = {}
 BattleMenuManager.__index = BattleMenuManager
 
@@ -162,6 +165,7 @@ local function get_single_unit_interaction(target_point, valid_tiles, acting_uni
     return found
 end
 
+---@type table<string, BattleMenuHandler>
 local HANDLERS = {}
 
 HANDLERS["select_swap_unit"] = function(services, _menu_data, session_context, value)

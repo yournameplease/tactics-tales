@@ -17,7 +17,9 @@ local game_menu_manager = {}
 ---@class MainMenuContext : MenuContext
 ---@field selected_file string The save file name chosen by the player for overwrite confirmation.
 
----@type table<string, MenuHandler>
+---@alias GameMenuHandler MenuHandler<GameMenuContext>
+
+---@type table<string, GameMenuHandler>
 local HANDLERS = {}
 
 --- Advance from the title screen: go to main menu, or auto-start the default story in demo mode.

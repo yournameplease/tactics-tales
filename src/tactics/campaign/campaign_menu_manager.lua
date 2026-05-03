@@ -111,7 +111,9 @@ local function menu_definition_for_character_select()
             :with_action("BUTTON_A", { command = "select", description = "Select" })
 end
 
----@type table<string, MenuHandler>
+---@alias CampaignMenuHandler MenuHandler<StoryMenuServices>
+
+---@type table<string, CampaignMenuHandler>
 local HANDLERS = {}
 
 HANDLERS["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
@@ -119,20 +121,17 @@ HANDLERS["randomize_appearance"] = function(_services, _menu_data, _session_cont
 end
 
 HANDLERS["create_character"] = function(services, menu_data, _session_context, _value)
-    ---@cast services StoryMenuServices
     services.handle_create_character(menu_data)
     return nil
 end
 
 HANDLERS["submit_text"] = function(services, _menu_data, session_context, _value)
-    ---@cast services StoryMenuServices
     ---@cast session_context KeyboardMenuContext
     services.handle_submit_text(session_context.keyboard_content)
     return nil
 end
 
 HANDLERS["select_option"] = function(services, _menu_data, _session_context, value)
-    ---@cast services StoryMenuServices
     services.handle_select_option(value)
     return nil
 end
