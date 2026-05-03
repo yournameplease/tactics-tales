@@ -93,9 +93,15 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field ox integer
 ---@field oy integer
 
+---@class AvoidRect
+---@field x integer World-pixel x (relative to anchor node origin).
+---@field y integer World-pixel y (relative to anchor node origin).
+---@field w integer
+---@field h integer
+
 ---@class ModalInfo
 ---@field current_key fun(ctx: UIContextManager): any
----@field compute fun(ctx: UIContextManager): UIElement, Anchor
+---@field compute fun(ctx: UIContextManager): UIElement?, Anchor?, AvoidRect[]?
 ---@field priorities CardinalDirection[]
 ---@field anchor_margin integer
 ---@field screen_padding integer
@@ -106,6 +112,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field last_key any
 ---@field active boolean
 ---@field anchor Anchor
+---@field avoid_rects? AvoidRect[]
 ---@field anchor_node? UIElement Cached anchor node to avoid repeated tree searches.
 
 ---@class UIElement
@@ -418,7 +425,7 @@ end
 
 ---@class ModalInfoOptions
 ---@field current_key? fun(ctx: UIContextManager): any
----@field compute? fun(ctx: UIContextManager): UIElement, Anchor
+---@field compute? fun(ctx: UIContextManager): UIElement?, Anchor?, AvoidRect[]?
 ---@field priorities? CardinalDirection[]
 ---@field anchor_margin? integer
 ---@field screen_padding? integer
@@ -429,6 +436,7 @@ end
 ---@field last_key? any
 ---@field active? boolean
 ---@field anchor? Anchor
+---@field avoid_rects? AvoidRect[]
 ---@field anchor_node? UIElement Cached anchor node to avoid repeated tree searches.
 
 --- Configure modal positioning for the element.
@@ -1001,6 +1009,7 @@ end
 --- Resolve the modal's position relative to its anchor node using priority-ordered placement.
 function Box:resolve_modal_position()
     local priorities = self.modal.priorities or {}
+    local avoid_rects = self.modal.avoid_rects
 
     local r_w = self.rect.w
     local r_h = self.rect.h
@@ -1017,42 +1026,72 @@ function Box:resolve_modal_position()
     local screen_padding = self.modal.screen_padding or 0
     local total_margin = anchor_margin + screen_padding
 
-    local d_x = 0
-    local d_y = 0
-
-    for _, p in ipairs(priorities) do
+    local function candidate(p)
         if p == "left" then
             if a_x - s_x >= r_w + total_margin then
-                d_x = a_x - anchor_margin - r_w
-                d_y = a_y - (r_h >> 1)
-                break
+                return a_x - anchor_margin - r_w, a_y - (r_h >> 1)
             end
         elseif p == "right" then
             if s_x + s_w - a_x >= r_w + total_margin then
-                d_x = a_x + anchor_margin
-                d_y = a_y - (r_h >> 1)
-                break
+                return a_x + anchor_margin, a_y - (r_h >> 1)
             end
         elseif p == "up" then
             if a_y - s_y >= r_h + total_margin then
-                d_x = a_x - (r_w >> 1)
-                d_y = a_y - anchor_margin - r_h
-                break
+                return a_x - (r_w >> 1), a_y - anchor_margin - r_h
             end
         elseif p == "down" then
             if s_y + s_h - a_y >= r_h + total_margin then
-                d_x = a_x - (r_w >> 1)
-                d_y = a_y + anchor_margin
-                break
+                return a_x - (r_w >> 1), a_y + anchor_margin
+            end
+        end
+        return nil, nil
+    end
+
+    local function clamp(dx, dy)
+        dx = math.max(s_x + screen_padding, dx)
+        dx = math.min(dx, s_x + s_w - r_w - screen_padding)
+        dy = math.max(s_y + screen_padding, dy)
+        dy = math.min(dy, s_y + s_h - r_h - screen_padding)
+        return dx, dy
+    end
+
+    local function overlaps_any_avoid(dx, dy)
+        if not avoid_rects then return false end
+        for _, ar in ipairs(avoid_rects) do
+            local ar_x = s_x + ar.x
+            local ar_y = s_y + ar.y
+            if not (dx + r_w <= ar_x or ar_x + ar.w <= dx or dy + r_h <= ar_y or ar_y + ar.h <= dy) then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Pass 1: prefer a direction that fits and doesn't cover any avoid rect.
+    if avoid_rects and #avoid_rects > 0 then
+        for _, p in ipairs(priorities) do
+            local cx, cy = candidate(p)
+            if cx ~= nil then
+                local clamped_x, clamped_y = clamp(cx, cy)
+                if not overlaps_any_avoid(clamped_x, clamped_y) then
+                    self:apply_layout(clamped_x, clamped_y, s_w, s_h, true)
+                    return
+                end
             end
         end
     end
 
-    d_x = math.max(s_x + screen_padding, d_x)
-    d_x = math.min(d_x, s_x + s_w - r_w - screen_padding)
-    d_y = math.max(s_y + screen_padding, d_y)
-    d_y = math.min(d_y, s_y + s_h - r_h - screen_padding)
+    -- Pass 2: fall back to first direction that fits spatially.
+    local d_x, d_y = 0, 0
+    for _, p in ipairs(priorities) do
+        local cx, cy = candidate(p)
+        if cx ~= nil and cy ~= nil then
+            d_x, d_y = cx, cy
+            break
+        end
+    end
 
+    d_x, d_y = clamp(d_x, d_y)
     self:apply_layout(d_x, d_y, s_w, s_h, true)
 end
 
@@ -1064,7 +1103,7 @@ function Box:recalculate_modal(state, root)
 
     local current_key = self.modal.current_key(state)
     if current_key ~= self.modal.last_key then
-        local node, new_anchor = self.modal.compute(state)
+        local node, new_anchor, avoid_rects = self.modal.compute(state)
 
         if node == nil then
             self.modal.active = false
@@ -1072,8 +1111,12 @@ function Box:recalculate_modal(state, root)
             self.modal.active = true
             self.children = {}
             self:add(node)
+            assert(new_anchor ~= nil)
             self.modal.anchor = new_anchor
             self.modal.anchor_node = root:find_node_by_id(new_anchor.target)
+            -- Computed once on open; staleness is acceptable since units don't
+            -- move while a dialogue or action menu is visible.
+            self.modal.avoid_rects = avoid_rects
         end
         self.modal.last_key = current_key
     end

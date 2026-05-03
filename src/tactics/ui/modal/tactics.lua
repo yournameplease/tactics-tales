@@ -21,11 +21,11 @@ end
 
 --- Compute the dialogue modal element and anchor for the current dialogue.
 ---@param state UIContextManager
----@return UIElement?, Anchor?
+---@return UIElement?, Anchor?, AvoidRect[]?
 local function compute_dialogue_modal(state)
     log.debug("Computing dialogue menu modal")
     if state.battle_context.active_dialogue == nil then
-        return nil, nil
+        return nil, nil, nil
     end
 
     local unit = state.battle_context.active_dialogue.speaking_unit
@@ -50,7 +50,19 @@ local function compute_dialogue_modal(state)
         oy = y,
     }
 
-    return node, anchor
+    local avoid_rects = {}
+    for _, u in ipairs(state.battle_context.battle_map:get_all_units()) do
+        if u ~= unit then
+            table.insert(avoid_rects, {
+                x = u.tile.x * TILE_WIDTH,
+                y = u.tile.y * TILE_HEIGHT,
+                w = TILE_WIDTH,
+                h = TILE_HEIGHT,
+            })
+        end
+    end
+
+    return node, anchor, avoid_rects
 end
 
 --- Build and return the tactics dialogue modal box.
@@ -89,13 +101,13 @@ end
 
 --- Compute the action menu modal element and anchor for the current menu step.
 ---@param state UIContextManager
----@return UIElement?, Anchor?
+---@return UIElement?, Anchor?, AvoidRect[]?
 local function compute_action_menu_modal(state)
     log.debug("Computing action menu modal")
     local menu = state.battle_context.battle_menu_manager
     local menu_step = menu.menu_step
     if menu_step == nil then
-        return nil, nil
+        return nil, nil, nil
     end
 
     local cursor = menu_step.node
@@ -105,7 +117,7 @@ local function compute_action_menu_modal(state)
     local y = 0
 
     if cursor == nil or cursor.type ~= "list" then
-        return nil, nil
+        return nil, nil, nil
     end
     x = math.floor((cursor_tile.x + 0.5) * TILE_SIZE.x)
     y = math.floor((cursor_tile.y + 0.5) * TILE_SIZE.y)
@@ -127,7 +139,20 @@ local function compute_action_menu_modal(state)
         oy = y,
     }
 
-    return node, anchor
+    local acting_unit = state.battle_context.acting_unit
+    local avoid_rects = {}
+    for _, u in ipairs(state.battle_context.battle_map:get_all_units()) do
+        if u ~= acting_unit then
+            table.insert(avoid_rects, {
+                x = u.tile.x * TILE_WIDTH,
+                y = u.tile.y * TILE_HEIGHT,
+                w = TILE_WIDTH,
+                h = TILE_HEIGHT,
+            })
+        end
+    end
+
+    return node, anchor, avoid_rects
 end
 
 --- Build and return the tactics action menu modal box.
