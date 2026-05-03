@@ -169,11 +169,28 @@ end
 ---@field sprites table<AnimationFrameName, table<FacingVertical, userdata>> Pre-rendered sprites keyed by frame and vertical facing.
 ---@field character Character The underlying persistent character.
 
+---@class DrawableCharacter : DrawableCharacterInstance
+
+---@param char Character
+---@param side Side
+---@param facing_dir Facing
+---@return DrawableCharacter
+local function create_drawable_unit(char, side, facing_dir)
+    ---@diagnostic disable-next-line missing-fields
+    return {
+        character = char,
+        side = side,
+        facing = facing_dir,
+        sprites = {},
+    }
+end
+
 local character = {
     facing = facing,
     Facing = Facing,
     CharacterAppearance = CharacterAppearance,
     Character = Character,
+    create_drawable_unit = create_drawable_unit,
 }
 
 return character
