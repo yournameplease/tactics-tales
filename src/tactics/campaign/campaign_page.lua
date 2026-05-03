@@ -2,7 +2,6 @@
 --- Represents the current visible state of a story scene.
 --- It holds the collection of nodes (text, menus) to be rendered.
 
-local drawable_character = require("src.tactics.campaign.drawable_character")
 local character = require("src.tactics.character.object.character")
 
 ---@alias RenderedCampaignNodeType "text"|"character_customization"|"text_input"|"chapter_header"|"game_results"|"select_option"
@@ -99,7 +98,7 @@ function rendered_story_node.character_customization(base_character, key, anim)
     local node = {
         type = 'character_customization',
         key = key,
-        character = drawable_character.create_drawable_unit(
+        character = character.create_drawable_unit(
             base_character,
             "player",
             character.facing.of("left")

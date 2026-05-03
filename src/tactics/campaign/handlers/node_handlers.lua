@@ -5,7 +5,6 @@ local save_system = require("src.tactics.save.save_system")
 local random = require("src.tactics.util.random")
 local battle_manager_module = require("src.tactics.battle.battle_manager")
 local campaign_state = require("src.tactics.campaign.campaign_state")
-local drawable_character = require("src.tactics.campaign.drawable_character")
 local character = require("src.tactics.character.object.character")
 
 ---@param campaign Campaign
@@ -350,7 +349,7 @@ local HANDLERS = {
                         end
                     end
                 end
-                local drawable = drawable_character.create_drawable_unit(
+                local drawable = character.create_drawable_unit(
                     unit, "player", character.facing.of("left")
                 )
                 drawable.animation_data = campaign.idle_animation

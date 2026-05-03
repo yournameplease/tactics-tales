@@ -8,13 +8,19 @@ local HANDLERS = require("src.tactics.campaign.handlers.node_handlers")
 local campaign_menu_manager = require("src.tactics.campaign.campaign_menu_manager")
 local character_manager = require("src.tactics.character.character_manager")
 local stats_service = require("src.tactics.campaign.statistics.stats_service")
-local campaign_menu_context = require("src.tactics.campaign.campaign_menu_context")
 local campaign_ui_context = require("src.tactics.campaign.campaign_ui_context")
 local campaign_page = require("src.tactics.campaign.campaign_page")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
+
+---@class StoryMenuServices : GameContext
+---@field character_appearance? table<string, string> Map from CharacterAppearanceKey to current value; set before opening the character creation menu.
+---@field handle_create_character fun(appearance: table<string, string>) Callback invoked when the player confirms character creation.
+---@field handle_submit_text fun(text: string) Callback invoked when the player submits text input.
+---@field selection_options? SelectOptionEntry[] Options for the active select_option node; set before opening the selection menu.
+---@field handle_select_option fun(option_id: string) Callback invoked when the player confirms an option selection.
 
 ---@class BattleServicesBundle Services needed to create a battle.
 ---@field task_manager TaskManager
@@ -44,7 +50,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package campaign_page CampaignPage
 ---@field package campaign_state CampaignState
 ---@field package character_manager CharacterManager
----@field package campaign_menu_context CampaignMenuServices
+---@field package campaign_menu_context StoryMenuServices
 ---@field package menu_manager MenuManager
 ---@field package stats_service StatsService
 ---@field package current_node ActiveNode
@@ -271,11 +277,12 @@ function campaign.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
-    self.campaign_menu_context = campaign_menu_context.new(
-        function(appearance) self:create_character(appearance) end,
-        function(text) self:submit_text(text) end,
-        function(option_id) self:select_option(option_id) end
-    )
+    ---@type StoryMenuServices
+    self.campaign_menu_context = {
+        handle_create_character = function(appearance) self:create_character(appearance) end,
+        handle_submit_text = function(text) self:submit_text(text) end,
+        handle_select_option = function(option_id) self:select_option(option_id) end,
+    }
     self.campaign_state = campaign_state.new(self.character_manager)
     -- Expose live memory to all factory functions (node and battle factories).
     -- Campaign-level factories use campaign_config.memory:get()/set(); the plain

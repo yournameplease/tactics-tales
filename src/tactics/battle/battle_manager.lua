@@ -10,8 +10,15 @@ local battle_ui_context = require("src.tactics.battle.battle_ui_context")
 local turn_manager = require("src.tactics.battle.turn_manager")
 local ai_engine = require("src.tactics.battle.tactics.ai_engine")
 local battle_objective_service = require("src.tactics.battle.battle_objective_service")
-local battle_menu_context = require("src.tactics.battle.battle_menu_context")
 local script_manager = require("src.tactics.battle.scripts.script_manager")
+
+---@class BattleMenuContext : GameContext
+---@field deployment_tiles_tag string Tag identifying tiles available for unit deployment.
+---@field battle_map BattleMap
+---@field tactics_engine TacticsEngine
+---@field handle_start_battle fun() Callback invoked when the player starts the battle.
+---@field handle_end_turn fun() Callback invoked when the player ends their turn.
+---@field tutorial_mode boolean When true, hides Wait and End Turn to force scripted actions.
 
 ---@class BattleConfig
 ---@field permadeath boolean
@@ -125,13 +132,15 @@ function battle_manager.new(
         })
     end
 
-    local battle_menu_ctx = battle_menu_context.new(
-        self.battle_map,
-        self.tactics_engine,
-        battle_def.deployment and battle_def.deployment.deployment_tiles_tag or nil,
-        begin_battle,
-        function() event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {}) end
-    )
+    ---@type BattleMenuContext
+    local battle_menu_ctx = {
+        battle_map = self.battle_map,
+        tactics_engine = self.tactics_engine,
+        deployment_tiles_tag = battle_def.deployment and battle_def.deployment.deployment_tiles_tag or nil,
+        handle_start_battle = begin_battle,
+        handle_end_turn = function() event_bus:emit("TACTICS_FINISH_SIDE_ACTIONS", {}) end,
+        tutorial_mode = false,
+    }
     self.script_manager.battle_menu_ctx = battle_menu_ctx
     self.battle_menu_manager = battle_menu_manager.new(
         battle_menu_ctx,
