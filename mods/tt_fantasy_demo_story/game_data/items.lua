@@ -78,29 +78,29 @@ end
 
 ---@type ModItemsModule
 local ITEM_DATA = {
-    dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1 ),
-    sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1 ),
+    dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1, nil, "1 range" ),
+    sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1, nil, "1 range" ),
     axe = lib.libs.weapon.melee( "Axe", 98, 2, 100, 1, {
             lib.libs.weapon.effect.shieldkiller()
-        }
+        }, "1 range"
     ),
     spear = lib.libs.weapon.melee( "Spear", 99, 1, 100, 1, {
             lib.libs.weapon.effect.long_reach()
-        }
+        }, "1 range"
     ),
     poleaxe = lib.libs.weapon.melee( "Poleaxe", 100, 2, 100, 1, {
             lib.libs.weapon.effect.long_reach(),
             lib.libs.weapon.effect.shieldkiller()
-        }
+        }, "1 range"
     ),
-    club = lib.libs.weapon.melee( "Club", 101, 1, 100, 1),
+    club = lib.libs.weapon.melee( "Club", 101, 1, 100, 1, nil, "1 range" ),
     mace = lib.libs.weapon.melee( "Mace", 102, 2, 100, 1, {
             lib.libs.weapon.effect.armorkiller(),
             lib.libs.weapon.effect.shieldkiller()
-        }
+        }, "1 range"
     ),
-    greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 100, 2),
-    bow = lib.libs.weapon.ranged( "Bow", 104, 2, 100, 2, 2, 2 ),
+    greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 100, 2, nil, "1 range" ),
+    bow = lib.libs.weapon.ranged( "Bow", 104, 2, 100, 2, 2, 2, nil, "2 range" ),
     shield = shield("Shield", 105, 1, 1, 0),
     armor = armor("Armor", 2, 1, 0),
     boulder = lib.libs.weapon.of(

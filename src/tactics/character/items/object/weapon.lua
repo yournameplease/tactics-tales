@@ -31,6 +31,7 @@ local ArmorkillerEffect = {}
 local ShieldkillerEffect = {}
 
 ---@class Targeting
+---@field description? string Optional human-readable range description shown in the battle UI.
 ---@field get_selection_tiles fun(origin: Point, map: BattleMap): Point[] Returns tiles the player can select as attack targets.
 ---@field get_targets_for_selection fun(origin: Point, selection: Point, map: BattleMap): BattleUnit[] Returns units hit when a selection tile is chosen.
 ---@field is_target_valid fun(origin: Point, selection: Point, map: BattleMap): boolean Returns whether the selected tile is a valid attack target.

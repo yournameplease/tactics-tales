@@ -34,9 +34,11 @@ end
 
 ---@param min_range integer
 ---@param max_range integer
+---@param description? string
 ---@return Targeting
-function weapon.range.single_target(min_range, max_range)
-    return {
+function weapon.range.single_target(min_range, max_range, description)
+    local t = {
+        description = description,
         get_selection_tiles = function(origin, map)
             local out = {}
             for x=-max_range,max_range do
@@ -61,6 +63,7 @@ function weapon.range.single_target(min_range, max_range)
             return min_range <= distance and distance <= max_range
         end,
     }
+    return t
 end
 
 local default_weapon = {
@@ -106,6 +109,7 @@ end
 ---@param accuracy integer
 ---@param slots integer
 ---@param effects? EquipmentEffect[]
+---@param targeting_description? string
 ---@return ItemDefinition
 function weapon.melee(
     name,
@@ -113,8 +117,18 @@ function weapon.melee(
     damage,
     accuracy,
     slots,
-    effects
+    effects,
+    targeting_description
 )
+    local data = {
+        name = name,
+        damage = damage,
+        accuracy = accuracy,
+        effects = effects or {}
+    }
+    if targeting_description then
+        data.targeting = weapon.range.single_target(1, 1, targeting_description)
+    end
     return weapon.of(
         name,
         slots,
@@ -123,12 +137,7 @@ function weapon.melee(
             sprite = sprite,
             anchor = lib.point.of(1,8)
         },
-        {
-            name = name,
-            damage = damage,
-            accuracy = accuracy,
-            effects = effects or {}
-        }
+        data
     )
 end
 
@@ -138,6 +147,7 @@ end
 ---@param accuracy integer
 ---@param slots integer
 ---@param effects? EquipmentEffect[]
+---@param targeting_description? string
 ---@return ItemDefinition
 function weapon.two_handed(
     name,
@@ -145,8 +155,20 @@ function weapon.two_handed(
     damage,
     accuracy,
     slots,
-    effects
+    effects,
+    targeting_description
 )
+    local data = {
+        name = name,
+        sprite = sprite,
+        damage = damage,
+        accuracy = accuracy,
+        body_type = "HORIZONTAL",
+        effects = effects or {}
+    }
+    if targeting_description then
+        data.targeting = weapon.range.single_target(1, 1, targeting_description)
+    end
     return weapon.of(
         name,
         slots,
@@ -155,14 +177,7 @@ function weapon.two_handed(
             sprite = sprite,
             anchor = lib.point.of(3,12)
         },
-        {
-            name = name,
-            sprite = sprite,
-            damage = damage,
-            accuracy = accuracy,
-            body_type = "HORIZONTAL",
-            effects = effects or {}
-        }
+        data
     )
 end
 
@@ -174,6 +189,7 @@ end
 ---@param max_range integer
 ---@param slots integer
 ---@param effects? EquipmentEffect[]
+---@param targeting_description? string
 ---@return ItemDefinition
 function weapon.ranged(
     name,
@@ -183,7 +199,8 @@ function weapon.ranged(
     min_range,
     max_range,
     slots,
-    effects
+    effects,
+    targeting_description
 )
     return weapon.of(
         name,
@@ -198,7 +215,7 @@ function weapon.ranged(
             sprite = sprite,
             damage = damage,
             accuracy = accuracy,
-            targeting = weapon.range.single_target(min_range,max_range),
+            targeting = weapon.range.single_target(min_range, max_range, targeting_description),
             type = "RANGED",
             body_type = "FRONT_HAND",
             effects = effects or {}
