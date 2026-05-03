@@ -28,7 +28,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -68,7 +68,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -90,7 +90,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         manager:update(input_helper.joypad({ dxp = 1 }))
@@ -114,7 +114,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- advance to "C"
@@ -125,7 +125,7 @@ describe("tactics.menu.cursor.selection", function()
         local ser = manager:serialize()
 
         -- new manager, deserialize
-        local manager2 = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager2 = menu_manager.new(menu_defs, ctx, bus)
         manager2:set_menu("TEST_MENU")
         manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 
@@ -149,7 +149,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -182,7 +182,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -206,7 +206,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -224,16 +224,16 @@ describe("tactics.menu.cursor.selection", function()
 
     it("on_change: joypad input calls handler and re-deserializes menu from returned data", function()
         local handler_calls = {}
-        local handlers = {
-            my_handler = function(_gc, menu_data, _mc, value)
-                table.insert(handler_calls, { value = value, data = menu_data })
-                return menu_manager.menu_handler.then_deserialize({ other_key = "injected_" .. value })
-            end
-        }
 
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    my_handler = function(_gc, menu_data, _mc, value)
+                        table.insert(handler_calls, { value = value, data = menu_data })
+                        return menu_manager.menu_handler.then_deserialize({ other_key = "injected_" .. value })
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
@@ -246,7 +246,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -265,17 +265,10 @@ describe("tactics.menu.cursor.selection", function()
     end)
 
     it("on_change: handle_command calls handler and re-deserializes", function()
-        local handler_calls = {}
-        local handlers = {
-            my_handler = function(_gc, _menu_data, _mc, value)
-                table.insert(handler_calls, value)
-                return menu_manager.menu_handler.then_deserialize({ other_key = "injected" })
-            end
-        }
-
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {},
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
@@ -287,7 +280,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- trigger via handle_command directly through joypad button
@@ -312,7 +305,7 @@ describe("tactics.menu.cursor.selection", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node

@@ -34,7 +34,7 @@ describe("tactics.menu.cursor.nested.list", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -83,7 +83,7 @@ describe("tactics.menu.cursor.nested.list", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -119,7 +119,7 @@ describe("tactics.menu.cursor.nested.list", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -154,7 +154,7 @@ describe("tactics.menu.cursor.nested.list", function()
                 }
             }
 
-            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager = menu_manager.new(menu_defs, ctx, bus)
             manager:set_menu("TEST_MENU")
 
             -- navigate to index 3
@@ -185,7 +185,7 @@ describe("tactics.menu.cursor.nested.list", function()
                 }
             }
 
-            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager = menu_manager.new(menu_defs, ctx, bus)
             manager:set_menu("TEST_MENU")
 
             -- navigate to index 2 and serialize
@@ -194,7 +194,7 @@ describe("tactics.menu.cursor.nested.list", function()
             luassert.are_equal(2, (ser.node.state --[[@as SerializedNestedMenuNodeState]]).i)
 
             -- create a new manager and deserialize
-            local manager2 = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager2 = menu_manager.new(menu_defs, ctx, bus)
             manager2:set_menu("TEST_MENU")
             manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 
@@ -220,7 +220,7 @@ describe("tactics.menu.cursor.nested.list", function()
                 }
             }
 
-            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager = menu_manager.new(menu_defs, ctx, bus)
             manager:set_menu("TEST_MENU")
 
             -- navigate to selection child and advance it
@@ -238,7 +238,7 @@ describe("tactics.menu.cursor.nested.list", function()
             luassert.are_equal("blue", ser.node.data["color"])
 
             -- new manager, restore
-            local manager2 = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager2 = menu_manager.new(menu_defs, ctx, bus)
             manager2:set_menu("TEST_MENU")
             manager2.menu_step.node:deserialize(ser.node.state, ser.node.data)
 

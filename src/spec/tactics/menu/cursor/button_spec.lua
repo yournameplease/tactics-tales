@@ -19,17 +19,16 @@ describe("tactics.menu.cursor.button", function()
         local handler_called = false
         local handler_value = nil
 
-        local handlers = {
-            ["test_handler"] = function(_gc, _md, _mc, value)
-                handler_called = true
-                handler_value = value
-                return nil
-            end
-        }
-
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    ["test_handler"] = function(_gc, _md, _mc, value)
+                        handler_called = true
+                        handler_value = value
+                        return nil
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("test_button")
@@ -41,7 +40,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         manager:update(input_helper.joypad({ a = true, ap = true }))
@@ -51,10 +50,10 @@ describe("tactics.menu.cursor.button", function()
     end)
 
     it("should navigate to next state when configured", function()
-        local handlers = {}
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {},
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1")
@@ -68,7 +67,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         manager:update(input_helper.joypad({ ap = true }))
@@ -77,10 +76,10 @@ describe("tactics.menu.cursor.button", function()
     end)
 
     it("should go back when configured", function()
-        local handlers = {}
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {},
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):advance_to("STEP_2")
@@ -93,7 +92,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- advance to STEP_2
@@ -106,10 +105,10 @@ describe("tactics.menu.cursor.button", function()
     end)
 
     it("should finish menu when as_final_step is set", function()
-        local handlers = {}
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {},
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):as_final_step()
@@ -118,7 +117,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         manager:update(input_helper.joypad({ ap = true }))
@@ -129,20 +128,19 @@ describe("tactics.menu.cursor.button", function()
         local select_called = false
         local menu_called = false
 
-        local handlers = {
-            ["select_h"] = function(_gc, _md, _mc, _v)
-                select_called = true
-                return nil
-            end,
-            ["menu_h"] = function(_gc, _md, _mc, _v)
-                menu_called = true
-                return nil
-            end
-        }
-
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    ["select_h"] = function(_gc, _md, _mc, _v)
+                        select_called = true
+                        return nil
+                    end,
+                    ["menu_h"] = function(_gc, _md, _mc, _v)
+                        menu_called = true
+                        return nil
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1")
@@ -154,7 +152,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- select
@@ -169,18 +167,18 @@ describe("tactics.menu.cursor.button", function()
 
     it("should handle complex handler responses (recompute and navigate)", function()
         local recompute_count = 0
-        local handlers = {
-            ["recompute_h"] = function(_gc, _md, _mc, _v)
-                return menu_manager.menu_handler.then_recompute()
-            end,
-            ["navigate_h"] = function(_gc, _md, _mc, _v)
-                return menu_manager.menu_handler.then_navigate("STEP_2")
-            end
-        }
 
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    ["recompute_h"] = function(_gc, _md, _mc, _v)
+                        return menu_manager.menu_handler.then_recompute()
+                    end,
+                    ["navigate_h"] = function(_gc, _md, _mc, _v)
+                        return menu_manager.menu_handler.then_navigate("STEP_2")
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1")
@@ -195,7 +193,7 @@ describe("tactics.menu.cursor.button", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- hook into recompute
@@ -219,6 +217,7 @@ describe("tactics.menu.cursor.button", function()
             local menu_defs = {
                 ["TEST_MENU"] = {
                     initial_step = "STEP_1",
+                    handlers = {},
                     steps = {
                         ["STEP_1"] = menu_manager.definition.step.of_node(
                             button.builder("btn1"):with_text("OK")
@@ -227,7 +226,7 @@ describe("tactics.menu.cursor.button", function()
                 }
             }
 
-            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager = menu_manager.new(menu_defs, ctx, bus)
             manager:set_menu("TEST_MENU")
 
             local ser = manager:serialize()
@@ -239,6 +238,7 @@ describe("tactics.menu.cursor.button", function()
             local menu_defs = {
                 ["TEST_MENU"] = {
                     initial_step = "STEP_1",
+                    handlers = {},
                     steps = {
                         ["STEP_1"] = menu_manager.definition.step.of_node(
                             button.builder("btn1"):with_text("OK")
@@ -247,7 +247,7 @@ describe("tactics.menu.cursor.button", function()
                 }
             }
 
-            local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+            local manager = menu_manager.new(menu_defs, ctx, bus)
             manager:set_menu("TEST_MENU")
 
             -- deserialize with empty data; should be a no-op

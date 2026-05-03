@@ -29,7 +29,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -57,20 +57,19 @@ describe("tactics.menu.cursor.nested.grid", function()
         local button1_called = false
         local button2_called = false
 
-        local handlers = {
-            ["h1"] = function(_gc, _md, _mc, _v)
-                button1_called = true
-                return nil
-            end,
-            ["h2"] = function(_gc, _md, _mc, _v)
-                button2_called = true
-                return nil
-            end
-        }
-
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    ["h1"] = function(_gc, _md, _mc, _v)
+                        button1_called = true
+                        return nil
+                    end,
+                    ["h2"] = function(_gc, _md, _mc, _v)
+                        button2_called = true
+                        return nil
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 2, 2)
@@ -91,7 +90,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- at (0,0), trigger btn00
@@ -127,7 +126,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -165,7 +164,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         local node = manager.menu_step.node
@@ -209,7 +208,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- move to (2, 1)
@@ -227,7 +226,7 @@ describe("tactics.menu.cursor.nested.grid", function()
         local serialized = manager:serialize()
 
         -- create new manager and deserialize
-        local manager2 = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager2 = menu_manager.new(menu_defs, ctx, bus)
         manager2:set_menu("TEST_MENU")
         manager2.menu_step.node:deserialize(serialized.node.state, serialized.node.data)
 
@@ -242,20 +241,19 @@ describe("tactics.menu.cursor.nested.grid", function()
         local action_called = false
         local cycle_called = false
 
-        local handlers = {
-            ["action_h"] = function(_gc, _md, _mc, _v)
-                action_called = true
-                return nil
-            end,
-            ["cycle_h"] = function(_gc, _md, _mc, _v)
-                cycle_called = true
-                return nil
-            end
-        }
-
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    ["action_h"] = function(_gc, _md, _mc, _v)
+                        action_called = true
+                        return nil
+                    end,
+                    ["cycle_h"] = function(_gc, _md, _mc, _v)
+                        cycle_called = true
+                        return nil
+                    end
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 5, 5)
@@ -273,7 +271,7 @@ describe("tactics.menu.cursor.nested.grid", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         -- trigger action

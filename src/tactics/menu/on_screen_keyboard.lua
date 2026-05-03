@@ -59,7 +59,11 @@ local function get_key_at_coordinates(p, session_context)
     return board[p.y + 1][p.x + 1]
 end
 
----@type table<string, MenuHandler<GameContext>>
+---@class KeyboardStepBundle
+---@field step MenuStepDefinition
+---@field handlers table<string, MenuHandler<GameContext, KeyboardMenuContext>>
+
+---@type table<string, MenuHandler<GameContext, KeyboardMenuContext>>
 local HANDLERS = {}
 
 HANDLERS["change_keyboard_mode"] = function(_services, _menu_data, session_context, _value)
@@ -115,14 +119,14 @@ end
 
 local menu_keyboard = {
     KeyboardMenuContext = {},  -- type alias placeholder
-    handlers = HANDLERS,
+    KeyboardStepBundle = {},   -- type alias placeholder
 }
 
---- Build a MenuStepDefinition for the on-screen keyboard.
+--- Build a KeyboardStepBundle containing the step definition and its handler map.
 ---@param submit string MenuHandlerId to invoke when the user confirms input.
----@return MenuStepDefinition
+---@return KeyboardStepBundle
 function menu_keyboard.step(submit)
-    return step_definition.of_node(
+    local step = step_definition.of_node(
         list.column(
             "keyboard_menu",
             function(_msb, _ctx)
@@ -164,6 +168,7 @@ function menu_keyboard.step(submit)
     :with_backspace_handler("delete_character")
     :with_action("BUTTON_A", { command = "select", description = "Select" })
     :with_action("BUTTON_B", { command = "back",   description = "Back" })
+    return { step = step, handlers = HANDLERS }
 end
 
 return menu_keyboard

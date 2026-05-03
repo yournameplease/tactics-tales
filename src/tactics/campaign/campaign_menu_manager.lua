@@ -111,49 +111,46 @@ local function menu_definition_for_character_select()
             :with_action("BUTTON_A", { command = "select", description = "Select" })
 end
 
----@alias CampaignMenuHandler MenuHandler<CampaignMenuServices>
-
----@type table<string, CampaignMenuHandler>
-local HANDLERS = {}
-
-HANDLERS["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
-    return menu_manager.menu_handler.then_deserialize(random_appearance())
-end
-
-HANDLERS["create_character"] = function(services, menu_data, _session_context, _value)
-    services.handle_create_character(menu_data)
-    return nil
-end
-
-HANDLERS["submit_text"] = function(services, _menu_data, session_context, _value)
-    ---@cast session_context KeyboardMenuContext
-    services.handle_submit_text(session_context.keyboard_content)
-    return nil
-end
-
-HANDLERS["select_option"] = function(services, _menu_data, _session_context, value)
-    services.handle_select_option(value)
-    return nil
-end
-
-maps.add_all(HANDLERS, menu_keyboard.handlers)
+local keyboard_bundle = menu_keyboard.step("submit_text")
 
 ---@type table<string, MenuDefinition>
 local MENU_DATA = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
+        handlers = {
+            ["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
+                return menu_manager.menu_handler.then_deserialize(random_appearance())
+            end,
+            ["create_character"] = function(services, menu_data, _session_context, _value)
+                services.handle_create_character(menu_data)
+                return nil
+            end,
+        },
         steps = {
             ["APPEARANCE_OPTIONS"] = menu_definition_for_character_select(),
         }
     },
     ["MENU_TEXT_INPUT"] = {
         initial_step = "KEYBOARD",
+        handlers = maps.merge(keyboard_bundle.handlers, {
+            ["submit_text"] = function(services, _menu_data, session_context, _value)
+                ---@cast session_context KeyboardMenuContext
+                services.handle_submit_text(session_context.keyboard_content)
+                return nil
+            end,
+        }),
         steps = {
-            ["KEYBOARD"] = menu_keyboard.step("submit_text"),
+            ["KEYBOARD"] = keyboard_bundle.step,
         }
     },
     ["MENU_SELECT_OPTION"] = {
         initial_step = "OPTION_LIST",
+        handlers = {
+            ["select_option"] = function(services, _menu_data, _session_context, value)
+                services.handle_select_option(value)
+                return nil
+            end,
+        },
         steps = {
             ["OPTION_LIST"] = step_definition.of_node(
                 list.column(
@@ -184,7 +181,7 @@ local campaign_menu_manager = {}
 ---@param bus EventBus
 ---@return MenuManager
 function campaign_menu_manager.new(ctx, bus)
-    return menu_manager.new(MENU_DATA, HANDLERS, ctx, bus)
+    return menu_manager.new(MENU_DATA, ctx, bus)
 end
 
 return campaign_menu_manager
