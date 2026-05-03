@@ -113,18 +113,52 @@ end
 
 local keyboard_bundle = menu_keyboard.step("submit_text")
 
+---@param _services CampaignMenuServices
+---@param _menu_data any
+---@param _session_context MenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+local function randomize_appearance(_services, _menu_data, _session_context, _value)
+    return menu_manager.menu_handler.then_deserialize(random_appearance())
+end
+
+---@param services CampaignMenuServices
+---@param menu_data table<string, string>
+---@param _session_context MenuContext
+---@param _value any
+---@return nil
+local function create_character(services, menu_data, _session_context, _value)
+    services.handle_create_character(menu_data)
+    return nil
+end
+
+---@param services CampaignMenuServices
+---@param _menu_data any
+---@param session_context KeyboardMenuContext
+---@param _value any
+---@return nil
+local function submit_text(services, _menu_data, session_context, _value)
+    services.handle_submit_text(session_context.keyboard_content)
+    return nil
+end
+
+---@param services CampaignMenuServices
+---@param _menu_data any
+---@param _session_context MenuContext
+---@param value any
+---@return nil
+local function select_option(services, _menu_data, _session_context, value)
+    services.handle_select_option(value)
+    return nil
+end
+
 ---@type table<string, MenuDefinition>
 local MENU_DATA = {
     ["MENU_CUSTOMIZE_CHARACTER"] = {
         initial_step = "APPEARANCE_OPTIONS",
         handlers = {
-            ["randomize_appearance"] = function(_services, _menu_data, _session_context, _value)
-                return menu_manager.menu_handler.then_deserialize(random_appearance())
-            end,
-            ["create_character"] = function(services, menu_data, _session_context, _value)
-                services.handle_create_character(menu_data)
-                return nil
-            end,
+            ["randomize_appearance"] = randomize_appearance,
+            ["create_character"] = create_character,
         },
         steps = {
             ["APPEARANCE_OPTIONS"] = menu_definition_for_character_select(),
@@ -133,11 +167,7 @@ local MENU_DATA = {
     ["MENU_TEXT_INPUT"] = {
         initial_step = "KEYBOARD",
         handlers = maps.merge(keyboard_bundle.handlers, {
-            ["submit_text"] = function(services, _menu_data, session_context, _value)
-                ---@cast session_context KeyboardMenuContext
-                services.handle_submit_text(session_context.keyboard_content)
-                return nil
-            end,
+            ["submit_text"] = submit_text,
         }),
         steps = {
             ["KEYBOARD"] = keyboard_bundle.step,
@@ -146,10 +176,7 @@ local MENU_DATA = {
     ["MENU_SELECT_OPTION"] = {
         initial_step = "OPTION_LIST",
         handlers = {
-            ["select_option"] = function(services, _menu_data, _session_context, value)
-                services.handle_select_option(value)
-                return nil
-            end,
+            ["select_option"] = select_option,
         },
         steps = {
             ["OPTION_LIST"] = step_definition.of_node(
