@@ -78,6 +78,8 @@ function HANDLERS.apply_preset(services, _ctx, value)
         return nil
     end
     local config = services.campaigns[services.default_campaign_id].config
+    if not config then return nil end
+
     local data = { _preset = preset_key }
     for _, p in ipairs(config.presets) do
         if p.key == preset_key then
