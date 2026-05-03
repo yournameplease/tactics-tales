@@ -35,6 +35,7 @@ describe("tactics.menu.menu_manager", function()
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {},
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):advance_to("STEP_2")
@@ -52,7 +53,7 @@ describe("tactics.menu.menu_manager", function()
             }
         }
 
-        local manager = menu_manager.new(menu_defs, {}, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
 
         luassert.are_equal("STEP_1", manager.menu_state.step)
@@ -86,6 +87,14 @@ describe("tactics.menu.menu_manager", function()
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    record_text = function(_svc, _data, _ctx, text)
+                        received_text = text
+                    end,
+                    noop_handler = function(_svc, _data, _ctx)
+                        return nil
+                    end,
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):with_text("key"):handle_keyboard("record_text")
@@ -93,18 +102,10 @@ describe("tactics.menu.menu_manager", function()
                 }
             }
         }
-        local handlers = {
-            record_text = function(_svc, _data, _ctx, text)
-                received_text = text
-            end,
-            noop_handler = function(_svc, _data, _ctx)
-                return nil
-            end,
-        }
 
         mock_text_input({"h", "i"})
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
         manager:update(input_helper.joypad({}))
 
@@ -116,6 +117,14 @@ describe("tactics.menu.menu_manager", function()
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    record_text = function(_svc, _data, _ctx, text)
+                        received_text = text
+                    end,
+                    noop_handler = function(_svc, _data, _ctx)
+                        return nil
+                    end,
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):with_text("key")
@@ -123,18 +132,10 @@ describe("tactics.menu.menu_manager", function()
                 }
             }
         }
-        local handlers = {
-            record_text = function(_svc, _data, _ctx, text)
-                received_text = text
-            end,
-            noop_handler = function(_svc, _data, _ctx)
-                return nil
-            end,
-        }
 
         mock_text_input({"h", "i"})
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
         manager:update(input_helper.joypad({}))
 
@@ -145,6 +146,11 @@ describe("tactics.menu.menu_manager", function()
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    noop_handler = function(_svc, _data, _ctx, _text)
+                        return nil
+                    end,
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):advance_to("STEP_2")
@@ -156,15 +162,10 @@ describe("tactics.menu.menu_manager", function()
                 }
             }
         }
-        local handlers = {
-            noop_handler = function(_svc, _data, _ctx, _text)
-                return nil
-            end,
-        }
 
         mock_text_input({"a"})
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
         manager:update(input_helper.joypad({ ap = true }))
 
@@ -175,6 +176,11 @@ describe("tactics.menu.menu_manager", function()
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
+                handlers = {
+                    passthrough_handler = function(_svc, _data, _ctx, _text)
+                        return true
+                    end,
+                },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1"):advance_to("STEP_2")
@@ -186,15 +192,10 @@ describe("tactics.menu.menu_manager", function()
                 }
             }
         }
-        local handlers = {
-            passthrough_handler = function(_svc, _data, _ctx, _text)
-                return true
-            end,
-        }
 
         mock_text_input({"a"})
 
-        local manager = menu_manager.new(menu_defs, handlers, ctx, bus)
+        local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
         manager:update(input_helper.joypad({ ap = true }))
 

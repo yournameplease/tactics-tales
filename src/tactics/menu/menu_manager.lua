@@ -33,7 +33,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "navigate"
 ---@field next_step string Step to navigate to.
 
----@alias MenuHandler<TServices> fun(services: TServices, menu_data: table<string, any>, session_context: MenuContext, value: any): MenuHandlerPostHandling?
+---@alias MenuHandler<TServices, TSession> fun(services: TServices, menu_data: table<string, any>, session_context: TSession, value: any): MenuHandlerPostHandling?
 
 local menu_handler = {}
 
@@ -207,6 +207,7 @@ end
 ---@class MenuDefinition
 ---@field initial_step string Starting step ID.
 ---@field steps table<string, MenuStepDefinition> All step definitions keyed by step ID.
+---@field handlers table<string, MenuHandler> Handler map for this menu.
 
 ---@class MenuManagerSerializedMenu
 ---@field menu_id? string Active menu ID; nil when no menu is open.
@@ -215,7 +216,6 @@ end
 
 ---@class MenuManager Abstract interface for menu managers.
 ---@field menu_definitions table<string, MenuDefinition>
----@field menu_handlers table<string, MenuHandler<GameContext>>
 ---@field menu_state MenuState
 ---@field menu_ctx? MenuContext
 ---@field menu_step? ActiveMenuStep Active step node and bindings; nil when no menu is open.
@@ -242,16 +242,14 @@ local menu_manager = {
 
 --- Create a new MenuManager.
 ---@param menu_definitions table<string, MenuDefinition>
----@param menu_handlers table<string, MenuHandler<GameContext>>
 ---@param ctx GameContext
 ---@param bus EventBus
 ---@return MenuManager
-function menu_manager.new(menu_definitions, menu_handlers, ctx, bus)
+function menu_manager.new(menu_definitions, ctx, bus)
     ---@type MenuManager
     local self = setmetatable({}, { __index = BaseMenuManager })
 
     self.menu_definitions = menu_definitions
-    self.menu_handlers = menu_handlers
 
     ---@type MenuState
     self.menu_state = { step = nil, menu_id = nil }
@@ -337,7 +335,7 @@ function BaseMenuManager:handle_menu_back(target_step)
         local step_def = menu_def.steps[current]
         local handler_id = step_def.handlers and step_def.handlers["back"]
         if handler_id then
-            local handler = self.menu_handlers[handler_id]
+            local handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
             assert(handler ~= nil, "Bad handler for id " .. handler_id)
             log.debug("Calling back handler for intermediate step: " .. current)
             handler(self.game_ctx, self:serialize().node.data, self.menu_ctx, nil)
@@ -392,13 +390,13 @@ function BaseMenuManager:update(input)
                 local focused = self.menu_step.node:get_focused_leaves(self.menu_ctx, self.game_ctx)
                 for _, leaf in ipairs(focused) do
                     if leaf.keyboard_handler then
-                        local leaf_handler = self.menu_handlers[leaf.keyboard_handler]
+                        local leaf_handler = self.menu_definitions[self.menu_state.menu_id].handlers[leaf.keyboard_handler]
                         if leaf_handler then
                             leaf_handler(self.game_ctx, menu_data, self.menu_ctx, text)
                         end
                     end
                 end
-                local step_handler = self.menu_handlers[self.menu_step.keyboard_handler]
+                local step_handler = self.menu_definitions[self.menu_state.menu_id].handlers[self.menu_step.keyboard_handler]
                 assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
                 allow_joypad = step_handler(self.game_ctx, menu_data, self.menu_ctx) == true
             else
@@ -410,7 +408,7 @@ function BaseMenuManager:update(input)
 
         if self.menu_step.backspace_handler and keyp("backspace") then
             local menu_data = self:serialize().node.data
-            local bs_handler = self.menu_handlers[self.menu_step.backspace_handler]
+            local bs_handler = self.menu_definitions[self.menu_state.menu_id].handlers[self.menu_step.backspace_handler]
             assert(bs_handler ~= nil, "Bad handler for id " .. self.menu_step.backspace_handler)
             bs_handler(self.game_ctx, menu_data, self.menu_ctx)
         end
@@ -505,7 +503,7 @@ function BaseMenuManager:update(input)
             if triggered_command then
                 local handler_id = self.menu_step.handlers and self.menu_step.handlers[triggered_command]
                 if handler_id then
-                    local handler = self.menu_handlers[handler_id]
+                    local handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
                     assert(handler ~= nil, "Bad handler for id " .. handler_id)
                     log.debug("Calling menu handler: " .. handler_id)
                     handler(
@@ -523,7 +521,7 @@ function BaseMenuManager:update(input)
             ---@cast signal MenuSignalBack
             local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
             if handler_id then
-                local handler = self.menu_handlers[handler_id]
+                local handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
                 assert(handler ~= nil, "Bad handler for id " .. handler_id)
                 log.debug("Calling menu handler: " .. handler_id)
                 handler(
@@ -539,7 +537,7 @@ function BaseMenuManager:update(input)
             self:handle_menu_advance(signal.target)
         elseif signal.type == "on_change" then
             ---@cast signal MenuSignalOnChange
-            local handler = self.menu_handlers[signal.handler]
+            local handler = self.menu_definitions[self.menu_state.menu_id].handlers[signal.handler]
             assert(handler ~= nil, "Bad handler for id " .. signal.handler)
             local handler_res = handler(
                 self.game_ctx,
@@ -555,7 +553,7 @@ function BaseMenuManager:update(input)
             self:clear_menu()
         elseif signal.type == "call_handler" then
             ---@cast signal MenuSignalCallHandler
-            local handler = self.menu_handlers[signal.handler]
+            local handler = self.menu_definitions[self.menu_state.menu_id].handlers[signal.handler]
             assert(handler ~= nil, "Bad handler for id " .. signal.handler)
             log.debug("Calling menu handler: " .. signal.handler)
             local ser = self:serialize()
@@ -608,7 +606,7 @@ function BaseMenuManager:update(input)
             if signal.then_back or signal.then_back_to then
                 local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
                 if handler_id then
-                    local back_handler = self.menu_handlers[handler_id]
+                    local back_handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
                     assert(back_handler ~= nil, "Bad handler for id " .. handler_id)
                     log.debug("Calling menu handler: " .. handler_id)
                     back_handler(

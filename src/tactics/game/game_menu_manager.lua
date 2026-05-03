@@ -17,9 +17,7 @@ local game_menu_manager = {}
 ---@class MainMenuContext : MenuContext
 ---@field selected_file string The save file name chosen by the player for overwrite confirmation.
 
----@alias GameMenuHandler MenuHandler<GameMenuContext>
-
----@type table<string, GameMenuHandler>
+---@type table<string, MenuHandler<GameMenuContext, MainMenuContext>>
 local HANDLERS = {}
 
 --- Advance from the title screen: go to main menu, or auto-start the default campaign in demo mode.
@@ -204,6 +202,7 @@ end
 local MENU_DATA = {
     ["MENU_MAIN_MENU"] = {
         initial_step = "TITLE_SCREEN",
+        handlers = HANDLERS,
         steps = {
             ["TITLE_SCREEN"] = step_definition.of_node(
                 button.builder("to_main_menu")
@@ -536,7 +535,6 @@ local MENU_DATA = {
 function game_menu_manager.new(ctx, bus)
     return menu_manager.new(
         MENU_DATA,
-        HANDLERS,
         ctx,
         bus
     ) --[[@as GameMenuManager]]
