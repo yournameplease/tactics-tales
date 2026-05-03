@@ -382,24 +382,30 @@ end
 function BaseMenuManager:update(input)
     if self.menu_step ~= nil then
         local allow_joypad = true
-        if self.menu_step.keyboard_handler and peektext() then
-            local text = ""
-            while peektext() do
-                text = text .. readtext()
-            end
-            local menu_data = self:serialize().node.data
-            local focused = self.menu_step.node:get_focused_leaves(self.menu_ctx, self.game_ctx)
-            for _, leaf in ipairs(focused) do
-                if leaf.keyboard_handler then
-                    local leaf_handler = self.menu_handlers[leaf.keyboard_handler]
-                    if leaf_handler then
-                        leaf_handler(self.game_ctx, menu_data, self.menu_ctx, text)
+        if peektext() then
+            if self.menu_step.keyboard_handler then
+                local text = ""
+                while peektext() do
+                    text = text .. readtext()
+                end
+                local menu_data = self:serialize().node.data
+                local focused = self.menu_step.node:get_focused_leaves(self.menu_ctx, self.game_ctx)
+                for _, leaf in ipairs(focused) do
+                    if leaf.keyboard_handler then
+                        local leaf_handler = self.menu_handlers[leaf.keyboard_handler]
+                        if leaf_handler then
+                            leaf_handler(self.game_ctx, menu_data, self.menu_ctx, text)
+                        end
                     end
                 end
+                local step_handler = self.menu_handlers[self.menu_step.keyboard_handler]
+                assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
+                allow_joypad = step_handler(self.game_ctx, menu_data, self.menu_ctx) == true
+            else
+                -- prevent buildup of text buffer if no keyboard handler
+                -- two "z" will still come through, though...
+                readtext(true)
             end
-            local step_handler = self.menu_handlers[self.menu_step.keyboard_handler]
-            assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
-            allow_joypad = step_handler(self.game_ctx, menu_data, self.menu_ctx) == true
         end
 
         if self.menu_step.backspace_handler and keyp("backspace") then
