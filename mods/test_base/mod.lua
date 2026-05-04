@@ -6,7 +6,7 @@ return {
     dependendcies = {},
     content = {
         maps           = "game_data/maps",
-        battles        = "game_data/battles",
+        missions       = "game_data/missions",
         campaigns       = "game_data/campaigns",
         characters     = "game_data/characters",
         items          = "game_data/items",

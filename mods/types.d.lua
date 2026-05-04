@@ -10,7 +10,7 @@
 
 ---@class ModContent
 ---@field maps? string    Relative path (no .map) to the maps data file.
----@field battles? string
+---@field missions? string
 ---@field campaigns? string
 ---@field characters? string
 ---@field items? string
@@ -26,8 +26,8 @@
 -- Returned by game_data/characters.lua
 ---@alias ModCharactersModule table<string, CharacterTemplate>
 
--- Returned by game_data/battles.lua
----@alias ModBattlesModule table<string, BattleDefinitionFactory>
+-- Returned by game_data/missions.lua
+---@alias ModMissionsModule table<string, MissionFactory>
 
 -- Returned by game_data/campaigns.lua
 ---@class ModStoriesModule

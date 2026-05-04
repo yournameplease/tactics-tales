@@ -143,10 +143,10 @@ function ModLoader:load_mod_data()
         function(mod) return mod.spec.content.maps end,
         nil
     )
-    log.debug("Loading battles...")
-    game_data.battles = load_mod_map(
+    log.debug("Loading missions...")
+    game_data.missions = load_mod_map(
         self.registered,
-        function(mod) return mod.spec.content.battles end,
+        function(mod) return mod.spec.content.missions end,
         nil
     )
     log.debug("Loading campaigns...")

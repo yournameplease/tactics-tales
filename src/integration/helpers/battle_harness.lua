@@ -123,6 +123,7 @@ function battle_harness.new(overrides)
 
     -- Load mod data.
     local loader = mod_loader_mod.new()
+    loader:register_mod("base")
     loader:register_mod("test_base")
     self._game_data = loader:load_mod_data()
 

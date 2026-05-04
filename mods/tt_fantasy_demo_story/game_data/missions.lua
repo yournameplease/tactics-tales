@@ -1,16 +1,17 @@
 local script = lib.libs.script
 local script_unit = script.unit
+local battle = lib.libs.battle
 
-local ai <const> = {
-    default = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
-    move_one = { move = "one", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
-    move_two = { move = "two", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
-    move_inf = { move = "infinity", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
-    stationary = { move = "zero", target_sides = {"player", "neutral"}, exclude_tags = {"neutral_enemy"}},
-    stationary_allied = { move = "zero", target_sides = {"enemy"}},
-    move_one_allied = { move = "one", target_sides = {"enemy"}},
-    move_inf_allied = { move = "infinity", target_sides = {"enemy"}},
-    stationary_neutral = { move = "zero", target_sides = {} }
+local ai <const> = battle.ai
+local character_source = battle.character_source
+local objectives = {
+    rout             = battle.victory.rout,
+    defeat_tagged    = battle.victory.defeat_tagged,
+    survive          = battle.victory.survive,
+    escape           = battle.victory.escape,
+    all_players_die  = battle.failure.all_players_die,
+    tagged_unit_dies = battle.failure.tagged_unit_dies,
+    turn_limit       = battle.failure.turn_limit,
 }
 
 local phase <const> = {
@@ -20,81 +21,6 @@ local phase <const> = {
     after_enemy = { offset = "after", side = "enemy"},
 }
 
-local character_source = {}
-
-function character_source.template(template)
-	local self = {
-		type = "template",
-		template = template,
-	}
-	return self
-end
-
-function character_source.player_roster()
-	local self = {
-		type = "player_roster",
-	}
-	return self
-end
-
-local objectives = {}
-
-function objectives.rout()
-    local self = {
-        type = "rout",
-        text = "Defeat all enemies"
-    }
-    return self
-end
-
-function objectives.defeat_tagged(tag, text)
-    local self = {
-        type = "defeat_tagged",
-        text = text,
-        tag = tag,
-    }
-    return self
-end
-
-function objectives.survive()
-    local self = {
-        type = "survive",
-        text = "Survive"
-    }
-    return self
-end
-
-function objectives.escape()
-    local self = {
-        type = "escape",
-        text = "Escape",
-    }
-    return self
-end
-
-
-function objectives.all_players_die()
-    local self = {
-        type = "all_players_die",
-    }
-    return self
-end
-
-function objectives.tagged_unit_dies(tag)
-    local self = {
-        type = "tagged_unit_dies",
-        tag = tag,
-    }
-    return self
-end
-
-function objectives.turn_limit()
-    local self = {
-        type = "turn_limit",
-    }
-    return self
-end
-
 local function escape(tile_tag)
     return script.on_tile_interaction(tile_tag, "Escape")
         :then_dialogue(script_unit.source(), {"I'm retreating"})
@@ -102,7 +28,7 @@ local function escape(tile_tag)
 end
 
 
----@type ModBattlesModule
+---@type ModMissionsModule
 local BATTLE_DATA = {
     ["bandit_village"] = function(campaign_config)
         local turn_limits = {
