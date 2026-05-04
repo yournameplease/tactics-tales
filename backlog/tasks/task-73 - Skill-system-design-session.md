@@ -1,12 +1,15 @@
 ---
 id: TASK-73
 title: Skill system design session
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 21:48'
+updated_date: '2026-05-04 22:29'
 labels: []
 milestone: m-13
 dependencies: []
+documentation:
+  - docs/adr/skill-system.md
 priority: high
 ---
 
@@ -18,9 +21,9 @@ Design session with user to fully specify the mod-configurable Skill system. Out
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 docs/adr/skill-system.md written and agreed with user
-- [ ] #2 Implementation tasks created from spec
-- [ ] #3 All pre-session decisions reflected in spec doc
+- [x] #1 docs/adr/skill-system.md written and agreed with user
+- [x] #2 Implementation tasks created from spec
+- [x] #3 All pre-session decisions reflected in spec doc
 <!-- AC:END -->
 
 ## Definition of Done
