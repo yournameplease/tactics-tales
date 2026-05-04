@@ -106,6 +106,42 @@ local function tiled_layer_to_userdata(layer_data, map_w, map_h, tile_to_sprite)
     return bmp
 end
 
+--- Extract object layers from a Tiled map into a spawn_groups table.
+--- Per-layer properties supply defaults; per-object properties override them.
+---@param tiled_data table
+---@return table<string, SpawnGroup>
+local function extract_spawn_groups(tiled_data)
+    local tile_w = tiled_data.tilewidth
+    local tile_h = tiled_data.tileheight
+    local groups = {}
+    for _, layer in ipairs(tiled_data.layers) do
+        if layer.type == "objectgroup" then
+            local layer_props = layer.properties or {}
+            local group = {
+                from   = layer_props["from"] or nil,
+                points = {},
+            }
+            local layer_ai_hint = layer_props["ai_hint"]
+            local layer_slot    = layer_props["slot"]
+            for _, obj in ipairs(layer.objects or {}) do
+                if obj.shape == "point" then
+                    local obj_props = obj.properties or {}
+                    local pt = {
+                        x    = math.floor(obj.x / tile_w),
+                        y    = math.floor(obj.y / tile_h),
+                        slot = obj_props["slot"] or layer_slot or "default",
+                    }
+                    local ai_hint = obj_props["ai_hint"] or layer_ai_hint
+                    if ai_hint then pt.ai_hint = ai_hint end
+                    table.insert(group.points, pt)
+                end
+            end
+            groups[layer.name] = group
+        end
+    end
+    return groups
+end
+
 --- Load a Tiled .lua map export, convert tile IDs via gfx_registry, and build the BattleMap.
 ---@param definition TiledMapDefinition
 ---@param tile_labels table<string, integer[]>
@@ -210,6 +246,7 @@ local function load_tiled(definition, tile_labels, gfx_registry)
 
     local map = battle_map.new(map_w, map_h, labels)
     map.layers = layers
+    map.spawn_groups = extract_spawn_groups(tiled_data)
     map.metadata = { player_spawners = {}, enemy_spawners = {} }
 
     return map

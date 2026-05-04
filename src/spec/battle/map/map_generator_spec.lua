@@ -317,6 +317,131 @@ describe("battle.map.map_generator", function()
     end)
 
     -- -----------------------------------------------------------------------
+    -- load_map — spawn_groups
+    -- -----------------------------------------------------------------------
+
+    describe("load_map spawn_groups (tiled)", function()
+        local function make_point_obj(x, y, props)
+            return { shape = "point", x = x, y = y, properties = props or {} }
+        end
+
+        it("should produce an empty spawn_groups table when no object layers exist", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) }
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_same({}, map.spawn_groups)
+        end)
+
+        it("should create a group keyed by layer name with pixel coords converted to tile coords", function()
+            -- tilewidth=16, tileheight=16; pixel (32,48) -> tile (2,3)
+            local tiled = make_tiled_map(4, 4, {
+                { type = "tilelayer", name = "ground", width = 4, height = 4,
+                  data = make_tile_data(4, 4, 1) },
+                { type = "objectgroup", name = "spawn_zone", properties = {},
+                  objects = { make_point_obj(32, 48) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.is_not_nil(map.spawn_groups["spawn_zone"])
+            luassert.are_equal(1, #map.spawn_groups["spawn_zone"].points)
+            luassert.are_equal(2, map.spawn_groups["spawn_zone"].points[1].x)
+            luassert.are_equal(3, map.spawn_groups["spawn_zone"].points[1].y)
+        end)
+
+        it("should default slot to 'default' when no slot property is present", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "squad", properties = {},
+                  objects = { make_point_obj(16, 16) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_equal("default", map.spawn_groups["squad"].points[1].slot)
+        end)
+
+        it("should attach per-object slot property to the point", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "squad", properties = {},
+                  objects = { make_point_obj(16, 16, { slot = "squad_leader" }) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_equal("squad_leader", map.spawn_groups["squad"].points[1].slot)
+        end)
+
+        it("should propagate layer-level slot to points that lack a per-object slot", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "boss_room",
+                  properties = { slot = "boss", ai_hint = "stationary" },
+                  objects = { make_point_obj(16, 16) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_equal("boss", map.spawn_groups["boss_room"].points[1].slot)
+            luassert.are_equal("stationary", map.spawn_groups["boss_room"].points[1].ai_hint)
+        end)
+
+        it("should let per-object ai_hint override the layer default", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "patrol",
+                  properties = { ai_hint = "patrol" },
+                  objects = {
+                      make_point_obj(16, 16),
+                      make_point_obj(32, 16, { ai_hint = "stationary" }),
+                  } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_equal("patrol",     map.spawn_groups["patrol"].points[1].ai_hint)
+            luassert.are_equal("stationary", map.spawn_groups["patrol"].points[2].ai_hint)
+        end)
+
+        it("should attach per-layer 'from' to the group, not to individual points", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "reinforce",
+                  properties = { from = "west" },
+                  objects = { make_point_obj(0, 16), make_point_obj(0, 32) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.are_equal("west", map.spawn_groups["reinforce"].from)
+            luassert.is_nil(map.spawn_groups["reinforce"].points[1].from)
+        end)
+
+        it("should leave 'from' nil on groups that have no from property", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "deploy", properties = {},
+                  objects = { make_point_obj(16, 16) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+            luassert.is_nil(map.spawn_groups["deploy"].from)
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
     -- load_map — unknown type
     -- -----------------------------------------------------------------------
 

@@ -26,6 +26,16 @@ local lists = require("src.tactics.util.lists")
 ---@field player_spawners table<integer, Point> Indexed spawner positions for player units.
 ---@field enemy_spawners table<integer, Point[]> Indexed spawn groups for enemy units.
 
+---@class SpawnPoint
+---@field x integer
+---@field y integer
+---@field slot string Role designator for this point (defaults to "default").
+---@field ai_hint string? Advisory AI behavior for the unit at this point.
+
+---@class SpawnGroup
+---@field from string? Edge this group enters from for reinforcement waves.
+---@field points SpawnPoint[]
+
 ---@class BattleMap
 ---@field width integer
 ---@field height integer
@@ -35,6 +45,7 @@ local lists = require("src.tactics.util.lists")
 ---@field interactions_by_unit_id table<UnitId, table<ScriptId, UnitInteractionHook>>
 ---@field interactions_by_x_y Array2D<table<TileDistance, table<ScriptId, TileInteractionHook>>>
 ---@field tile_labels table<string, Point[]> Points grouped by semantic tile label.
+---@field spawn_groups table<string, SpawnGroup> Named spawn groups extracted from Tiled object layers.
 ---@field layers MapLayers Sprite layers making up the map.
 ---@field metadata MapMetadata Spawn point and event metadata.
 local BattleMap = {}
