@@ -198,17 +198,51 @@ function ModLoader:load_mod_data()
     return game_data
 end
 
+---@param mod RegisteredMod
+---@return string[]
+local function validate_gfx_paths(mod)
+    local errors = {}
+    local gfx = mod.spec.content.gfx
+    if gfx == nil then return errors end
+    for _, gfx_path in ipairs(gfx) do
+        local dir, fname = gfx_path:match("^(.+)/([^/]+)$")
+        local full_dir = "mods/" .. mod.path .. "/" .. (dir or "")
+        local found = false
+        local files = ls(full_dir)
+        if files ~= nil then
+            for _, f in ipairs(files) do
+                if f == fname .. ".gfx" then
+                    found = true
+                    break
+                end
+            end
+        end
+        if not found then
+            table.insert(errors, "gfx file not found: mods/" .. mod.path .. "/" .. gfx_path .. ".gfx")
+        end
+    end
+    return errors
+end
+
 --- Validate all registered mods against the game data schema.
 ---@return boolean is_valid, string[] errors
 function ModLoader:validate_mods()
     local game_data = self:load_mod_data()
 
-    -- final validation, for all loaded data
-    return schema_validator.validate(
+    local is_valid, errors = schema_validator.validate(
         game_data,
         mod_schema.final_schema,
         game_data
     )
+
+    for _, mod in ipairs(self.registered) do
+        for _, e in ipairs(validate_gfx_paths(mod)) do
+            table.insert(errors, e)
+            is_valid = false
+        end
+    end
+
+    return is_valid, errors
 end
 
 return mod_loader
