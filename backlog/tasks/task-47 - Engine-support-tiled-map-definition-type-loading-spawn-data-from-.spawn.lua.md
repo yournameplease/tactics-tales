@@ -4,7 +4,7 @@ title: 'Engine: support tiled map definition type loading spawn data from .spawn
 status: To Do
 assignee: []
 created_date: '2026-04-28 03:10'
-updated_date: '2026-05-04 02:12'
+updated_date: '2026-05-04 13:50'
 labels: []
 milestone: m-9
 dependencies:
@@ -49,6 +49,8 @@ Extend `src/tactics/battle/map/map_generator.lua` to support a new `"tiled"` map
 `BattleDefinition.tile_labels` is ignored for `tiled` maps (it is only used by the metatile path).
 
 **Spawn point coordinate format:** `{x, y, slot?, facing?, ai_hint?}` — extra fields must be accessible from `tile_labels` points so battle factories can read `slot` and `ai_hint` when building `UnitSpawnData`.
+
+**Test fixture:** `mods/test_tt_procedural_campaign/` is the integration test mod for this feature. It depends on both `test_base` and `tt_procedural_campaign`. The mission `abandoned_fortress_seize` uses `map_id = "abandoned_fortress"` with `active_labels = { "deployment_seize", "boss_seize" }` — player (`test_fighter`) deploys south, enemy commander (`test_armed_enemy`, stationary) holds north. Rout victory, no failure condition. The campaign `abandoned_fortress_seize` runs it and exits. This mission will load correctly once `active_labels` support is implemented.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
