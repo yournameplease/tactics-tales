@@ -143,6 +143,15 @@ function BattleUnit:take_damage(amount)
     self.hp_current = new_hp
 end
 
+--- Decrement cooldown_remaining by 1 for each skill that is on cooldown, clamped to 0.
+function BattleUnit:tick_skill_cooldowns()
+    for _, state in pairs(self.skill_states) do
+        if state.cooldown_remaining > 0 then
+            state.cooldown_remaining = state.cooldown_remaining - 1
+        end
+    end
+end
+
 --- Kill this unit, marking the underlying character as dead.
 function BattleUnit:die()
     log.debug("Killing " .. tostring(self))

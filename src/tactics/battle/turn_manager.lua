@@ -114,12 +114,15 @@ function TurnManager:advance_phase()
 
         self.tactics_engine:yield_while_in_script()
 
+        local acting_side = self:acting_side()
+        self.tactics_engine:tick_skill_cooldowns_for_side(acting_side)
+
         local side_units = self.battle_map:get_units(function(u)
-            return u.side == self:acting_side()
+            return u.side == acting_side
         end)
         -- skip phases for empty sides
         if #side_units > 0 then
-            self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, self:acting_side()))
+            self.tactics_engine:show_phase_banner(phase_banner_text(self.turn, acting_side))
             for _ = 1, STATIC_CONFIG.PHASE_BANNER_DURATION do yield() end
             self.tactics_engine.phase_banner = nil
             self.tactics_engine.battle_is_blocked = false
