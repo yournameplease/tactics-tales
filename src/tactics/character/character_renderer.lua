@@ -41,7 +41,7 @@ local PALETTE_BY_SIDE = {
     neutral = {27, 3, 19},
 }
 
-local MAX_HEALTH_BAR_WIDTH = 18
+local MAX_HEALTH_BAR_WIDTH = 14
 
 local NECK_ROOT = { x = 9, y = 8 }
 
@@ -384,7 +384,7 @@ function character_renderer.draw(
         draw_character(drawable_unit, point.of(0, 0))
 
         local unit_sprite = draw_target_manager:pop_sprite()
-        draw.draw_shadow(COLOR_OUTLINE,
+        draw.draw_thick_shadow(COLOR_OUTLINE,
             function(draw_x, draw_y)
                 local outline_draw_point = point.of(draw_x, draw_y) - DRAW_TARGET_D
                 spr(unit_sprite, outline_draw_point.x, outline_draw_point.y)
@@ -434,7 +434,7 @@ local function draw_health_bar(unit, draw_point, theme)
     local current_width = cell_width * hp_current + 1
     local height = 4
 
-    local x = draw_point.x - (width >> 1)
+    local x = draw_point.x - (width >> 1) -3
     local y = draw_point.y - 2
     rrectfill(x, y, width, height, 1, theme.COLOR_HP_BORDER)
     rrectfill(x + 1, y + 1, width - 2, height - 2, 0, theme.COLOR_HP_SPENT)

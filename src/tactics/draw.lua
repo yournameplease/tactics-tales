@@ -17,6 +17,21 @@ local function draw_shadow(c, draw, x, y)
     pal()
 end
 
+local function draw_thick_shadow(c, draw, x, y)
+    for i = 1, 31 do
+        pal(i, c)
+    end
+    for dx = -2, 2 do
+        for dy = -2, 2 do
+            if not (dx == 0 and dy == 0) and not (math.abs(dx) == 2 and math.abs(dy) == 2) then
+                draw(x + dx, y + dy)
+            end
+        end
+    end
+    pal()
+end
+
 return {
-    draw_shadow = draw_shadow
+    draw_shadow = draw_shadow,
+    draw_thick_shadow = draw_thick_shadow,
 }
