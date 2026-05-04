@@ -2,7 +2,7 @@
 --- A utility for loading and preparing battle maps from map files.
 --- It processes map layers and generates the final BattleMap object.
 
----@alias MapGenerationType "static"|"procgen"
+---@alias MapGenerationType "static"|"tiled"|"procgen"
 
 ---@class MapDefinition Abstract base for all map definition variants.
 ---@field type MapGenerationType
@@ -10,6 +10,10 @@
 ---@class StaticMapDefinition : MapDefinition
 ---@field type "static"
 ---@field file string Path to the static map file.
+
+---@class TiledMapDefinition : MapDefinition
+---@field type "tiled"
+---@field file string Path to Tiled .lua export (no extension), relative to mod root.
 
 local point = require("src.tactics.util.point")
 local battle_map = require("src.tactics.battle.battle_map")
@@ -78,6 +82,120 @@ local function apply_default_walls(map_layers)
     end
 end
 
+--- Strip the extension from a filename, returning only the stem.
+---@param filename string
+---@return string
+local function file_stem(filename)
+    return (filename:match("^(.+)%..+$") or filename)
+end
+
+--- Build a userdata grid from a Tiled layer data array.
+---@param layer_data integer[] Flat row-major tile-ID array (1-indexed).
+---@param map_w integer Map width in tiles.
+---@param map_h integer Map height in tiles.
+---@param tile_to_sprite fun(id: integer): integer
+---@return userdata
+local function tiled_layer_to_userdata(layer_data, map_w, map_h, tile_to_sprite)
+    local bmp = userdata("u8", map_w, map_h)
+    for col = 0, map_w - 1 do
+        local col_values = {}
+        for row = 0, map_h - 1 do
+            col_values[row + 1] = tile_to_sprite(layer_data[row * map_w + col + 1])
+        end
+        bmp:set(col, table.unpack(col_values))
+    end
+    return bmp
+end
+
+--- Load a Tiled .lua map export, convert tile IDs via gfx_registry, and build the BattleMap.
+---@param definition TiledMapDefinition
+---@param tile_labels table<string, integer[]>
+---@param gfx_registry table<string, integer>
+---@return BattleMap
+local function load_tiled(definition, tile_labels, gfx_registry)
+    local tiled_data = include(definition.file .. ".lua")
+
+    local map_w = tiled_data.width
+    local map_h = tiled_data.height
+
+    -- Build tileset ranges sorted descending by firstgid for O(n) lookup.
+    local ranges = {}
+    for _, ts in ipairs(tiled_data.tilesets) do
+        local stem = file_stem(ts.filename)
+        table.insert(ranges, { firstgid = ts.firstgid, base = gfx_registry[stem] or 0 })
+    end
+    table.sort(ranges, function(a, b) return a.firstgid > b.firstgid end)
+
+    local function tile_to_sprite(tile_id)
+        if tile_id == 0 then return 0 end
+        for _, r in ipairs(ranges) do
+            if tile_id >= r.firstgid then
+                return r.base + (tile_id - r.firstgid)
+            end
+        end
+        return 0
+    end
+
+    -- Index tile layers by name (skip non-tilelayer entries).
+    local tile_layers = {}
+    for _, layer in ipairs(tiled_data.layers) do
+        if layer.type == "tilelayer" then
+            tile_layers[layer.name] = layer.data
+        end
+    end
+
+    assert(tile_layers["ground"], "tiled map missing required 'ground' layer: " .. tostring(definition.file))
+
+    local function opt_layer(name)
+        return tile_layers[name] and tiled_layer_to_userdata(tile_layers[name], map_w, map_h, tile_to_sprite) or nil
+    end
+
+    local layers = {
+        metatiles = opt_layer("metatiles"),
+        terrain = {
+            ground     = tiled_layer_to_userdata(tile_layers["ground"], map_w, map_h, tile_to_sprite),
+            front_wall = opt_layer("front_walls"),
+            mid_wall   = opt_layer("mid_walls"),
+            back_wall  = opt_layer("back_walls"),
+            ceiling    = opt_layer("ceiling"),
+        }
+    }
+
+    -- Build tile labels from the metatiles layer when present.
+    local labels = {}
+    if layers.metatiles then
+        local labels_by_metatile = {}
+        for label, metatiles in pairs(tile_labels) do
+            for _, metatile in ipairs(metatiles) do
+                if labels_by_metatile[metatile] == nil then
+                    labels_by_metatile[metatile] = {}
+                end
+                table.insert(labels_by_metatile[metatile], label)
+            end
+        end
+
+        local ml = layers.metatiles
+        for x = 0, ml:height() - 1 do
+            for y = 0, ml:width() - 1 do
+                local metatile = ml:get(x, y) - BASE_METATILE
+                if labels_by_metatile[metatile] ~= nil then
+                    local p = point.of(x, y)
+                    for _, label in ipairs(labels_by_metatile[metatile]) do
+                        if labels[label] == nil then labels[label] = {} end
+                        table.insert(labels[label], p)
+                    end
+                end
+            end
+        end
+    end
+
+    local map = battle_map.new(map_w, map_h, labels)
+    map.layers = layers
+    map.metadata = { player_spawners = {}, enemy_spawners = {} }
+
+    return map
+end
+
 --- Load a static map from disk, apply post-processing, and build the BattleMap.
 ---@param definition StaticMapDefinition
 ---@param tile_labels table<string, integer[]> Metatile indices grouped by label name.
@@ -130,10 +248,13 @@ end
 --- Load and return a BattleMap from the given map definition and label mapping.
 ---@param definition MapDefinition Map definition specifying type and source file.
 ---@param labels table<string, integer[]> Metatile indices grouped by label name.
+---@param gfx_registry table<string, integer>|nil Required for type="tiled"; maps gfx stem to base sprite index.
 ---@return BattleMap
-function map_generator.load_map(definition, labels)
+function map_generator.load_map(definition, labels, gfx_registry)
     if definition.type == "static" then
         return load_static(definition --[[@as StaticMapDefinition]], labels)
+    elseif definition.type == "tiled" then
+        return load_tiled(definition --[[@as TiledMapDefinition]], labels, gfx_registry or {})
     else
         error("unknown map type")
     end
