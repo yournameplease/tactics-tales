@@ -14,6 +14,8 @@
 ---@field CAMERA_EDGE_SCROLL_BORDER integer
 ---@field CAMERA_EDGE_SCROLL_SPEED integer
 ---@field PHASE_BANNER_DURATION integer
+---@field MOD_GFX_SLOT_START integer First spritesheet slot reserved for mod GFX.
+---@field MOD_GFX_SLOT_END integer Last spritesheet slot reserved for mod GFX.
 
 ---@type StaticConfig
 STATIC_CONFIG = {
@@ -29,4 +31,6 @@ STATIC_CONFIG = {
     CAMERA_EDGE_SCROLL_BORDER = 16,
     CAMERA_EDGE_SCROLL_SPEED = 1,
     PHASE_BANNER_DURATION = 90,
+    MOD_GFX_SLOT_START = 16,
+    MOD_GFX_SLOT_END = 31,
 }
