@@ -71,9 +71,9 @@ end
 ---@param tile Point Starting grid position.
 ---@param tags string[] Additional tags to apply to this unit.
 ---@param side Side Which team this unit belongs to.
----@param movement_side string Side used for movement rules; defaults to `side`.
+---@param movement_side? string Side used for movement rules; defaults to `side`.
 ---@param facing Facing Initial facing direction.
----@param ai UnitAI AI behaviour descriptor.
+---@param ai? UnitAI AI behaviour descriptor.
 ---@return BattleUnit
 function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side, facing, ai)
     local instance = {

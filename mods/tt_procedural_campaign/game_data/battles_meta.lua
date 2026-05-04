@@ -14,6 +14,9 @@ local battles_meta = {
     skirmish = {
         recruitment_archetypes = { "turncoat_enemy" },
     },
+    abandoned_fortress_seize = {
+        recruitment_archetypes = {},
+    },
 }
 
 return battles_meta

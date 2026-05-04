@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local stories_mod  = require("tt_procedural_campaign.game_data.stories")
+local stories_mod  = require("tt_procedural_campaign.game_data.campaigns")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
@@ -60,15 +60,27 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             luassert.is_true(found)
         end)
 
-        it("battle_loop step 3 is a battle node for 'skirmish'", function()
-            local step = proc_campaign.nodes.battle_loop[3]
-            luassert.are_equal("battle", step.type)
-            luassert.are_equal("skirmish", step.battle_id)
+        it("battle_loop step 3 returns a battle node using current_battle_id", function()
+            local mem = make_mem()
+            mem:set("current_battle_id", campaign_state.text("skirmish"))
+            local node = call_step("battle_loop", 3, make_sc(mem))
+            luassert.are_equal("battle", node.type)
+            luassert.are_equal("skirmish", node.battle_id)
+        end)
+
+        it("battle_loop step 3 uses abandoned_fortress_seize when set", function()
+            local mem = make_mem()
+            mem:set("current_battle_id", campaign_state.text("abandoned_fortress_seize"))
+            local node = call_step("battle_loop", 3, make_sc(mem))
+            luassert.are_equal("battle", node.type)
+            luassert.are_equal("abandoned_fortress_seize", node.battle_id)
         end)
 
         it("battle victory routes to post_battle", function()
-            local step = proc_campaign.nodes.battle_loop[3]
-            luassert.are_equal("post_battle", step.next_node_victory)
+            local mem = make_mem()
+            mem:set("current_battle_id", campaign_state.text("skirmish"))
+            local node = call_step("battle_loop", 3, make_sc(mem))
+            luassert.are_equal("post_battle", node.next_node_victory)
         end)
     end)
 
