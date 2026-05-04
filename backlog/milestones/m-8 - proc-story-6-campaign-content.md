@@ -1,6 +1,6 @@
 ---
 id: m-8
-title: "proc-story-6-fantasy-content"
+title: "proc-story-6-campaign-content"
 ---
 
 ## Description
