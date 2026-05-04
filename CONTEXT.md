@@ -42,7 +42,7 @@ _Note_: Currently split between `RecruitUnits` (battle script) and `roster_add` 
 
 **Campaign State**:
 A persistent key-value store scoped to a campaign run, used to carry player choices, character names, and mod-defined data across story nodes.
-_Avoid_: "story memory" (code term), "save data" (too broad — save data includes the roster and other state)
+_Avoid_: "story memory" (code term), "memory" alone (appears in older code as `set_memory`, `memory_branch` — these are being renamed to `set_state`, `state_branch`), "save data" (too broad — save data includes the roster and other state)
 
 **Victory Condition**:
 A rule that ends a battle in the player's favor (e.g., rout all enemies, survive N turns, escape the map).

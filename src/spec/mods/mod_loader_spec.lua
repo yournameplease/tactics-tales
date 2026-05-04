@@ -85,7 +85,7 @@ local function make_fs_with_mod(opts)
     local fs = mock_filesystem.new()
     local content = {
         maps = "game_data/maps",
-        battles = "game_data/battles",
+        missions = "game_data/missions",
         campaigns = "game_data/campaigns",
         characters = "game_data/characters",
         items = "game_data/items",
@@ -104,7 +104,7 @@ local function make_fs_with_mod(opts)
         content = content,
     })
     fs:put_file("mods/test_mod/game_data/maps.lua", {})
-    fs:put_file("mods/test_mod/game_data/battles.lua", {})
+    fs:put_file("mods/test_mod/game_data/missions.lua", {})
     fs:put_file("mods/test_mod/game_data/campaigns.lua", {
         data = {
             test_campaign = {

@@ -1,177 +1,4 @@
-local campaigns = {}
-
----@param config BattleConfigInput
----@return fun(CampaignConfig): BattleConfig
-local function static_battle_config(config)
-	return function()
-		return {
-			permadeath = config.permadeath or true
-		}
-	end
-end
-
-function campaigns.new_page()
-	return {
-		type = 'new_page'
-	}
-end
-
-function campaigns.chapter_header(text, number)
-	return {
-		type = 'chapter_header',
-		text = text,
-		chapter_number = number,
-	}
-end
-
-function campaigns.campaign_text(text)
-	return {
-		type = 'text',
-		text = text
-	}
-end
-
-function campaigns.save_game()
-	return {
-		type = 'save_game',
-	}
-end
-
-
-function campaigns.delete_file()
-	return {
-		type = 'delete_file',
-	}
-end
-
-function campaigns.advance()
-	return {
-		type = 'advance',
-	}
-end
-
-function campaigns.exit_campaign()
-	return {
-		type = 'exit_campaign',
-	}
-end
-
-function campaigns.game_results()
-	return {
-		type = 'game_results',
-	}
-end
-
-function campaigns.roster_add(template, tags)
-	return {
-		type = 'roster_add',
-		template = template,
-		tags = tags,
-	}
-end
-
-function campaigns.battle(battle_id, next_node_victory, next_node_failure)
-	return {
-		type = 'battle',
-		battle_id = battle_id,
-		next_node_victory = next_node_victory,
-		next_node_failure = next_node_failure,
-	}
-end
-
-function campaigns.character_customizer(
-	key,
-	name_key
-)
-	return {
-		type = 'character_customizer',
-		key = key,
-		name_key = name_key
-	}
-end
-
-function campaigns.text_input(
-	text,
-	key
-)
-	return {
-		type = 'text_input',
-		text = text,
-		key = key,
-	}
-end
-
-function campaigns.set_memory(key, value)
-	return {
-		type = 'set_memory',
-		key = key,
-		value = value,
-	}
-end
-
-function campaigns.jump(next_node)
-	return {
-		type = 'jump',
-		next_node = next_node
-	}
-end
-
-function campaigns.detour(target)
-	return {
-		type = 'detour',
-		target = target,
-	}
-end
-
-function campaigns.select_option(options, memory_key)
-	return {
-		type = 'select_option',
-		options = options,
-		memory_key = memory_key,
-	}
-end
-
----@param roster_units string[]
----@param name string
----@param text string
----@param battle_id BattleId
----@return BattleDefinition
-function campaigns.chapter_debug(
-	roster_units,
-	name,
-	text,
-	battle_id
-)
-	local intro_node = {}
-	add(intro_node, campaigns.roster_add('protagonist', {'hero'}))
-	for k,u in ipairs(roster_units) do
-		add(intro_node, campaigns.roster_add(u))
-	end
-	add(intro_node, campaigns.campaign_text(text))
-	add(intro_node, campaigns.battle(battle_id, 'victory', 'defeat'))
-
-	return {
-		starting_node = 'intro',
-		name = name,
-		description = text or "A single chapter.",
-		battle_config = static_battle_config{
-			permadeath = true,
-		},
-		nodes = {
-			intro = intro_node,
-			victory = {
-				campaigns.campaign_text("You Win!"),
-				campaigns.game_results(),
-				campaigns.exit_campaign(),
-			},
-			defeat = {
-				campaigns.campaign_text("You Lose..."),
-				campaigns.game_results(),
-				campaigns.exit_campaign(),
-			},
-		}
-	}
-end
+local c = lib.libs.campaign
 
 local GENERIC_CONFIG = {
 	options = {
@@ -260,13 +87,13 @@ local GENERIC_CONFIG = {
 }
 
 local STORIES = {
-	bandit_village = campaigns.chapter_debug(
+	bandit_village = c.chapter_debug(
 		{},
 		"Chapter 1: Bandit Village",
 		"A young hero finds their village under attack by bandits!",
 		"bandit_village"
 	),
-	cultist_cave = campaigns.chapter_debug(
+	cultist_cave = c.chapter_debug(
 		{
 			"militia_spear_captain",
 			"militia_spearman",
@@ -279,7 +106,7 @@ local STORIES = {
 		"The heros find a cave where cultists keep prisoners for sacrifice.",
 		"cultist_cave"
 	),
-	fortress_town = campaigns.chapter_debug(
+	fortress_town = c.chapter_debug(
 		{
 			"militia_spear_captain",
 			"militia_spearman",
@@ -295,7 +122,7 @@ local STORIES = {
 		"Corrupt local militia have allied with bandits!",
 		"fortress_town"
 	),
-	cliff_crossing = campaigns.chapter_debug(
+	cliff_crossing = c.chapter_debug(
 		{
 			"militia_spear_captain",
 			"militia_spearman",
@@ -313,7 +140,7 @@ local STORIES = {
 		"An unlikely alliance was guarding the cliffside.",
 		"cliff_crossing"
 	),
-	castle_defense = campaigns.chapter_debug(
+	castle_defense = c.chapter_debug(
 		{
 			"militia_spear_captain",
 			"militia_spearman",
@@ -331,13 +158,13 @@ local STORIES = {
 		"A three-way alliance is storming the capitol.",
 		"castle_defense"
 	),
-	demo_playground = campaigns.chapter_debug(
+	demo_playground = c.chapter_debug(
 		{},
 		"Playground",
 		"Various characters to assist in debugging.",
 		"playground"
 	),
-	model_room = campaigns.chapter_debug(
+	model_room = c.chapter_debug(
 		{},
 		"Model Room",
 		"A lot of randomly generated characters.",
@@ -348,42 +175,40 @@ local STORIES = {
 		name = 'Tactics Tales Fantasy',
 		description = "A simple story of bandits, cultists, and evil armies. Lead a band of heroes after bandits attack your village.",
 		config = GENERIC_CONFIG,
-		battle_config = static_battle_config{
-			permadeath = true,
-		},
+		battle_config = c.static_battle_config{ permadeath = true },
 		nodes = {
 			prologue = {
-				campaigns.chapter_header("Tactics Tales"),
-				campaigns.text_input("This is the story of ${hero_name}", "hero_name"),
-				campaigns.set_memory("hero_village", "Herovillageton"),
-				campaigns.character_customizer("hero", "hero_name"),
-				campaigns.jump('ch_1_intro'),
+				c.chapter_header("Tactics Tales"),
+				c.text_input("This is the story of ${hero_name}", "hero_name"),
+				c.set_state("hero_village", "Herovillageton"),
+				c.character_customizer("hero", "hero_name"),
+				c.jump('ch_1_intro'),
 			},
 			ch_1_intro = {
-				campaigns.new_page(),
+				c.new_page(),
 
-				campaigns.campaign_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
-				campaigns.campaign_text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
-				campaigns.campaign_text("${hero_village} had a sole militiaman, so ${hero.name} would need to help with the bandit threat."),
-				campaigns.campaign_text("Prepare for battle!"),
+				c.text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+				c.text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
+				c.text("${hero_village} had a sole militiaman, so ${hero.name} would need to help with the bandit threat."),
+				c.text("Prepare for battle!"),
 
-				campaigns.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
+				c.start_battle('bandit_village', { victory = 'ch_1_v', failure = 'ch_1_f' }),
 			},
 			ch_1_v = {
-				campaigns.new_page(),
-				campaigns.campaign_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
-				campaigns.campaign_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
-				campaigns.campaign_text("But you'll need to play the full game to see that!"),
-				campaigns.campaign_text("Check it out at \nyour-name-please.itch.io/tactics-tales!"),
-				campaigns.exit_campaign(),
+				c.new_page(),
+				c.text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+				c.text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
+				c.text("But you'll need to play the full game to see that!"),
+				c.text("Check it out at \nyour-name-please.itch.io/tactics-tales!"),
+				c.exit_campaign(),
 			},
 			ch_1_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("${hero.name} and the visiting militia were no match for the bandits."),
-				campaigns.campaign_text("${hero_village} would find itself under bandit rule for years to come."),
-				campaigns.campaign_text("Try again for a victory. I believe in you!"),
-				campaigns.campaign_text("Or, play the full game at \nyour-name-please.itch.io/tactics-tales!"),
-				campaigns.exit_campaign(),
+				c.new_page(),
+				c.text("${hero.name} and the visiting militia were no match for the bandits."),
+				c.text("${hero_village} would find itself under bandit rule for years to come."),
+				c.text("Try again for a victory. I believe in you!"),
+				c.text("Or, play the full game at \nyour-name-please.itch.io/tactics-tales!"),
+				c.exit_campaign(),
 			},
 		},
 	},
@@ -401,186 +226,186 @@ local STORIES = {
 		end,
 		nodes = {
 			save_auto = {
-				campaigns.save_game()
+				c.save_game()
 			},
 			save_ask = {
-				campaigns.select_option({
+				c.select_option({
 					{ id = "save", name = "Save", description = "Save your progress." },
 					{ id = "skip", name = "Don't Save", description = "Continue without saving." },
 				}, "save_choice"),
-				lib.libs.campaign.memory_branch(
-					function(c, s) return s["save_choice"] == "save" end,
-					campaigns.detour("save_auto"),
-					campaigns.advance()
+				c.state_branch(
+					function(cfg, s) return s["save_choice"] == "save" end,
+					c.detour("save_auto"),
+					c.advance()
 				),
 			},
 			prologue = {
-				campaigns.chapter_header("Prologue"),
-				campaigns.text_input("This is the story of ${hero_name}", "hero_name"),
-				campaigns.set_memory("hero_village", "Herovillageton"),
-				campaigns.character_customizer("hero", "hero_name"),
-				campaigns.jump('ch_1_intro'),
+				c.chapter_header("Prologue"),
+				c.text_input("This is the story of ${hero_name}", "hero_name"),
+				c.set_state("hero_village", "Herovillageton"),
+				c.character_customizer("hero", "hero_name"),
+				c.jump('ch_1_intro'),
 			},
 			ch_1_intro = {
-				campaigns.new_page(),
-				campaigns.chapter_header("Homecoming", 1),
+				c.new_page(),
+				c.chapter_header("Homecoming", 1),
 
-				campaigns.campaign_text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
-				campaigns.campaign_text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
-				campaigns.campaign_text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
-				campaigns.campaign_text("Prepare for battle!"),
+				c.text("After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+				c.text("From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
+				c.text("${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
+				c.text("Prepare for battle!"),
 
-				campaigns.battle('bandit_village', 'ch_1_v', 'ch_1_f'),
+				c.start_battle('bandit_village', { victory = 'ch_1_v', failure = 'ch_1_f' }),
 			},
 			ch_1_v = {
-				campaigns.new_page(),
-				lib.libs.campaign.config_branch(function(c) return c.deaths == "classic" end, campaigns.campaign_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
-				lib.libs.campaign.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
-				campaigns.new_page(),
-				campaigns.campaign_text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
-				campaigns.campaign_text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
-				campaigns.jump('ch_2_intro'),
+				c.new_page(),
+				c.config_branch(function(cfg) return cfg.deaths == "classic" end, c.text("${stats.current.players_lost} of your units fell in combat."), c.advance()),
+				c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
+				c.new_page(),
+				c.text("After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+				c.text("The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
+				c.jump('ch_2_intro'),
 			},
 			ch_1_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("${hero.name} and the visiting militia were no match for the bandits."),
-				campaigns.campaign_text("${hero_village} would find itself under bandit rule for years to come."),
-				campaigns.jump('game_over'),
+				c.new_page(),
+				c.text("${hero.name} and the visiting militia were no match for the bandits."),
+				c.text("${hero_village} would find itself under bandit rule for years to come."),
+				c.jump('game_over'),
 			},
 			ch_2_intro = {
-				campaigns.save_game(),
-				campaigns.new_page(),
-				campaigns.chapter_header("Those Who Act in the Shadows", 2),
+				c.save_game(),
+				c.new_page(),
+				c.chapter_header("Those Who Act in the Shadows", 2),
 
-				campaigns.campaign_text("En route to the capitol, ${hero.name}'s party learned of a local cult."),
-				campaigns.campaign_text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
-				campaigns.campaign_text("Though the leader is powerful, the party could attempt to free some prisoners before making an escape."),
-				campaigns.campaign_text("Prepare for battle!"),
+				c.text("En route to the capitol, ${hero.name}'s party learned of a local cult."),
+				c.text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
+				c.text("Though the leader is powerful, the party could attempt to free some prisoners before making an escape."),
+				c.text("Prepare for battle!"),
 
-				campaigns.battle('cultist_cave', 'ch_2_v', 'ch_2_f'),
+				c.start_battle('cultist_cave', { victory = 'ch_2_v', failure = 'ch_2_f' }),
 			},
 			ch_2_v = {
-				campaigns.new_page(),
-				lib.libs.campaign.config_branch(function(c) return c.deaths == "classic" end, campaigns.campaign_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
-				lib.libs.campaign.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
-				campaigns.new_page(),
-				campaigns.campaign_text("The heroes managed to escape the cave."),
-				campaigns.campaign_text("Future encounters may not afford such stealthy encounters."),
-				campaigns.jump('ch_3_intro'),
+				c.new_page(),
+				c.config_branch(function(cfg) return cfg.deaths == "classic" end, c.text("${stats.current.players_lost} of your units fell in combat."), c.advance()),
+				c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
+				c.new_page(),
+				c.text("The heroes managed to escape the cave."),
+				c.text("Future encounters may not afford such stealthy encounters."),
+				c.jump('ch_3_intro'),
 			},
 			ch_2_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("Defeat!"),
-				campaigns.jump('game_over'),
+				c.new_page(),
+				c.text("Defeat!"),
+				c.jump('game_over'),
 			},
 			ch_3_intro = {
-				campaigns.save_game(),
-				campaigns.new_page(),
-				campaigns.chapter_header("", 3),
+				c.save_game(),
+				c.new_page(),
+				c.chapter_header("", 3),
 
-				campaigns.campaign_text("As their journey continued, the party reached a fortress town, a final bastion of safety before they could cross bandit-infested cliffs to reach the capitol."),
-				campaigns.campaign_text("There would be no time for rest, however.  Bandits were laying siege to the fortress."),
-				campaigns.campaign_text("It made no sense.  The fortress was well guarded."),
-				campaigns.campaign_text("Why wouldn't the army put up a fight?"),
-				campaigns.campaign_text("Prepare for battle!"),
+				c.text("As their journey continued, the party reached a fortress town, a final bastion of safety before they could cross bandit-infested cliffs to reach the capitol."),
+				c.text("There would be no time for rest, however.  Bandits were laying siege to the fortress."),
+				c.text("It made no sense.  The fortress was well guarded."),
+				c.text("Why wouldn't the army put up a fight?"),
+				c.text("Prepare for battle!"),
 
-				campaigns.battle('fortress_town', 'ch_3_v', 'ch_3_f'),
+				c.start_battle('fortress_town', { victory = 'ch_3_v', failure = 'ch_3_f' }),
 			},
 			ch_3_v = {
-				campaigns.new_page(),
-				lib.libs.campaign.config_branch(function(c) return c.deaths == "classic" end, campaigns.campaign_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
-				lib.libs.campaign.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
-				campaigns.new_page(),
+				c.new_page(),
+				c.config_branch(function(cfg) return cfg.deaths == "classic" end, c.text("${stats.current.players_lost} of your units fell in combat."), c.advance()),
+				c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
+				c.new_page(),
 
-				campaigns.campaign_text("Clearly, bandit influence ran deep here."),
-				campaigns.campaign_text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
+				c.text("Clearly, bandit influence ran deep here."),
+				c.text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
 
-				campaigns.jump('ch_4_intro'),
+				c.jump('ch_4_intro'),
 			},
 			ch_3_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("Defeat!"),
-				campaigns.jump('game_over'),
+				c.new_page(),
+				c.text("Defeat!"),
+				c.jump('game_over'),
 			},
 			ch_4_intro = {
-				campaigns.save_game(),
-				campaigns.new_page(),
-				campaigns.chapter_header("Unlikely Alliance", 4),
+				c.save_game(),
+				c.new_page(),
+				c.chapter_header("Unlikely Alliance", 4),
 
-				campaigns.campaign_text("${hero.name} was prepared for bandits when they approached the cliffs."),
-				campaigns.campaign_text("To their surprise, though, the bandits were not alone this time."),
-				campaigns.campaign_text("Cultists should hate bandits!  Why were they working together?"),
+				c.text("${hero.name} was prepared for bandits when they approached the cliffs."),
+				c.text("To their surprise, though, the bandits were not alone this time."),
+				c.text("Cultists should hate bandits!  Why were they working together?"),
 
-				campaigns.campaign_text("Prepare for battle!"),
-				campaigns.campaign_text("And watch for rolling rocks!"),
+				c.text("Prepare for battle!"),
+				c.text("And watch for rolling rocks!"),
 
-				campaigns.battle('cliff_crossing', 'ch_4_v', 'ch_4_f'),
+				c.start_battle('cliff_crossing', { victory = 'ch_4_v', failure = 'ch_4_f' }),
 			},
 			ch_4_v = {
-				campaigns.new_page(),
-				lib.libs.campaign.config_branch(function(c) return c.deaths == "classic" end, campaigns.campaign_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
-				lib.libs.campaign.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
-				campaigns.new_page(),
+				c.new_page(),
+				c.config_branch(function(cfg) return cfg.deaths == "classic" end, c.text("${stats.current.players_lost} of your units fell in combat."), c.advance()),
+				c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
+				c.new_page(),
 
-				campaigns.campaign_text("Clearly, bandit influence ran deep here."),
-				campaigns.campaign_text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
+				c.text("Clearly, bandit influence ran deep here."),
+				c.text("${hero.name} would need to keep their guard up as they proceeded through the cliffs."),
 
-				campaigns.jump('ch_5_intro'),
+				c.jump('ch_5_intro'),
 			},
 			ch_4_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("Defeat!"),
-				campaigns.jump('game_over'),
+				c.new_page(),
+				c.text("Defeat!"),
+				c.jump('game_over'),
 			},
 			ch_5_intro = {
-				campaigns.save_game(),
-				campaigns.new_page(),
-				campaigns.chapter_header("Last Stand", 5),
+				c.save_game(),
+				c.new_page(),
+				c.chapter_header("Last Stand", 5),
 
-				campaigns.campaign_text("At last, ${hero.name} had reached the capitol.  And just in the nick of time."),
-				campaigns.campaign_text("A three-pronged alliance of bandits, cultists, and defecting milita were assaulting the fortress."),
+				c.text("At last, ${hero.name} had reached the capitol.  And just in the nick of time."),
+				c.text("A three-pronged alliance of bandits, cultists, and defecting milita were assaulting the fortress."),
 
-				campaigns.campaign_text("This is it, the final battle!  Protect the monarch!"),
-				campaigns.campaign_text("Prepare for battle!"),
+				c.text("This is it, the final battle!  Protect the monarch!"),
+				c.text("Prepare for battle!"),
 
-				campaigns.battle('castle_defense', 'ch_5_v', 'ch_5_f'),
+				c.start_battle('castle_defense', { victory = 'ch_5_v', failure = 'ch_5_f' }),
 			},
 			ch_5_v = {
-				campaigns.new_page(),
-				lib.libs.campaign.config_branch(function(c) return c.deaths == "classic" end, campaigns.campaign_text("${stats.current.players_lost} of your units fell in combat."), campaigns.advance()),
-				lib.libs.campaign.config_branch(function(c) return c.saving == "ask" end, campaigns.detour("save_ask"), campaigns.detour("save_auto")),
-				campaigns.new_page(),
+				c.new_page(),
+				c.config_branch(function(cfg) return cfg.deaths == "classic" end, c.text("${stats.current.players_lost} of your units fell in combat."), c.advance()),
+				c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
+				c.new_page(),
 
-				campaigns.jump('victory'),
+				c.jump('victory'),
 			},
 			ch_5_f = {
-				campaigns.new_page(),
-				campaigns.campaign_text("Defeat!"),
-				campaigns.jump('game_over'),
+				c.new_page(),
+				c.text("Defeat!"),
+				c.jump('game_over'),
 			},
 			victory = {
-				campaigns.save_game(),
-				campaigns.new_page(),
-				campaigns.chapter_header("Victory"),
-				campaigns.campaign_text("Congratulations!"),
-				campaigns.campaign_text("Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
-				campaigns.exit_campaign(),
+				c.save_game(),
+				c.new_page(),
+				c.chapter_header("Victory"),
+				c.text("Congratulations!"),
+				c.text("Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
+				c.exit_campaign(),
 			},
 			game_over = {
-				campaigns.new_page(),
-				campaigns.chapter_header("Game Over"),
-				campaigns.campaign_text("Try again.  I believe in you!"),
-				lib.libs.campaign.config_branch(
-					function(c) return c.saving == "hardcore" end,
-					campaigns.jump("delete_file"),
-					campaigns.advance()
+				c.new_page(),
+				c.chapter_header("Game Over"),
+				c.text("Try again.  I believe in you!"),
+				c.config_branch(
+					function(cfg) return cfg.saving == "hardcore" end,
+					c.jump("delete_file"),
+					c.advance()
 				),
-				campaigns.exit_campaign(),
+				c.exit_campaign(),
 			},
 			delete_file = {
-				campaigns.delete_file(),
-				campaigns.campaign_text("File deleted."),
-				campaigns.exit_campaign(),
+				c.delete_file(),
+				c.text("File deleted."),
+				c.exit_campaign(),
 			}
 		}
 	}

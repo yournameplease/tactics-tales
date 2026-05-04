@@ -2,7 +2,7 @@
 --- Specification for game mods.
 --- Note that reference fields may be provided by dependent mods as well.
 --- Used for mod validation.
---- Certain segments of mod data, such as battles, primarily use factory functions
+--- Certain segments of mod data, such as missions, primarily use factory functions
 --- and are excluded from static schema checking
 
 --- TODO: this was mostly AI generated, some cleanup is still needed
@@ -84,10 +84,10 @@ local character_template_spec = s.record({
 })
 local characters_spec = s.dictionary(s.string(), character_template_spec)
 
-local battles_spec = s.dictionary(s.string(), s.factory())
+local missions_spec = s.dictionary(s.string(), s.factory())
 
 -- Campaign nodes can contain factory functions (CampaignNodeFactory), so deep
--- validation is not possible here. Accept any table, like battles_spec.
+-- validation is not possible here. Accept any table, like missions_spec.
 local campaigns_data_spec = s.dictionary(s.string(), s.record({}))
 
 local campaigns_spec = s.record({
@@ -102,7 +102,7 @@ local game_data_schema = s.record({
 		s.boolean()
 	),
 	maps = maps_spec,
-	battles = battles_spec,
+	missions = missions_spec,
 	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
@@ -110,7 +110,7 @@ local game_data_schema = s.record({
 
 return {
 	maps = maps_spec,
-	battles = battles_spec,
+	missions = missions_spec,
 	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,

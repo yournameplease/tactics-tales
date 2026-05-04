@@ -3,31 +3,15 @@ local factions_data = factions_mod.factions
 local resolve_slot  = factions_mod.resolve_slot
 local script_lib    = include("mods/base/lib/script.lua")
 local script        = script_lib.script
+local battle_lib    = include("mods/base/lib/battle.lua")
+local battle        = battle_lib.battle
 
-local character_source = {}
+local character_source = battle.character_source
+local ai <const>       = battle.ai
 
-function character_source.template(template)
-    return { type = "template", template = template }
-end
-
-function character_source.player_roster()
-    return { type = "player_roster" }
-end
-
-local objectives = {}
-
-function objectives.rout()
-    return { type = "rout", text = "Defeat all enemies" }
-end
-
-function objectives.tagged_unit_dies(tag)
-    return { type = "tagged_unit_dies", tag = tag }
-end
-
-local ai <const> = {
-    move_two      = { move = "two",      target_sides = { "player", "neutral" } },
-    move_one      = { move = "one",      target_sides = { "player", "neutral" } },
-    stationary    = { move = "zero",     target_sides = { "player", "neutral" } },
+local objectives = {
+    rout             = battle.victory.rout,
+    tagged_unit_dies = battle.failure.tagged_unit_dies,
 }
 
 local function mem_text(campaign_config, key)
@@ -55,7 +39,7 @@ local function get_tier(campaign_config)
     return tonumber(mem_text(campaign_config, "base_difficulty")) or 1
 end
 
----@type ModBattlesModule
+---@type ModMissionsModule
 local battles = {
     ["skirmish"] = function(campaign_config, rng_context)
         local faction  = get_faction(campaign_config)
