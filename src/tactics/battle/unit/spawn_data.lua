@@ -26,4 +26,15 @@
 ---@field tile TileLabel Tile label identifying the spawn location.
 ---@field tags? string[] Tags for this unit; spawn tile tag is added automatically.
 
+---@class SlotSpawnData
+---@field character_source CharacterSource
+---@field ai? UnitAI AI behavior definition for units at this slot.
+
+---@class LayerSpawnData
+---@field side Side Which team these units belong to.
+---@field movement_side? string Movement team identifier; defaults to side.
+---@field layer string Spawn group layer name (from map.spawn_groups).
+---@field slots table<string, SlotSpawnData> Slot key to spawn configuration.
+---@field tags? string[] Tags applied to all units in this layer.
+
 return {}
