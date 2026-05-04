@@ -120,12 +120,48 @@ function ModLoader:create_sandbox()
     lib.libs = libs
 end
 
+--- Copy mod .gfx files into the cartridge gfx/ directory and build gfx_registry.
+---@param game_data table
+function ModLoader:load_mod_gfx(game_data)
+    local slot_start = STATIC_CONFIG.MOD_GFX_SLOT_START
+    local slot_end = STATIC_CONFIG.MOD_GFX_SLOT_END
+    local max_slots = slot_end - slot_start + 1
+
+    local all_gfx = {}
+    for _, mod in ipairs(self.registered) do
+        local gfx = mod.spec.content.gfx
+        if gfx ~= nil then
+            for _, gfx_path in ipairs(gfx) do
+                table.insert(all_gfx, { mod = mod, path = gfx_path })
+            end
+        end
+    end
+
+    if #all_gfx > max_slots then
+        error("Too many mod gfx files: " .. #all_gfx .. " declared, max is " .. max_slots)
+    end
+
+    game_data.gfx_registry = {}
+    for i, entry in ipairs(all_gfx) do
+        local slot = slot_start + i - 1
+        local stem = entry.path:match("([^/]+)$")
+        local src = "mods/" .. entry.mod.path .. "/" .. entry.path .. ".gfx"
+        local dst = DATP .. "gfx/" .. slot .. "_" .. stem .. ".gfx"
+        log.debug("load_mod_gfx: cp '"..src.."' -> '"..dst.."' slot="..slot.." base="..(slot*256))
+        cp(src, dst)
+        game_data.gfx_registry[stem] = slot * 256
+        log.debug("load_mod_gfx: registered '"..stem.."' = "..(slot*256))
+    end
+    log.debug("load_mod_gfx: done, "..#all_gfx.." file(s) registered")
+end
+
 --- Load and merge all data from registered mods into a GameData table.
 ---@return any -- TODO: narrow to GameData once game_data.tl is migrated
 function ModLoader:load_mod_data()
     self:create_sandbox()
 
     local game_data = {} -- TODO: annotate as GameData once game_data.tl is migrated
+    self:load_mod_gfx(game_data)
 
     game_data.loaded_mods = maps.collect(
         self.registered,
@@ -198,17 +234,51 @@ function ModLoader:load_mod_data()
     return game_data
 end
 
+---@param mod RegisteredMod
+---@return string[]
+local function validate_gfx_paths(mod)
+    local errors = {}
+    local gfx = mod.spec.content.gfx
+    if gfx == nil then return errors end
+    for _, gfx_path in ipairs(gfx) do
+        local dir, fname = gfx_path:match("^(.+)/([^/]+)$")
+        local full_dir = "mods/" .. mod.path .. "/" .. (dir or "")
+        local found = false
+        local files = ls(full_dir)
+        if files ~= nil then
+            for _, f in ipairs(files) do
+                if f == fname .. ".gfx" then
+                    found = true
+                    break
+                end
+            end
+        end
+        if not found then
+            table.insert(errors, "gfx file not found: mods/" .. mod.path .. "/" .. gfx_path .. ".gfx")
+        end
+    end
+    return errors
+end
+
 --- Validate all registered mods against the game data schema.
 ---@return boolean is_valid, string[] errors
 function ModLoader:validate_mods()
     local game_data = self:load_mod_data()
 
-    -- final validation, for all loaded data
-    return schema_validator.validate(
+    local is_valid, errors = schema_validator.validate(
         game_data,
         mod_schema.final_schema,
         game_data
     )
+
+    for _, mod in ipairs(self.registered) do
+        for _, e in ipairs(validate_gfx_paths(mod)) do
+            table.insert(errors, e)
+            is_valid = false
+        end
+    end
+
+    return is_valid, errors
 end
 
 return mod_loader

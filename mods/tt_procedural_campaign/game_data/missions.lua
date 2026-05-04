@@ -41,6 +41,26 @@ end
 
 ---@type ModMissionsModule
 local battles = {
+    ["abandoned_fortress_seize"] = function(campaign_config, _rng_context)
+        local faction = get_faction(campaign_config)
+        local tier    = get_tier(campaign_config)
+
+        return {
+            map_id = "abandoned_fortress",
+            music  = 0,
+            victory_conditions = { objectives.rout() },
+            failure_conditions = { objectives.tagged_unit_dies("hero") },
+            units = {
+                { side = "player", layer = "deployment_seize", slots = {
+                    default = { character_source = character_source.player_roster() },
+                }},
+                { side = "enemy", layer = "boss_seize", tags = { "boss" }, slots = {
+                    enemy_commander = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_commander")), ai = ai.stationary },
+                }},
+            },
+            scripts = {},
+        }
+    end,
     ["skirmish"] = function(campaign_config, rng_context)
         local faction  = get_faction(campaign_config)
         local tier     = get_tier(campaign_config)
@@ -69,7 +89,7 @@ local battles = {
         end
 
         return {
-            map_id = "playground",
+            map_id = "abandoned_fortress",
             music  = 0,
             tile_labels = {
                 ["player_deployment"] = { 0x00, 0x01, 0x02, 0x03 },

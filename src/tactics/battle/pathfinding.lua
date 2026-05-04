@@ -239,7 +239,7 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
             table.insert(new_points, prev)
         end
         -- TODO: config
-        local visited = array_2d.new(16, 16, false)
+        local visited = array_2d.new(legal_tiles:width(), legal_tiles:height(), false)
         for _,p in ipairs(current_path) do
             visited:set_point(p, true)
         end
@@ -279,7 +279,7 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
     while #path > 0 do
         local start = path[#path]
         local remaining_length = max_length + 1 - #path
-        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, max_tile)
+        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, point.of(legal_tiles:width(), legal_tiles:height()))
         if full_map:get_point(target) ~= nil and full_map:get_point(target).cost <= remaining_length then
             return extend_path(path, target, full_map)
         end

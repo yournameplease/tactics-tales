@@ -251,12 +251,17 @@ local function draw_tactics_map(
     end
 
     local sorted_units = userdata("i16", 3, #unit_positions)
-    for i,u in ipairs(unit_positions) do
-        sorted_units:set(0,i-1, u.point.y - camera_y)
-        sorted_units:set(1,i-1, u.point.x - camera_x)
-        sorted_units:set(2,i-1, u.id)
+    if sorted_units then
+        for i,u in ipairs(unit_positions) do
+            sorted_units:set(0,i-1, u.point.y - camera_y)
+            sorted_units:set(1,i-1, u.point.x - camera_x)
+            sorted_units:set(2,i-1, u.id)
+        end
     end
-    sorted_units:sort()
+    -- Only sort if > 1 unit.  Sorting a single row will consider it a 1-d userdata
+    if #unit_positions > 1 then
+        sorted_units:sort()
+    end
 
     -- TODO: preload layers
     local layers = battle_map.layers
@@ -293,15 +298,19 @@ local function draw_tactics_map(
     for i=0,#unit_positions-1 do
         local unit_id = sorted_units:get(2, i)
         local unit = battle_map:get_unit_by_id(unit_id)
-        local next_z = sorted_units:get(0, i) + camera_y
-        local next_x = sorted_units:get(1, i)
-        if next_z > prev_z then
-            draw_map_decorations(layers, prev_z, next_z, tile_ox, px, camera_y, draw_w)
-            prev_z = next_z
+        if unit then
+            local next_z = sorted_units:get(0, i) + camera_y
+            local next_x = sorted_units:get(1, i)
+            if next_z > prev_z then
+                draw_map_decorations(layers, prev_z, next_z, tile_ox, px, camera_y, draw_w)
+                prev_z = next_z
+            end
+            local animated_point = point.of(next_x, next_z - camera_y)
+            local camera = point.of(camera_x, camera_y)
+            draw_unit(unit, animated_point, camera, draw_target_manager, ui_theme)
+        else
+            log.warn("Unit not found while drawing. This is likely a bug.")
         end
-        local animated_point = point.of(next_x, next_z - camera_y)
-        local camera = point.of(camera_x, camera_y)
-        draw_unit(unit --[[@as BattleUnit]], animated_point, camera, draw_target_manager, ui_theme)
     end
     draw_map_decorations(layers, prev_z, battle_map.height * TILE_SIZE.y, tile_ox, px, camera_y, draw_w)
 

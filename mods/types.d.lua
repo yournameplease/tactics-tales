@@ -14,6 +14,7 @@
 ---@field campaigns? string
 ---@field characters? string
 ---@field items? string
+---@field gfx? string[]  Paths (relative to mod root, no extension) to .gfx tileset files.
 ---@field campaign_select? string[]  Ordered list of campaign IDs shown in Chapter Select. Defaults to all stories.
 ---@field default_campaign? string   Campaign ID used when starting a new file. Required on at least one mod.
 
