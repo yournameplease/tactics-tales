@@ -15,6 +15,7 @@ local mod_content_spec = s.record({
 	campaigns = s.optional(s.string()),
 	characters = s.optional(s.string()),
 	items = s.optional(s.string()),
+	skills = s.optional(s.string()),
 	gfx = s.optional(s.list(s.string())),
 	campaign_select = s.optional(s.list(s.string())),
 	default_campaign = s.optional(s.string()),
@@ -67,6 +68,36 @@ local item_spec_record = s.record({
 })
 local items_spec = s.dictionary(s.string(), item_spec_record)
 
+-- Schemas for `skills`
+local skill_entry_spec = s.custom(function(skill)
+	if type(skill) ~= "table" then
+		return false, {"expected table, got " .. type(skill)}
+	end
+	local errors = {}
+	if type(skill.name) ~= "string" then
+		table.insert(errors, "name: required string")
+	end
+	if skill.effect_type ~= "heal" and skill.effect_type ~= "damage" then
+		table.insert(errors, "effect_type: must be 'heal' or 'damage', got " .. tostring(skill.effect_type))
+	end
+	if skill.effect_type == "heal" and skill.heal_amount == nil then
+		table.insert(errors, "heal_amount: required when effect_type is 'heal'")
+	end
+	if skill.effect_type == "damage" then
+		if skill.damage == nil then
+			table.insert(errors, "damage: required when effect_type is 'damage'")
+		end
+		if skill.accuracy == nil then
+			table.insert(errors, "accuracy: required when effect_type is 'damage'")
+		end
+	end
+	if skill.targeting == nil then
+		table.insert(errors, "targeting: required")
+	end
+	return #errors == 0, errors
+end)
+local skills_spec = s.dictionary(s.string(), skill_entry_spec)
+
 -- Schemas for `characters`
 local randomizer_options_spec = s.record({
 	type = s.string(),
@@ -117,6 +148,7 @@ local game_data_schema = s.record({
 	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
+	skills = skills_spec,
 })
 
 return {
@@ -125,6 +157,7 @@ return {
 	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
+	skills = skills_spec,
 	mod_content = mod_content_spec,
 	final_schema = game_data_schema,
 }
