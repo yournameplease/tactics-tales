@@ -99,6 +99,10 @@ local stories = {
                       memory_key = "archetype_id",
                       options    = archetype_options() },
                     { type = "set_memory", key = "battle_index", value = "1" },
+                    { type = "roster_add", template = "militia_spear_captain" },
+                    { type = "roster_add", template = "militia_spearman" },
+                    { type = "roster_add", template = "militia_archer" },
+                    { type = "roster_add", template = "militia_armor" },
                     { type = "jump", next_node = "battle_loop" },
                 },
 
@@ -107,11 +111,14 @@ local stories = {
                 -- state at the moment it is entered.
                 battle_loop = {
                     -- Step 1: accumulate credits and roll pending recruits.
+                    -- Also writes current_battle_id so step 3 can read the resolved
+                    -- template without re-rolling RNG for filler slots.
                     function(sc, rng)
                         local archetype = get_archetype(sc)
                         local idx       = get_battle_index(sc)
                         local slot      = archetype.slots[idx]
                         local template  = slot_template_id(archetype, slot, rng.campaign_rng)
+                        sc.memory:set("current_battle_id", campaign_state_mod.text(template))
                         local text      = recruitment.update_recruitment_quota(
                             archetype, sc.memory, rng.campaign_rng, template)
                         return { type = "text", text = text }
@@ -126,9 +133,15 @@ local stories = {
                     end,
 
                     -- Step 3: run the battle; both outcomes go to post_battle.
-                    { type = "battle", battle_id = "skirmish",
-                      next_node_victory = "post_battle",
-                      next_node_failure = "post_battle" },
+                    -- battle_id is read from memory (written by step 1) so filler
+                    -- slots don't re-roll RNG.
+                    function(sc, _)
+                        local entry = sc.memory and sc.memory:get("current_battle_id")
+                        local battle_id = (entry and entry.text) or "skirmish"
+                        return { type = "battle", battle_id = battle_id,
+                                 next_node_victory = "post_battle",
+                                 next_node_failure = "post_battle" }
+                    end,
                 },
 
                 -- Post-battle cleanup: forced_join → auto_recruit → increment index → loop or exit.
