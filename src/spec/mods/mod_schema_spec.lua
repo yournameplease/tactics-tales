@@ -21,6 +21,19 @@ describe("mod_schema", function()
             luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
         end)
 
+        it("rejects a gfx list containing a non-string entry", function()
+            -- Given
+            local content = {
+                gfx = { 42 },
+            }
+
+            -- When
+            local is_valid, _ = validator.validate(content, mod_schema.mod_content, {})
+
+            -- Then
+            luassert.is_false(is_valid)
+        end)
+
         it("accepts a content block without a gfx field", function()
             -- Given
             local content = {
