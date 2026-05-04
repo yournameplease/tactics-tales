@@ -587,6 +587,58 @@ function TacticsEngine:handle_attack_unit(unit, target)
     end)
 end
 
+--- Execute a skill inside the current coroutine: deduct HP cost, apply effect,
+--- process deaths, consume resources, then call finish_unit_action.
+---@param caster BattleUnit
+---@param skill_id string
+---@param target BattleUnit
+function TacticsEngine:skill_action(caster, skill_id, target)
+    local skill = self.skill_defs[skill_id]
+
+    if skill.hp_cost then
+        caster:take_damage(skill.hp_cost)
+    end
+
+    local caster_dead = caster.hp_current <= 0
+
+    local target_dead = false
+    if skill.effect_type == "heal" then
+        target:restore_hp(skill.heal_amount)
+    elseif skill.effect_type == "damage" then
+        if math.random(100) <= skill.accuracy then
+            target:take_damage(skill.damage)
+            target_dead = target.hp_current <= 0
+        end
+    end
+
+    if caster_dead then
+        self:kill_unit(caster)
+    end
+    if target_dead then
+        self:kill_unit(target, caster)
+    end
+
+    local state = caster.skill_states[skill_id]
+    state.cooldown_remaining = skill.cooldown or 0
+    if state.uses_remaining ~= nil then
+        state.uses_remaining = state.uses_remaining - 1
+    end
+
+    self:finish_unit_action(caster)
+end
+
+--- Start a coroutine that executes `skill_id` with `caster` targeting `target_tile`.
+---@param caster BattleUnit
+---@param skill_id string
+---@param target_tile Point
+function TacticsEngine:handle_skill(caster, skill_id, target_tile)
+    self.task_manager:start_routine(function()
+        local target = self.battle_map:get_at_tile(target_tile)
+        ---@cast target BattleUnit
+        self:skill_action(caster, skill_id, target)
+    end)
+end
+
 --- Teleport `unit` to `destination` instantly with no animation.
 ---@param unit BattleUnit
 ---@param destination Point

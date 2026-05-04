@@ -1,9 +1,10 @@
 ---
 id: TASK-84
 title: Add skill execution to tactics_engine
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:29'
+updated_date: '2026-05-04 23:46'
 labels: []
 milestone: m-13
 dependencies:
@@ -36,14 +37,14 @@ Also add `restore_hp` to `src/tactics/battle/tactics/battle_unit.lua`.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Heal effect restores heal_amount HP to target, clamped to hp_max
-- [ ] #2 Damage effect applies flat damage with no defense reduction and no counterattack
-- [ ] #3 Damage skill can miss when accuracy < 100
-- [ ] #4 HP cost is deducted before effect fires
-- [ ] #5 Effect fires even if HP cost kills the caster
-- [ ] #6 Cooldown and uses_remaining are updated after cast
-- [ ] #7 finish_unit_action is called after execution
-- [ ] #8 make test passes
+- [x] #1 Heal effect restores heal_amount HP to target, clamped to hp_max
+- [x] #2 Damage effect applies flat damage with no defense reduction and no counterattack
+- [x] #3 Damage skill can miss when accuracy < 100
+- [x] #4 HP cost is deducted before effect fires
+- [x] #5 Effect fires even if HP cost kills the caster
+- [x] #6 Cooldown and uses_remaining are updated after cast
+- [x] #7 finish_unit_action is called after execution
+- [x] #8 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

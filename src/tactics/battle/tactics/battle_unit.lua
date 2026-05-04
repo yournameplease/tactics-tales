@@ -109,9 +109,9 @@ function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side,
     setmetatable(instance, {
         __index = BattleUnit,
         __tostring = function(u)
-            local tags_str = nil
+            local tags_str = ""
             for tag, _ in pairs(u.tags) do
-                if tags_str == nil then
+                if tags_str == "" then
                     tags_str = tag
                 else
                     tags_str = tags_str .. ", " .. tag
@@ -141,6 +141,12 @@ end
 function BattleUnit:take_damage(amount)
     local new_hp = math.max(0, math.min(self.hp_current - amount, self.character.stats.hp_max))
     self.hp_current = new_hp
+end
+
+--- Restore this unit's HP by `amount`, clamped to hp_max.
+---@param amount integer HP to restore.
+function BattleUnit:restore_hp(amount)
+    self.hp_current = math.min(self.hp_current + amount, self.character.stats.hp_max)
 end
 
 --- Decrement cooldown_remaining by 1 for each skill that is on cooldown, clamped to 0.
