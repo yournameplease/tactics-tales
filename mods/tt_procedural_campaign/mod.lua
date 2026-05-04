@@ -13,5 +13,6 @@ return {
         -- items and characters inherited from tt_fantasy_demo_story
         default_campaign = "proc_campaign",
         campaign_select  = { "proc_campaign" },
+        gfx = { "game_data/gfx/tiny_tileset" },
     },
 }
