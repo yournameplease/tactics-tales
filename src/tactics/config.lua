@@ -21,9 +21,10 @@
 STATIC_CONFIG = {
     SCREEN_WIDTH = 480,
     SCREEN_HEIGHT = 270,
-    VIEWPORT_WIDTH = 16,
+    -- note: viewport and tile width/heigh probably belong in a per-campaign or per-map config
+    VIEWPORT_WIDTH = 20,
     VIEWPORT_HEIGHT = 16,
-    TILE_WIDTH = 20,
+    TILE_WIDTH = 16,
     TILE_HEIGHT = 16,
     WALL_HEIGHT = 16,
     CAMERA_DEAD_ZONE_PLAYER = 2,
