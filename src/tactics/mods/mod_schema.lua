@@ -9,6 +9,17 @@
 
 local s = require("src.tactics.validator.schema_definition")
 
+local mod_content_spec = s.record({
+	maps = s.optional(s.string()),
+	missions = s.optional(s.string()),
+	campaigns = s.optional(s.string()),
+	characters = s.optional(s.string()),
+	items = s.optional(s.string()),
+	gfx = s.optional(s.list(s.string())),
+	campaign_select = s.optional(s.list(s.string())),
+	default_campaign = s.optional(s.string()),
+})
+
 local maps_spec = s.dictionary(
 	s.string(),
 	s.record({
@@ -114,5 +125,6 @@ return {
 	campaigns = campaigns_spec,
 	characters = characters_spec,
 	items = items_spec,
+	mod_content = mod_content_spec,
 	final_schema = game_data_schema,
 }
