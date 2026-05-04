@@ -229,6 +229,12 @@ function ModLoader:load_mod_data()
         function(mod) return mod.spec.content.items end,
         nil
     )
+    log.debug("Loading skills...")
+    game_data.skills = load_mod_map(
+        self.registered,
+        function(mod) return mod.spec.content.skills end,
+        nil
+    )
     log.debug("Finished loading mods.")
 
     return game_data

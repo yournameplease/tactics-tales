@@ -14,6 +14,7 @@
 ---@field campaigns CampaignData
 ---@field characters table<string, CharacterTemplate>
 ---@field items table<string, ItemDefinition>
+---@field skills table<string, SkillDefinition>
 
 local game_data = {}
 

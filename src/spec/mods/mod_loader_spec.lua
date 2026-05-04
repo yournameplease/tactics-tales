@@ -106,6 +106,7 @@ local function make_fs_with_mod(opts)
         campaigns = "game_data/campaigns",
         characters = "game_data/characters",
         items = "game_data/items",
+        skills = "game_data/skills",
     }
     if opts.default_campaign ~= false then
         content.default_campaign = opts.default_campaign or "test_campaign"
@@ -147,6 +148,7 @@ local function make_fs_with_mod(opts)
     })
     fs:put_file("mods/test_mod/game_data/characters.lua", {})
     fs:put_file("mods/test_mod/game_data/items.lua", {})
+    fs:put_file("mods/test_mod/game_data/skills.lua", {})
     return fs
 end
 
@@ -278,6 +280,128 @@ describe("mod_loader", function()
             luassert.has_error(function()
                 loader:load_mod_data()
             end)
+        end)
+
+        it("populates game_data.skills from a mod's skills file", function()
+            -- Given
+            local fs = make_fs_with_mod()
+            local targeting = {
+                get_selection_tiles = function() end,
+                get_targets_for_selection = function() end,
+                is_target_valid = function() end,
+            }
+            fs:put_file("mods/test_mod/game_data/skills.lua", {
+                heal = {
+                    name = "Heal",
+                    effect_type = "heal",
+                    heal_amount = 3,
+                    targeting = targeting,
+                },
+            })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            -- When
+            local game_data = loader:load_mod_data()
+
+            -- Then
+            luassert.are_equal("table", type(game_data.skills))
+            luassert.are_equal("Heal", game_data.skills.heal.name)
+        end)
+    end)
+
+    describe("validate_mods (skills)", function()
+        local function make_fs_with_skills(skills_data)
+            local fs = make_fs_with_mod()
+            fs:put_file("mods/test_mod/game_data/skills.lua", skills_data)
+            return fs
+        end
+
+        local function base_targeting()
+            return {
+                get_selection_tiles = function() end,
+                get_targets_for_selection = function() end,
+                is_target_valid = function() end,
+            }
+        end
+
+        it("passes validation for a valid heal skill", function()
+            -- Given
+            make_fs_with_skills({
+                heal = {
+                    name = "Heal",
+                    effect_type = "heal",
+                    heal_amount = 3,
+                    targeting = base_targeting(),
+                },
+            })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            -- When
+            local is_valid, errors = loader:validate_mods()
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+        end)
+
+        it("fails validation for an unknown effect_type", function()
+            -- Given
+            make_fs_with_skills({
+                bad_skill = {
+                    name = "Bad",
+                    effect_type = "explode",
+                    targeting = base_targeting(),
+                },
+            })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            -- When
+            local is_valid, _ = loader:validate_mods()
+
+            -- Then
+            luassert.is_false(is_valid)
+        end)
+
+        it("fails validation when heal_amount is missing for a heal skill", function()
+            -- Given
+            make_fs_with_skills({
+                broken_heal = {
+                    name = "Broken Heal",
+                    effect_type = "heal",
+                    targeting = base_targeting(),
+                },
+            })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            -- When
+            local is_valid, _ = loader:validate_mods()
+
+            -- Then
+            luassert.is_false(is_valid)
+        end)
+
+        it("fails validation when damage is missing for a damage skill", function()
+            -- Given
+            make_fs_with_skills({
+                broken_damage = {
+                    name = "Broken Damage",
+                    effect_type = "damage",
+                    accuracy = 80,
+                    targeting = base_targeting(),
+                },
+            })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            -- When
+            local is_valid, _ = loader:validate_mods()
+
+            -- Then
+            luassert.is_false(is_valid)
         end)
     end)
 end)

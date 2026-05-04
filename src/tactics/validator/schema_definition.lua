@@ -144,6 +144,24 @@ function schema_definition.factory()
     return self
 end
 
+---@class CustomSchemaDefinition : SchemaDefinition
+---@field type "custom"
+---@field validate fun(data: any): boolean, string[]
+
+--- Create a schema that validates a value with a custom function.
+--- The function receives the data and returns (is_valid, errors[]).
+---@param fn fun(data: any): boolean, string[]
+---@return SchemaDefinition
+function schema_definition.custom(fn)
+    ---@type CustomSchemaDefinition
+    local self = {
+        type = "custom",
+        optional = false,
+        validate = fn,
+    }
+    return self
+end
+
 --- Create a schema that validates a value by traversing `memory` along the given path.
 ---@param path string Dot-separated path string (e.g. "maps.castle") to the referenced entry.
 ---@return SchemaDefinition

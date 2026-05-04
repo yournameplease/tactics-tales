@@ -146,6 +146,13 @@ local function validate(data, schema, memory, path)
                         add_deep_errors(field_errors)
                     end
                 end
+            elseif schema.type == "custom" then
+                ---@cast schema CustomSchemaDefinition
+                local custom_valid, custom_errors = schema.validate(data)
+                if not custom_valid then
+                    is_valid = false
+                    add_local_errors(custom_errors)
+                end
             elseif schema.type == "factory" then
                 ---@cast schema FactorySchemaDefinition
                 if type(data) ~= "function" then
