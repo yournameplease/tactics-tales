@@ -13,14 +13,7 @@
 ---@field cooldown? integer Turns the skill is unavailable after use (decrements at start of caster's next turn). nil = no cooldown.
 ---@field uses_per_battle? integer Maximum uses in a single battle. nil = unlimited.
 ---@field targeting Targeting Tile selection and validity functions (same interface as weapon targeting).
-local SkillDefinition = {}
 
 ---@class SkillState
 ---@field cooldown_remaining integer Turns remaining before this skill is available again. 0 = available.
 ---@field uses_remaining? integer Uses left this battle. nil = unlimited.
-local SkillState = {}
-
-return {
-    SkillDefinition = SkillDefinition,
-    SkillState = SkillState,
-}
