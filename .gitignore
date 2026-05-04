@@ -21,3 +21,7 @@ docs/todos/
 /luacov.report.html
 /luacov.report.out
 /luacov.stats.out
+
+tactics.p64/gfx/1[6-9]_*.gfx
+tactics.p64/gfx/2[0-9]_*.gfx
+tactics.p64/gfx/3[01]_*.gfx

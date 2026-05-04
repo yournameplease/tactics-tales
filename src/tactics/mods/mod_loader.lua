@@ -120,12 +120,45 @@ function ModLoader:create_sandbox()
     lib.libs = libs
 end
 
+--- Copy mod .gfx files into the cartridge gfx/ directory and build gfx_registry.
+---@param game_data table
+function ModLoader:load_mod_gfx(game_data)
+    local slot_start = STATIC_CONFIG.MOD_GFX_SLOT_START
+    local slot_end = STATIC_CONFIG.MOD_GFX_SLOT_END
+    local max_slots = slot_end - slot_start + 1
+
+    local all_gfx = {}
+    for _, mod in ipairs(self.registered) do
+        local gfx = mod.spec.content.gfx
+        if gfx ~= nil then
+            for _, gfx_path in ipairs(gfx) do
+                table.insert(all_gfx, { mod = mod, path = gfx_path })
+            end
+        end
+    end
+
+    if #all_gfx > max_slots then
+        error("Too many mod gfx files: " .. #all_gfx .. " declared, max is " .. max_slots)
+    end
+
+    game_data.gfx_registry = {}
+    for i, entry in ipairs(all_gfx) do
+        local slot = slot_start + i - 1
+        local stem = entry.path:match("([^/]+)$")
+        local src = "mods/" .. entry.mod.path .. "/" .. entry.path .. ".gfx"
+        local dst = "tactics.p64/gfx/" .. slot .. "_" .. stem .. ".gfx"
+        cp(src, dst)
+        game_data.gfx_registry[stem] = slot * 256
+    end
+end
+
 --- Load and merge all data from registered mods into a GameData table.
 ---@return any -- TODO: narrow to GameData once game_data.tl is migrated
 function ModLoader:load_mod_data()
     self:create_sandbox()
 
     local game_data = {} -- TODO: annotate as GameData once game_data.tl is migrated
+    self:load_mod_gfx(game_data)
 
     game_data.loaded_mods = maps.collect(
         self.registered,

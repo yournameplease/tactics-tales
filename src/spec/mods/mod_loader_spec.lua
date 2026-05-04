@@ -150,7 +150,66 @@ local function make_fs_with_mod(opts)
     return fs
 end
 
+local function setup_gfx_globals()
+    local cp_calls = {}
+    _G.cp = function(src, dst)
+        table.insert(cp_calls, { src = src, dst = dst })
+    end
+    ---@diagnostic disable-next-line: missing-fields
+    _G.STATIC_CONFIG = {
+        MOD_GFX_SLOT_START = 16,
+        MOD_GFX_SLOT_END = 31,
+    }
+    return cp_calls
+end
+
 describe("mod_loader", function()
+    before_each(function()
+        setup_gfx_globals()
+    end)
+
+    describe("load_mod_gfx (via load_mod_data)", function()
+        it("skips mods with no gfx field and sets empty gfx_registry", function()
+            make_fs_with_mod()
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            local game_data = loader:load_mod_data()
+
+            luassert.are_equal("table", type(game_data.gfx_registry))
+            luassert.are_equal(0, #(function() local t={} for k in pairs(game_data.gfx_registry) do t[#t+1]=k end return t end)())
+        end)
+
+        it("copies gfx files to correct slot paths and builds gfx_registry", function()
+            make_fs_with_mod({ gfx = { "game_data/gfx/tiny_tileset" } })
+            local cp_calls = {}
+            _G.cp = function(src, dst) table.insert(cp_calls, { src = src, dst = dst }) end
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            local game_data = loader:load_mod_data()
+
+            luassert.are_equal(1, #cp_calls)
+            luassert.are_equal("mods/test_mod/game_data/gfx/tiny_tileset.gfx", cp_calls[1].src)
+            luassert.are_equal("tactics.p64/gfx/16_tiny_tileset.gfx", cp_calls[1].dst)
+            luassert.are_equal(16 * 256, game_data.gfx_registry["tiny_tileset"])
+        end)
+
+        it("raises an error when more than 16 gfx files are declared", function()
+            local gfx_paths = {}
+            for i = 1, 17 do
+                table.insert(gfx_paths, "game_data/gfx/tileset_" .. i)
+            end
+            make_fs_with_mod({ gfx = gfx_paths })
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            luassert.has_error(function()
+                loader:load_mod_data()
+            end)
+        end)
+    end)
+
     describe("validate_mods", function()
         it("should be valid for a mod with content", function()
             -- Given
