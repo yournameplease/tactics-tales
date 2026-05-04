@@ -244,6 +244,14 @@ local function load_tiled(definition, tile_labels, gfx_registry)
         end
     end
 
+    local decorations = {}
+    for _, layer in ipairs(tiled_data.layers) do
+        if layer.type == "tilelayer" and layer.name:match("^decoration_") then
+            table.insert(decorations, tiled_layer_to_userdata(layer.data, map_w, map_h, tile_to_sprite))
+        end
+    end
+    layers.decorations = decorations
+
     local map = battle_map.new(map_w, map_h, labels)
     map.layers = layers
     map.spawn_groups = extract_spawn_groups(tiled_data)
