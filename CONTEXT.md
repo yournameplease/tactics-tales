@@ -57,6 +57,14 @@ The behavioral ruleset attached to a Unit defining how it acts on its turn — w
 **Deployment**:
 An optional pre-battle phase where the player arranges their units among predefined deployment positions before the battle begins. Not all Missions include it.
 
+**Spawn Group**:
+A named set of spawn-point coordinates in a map's `.spawn.lua` file — e.g. `deployment_defense`, `boss_seize`, `reinforce_west`. A Mission's definition lists which Spawn Groups are active for that mission; the engine loads only those groups. Spawn Groups carry per-point properties (`slot`, `facing`, `ai_hint`) and optional per-group properties (`from` for reinforcement entry direction). Layer-level properties in Tiled set defaults inherited by all points in the group; per-point properties override.
+_Avoid_: "label" alone (the code key name), "spawn layer" (conflates the Tiled layer with the runtime concept)
+
+**Spawn File**:
+A `.spawn.lua` file produced by the Tiled converter alongside the `.map` file. Contains all Spawn Groups for a map, organized under `labels` (always-available groups) and `variant_sets` (mutually exclusive groups). Loaded by the engine when a Mission uses a `tiled` map definition.
+_Avoid_: "spawn data", "meta file" (the `_meta.lua` sidecar is a different artifact)
+
 **Side**:
 A unit's team affiliation in battle: `player`, `enemy`, or `neutral`. Determines targeting and AI behavior.
 _Avoid_: "ally" as a side name — some UI displays neutral as "ally" but this is a presentation detail, not a domain term.
@@ -78,7 +86,7 @@ _Note_: The code uses `StoryDefinition` / `Story` — the player-facing term is 
 
 - A **Mod** contains one or more **Campaigns**, **Missions**, characters, items, and maps
 - A **Campaign** is a sequence of story nodes; **Mission** nodes launch battles
-- A **Mission** defines one battle's map, spawned **Units**, **Victory Conditions**, **Failure Conditions**, and **Battle Scripts**
+- A **Mission** defines one battle's map, spawned **Units**, **Victory Conditions**, **Failure Conditions**, and **Battle Scripts**; for tiled maps it also names which **Spawn Groups** are active
 - A **Character** enters a battle as a **Unit**; if the Unit is killed, the Character is permanently removed from the **Roster** (permadeath)
 - **Recruitment** adds a Character to the Roster — either via a **Battle Script** during a Mission or via a story node in a Campaign
 - **Campaign State** is written and read by story nodes across a Campaign run

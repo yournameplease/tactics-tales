@@ -1,10 +1,10 @@
 ---
 id: TASK-45
 title: 'Map: author abandoned_fortress in Tiled as pipeline reference sample'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-28 03:09'
-updated_date: '2026-05-04 02:12'
+updated_date: '2026-05-04 03:31'
 labels: []
 milestone: m-9
 dependencies: []
@@ -51,17 +51,17 @@ The Tiled Lua export of this file is what the converter (TASK-46) consumes.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Tiled project configured with 16×16 tile size, snap-to-grid enabled, and only tiny_tileset.tsx referenced
-- [ ] #2 abandoned_fortress.tmx tile layers are named per spec (floor, front_walls, etc.) matching the visual layout
-- [ ] #3 boss_seize layer carries ai_hint and slot as layer-level properties; the point object has no redundant per-object overrides
-- [ ] #4 All Spawn Groups (deployment_defense, deployment_seize, boss_seize, reinforce_west) are object layers with point objects at correct grid positions
-- [ ] #5 reinforce_west layer has from = "west" as a layer property
-- [ ] #6 abandoned_fortress_meta.lua sidecar exists alongside the .tmx
-- [ ] #7 Tiled Lua export produces a valid Lua file loadable with require()
+- [x] #1 Tiled project configured with 16×16 tile size, snap-to-grid enabled, and only tiny_tileset.tsx referenced
+- [x] #2 abandoned_fortress.tmx tile layers are named per spec (floor, front_walls, etc.) matching the visual layout
+- [x] #3 boss_seize layer carries ai_hint and slot as layer-level properties; the point object has no redundant per-object overrides
+- [x] #4 All Spawn Groups (deployment_defense, deployment_seize, boss_seize, reinforce_west) are object layers with point objects at correct grid positions
+- [x] #5 reinforce_west layer has from = "west" as a layer property
+- [x] #6 abandoned_fortress_meta.lua sidecar exists alongside the .tmx
+- [x] #7 Tiled Lua export produces a valid Lua file loadable with require()
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
