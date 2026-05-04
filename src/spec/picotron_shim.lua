@@ -109,8 +109,19 @@ MockUserdata_mt = {
         set = function(self, x, ...)
             local state = internal_data[self]
             local args = { ... }
-            for y = 0, math.min(state.height - 1, #args - 1) do
-                state.data[y][x] = args[y + 1]
+            -- 2D form: set(x, y, val) — exactly two varargs means (row, value)
+            if state.height > 1 and #args == 2 then
+                local y = args[1]
+                for i = 2, #args do
+                    local row = y + (i - 2)
+                    if row > state.height - 1 then break end
+                    state.data[row][x] = args[i]
+                end
+            else
+                -- 1D/column form: set(x, val0, val1, ...) — values go down column x from row 0
+                for y = 0, math.min(state.height - 1, #args - 1) do
+                    state.data[y][x] = args[y + 1]
+                end
             end
         end,
         sort = function(self)

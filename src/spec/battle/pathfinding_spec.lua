@@ -39,19 +39,26 @@ local function open_map(w, h)
     return make_mock_map(w, h, function() return open_terrain() end)
 end
 
---- Build a mock legal_tiles object for extend_path_to_point tests.
+--- Build a mock userdata for extend_path_to_point tests.
 --- legal_positions is a list of {x, y} pairs that are considered legal (value=1).
+--- Uses the picotron_shim userdata so width()/height() are available.
 ---@param legal_positions table[]
 ---@return userdata
 local function make_legal_tiles(legal_positions)
-    local function get(_, x, y)
-        for _, p in ipairs(legal_positions) do
-            if p[1] == x and p[2] == y then return 1 end
-        end
-        return 0
+    local ud = userdata("u8", 32, 32)
+    local legal_set = {}
+    for _, p in ipairs(legal_positions) do
+        if not legal_set[p[1]] then legal_set[p[1]] = {} end
+        legal_set[p[1]][p[2]] = true
     end
-    ---@diagnostic disable-next-line: return-type-mismatch
-    return setmetatable({}, { __index = { get = get } })
+    for x = 0, 31 do
+        local col = {}
+        for y = 0, 31 do
+            col[y + 1] = (legal_set[x] and legal_set[x][y]) and 1 or 0
+        end
+        ud:set(x, table.unpack(col))
+    end
+    return ud
 end
 
 -- ---------------------------------------------------------------------------
