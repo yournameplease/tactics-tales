@@ -146,10 +146,13 @@ function ModLoader:load_mod_gfx(game_data)
         local slot = slot_start + i - 1
         local stem = entry.path:match("([^/]+)$")
         local src = "mods/" .. entry.mod.path .. "/" .. entry.path .. ".gfx"
-        local dst = "tactics.p64/gfx/" .. slot .. "_" .. stem .. ".gfx"
+        local dst = DATP .. "gfx/" .. slot .. "_" .. stem .. ".gfx"
+        log.debug("load_mod_gfx: cp '"..src.."' -> '"..dst.."' slot="..slot.." base="..(slot*256))
         cp(src, dst)
         game_data.gfx_registry[stem] = slot * 256
+        log.debug("load_mod_gfx: registered '"..stem.."' = "..(slot*256))
     end
+    log.debug("load_mod_gfx: done, "..#all_gfx.." file(s) registered")
 end
 
 --- Load and merge all data from registered mods into a GameData table.
