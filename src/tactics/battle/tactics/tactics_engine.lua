@@ -44,6 +44,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@field battle_map BattleMap
 ---@field character_manager CharacterManager
 ---@field music_player MusicPlayer
+---@field skill_defs table<string, SkillDefinition> Skill definitions for initialising unit skill states.
 ---@field id_generator IdGenerator
 ---@field task_manager TaskManager
 ---@field animation_manager AnimationManager
@@ -72,6 +73,7 @@ local tactics_engine = {
 ---@param animation_manager AnimationManager
 ---@param bus EventBus
 ---@param music_player MusicPlayer
+---@param skill_defs? table<string, SkillDefinition>
 ---@return TacticsEngine
 function tactics_engine.new(
     chapter,
@@ -81,7 +83,8 @@ function tactics_engine.new(
     task_manager,
     animation_manager,
     bus,
-    music_player
+    music_player,
+    skill_defs
 )
     ---@type TacticsEngine
     local self = setmetatable({}, TacticsEngine)
@@ -94,6 +97,7 @@ function tactics_engine.new(
     self.battle_map = map
     self.character_manager = character_mgr
     self.music_player = music_player
+    self.skill_defs = skill_defs or {}
 
     self.id_generator = id_generator.new()
     self.task_manager = task_manager
@@ -269,7 +273,8 @@ local function try_spawn_at(self, char_man, player_roster, roster_count, spawn_p
         side,
         movement_side,
         character.facing.of(facing_r and "right" or "left"),
-        ai
+        ai,
+        self.skill_defs
     )
     self:spawn_unit(unit, spawn_point)
     return unit, roster_count

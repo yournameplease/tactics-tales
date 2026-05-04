@@ -6,7 +6,7 @@ local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 -- ---------------------------------------------------------------------------
 
 --- Build a minimal Character mock.
----@param opts table? fields: id, name, hp_max, dead, tags
+---@param opts table? fields: id, name, hp_max, dead, tags, skill_loadout
 ---@return table
 local function make_character(opts)
     opts = opts or {}
@@ -16,11 +16,12 @@ local function make_character(opts)
         stats = { hp_max = opts.hp_max or 10 },
         dead = opts.dead or false,
         tags = opts.tags or {},
+        skill_loadout = opts.skill_loadout or {},
     }
 end
 
 --- Spawn a BattleUnit with sensible defaults.
----@param opts table? fields: character, tile, tags, side, movement_side, facing, ai
+---@param opts table? fields: character, tile, tags, side, movement_side, facing, ai, skill_defs
 ---@return BattleUnit
 local function make_unit(opts)
     opts = opts or {}
@@ -31,7 +32,7 @@ local function make_unit(opts)
     local movement_side = opts.movement_side
     local facing = opts.facing or { vertical = "down", horizontal = "right" }
     local ai = opts.ai or { move = "one", target_sides = {}, exclude_tags = {} }
-    return battle_unit.spawn_unit(char, tile, tags, side, movement_side, facing, ai)
+    return battle_unit.spawn_unit(char, tile, tags, side, movement_side, facing, ai, opts.skill_defs)
 end
 
 -- ---------------------------------------------------------------------------
@@ -71,6 +72,44 @@ describe("battle.tactics.battle_unit", function()
         it("should use provided movement_side when given", function()
             local unit = make_unit({ side = "enemy", movement_side = "neutral" })
             luassert.are_equal("neutral", unit.movement_side)
+        end)
+
+        it("should initialise skill_states keyed by skill_id for each skill in loadout", function()
+            local char = make_character({ skill_loadout = { "heal", "fireball" } })
+            local skill_defs = {
+                heal = { uses_per_battle = 3 },
+                fireball = { uses_per_battle = 1 },
+            }
+            local unit = make_unit({ character = char, skill_defs = skill_defs })
+            luassert.is_not_nil(unit.skill_states["heal"])
+            luassert.is_not_nil(unit.skill_states["fireball"])
+        end)
+
+        it("should set cooldown_remaining to 0 for all skills", function()
+            local char = make_character({ skill_loadout = { "heal" } })
+            local skill_defs = { heal = { uses_per_battle = 2 } }
+            local unit = make_unit({ character = char, skill_defs = skill_defs })
+            luassert.are_equal(0, unit.skill_states["heal"].cooldown_remaining)
+        end)
+
+        it("should set uses_remaining from uses_per_battle in the skill definition", function()
+            local char = make_character({ skill_loadout = { "heal" } })
+            local skill_defs = { heal = { uses_per_battle = 5 } }
+            local unit = make_unit({ character = char, skill_defs = skill_defs })
+            luassert.are_equal(5, unit.skill_states["heal"].uses_remaining)
+        end)
+
+        it("should set uses_remaining to nil when uses_per_battle is nil (unlimited)", function()
+            local char = make_character({ skill_loadout = { "slash" } })
+            local skill_defs = { slash = {} }
+            local unit = make_unit({ character = char, skill_defs = skill_defs })
+            luassert.is_nil(unit.skill_states["slash"].uses_remaining)
+        end)
+
+        it("should produce an empty skill_states table when character has no skill_loadout", function()
+            local char = make_character({ skill_loadout = {} })
+            local unit = make_unit({ character = char })
+            luassert.are_same({}, unit.skill_states)
         end)
     end)
 
