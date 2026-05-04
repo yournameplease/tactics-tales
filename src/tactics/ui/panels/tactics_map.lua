@@ -291,6 +291,10 @@ local function draw_tactics_map(
     map(checkerboard_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
     
 
+    for _, decoration_layer in ipairs(layers.decorations or {}) do
+        map(decoration_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+    end
+
     map(state.battle_context.highlighted_tiles, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
     map(layer_path, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
