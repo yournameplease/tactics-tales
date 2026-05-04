@@ -96,13 +96,12 @@ end
 ---@param tile_to_sprite fun(id: integer): integer
 ---@return userdata
 local function tiled_layer_to_userdata(layer_data, map_w, map_h, tile_to_sprite)
-    local bmp = userdata("u8", map_w, map_h)
-    for col = 0, map_w - 1 do
-        local col_values = {}
-        for row = 0, map_h - 1 do
-            col_values[row + 1] = tile_to_sprite(layer_data[row * map_w + col + 1])
+    local bmp = userdata("i16", map_w, map_h)
+    for row = 0, map_h - 1 do
+        for col = 0, map_w - 1 do
+            local tile_id = tile_to_sprite(layer_data[row * map_w + col + 1])
+            bmp:set(col, row, tile_id)
         end
-        bmp:set(col, table.unpack(col_values))
     end
     return bmp
 end
@@ -113,16 +112,31 @@ end
 ---@param gfx_registry table<string, integer>
 ---@return BattleMap
 local function load_tiled(definition, tile_labels, gfx_registry)
+    log.debug("load_tiled: file='"..tostring(definition.file).."'")
     local tiled_data = include(definition.file .. ".lua")
+
+    if tiled_data == nil then
+        log.error("load_tiled: include returned nil for '"..tostring(definition.file)..".lua'")
+        error("tiled map file not found: " .. tostring(definition.file))
+    end
 
     local map_w = tiled_data.width
     local map_h = tiled_data.height
+    log.debug("load_tiled: map size "..map_w.."x"..map_h)
+
+    do
+        local keys = {}
+        for k, v in pairs(gfx_registry) do table.insert(keys, k.."="..tostring(v)) end
+        log.debug("load_tiled: gfx_registry { "..table.concat(keys, ", ").." }")
+    end
 
     -- Build tileset ranges; keyed by firstgid for direct lookup.
     local ranges = {}
     for _, ts in ipairs(tiled_data.tilesets) do
         local stem = file_stem(ts.filename)
-        table.insert(ranges, { firstgid = ts.firstgid, base = gfx_registry[stem] or 0 })
+        local base = gfx_registry[stem] or 0
+        log.debug("load_tiled: tileset '"..tostring(ts.filename).."' stem='"..stem.."' firstgid="..tostring(ts.firstgid).." base="..tostring(base))
+        table.insert(ranges, { firstgid = ts.firstgid, base = base })
     end
 
     local function tile_to_sprite(tile_id)
@@ -140,11 +154,14 @@ local function load_tiled(definition, tile_labels, gfx_registry)
 
     -- Index tile layers by name (skip non-tilelayer entries).
     local tile_layers = {}
+    local layer_names = {}
     for _, layer in ipairs(tiled_data.layers) do
         if layer.type == "tilelayer" then
             tile_layers[layer.name] = layer.data
+            table.insert(layer_names, layer.name)
         end
     end
+    log.debug("load_tiled: tile layers found: "..table.concat(layer_names, ", "))
 
     assert(tile_layers["ground"], "tiled map missing required 'ground' layer: " .. tostring(definition.file))
 
