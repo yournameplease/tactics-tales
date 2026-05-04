@@ -1,9 +1,10 @@
 ---
 id: TASK-76
 title: Define SkillDefinition and SkillState types
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:27'
+updated_date: '2026-05-04 22:37'
 labels: []
 milestone: m-13
 dependencies:
@@ -38,8 +39,8 @@ Place alongside item/weapon types or in a new `src/tactics/skill/` module. No ru
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 SkillDefinition and SkillState LuaCATS types are defined
-- [ ] #2 make test passes with no new type errors
+- [x] #1 SkillDefinition and SkillState LuaCATS types are defined
+- [x] #2 make test passes with no new type errors
 <!-- AC:END -->
 
 ## Definition of Done
