@@ -1,9 +1,10 @@
 ---
 id: TASK-70
 title: 'MapGenerator: support type="tiled" reading Tiled .lua map source at runtime'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 04:33'
+updated_date: '2026-05-04 05:10'
 labels: []
 milestone: m-9
 dependencies:

@@ -251,12 +251,14 @@ local function draw_tactics_map(
     end
 
     local sorted_units = userdata("i16", 3, #unit_positions)
-    for i,u in ipairs(unit_positions) do
-        sorted_units:set(0,i-1, u.point.y - camera_y)
-        sorted_units:set(1,i-1, u.point.x - camera_x)
-        sorted_units:set(2,i-1, u.id)
+    if sorted_units then
+        for i,u in ipairs(unit_positions) do
+            sorted_units:set(0,i-1, u.point.y - camera_y)
+            sorted_units:set(1,i-1, u.point.x - camera_x)
+            sorted_units:set(2,i-1, u.id)
+        end
+        sorted_units:sort()
     end
-    sorted_units:sort()
 
     -- TODO: preload layers
     local layers = battle_map.layers
