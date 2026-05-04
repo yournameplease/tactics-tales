@@ -118,22 +118,24 @@ local function load_tiled(definition, tile_labels, gfx_registry)
     local map_w = tiled_data.width
     local map_h = tiled_data.height
 
-    -- Build tileset ranges sorted descending by firstgid for O(n) lookup.
+    -- Build tileset ranges; keyed by firstgid for direct lookup.
     local ranges = {}
     for _, ts in ipairs(tiled_data.tilesets) do
         local stem = file_stem(ts.filename)
         table.insert(ranges, { firstgid = ts.firstgid, base = gfx_registry[stem] or 0 })
     end
-    table.sort(ranges, function(a, b) return a.firstgid > b.firstgid end)
 
     local function tile_to_sprite(tile_id)
         if tile_id == 0 then return 0 end
+        local best_firstgid = 0
+        local best_base = 0
         for _, r in ipairs(ranges) do
-            if tile_id >= r.firstgid then
-                return r.base + (tile_id - r.firstgid)
+            if tile_id >= r.firstgid and r.firstgid > best_firstgid then
+                best_firstgid = r.firstgid
+                best_base = r.base
             end
         end
-        return 0
+        return best_base + (tile_id - best_firstgid)
     end
 
     -- Index tile layers by name (skip non-tilelayer entries).

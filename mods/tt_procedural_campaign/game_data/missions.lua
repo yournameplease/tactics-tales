@@ -69,7 +69,7 @@ local battles = {
         end
 
         return {
-            map_id = "playground",
+            map_id = "abandoned_fortress",
             music  = 0,
             tile_labels = {
                 ["player_deployment"] = { 0x00, 0x01, 0x02, 0x03 },

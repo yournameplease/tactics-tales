@@ -1,9 +1,10 @@
 ---
 id: TASK-69
 title: 'ModLoader: load mod .gfx files into reserved slots and build gfx_registry'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 04:33'
+updated_date: '2026-05-04 05:01'
 labels: []
 milestone: m-9
 dependencies:
@@ -38,13 +39,13 @@ tactics.p64/gfx/3[01]_*.gfx
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 load_mod_gfx() is called before any other loading in load_mod_data()
-- [ ] #2 Each declared .gfx file is copied to tactics.p64/gfx/<slot>_<stem>.gfx on startup, overwriting any existing file
-- [ ] #3 game_data.gfx_registry maps each stem to its base sprite index (slot * 256)
-- [ ] #4 Registering more than 16 total gfx files across all mods raises a clear error before any loading
-- [ ] #5 Mods with no gfx field are silently skipped
-- [ ] #6 Generated gfx files (slots 16-31) are covered by .gitignore
-- [ ] #7 make test passes
+- [x] #1 load_mod_gfx() is called before any other loading in load_mod_data()
+- [x] #2 Each declared .gfx file is copied to tactics.p64/gfx/<slot>_<stem>.gfx on startup, overwriting any existing file
+- [x] #3 game_data.gfx_registry maps each stem to its base sprite index (slot * 256)
+- [x] #4 Registering more than 16 total gfx files across all mods raises a clear error before any loading
+- [x] #5 Mods with no gfx field are silently skipped
+- [x] #6 Generated gfx files (slots 16-31) are covered by .gitignore
+- [x] #7 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

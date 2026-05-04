@@ -1,6 +1,6 @@
 local luassert = require("luassert")
 
-local stories_mod  = require("tt_procedural_campaign.game_data.stories")
+local stories_mod  = require("tt_procedural_campaign.game_data.campaigns")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random       = require("src.tactics.util.random")
 
