@@ -191,7 +191,7 @@ describe("mod_loader", function()
 
             luassert.are_equal(1, #cp_calls)
             luassert.are_equal("mods/test_mod/game_data/gfx/tiny_tileset.gfx", cp_calls[1].src)
-            luassert.are_equal("tactics.p64/gfx/16_tiny_tileset.gfx", cp_calls[1].dst)
+            luassert.are_equal("gfx/16_tiny_tileset.gfx", cp_calls[1].dst)
             luassert.are_equal(16 * 256, game_data.gfx_registry["tiny_tileset"])
         end)
 
