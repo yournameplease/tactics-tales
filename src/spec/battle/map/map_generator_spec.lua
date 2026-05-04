@@ -33,6 +33,44 @@ local function stub_fetch(result)
     return function() _G.fetch = original end
 end
 
+--- Install a temporary include override that returns `result`.
+---@param result table
+---@return fun()
+local function stub_include(result)
+    local original = _G.include
+    _G.include = function(_) return result end --[[@diagnostic disable-line: duplicate-set-field]]
+    return function() _G.include = original end
+end
+
+--- Build a minimal Tiled map data structure.
+---@param w integer Map width in tiles.
+---@param h integer Map height in tiles.
+---@param layers table[] Array of layer tables to include.
+---@return table
+local function make_tiled_map(w, h, layers)
+    return {
+        width = w,
+        height = h,
+        tilewidth = 16,
+        tileheight = 16,
+        tilesets = {
+            { name = "my_tileset", firstgid = 1, filename = "my_tileset.tsx" }
+        },
+        layers = layers,
+    }
+end
+
+--- Build a flat row-major tile-data array filled with a single tile ID.
+---@param w integer
+---@param h integer
+---@param tile_id integer
+---@return integer[]
+local function make_tile_data(w, h, tile_id)
+    local data = {}
+    for i = 1, w * h do data[i] = tile_id end
+    return data
+end
+
 -- ---------------------------------------------------------------------------
 -- Tests
 -- ---------------------------------------------------------------------------
@@ -131,6 +169,150 @@ describe("battle.map.map_generator", function()
 
             -- No tile in the default (all-zero) layer matches metatile 5
             luassert.is_nil(map.tile_labels["zone"])
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
+    -- load_map — tiled
+    -- -----------------------------------------------------------------------
+
+    describe("load_map (tiled)", function()
+        it("should create a BattleMap with dimensions from the tiled source", function()
+            local tiled = make_tiled_map(5, 3, {
+                { type = "tilelayer", name = "ground", width = 5, height = 3,
+                  data = make_tile_data(5, 3, 1) }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 0 })
+            restore()
+
+            luassert.are_equal(5, map.width)
+            luassert.are_equal(3, map.height)
+        end)
+
+        it("should convert tile IDs using base + (tile_id - firstgid)", function()
+            -- gfx_registry maps stem -> base 10; firstgid = 1; tile_id = 3
+            -- expected sprite = 10 + (3 - 1) = 12
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = { 3, 3, 3, 3 } }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 10 })
+            restore()
+
+            luassert.are_equal(12, map.layers.terrain.ground:get(0, 0))
+        end)
+
+        it("should look up base sprite index from gfx_registry by filename stem", function()
+            -- filename "my_tileset.tsx" -> stem "my_tileset" -> base 100
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = { 1, 1, 1, 1 } }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 100 })
+            restore()
+
+            -- tile_id=1, firstgid=1, base=100 => sprite = 100 + 0 = 100
+            luassert.are_equal(100, map.layers.terrain.ground:get(0, 0))
+        end)
+
+        it("should return 0 for empty tiles (tile_id == 0)", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = { 0, 0, 0, 0 } }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 50 })
+            restore()
+
+            luassert.are_equal(0, map.layers.terrain.ground:get(0, 0))
+        end)
+
+        it("should produce nil for missing optional layers", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 0 })
+            restore()
+
+            luassert.is_nil(map.layers.metatiles)
+            luassert.is_nil(map.layers.terrain.front_wall)
+            luassert.is_nil(map.layers.terrain.mid_wall)
+            luassert.is_nil(map.layers.terrain.back_wall)
+            luassert.is_nil(map.layers.terrain.ceiling)
+        end)
+
+        it("should populate optional layers when present", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground",      width = 2, height = 2, data = make_tile_data(2, 2, 1) },
+                { type = "tilelayer", name = "front_walls", width = 2, height = 2, data = make_tile_data(2, 2, 2) },
+                { type = "tilelayer", name = "back_walls",  width = 2, height = 2, data = make_tile_data(2, 2, 3) },
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 0 })
+            restore()
+
+            luassert.is_not_nil(map.layers.terrain.front_wall)
+            luassert.is_not_nil(map.layers.terrain.back_wall)
+            luassert.is_nil(map.layers.terrain.mid_wall)
+        end)
+
+        it("should error when the ground layer is missing", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "front_walls", width = 2, height = 2, data = make_tile_data(2, 2, 1) }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            luassert.has_error(function()
+                map_generator.load_map(def, {}, { my_tileset = 0 })
+            end)
+            restore()
+        end)
+
+        it("should skip non-tilelayer entries (e.g. objectgroup)", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer",  name = "ground",     width = 2, height = 2, data = make_tile_data(2, 2, 1) },
+                { type = "objectgroup", name = "deployment", objects = {} },
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 0 })
+            restore()
+
+            luassert.is_not_nil(map.layers.terrain.ground)
+        end)
+
+        it("should initialise empty player and enemy spawner tables", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2,
+                  data = make_tile_data(2, 2, 1) }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 0 })
+            restore()
+
+            luassert.are_same({}, map.metadata.player_spawners)
+            luassert.are_same({}, map.metadata.enemy_spawners)
         end)
     end)
 
