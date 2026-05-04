@@ -4,6 +4,45 @@ local mod_schema = require("src.tactics.mods.mod_schema")
 local validator = require("src.tactics.validator.schema_validator")
 
 describe("mod_schema", function()
+    describe("characters (skill_loadout reference)", function()
+        it("fails validation when skill_loadout references an undefined skill", function()
+            -- Given
+            local characters = {
+                soldier = {
+                    skill_loadout = { "undefined_skill" },
+                },
+            }
+            local memory = { skills = {}, items = {}, characters = characters }
+
+            -- When
+            local is_valid, _ = validator.validate(characters, mod_schema.characters, memory)
+
+            -- Then
+            luassert.is_false(is_valid)
+        end)
+
+        it("passes validation when skill_loadout references a defined skill", function()
+            -- Given
+            local characters = {
+                healer = {
+                    skill_loadout = { "heal" },
+                },
+            }
+            local memory = {
+                skills = { heal = { name = "Heal", effect_type = "heal" } },
+                items = {},
+                characters = characters,
+            }
+
+            -- When
+            local is_valid, errors = validator.validate(characters, mod_schema.characters, memory)
+
+            -- Then
+            luassert.is_true(is_valid)
+            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+        end)
+    end)
+
     describe("mod_content", function()
         it("accepts a content block with a gfx list", function()
             -- Given

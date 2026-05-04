@@ -47,6 +47,7 @@ local CharacterAppearance = {}
 ---@field appearance CharacterAppearance Base appearance before equipment overrides.
 ---@field stats CharacterStats
 ---@field inventory ItemInventory
+---@field skill_loadout string[] Skill IDs assigned to this character.
 ---@field tags table<string, boolean> Set of string tags.
 ---@field dead boolean? True when the character has been killed.
 local Character = {}

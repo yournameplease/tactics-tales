@@ -111,6 +111,7 @@ local character_template_spec = s.record({
 	movement = s.optional(s.integer()),
 	hp_max = s.optional(s.integer()),
 	item_loadout = s.optional(s.list(s.reference("items"))),
+	skill_loadout = s.optional(s.list(s.reference("skills"))),
 	head_options_m = s.optional(randomizer_options_spec),
 	head_options_f = s.optional(randomizer_options_spec),
 	headwear_options = s.optional(randomizer_options_spec),
