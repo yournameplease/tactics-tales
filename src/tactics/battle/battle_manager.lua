@@ -95,7 +95,8 @@ function battle_manager.new(
         task_manager,
         animation_manager,
         event_bus,
-        music_player
+        music_player,
+        game_data.skills
     )
 
     self.tactics_engine:spawn_all(

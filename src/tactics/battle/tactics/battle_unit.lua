@@ -16,6 +16,7 @@ local maps = require("src.tactics.util.maps")
 ---@field unit_ai UnitAI AI behaviour descriptor for this unit.
 ---@field tags table<string, boolean> Set of string tags associated with this unit.
 ---@field marked boolean True when the unit is currently marked.
+---@field skill_states table<string, SkillState> Per-skill battle state keyed by skill_id.
 local BattleUnit = {}
 BattleUnit.__index = BattleUnit
 
@@ -74,8 +75,18 @@ end
 ---@param movement_side? string Side used for movement rules; defaults to `side`.
 ---@param facing Facing Initial facing direction.
 ---@param ai? UnitAI AI behaviour descriptor.
+---@param skill_defs? table<string, SkillDefinition> Skill definitions used to initialise skill_states.
 ---@return BattleUnit
-function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side, facing, ai)
+function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side, facing, ai, skill_defs)
+    local skill_states = {}
+    for _, skill_id in ipairs(permanent_unit.skill_loadout or {}) do
+        local def = skill_defs and skill_defs[skill_id]
+        skill_states[skill_id] = {
+            cooldown_remaining = 0,
+            uses_remaining = def and def.uses_per_battle or nil,
+        }
+    end
+
     local instance = {
         id = permanent_unit.id,
         tile = tile,
@@ -92,6 +103,7 @@ function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side,
         marked = false,
         unit_ai = ai,
         sprites = {},
+        skill_states = skill_states,
     }
 
     setmetatable(instance, {
