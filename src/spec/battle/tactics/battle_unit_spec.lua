@@ -243,6 +243,46 @@ describe("battle.tactics.battle_unit", function()
     end)
 
     -- ---------------------------------------------------------------------------
+    -- tick_skill_cooldowns
+    -- ---------------------------------------------------------------------------
+
+    describe("tick_skill_cooldowns", function()
+        it("should decrement cooldown_remaining by 1 for skills on cooldown", function()
+            local char = make_character({ skill_loadout = { "heal" } })
+            local unit = make_unit({ character = char, skill_defs = { heal = {} } })
+            unit.skill_states["heal"].cooldown_remaining = 2
+            unit:tick_skill_cooldowns()
+            luassert.are_equal(1, unit.skill_states["heal"].cooldown_remaining)
+        end)
+
+        it("should not decrement cooldown_remaining below 0", function()
+            local char = make_character({ skill_loadout = { "heal" } })
+            local unit = make_unit({ character = char, skill_defs = { heal = {} } })
+            unit.skill_states["heal"].cooldown_remaining = 0
+            unit:tick_skill_cooldowns()
+            luassert.are_equal(0, unit.skill_states["heal"].cooldown_remaining)
+        end)
+
+        it("should tick multiple skills independently", function()
+            local char = make_character({ skill_loadout = { "heal", "fireball" } })
+            local unit = make_unit({ character = char, skill_defs = { heal = {}, fireball = {} } })
+            unit.skill_states["heal"].cooldown_remaining = 2
+            unit.skill_states["fireball"].cooldown_remaining = 0
+            unit:tick_skill_cooldowns()
+            luassert.are_equal(1, unit.skill_states["heal"].cooldown_remaining)
+            luassert.are_equal(0, unit.skill_states["fireball"].cooldown_remaining)
+        end)
+
+        it("should reduce from 1 to 0 making skill available again", function()
+            local char = make_character({ skill_loadout = { "heal" } })
+            local unit = make_unit({ character = char, skill_defs = { heal = {} } })
+            unit.skill_states["heal"].cooldown_remaining = 1
+            unit:tick_skill_cooldowns()
+            luassert.are_equal(0, unit.skill_states["heal"].cooldown_remaining)
+        end)
+    end)
+
+    -- ---------------------------------------------------------------------------
     -- die
     -- ---------------------------------------------------------------------------
 

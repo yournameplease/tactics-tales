@@ -762,6 +762,15 @@ end
 
 -- Turn flow
 
+--- Tick skill cooldowns for all units on the given side.
+---@param side Side
+function TacticsEngine:tick_skill_cooldowns_for_side(side)
+    local units = self.battle_map:get_units(function(u) return u.side == side end)
+    for _, unit in ipairs(units) do
+        unit:tick_skill_cooldowns()
+    end
+end
+
 --- Reset `has_acted` on every unit on the map.
 function TacticsEngine:refresh_all_units()
     self:refresh_units(fp.fn_true)
