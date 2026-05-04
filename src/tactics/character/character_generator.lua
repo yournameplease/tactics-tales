@@ -42,6 +42,7 @@ local function apply_template_to_parent(parent, child)
         movement = child.movement or parent.movement,
         hp_max = child.hp_max or parent.hp_max,
         item_loadout = child.item_loadout or parent.item_loadout,
+        skill_loadout = child.skill_loadout or parent.skill_loadout,
         head_options_m = child.head_options_m or parent.head_options_m,
         head_options_f = child.head_options_f or parent.head_options_f,
         eyewear_options = child.eyewear_options or parent.eyewear_options,
@@ -128,6 +129,8 @@ function character_generator.generate_from_template(id, template_id, tags, game_
     if char.appearance.gender == "female" and char.appearance.body_class == "shirtless" then
         char.appearance.body_class = "sleeveless"
     end
+
+    char.skill_loadout = template.skill_loadout or {}
 
     char.tags = maps.set(tags) --[[@as table<string, boolean>]]
 

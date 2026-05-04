@@ -29,6 +29,7 @@
 ---@field movement? integer Base movement range in tiles.
 ---@field hp_max? integer Maximum hit points.
 ---@field item_loadout? string[] Item IDs to add to the starting inventory.
+---@field skill_loadout? string[] Skill IDs assigned to this character.
 ---@field head_options_m? AttributeOptions Head shape options for male characters.
 ---@field head_options_f? AttributeOptions Head shape options for female characters.
 ---@field eyewear_options? AttributeOptions Eyewear accessory options.

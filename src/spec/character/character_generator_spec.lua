@@ -132,6 +132,34 @@ describe("tactics.character.character_generator", function()
 
             luassert.are_equal(42, char.id)
         end)
+
+        it("should carry skill_loadout from the template", function()
+            local game_data = make_game_data({ skill_loadout = { "heal", "fireball" } })
+
+            local char = character_generator.generate_from_template(1, nil, {}, game_data)
+
+            luassert.are_same({ "heal", "fireball" }, char.skill_loadout)
+        end)
+
+        it("should set an empty skill_loadout when template has none", function()
+            local game_data = make_game_data()
+
+            local char = character_generator.generate_from_template(1, nil, {}, game_data)
+
+            luassert.are_same({}, char.skill_loadout)
+        end)
+
+        it("child skill_loadout replaces parent skill_loadout", function()
+            local game_data = make_game_data({ skill_loadout = { "heal" } })
+            game_data.characters["child"] = {
+                parent_template = "default",
+                skill_loadout = { "fireball" },
+            }
+
+            local char = character_generator.generate_from_template(1, "child", {}, game_data)
+
+            luassert.are_same({ "fireball" }, char.skill_loadout)
+        end)
     end)
 
     describe("deserialize", function()
