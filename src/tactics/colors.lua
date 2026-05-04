@@ -6,7 +6,9 @@
 
 ---@alias Color integer
 
----@alias ColorTableId "paper"
+---@alias ColorTableId
+---| "light"
+---| "dark"
 
 ---@alias PaletteId "default"|"paper"
 
@@ -33,7 +35,8 @@ end
 
 ---@type table<ColorTableId, integer>
 local rows_by_id = {
-    ["paper"] = 32,
+    ["light"] = 33,
+    ["dark"] = 35,
 }
 
 local color_table_sprite = 1

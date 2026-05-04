@@ -7,6 +7,7 @@ local lists = require("src.tactics.util.lists")
 local point = require("src.tactics.util.point")
 local mouse_menu_selection = require("src.tactics.menu.menu_cursor").mouse_selection
 local CharacterRenderer = require("src.tactics.character.character_renderer")
+local colors = require("src.tactics.colors")
 
 ---@class MapData
 ---@field menu_node? MenuNode
@@ -279,6 +280,16 @@ local function draw_tactics_map(
     -- local clip_h = VIEWPORT_HEIGHT * TILE_HEIGHT
     -- clip(0, self.rect.c_y, clip_w, clip_h)
     map(layer_ground, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+
+    local checkerboard_layer = userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
+    for x = 0, battle_map.width do
+        for y = x%2, battle_map.height, 2 do
+            checkerboard_layer:set(x, y, 192)
+        end
+    end
+    colors.apply_colortable_row("dark")
+    map(checkerboard_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+    
 
     map(state.battle_context.highlighted_tiles, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
