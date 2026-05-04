@@ -4,8 +4,9 @@ title: 'Mod: configurable recruitment rate overrides per archetype and difficult
 status: To Do
 assignee: []
 created_date: '2026-04-26 19:12'
-updated_date: '2026-04-26 20:09'
-labels: []
+updated_date: '2026-05-04 21:47'
+labels:
+  - deferred
 milestone: m-7
 dependencies: []
 priority: low

@@ -4,7 +4,9 @@ title: Factor shared fantasy assets into a common mod dependency
 status: To Do
 assignee: []
 created_date: '2026-04-26 19:12'
-labels: []
+updated_date: '2026-05-04 21:47'
+labels:
+  - deferred
 milestone: m-8
 dependencies: []
 priority: low

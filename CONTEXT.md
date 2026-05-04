@@ -103,6 +103,10 @@ _Note_: The code uses `StoryDefinition` / `Story` — the player-facing term is 
 > **Dev:** "That's a **RecruitUnits** script effect — same battle script or a separate one triggered by the captain's death?"
 > **Designer:** "Separate — trigger on the captain surviving to end of battle, not dying. And make sure the **campaign state** records that she joined, so a later **campaign** node can reference her name."
 
+**Skill**:
+A learnable active ability a Character can use in battle, defined entirely in mod data (no hardcoded skills in the engine). Skills are stored on the Character (persistent across battles); cooldown and uses-remaining state are tracked on the Unit (battle-instance only). A Skill may have a turn-based cooldown (unavailable for N turns after use), a per-battle use limit, or both. Some Skills have an HP cost (self-damage on cast; self-kill is allowed). The engine provides a general Skill framework; specific skills (e.g., healing, damaging magic) are sample content authored in mods and subject to change.
+_Avoid_: Spell (magic-only connotation), Ability (used colloquially — prefer Skill in design discussion)
+
 ## Flagged ambiguities
 
 - **chapter** is used in code for two distinct things: the narrative **Chapter** (player-facing titled section) and the **Battle Index** (internal battle count). Never use "chapter" alone in design discussion — qualify which you mean.

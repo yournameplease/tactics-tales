@@ -1,9 +1,10 @@
 ---
 id: TASK-36
-title: 'Define initial archetypes: defeat the evil king and rally nations'
+title: 'Define initial archetype: Defeat the Evil King'
 status: To Do
 assignee: []
 created_date: '2026-04-26 19:12'
+updated_date: '2026-05-04 21:47'
 labels: []
 milestone: m-8
 dependencies: []
@@ -14,7 +15,7 @@ ordinal: 2000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Author 2 archetypes in tt_fantasy_procedural_story: \"Defeat the Evil King\" and \"Rally Nations Against the Monster Army\". Each declares an ordered beat/filler slot sequence (~10-14 slots), filler pool weights, faction bias, and a recruitment rate. Beats are placeholders (pointing to not-yet-authored battle IDs) at this stage.
+Author the "Defeat the Evil King" archetype in tt_procedural_campaign. Declare an ordered beat/filler slot sequence (~10 slots), filler pool weights, faction bias, and a recruitment rate. Beats are placeholders (pointing to not-yet-authored battle IDs) at this stage. Map reuse across filler slots is fine.\n\nNote: "Rally Nations Against the Monster Army" archetype is deferred — do not include it in this task.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
