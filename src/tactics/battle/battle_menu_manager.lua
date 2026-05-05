@@ -833,6 +833,13 @@ return {
                                 :as_final_step())
                         end
 
+                        local skill_loadout = ctx.acting_unit.unit.character.skill_loadout
+                        if #skill_loadout > 0 then
+                            table.insert(options, button.builder("skills")
+                                :with_text("Skills")
+                                :advance_to("SELECT_SKILL"))
+                        end
+
                         if not msb.tutorial_mode then
                             table.insert(options, button.builder("wait")
                                 :with_text("Wait")
@@ -901,6 +908,17 @@ return {
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
                 -- :with_action("SHOULDER_L", { command = "cycle_left", description = "Previous Target" })
                 -- :with_action("SHOULDER_R", { command = "cycle_right", description = "Next Target" }),
+            ["SELECT_SKILL"] = step_definition.of_node(
+                list.column(
+                    "select_skill",
+                    function(_msb, _ctx)
+                        return {}
+                    end
+                )
+            )
+            :with_previous_step("SELECT_ACTION")
+            :with_action("BUTTON_A", { command = "select", description = "Select" })
+            :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["CONFIRM_ATTACK"] = step_definition.of_node(
                 list.column(
                     "confirm_attack",
