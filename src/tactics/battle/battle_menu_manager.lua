@@ -392,6 +392,19 @@ end
 
 ---@param services BattleMenuContext
 ---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+function PLAYER_TURN_HANDLERS.use_skill_at_tile(services, session_context, value)
+    services.tactics_engine:handle_skill(
+        session_context.acting_unit.unit,
+        session_context.selected_skill_id,
+        value.point
+    )
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param session_context BattleMainMenuContext
 ---@param _value any
 ---@return nil
 function PLAYER_TURN_HANDLERS.wait_acting_unit(services, session_context, _value)
@@ -967,15 +980,42 @@ return {
             :with_action("BUTTON_A", { command = "select", description = "Select" })
             :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["SELECT_SKILL_TARGET"] = step_definition.of_node(
-                list.column(
-                    "select_skill_target",
-                    function(_msb, _ctx)
-                        return {}
-                    end
-                )
+                grid.grid("select_skill_target", map_width, map_height)
+                    :with_child(
+                        function(point, msb, ctx)
+                            ---@cast msb BattleMenuContext
+                            ---@cast ctx BattleMainMenuContext
+                            local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
+                            if not def then return false end
+                            return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map)
+                        end,
+                        button.builder("use_skill")
+                            :handle_action("select", "use_skill_at_tile")
+                            :as_final_step()
+                    )
+                    :with_tile_highlights(function(msb, ctx)
+                        ---@cast msb BattleMenuContext
+                        ---@cast ctx BattleMainMenuContext
+                        local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
+                        if not def then
+                            return msb.battle_map:get_tiles_userdata_by("u8", function() return 0 end)
+                        end
+                        local tiles = def.targeting.get_selection_tiles(ctx.destination.point, msb.battle_map)
+                        local tile_set = {}
+                        for _, t in ipairs(tiles) do
+                            tile_set[t.x .. "," .. t.y] = true
+                        end
+                        return msb.battle_map:get_tiles_userdata_by("u8", function(p)
+                            return tile_set[p.x .. "," .. p.y] and HIGHLIGHT.IS_VALID or 0
+                        end)
+                    end)
+                    :with_initial_point(function(services, _ctx)
+                        ---@cast services BattleMenuContext
+                        return services.tactics_engine.active_point
+                    end)
             )
             :with_previous_step("SELECT_SKILL")
-            :with_action("BUTTON_A", { command = "select", description = "Select" })
+            :with_action("BUTTON_A", { command = "select", description = "Select Target" })
             :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["CONFIRM_ATTACK"] = step_definition.of_node(
                 list.column(
