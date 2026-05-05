@@ -38,5 +38,9 @@
     },
     "runtime.special": {
         "include": "require"
+    },
+    "format.defaultConfig": {
+        "indent_style": "space",
+        "indent_size": 2
     }
 }
