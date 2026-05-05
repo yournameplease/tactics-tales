@@ -162,7 +162,7 @@ local UNIT_TEMPLATES = {
 	bandit_base = {
 		parent_template = "human_base",
 		gender_options = options.weighted{
-			["male"] = 5,
+			["male"] = 3,
 			["female"] = 1
 		},
 		body_options = options.weighted{
