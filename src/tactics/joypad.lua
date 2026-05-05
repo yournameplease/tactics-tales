@@ -121,11 +121,10 @@ end
 --- Sample raw input, update action pressed/released state, and return a unified UserInput.
 ---@return UserInput
 function InputService:get_user_input()
-   
-    local joy   = self:get_joypad()
-    local mouse = self:get_mouse()
+    local joy       = self:get_joypad()
+    local mouse     = self:get_mouse()
 
-    local any_joy =
+    local any_joy   =
         joy.dx ~= 0
         or joy.dy ~= 0
         or joy.a
@@ -141,8 +140,8 @@ function InputService:get_user_input()
         or mouse.mm
 
     if DYNAMIC_CONFIG.input_group == "mouse_and_keyboard" then
-        if any_joy   then self.current_input = "joypad" end
-        if any_mouse then self.current_input = "mouse"  end
+        if any_joy then self.current_input = "joypad" end
+        if any_mouse then self.current_input = "mouse" end
     elseif DYNAMIC_CONFIG.input_group == "mouse_only" then
         self.current_input = "mouse"
     else
@@ -153,15 +152,15 @@ function InputService:get_user_input()
     local new_actions
     if self.current_input == "mouse" then
         new_actions = {
-            ["BUTTON_A"]  = mouse.ml,
-            ["BUTTON_B"]  = mouse.mr,
+            ["BUTTON_A"]   = mouse.ml,
+            ["BUTTON_B"]   = mouse.mr,
             ["SHOULDER_L"] = false,
             ["SHOULDER_R"] = false,
         }
     else
         new_actions = {
-            ["BUTTON_A"]  = joy.a,
-            ["BUTTON_B"]  = joy.b,
+            ["BUTTON_A"]   = joy.a,
+            ["BUTTON_B"]   = joy.b,
             ["SHOULDER_L"] = joy.l,
             ["SHOULDER_R"] = joy.r,
         }
@@ -174,7 +173,7 @@ function InputService:get_user_input()
     end
 
     ---@type UserInput
-    local out = {
+    local out           = {
         joypad         = joy,
         mouse          = mouse,
         active_method  = self.current_input,
@@ -182,7 +181,7 @@ function InputService:get_user_input()
         actions        = self.actions,
     }
 
-    self.mouse_prev    = mouse
+    self.mouse_prev     = mouse
     self.previous_input = self.current_input
 
     return out
@@ -202,10 +201,10 @@ function input_service.new()
     }
     ---@type InputService
     local self = setmetatable({
-        current_input   = "mouse",
-        previous_input  = nil,
-        mouse_prev      = nil,
-        actions         = actions,
+        current_input  = "mouse",
+        previous_input = nil,
+        mouse_prev     = nil,
+        actions        = actions,
     }, InputService)
     return self
 end

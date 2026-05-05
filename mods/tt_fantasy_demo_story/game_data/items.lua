@@ -37,7 +37,7 @@ local function shield(name, sprite_id, slots, defense, avoid)
     if avoid and avoid ~= 0 then
         add(effects, effect.increase_avoid(avoid, "SHIELD"))
     end
-    
+
     return {
         name = name,
         type = "SHIELD",
@@ -48,7 +48,7 @@ local function shield(name, sprite_id, slots, defense, avoid)
             anchor = lib.point.of(14, 12)
         },
 
-        equipment_effects = effects,        
+        equipment_effects = effects,
     }
 end
 
@@ -78,29 +78,29 @@ end
 
 ---@type ModItemsModule
 local ITEM_DATA = {
-    dagger = lib.libs.weapon.melee( "Dagger", 96, 1, 100, 1, nil, "1 range" ),
-    sword = lib.libs.weapon.melee( "Sword", 97, 2, 100, 1, nil, "1 range" ),
-    axe = lib.libs.weapon.melee( "Axe", 98, 2, 100, 1, {
-            lib.libs.weapon.effect.shieldkiller()
-        }, "1 range"
+    dagger = lib.libs.weapon.melee("Dagger", 96, 1, 100, 1, nil, "1 range"),
+    sword = lib.libs.weapon.melee("Sword", 97, 2, 100, 1, nil, "1 range"),
+    axe = lib.libs.weapon.melee("Axe", 98, 2, 100, 1, {
+        lib.libs.weapon.effect.shieldkiller()
+    }, "1 range"
     ),
-    spear = lib.libs.weapon.melee( "Spear", 99, 1, 100, 1, {
-            lib.libs.weapon.effect.long_reach()
-        }, "1 range"
+    spear = lib.libs.weapon.melee("Spear", 99, 1, 100, 1, {
+        lib.libs.weapon.effect.long_reach()
+    }, "1 range"
     ),
-    poleaxe = lib.libs.weapon.melee( "Poleaxe", 100, 2, 100, 1, {
-            lib.libs.weapon.effect.long_reach(),
-            lib.libs.weapon.effect.shieldkiller()
-        }, "1 range"
+    poleaxe = lib.libs.weapon.melee("Poleaxe", 100, 2, 100, 1, {
+        lib.libs.weapon.effect.long_reach(),
+        lib.libs.weapon.effect.shieldkiller()
+    }, "1 range"
     ),
-    club = lib.libs.weapon.melee( "Club", 101, 1, 100, 1, nil, "1 range" ),
-    mace = lib.libs.weapon.melee( "Mace", 102, 2, 100, 1, {
-            lib.libs.weapon.effect.armorkiller(),
-            lib.libs.weapon.effect.shieldkiller()
-        }, "1 range"
+    club = lib.libs.weapon.melee("Club", 101, 1, 100, 1, nil, "1 range"),
+    mace = lib.libs.weapon.melee("Mace", 102, 2, 100, 1, {
+        lib.libs.weapon.effect.armorkiller(),
+        lib.libs.weapon.effect.shieldkiller()
+    }, "1 range"
     ),
-    greatsword = lib.libs.weapon.two_handed( "Greatsword", 103, 3, 100, 2, nil, "1 range" ),
-    bow = lib.libs.weapon.ranged( "Bow", 104, 2, 100, 2, 2, 2, nil, "2 range" ),
+    greatsword = lib.libs.weapon.two_handed("Greatsword", 103, 3, 100, 2, nil, "1 range"),
+    bow = lib.libs.weapon.ranged("Bow", 104, 2, 100, 2, 2, 2, nil, "2 range"),
     shield = shield("Shield", 105, 1, 1, 0),
     armor = armor("Armor", 2, 1, 0),
     boulder = lib.libs.weapon.of(
@@ -120,10 +120,10 @@ local ITEM_DATA = {
                 get_selection_tiles = function(origin, map)
                     local out = {}
                     local height = map.height
-                    for y=origin.y+1,height-1 do
+                    for y = origin.y + 1, height - 1 do
                         add(out, lib.point.of(origin.x, y))
                     end
-            
+
                     return out
                 end,
                 get_targets_for_selection = function(origin, selection, map)

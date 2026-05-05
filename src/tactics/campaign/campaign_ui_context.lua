@@ -43,7 +43,8 @@ function CampaignUIContext:enrich()
         ---@type table<string, string>
         local appearance = menu.node.data
 
-        local character_customizer_node = self.campaign_page.nodes[#self.campaign_page.nodes] --[[@as RenderedCharacterCustomization]]
+        local character_customizer_node = self.campaign_page.nodes
+        [#self.campaign_page.nodes] --[[@as RenderedCharacterCustomization]]
 
         local drawable_character = character_customizer_node.character
         if drawable_character ~= nil then

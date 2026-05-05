@@ -32,9 +32,9 @@ describe("tactics.menu.cursor.button", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("test_button")
-                            :with_text("Test Button")
-                            :with_value("test_value")
-                            :handle_action("select", "test_handler")
+                        :with_text("Test Button")
+                        :with_value("test_value")
+                        :handle_action("select", "test_handler")
                     ):with_action("BUTTON_A", { command = "select", description = "Select" })
                 }
             }
@@ -57,11 +57,11 @@ describe("tactics.menu.cursor.button", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         button.builder("btn1")
-                            :advance_to("STEP_2")
+                        :advance_to("STEP_2")
                     ):with_action("BUTTON_A", { command = "select" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
                         button.builder("btn2")
-                            :with_text("Step 2")
+                        :with_text("Step 2")
                     )
                 }
             }
@@ -85,9 +85,9 @@ describe("tactics.menu.cursor.button", function()
                         button.builder("btn1"):advance_to("STEP_2")
                     ):with_action("BUTTON_A", { command = "select" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
-                        button.builder("btn2"):then_go_back()
-                    ):with_previous_step("STEP_1")
-                     :with_action("BUTTON_A", { command = "select" })
+                            button.builder("btn2"):then_go_back()
+                        ):with_previous_step("STEP_1")
+                        :with_action("BUTTON_A", { command = "select" })
                 }
             }
         }
@@ -143,11 +143,11 @@ describe("tactics.menu.cursor.button", function()
                 },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        button.builder("btn1")
+                            button.builder("btn1")
                             :handle_action("select", "select_h")
                             :handle_action("menu", "menu_h")
-                    ):with_action("BUTTON_A", { command = "select" })
-                     :with_action("BUTTON_B", { command = "menu" })
+                        ):with_action("BUTTON_A", { command = "select" })
+                        :with_action("BUTTON_B", { command = "menu" })
                 }
             }
         }
@@ -181,11 +181,11 @@ describe("tactics.menu.cursor.button", function()
                 },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        button.builder("btn1")
+                            button.builder("btn1")
                             :handle_action("select", "recompute_h")
                             :handle_action("menu", "navigate_h")
-                    ):with_action("BUTTON_A", { command = "select" })
-                     :with_action("BUTTON_B", { command = "menu" }),
+                        ):with_action("BUTTON_A", { command = "select" })
+                        :with_action("BUTTON_B", { command = "menu" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
                         button.builder("btn2")
                     )

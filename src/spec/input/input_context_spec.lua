@@ -4,23 +4,23 @@ local input_context = require("src.tactics.input.input_context")
 --- Minimal Joypad stub.
 ---@return Joypad
 local function make_joy()
-    return { dx=0, dxp=0, dy=0, dyp=0, a=false, ap=false, b=false, bp=false, l=false, lp=false, r=false, rp=false }
+    return { dx = 0, dxp = 0, dy = 0, dyp = 0, a = false, ap = false, b = false, bp = false, l = false, lp = false, r = false, rp = false }
 end
 
 --- Minimal Mouse stub.
 ---@return Mouse
 local function make_mouse()
-    return { mx=0, my=0, ml=false, mlp=false, mr=false, mrp=false, mm=false, mmp=false, wheel_x=0, wheel_y=0 }
+    return { mx = 0, my = 0, ml = false, mlp = false, mr = false, mrp = false, mm = false, mmp = false, wheel_x = 0, wheel_y = 0 }
 end
 
 --- Minimal InputActions stub (all released, not held).
 ---@return InputActions
 local function make_actions()
     return {
-        ["BUTTON_A"]   = { held=false, pressed=false, released=false },
-        ["BUTTON_B"]   = { held=false, pressed=false, released=false },
-        ["SHOULDER_L"] = { held=false, pressed=false, released=false },
-        ["SHOULDER_R"] = { held=false, pressed=false, released=false },
+        ["BUTTON_A"]   = { held = false, pressed = false, released = false },
+        ["BUTTON_B"]   = { held = false, pressed = false, released = false },
+        ["SHOULDER_L"] = { held = false, pressed = false, released = false },
+        ["SHOULDER_R"] = { held = false, pressed = false, released = false },
     }
 end
 
@@ -119,7 +119,9 @@ describe("tactics.input.input_context", function()
             input_context.handle_update(
                 ctx,
                 function(_) return nil end,
-                function(_, h) captured_hovered = h; return nil end
+                function(_, h)
+                    captured_hovered = h; return nil
+                end
             )
 
             luassert.are_equal(hovered, captured_hovered)
@@ -132,7 +134,9 @@ describe("tactics.input.input_context", function()
             input_context.handle_update(
                 ctx,
                 function(_) return nil end,
-                function(_, _h) mouse_called = true; return nil end
+                function(_, _h)
+                    mouse_called = true; return nil
+                end
             )
 
             luassert.is_false(mouse_called)
@@ -144,7 +148,9 @@ describe("tactics.input.input_context", function()
 
             input_context.handle_update(
                 ctx,
-                function(_) joy_called = true; return nil end,
+                function(_)
+                    joy_called = true; return nil
+                end,
                 function(_, _h) return nil end
             )
 

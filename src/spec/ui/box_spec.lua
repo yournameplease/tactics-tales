@@ -67,10 +67,8 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("tactics.ui.box", function()
-
     -- -----------------------------------------------------------------------
     describe("builder / build defaults", function()
-
         it("defaults width to 'fill' when unset", function()
             local elem = box_module.builder("x"):build()
             luassert.are_equal("fill", elem.layout.width)
@@ -82,7 +80,7 @@ describe("tactics.ui.box", function()
         end)
 
         it("sets flex_grow to 1 when width is fill", function()
-            local elem = box_module.builder("x"):build()  -- width defaults to "fill"
+            local elem = box_module.builder("x"):build() -- width defaults to "fill"
             luassert.are_equal(1, elem.layout.flex_grow)
         end)
 
@@ -126,7 +124,7 @@ describe("tactics.ui.box", function()
         it("raises when decoration_padding exceeds any padding side", function()
             luassert.has_error(function()
                 box_module.builder("x")
-                    :layout({ width = "fit_content", height = "fill", padding = { t=2, b=2, l=2, r=2 } })
+                    :layout({ width = "fit_content", height = "fill", padding = { t = 2, b = 2, l = 2, r = 2 } })
                     :style({ decoration_padding = 3, decoration = "embossed" })
                     :build()
             end)
@@ -135,16 +133,14 @@ describe("tactics.ui.box", function()
         it("does not raise when decoration_padding equals all padding sides", function()
             -- should not throw
             box_module.builder("x")
-                :layout({ width = "fit_content", height = "fill", padding = { t=3, b=3, l=3, r=3 } })
+                :layout({ width = "fit_content", height = "fill", padding = { t = 3, b = 3, l = 3, r = 3 } })
                 :style({ decoration_padding = 3, decoration = "embossed" })
                 :build()
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("UIBuilder:container preset", function()
-
         it("'block' on col dir gives fit_content height and fill width", function()
             local elem = box_module.builder("x"):direction("col"):container("block"):build()
             luassert.are_equal("fit_content", elem.layout.height)
@@ -174,12 +170,10 @@ describe("tactics.ui.box", function()
             luassert.are_equal("fit_content", elem.layout.width)
             luassert.are_equal("fit_content", elem.layout.height)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("UIBuilder:padding", function()
-
         it("integer argument sets all four padding fields uniformly", function()
             -- :padding() must be called after :layout() to avoid being overwritten
             local elem = box_module.builder("x"):layout({ width = "fill", height = "fit_content" }):padding(4):build()
@@ -190,18 +184,17 @@ describe("tactics.ui.box", function()
         end)
 
         it("Padding table sets each side independently", function()
-            local elem = box_module.builder("x"):layout({ width = "fill", height = "fit_content" }):padding({ t = 1, b = 2, l = 3, r = 4 }):build()
+            local elem = box_module.builder("x"):layout({ width = "fill", height = "fit_content" }):padding({ t = 1, b = 2, l = 3, r = 4 })
+            :build()
             luassert.are_equal(1, elem.layout.padding.t)
             luassert.are_equal(2, elem.layout.padding.b)
             luassert.are_equal(3, elem.layout.padding.l)
             luassert.are_equal(4, elem.layout.padding.r)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:add", function()
-
         it("returns the added child for chaining", function()
             local parent = make_fit("parent")
             local child = make_fixed("child", 10, 10)
@@ -223,12 +216,10 @@ describe("tactics.ui.box", function()
             parent:add(child)
             luassert.are_equal(parent, child.parent)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:measure — fixed size", function()
-
         it("sets rect.w and rect.h from the fixed dimensions", function()
             local elem = make_fixed("e", 30, 20)
             elem:measure(1, true)
@@ -239,11 +230,11 @@ describe("tactics.ui.box", function()
         it("subtracts padding from content dimensions", function()
             -- Include padding inside the layout table so :layout() doesn't overwrite it
             local elem = box_module.builder("e")
-                :layout({ width = 30, height = 20, padding = { t=3, b=3, l=3, r=3 } })
+                :layout({ width = 30, height = 20, padding = { t = 3, b = 3, l = 3, r = 3 } })
                 :build()
             elem:measure(1, true)
-            luassert.are_equal(24, elem.rect.c_w)  -- 30 - 3 - 3
-            luassert.are_equal(14, elem.rect.c_h)  -- 20 - 3 - 3
+            luassert.are_equal(24, elem.rect.c_w) -- 30 - 3 - 3
+            luassert.are_equal(14, elem.rect.c_h) -- 20 - 3 - 3
         end)
 
         it("stores the depth in the rect", function()
@@ -251,12 +242,10 @@ describe("tactics.ui.box", function()
             elem:measure(3, true)
             luassert.are_equal(3, elem.rect.depth)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:measure — fit_content col direction", function()
-
         it("height equals sum of child heights", function()
             local parent = make_fit("p")
             parent:add(make_fixed("a", 10, 5))
@@ -290,19 +279,17 @@ describe("tactics.ui.box", function()
         it("accounts for padding in fit_content size", function()
             local parent = box_module.builder("p")
                 :direction("col")
-                :layout({ width = "fit_content", height = "fit_content", padding = { t=3, b=3, l=3, r=3 } })
+                :layout({ width = "fit_content", height = "fit_content", padding = { t = 3, b = 3, l = 3, r = 3 } })
                 :build()
             parent:add(make_fixed("a", 10, 5))
             parent:measure(1, true)
-            luassert.are_equal(10 + 6, parent.rect.w)  -- content + l + r
-            luassert.are_equal(5  + 6, parent.rect.h)  -- content + t + b
+            luassert.are_equal(10 + 6, parent.rect.w) -- content + l + r
+            luassert.are_equal(5 + 6, parent.rect.h)  -- content + t + b
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:measure — fit_content row direction", function()
-
         it("width equals sum of child widths", function()
             local parent = box_module.builder("p")
                 :direction("row")
@@ -333,16 +320,14 @@ describe("tactics.ui.box", function()
             parent:add(make_fixed("a", 10, 5))
             parent:add(make_fixed("b", 10, 5))
             parent:measure(1, true)
-            luassert.are_equal(22, parent.rect.w)  -- 10 + 2 + 10
+            luassert.are_equal(22, parent.rect.w) -- 10 + 2 + 10
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:measure — fill dimension", function()
-
         it("leaves rect.w nil when width is 'fill'", function()
-            local elem = box_module.builder("e"):build()  -- width defaults to "fill"
+            local elem = box_module.builder("e"):build() -- width defaults to "fill"
             elem:measure(1, true)
             luassert.is_nil(elem.rect.w)
         end)
@@ -353,14 +338,12 @@ describe("tactics.ui.box", function()
             elem:measure(1, true)
             luassert.is_nil(elem.rect.h)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:apply_layout — fill dimension resolution", function()
-
         it("fill width is set to max_w from parent", function()
-            local elem = box_module.builder("e"):build()  -- width="fill"
+            local elem = box_module.builder("e"):build() -- width="fill"
             do_layout(elem, 100, 80)
             luassert.are_equal(100, elem.rect.w)
         end)
@@ -381,21 +364,19 @@ describe("tactics.ui.box", function()
         it("content bounds account for asymmetric padding", function()
             -- Arrange: include padding inside layout table so it isn't lost
             local elem = box_module.builder("e")
-                :layout({ width = 40, height = 30, padding = { t=2, b=3, l=4, r=5 } })
+                :layout({ width = 40, height = 30, padding = { t = 2, b = 3, l = 4, r = 5 } })
                 :build()
             do_layout(elem, 100, 100)
             -- Assert
-            luassert.are_equal(4,  elem.rect.c_x)   -- x=0 + padding.l=4
-            luassert.are_equal(2,  elem.rect.c_y)   -- y=0 + padding.t=2
-            luassert.are_equal(31, elem.rect.c_w)   -- 40 - 4 - 5
-            luassert.are_equal(25, elem.rect.c_h)   -- 30 - 2 - 3
+            luassert.are_equal(4, elem.rect.c_x)  -- x=0 + padding.l=4
+            luassert.are_equal(2, elem.rect.c_y)  -- y=0 + padding.t=2
+            luassert.are_equal(31, elem.rect.c_w) -- 40 - 4 - 5
+            luassert.are_equal(25, elem.rect.c_h) -- 30 - 2 - 3
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:apply_layout — flex distribution", function()
-
         it("single flex child fills all remaining space in a row container", function()
             -- Arrange: row container 100px wide, one fixed 20px child, one spacer
             local parent = make_row("p", 100, 20)
@@ -460,12 +441,10 @@ describe("tactics.ui.box", function()
             luassert.are_equal(45, parent.children[1].rect.w)
             luassert.are_equal(45, parent.children[2].rect.w)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:find_node_by_id", function()
-
         it("returns self when id matches", function()
             local elem = make_fixed("target", 10, 10)
             luassert.are_equal(elem, elem:find_node_by_id("target"))
@@ -491,12 +470,10 @@ describe("tactics.ui.box", function()
             local elem = make_fixed("elem", 10, 10)
             luassert.is_nil(elem:find_node_by_id("nonexistent"))
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("box.find_topmost_selection", function()
-
         --- Build a laid-out element positioned and sized exactly, with optional hover event.
         ---@param id string
         ---@param x integer
@@ -568,12 +545,10 @@ describe("tactics.ui.box", function()
             local result = box_module.find_topmost_selection(parent, 15, 15)
             luassert.are_equal(inner_event, result)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:compute_children", function()
-
         it("does nothing when the key is unchanged", function()
             local original_children = {}
             local elem = make_fit("e")
@@ -656,12 +631,10 @@ describe("tactics.ui.box", function()
             child:compute_children({})
             luassert.is_true(parent.cacheable.dirty_layout)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("Box:mark_dirty_layout", function()
-
         it("sets dirty_layout to true on self", function()
             local elem = make_fixed("e", 10, 10)
             elem.cacheable.dirty_layout = false
@@ -696,12 +669,10 @@ describe("tactics.ui.box", function()
                 root:mark_dirty_layout()
             end)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("box.spacer", function()
-
         it("creates an element with flex_grow = 1 by default", function()
             local s = box_module.spacer()
             luassert.are_equal(1, s.layout.flex_grow)
@@ -717,12 +688,10 @@ describe("tactics.ui.box", function()
             luassert.are_equal("fill", s.layout.width)
             luassert.are_equal("fill", s.layout.height)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
     describe("layout.padding helper", function()
-
         it("sets all four sides to the given value", function()
             local p = box_module.layout.padding(5)
             luassert.are_equal(5, p.t)
@@ -730,7 +699,5 @@ describe("tactics.ui.box", function()
             luassert.are_equal(5, p.l)
             luassert.are_equal(5, p.r)
         end)
-
     end)
-
 end)

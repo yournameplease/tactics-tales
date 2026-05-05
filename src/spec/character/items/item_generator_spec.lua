@@ -8,7 +8,7 @@ local function make_item_data(overrides)
         type = "WEAPON",
         slots = 1,
         equip_slot = "MAIN_HAND",
-        sprite_data = {sprite = 1, anchor = {x = 0, y = 0}},
+        sprite_data = { sprite = 1, anchor = { x = 0, y = 0 } },
         equipment_effects = {},
         appearance_overrides = nil,
         weapon_definition = nil,
@@ -63,7 +63,7 @@ describe("tactics.character.items.item_generator", function()
                 effects = {},
             }
             local item_data = {
-                iron_sword = make_item_data({weapon_definition = weapon_def})
+                iron_sword = make_item_data({ weapon_definition = weapon_def })
             }
 
             local item = item_generator.generate("iron_sword", item_data)

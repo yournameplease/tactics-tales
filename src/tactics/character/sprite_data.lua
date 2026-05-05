@@ -418,19 +418,19 @@ local EYEWEAR = {
 local SKIN_COLOR = {
     a = {
         name = "A",
-        colors = {15, 31},
+        colors = { 15, 31 },
     },
     b = {
         name = "B",
-        colors = {31, 4},
+        colors = { 31, 4 },
     },
     c = {
         name = "C",
-        colors = {4, 20},
+        colors = { 4, 20 },
     },
     d = {
         name = "D",
-        colors = {20, 21},
+        colors = { 20, 21 },
     },
 }
 

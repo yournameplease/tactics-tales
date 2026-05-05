@@ -61,7 +61,7 @@ local function allow_inputs_for_label(input_label)
         allow_draw_joy = DYNAMIC_CONFIG.input_group == "mouse_and_keyboard"
             or DYNAMIC_CONFIG.input_group == "joy_only"
         allow_draw_mouse = DYNAMIC_CONFIG.input_group == "mouse_and_keyboard"
-                or DYNAMIC_CONFIG.input_group == "mouse_only"
+            or DYNAMIC_CONFIG.input_group == "mouse_only"
     end
 
     local draw_mouse = HAS_MOUSE_SPRITE[input_label] and allow_draw_mouse
@@ -86,8 +86,8 @@ local function control_hint_glyphs(input_label, text_color)
     if draw_mouse then
         row:add(
             box.builder("control_sprite_" .. input_label)
-            :sprite{ ox = 1, oy = 1 }
-            :layout{ width = 9, height = 9 }
+            :sprite { ox = 1, oy = 1 }
+            :layout { width = 9, height = 9 }
             :on_update(function(self, _state)
                 self.sprite.s = sprite_by_label_and_method(input_label, "mouse")
             end)
@@ -96,12 +96,12 @@ local function control_hint_glyphs(input_label, text_color)
     if draw_mouse and draw_joy then
         row:add(
             box.builder("control_text_" .. input_label)
-            :layout{
+            :layout {
                 width = 6,
                 height = 10,
                 padding = box.layout.padding(2),
             }
-            :text{
+            :text {
                 content = { "/" },
                 draw_properties = { wrap = "no_wrap" },
                 text_color = text_color,
@@ -111,8 +111,8 @@ local function control_hint_glyphs(input_label, text_color)
     if draw_joy then
         row:add(
             box.builder("control_sprite_" .. input_label)
-            :sprite{ ox = 1, oy = 1 }
-            :layout{ width = 9, height = 9 }
+            :sprite { ox = 1, oy = 1 }
+            :layout { width = 9, height = 9 }
             :on_update(function(self, _state)
                 self.sprite.s = sprite_by_label_and_method(input_label, "joypad")
             end)
@@ -129,7 +129,7 @@ end
 ---@return UIElement
 local function control_hint_row(input_label, menu_step_func, default_hints)
     local row = box.builder("control_row_" .. input_label)
-        :layout{
+        :layout {
             dir = "row",
             width = "fill",
             height = 10,
@@ -139,8 +139,8 @@ local function control_hint_row(input_label, menu_step_func, default_hints)
     row:add(control_hint_glyphs(input_label, nil))
     row:add(
         box.builder("control_text_" .. input_label)
-        :text{ draw_properties = { wrap = "no_wrap" } }
-        :layout{
+        :text { draw_properties = { wrap = "no_wrap" } }
+        :layout {
             flex_grow = 1,
             padding = box.layout.padding(1),
         }
@@ -189,15 +189,15 @@ function generate_centered_control_hint_row(input_label, message, text_color)
             :direction("col")
             :container("strip")
             :padding(1)
-            :text{
+            :text {
                 content = { " " .. message },
                 draw_properties = { wrap = "no_wrap" },
                 text_color = text_color,
             }
             :build())
         row:add(box.spacer(1))
-    
-        return {row}
+
+        return { row }
     end
 end
 
@@ -210,7 +210,7 @@ function control_hints.centered_control_hint_row(input_label, message, text_colo
     local self = box.builder("control_hints")
         :direction("col")
         :container("block")
-        :child_generator{
+        :child_generator {
             current_key = function(_)
                 return DYNAMIC_CONFIG and DYNAMIC_CONFIG.input_group
             end,
@@ -237,7 +237,7 @@ function control_hint_rows(menu_step_func, default_hints)
             table.insert(children, control_hint_row("SHOULDER_L", menu_step_func, default_hints))
             table.insert(children, control_hint_row("SHOULDER_R", menu_step_func, default_hints))
         end
-    
+
         return children
     end
 end
@@ -250,7 +250,7 @@ function control_hints.new(menu_step_func, default_hints)
     local self = box.builder("control_hints")
         :direction("col")
         :container("block")
-        :child_generator{
+        :child_generator {
             current_key = function(c)
                 local layout = c.layout
                 -- return DYNAMIC_CONFIG

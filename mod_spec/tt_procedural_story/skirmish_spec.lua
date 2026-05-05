@@ -1,8 +1,8 @@
-local luassert = require("luassert")
+local luassert       = require("luassert")
 
-local battles_mod = require("tt_procedural_campaign.game_data.missions")
+local battles_mod    = require("tt_procedural_campaign.game_data.missions")
 local campaign_state = require("src.tactics.campaign.campaign_state")
-local random       = require("src.tactics.util.random")
+local random         = require("src.tactics.util.random")
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })
@@ -40,7 +40,7 @@ describe("tt_procedural_campaign.missions skirmish", function()
         local unit = find_unit(def, "recruit_slot")
         luassert.is_not_nil(unit)
         luassert.are_equal("enemy", unit.side)
-        luassert.is_nil(unit.tags or nil)  -- no "turncoat" tag on normal enemy
+        luassert.is_nil(unit.tags or nil) -- no "turncoat" tag on normal enemy
     end)
 
     it("spawns turncoat unit at recruit_slot when turncoat_enemy is pending", function()

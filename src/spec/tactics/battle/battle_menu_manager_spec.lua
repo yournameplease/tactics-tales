@@ -375,7 +375,8 @@ describe("battle.battle_menu_manager SELECT_SKILL_TARGET", function()
         local skill_id = "heal"
         local highlighted = {}
         local map = {
-            width = 10, height = 10,
+            width = 10,
+            height = 10,
             get_targets_in_range = function() return {} end,
             get_nearby_interactions = function() return {} end,
             get_at_tile = function() return nil end,

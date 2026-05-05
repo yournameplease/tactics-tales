@@ -84,6 +84,7 @@ function split(str, separator, convert_numbers) end
 --- @param convert_numbers? false
 --- @return string[]
 function split(str, separator, convert_numbers) end
+
 string.split = split
 
 --- Create a string encoding all the information needed to get from str0 to str1.

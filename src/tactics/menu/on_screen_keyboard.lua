@@ -9,22 +9,22 @@ local button = require("src.tactics.menu.cursor.button")
 local step_definition = menu_manager.definition.step
 
 local LAYOUT_LOWER = {
-    {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"},
-    {"a", "s", "d", "f", "g", "h", "j", "k", "l", ";"},
-    {"z", "x", "c", "v", "b", "n", "m", ",", ".", "/"},
-    {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")"},
+    { "q", "w", "e", "r", "t", "y", "u", "i", "o", "p" },
+    { "a", "s", "d", "f", "g", "h", "j", "k", "l", ";" },
+    { "z", "x", "c", "v", "b", "n", "m", ",", ".", "/" },
+    { "!", "@", "#", "$", "%", "^", "&", "*", "(", ")" },
 }
 local LAYOUT_UPPER = {
-    {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"},
-    {"A", "S", "D", "F", "G", "H", "J", "K", "L", ":"},
-    {"Z", "X", "C", "V", "B", "N", "M", "<", ">", "?"},
-    {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
+    { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P" },
+    { "A", "S", "D", "F", "G", "H", "J", "K", "L", ":" },
+    { "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?" },
+    { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" },
 }
 local LAYOUT_SYMBOL = {
-    {chr(143), chr(149), chr(131), chr(144), chr(146), chr(151), chr(147), chr(135), chr(141), chr(142)},
-    {chr(127), chr(145), chr(130), chr(132), chr(133), chr(134), chr(136), chr(137), chr(138), " "},
-    {chr(152), chr(150), chr(129), chr(148), chr(128), chr(140), chr(139), " ", " ", " "},
-    {"`", "~", "-", "_", "+", "=", " ", " ", " ", " "},
+    { chr(143), chr(149), chr(131), chr(144), chr(146), chr(151), chr(147), chr(135), chr(141), chr(142) },
+    { chr(127), chr(145), chr(130), chr(132), chr(133), chr(134), chr(136), chr(137), chr(138), " " },
+    { chr(152), chr(150), chr(129), chr(148), chr(128), chr(140), chr(139), " ",      " ",      " " },
+    { "`",      "~",      "-",      "_",      "+",      "=",      " ",      " ",      " ",      " " },
 }
 
 local KEYBOARDS = {
@@ -34,9 +34,9 @@ local KEYBOARDS = {
 }
 
 local keyboard_modes = {
-    {"upper", "Upper"},
-    {"lower", "Lower"},
-    {"symbol", "Symbol"},
+    { "upper",  "Upper" },
+    { "lower",  "Lower" },
+    { "symbol", "Symbol" },
 }
 
 ---@class KeyboardMenuContext : MenuContext
@@ -111,15 +111,16 @@ HANDLERS["delete_character"] = function(_services, session_context, _value)
     end
 
     if #session_context.keyboard_content > 0 then
-        session_context.keyboard_content = string.sub(session_context.keyboard_content, 1, #session_context.keyboard_content - 1)
+        session_context.keyboard_content = string.sub(session_context.keyboard_content, 1,
+            #session_context.keyboard_content - 1)
     end
 
     return nil
 end
 
 local menu_keyboard = {
-    KeyboardMenuContext = {},  -- type alias placeholder
-    KeyboardStepBundle = {},   -- type alias placeholder
+    KeyboardMenuContext = {}, -- type alias placeholder
+    KeyboardStepBundle = {},  -- type alias placeholder
 }
 
 --- Build a KeyboardStepBundle containing the step definition and its handler map.
@@ -127,47 +128,47 @@ local menu_keyboard = {
 ---@return KeyboardStepBundle
 function menu_keyboard.step(submit)
     local step = step_definition.of_node(
-        list.column(
-            "keyboard_menu",
-            function(_msb, _ctx)
-                local children = {}
+            list.column(
+                "keyboard_menu",
+                function(_msb, _ctx)
+                    local children = {}
 
-                table.insert(children, grid.grid("keyboard", 10, 4)
-                    :with_common_child(
-                        button.builder("keyboard_key")
+                    table.insert(children, grid.grid("keyboard", 10, 4)
+                        :with_common_child(
+                            button.builder("keyboard_key")
                             :with_text("key")
                             :handle_action("select", "type_character")
                             :handle_keyboard("type_character")
-                    )
-                    :with_text_function(function(pt_arg, _services, ctx)
-                        ---@cast ctx KeyboardMenuContext
-                        return get_key_at_coordinates(pt_arg, ctx)
-                    end))
+                        )
+                        :with_text_function(function(pt_arg, _services, ctx)
+                            ---@cast ctx KeyboardMenuContext
+                            return get_key_at_coordinates(pt_arg, ctx)
+                        end))
 
-                table.insert(children, list.row(
-                    "keyboard_navigation",
-                    function(_msb2, _ctx2)
-                        local options = {}
-                        table.insert(options, button.builder("mode")
-                            :with_text("Mode")
-                            :handle_action("select", "change_keyboard_mode"))
-                        table.insert(options, button.builder("random")
-                            :with_text("Back")
-                            :handle_action("select", "delete_character"))
-                        table.insert(options, button.builder("confirm")
-                            :with_text("Confirm")
-                            :handle_action("select", submit))
-                        return options
-                    end))
+                    table.insert(children, list.row(
+                        "keyboard_navigation",
+                        function(_msb2, _ctx2)
+                            local options = {}
+                            table.insert(options, button.builder("mode")
+                                :with_text("Mode")
+                                :handle_action("select", "change_keyboard_mode"))
+                            table.insert(options, button.builder("random")
+                                :with_text("Back")
+                                :handle_action("select", "delete_character"))
+                            table.insert(options, button.builder("confirm")
+                                :with_text("Confirm")
+                                :handle_action("select", submit))
+                            return options
+                        end))
 
-                return children
-            end
+                    return children
+                end
+            )
         )
-    )
-    :with_keyboard_handler("type_text")
-    :with_backspace_handler("delete_character")
-    :with_action("BUTTON_A", { command = "select", description = "Select" })
-    :with_action("BUTTON_B", { command = "back",   description = "Back" })
+        :with_keyboard_handler("type_text")
+        :with_backspace_handler("delete_character")
+        :with_action("BUTTON_A", { command = "select", description = "Select" })
+        :with_action("BUTTON_B", { command = "back", description = "Back" })
     return { step = step, handlers = HANDLERS }
 end
 

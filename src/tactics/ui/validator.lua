@@ -32,8 +32,8 @@ function menu_validator.validate(node, path)
         if fill_child and not non_fill_child then
             error(
                 "LAYOUT ERROR: Circular Dependency.\nPath: "
-                    .. path .. " > " .. fill_child.id
-                    .. "Parent is 'fit_content' height, but child has to 'fill' height."
+                .. path .. " > " .. fill_child.id
+                .. "Parent is 'fit_content' height, but child has to 'fill' height."
             )
         end
     end

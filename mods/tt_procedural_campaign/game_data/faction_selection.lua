@@ -70,10 +70,10 @@ local function select_faction(archetype, mem, campaign_rng)
         end
     end
 
-    local weights  = compute_weights(archetype.faction_pool, counts, archetype.bias)
-    local selected = weighted_pick(campaign_rng, weights)
+    local weights     = compute_weights(archetype.faction_pool, counts, archetype.bias)
+    local selected    = weighted_pick(campaign_rng, weights)
 
-    counts[selected] = (counts[selected] or 0) + 1
+    counts[selected]  = (counts[selected] or 0) + 1
     local new_entries = {}
     for id, n in pairs(counts) do
         new_entries[id] = tostring(n)

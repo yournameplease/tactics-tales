@@ -69,21 +69,21 @@ end
 ---@return UIElement
 function modal.tactics_dialogue_menu()
     local menu_box = box.builder("tactics_dialogue_box")
-        :layout{
+        :layout {
             width = 80,
             height = 33,
             padding = box.layout.padding(2),
         }
-        :style{
+        :style {
             decoration_padding = 1,
             solid = true,
             decoration = "border",
         }
-        :modal{
+        :modal {
             current_key = compute_dialogue_modal_key,
             compute = compute_dialogue_modal,
 
-            priorities = {"right", "left", "up", "down"},
+            priorities = { "right", "left", "up", "down" },
             anchor_margin = 16,
             screen_padding = 24,
         }
@@ -123,7 +123,7 @@ local function compute_action_menu_modal(state)
     y = math.floor((cursor_tile.y + 0.5) * TILE_SIZE.y)
 
     local node = menu_ui.generic_menu_modal(
-        -- no need to recompute as this node handles new children
+    -- no need to recompute as this node handles new children
         function() return 0 end,
         function(s)
             local c = s.battle_context.battle_menu_manager.menu_step.node
@@ -159,21 +159,21 @@ end
 ---@return UIElement
 function modal.tactics_action_menu()
     local menu_box = box.builder("tactics_dialogue_box")
-        :layout{
+        :layout {
             width = "fit_content",
             height = "fit_content",
             padding = box.layout.padding(2),
         }
-        :style{
+        :style {
             decoration_padding = 1,
             solid = true,
             decoration = "border",
         }
-        :modal{
+        :modal {
             current_key = compute_action_menu_modal_key,
             compute = compute_action_menu_modal,
 
-            priorities = {"right", "left", "up", "down"},
+            priorities = { "right", "left", "up", "down" },
             anchor_margin = 16,
             screen_padding = 24,
         }

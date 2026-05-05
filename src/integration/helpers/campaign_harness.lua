@@ -3,19 +3,19 @@
 --- Wires up a system slice (Campaign + TaskManager + EventBus) and provides
 --- a simple API for driving campaign flows and asserting on stable outcomes.
 
-local tasks            = require("src.tactics.systems.tasks")
-local event_bus_mod    = require("src.tactics.systems.event_bus")
-local animation        = require("src.tactics.animation")
-local ui_ctx_mgr       = require("src.tactics.ui.ui_context_manager")
-local music_player     = require("src.tactics.music.music_player")
-local mod_loader_mod   = require("src.tactics.mods.mod_loader")
-local campaign_mod        = require("src.tactics.campaign.campaign")
-local input_helper     = require("src.spec.input.input_helper")
+local tasks                 = require("src.tactics.systems.tasks")
+local event_bus_mod         = require("src.tactics.systems.event_bus")
+local animation             = require("src.tactics.animation")
+local ui_ctx_mgr            = require("src.tactics.ui.ui_context_manager")
+local music_player          = require("src.tactics.music.music_player")
+local mod_loader_mod        = require("src.tactics.mods.mod_loader")
+local campaign_mod          = require("src.tactics.campaign.campaign")
+local input_helper          = require("src.spec.input.input_helper")
 local sprite_fixtures       = require("src.integration.helpers.sprite_fixtures")
 local map_fetch_interceptor = require("src.integration.helpers.map_fetch_interceptor")
 local battle_harness        = require("src.integration.helpers.battle_harness")
 
-local TICK_LIMIT = 1000
+local TICK_LIMIT            = 1000
 
 ---@class CampaignHarness
 ---@field _task_manager TaskManager
@@ -28,10 +28,10 @@ local TICK_LIMIT = 1000
 ---@field _emitted table<string, table<string, any>[]>
 ---@field _campaign? table
 ---@field _interceptor MapFetchInterceptor
-local CampaignHarness = {}
-CampaignHarness.__index = CampaignHarness
+local CampaignHarness       = {}
+CampaignHarness.__index     = CampaignHarness
 
-local campaign_harness = {}
+local campaign_harness      = {}
 
 --- Create a new CampaignHarness backed by the test_base mod.
 --- Pass overrides.campaigns to merge inline campaign definitions on top of test_base.
@@ -45,13 +45,13 @@ function campaign_harness.new(overrides)
     -- Instant dialogue speed: one update() renders all chars and advances the row.
     DYNAMIC_CONFIG.dialogue_speed = "instant"
 
-    self._task_manager      = tasks.task_manager()
-    self._event_bus         = event_bus_mod.new()
-    self._animation_manager = animation.animation_manager()
-    self._ui_context        = ui_ctx_mgr.new()
-    self._music_player      = music_player.new()
+    self._task_manager            = tasks.task_manager()
+    self._event_bus               = event_bus_mod.new()
+    self._animation_manager       = animation.animation_manager()
+    self._ui_context              = ui_ctx_mgr.new()
+    self._music_player            = music_player.new()
 
-    local loader = mod_loader_mod.new()
+    local loader                  = mod_loader_mod.new()
     loader:register_mod("base")
     loader:register_mod("test_base")
     self._game_data = loader:load_mod_data()
@@ -62,11 +62,11 @@ function campaign_harness.new(overrides)
         end
     end
 
-    self._complete = false
-    self._emitted  = {}
+    self._complete       = false
+    self._emitted        = {}
 
     -- Wrap emit to record all events by type.
-    local original_emit = self._event_bus.emit
+    local original_emit  = self._event_bus.emit
     self._event_bus.emit = function(bus, event_type, args)
         if not self._emitted[event_type] then
             self._emitted[event_type] = {}
@@ -78,14 +78,14 @@ function campaign_harness.new(overrides)
         return original_emit(bus, event_type, args)
     end
 
-    self._campaign = nil
+    self._campaign       = nil
 
     -- Install fetch interceptor so campaign nodes that start battles can load maps.
-    self._interceptor = map_fetch_interceptor.new()
+    self._interceptor    = map_fetch_interceptor.new()
     self._interceptor:register(
         "map/test_arena.map",
         battle_harness.build_map_fetch(16, 16, {
-            [0x01] = { { x = 2,  y = 7 } },
+            [0x01] = { { x = 2, y = 7 } },
             [0x02] = { { x = 13, y = 7 } },
         })
     )

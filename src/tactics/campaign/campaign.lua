@@ -121,7 +121,7 @@ end
 function Campaign:jump_to_node_step(node_id, node_step)
     local steps = self:resolve_to_array(self.campaign_definition.nodes[node_id])
     local node_definition = self:resolve_node_source(steps[node_step])
-    
+
     self.current_node = {
         node_id = node_id,
         node_step = node_step,
@@ -159,7 +159,7 @@ function Campaign:advance_node()
     if h and h.exit then h.exit(self, node) end
     self.current_node.node_step = self.current_node.node_step + 1
     local steps = self:resolve_to_array(self.campaign_definition.nodes[self.current_node.node_id])
-    
+
     if steps[self.current_node.node_step] == nil and #self.return_stack > 0 then
         log.debug("popping return stack")
         local ret = table.remove(self.return_stack)
@@ -331,7 +331,8 @@ end
 ---@param music_player MusicPlayer
 ---@param ui_context UIContextManager
 ---@return Campaign
-function campaign.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context, input_service)
+function campaign.load(save_name, game_data, task_manager, animation_manager, event_bus, music_player, ui_context,
+                       input_service)
     local save_data = save_system.load(save_name)
     assert(save_data, "File failed to load!")
 

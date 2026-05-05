@@ -50,7 +50,7 @@ end
 
 
 -- Shared neighbor offsets (up, down, left, right)
-local NEIGHBORS = { {x=0, y=1}, {x=0, y=-1}, {x=1, y=0}, {x=-1, y=0} }
+local NEIGHBORS = { { x = 0, y = 1 }, { x = 0, y = -1 }, { x = 1, y = 0 }, { x = -1, y = 0 } }
 
 ---@param map BattleMap
 ---@param movement_side string
@@ -83,7 +83,7 @@ local function _dijkstra_traversal(start_x, start_y, distance_function, max_cost
     local start_cost = 0 -- Cost to be at the start is 0
 
     visited_info:set(start_x, start_y, { cost = start_cost, prev = nil })
-    table.insert(priority_queue, {x = start_x, y = start_y, cost = start_cost})
+    table.insert(priority_queue, { x = start_x, y = start_y, cost = start_cost })
 
     -- Main Loop
     while #priority_queue > 0 do
@@ -106,7 +106,6 @@ local function _dijkstra_traversal(start_x, start_y, distance_function, max_cost
         -- (Standard Dijkstra laziness check)
         local current_info = visited_info:get(ux, uy)
         if current_info and ucost <= current_info.cost then
-
             -- 3. Explore neighbors
             for _, offset in ipairs(NEIGHBORS) do
                 local vx, vy = ux + offset.x, uy + offset.y
@@ -132,7 +131,7 @@ local function _dijkstra_traversal(start_x, start_y, distance_function, max_cost
                         if not neighbor_info or new_total < neighbor_info.cost then
                             -- Record the new cost and the tile we came from (ux, uy)
                             visited_info:set(vx, vy, { cost = new_total, prev = point.of(ux, uy) })
-                            table.insert(priority_queue, {x = vx, y = vy, cost = new_total})
+                            table.insert(priority_queue, { x = vx, y = vy, cost = new_total })
                         end
                     end
                 end
@@ -159,7 +158,8 @@ local pathfinding = {
 ---@return Array2D Sparse 2D map where each entry is a ShortestPathEntry.
 function pathfinding.calculate_all_tile_costs(map, start_x, start_y, movement_side, max_limit)
     local limit = max_limit or 99999
-    return _dijkstra_traversal(start_x, start_y, distance_for_unit(map, movement_side), limit, point.of(map.width, map.height))
+    return _dijkstra_traversal(start_x, start_y, distance_for_unit(map, movement_side), limit,
+        point.of(map.width, map.height))
 end
 
 --- Reconstructs the path from the start tile to the given target tile.
@@ -187,13 +187,14 @@ end
 ---@return Array2D Sparse 2D map where reachable[x][y] = true.
 function pathfinding.find_reachable_tiles(map, start_x, start_y, movement_side, total_cost)
     -- 1. Get the detailed map from the core engine
-    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(map, movement_side), total_cost, point.of(map.width, map.height))
+    local full_map = _dijkstra_traversal(start_x, start_y, distance_for_unit(map, movement_side), total_cost,
+        point.of(map.width, map.height))
 
     -- 2. Transform it into the simple boolean map expected by existing code
     local reachable = array_2d.new(full_map.w, full_map.h, false)
 
     full_map:foreachpoint(
-        function (tile, value)
+        function(tile, value)
             -- We don't need to check cost <= total_cost here because
             -- the core engine already filtered by total_cost.
             -- TODO: not positive after refactor to array_2d.Array2D.  investigate.
@@ -240,7 +241,7 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
         end
         -- TODO: config
         local visited = array_2d.new(legal_tiles:width(), legal_tiles:height(), false)
-        for _,p in ipairs(current_path) do
+        for _, p in ipairs(current_path) do
             visited:set_point(p, true)
         end
         while #new_points > 0 do
@@ -260,10 +261,10 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
         return current_path
     end
 
-    for i,p in ipairs(path) do
+    for i, p in ipairs(path) do
         if p == target then
             local out = {}
-            for j=1,i do
+            for j = 1, i do
                 table.insert(out, path[j]:copy())
             end
             return out
@@ -279,7 +280,8 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
     while #path > 0 do
         local start = path[#path]
         local remaining_length = max_length + 1 - #path
-        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length, point.of(legal_tiles:width(), legal_tiles:height()))
+        local full_map = _dijkstra_traversal(start.x, start.y, distance, remaining_length,
+            point.of(legal_tiles:width(), legal_tiles:height()))
         if full_map:get_point(target) ~= nil and full_map:get_point(target).cost <= remaining_length then
             return extend_path(path, target, full_map)
         end

@@ -79,7 +79,7 @@ describe("campaign flow #it", function()
     describe("single_node_source", function()
         it("should complete when node entry is a bare CampaignNode (not wrapped in array)", function()
             local h = campaign_harness.new({
-            campaigns = {
+                campaigns = {
                     single_node_source = {
                         starting_node = "start",
                         nodes = {
@@ -94,7 +94,7 @@ describe("campaign flow #it", function()
 
         it("should complete when node entry is a top-level factory function", function()
             local h = campaign_harness.new({
-            campaigns = {
+                campaigns = {
                     top_level_factory = {
                         starting_node = "start",
                         nodes = {

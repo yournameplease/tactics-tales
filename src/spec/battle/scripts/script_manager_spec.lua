@@ -32,14 +32,18 @@ local function make_engine()
         engine.lock_count = engine.lock_count + 1
         return id
     end
+
     function engine:remove_lock(id)
         engine.tactics_locks[id] = nil
     end
+
     function engine:is_blocked() return false end
+
     function engine:is_locked()
         for _ in pairs(engine.tactics_locks) do return true end
         return false
     end
+
     return engine
 end
 

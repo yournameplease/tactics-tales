@@ -315,7 +315,6 @@ function sides_can_fight(side_1, side_2)
     return true
 end
 
-
 --- Return all enemy units in weapon range of `unit_id` from `tile`.
 ---@param unit_id UnitId
 ---@param tile Point

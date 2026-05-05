@@ -1,10 +1,10 @@
-local luassert = require("luassert")
+local luassert                 = require("luassert")
 
-local recruitment_quota      = require("tt_procedural_campaign.game_data.recruitment_quota")
+local recruitment_quota        = require("tt_procedural_campaign.game_data.recruitment_quota")
 local update_recruitment_quota = recruitment_quota.update_recruitment_quota
 
-local campaign_state = require("src.tactics.campaign.campaign_state")
-local random       = require("src.tactics.util.random")
+local campaign_state           = require("src.tactics.campaign.campaign_state")
+local random                   = require("src.tactics.util.random")
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })

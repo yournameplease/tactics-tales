@@ -89,7 +89,7 @@ describe("tactics.systems.event_bus", function()
             local bus = event_bus.new()
             local count = 0
             local id1 = bus:on("TACTICS_BEGIN_TURN", function() count = count + 1 end)
-            local id2 = bus:on("TACTICS_END_TURN",   function() count = count + 1 end)
+            local id2 = bus:on("TACTICS_END_TURN", function() count = count + 1 end)
             bus:remove_all({ [id1] = true, [id2] = true })
             bus:emit("TACTICS_BEGIN_TURN", {})
             bus:emit("TACTICS_END_TURN", {})

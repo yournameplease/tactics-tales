@@ -3,27 +3,27 @@
 --- Wires up a full battle service stack (BattleManager + TurnManager + AIEngine etc.)
 --- and provides a simple API for driving battles and asserting on outcomes.
 
-local tasks               = require("src.tactics.systems.tasks")
-local event_bus_mod       = require("src.tactics.systems.event_bus")
-local animation           = require("src.tactics.animation")
-local ui_ctx_mgr          = require("src.tactics.ui.ui_context_manager")
-local music_player_mod    = require("src.tactics.music.music_player")
-local mod_loader_mod      = require("src.tactics.mods.mod_loader")
+local tasks                 = require("src.tactics.systems.tasks")
+local event_bus_mod         = require("src.tactics.systems.event_bus")
+local animation             = require("src.tactics.animation")
+local ui_ctx_mgr            = require("src.tactics.ui.ui_context_manager")
+local music_player_mod      = require("src.tactics.music.music_player")
+local mod_loader_mod        = require("src.tactics.mods.mod_loader")
 local character_manager_mod = require("src.tactics.character.character_manager")
-local battle_manager_mod  = require("src.tactics.battle.battle_manager")
-local sprite_fixtures     = require("src.integration.helpers.sprite_fixtures")
+local battle_manager_mod    = require("src.tactics.battle.battle_manager")
+local sprite_fixtures       = require("src.integration.helpers.sprite_fixtures")
 local map_fetch_interceptor = require("src.integration.helpers.map_fetch_interceptor")
 
-local TICK_LIMIT    = 1000
-local BASE_METATILE = 0x400
-local ARENA_W       = 16
-local ARENA_H       = 16
+local TICK_LIMIT            = 1000
+local BASE_METATILE         = 0x400
+local ARENA_W               = 16
+local ARENA_H               = 16
 
 -- Metatile positions for the test_arena map.
 -- 0x01 → player_spawn at (2, 7)
 -- 0x02 → enemy_spawn  at (13, 7)
-local ARENA_TILE_POSITIONS = {
-    [0x01] = { { x = 2,  y = 7 } },
+local ARENA_TILE_POSITIONS  = {
+    [0x01] = { { x = 2, y = 7 } },
     [0x02] = { { x = 13, y = 7 } },
 }
 
@@ -122,7 +122,7 @@ function battle_harness.new(overrides)
     self._music_player      = music_player_mod.new()
 
     -- Load mod data.
-    local loader = mod_loader_mod.new()
+    local loader            = mod_loader_mod.new()
     loader:register_mod("base")
     loader:register_mod("test_base")
     self._game_data = loader:load_mod_data()

@@ -86,7 +86,7 @@ describe("BattleUIContext camera", function()
 
         it("moves camera left when tile exits left dead zone", function()
             local ctx, map = make_ctx(VW + 8, VH + 8)
-            ctx.camera_x = 4 * TW  -- scrolled right by 4 tiles
+            ctx.camera_x = 4 * TW -- scrolled right by 4 tiles
             ctx.camera_y = 0
             local dead_zone = 2
             -- tile at x=0: pixel center = TW//2, camera_x + dead_zone*TW = 4*TW + 2*TW

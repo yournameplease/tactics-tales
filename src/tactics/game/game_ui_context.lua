@@ -13,7 +13,7 @@ local GameUIContext = {}
 GameUIContext.__index = GameUIContext
 
 local game_ui_context = {
-	GameUIContext = GameUIContext,
+    GameUIContext = GameUIContext,
 }
 
 --- Create a new GameUIContext bound to the given bus, menu manager, and input service.
@@ -22,43 +22,43 @@ local game_ui_context = {
 ---@param input_service InputService
 ---@return GameUIContext
 function game_ui_context.new(bus, menu_manager, input_service)
-	---@type GameUIContext
-	local self = setmetatable({
-		type = "game",
-	}, GameUIContext)
-	self.event_bus = bus
-	self.menu_manager = menu_manager
-	self.input_service = input_service
-	return self
+    ---@type GameUIContext
+    local self = setmetatable({
+        type = "game",
+    }, GameUIContext)
+    self.event_bus = bus
+    self.menu_manager = menu_manager
+    self.input_service = input_service
+    return self
 end
 
 --- Populate derived display fields from current menu and input state.
 function GameUIContext:enrich()
-	self.input_method = self.input_service.current_input
+    self.input_method = self.input_service.current_input
 
-	self.layout = "TITLED_MENU_PAGE"
+    self.layout = "TITLED_MENU_PAGE"
 
-	if self.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
-		if self.menu_manager.menu_state.step == "TITLE_SCREEN" then
-			self.layout = "TITLE_SCREEN"
-		elseif self.menu_manager.menu_state.step == "MAIN_MENU" then
-			self.menu_title = "Tactics Tales"
-		elseif self.menu_manager.menu_state.step == "NEW_FILE_SELECT" then
-			self.menu_title = "New File"
-		elseif self.menu_manager.menu_state.step == "CONFIRM_FILE" then
-			self.menu_title = "New File"
-		elseif self.menu_manager.menu_state.step == "CAMPAIGN_CONFIG" then
-			self.menu_title = "New File"
-		elseif self.menu_manager.menu_state.step == "LOAD_FILE_SELECT" then
-			self.menu_title = "Load File"
-		elseif self.menu_manager.menu_state.step == "CHAPTER_SELECT" then
-			self.menu_title = "Chapters"
-		elseif self.menu_manager.menu_state.step == "OPTIONS_MENU" then
-			self.menu_title = "Options"
-		else
-			error("unexpected menu state")
-		end
-	end
+    if self.menu_manager.menu_state.menu_id == "MENU_MAIN_MENU" then
+        if self.menu_manager.menu_state.step == "TITLE_SCREEN" then
+            self.layout = "TITLE_SCREEN"
+        elseif self.menu_manager.menu_state.step == "MAIN_MENU" then
+            self.menu_title = "Tactics Tales"
+        elseif self.menu_manager.menu_state.step == "NEW_FILE_SELECT" then
+            self.menu_title = "New File"
+        elseif self.menu_manager.menu_state.step == "CONFIRM_FILE" then
+            self.menu_title = "New File"
+        elseif self.menu_manager.menu_state.step == "CAMPAIGN_CONFIG" then
+            self.menu_title = "New File"
+        elseif self.menu_manager.menu_state.step == "LOAD_FILE_SELECT" then
+            self.menu_title = "Load File"
+        elseif self.menu_manager.menu_state.step == "CHAPTER_SELECT" then
+            self.menu_title = "Chapters"
+        elseif self.menu_manager.menu_state.step == "OPTIONS_MENU" then
+            self.menu_title = "Options"
+        else
+            error("unexpected menu state")
+        end
+    end
 end
 
 return game_ui_context

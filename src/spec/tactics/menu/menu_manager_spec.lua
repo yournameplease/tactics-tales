@@ -41,14 +41,14 @@ describe("tactics.menu.menu_manager", function()
                         button.builder("btn1"):advance_to("STEP_2")
                     ):with_action("BUTTON_A", { command = "select" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
-                        button.builder("btn2"):advance_to("STEP_3")
-                    ):with_previous_step("STEP_1")
-                     :with_action("BUTTON_A", { command = "select" })
-                     :with_action("BUTTON_B", { command = "back" }),
+                            button.builder("btn2"):advance_to("STEP_3")
+                        ):with_previous_step("STEP_1")
+                        :with_action("BUTTON_A", { command = "select" })
+                        :with_action("BUTTON_B", { command = "back" }),
                     ["STEP_3"] = menu_manager.definition.step.of_node(
-                        button.builder("btn3"):with_text("Finish")
-                    ):with_previous_step("STEP_2")
-                     :with_action("BUTTON_B", { command = "back" })
+                            button.builder("btn3"):with_text("Finish")
+                        ):with_previous_step("STEP_2")
+                        :with_action("BUTTON_B", { command = "back" })
                 }
             }
         }
@@ -103,7 +103,7 @@ describe("tactics.menu.menu_manager", function()
             }
         }
 
-        mock_text_input({"h", "i"})
+        mock_text_input({ "h", "i" })
 
         local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
@@ -133,7 +133,7 @@ describe("tactics.menu.menu_manager", function()
             }
         }
 
-        mock_text_input({"h", "i"})
+        mock_text_input({ "h", "i" })
 
         local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
@@ -153,9 +153,9 @@ describe("tactics.menu.menu_manager", function()
                 },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        button.builder("btn1"):advance_to("STEP_2")
-                    ):with_keyboard_handler("noop_handler")
-                     :with_action("BUTTON_A", { command = "select" }),
+                            button.builder("btn1"):advance_to("STEP_2")
+                        ):with_keyboard_handler("noop_handler")
+                        :with_action("BUTTON_A", { command = "select" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
                         button.builder("btn2"):with_text("done")
                     ),
@@ -163,7 +163,7 @@ describe("tactics.menu.menu_manager", function()
             }
         }
 
-        mock_text_input({"a"})
+        mock_text_input({ "a" })
 
         local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")
@@ -183,9 +183,9 @@ describe("tactics.menu.menu_manager", function()
                 },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        button.builder("btn1"):advance_to("STEP_2")
-                    ):with_keyboard_handler("passthrough_handler")
-                     :with_action("BUTTON_A", { command = "select" }),
+                            button.builder("btn1"):advance_to("STEP_2")
+                        ):with_keyboard_handler("passthrough_handler")
+                        :with_action("BUTTON_A", { command = "select" }),
                     ["STEP_2"] = menu_manager.definition.step.of_node(
                         button.builder("btn2"):with_text("done")
                     ),
@@ -193,7 +193,7 @@ describe("tactics.menu.menu_manager", function()
             }
         }
 
-        mock_text_input({"a"})
+        mock_text_input({ "a" })
 
         local manager = menu_manager.new(menu_defs, ctx, bus)
         manager:set_menu("TEST_MENU")

@@ -151,7 +151,7 @@ end
 ---@return table<K, V>
 function maps.merge(...)
     local out = {}
-    for _, m in ipairs({...}) do
+    for _, m in ipairs({ ... }) do
         maps.add_all(out, m)
     end
     return out

@@ -117,7 +117,7 @@ local HANDLERS = {
             ---@cast node ChapterHeader
             campaign.campaign_page:add_chapter_header(node.text, node.chapter_number)
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
-                {"deleteme"}, -- TODO: this breaks if empty
+                { "deleteme" }, -- TODO: this breaks if empty
                 { auto_advance = false },
                 {}
             )
@@ -134,7 +134,7 @@ local HANDLERS = {
             local map = campaign.campaign_state:get_as_map()
             for k, v in pairs(campaign.stats_service:get_as_map()) do map[k] = v end
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
-                {node.text},
+                { node.text },
                 { can_skip = true, auto_advance = false },
                 map
             )
@@ -166,7 +166,7 @@ local HANDLERS = {
                 }
                 save_system.save(campaign.save_name, save_data)
                 campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
-                    {"Progress saved."},
+                    { "Progress saved." },
                     { can_skip = true, auto_advance = false },
                     campaign.campaign_state:get_as_map()
                 )
@@ -182,12 +182,12 @@ local HANDLERS = {
         enter = function(campaign, node)
             ---@cast node CharacterCustomizerNode
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
-                {"Customize your hero!"},
+                { "Customize your hero!" },
                 { can_skip = true },
                 campaign.campaign_state:get_as_map()
             )
             campaign.customized_character = campaign.character_manager:generate_character(
-                "character_customizer_template", {"hero"}
+                "character_customizer_template", { "hero" }
             )
             campaign.campaign_menu_context.character_appearance = campaign.customized_character.appearance
             if node.name_key then
@@ -231,7 +231,7 @@ local HANDLERS = {
                 end
             })
             campaign.active_dialogue = campaign.dialogue_manager:create_dialogue(
-                {node.text},
+                { node.text },
                 { can_skip = true },
                 memory_map,
                 true
@@ -251,7 +251,7 @@ local HANDLERS = {
             campaign.campaign_page:pop()
             campaign.campaign_page:pop()
             local dialogue = campaign.dialogue_manager:create_dialogue(
-                {node.text},
+                { node.text },
                 { can_skip = true },
                 campaign.campaign_state:get_as_map(),
                 true

@@ -116,8 +116,8 @@ local function extract_spawn_groups(tiled_data)
     local groups = {}
     for _, layer in ipairs(tiled_data.layers) do
         if layer.type == "objectgroup" then
-            local layer_props = layer.properties or {}
-            local group = {
+            local layer_props   = layer.properties or {}
+            local group         = {
                 from   = layer_props["from"] or nil,
                 points = {},
             }
@@ -148,22 +148,22 @@ end
 ---@param gfx_registry table<string, integer>
 ---@return BattleMap
 local function load_tiled(definition, tile_labels, gfx_registry)
-    log.debug("load_tiled: file='"..tostring(definition.file).."'")
+    log.debug("load_tiled: file='" .. tostring(definition.file) .. "'")
     local tiled_data = include(definition.file .. ".lua")
 
     if tiled_data == nil then
-        log.error("load_tiled: include returned nil for '"..tostring(definition.file)..".lua'")
+        log.error("load_tiled: include returned nil for '" .. tostring(definition.file) .. ".lua'")
         error("tiled map file not found: " .. tostring(definition.file))
     end
 
     local map_w = tiled_data.width
     local map_h = tiled_data.height
-    log.debug("load_tiled: map size "..map_w.."x"..map_h)
+    log.debug("load_tiled: map size " .. map_w .. "x" .. map_h)
 
     do
         local keys = {}
-        for k, v in pairs(gfx_registry) do table.insert(keys, k.."="..tostring(v)) end
-        log.debug("load_tiled: gfx_registry { "..table.concat(keys, ", ").." }")
+        for k, v in pairs(gfx_registry) do table.insert(keys, k .. "=" .. tostring(v)) end
+        log.debug("load_tiled: gfx_registry { " .. table.concat(keys, ", ") .. " }")
     end
 
     -- Build tileset ranges; keyed by firstgid for direct lookup.
@@ -171,7 +171,9 @@ local function load_tiled(definition, tile_labels, gfx_registry)
     for _, ts in ipairs(tiled_data.tilesets) do
         local stem = file_stem(ts.filename)
         local base = gfx_registry[stem] or 0
-        log.debug("load_tiled: tileset '"..tostring(ts.filename).."' stem='"..stem.."' firstgid="..tostring(ts.firstgid).." base="..tostring(base))
+        log.debug("load_tiled: tileset '" ..
+        tostring(ts.filename) .. "' stem='" .. stem .. "' firstgid=" .. tostring(ts.firstgid) .. " base=" ..
+        tostring(base))
         table.insert(ranges, { firstgid = ts.firstgid, base = base })
     end
 
@@ -197,7 +199,7 @@ local function load_tiled(definition, tile_labels, gfx_registry)
             table.insert(layer_names, layer.name)
         end
     end
-    log.debug("load_tiled: tile layers found: "..table.concat(layer_names, ", "))
+    log.debug("load_tiled: tile layers found: " .. table.concat(layer_names, ", "))
 
     assert(tile_layers["ground"], "tiled map missing required 'ground' layer: " .. tostring(definition.file))
 
@@ -299,7 +301,8 @@ local function load_static(definition, tile_labels)
         end
     end
 
-    local map = battle_map.new(metatiles_layer:width() --[[@as integer]], metatiles_layer:height() --[[@as integer]], labels)
+    local map = battle_map.new(metatiles_layer:width() --[[@as integer]], metatiles_layer:height() --[[@as integer]],
+        labels)
     map.layers = layers
     map.metadata = {
         player_spawners = {},

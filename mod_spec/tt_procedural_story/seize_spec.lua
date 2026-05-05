@@ -1,4 +1,4 @@
-local luassert = require("luassert")
+local luassert       = require("luassert")
 
 local battles_mod    = require("tt_procedural_campaign.game_data.missions")
 local campaign_state = require("src.tactics.campaign.campaign_state")

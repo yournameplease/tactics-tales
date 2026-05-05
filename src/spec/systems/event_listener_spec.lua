@@ -1,4 +1,4 @@
-local luassert = require("luassert")
+local luassert       = require("luassert")
 
 local event_bus      = require("src.tactics.systems.event_bus")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
@@ -45,7 +45,7 @@ describe("tactics.systems.event_bus.event_listener", function()
             local listener = event_listener.new(bus)
             local count = 0
             listener:on("TACTICS_BEGIN_TURN", function() count = count + 1 end)
-            listener:on("TACTICS_END_TURN",   function() count = count + 1 end)
+            listener:on("TACTICS_END_TURN", function() count = count + 1 end)
             listener:teardown()
             bus:emit("TACTICS_BEGIN_TURN", {})
             bus:emit("TACTICS_END_TURN", {})

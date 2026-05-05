@@ -20,12 +20,14 @@ local function make_mock_map(w, h, get_terrain_fn, get_at_tile_fn)
     function map:get_terrain(tile)
         return get_terrain_fn(tile.x, tile.y)
     end
+
     function map:get_at_tile(tile)
         if get_at_tile_fn then
             return get_at_tile_fn(tile.x, tile.y)
         end
         return nil
     end
+
     return map
 end
 
@@ -66,13 +68,11 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("tactics.battle.pathfinding", function()
-
     -- -----------------------------------------------------------------------
     -- calculate_all_tile_costs
     -- -----------------------------------------------------------------------
 
     describe("calculate_all_tile_costs", function()
-
         it("should assign cost equal to taxicab distance on an open grid", function()
             local map = open_map(5, 5)
             local costs = pathfinding.calculate_all_tile_costs(map, 2, 2, "player", 99)
@@ -151,7 +151,6 @@ describe("tactics.battle.pathfinding", function()
             -- Friendly-occupied tile is still reachable
             luassert.is_not_nil(costs:get(2, 1))
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
@@ -159,7 +158,6 @@ describe("tactics.battle.pathfinding", function()
     -- -----------------------------------------------------------------------
 
     describe("get_path_to_tile", function()
-
         it("should return a straight path on an open grid", function()
             local map = open_map(5, 5)
             local costs = pathfinding.calculate_all_tile_costs(map, 0, 0, "player", 99)
@@ -191,8 +189,8 @@ describe("tactics.battle.pathfinding", function()
             luassert.are_equal(2, path[#path].y)
             -- Each step differs by exactly 1 in one axis
             for i = 2, #path do
-                local dx = math.abs(path[i].x - path[i-1].x)
-                local dy = math.abs(path[i].y - path[i-1].y)
+                local dx = math.abs(path[i].x - path[i - 1].x)
+                local dy = math.abs(path[i].y - path[i - 1].y)
                 luassert.are_equal(1, dx + dy)
             end
         end)
@@ -206,7 +204,6 @@ describe("tactics.battle.pathfinding", function()
             luassert.are_equal(2, path[1].x)
             luassert.are_equal(2, path[1].y)
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
@@ -214,7 +211,6 @@ describe("tactics.battle.pathfinding", function()
     -- -----------------------------------------------------------------------
 
     describe("find_reachable_tiles", function()
-
         it("should mark all tiles within cost as reachable", function()
             local map = open_map(5, 5)
             local reachable = pathfinding.find_reachable_tiles(map, 0, 0, "player", 2)
@@ -257,7 +253,6 @@ describe("tactics.battle.pathfinding", function()
 
             luassert.is_falsy(reachable:get(1, 0))
         end)
-
     end)
 
     -- -----------------------------------------------------------------------
@@ -265,7 +260,6 @@ describe("tactics.battle.pathfinding", function()
     -- -----------------------------------------------------------------------
 
     describe("extend_path_to_point", function()
-
         it("should return the original path unchanged when target is not legal", function()
             local path = { point.of(0, 0), point.of(1, 0) }
             local target = point.of(5, 5)
@@ -284,7 +278,7 @@ describe("tactics.battle.pathfinding", function()
             local path = { point.of(0, 0), point.of(1, 0), point.of(2, 0) }
             local target = point.of(1, 0)
             -- All tiles on the path are legal
-            local legal = make_legal_tiles({{0,0},{1,0},{2,0}})
+            local legal = make_legal_tiles({ { 0, 0 }, { 1, 0 }, { 2, 0 } })
             local result = pathfinding.extend_path_to_point(path, target, 10, legal)
 
             luassert.are_equal(2, #result)
@@ -296,7 +290,7 @@ describe("tactics.battle.pathfinding", function()
 
         it("should extend the path towards a new reachable target", function()
             -- Start at (0,0), legal strip along x-axis up to x=3
-            local legal = make_legal_tiles({{0,0},{1,0},{2,0},{3,0}})
+            local legal = make_legal_tiles({ { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 } })
             local path = { point.of(0, 0) }
             local target = point.of(3, 0)
             local result = pathfinding.extend_path_to_point(path, target, 4, legal)
@@ -315,7 +309,7 @@ describe("tactics.battle.pathfinding", function()
                 point.of(0, 3), point.of(0, 4),
             }
             -- Target is (1,0), reachable via (0,0) and (1,0)
-            local legal = make_legal_tiles({{0,0},{0,1},{0,2},{0,3},{0,4},{1,0},{1,1}})
+            local legal = make_legal_tiles({ { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 }, { 1, 0 }, { 1, 1 } })
             local target = point.of(1, 0)
             local result = pathfinding.extend_path_to_point(path, target, 2, legal)
 
@@ -325,7 +319,5 @@ describe("tactics.battle.pathfinding", function()
             -- Result length must not exceed max_length + 1
             luassert.is_true(#result <= 3)
         end)
-
     end)
-
 end)

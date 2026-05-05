@@ -1,5 +1,5 @@
 local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
-local battles_meta     = include("mods/tt_procedural_campaign/game_data/battles_meta.lua")
+local battles_meta       = include("mods/tt_procedural_campaign/game_data/battles_meta.lua")
 
 --- Accumulate recruitment credits for this battle, roll pending recruit types,
 --- and write the results back to story memory.
@@ -20,12 +20,12 @@ local function update_recruitment_quota(archetype, mem, rng, template_id)
         credits = tonumber(credits_entry.text) or 0
     end
 
-    credits = credits + archetype.recruitment_rate
-    local recruit_count = math.floor(credits)
-    local remainder     = credits - recruit_count
+    credits               = credits + archetype.recruitment_rate
+    local recruit_count   = math.floor(credits)
+    local remainder       = credits - recruit_count
 
-    local pending      = {}
-    local meta         = battles_meta[template_id]
+    local pending         = {}
+    local meta            = battles_meta[template_id]
     local archetype_types = meta and meta.recruitment_archetypes or {}
     if #archetype_types > 0 then
         for _ = 1, recruit_count do

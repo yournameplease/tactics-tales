@@ -1,11 +1,11 @@
-local luassert = require("luassert")
+local luassert          = require("luassert")
 
 local faction_selection = require("tt_procedural_campaign.game_data.faction_selection")
 local select_faction    = faction_selection.select_faction
 local compute_weights   = faction_selection.compute_weights
 
-local campaign_state = require("src.tactics.campaign.campaign_state")
-local random       = require("src.tactics.util.random")
+local campaign_state    = require("src.tactics.campaign.campaign_state")
+local random            = require("src.tactics.util.random")
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })

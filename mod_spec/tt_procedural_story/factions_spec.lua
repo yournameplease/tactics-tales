@@ -1,4 +1,4 @@
-local luassert = require("luassert")
+local luassert     = require("luassert")
 
 local factions_mod = require("tt_procedural_campaign.game_data.factions")
 local factions     = factions_mod.factions
@@ -20,24 +20,24 @@ describe("tt_procedural_campaign.factions", function()
 
         it("bandits tier 1 has correct templates", function()
             local t = factions.bandits.tiers[1]
-            luassert.are_equal("bandit_goon",  t.enemy_infantry)
-            luassert.are_equal("bandit_boss",  t.enemy_commander)
+            luassert.are_equal("bandit_goon", t.enemy_infantry)
+            luassert.are_equal("bandit_boss", t.enemy_commander)
             luassert.are_equal("bandit_guard", t.enemy_tank)
             luassert.is_nil(t.enemy_ranged)
         end)
 
         it("bandits tier 2 has correct templates", function()
             local t = factions.bandits.tiers[2]
-            luassert.are_equal("bandit_axe",       t.enemy_infantry)
+            luassert.are_equal("bandit_axe", t.enemy_infantry)
             luassert.are_equal("bandit_berzerker", t.enemy_commander)
-            luassert.are_equal("bandit_guard",     t.enemy_tank)
+            luassert.are_equal("bandit_guard", t.enemy_tank)
             luassert.is_nil(t.enemy_ranged)
         end)
 
         it("cultists tier 1 has correct templates", function()
             local t = factions.cultists.tiers[1]
-            luassert.are_equal("cultist_goon",  t.enemy_infantry)
-            luassert.are_equal("cultist_boss",  t.enemy_commander)
+            luassert.are_equal("cultist_goon", t.enemy_infantry)
+            luassert.are_equal("cultist_boss", t.enemy_commander)
             luassert.are_equal("cultist_guard", t.enemy_tank)
             luassert.is_nil(t.enemy_ranged)
         end)

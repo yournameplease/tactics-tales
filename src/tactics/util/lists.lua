@@ -29,7 +29,7 @@ end
 ---@return V[]
 function lists.merge(...)
     local out = {}
-    for _, l in ipairs({...}) do
+    for _, l in ipairs({ ... }) do
         for _, elem in ipairs(l) do
             table.insert(out, elem)
         end

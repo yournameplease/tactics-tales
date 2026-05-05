@@ -37,7 +37,7 @@ local randomizer = {
 ---@param ... V Values to choose from.
 ---@return WeightedOptionSelector<V>
 function randomizer.weighted_option_selector.of(...)
-    local array = {...}
+    local array = { ... }
     local options = lists.do_map(array, function(v) return { v, 1 } end)
     return setmetatable({
         options = options,
@@ -67,7 +67,7 @@ end
 ---@param ... WeightedOption<V> Value-weight pairs in pick order.
 ---@return WeightedOptionSelector<V>
 function randomizer.weighted_option_selector.of_weighted(...)
-    local array = {...}
+    local array = { ... }
     return setmetatable({
         options = array,
         total_weight = lists.do_sum(array, function(o) return o[2] end)
@@ -79,7 +79,7 @@ end
 ---@param ... WeightedOption<WeightedOptionSelector<V>> Sub-selector weight pairs; inner option weights are scaled by the outer weight.
 ---@return WeightedOptionSelector<V>
 function randomizer.weighted_option_selector.of_recursive(...)
-    local array = {...}
+    local array = { ... }
     local options = lists.do_flat_map(array, function(o)
         local weight = o[2]
         return lists.do_map(o[1].options, function(n_o)
@@ -112,7 +112,7 @@ end
 ---@param ... Randomizer<V> Sub-randomizers to invoke in order.
 ---@return ListSelector<V>
 function randomizer.list_selector.of_randomizers(...)
-    local selectors = {...}
+    local selectors = { ... }
     return setmetatable({
         selectors = selectors,
     }, { __index = ListSelector })

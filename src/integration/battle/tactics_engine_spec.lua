@@ -1,9 +1,9 @@
-local luassert   = require("luassert")
-local battle_unit = require("src.tactics.battle.tactics.battle_unit")
+local luassert           = require("luassert")
+local battle_unit        = require("src.tactics.battle.tactics.battle_unit")
 local tactics_engine_mod = require("src.tactics.battle.tactics.tactics_engine")
-local event_bus_mod = require("src.tactics.systems.event_bus")
-local tasks      = require("src.tactics.systems.tasks")
-local point      = require("src.tactics.util.point")
+local event_bus_mod      = require("src.tactics.systems.event_bus")
+local tasks              = require("src.tactics.systems.tasks")
+local point              = require("src.tactics.util.point")
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -30,10 +30,10 @@ local function make_facing()
 end
 
 local function make_unit(opts)
-    opts = opts or {}
-    local char    = opts.character or make_character(opts)
-    local facing  = make_facing()
-    local unit = battle_unit.spawn_unit(
+    opts                = opts or {}
+    local char          = opts.character or make_character(opts)
+    local facing        = make_facing()
+    local unit          = battle_unit.spawn_unit(
         char,
         opts.tile or point.of(0, 0),
         opts.tags or {},
@@ -59,11 +59,15 @@ local function make_map(units)
     function map:get_at_tile(tile)
         return by_tile[tile.x .. "," .. tile.y]
     end
+
     function map:kill_unit(unit)
         by_tile[unit.tile.x .. "," .. unit.tile.y] = nil
     end
+
     function map:remove_unit(_id) end
+
     function map:get_unit_by_id(_id) return nil end
+
     function map:get_units(filter)
         local result = {}
         for _, u in pairs(by_tile) do
@@ -71,6 +75,7 @@ local function make_map(units)
         end
         return result
     end
+
     return map
 end
 
@@ -143,19 +148,22 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("tactics_engine handle_skill #it", function()
-
     describe("heal effect", function()
         it("restores heal_amount HP to the target", function()
             local skill_defs = {
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -172,12 +180,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 10, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 8
@@ -196,12 +208,16 @@ describe("tactics_engine handle_skill #it", function()
                 blast = { effect_type = "damage", damage = 5, accuracy = 100, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "blast" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "enemy",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
 
@@ -217,12 +233,16 @@ describe("tactics_engine handle_skill #it", function()
                 blast = { effect_type = "damage", damage = 5, accuracy = 0, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "blast" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "enemy",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
 
@@ -240,12 +260,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = 2, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -263,12 +287,16 @@ describe("tactics_engine handle_skill #it", function()
             }
             -- Use enemy side to skip the player-death dialogue path.
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "enemy",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "enemy",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -285,12 +313,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = 10, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "enemy",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "enemy",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -309,12 +341,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = 2 },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -331,12 +367,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -353,12 +393,16 @@ describe("tactics_engine handle_skill #it", function()
                 blast = { effect_type = "damage", damage = 1, accuracy = 100, hp_cost = nil, cooldown = nil, uses_per_battle = 3 },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "blast" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "enemy",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
 
@@ -374,12 +418,16 @@ describe("tactics_engine handle_skill #it", function()
                 slash = { effect_type = "damage", damage = 1, accuracy = 100, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "slash" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "enemy",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
 
@@ -397,12 +445,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5
@@ -419,12 +471,16 @@ describe("tactics_engine handle_skill #it", function()
                 heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
             }
             local caster = make_unit({
-                id = 1, tile = point.of(0, 0), side = "player",
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
                 character = make_character({ id = 1, hp_max = 10, skill_loadout = { "heal" } }),
                 skill_defs = skill_defs,
             })
             local target = make_unit({
-                id = 2, tile = point.of(1, 0), side = "player",
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
                 character = make_character({ id = 2, hp_max = 10 }),
             })
             target.hp_current = 5

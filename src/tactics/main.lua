@@ -23,11 +23,11 @@ local input_service = require("src.tactics.joypad")
 local input_context = require("src.tactics.input.input_context")
 
 function todo(message)
-	error("Function is not implemented!"..(message and " "..message or ""))
+    error("Function is not implemented!" .. (message and " " .. message or ""))
 end
 
 function unexpected(state)
-	error("Received an unexpected state: "..(state and state or "nil"))
+    error("Received an unexpected state: " .. (state and state or "nil"))
 end
 
 require("profiler")
@@ -52,7 +52,7 @@ local bus
 
 function _init()
     mkdir("/appdata/tactics_tales/saves")
-    
+
     local config_mgr = config_manager.new()
 
     -- bold font
@@ -61,7 +61,7 @@ function _init()
     -- custom joypad delays, until I add custom handling
     poke(0x5f5c, 18)
     poke(0x5f5d, 6)
-    
+
     input = input_service.new()
     task_manager = tasks.task_manager()
     ui_manager = ui_mgr.new()
@@ -72,7 +72,7 @@ function _init()
     ui_context = ui_context_manager.new()
 
     local mod_loader = mod_ldr.new()
-    
+
     game_manager = game.new(
         task_manager,
         animation_manager,
@@ -120,7 +120,7 @@ end
 function _draw()
     if user_input.method_changed then
         if user_input.active_method == "joypad" then
-            window{
+            window {
                 hide_cursor = "until_move"
             }
         elseif user_input.active_method == "mouse" then

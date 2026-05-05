@@ -59,7 +59,7 @@ end
 --- Start a new campaign, either from scratch or from a save file.
 ---@param file_name string|nil Save file path, or nil for a new campaign.
 ---@param campaign_id CampaignId Campaign to start; defaults to the game's default campaign.
----@param config table<string, string> 
+---@param config table<string, string>
 function Game:begin_campaign(file_name, campaign_id, config)
     local game_data = self.mod_loader:load_mod_data()
 

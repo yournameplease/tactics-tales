@@ -32,14 +32,18 @@ end
 local function player(tags)
     local u = { side = "player", tags = tags or {} }
     function u:is_player() return self.side == "player" end
-    function u:is_enemy()  return self.side == "enemy"  end
+
+    function u:is_enemy() return self.side == "enemy" end
+
     return u
 end
 
 local function enemy(tags)
     local u = { side = "enemy", tags = tags or {} }
     function u:is_player() return self.side == "player" end
-    function u:is_enemy()  return self.side == "enemy"  end
+
+    function u:is_enemy() return self.side == "enemy" end
+
     return u
 end
 
@@ -49,9 +53,7 @@ local function make_service(map, turn_limit, victories, failures)
 end
 
 describe("tactics.battle.battle_objective_service", function()
-
     describe("check_objectives", function()
-
         it("returns finished=false when nothing triggers", function()
             -- Both a living player and a living enemy: rout and all_players_die are both unsatisfied.
             local map = make_map({ player(), enemy() }, {})
@@ -65,7 +67,7 @@ describe("tactics.battle.battle_objective_service", function()
         end)
 
         it("returns VICTORY when the victory condition triggers", function()
-            local map = make_map({}, {})   -- no living units → rout succeeds
+            local map = make_map({}, {}) -- no living units → rout succeeds
             local svc = make_service(map, nil,
                 { { type = "rout", text = "Rout" } },
                 {}
@@ -76,7 +78,7 @@ describe("tactics.battle.battle_objective_service", function()
         end)
 
         it("returns DEFEAT when a failure condition triggers", function()
-            local map = make_map({}, {})  -- no living players → all_players_die triggers
+            local map = make_map({}, {}) -- no living players → all_players_die triggers
             local svc = make_service(map, nil,
                 {},
                 { { type = "all_players_die", text = "Survive" } }
@@ -170,11 +172,9 @@ describe("tactics.battle.battle_objective_service", function()
             luassert.is_true(result.finished)
             luassert.are_equal("VICTORY", result.result)
         end)
-
     end)
 
     describe("objective_text", function()
-
         it("returns empty table when no conditions have text", function()
             local map = make_map({}, {})
             local svc = make_service(map, nil,
@@ -198,7 +198,7 @@ describe("tactics.battle.battle_objective_service", function()
             local map = make_map({}, {})
             local svc = make_service(map, nil,
                 { { type = "rout", text = "Defeat all enemies" },
-                  { type = "escape", text = "Escape" } },
+                    { type = "escape", text = "Escape" } },
                 {}
             )
             luassert.are_equal(2, #svc.objective_text)
@@ -224,7 +224,7 @@ describe("tactics.battle.battle_objective_service", function()
             local map = make_map({}, {})
             local svc = make_service(map, 10,
                 { { type = "rout", text = "Defeat all enemies" },
-                  { type = "escape", text = "Escape" } },
+                    { type = "escape", text = "Escape" } },
                 {}
             )
             svc:set_turn(3)
@@ -244,7 +244,5 @@ describe("tactics.battle.battle_objective_service", function()
             luassert.are_equal(1, #svc.objective_text)
             luassert.are_equal("Defeat all enemies", svc.objective_text[1])
         end)
-
     end)
-
 end)

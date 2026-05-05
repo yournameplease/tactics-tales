@@ -1,7 +1,7 @@
 local luassert = require("luassert")
 
 local Campaign = require("src.tactics.campaign.campaign").Campaign
-local HANDLERS  = require("src.tactics.campaign.handlers.node_handlers")
+local HANDLERS = require("src.tactics.campaign.handlers.node_handlers")
 
 -- ---------------------------------------------------------------------------
 -- Test helper: minimal Campaign-like object
@@ -55,7 +55,7 @@ describe("detour handler", function()
 
         luassert.are_equal(1, #mock.return_stack)
         luassert.are_equal("main", mock.return_stack[1].node_id)
-        luassert.are_equal(4, mock.return_stack[1].node_step)  -- node_step + 1
+        luassert.are_equal(4, mock.return_stack[1].node_step) -- node_step + 1
     end)
 
     it("jumps to the target node", function()
@@ -81,11 +81,11 @@ describe("Campaign:advance_node detour return", function()
         -- sub:  advance  (1 step; exhaustion triggers return to main/2)
         local self, _ = make_campaign({
             main = {
-                { type = "detour", target = "sub" },  -- step 1
-                { type = "text",   text  = "back" },  -- step 2 — resume target
+                { type = "detour", target = "sub" }, -- step 1
+                { type = "text",   text = "back" },  -- step 2 — resume target
             },
             sub = {
-                { type = "advance" },                 -- sole step; exhaustion returns
+                { type = "advance" }, -- sole step; exhaustion returns
             },
         })
 
@@ -93,16 +93,16 @@ describe("Campaign:advance_node detour return", function()
 
         -- Should have returned to main/2 without further auto-advance
         luassert.are_equal("main", self.current_node.node_id)
-        luassert.are_equal(2,      self.current_node.node_step)
+        luassert.are_equal(2, self.current_node.node_step)
         luassert.are_equal("text", self.current_node.definition.type)
-        luassert.are_equal(0,      #self.return_stack)
+        luassert.are_equal(0, #self.return_stack)
     end)
 
     it("does not pop return_stack when remaining steps exist", function()
         local self, _ = make_campaign({
             main = {
                 { type = "advance" },
-                { type = "text", text = "b" },
+                { type = "text",   text = "b" },
             },
         })
         self.return_stack = { { node_id = "caller", node_step = 99 } }
@@ -116,8 +116,8 @@ describe("Campaign:advance_node detour return", function()
         Campaign.advance_node(self)
 
         luassert.are_equal("main", self.current_node.node_id)
-        luassert.are_equal(2,      self.current_node.node_step)
-        luassert.are_equal(1,      #self.return_stack)
+        luassert.are_equal(2, self.current_node.node_step)
+        luassert.are_equal(1, #self.return_stack)
     end)
 end)
 
@@ -132,7 +132,7 @@ describe("nested detours", function()
         -- inner → advance       → exhausted → return to mid/2
         local self, _ = make_campaign({
             main = {
-                { type = "detour", target = "mid" },   -- step 1
+                { type = "detour", target = "mid" },    -- step 1
                 { type = "text",   text = "main end" }, -- step 2
             },
             mid = {
@@ -140,16 +140,16 @@ describe("nested detours", function()
                 { type = "advance" },                  -- step 2 (return from inner)
             },
             inner = {
-                { type = "advance" },                  -- sole step
+                { type = "advance" }, -- sole step
             },
         })
 
         Campaign.jump_to_node(self, "main")
 
         luassert.are_equal("main", self.current_node.node_id)
-        luassert.are_equal(2,      self.current_node.node_step)
+        luassert.are_equal(2, self.current_node.node_step)
         luassert.are_equal("text", self.current_node.definition.type)
-        luassert.are_equal(0,      #self.return_stack)
+        luassert.are_equal(0, #self.return_stack)
     end)
 end)
 

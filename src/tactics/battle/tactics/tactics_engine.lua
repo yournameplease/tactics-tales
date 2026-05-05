@@ -248,7 +248,8 @@ end
 ---@param labels string[]
 ---@param blocked_behavior UnitSpawnBlockedBehavior
 ---@return BattleUnit?, integer
-local function try_spawn_at(self, char_man, player_roster, roster_count, spawn_point, character_source, side, movement_side, ai, labels, blocked_behavior)
+local function try_spawn_at(self, char_man, player_roster, roster_count, spawn_point, character_source, side,
+                            movement_side, ai, labels, blocked_behavior)
     local existing_unit = self.battle_map:get_at_tile(spawn_point)
     if existing_unit ~= nil then
         if blocked_behavior == "prevent" then
@@ -894,7 +895,7 @@ function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
                     local interactions = self.battle_map.interactions_by_unit_id[tile_unit.id]
                     if interactions and next(interactions) then
                         tiles:set(t.x, t.y, current | HIGHLIGHT.IS_VALID)
-                    end 
+                    end
                 end
             end
             -- neutral units: interaction destination is handled via get_nearby_interactions

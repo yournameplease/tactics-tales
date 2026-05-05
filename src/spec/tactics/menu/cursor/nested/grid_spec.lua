@@ -23,7 +23,7 @@ describe("tactics.menu.cursor.nested.grid", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 5, 5)
-                            :with_common_child(button.builder("common_btn"))
+                        :with_common_child(button.builder("common_btn"))
                     )
                 }
             }
@@ -73,18 +73,18 @@ describe("tactics.menu.cursor.nested.grid", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 2, 2)
-                            :with_child(
-                                function(p, _gc, _mc)
-                                    return p.x == 0 and p.y == 0
-                                end,
-                                button.builder("btn00"):handle_action("select", "h1")
-                            )
-                            :with_child(
-                                function(p, _gc, _mc)
-                                    return p.x == 1 and p.y == 1
-                                end,
-                                button.builder("btn11"):handle_action("select", "h2")
-                            )
+                        :with_child(
+                            function(p, _gc, _mc)
+                                return p.x == 0 and p.y == 0
+                            end,
+                            button.builder("btn00"):handle_action("select", "h1")
+                        )
+                        :with_child(
+                            function(p, _gc, _mc)
+                                return p.x == 1 and p.y == 1
+                            end,
+                            button.builder("btn11"):handle_action("select", "h2")
+                        )
                     ):with_action("BUTTON_A", { command = "select" })
                 }
             }
@@ -117,10 +117,10 @@ describe("tactics.menu.cursor.nested.grid", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 5, 5)
-                            :with_common_child(button.builder("common_btn"))
-                            :with_initial_point(function(_gc, _mc)
-                                return point.of(3, 4)
-                            end)
+                        :with_common_child(button.builder("common_btn"))
+                        :with_initial_point(function(_gc, _mc)
+                            return point.of(3, 4)
+                        end)
                     )
                 }
             }
@@ -143,22 +143,22 @@ describe("tactics.menu.cursor.nested.grid", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 16, 16)
-                            :with_common_child(button.builder("common_btn"))
-                            :with_path_anchor(function(_gc, _mc)
-                                return point.of(0, 0)
-                            end)
-                            :with_path_length(function(_gc, _mc)
-                                return 5
-                            end)
-                            :with_tile_highlights(function(_gc, _mc)
-                                local tiles = userdata("u8", 16, 16)
-                                for y = 0, 15 do
-                                    for x = 0, 15 do
-                                        tiles:set(x, y, 3)
-                                    end
+                        :with_common_child(button.builder("common_btn"))
+                        :with_path_anchor(function(_gc, _mc)
+                            return point.of(0, 0)
+                        end)
+                        :with_path_length(function(_gc, _mc)
+                            return 5
+                        end)
+                        :with_tile_highlights(function(_gc, _mc)
+                            local tiles = userdata("u8", 16, 16)
+                            for y = 0, 15 do
+                                for x = 0, 15 do
+                                    tiles:set(x, y, 3)
                                 end
-                                return tiles
-                            end)
+                            end
+                            return tiles
+                        end)
                     )
                 }
             }
@@ -187,22 +187,22 @@ describe("tactics.menu.cursor.nested.grid", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 16, 16)
-                            :with_common_child(button.builder("common_btn"))
-                            :with_path_anchor(function(_gc, _mc)
-                                return point.of(0, 0)
-                            end)
-                            :with_path_length(function(_gc, _mc)
-                                return 5
-                            end)
-                            :with_tile_highlights(function(_gc, _mc)
-                                local tiles = userdata("u8", 16, 16)
-                                for y = 0, 15 do
-                                    for x = 0, 15 do
-                                        tiles:set(x, y, 3)
-                                    end
+                        :with_common_child(button.builder("common_btn"))
+                        :with_path_anchor(function(_gc, _mc)
+                            return point.of(0, 0)
+                        end)
+                        :with_path_length(function(_gc, _mc)
+                            return 5
+                        end)
+                        :with_tile_highlights(function(_gc, _mc)
+                            local tiles = userdata("u8", 16, 16)
+                            for y = 0, 15 do
+                                for x = 0, 15 do
+                                    tiles:set(x, y, 3)
                                 end
-                                return tiles
-                            end)
+                            end
+                            return tiles
+                        end)
                     )
                 }
             }
@@ -256,17 +256,17 @@ describe("tactics.menu.cursor.nested.grid", function()
                 },
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
-                        grid.grid("test_grid", 5, 5)
+                            grid.grid("test_grid", 5, 5)
                             :with_common_child(
                                 button.builder("action_btn")
-                                    :handle_action("select", "action_h")
+                                :handle_action("select", "action_h")
                             )
                             :with_common_child(
                                 button.builder("cycle_btn")
-                                    :handle_action("cycle_right", "cycle_h")
+                                :handle_action("cycle_right", "cycle_h")
                             )
-                    ):with_action("BUTTON_A", { command = "select" })
-                     :with_action("SHOULDER_R", { command = "cycle_right" })
+                        ):with_action("BUTTON_A", { command = "select" })
+                        :with_action("SHOULDER_R", { command = "cycle_right" })
                 }
             }
         }

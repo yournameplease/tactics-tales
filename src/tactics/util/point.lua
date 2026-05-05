@@ -23,7 +23,7 @@ Point.__index = Point
 
 local point = {}
 
-local point_of  -- forward declaration
+local point_of -- forward declaration
 
 Point.__eq = function(a, b)
     return a.x == b.x and a.y == b.y

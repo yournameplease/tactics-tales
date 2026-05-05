@@ -1,4 +1,3 @@
-
 local weapon = {
     effect = {},
     range = {},
@@ -41,8 +40,8 @@ function weapon.range.single_target(min_range, max_range, description)
         description = description,
         get_selection_tiles = function(origin, map)
             local out = {}
-            for x=-max_range,max_range do
-                for y=-max_range,max_range do
+            for x = -max_range, max_range do
+                for y = -max_range, max_range do
                     local p = origin + lib.point.of(x, y)
                     local distance = lib.point.taxicab_distance(origin, p)
                     if min_range <= distance and distance <= max_range
@@ -69,12 +68,12 @@ end
 local default_weapon = {
     name = "Default Weapon",
     sprite = 104,
-    hand_anchor = lib.point.of(1,8), -- the top left position of the handle
+    hand_anchor = lib.point.of(1, 8), -- the top left position of the handle
     damage = 1,
     accuracy = 100,
     type = "MELEE",
     body_type = "BACK_HAND",
-    targeting = weapon.range.single_target(1,1),
+    targeting = weapon.range.single_target(1, 1),
 }
 
 ---@param name string
@@ -135,7 +134,7 @@ function weapon.melee(
         "MAIN_HAND",
         {
             sprite = sprite,
-            anchor = lib.point.of(1,8)
+            anchor = lib.point.of(1, 8)
         },
         data
     )
@@ -175,7 +174,7 @@ function weapon.two_handed(
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = lib.point.of(3,12)
+            anchor = lib.point.of(3, 12)
         },
         data
     )
@@ -208,7 +207,7 @@ function weapon.ranged(
         "TWO_HANDS",
         {
             sprite = sprite,
-            anchor = lib.point.of(13,9)
+            anchor = lib.point.of(13, 9)
         },
         {
             name = name,
