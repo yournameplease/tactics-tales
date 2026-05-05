@@ -2,9 +2,9 @@ LUA_SRC = $(shell find src/ -type f -name '*.lua')
 
 LLS = lua-language-server
 
-.PHONY: all check ut it test coverage
+.PHONY: all check ut it test coverage format checkstyle
 
-all: check test
+all: check test format
 
 check:
 	$(LLS) --check=$(CURDIR)
@@ -21,3 +21,9 @@ test:
 coverage:
 	busted src/ mod_spec/ --helper=busted_coverage_setup.lua
 	luacov
+
+format:
+	CodeFormat format -w . -d
+
+checkstyle:
+	CodeFormat check -w . -d
