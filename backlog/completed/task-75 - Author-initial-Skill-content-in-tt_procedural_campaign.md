@@ -1,10 +1,10 @@
 ---
 id: TASK-75
 title: Author initial Skill content in tt_procedural_campaign
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 21:48'
-updated_date: '2026-05-04 22:29'
+updated_date: '2026-05-05 00:56'
 labels: []
 milestone: m-13
 dependencies:
@@ -29,15 +29,15 @@ Skills must be purely data — no engine logic.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 At least one heal skill defined in mod data and usable in battle
-- [ ] #2 At least one damage skill defined in mod data and usable in battle
-- [ ] #3 Skills are data-only — no skill logic hardcoded in engine
-- [ ] #4 Mod loads without validation errors
-- [ ] #5 make test passes
+- [x] #1 At least one heal skill defined in mod data and usable in battle
+- [x] #2 At least one damage skill defined in mod data and usable in battle
+- [x] #3 Skills are data-only — no skill logic hardcoded in engine
+- [x] #4 Mod loads without validation errors
+- [x] #5 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->

@@ -1,9 +1,10 @@
 ---
 id: TASK-81
 title: Add Skills entry to turn action menu
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:28'
+updated_date: '2026-05-05 00:13'
 labels: []
 milestone: m-13
 dependencies:

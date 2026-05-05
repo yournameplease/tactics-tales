@@ -1,9 +1,10 @@
 ---
 id: TASK-83
 title: Add skill target selection step
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:28'
+updated_date: '2026-05-05 00:43'
 labels: []
 milestone: m-13
 dependencies:
@@ -33,16 +34,16 @@ Files to modify: `src/tactics/battle/battle_menu_manager.lua`, possibly `src/tac
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Only tiles returned by get_selection_tiles are highlighted and selectable
-- [ ] #2 is_target_valid is enforced at confirmation
-- [ ] #3 Cursor navigates among valid tiles only
-- [ ] #4 Back returns to SELECT_SKILL with the same skill selected
-- [ ] #5 Confirming a target triggers skill execution
-- [ ] #6 make test passes
+- [x] #1 Only tiles returned by get_selection_tiles are highlighted and selectable
+- [x] #2 is_target_valid is enforced at confirmation
+- [x] #3 Cursor navigates among valid tiles only
+- [x] #4 Back returns to SELECT_SKILL with the same skill selected
+- [x] #5 Confirming a target triggers skill execution
+- [x] #6 make test passes
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
