@@ -13,11 +13,11 @@ local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local lists = require("src.tactics.util.lists")
 local id_generator = require("src.tactics.util.id_generator")
 local mutex = require("src.tactics.systems.mutex")
-local character = require("src.tactics.character.object.character")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local BattleUnit = battle_unit.BattleUnit
+local unit_spawner = require("src.tactics.battle.unit_spawner")
 
 local TILE_WIDTH = STATIC_CONFIG.TILE_WIDTH
 local TILE_HEIGHT = STATIC_CONFIG.TILE_HEIGHT
@@ -205,81 +205,6 @@ function TacticsEngine:despawn_unit(units)
     end
 end
 
---- Resolve a character from a source and optionally persist a player character.
---- Returns the resolved character and the updated roster_count.
----@param char_man CharacterManager
----@param player_roster Character[]
----@param roster_count integer
----@param character_source CharacterSource
----@param side Side
----@return Character?, integer
-local function resolve_character(char_man, player_roster, roster_count, character_source, side)
-    if character_source.type == "template" then
-        ---@cast character_source CharacterTemplateSource
-        local unit_character = char_man:generate_character(character_source.template, {})
-        if side == "player" then
-            char_man:persist_player(unit_character)
-        end
-        return unit_character, roster_count
-    elseif character_source.type == "player_roster" then
-        ---@cast character_source PlayerRosterSource
-        if player_roster[roster_count] ~= nil then
-            return player_roster[roster_count], roster_count + 1
-        end
-        return nil, roster_count
-    else
-        unexpected(character_source.type)
-        return nil, roster_count
-    end
-end
-
---- Attempt to spawn one unit at a single tile. Returns the spawned unit (or nil) and updated roster_count.
----@param self TacticsEngine
----@param char_man CharacterManager
----@param player_roster Character[]
----@param roster_count integer
----@param spawn_point Point
----@param character_source CharacterSource
----@param side Side
----@param movement_side? string
----@param ai? UnitAI
----@param labels string[]
----@param blocked_behavior UnitSpawnBlockedBehavior
----@return BattleUnit?, integer
-local function try_spawn_at(self, char_man, player_roster, roster_count, spawn_point, character_source, side,
-                            movement_side, ai, labels, blocked_behavior)
-    local existing_unit = self.battle_map:get_at_tile(spawn_point)
-    if existing_unit ~= nil then
-        if blocked_behavior == "prevent" then
-            return nil, roster_count
-        elseif blocked_behavior == "spawn_nearby" then
-            -- todo
-        else
-            unexpected(blocked_behavior)
-        end
-    end
-
-    local unit_character
-    unit_character, roster_count = resolve_character(char_man, player_roster, roster_count, character_source, side)
-    if unit_character == nil then
-        return nil, roster_count
-    end
-
-    local facing_r = spawn_point.x <= (self.battle_map.width >> 1) - 2
-    local unit = battle_unit.spawn_unit(
-        unit_character,
-        spawn_point,
-        labels,
-        side,
-        movement_side,
-        character.facing.of(facing_r and "right" or "left"),
-        ai,
-        self.skill_defs
-    )
-    self:spawn_unit(unit, spawn_point)
-    return unit, roster_count
-end
-
 --- Iterate over unit definitions and spawn each via CharacterManager, respecting `blocked_behavior`.
 --- Accepts both tile-label entries (UnitSpawnData) and squad/slot entries (LayerSpawnData).
 ---@param units (UnitSpawnData|LayerSpawnData)[]
@@ -304,7 +229,7 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
                     if slot_data then
                         local spawn_point = point.of(pt.x, pt.y)
                         local unit
-                        unit, roster_count = try_spawn_at(
+                        unit, roster_count = unit_spawner.try_spawn_at(
                             self, char_man, player_roster, roster_count,
                             spawn_point, slot_data.character_source,
                             spawn_data.side, spawn_data.movement_side,
@@ -322,7 +247,7 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
             local spawn_points = self.battle_map:get_tiles_by_label(spawn_data.tile)
             for _, spawn_point in ipairs(spawn_points) do
                 local unit
-                unit, roster_count = try_spawn_at(
+                unit, roster_count = unit_spawner.try_spawn_at(
                     self, char_man, player_roster, roster_count,
                     spawn_point, spawn_data.character_source,
                     spawn_data.side, spawn_data.movement_side,
