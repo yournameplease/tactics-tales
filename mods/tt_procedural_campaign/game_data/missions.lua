@@ -57,6 +57,27 @@ local battles = {
                 { side = "enemy", layer = "boss_seize", tags = { "boss" }, slots = {
                     enemy_commander = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_commander")), ai = ai.stationary },
                 }},
+                { side = "enemy", layer = "guard_west", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_tank")), ai = ai.stationary },
+                }},
+                { side = "enemy", layer = "guard_east", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_tank")), ai = ai.stationary },
+                }},
+                { side = "enemy", layer = "squad_center", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
+                }},
+                { side = "enemy", layer = "squad_north", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
+                }},
+                { side = "enemy", layer = "squad_center_south", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
+                }},
+                { side = "enemy", layer = "squad_west", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
+                }},
+                { side = "enemy", layer = "squad_east", tags = {  }, slots = {
+                    default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
+                }},
             },
             scripts = {},
         }
