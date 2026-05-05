@@ -5,6 +5,7 @@
 
 local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
+local random = require("src.tactics.util.random")
 local fp = require("src.tactics.util.fp")
 local array_2d = require("src.tactics.util.array_2d")
 local pathfinding = require("src.tactics.battle.pathfinding")
@@ -605,7 +606,7 @@ function TacticsEngine:skill_action(caster, skill_id, target)
     if skill.effect_type == "heal" then
         target:restore_hp(skill.heal_amount)
     elseif skill.effect_type == "damage" then
-        if math.random(100) <= skill.accuracy then
+        if random.rndi(100) < skill.accuracy then
             target:take_damage(skill.damage)
             target_dead = target.hp_current <= 0
         end
