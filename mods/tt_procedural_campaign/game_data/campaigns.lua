@@ -103,6 +103,8 @@ local stories = {
                     { type = "roster_add", template = "militia_spearman" },
                     { type = "roster_add", template = "militia_archer" },
                     { type = "roster_add", template = "militia_armor" },
+                    { type = "roster_add", template = "priest" },
+                    { type = "roster_add", template = "mage" },
                     { type = "jump", next_node = "battle_loop" },
                 },
 

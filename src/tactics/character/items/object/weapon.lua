@@ -30,6 +30,7 @@ local ArmorkillerEffect = {}
 ---@field type "shieldkiller"
 local ShieldkillerEffect = {}
 
+-- TODO: specify sides (opposite, same, or both)
 ---@class Targeting
 ---@field description? string Optional human-readable range description shown in the battle UI.
 ---@field get_selection_tiles fun(origin: Point, map: BattleMap): Point[] Returns tiles the player can select as attack targets.

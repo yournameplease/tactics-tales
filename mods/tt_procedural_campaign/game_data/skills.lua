@@ -3,9 +3,9 @@ return {
     heal = {
         name            = "Heal",
         effect_type     = "heal",
-        heal_amount     = 3,
+        heal_amount     = 5,
         hp_cost         = 1,
-        cooldown        = 2,
+        cooldown        = nil,
         uses_per_battle = nil,
         targeting = {
             get_selection_tiles = function(origin, map)
@@ -42,11 +42,11 @@ return {
         },
     },
 
-    fireball = {
-        name            = "Fireball",
+    missile = {
+        name            = "Missile",
         effect_type     = "damage",
         damage          = 3,
-        accuracy        = 75,
+        accuracy        = 100,
         hp_cost         = nil,
         cooldown        = nil,
         uses_per_battle = 1,
