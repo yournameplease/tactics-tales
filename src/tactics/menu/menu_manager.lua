@@ -392,14 +392,14 @@ function BaseMenuManager:update(input)
                 for _, leaf in ipairs(focused) do
                     if leaf.keyboard_handler then
                         local leaf_handler = self.menu_definitions[self.menu_state.menu_id].handlers
-                        [leaf.keyboard_handler]
+                            [leaf.keyboard_handler]
                         if leaf_handler then
                             leaf_handler(self.game_ctx, self.menu_ctx, text)
                         end
                     end
                 end
                 local step_handler = self.menu_definitions[self.menu_state.menu_id].handlers
-                [self.menu_step.keyboard_handler]
+                    [self.menu_step.keyboard_handler]
                 assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
                 allow_joypad = step_handler(self.game_ctx, self.menu_ctx, text) == true
             else

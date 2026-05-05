@@ -172,8 +172,8 @@ local function load_tiled(definition, tile_labels, gfx_registry)
         local stem = file_stem(ts.filename)
         local base = gfx_registry[stem] or 0
         log.debug("load_tiled: tileset '" ..
-        tostring(ts.filename) .. "' stem='" .. stem .. "' firstgid=" .. tostring(ts.firstgid) .. " base=" ..
-        tostring(base))
+            tostring(ts.filename) .. "' stem='" .. stem .. "' firstgid=" .. tostring(ts.firstgid) .. " base=" ..
+            tostring(base))
         table.insert(ranges, { firstgid = ts.firstgid, base = base })
     end
 
