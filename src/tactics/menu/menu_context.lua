@@ -38,6 +38,7 @@
 ---@field target_unit UnitSelection
 ---@field selected_script ScriptSelection
 ---@field selected_item ItemSelection
+---@field selected_skill_id string? Skill ID chosen in SELECT_SKILL, consumed by SELECT_SKILL_TARGET.
 ---@field metadata table<string, any>
 ---@field valid_attack_points Point[]? Valid positions from which the acting unit can attack the target.
 ---@field stored_interaction InteractionHook? Single interaction selected via the SELECT_DESTINATION shortcut.
