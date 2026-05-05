@@ -84,7 +84,7 @@ local function menu_definition_for_character_select()
                                 multiple_option_cursor_for_part("body_class", "Body", customization_options.BODY_CLASS,
                                     sprite_data.BODY_CLASS),
                                 multiple_option_cursor_for_part("beard", "Facial Hair", customization_options
-                                .FACIAL_HAIR, sprite_data.FACIAL_HAIR),
+                                    .FACIAL_HAIR, sprite_data.FACIAL_HAIR),
                                 multiple_option_cursor_for_part("eyes", "Eyes", customization_options.EYES,
                                     sprite_data.EYES),
                                 multiple_option_cursor_for_part("eyewear", "Eyewear", customization_options.EYEWEAR,

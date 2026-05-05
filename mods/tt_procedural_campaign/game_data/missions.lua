@@ -144,8 +144,14 @@ local battles = {
             local rng = rng_context and rng_context.battle_rng
             local slot = rng and rng:choose_random_from_list(faction.recruitable) or faction.recruitable[1]
             local template = resolve_slot(faction, tier, slot)
-            recruit_unit_entry = { side = "enemy", character_source = character_source.template(template), ai = ai
-            .stationary, tile = "recruit_slot", tags = { "turncoat" } }
+            recruit_unit_entry = {
+                side = "enemy",
+                character_source = character_source.template(template),
+                ai = ai
+                    .stationary,
+                tile = "recruit_slot",
+                tags = { "turncoat" }
+            }
             table.insert(recruit_scripts,
                 script.on_talk("turncoat")
                 :then_dialogue(script.unit.target(), { "[turncoat] Turncoat joins the player." })
@@ -153,8 +159,13 @@ local battles = {
                 :as_one_shot()
             )
         else
-            recruit_unit_entry = { side = "enemy", character_source = character_source.template(resolve_slot(faction,
-                tier, "enemy_infantry")), ai = ai.move_two, tile = "recruit_slot" }
+            recruit_unit_entry = {
+                side = "enemy",
+                character_source = character_source.template(resolve_slot(faction,
+                    tier, "enemy_infantry")),
+                ai = ai.move_two,
+                tile = "recruit_slot"
+            }
         end
 
         return {

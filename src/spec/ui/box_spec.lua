@@ -185,7 +185,7 @@ describe("tactics.ui.box", function()
 
         it("Padding table sets each side independently", function()
             local elem = box_module.builder("x"):layout({ width = "fill", height = "fit_content" }):padding({ t = 1, b = 2, l = 3, r = 4 })
-            :build()
+                :build()
             luassert.are_equal(1, elem.layout.padding.t)
             luassert.are_equal(2, elem.layout.padding.b)
             luassert.are_equal(3, elem.layout.padding.l)

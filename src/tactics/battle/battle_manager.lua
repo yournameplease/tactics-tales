@@ -84,8 +84,8 @@ function battle_manager.new(
     local battle_def = game_data.missions[battle_id](campaign_config, rng_context)
     local map_def = game_data.maps[battle_def.map_id]
     log.debug("Loading map '" ..
-    tostring(battle_def.map_id) ..
-    "' type='" .. tostring(map_def and map_def.type) .. "' file='" .. tostring(map_def and map_def.file) .. "'")
+        tostring(battle_def.map_id) ..
+        "' type='" .. tostring(map_def and map_def.type) .. "' file='" .. tostring(map_def and map_def.file) .. "'")
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels, game_data.gfx_registry)
     log.debug("Generated battle map with size " .. self.battle_map.width .. "x" .. self.battle_map.height .. ".")
 

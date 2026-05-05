@@ -190,11 +190,11 @@ local STORIES = {
                 c.new_page(),
 
                 c.text(
-                "After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+                    "After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
                 c.text(
-                "From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
+                    "From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
                 c.text(
-                "${hero_village} had a sole militiaman, so ${hero.name} would need to help with the bandit threat."),
+                    "${hero_village} had a sole militiaman, so ${hero.name} would need to help with the bandit threat."),
                 c.text("Prepare for battle!"),
 
                 c.start_battle('bandit_village', { victory = 'ch_1_v', failure = 'ch_1_f' }),
@@ -202,9 +202,9 @@ local STORIES = {
             ch_1_v = {
                 c.new_page(),
                 c.text(
-                "After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+                    "After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
                 c.text(
-                "The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
+                    "The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
                 c.text("But you'll need to play the full game to see that!"),
                 c.text("Check it out at \nyour-name-please.itch.io/tactics-tales!"),
                 c.exit_campaign(),
@@ -259,11 +259,11 @@ local STORIES = {
                 c.chapter_header("Homecoming", 1),
 
                 c.text(
-                "After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
+                    "After many months away training to join the royal army, ${hero.name} returned home. However, this would be no peaceful reunion."),
                 c.text(
-                "From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
+                    "From the distance, songs of battle could be heard.  There could be no mistake, these were bandits!"),
                 c.text(
-                "${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
+                    "${hero_village} held no militia of its own, so ${hero.name} would need to face the bandit threat alone."),
                 c.text("Prepare for battle!"),
 
                 c.start_battle('bandit_village', { victory = 'ch_1_v', failure = 'ch_1_f' }),
@@ -275,9 +275,9 @@ local STORIES = {
                 c.config_branch(function(cfg) return cfg.saving == "ask" end, c.detour("save_ask"), c.detour("save_auto")),
                 c.new_page(),
                 c.text(
-                "After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
+                    "After defeating the bandits' leader, ${hero.name} and their newfound allies forced the bandit forces to retreat from ${hero_village}."),
                 c.text(
-                "The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
+                    "The party would proceed to the capitol, to petition for aid in defending against the bandit threat."),
                 c.jump('ch_2_intro'),
             },
             ch_1_f = {
@@ -294,7 +294,7 @@ local STORIES = {
                 c.text("En route to the capitol, ${hero.name}'s party learned of a local cult."),
                 c.text("The cult kept a hideout in a nearby cave, where they would hold prisoners for sacrifice."),
                 c.text(
-                "Though the leader is powerful, the party could attempt to free some prisoners before making an escape."),
+                    "Though the leader is powerful, the party could attempt to free some prisoners before making an escape."),
                 c.text("Prepare for battle!"),
 
                 c.start_battle('cultist_cave', { victory = 'ch_2_v', failure = 'ch_2_f' }),
@@ -320,7 +320,7 @@ local STORIES = {
                 c.chapter_header("", 3),
 
                 c.text(
-                "As their journey continued, the party reached a fortress town, a final bastion of safety before they could cross bandit-infested cliffs to reach the capitol."),
+                    "As their journey continued, the party reached a fortress town, a final bastion of safety before they could cross bandit-infested cliffs to reach the capitol."),
                 c.text("There would be no time for rest, however.  Bandits were laying siege to the fortress."),
                 c.text("It made no sense.  The fortress was well guarded."),
                 c.text("Why wouldn't the army put up a fight?"),
@@ -383,8 +383,7 @@ local STORIES = {
 
                 c.text("At last, ${hero.name} had reached the capitol.  And just in the nick of time."),
                 c.text(
-                "A three-pronged alliance of bandits, cultists, and defecting milita were assaulting the fortress."),
-
+                    "A three-pronged alliance of bandits, cultists, and defecting milita were assaulting the fortress."),
                 c.text("This is it, the final battle!  Protect the monarch!"),
                 c.text("Prepare for battle!"),
 
@@ -410,7 +409,7 @@ local STORIES = {
                 c.chapter_header("Victory"),
                 c.text("Congratulations!"),
                 c.text(
-                "Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
+                    "Thank you so much for playing my game.  Please share any feedback you have.  I'm excited to improve the systems and add new content."),
                 c.exit_campaign(),
             },
             game_over = {
