@@ -13,6 +13,7 @@ local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local lists = require("src.tactics.util.lists")
 local id_generator = require("src.tactics.util.id_generator")
+local mutex = require("src.tactics.systems.mutex")
 local character = require("src.tactics.character.object.character")
 local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 
@@ -40,7 +41,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@field chapter integer The current chapter.
 ---@field battle_config BattleConfig
 ---@field battle_is_blocked boolean Whether a coroutine is currently blocking battle input.
----@field tactics_locks table<integer, boolean> Set of active lock IDs preventing certain actions.
+---@field script_mutex Mutex Counted mutex controlling script-lock state.
 ---@field active_point? Point
 ---@field battle_map BattleMap
 ---@field character_manager CharacterManager
@@ -92,7 +93,7 @@ function tactics_engine.new(
     self.chapter = chapter
     self.turn = 1
     self.battle_is_blocked = false
-    self.tactics_locks = {}
+    self.script_mutex = mutex.new()
 
     self.battle_config = battle_config
     self.battle_map = map
@@ -119,15 +120,13 @@ end
 --- Acquire an exclusive lock and return its ID.
 ---@return integer
 function TacticsEngine:acquire_lock()
-    local id = self.id_generator:get_id()
-    self.tactics_locks[id] = true
-    return id
+    return self.script_mutex:acquire()
 end
 
 --- Release the lock with the given ID.
 ---@param lock_id integer
 function TacticsEngine:remove_lock(lock_id)
-    self.tactics_locks[lock_id] = nil
+    self.script_mutex:release(lock_id)
 end
 
 ---@return boolean
@@ -851,10 +850,7 @@ end
 --- Return true if any script lock is currently held.
 ---@return boolean
 function TacticsEngine:is_locked()
-    for _, _ in pairs(self.tactics_locks) do
-        return true
-    end
-    return false
+    return self.script_mutex:is_locked()
 end
 
 --- Return true if blocked by animation/dialogue or by a held script lock.
