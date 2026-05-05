@@ -7,7 +7,6 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
 local random = require("src.tactics.util.random")
 local fp = require("src.tactics.util.fp")
-local array_2d = require("src.tactics.util.array_2d")
 local pathfinding = require("src.tactics.battle.pathfinding")
 local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
@@ -910,36 +909,10 @@ end
 ---@param max_distance integer? Defaults to `min_distance`.
 ---@return Array2D
 function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
-    max_distance = max_distance or min_distance
-
-    local map_w = self.battle_map.width
-    local map_h = self.battle_map.height
-    local reachable = array_2d.new(map_w, map_h, false)
-    for x = -max_distance, max_distance do
-        local map_x = x + tile_x
-        if map_x >= 0 and map_x < map_w then
-            local abs_x = abs(x)
-            local min_y_abs = math.max(0, min_distance - abs_x)
-            local max_y_abs = max_distance - abs_x
-
-            if max_y_abs >= min_y_abs then
-                for y = -max_y_abs, -min_y_abs do
-                    local map_y = y + tile_y
-                    if map_y >= 0 and map_y < map_h then
-                        reachable:set(map_x, map_y, true)
-                    end
-                end
-                for y = min_y_abs, max_y_abs do
-                    local map_y = y + tile_y
-                    if map_y >= 0 and map_y < map_h then
-                        reachable:set(map_x, map_y, true)
-                    end
-                end
-            end
-        end
-    end
-
-    return reachable
+    return pathfinding.tiles_with_distance_from_tile(
+        tile_x, tile_y, min_distance, max_distance,
+        self.battle_map.width, self.battle_map.height
+    )
 end
 
 --- Return a u8 userdata whose bits signify reachable (0x1), valid selection (0x2), and attack range (0x4) for `unit`.
