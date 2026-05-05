@@ -95,7 +95,6 @@ function MockFilesystem:put_file(path, data)
     dir[file_name] = data
 end
 
-
 ---@param opts? {default_campaign?: string|false, campaign_select?: string[]|false, gfx?: string[], gfx_files_present?: boolean}
 local function make_fs_with_mod(opts)
     opts = opts or {}
@@ -112,7 +111,7 @@ local function make_fs_with_mod(opts)
         content.default_campaign = opts.default_campaign or "test_campaign"
     end
     if opts.campaign_select ~= false then
-        content.campaign_select = opts.campaign_select or {"test_campaign"}
+        content.campaign_select = opts.campaign_select or { "test_campaign" }
     end
     if opts.gfx ~= nil then
         content.gfx = opts.gfx
@@ -138,11 +137,11 @@ local function make_fs_with_mod(opts)
         data = {
             test_campaign = {
                 starting_node = "node_1",
-                nodes = { node_1 = {{type = "exit_campaign"}} },
+                nodes = { node_1 = { { type = "exit_campaign" } } },
             },
             other_campaign = {
                 starting_node = "node_1",
-                nodes = { node_1 = {{type = "exit_campaign"}} },
+                nodes = { node_1 = { { type = "exit_campaign" } } },
             },
         },
     })
@@ -179,7 +178,12 @@ describe("mod_loader", function()
             local game_data = loader:load_mod_data()
 
             luassert.are_equal("table", type(game_data.gfx_registry))
-            luassert.are_equal(0, #(function() local t={} for k in pairs(game_data.gfx_registry) do t[#t+1]=k end return t end)())
+            luassert.are_equal(0,
+                #(function()
+                    local t = {}
+                    for k in pairs(game_data.gfx_registry) do t[#t + 1] = k end
+                    return t
+                end)())
         end)
 
         it("copies gfx files to correct slot paths and builds gfx_registry", function()
@@ -224,7 +228,7 @@ describe("mod_loader", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
 
         it("passes validation when declared gfx files are present on disk", function()
@@ -238,7 +242,7 @@ describe("mod_loader", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
 
         it("fails validation when a declared gfx file is not present on disk", function()
@@ -343,7 +347,7 @@ describe("mod_loader", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
 
         it("fails validation for an unknown effect_type", function()

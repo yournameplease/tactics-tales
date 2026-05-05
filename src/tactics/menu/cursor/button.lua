@@ -172,12 +172,14 @@ function ButtonDefinition:to_cursor(parent, _game_ctx, _menu_ctx, _menu_state)
         parent = parent,
         has_focus = false,
     }
-    setmetatable(cursor, { __index = function(_, k)
-        if ButtonCursor[k] then
-            return ButtonCursor[k]
+    setmetatable(cursor, {
+        __index = function(_, k)
+            if ButtonCursor[k] then
+                return ButtonCursor[k]
+            end
+            return self[k]
         end
-        return self[k]
-    end })
+    })
     if cursor.handlers == nil then cursor.handlers = {} end
     return cursor
 end

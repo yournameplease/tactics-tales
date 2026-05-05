@@ -28,8 +28,8 @@ local BASE_TILE_SPRITE = 2 * 256
 
 local CURSOR_SPRITE = 8
 
-local FOOT_GROUND_ANCHOR = point.of(8,12)
-local ICON_ANCHOR = point.of(4,-8)
+local FOOT_GROUND_ANCHOR = point.of(8, 12)
+local ICON_ANCHOR = point.of(4, -8)
 
 ---@class AnimatedUnitPosition
 ---@field id integer
@@ -70,12 +70,12 @@ local function draw_unit(
 
     -- TODO: these should check objective instead
     local animated_sprite_point = animated_position + ICON_ANCHOR
-	if unit.tags["hero"] then
-		spr(128, animated_sprite_point.x, animated_sprite_point.y)
-	end
-	if unit.tags["boss"] then
-		spr(129, animated_sprite_point.x, animated_sprite_point.y)
-	end
+    if unit.tags["hero"] then
+        spr(128, animated_sprite_point.x, animated_sprite_point.y)
+    end
+    if unit.tags["boss"] then
+        spr(129, animated_sprite_point.x, animated_sprite_point.y)
+    end
 end
 
 ---@param ud userdata
@@ -113,9 +113,9 @@ local function get_path_layer(state)
                 assert(s ~= 0)
                 set_ud_tile(path_layer, path[1], s)
             end
-            for i = 2, #path-1 do
-                local step_offset = path[i+1] - path[i-1]
-                local one_step_offset = path[i] - path[i-1]
+            for i = 2, #path - 1 do
+                local step_offset = path[i + 1] - path[i - 1]
+                local one_step_offset = path[i] - path[i - 1]
                 local s = 0
                 if step_offset.x == 0 then
                     s = 193
@@ -123,7 +123,7 @@ local function get_path_layer(state)
                     s = 192
                 else
                     local dir = step_offset.x * step_offset.y -- +/- 1
-                    if dir == 1 then -- 45 deg down
+                    if dir == 1 then                          -- 45 deg down
                         if one_step_offset.x == 1 or one_step_offset.y == -1 then
                             s = 196
                         else
@@ -141,7 +141,7 @@ local function get_path_layer(state)
                 set_ud_tile(path_layer, path[i], s)
             end
             do
-                local step_offset = path[#path] - path[#path-1]
+                local step_offset = path[#path] - path[#path - 1]
                 local s = 0
                 if step_offset.x == 0 then
                     if step_offset.y == -1 then
@@ -178,14 +178,16 @@ local function draw_map_decorations(layers, z_0, z_1, tile_ox, px, camera_y, dra
     local layer_wall_mid = layers.terrain.mid_wall
     local layer_wall_front = layers.terrain.front_wall
 
-    for z=z_0,z_1 do
+    for z = z_0, z_1 do
         if z % TILE_HEIGHT == 0 then
             local y = flr(z / TILE_HEIGHT)
-            map(layer_wall_back, tile_ox, y, px, (y - 1) * TILE_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            map(layer_wall_back, tile_ox, y, px, (y - 1) * TILE_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x,
+                TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == HALF_HEIGHT then
             local y = flr(z / TILE_HEIGHT)
-            map(layer_wall_mid, tile_ox, y, px, y * TILE_HEIGHT - HALF_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x, TILE_HEIGHT)
+            map(layer_wall_mid, tile_ox, y, px, y * TILE_HEIGHT - HALF_HEIGHT - camera_y, draw_w, 1, nil, TILE_SIZE.x,
+                TILE_HEIGHT)
         end
         if z % TILE_HEIGHT == 0 then
             local y = flr(z / TILE_HEIGHT)
@@ -253,10 +255,10 @@ local function draw_tactics_map(
 
     local sorted_units = userdata("i16", 3, #unit_positions)
     if sorted_units then
-        for i,u in ipairs(unit_positions) do
-            sorted_units:set(0,i-1, u.point.y - camera_y)
-            sorted_units:set(1,i-1, u.point.x - camera_x)
-            sorted_units:set(2,i-1, u.id)
+        for i, u in ipairs(unit_positions) do
+            sorted_units:set(0, i - 1, u.point.y - camera_y)
+            sorted_units:set(1, i - 1, u.point.x - camera_x)
+            sorted_units:set(2, i - 1, u.id)
         end
     end
     -- Only sort if > 1 unit.  Sorting a single row will consider it a 1-d userdata
@@ -281,15 +283,16 @@ local function draw_tactics_map(
     -- clip(0, self.rect.c_y, clip_w, clip_h)
     map(layer_ground, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    local checkerboard_layer = userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
+    local checkerboard_layer = userdata("i16", state.battle_context.battle_map.width,
+        state.battle_context.battle_map.height)
     for x = 0, battle_map.width do
-        for y = x%2, battle_map.height, 2 do
+        for y = x % 2, battle_map.height, 2 do
             checkerboard_layer:set(x, y, 192)
         end
     end
     colors.apply_colortable_row("dark")
     map(checkerboard_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
-    
+
 
     for _, decoration_layer in ipairs(layers.decorations or {}) do
         map(decoration_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
@@ -310,7 +313,7 @@ local function draw_tactics_map(
 
     profile("draw_map_rows")
     local prev_z = camera_y
-    for i=0,#unit_positions-1 do
+    for i = 0, #unit_positions - 1 do
         local unit_id = sorted_units:get(2, i)
         local unit = battle_map:get_unit_by_id(unit_id)
         if unit then
@@ -355,12 +358,12 @@ local function draw_tactics_map(
         local bw, bh = 160, 24
         local bx = (sw - bw) / 2 + self.rect.c_x
         local by = (sh - bh) / 2 + self.rect.c_y
-        
+
         local c1 = ui_theme.COLOR_INTERIOR
         local c2 = ui_theme.COLOR_PAGE_DECOR
         local c3 = ui_theme.COLOR_INTERIOR_TEXT
         rectfill(bx, by, bx + bw, by + bh, c1)
-        rect(bx+1, by+1, bx + bw - 1, by + bh - 1, c2)
+        rect(bx + 1, by + 1, bx + bw - 1, by + bh - 1, c2)
         print(banner.text, bx + 8, by + 8, c3)
     end
 
@@ -410,61 +413,61 @@ function tactics_map.new()
     local map_data = {}
 
     local self = box.builder("tactics_map")
-    :data(map_data)
-    :layout{
-        padding = {
-            t = 5,
-            b = 5,
-            l = 4,
-            r = 4,
-        },
-        width = c_w + 4 + 4,
-        height = c_h + 5 + 5,
-    }
-    :style{
-        decoration_padding = 2,
-        solid = true,
-        decoration = "border",
-    }
-    :menu_handling{
-        get_selection_at = get_selection_at,
-    }
-    :on_draw(draw_tactics_map)
-    :on_update(function(self, state)
-        local data = self.data
-        local menu_step = state.battle_context.battle_menu_manager.menu_step
-        data.menu_node = menu_step and menu_step.node or nil
-        data.camera_x = state.battle_context.camera_x
-        data.camera_y = state.battle_context.camera_y
-        data.map_width = state.battle_context.battle_map.width
-        data.map_height = state.battle_context.battle_map.height
+        :data(map_data)
+        :layout {
+            padding = {
+                t = 5,
+                b = 5,
+                l = 4,
+                r = 4,
+            },
+            width = c_w + 4 + 4,
+            height = c_h + 5 + 5,
+        }
+        :style {
+            decoration_padding = 2,
+            solid = true,
+            decoration = "border",
+        }
+        :menu_handling {
+            get_selection_at = get_selection_at,
+        }
+        :on_draw(draw_tactics_map)
+        :on_update(function(self, state)
+            local data = self.data
+            local menu_step = state.battle_context.battle_menu_manager.menu_step
+            data.menu_node = menu_step and menu_step.node or nil
+            data.camera_x = state.battle_context.camera_x
+            data.camera_y = state.battle_context.camera_y
+            data.map_width = state.battle_context.battle_map.width
+            data.map_height = state.battle_context.battle_map.height
 
-        if state.game_context.input_service.current_input == "mouse" then
-            local m = state.game_context.input_service:get_mouse()
-            local lx = m.mx - (self.rect.c_x or 0)
-            local ly = m.my - (self.rect.c_y or 0)
-            local vp_w = VIEWPORT_WIDTH * TILE_WIDTH
-            local vp_h = VIEWPORT_HEIGHT * TILE_HEIGHT
-            local border = STATIC_CONFIG.CAMERA_EDGE_SCROLL_BORDER
-            local speed = STATIC_CONFIG.CAMERA_EDGE_SCROLL_SPEED
-            local bctx = state.battle_context
+            if state.game_context.input_service.current_input == "mouse" then
+                local m = state.game_context.input_service:get_mouse()
+                local lx = m.mx - (self.rect.c_x or 0)
+                local ly = m.my - (self.rect.c_y or 0)
+                local vp_w = VIEWPORT_WIDTH * TILE_WIDTH
+                local vp_h = VIEWPORT_HEIGHT * TILE_HEIGHT
+                local border = STATIC_CONFIG.CAMERA_EDGE_SCROLL_BORDER
+                local speed = STATIC_CONFIG.CAMERA_EDGE_SCROLL_SPEED
+                local bctx = state.battle_context
 
-            if bctx then
-                if lx >= 0 and lx < border then
-                    bctx.camera_x = bctx.camera_x - speed
-                elseif lx >= vp_w - border and lx < vp_w then
-                    bctx.camera_x = bctx.camera_x + speed
+                if bctx then
+                    if lx >= 0 and lx < border then
+                        bctx.camera_x = bctx.camera_x - speed
+                    elseif lx >= vp_w - border and lx < vp_w then
+                        bctx.camera_x = bctx.camera_x + speed
+                    end
+                    if ly >= 0 and ly < border then
+                        bctx.camera_y = bctx.camera_y - speed
+                    elseif ly >= vp_h - border and ly < vp_h then
+                        bctx.camera_y = bctx.camera_y + speed
+                    end
+                    bctx:clamp_camera(bctx.battle_map)
                 end
-                if ly >= 0 and ly < border then
-                    bctx.camera_y = bctx.camera_y - speed
-                elseif ly >= vp_h - border and ly < vp_h then
-                    bctx.camera_y = bctx.camera_y + speed
-                end
-                bctx:clamp_camera(bctx.battle_map)
             end
-        end
-    end)
-    :build()
+        end)
+        :build()
 
     return self
 end

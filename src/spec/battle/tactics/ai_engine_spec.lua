@@ -64,6 +64,7 @@ local function make_unit(opts)
     function char:get_weapon_targeting()
         return melee_targeting
     end
+
     local side = opts.side or "enemy"
     local unit = {
         id = opts.id or 1,
@@ -80,6 +81,7 @@ local function make_unit(opts)
         character = char,
     }
     function unit:has_tag(_tag) return false end
+
     return unit
 end
 
@@ -139,10 +141,12 @@ local function make_tactics_spy()
         self.method = "handle_move_and_attack"
         self.args = { unit = unit, dest = dest, path = path, target = target }
     end
+
     function spy:handle_move_and_wait(unit, dest, path)
         self.method = "handle_move_and_wait"
         self.args = { unit = unit, dest = dest, path = path }
     end
+
     return spy
 end
 
@@ -152,7 +156,6 @@ end
 
 describe("ai_engine", function()
     describe("compute_unit_ai", function()
-
         it("attacks an adjacent enemy in one move", function()
             -- AI unit at (0,0); enemy at (0,1) — melee range from (0,0).
             local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
@@ -198,7 +201,7 @@ describe("ai_engine", function()
             -- enemy_b has 999 HP: no kill possible.
             -- Both are adjacent and unarmed (no counterattack, equal self-damage).
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2, hp = 20, hp_max = 20 })
-            local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 1,   hp_max = 10, weapons = {} })
+            local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 1, hp_max = 10, weapons = {} })
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999, weapons = {} })
             local spy     = make_tactics_spy()
             local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
@@ -214,10 +217,22 @@ describe("ai_engine", function()
             -- enemy_b is unarmed: no counterattack, no self-kill risk.
             -- Neither target is killable (hp=999 > 5 damage).
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2, hp = 1, hp_max = 20 })
-            local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 999, hp_max = 999,
-                                        weapons = { make_weapon(5, 100) } })
-            local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
-                                        weapons = {} })
+            local enemy_a = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = { make_weapon(5, 100) }
+            })
+            local enemy_b = make_unit({
+                id = 3,
+                tile = point.of(1, 2),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = {}
+            })
             local spy     = make_tactics_spy()
             local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
@@ -233,10 +248,22 @@ describe("ai_engine", function()
             -- enemy_b is unarmed (possible_counterattack = false).
             -- Neither target is killable.
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2, hp = 20, hp_max = 20 })
-            local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 999, hp_max = 999,
-                                        weapons = { make_weapon(1, 100) } })
-            local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
-                                        weapons = {} })
+            local enemy_a = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = { make_weapon(1, 100) }
+            })
+            local enemy_b = make_unit({
+                id = 3,
+                tile = point.of(1, 2),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = {}
+            })
             local spy     = make_tactics_spy()
             local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
@@ -252,10 +279,24 @@ describe("ai_engine", function()
             -- enemy_b has massive armor: expected_damage = 1 (minimum floor).
             -- AI should pick enemy_a (higher expected_damage).
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2, hp = 20, hp_max = 20 })
-            local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 999, hp_max = 999,
-                                        weapons = {}, items = {} })
-            local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999,
-                                        weapons = {}, items = { make_armor_item(999) } })
+            local enemy_a = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = {},
+                items = {}
+            })
+            local enemy_b = make_unit({
+                id = 3,
+                tile = point.of(1, 2),
+                side = "player",
+                hp = 999,
+                hp_max = 999,
+                weapons = {},
+                items = { make_armor_item(999) }
+            })
             local spy     = make_tactics_spy()
             local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
@@ -271,12 +312,15 @@ describe("ai_engine", function()
             -- covers the starting tile (cost=0). The unit cannot move to (0,1), so no
             -- attack position is found and the unit waits in place.
             local ai_unit = make_unit({
-                id = 1, tile = point.of(0, 0), side = "enemy", movement = 3,
+                id = 1,
+                tile = point.of(0, 0),
+                side = "enemy",
+                movement = 3,
                 unit_ai = { move = "zero", target_sides = { "player" }, exclude_tags = nil },
             })
-            local enemy = make_unit({ id = 2, tile = point.of(0, 2), side = "player", hp = 10 })
-            local spy   = make_tactics_spy()
-            local engine = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+            local enemy   = make_unit({ id = 2, tile = point.of(0, 2), side = "player", hp = 10 })
+            local spy     = make_tactics_spy()
+            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -284,6 +328,5 @@ describe("ai_engine", function()
             luassert.are_equal(0, spy.args.dest.x)
             luassert.are_equal(0, spy.args.dest.y)
         end)
-
     end)
 end)

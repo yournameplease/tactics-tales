@@ -39,7 +39,7 @@ describe("mod_schema", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
     end)
 
@@ -57,7 +57,7 @@ describe("mod_schema", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
 
         it("rejects a gfx list containing a non-string entry", function()
@@ -85,7 +85,7 @@ describe("mod_schema", function()
 
             -- Then
             luassert.is_true(is_valid)
-            luassert.are_equal(0, #errors, "Got errors:\n\t"..table.concat(errors, "\n\t"))
+            luassert.are_equal(0, #errors, "Got errors:\n\t" .. table.concat(errors, "\n\t"))
         end)
     end)
 end)

@@ -159,7 +159,7 @@ end
 ---@return MissionDefinition
 function campaign.chapter_debug(roster_units, name, text, battle_id)
     local intro_node = {}
-    add(intro_node, campaign.recruit("protagonist", {"hero"}))
+    add(intro_node, campaign.recruit("protagonist", { "hero" }))
     for _, u in ipairs(roster_units) do
         add(intro_node, campaign.recruit(u))
     end
@@ -170,7 +170,7 @@ function campaign.chapter_debug(roster_units, name, text, battle_id)
         starting_node = "intro",
         name = name,
         description = text or "A single chapter.",
-        battle_config = campaign.static_battle_config{ permadeath = true },
+        battle_config = campaign.static_battle_config { permadeath = true },
         nodes = {
             intro = intro_node,
             victory = {

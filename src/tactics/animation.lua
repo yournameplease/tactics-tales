@@ -42,7 +42,7 @@ function sprite_frame_data.new(sprite_frames)
     for _, v in ipairs(sprite_frames) do
         duration = duration + v.duration
     end
-    
+
     return setmetatable({
         duration = duration,
         sprite_frames = sprite_frames
@@ -74,7 +74,7 @@ end
 ---@param duration integer
 ---@return Point
 local function lerp_offsets(o0, o1, frame, duration)
-    return o0 + (frame/duration) * (o1 - o0)
+    return o0 + (frame / duration) * (o1 - o0)
 end
 
 ---@class PathAnimationPoint
@@ -82,7 +82,7 @@ end
 ---@field duration integer
 
 ---@class PathAnimationInstance : AnimationInstance
----@field type "path" 
+---@field type "path"
 ---@field current_point integer
 ---@field frame integer
 ---@field path_points PathAnimationPoint[]
@@ -116,7 +116,7 @@ function PathAnimationInstance:get_animation_offset(_global_frame)
     end
 
     local prev_point = self.path_points[self.current_point]
-    local next_point = self.path_points[self.current_point+1]
+    local next_point = self.path_points[self.current_point + 1]
     return lerp_offsets(prev_point.point, next_point.point, self.frame, prev_point.duration)
 end
 
@@ -128,7 +128,7 @@ function PathAnimationInstance:get_animation_facing(_global_frame)
     end
 
     local prev_point = self.path_points[self.current_point]
-    local next_point = self.path_points[self.current_point+1]
+    local next_point = self.path_points[self.current_point + 1]
     if prev_point.point == nil or next_point.point == nil then
         return nil
     end
@@ -148,8 +148,8 @@ end
 
 ---@class DirectionalOffsetAnimationInstance : AnimationInstance
 ---@field type "offset"
----@field track number[] 
----@field frame integer 
+---@field track number[]
+---@field frame integer
 ---@field direction Angle
 ---@field sprites SpriteFrameData
 local DirectionalOffsetAnimationInstance = {}
@@ -238,7 +238,7 @@ local OFFSET_ANIMATION_DATA = {
             }
         },
         track = { -- list of offsets
-            0, 1, 1,3, 6, 7, 7, 7, 7, 6, 4, 2, 0
+            0, 1, 1, 3, 6, 7, 7, 7, 7, 6, 4, 2, 0
         }
     },
     ["DODGE"] = {
@@ -249,7 +249,7 @@ local OFFSET_ANIMATION_DATA = {
             }
         },
         track = { -- list of offsets
-            0, 2,4,6, 8, 8, 4, 2, 0
+            0, 2, 4, 6, 8, 8, 4, 2, 0
         }
     },
     ["HURT"] = {
@@ -297,7 +297,7 @@ end
 function AnimationManager:tick()
     self.global_frame = self.global_frame + 1
 
-    log.trace("Ticking "..#self.active_animations.." animations")
+    log.trace("Ticking " .. #self.active_animations .. " animations")
     for _, anim in ipairs(self.active_animations) do
         anim:tick()
     end
@@ -333,7 +333,7 @@ function AnimationManager:create_idle_animation()
         animated_object = { playing = true },
         playing = true
     }
-    
+
     add(self.active_animations, instance)
     setmetatable(instance, GlobalAnimationInstance)
 
@@ -359,7 +359,7 @@ function AnimationManager:create_animation(animation_id, direction)
     }
 
     add(self.active_animations, animation_data)
-    setmetatable(animation_data, DirectionalOffsetAnimationInstance )
+    setmetatable(animation_data, DirectionalOffsetAnimationInstance)
 
     return animation_data.animated_object
 end
@@ -370,7 +370,7 @@ end
 ---@return AnimatedSpriteData
 function AnimationManager:create_walk_animation(
     path,
-    time_scale  -- default 1
+    time_scale -- default 1
 )
     time_scale = time_scale or 1
     -- TODO: future

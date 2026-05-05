@@ -1,10 +1,10 @@
 return {
     test_sword = {
-        name         = "Test Sword",
-        type         = "WEAPON",
-        slots        = 1,
-        equip_slot   = "MAIN_HAND",
-        sprite_data  = { sprite = 104, anchor = lib.point.of(1, 8) },
+        name              = "Test Sword",
+        type              = "WEAPON",
+        slots             = 1,
+        equip_slot        = "MAIN_HAND",
+        sprite_data       = { sprite = 104, anchor = lib.point.of(1, 8) },
         equipment_effects = {},
         weapon_definition = {
             name      = "Test Sword",

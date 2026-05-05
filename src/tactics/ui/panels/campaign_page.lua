@@ -19,11 +19,11 @@ local function chapter_header_page(node)
         :build()
     if node.number ~= nil then
         root:add(box.builder("chapter_number")
-            :layout{
+            :layout {
                 height = "fit_content"
             }
-            :text{
-                content = {"\014Chapter "..node.number},
+            :text {
+                content = { "\014Chapter " .. node.number },
                 text_color = "light",
                 draw_properties = {
                     justify = "center",
@@ -32,8 +32,8 @@ local function chapter_header_page(node)
             }
             :build())
     end
-    root:add(book.title{
-        content = {node.text},
+    root:add(book.title {
+        content = { node.text },
         draw_properties = {
             wrap = "wrap"
         },
@@ -51,29 +51,29 @@ local function chapter_results_section(chapter)
         :container("block")
         :build()
 
-    root:add(book.title{content = {"\014Chapter "..chapter.chapter_number}})
+    root:add(book.title { content = { "\014Chapter " .. chapter.chapter_number } })
 
     local result_label = chapter.result == "VICTORY" and "Victory" or "Defeat"
     root:add(box.builder("result_line")
-        :text{
-            content = {result_label.." in "..chapter.turns_taken.." turns"},
-            draw_properties = {wrap = "wrap", justify = "left"},
+        :text {
+            content = { result_label .. " in " .. chapter.turns_taken .. " turns" },
+            draw_properties = { wrap = "wrap", justify = "left" },
         }
         :build())
 
     local lost_label = #chapter.units_lost_names > 0 and "Units Lost" or "No casualties"
     root:add(box.builder("units_lost_label")
-        :text{
-            content = {lost_label},
-            draw_properties = {wrap = "wrap", justify = "left"},
+        :text {
+            content = { lost_label },
+            draw_properties = { wrap = "wrap", justify = "left" },
         }
         :build())
 
     for _, name in ipairs(chapter.units_lost_names) do
         root:add(box.builder("unit_lost")
-            :text{
-                content = {name},
-                draw_properties = {wrap = "wrap", justify = "left"},
+            :text {
+                content = { name },
+                draw_properties = { wrap = "wrap", justify = "left" },
             }
             :build())
     end
@@ -89,7 +89,7 @@ local function unit_results_section(unit_display)
         :direction("row")
         :container("strip")
         :padding(8)
-        :style{
+        :style {
             decoration = "border",
             decoration_padding = 5,
         }
@@ -105,28 +105,28 @@ local function unit_results_section(unit_display)
         :container("block")
         :build()
 
-    stats:add(book.title{content = {"\014"..unit_display.name}})
+    stats:add(book.title { content = { "\014" .. unit_display.name } })
 
     if unit_display.chapter_recruited ~= nil then
         stats:add(box.builder("unit_recruited")
-            :text{
-                content = {"Recruited: Ch. "..unit_display.chapter_recruited},
-                draw_properties = {wrap = "wrap", justify = "left"},
+            :text {
+                content = { "Recruited: Ch. " .. unit_display.chapter_recruited },
+                draw_properties = { wrap = "wrap", justify = "left" },
             }
             :build())
     end
 
     stats:add(box.builder("unit_combats")
-        :text{
-            content = {"Combats: "..unit_display.combats},
-            draw_properties = {wrap = "wrap", justify = "left"},
+        :text {
+            content = { "Combats: " .. unit_display.combats },
+            draw_properties = { wrap = "wrap", justify = "left" },
         }
         :build())
 
     stats:add(box.builder("unit_kills")
-        :text{
-            content = {"Kills: "..unit_display.kills},
-            draw_properties = {wrap = "wrap", justify = "left"},
+        :text {
+            content = { "Kills: " .. unit_display.kills },
+            draw_properties = { wrap = "wrap", justify = "left" },
         }
         :build())
 
@@ -148,10 +148,10 @@ local function game_results_page(node)
         :container("block")
         :build()
     header_box:add(box.builder("chapter_header_line")
-        :text{
-            content = {"|\014Results|"},
+        :text {
+            content = { "|\014Results|" },
             text_color = "light",
-            draw_properties = {align = true},
+            draw_properties = { align = true },
         }
         :build())
     header_box:add(book.section_divider(1))
@@ -160,7 +160,7 @@ local function game_results_page(node)
     local content_box = box.builder("campaign_page_content")
         :direction("col")
         :container("block")
-        :padding{t = 2, l = 2, r = 2}
+        :padding { t = 2, l = 2, r = 2 }
         :build()
 
     if node.section == "chapters" then
@@ -232,7 +232,7 @@ local function compute_children(state)
             end, palette))
         elseif n.type == "game_results" then
             ---@cast n RenderedGameResults
-            return {game_results_page(n)}
+            return { game_results_page(n) }
         elseif n.type == "text_input" then
             local root_node = state.campaign_context.menu_manager.menu_step.node
             child = menu_ui.generic_menu_box(
@@ -275,7 +275,7 @@ local function compute_children(state)
         page:add(page_content_box)
         page:add(box.spacer(1))
 
-        return {page}
+        return { page }
     else
         local page = box.builder("campaign_page")
             :direction("col")
@@ -287,12 +287,12 @@ local function compute_children(state)
                 :container("block")
                 :build()
             local num_text = rendered_page.chapter_number
-                and "\014"..tostring(rendered_page.chapter_number)
+                and "\014" .. tostring(rendered_page.chapter_number)
                 or ""
             local chapter_text = rendered_page.chapter_text
             header_box:add(box.builder("chapter_header_line")
-                :text{
-                    content = {num_text.."|\014"..chapter_text.."\015|"},
+                :text {
+                    content = { num_text .. "|\014" .. chapter_text .. "\015|" },
                     text_color = "light",
                     draw_properties = {
                         align = true
@@ -305,7 +305,7 @@ local function compute_children(state)
         local page_content_box = box.builder("campaign_page_content")
             :direction("col")
             :container("block")
-            :padding{
+            :padding {
                 t = 2,
                 l = 2,
                 r = 2,
@@ -319,7 +319,7 @@ local function compute_children(state)
         page:add(page_content_box)
         page:add(box.spacer(1))
 
-        return {page}
+        return { page }
     end
 end
 
@@ -327,11 +327,11 @@ end
 ---@return UIElement
 function campaign_page_ui.new()
     local content = box.builder("campaign_content")
-        :layout{
+        :layout {
             width = "fill",
             height = "fill",
         }
-        :child_generator{
+        :child_generator {
             current_key = function(state)
                 return state.campaign_context.campaign_page.campaign_revision
             end,

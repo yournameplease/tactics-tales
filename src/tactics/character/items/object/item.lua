@@ -41,7 +41,7 @@ function item.new(id, name, item_type, slots, equip_slot, sprite_data, equipment
     self.slots = slots
     self.equip_slot = equip_slot
     self.sprite_data = sprite_data
-    self.equipment_effects = equipment_effects -- note: copied by reference
+    self.equipment_effects = equipment_effects       -- note: copied by reference
     self.appearance_overrides = appearance_overrides -- note: copied by reference
     self.weapon = weapon
     return self

@@ -10,7 +10,7 @@ local function make_item(overrides)
         type = "WEAPON",
         slots = 1,
         equip_slot = "MAIN_HAND",
-        sprite_data = {sprite = 1, anchor = {x = 0, y = 0}},
+        sprite_data = { sprite = 1, anchor = { x = 0, y = 0 } },
         equipment_effects = {},
         appearance_overrides = nil,
         weapon = nil,
@@ -46,15 +46,15 @@ describe("tactics.character.items.object.item_inventory", function()
     describe("can_add_item / add_item", function()
         it("should allow adding an item when slots are available", function()
             local inv = item_inventory_mod.new(4)
-            local item = make_item({slots = 2})
+            local item = make_item({ slots = 2 })
 
             luassert.is_true(inv:can_add_item(item))
         end)
 
         it("should reject adding an item when capacity would be exceeded", function()
             local inv = item_inventory_mod.new(2)
-            local item_a = make_item({id = "a", slots = 1})
-            local item_b = make_item({id = "b", slots = 2})
+            local item_a = make_item({ id = "a", slots = 1 })
+            local item_b = make_item({ id = "b", slots = 2 })
             inv:add_item(item_a)
 
             luassert.is_false(inv:can_add_item(item_b))
@@ -62,7 +62,7 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should add item and update slot mapping", function()
             local inv = item_inventory_mod.new(4)
-            local item = make_item({id = "sword", slots = 2})
+            local item = make_item({ id = "sword", slots = 2 })
 
             inv:add_item(item)
 
@@ -77,7 +77,7 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should error when adding an item that exceeds capacity", function()
             local inv = item_inventory_mod.new(1)
-            local item = make_item({slots = 2})
+            local item = make_item({ slots = 2 })
 
             luassert.has_error(function()
                 inv:add_item(item)
@@ -88,7 +88,7 @@ describe("tactics.character.items.object.item_inventory", function()
     describe("can_equip", function()
         it("should allow equipping TWO_HANDS when no hand slots are used", function()
             local inv = item_inventory_mod.new(4)
-            local item = make_item({equip_slot = "TWO_HANDS", slots = 2})
+            local item = make_item({ equip_slot = "TWO_HANDS", slots = 2 })
             inv:add_item(item)
 
             luassert.is_true(inv:can_equip(1))
@@ -96,8 +96,8 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should block TWO_HANDS when MAIN_HAND is already equipped", function()
             local inv = item_inventory_mod.new(4)
-            local main = make_item({id = "main", equip_slot = "MAIN_HAND"})
-            local two = make_item({id = "two", equip_slot = "TWO_HANDS", slots = 2})
+            local main = make_item({ id = "main", equip_slot = "MAIN_HAND" })
+            local two = make_item({ id = "two", equip_slot = "TWO_HANDS", slots = 2 })
             inv:add_item(main)
             inv:add_item(two)
             inv:equip_item(1)
@@ -107,8 +107,8 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should block MAIN_HAND when TWO_HANDS is already equipped", function()
             local inv = item_inventory_mod.new(4)
-            local two = make_item({id = "two", equip_slot = "TWO_HANDS", slots = 2})
-            local main = make_item({id = "main", equip_slot = "MAIN_HAND"})
+            local two = make_item({ id = "two", equip_slot = "TWO_HANDS", slots = 2 })
+            local main = make_item({ id = "main", equip_slot = "MAIN_HAND" })
             inv:add_item(two)
             inv:add_item(main)
             inv:equip_item(1)
@@ -118,8 +118,8 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should block OFF_HAND when TWO_HANDS is already equipped", function()
             local inv = item_inventory_mod.new(4)
-            local two = make_item({id = "two", equip_slot = "TWO_HANDS", slots = 2})
-            local off = make_item({id = "off", equip_slot = "OFF_HAND"})
+            local two = make_item({ id = "two", equip_slot = "TWO_HANDS", slots = 2 })
+            local off = make_item({ id = "off", equip_slot = "OFF_HAND" })
             inv:add_item(two)
             inv:add_item(off)
             inv:equip_item(1)
@@ -129,8 +129,8 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should block BODY when a body item is already equipped", function()
             local inv = item_inventory_mod.new(4)
-            local armor_a = make_item({id = "armor_a", type = "ARMOR", equip_slot = "BODY"})
-            local armor_b = make_item({id = "armor_b", type = "ARMOR", equip_slot = "BODY"})
+            local armor_a = make_item({ id = "armor_a", type = "ARMOR", equip_slot = "BODY" })
+            local armor_b = make_item({ id = "armor_b", type = "ARMOR", equip_slot = "BODY" })
             inv:add_item(armor_a)
             inv:add_item(armor_b)
             inv:equip_item(1)
@@ -142,7 +142,7 @@ describe("tactics.character.items.object.item_inventory", function()
     describe("equip_item / unequip_item", function()
         it("should equip an item and report it as equipped", function()
             local inv = item_inventory_mod.new(4)
-            local item = make_item({equip_slot = "MAIN_HAND"})
+            local item = make_item({ equip_slot = "MAIN_HAND" })
             inv:add_item(item)
 
             inv:equip_item(1)
@@ -152,7 +152,7 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should unequip an item when requested", function()
             local inv = item_inventory_mod.new(4)
-            local item = make_item({equip_slot = "MAIN_HAND"})
+            local item = make_item({ equip_slot = "MAIN_HAND" })
             inv:add_item(item)
             inv:equip_item(1)
 
@@ -163,9 +163,9 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("equipping TWO_HANDS should unequip MAIN_HAND and OFF_HAND", function()
             local inv = item_inventory_mod.new(6)
-            local main = make_item({id = "main", equip_slot = "MAIN_HAND"})
-            local off = make_item({id = "off", equip_slot = "OFF_HAND"})
-            local two = make_item({id = "two", equip_slot = "TWO_HANDS", slots = 2})
+            local main = make_item({ id = "main", equip_slot = "MAIN_HAND" })
+            local off = make_item({ id = "off", equip_slot = "OFF_HAND" })
+            local two = make_item({ id = "two", equip_slot = "TWO_HANDS", slots = 2 })
             inv:add_item(main)
             inv:add_item(off)
             inv:add_item(two)
@@ -181,8 +181,8 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("equipping MAIN_HAND should unequip TWO_HANDS", function()
             local inv = item_inventory_mod.new(4)
-            local two = make_item({id = "two", equip_slot = "TWO_HANDS", slots = 2})
-            local main = make_item({id = "main", equip_slot = "MAIN_HAND"})
+            local two = make_item({ id = "two", equip_slot = "TWO_HANDS", slots = 2 })
+            local main = make_item({ id = "main", equip_slot = "MAIN_HAND" })
             inv:add_item(two)
             inv:add_item(main)
             inv:equip_item(1)
@@ -196,9 +196,9 @@ describe("tactics.character.items.object.item_inventory", function()
 
     describe("get_equipped_weapons", function()
         it("should return weapons equipped in hand slots", function()
-            local mock_weapon = {damage = 10, accuracy = 90, type = "MELEE", body_type = "BACK_HAND", effects = {}}
+            local mock_weapon = { damage = 10, accuracy = 90, type = "MELEE", body_type = "BACK_HAND", effects = {} }
             local inv = item_inventory_mod.new(4)
-            local sword = make_item({id = "sword", equip_slot = "MAIN_HAND", weapon = mock_weapon})
+            local sword = make_item({ id = "sword", equip_slot = "MAIN_HAND", weapon = mock_weapon })
             inv:add_item(sword)
             inv:equip_item(1)
 
@@ -210,7 +210,7 @@ describe("tactics.character.items.object.item_inventory", function()
 
         it("should not return non-weapon items from hand slots", function()
             local inv = item_inventory_mod.new(4)
-            local shield = make_item({id = "shield", type = "SHIELD", equip_slot = "OFF_HAND", weapon = nil})
+            local shield = make_item({ id = "shield", type = "SHIELD", equip_slot = "OFF_HAND", weapon = nil })
             inv:add_item(shield)
             inv:equip_item(1)
 
@@ -227,10 +227,10 @@ describe("tactics.character.items.object.item_inventory", function()
                 accuracy = 70,
                 type = "MELEE",
                 body_type = "BACK_HAND",
-                effects = {{type = "long_reach"}},
+                effects = { { type = "long_reach" } },
             }
             local inv = item_inventory_mod.new(4)
-            local sword = make_item({id = "sword", name = "Long Sword", weapon = mock_weapon})
+            local sword = make_item({ id = "sword", name = "Long Sword", weapon = mock_weapon })
             inv:add_item(sword)
             inv:equip_item(1)
 
@@ -250,7 +250,7 @@ describe("tactics.character.items.object.item_inventory", function()
                 type = "ARMOR",
                 equip_slot = "BODY",
                 weapon = nil,
-                equipment_effects = {{type = "increase_defense", amount = 3, defense_type = "ARMOR"}},
+                equipment_effects = { { type = "increase_defense", amount = 3, defense_type = "ARMOR" } },
             })
             inv:add_item(armor)
             inv:equip_item(1)

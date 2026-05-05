@@ -1,10 +1,10 @@
-local luassert = require("luassert")
+local luassert       = require("luassert")
 
-local stories_mod  = require("tt_procedural_campaign.game_data.campaigns")
+local stories_mod    = require("tt_procedural_campaign.game_data.campaigns")
 local campaign_state = require("src.tactics.campaign.campaign_state")
-local random       = require("src.tactics.util.random")
+local random         = require("src.tactics.util.random")
 
-local proc_campaign = stories_mod.data.proc_campaign
+local proc_campaign  = stories_mod.data.proc_campaign
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })

@@ -76,8 +76,8 @@ describe("base.lib.campaign", function()
         end)
 
         it("stores tags when provided", function()
-            local node = campaign.recruit("hero", {"player"})
-            luassert.are_same({"player"}, node.tags)
+            local node = campaign.recruit("hero", { "player" })
+            luassert.are_same({ "player" }, node.tags)
         end)
     end)
 
@@ -173,7 +173,7 @@ describe("base.lib.campaign", function()
         end)
 
         it("stores options and memory_key", function()
-            local opts = {{ id = "a", name = "A" }}
+            local opts = { { id = "a", name = "A" } }
             local node = campaign.select_option(opts, "my_choice")
             luassert.are_same(opts, node.options)
             luassert.are_equal("my_choice", node.memory_key)
@@ -182,7 +182,8 @@ describe("base.lib.campaign", function()
 
     describe("config_branch", function()
         it("returns a factory function", function()
-            local factory = campaign.config_branch(function(_) return true end, { type = "advance" }, { type = "advance" })
+            local factory = campaign.config_branch(function(_) return true end, { type = "advance" },
+                { type = "advance" })
             luassert.are_equal("function", type(factory))
         end)
 
@@ -204,7 +205,9 @@ describe("base.lib.campaign", function()
             local received_config = nil
             local config = { difficulty = "hard" }
             local factory = campaign.config_branch(
-                function(c) received_config = c; return true end,
+                function(c)
+                    received_config = c; return true
+                end,
                 { type = "advance" },
                 { type = "advance" }
             )
@@ -215,7 +218,8 @@ describe("base.lib.campaign", function()
 
     describe("state_branch", function()
         it("returns a factory function", function()
-            local factory = campaign.state_branch(function(_, _) return true end, { type = "advance" }, { type = "advance" })
+            local factory = campaign.state_branch(function(_, _) return true end, { type = "advance" },
+                { type = "advance" })
             luassert.are_equal("function", type(factory))
         end)
 
@@ -238,7 +242,9 @@ describe("base.lib.campaign", function()
             local config = { difficulty = "hard" }
             local state = { hero_name = "Aeron" }
             local factory = campaign.state_branch(
-                function(c, s) received_config = c; received_state = s; return true end,
+                function(c, s)
+                    received_config = c; received_state = s; return true
+                end,
                 { type = "advance" },
                 { type = "advance" }
             )

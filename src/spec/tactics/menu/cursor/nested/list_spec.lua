@@ -212,7 +212,7 @@ describe("tactics.menu.cursor.nested.list", function()
                                     button.builder("btn1"),
                                     selection.row("sel1")
                                         :with_key("color")
-                                        :with_static_options({"red", "green", "blue"}),
+                                        :with_static_options({ "red", "green", "blue" }),
                                 }
                             end)
                         )

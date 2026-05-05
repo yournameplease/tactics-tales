@@ -76,7 +76,6 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("battle.map.map_generator", function()
-
     -- -----------------------------------------------------------------------
     -- load_map — dimensions
     -- -----------------------------------------------------------------------
@@ -131,7 +130,7 @@ describe("battle.map.map_generator", function()
             -- Set metatiles(x=0, y=0) = BASE_METATILE + 5 = 1029
             -- Using mock set API: set(col, val_at_row0) sets data[row0][col]
             local fetch_result = make_fetch_result(4, 4)
-            fetch_result[1].bmp:set(0, BASE_METATILE + 5)  -- column 0, row 0 = 1029
+            fetch_result[1].bmp:set(0, BASE_METATILE + 5) -- column 0, row 0 = 1029
 
             local restore = stub_fetch(fetch_result)
             local def = { type = "static", file = "test.lua" }
@@ -146,7 +145,7 @@ describe("battle.map.map_generator", function()
 
         it("should assign multiple labels from the same metatile", function()
             local fetch_result = make_fetch_result(4, 4)
-            fetch_result[1].bmp:set(0, BASE_METATILE + 7)  -- metatile 7 at (0,0)
+            fetch_result[1].bmp:set(0, BASE_METATILE + 7) -- metatile 7 at (0,0)
 
             local restore = stub_fetch(fetch_result)
             local def = { type = "static", file = "test.lua" }
@@ -179,8 +178,13 @@ describe("battle.map.map_generator", function()
     describe("load_map (tiled)", function()
         it("should create a BattleMap with dimensions from the tiled source", function()
             local tiled = make_tiled_map(5, 3, {
-                { type = "tilelayer", name = "ground", width = 5, height = 3,
-                  data = make_tile_data(5, 3, 1) }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 5,
+                    height = 3,
+                    data = make_tile_data(5, 3, 1)
+                }
             })
             local restore = stub_include(tiled)
 
@@ -196,8 +200,13 @@ describe("battle.map.map_generator", function()
             -- gfx_registry maps stem -> base 10; firstgid = 1; tile_id = 3
             -- expected sprite = 10 + (3 - 1) = 12
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = { 3, 3, 3, 3 } }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = { 3, 3, 3, 3 }
+                }
             })
             local restore = stub_include(tiled)
 
@@ -211,8 +220,13 @@ describe("battle.map.map_generator", function()
         it("should look up base sprite index from gfx_registry by filename stem", function()
             -- filename "my_tileset.tsx" -> stem "my_tileset" -> base 100
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = { 1, 1, 1, 1 } }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = { 1, 1, 1, 1 }
+                }
             })
             local restore = stub_include(tiled)
 
@@ -226,8 +240,13 @@ describe("battle.map.map_generator", function()
 
         it("should return 0 for empty tiles (tile_id == 0)", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = { 0, 0, 0, 0 } }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = { 0, 0, 0, 0 }
+                }
             })
             local restore = stub_include(tiled)
 
@@ -240,8 +259,13 @@ describe("battle.map.map_generator", function()
 
         it("should produce nil for missing optional layers", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                }
             })
             local restore = stub_include(tiled)
 
@@ -288,7 +312,7 @@ describe("battle.map.map_generator", function()
 
         it("should skip non-tilelayer entries (e.g. objectgroup)", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer",  name = "ground",     width = 2, height = 2, data = make_tile_data(2, 2, 1) },
+                { type = "tilelayer",   name = "ground",     width = 2,   height = 2, data = make_tile_data(2, 2, 1) },
                 { type = "objectgroup", name = "deployment", objects = {} },
             })
             local restore = stub_include(tiled)
@@ -302,8 +326,13 @@ describe("battle.map.map_generator", function()
 
         it("should initialise empty player and enemy spawner tables", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                }
             })
             local restore = stub_include(tiled)
 
@@ -327,8 +356,13 @@ describe("battle.map.map_generator", function()
 
         it("should produce an empty spawn_groups table when no object layers exist", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) }
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                }
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -339,10 +373,19 @@ describe("battle.map.map_generator", function()
         it("should create a group keyed by layer name with pixel coords converted to tile coords", function()
             -- tilewidth=16, tileheight=16; pixel (32,48) -> tile (2,3)
             local tiled = make_tiled_map(4, 4, {
-                { type = "tilelayer", name = "ground", width = 4, height = 4,
-                  data = make_tile_data(4, 4, 1) },
-                { type = "objectgroup", name = "spawn_zone", properties = {},
-                  objects = { make_point_obj(32, 48) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 4,
+                    height = 4,
+                    data = make_tile_data(4, 4, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "spawn_zone",
+                    properties = {},
+                    objects = { make_point_obj(32, 48) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -355,10 +398,19 @@ describe("battle.map.map_generator", function()
 
         it("should default slot to 'default' when no slot property is present", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "squad", properties = {},
-                  objects = { make_point_obj(16, 16) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "squad",
+                    properties = {},
+                    objects = { make_point_obj(16, 16) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -368,10 +420,19 @@ describe("battle.map.map_generator", function()
 
         it("should attach per-object slot property to the point", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "squad", properties = {},
-                  objects = { make_point_obj(16, 16, { slot = "squad_leader" }) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "squad",
+                    properties = {},
+                    objects = { make_point_obj(16, 16, { slot = "squad_leader" }) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -381,11 +442,19 @@ describe("battle.map.map_generator", function()
 
         it("should propagate layer-level slot to points that lack a per-object slot", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "boss_room",
-                  properties = { slot = "boss", ai_hint = "stationary" },
-                  objects = { make_point_obj(16, 16) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "boss_room",
+                    properties = { slot = "boss", ai_hint = "stationary" },
+                    objects = { make_point_obj(16, 16) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -396,29 +465,45 @@ describe("battle.map.map_generator", function()
 
         it("should let per-object ai_hint override the layer default", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "patrol",
-                  properties = { ai_hint = "patrol" },
-                  objects = {
-                      make_point_obj(16, 16),
-                      make_point_obj(32, 16, { ai_hint = "stationary" }),
-                  } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "patrol",
+                    properties = { ai_hint = "patrol" },
+                    objects = {
+                        make_point_obj(16, 16),
+                        make_point_obj(32, 16, { ai_hint = "stationary" }),
+                    }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
             restore()
-            luassert.are_equal("patrol",     map.spawn_groups["patrol"].points[1].ai_hint)
+            luassert.are_equal("patrol", map.spawn_groups["patrol"].points[1].ai_hint)
             luassert.are_equal("stationary", map.spawn_groups["patrol"].points[2].ai_hint)
         end)
 
         it("should attach per-layer 'from' to the group, not to individual points", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "reinforce",
-                  properties = { from = "west" },
-                  objects = { make_point_obj(0, 16), make_point_obj(0, 32) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "reinforce",
+                    properties = { from = "west" },
+                    objects = { make_point_obj(0, 16), make_point_obj(0, 32) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -429,10 +514,19 @@ describe("battle.map.map_generator", function()
 
         it("should leave 'from' nil on groups that have no from property", function()
             local tiled = make_tiled_map(2, 2, {
-                { type = "tilelayer", name = "ground", width = 2, height = 2,
-                  data = make_tile_data(2, 2, 1) },
-                { type = "objectgroup", name = "deploy", properties = {},
-                  objects = { make_point_obj(16, 16) } },
+                {
+                    type = "tilelayer",
+                    name = "ground",
+                    width = 2,
+                    height = 2,
+                    data = make_tile_data(2, 2, 1)
+                },
+                {
+                    type = "objectgroup",
+                    name = "deploy",
+                    properties = {},
+                    objects = { make_point_obj(16, 16) }
+                },
             })
             local restore = stub_include(tiled)
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
@@ -453,5 +547,4 @@ describe("battle.map.map_generator", function()
             end)
         end)
     end)
-
 end)

@@ -179,15 +179,15 @@ local function validate(data, schema, memory, path)
                         is_valid = false
                         add_local_errors({
                             "Field expected to find data at `"
-                                .. expected_path_string
-                                .. "` but found nil data at root memory."
+                            .. expected_path_string
+                            .. "` but found nil data at root memory."
                         })
                     elseif type(memory_cursor) ~= "table" then
                         is_valid = false
                         add_local_errors({
                             "Field expected to find data at `"
-                                .. expected_path_string
-                                .. "` but root memory was not a table."
+                            .. expected_path_string
+                            .. "` but root memory was not a table."
                         })
                     else
                         for i, p in ipairs(expected_path) do
@@ -199,10 +199,10 @@ local function validate(data, schema, memory, path)
                                 is_valid = false
                                 add_local_errors({
                                     "Field expected to find data at `"
-                                        .. expected_path_string
-                                        .. "` but found nil data at `"
-                                        .. current_path
-                                        .. "`."
+                                    .. expected_path_string
+                                    .. "` but found nil data at `"
+                                    .. current_path
+                                    .. "`."
                                 })
                                 break
                             elseif type(memory_cursor[p]) ~= "table" then
@@ -210,12 +210,12 @@ local function validate(data, schema, memory, path)
                                     is_valid = false
                                     add_local_errors({
                                         "Field expected to find data at `"
-                                            .. expected_path_string
-                                            .. "` but found data "
-                                            .. tostring(memory_cursor)
-                                            .. " at `"
-                                            .. current_path
-                                            .. "` which was not a table."
+                                        .. expected_path_string
+                                        .. "` but found data "
+                                        .. tostring(memory_cursor)
+                                        .. " at `"
+                                        .. current_path
+                                        .. "` which was not a table."
                                     })
                                     break
                                 end

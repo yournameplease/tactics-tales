@@ -21,8 +21,8 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_static_options({"A", "B", "C"})
-                            :with_wrap(true)
+                        :with_static_options({ "A", "B", "C" })
+                        :with_wrap(true)
                     ):with_action("BUTTON_A", { command = "select" })
                 }
             }
@@ -59,8 +59,8 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_key("my_key")
-                            :with_static_options({"A", "B", "C"})
+                        :with_key("my_key")
+                        :with_static_options({ "A", "B", "C" })
                     ):with_initial_data(function(_gc, _mc)
                         return { ["my_key"] = "B" }
                     end)
@@ -83,8 +83,8 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_key("my_key")
-                            :with_static_options({"A", "B", "C"})
+                        :with_key("my_key")
+                        :with_static_options({ "A", "B", "C" })
                     ):with_action("BUTTON_A", { command = "select" })
                 }
             }
@@ -106,9 +106,9 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_key("my_key")
-                            :with_static_options({"A", "B", "C"})
-                            :with_wrap(true)
+                        :with_key("my_key")
+                        :with_static_options({ "A", "B", "C" })
+                        :with_wrap(true)
                     )
                 }
             }
@@ -140,7 +140,7 @@ describe("tactics.menu.cursor.selection", function()
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         (function()
                             local def = selection.row("test_sel")
-                                :with_static_options({"A", "B", "C"})
+                                :with_static_options({ "A", "B", "C" })
                             def.direction = "vertical"
                             return def
                         end)()
@@ -172,11 +172,11 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_precomputed_options({
-                                { text = "A", value = "a", description = "Option A desc" },
-                                { text = "B", value = "b" },
-                            })
-                            :with_wrap(false)
+                        :with_precomputed_options({
+                            { text = "A", value = "a", description = "Option A desc" },
+                            { text = "B", value = "b" },
+                        })
+                        :with_wrap(false)
                     )
                 }
             }
@@ -200,7 +200,7 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_static_options({"A", "B", "C"})
+                        :with_static_options({ "A", "B", "C" })
                     )
                 }
             }
@@ -237,10 +237,10 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_key("sel_key")
-                            :with_static_options({"A", "B", "C"})
-                            :with_wrap(true)
-                            :with_on_change("my_handler")
+                        :with_key("sel_key")
+                        :with_static_options({ "A", "B", "C" })
+                        :with_wrap(true)
+                        :with_on_change("my_handler")
                     )
                 }
             }
@@ -272,9 +272,9 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_key("sel_key")
-                            :with_static_options({"A", "B", "C"})
-                            :with_on_change("my_handler")
+                        :with_key("sel_key")
+                        :with_static_options({ "A", "B", "C" })
+                        :with_on_change("my_handler")
                     )
                 }
             }
@@ -299,7 +299,7 @@ describe("tactics.menu.cursor.selection", function()
                 steps = {
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         selection.row("test_sel")
-                            :with_static_options({"A", "B", "C"})
+                        :with_static_options({ "A", "B", "C" })
                     )
                 }
             }

@@ -82,7 +82,8 @@ describe("tactics.campaign.statistics.stats_service", function()
         it("initialises deaths_by_side to zero on begin_chapter", function()
             local svc = new_service()
             svc:begin_chapter(1, "battle_1")
-            luassert.are_same({ player = 0, enemy = 0, neutral = 0 }, svc.campaign_results.chapter_results[1].deaths_by_side)
+            luassert.are_same({ player = 0, enemy = 0, neutral = 0 },
+                svc.campaign_results.chapter_results[1].deaths_by_side)
         end)
 
         it("increments deaths_by_side for a player unit", function()

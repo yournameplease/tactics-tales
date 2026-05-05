@@ -36,9 +36,9 @@ local BASE_UNIT_SPRITE = 6 * 256
 
 ---@type table<Side, integer[]>
 local PALETTE_BY_SIDE = {
-    player = {16, 19, 1},
-    enemy = {8, 24, 2},
-    neutral = {27, 3, 19},
+    player = { 16, 19, 1 },
+    enemy = { 8, 24, 2 },
+    neutral = { 27, 3, 19 },
 }
 
 local MAX_HEALTH_BAR_WIDTH = 14
@@ -128,7 +128,7 @@ local function get_animation_frame(drawable_unit)
     else
         log.debug("Unrecognized animation frame.")
         frame_name = "idle_1"
-        offset = {x = 0, y = 0}
+        offset = { x = 0, y = 0 }
     end
 
     local body_type = get_body_type(drawable_unit)
@@ -155,8 +155,10 @@ end
 function character_renderer.get_animation_offset(drawable_unit)
     local frame_data = get_animation_frame(drawable_unit)
 
-    return { x = frame_data.offset.x + frame_data.node.root.x,
-             y = frame_data.offset.y + frame_data.node.root.y }
+    return {
+        x = frame_data.offset.x + frame_data.node.root.x,
+        y = frame_data.offset.y + frame_data.node.root.y
+    }
 end
 
 --- Apply palette swaps for a drawable unit's team colour, skin, hair, and eye direction.
@@ -172,9 +174,9 @@ local function set_palette(drawable_unit, draw_outline, look_direction)
     pal(COLOR_SIDE_3, side_palette[3])
     local appearance = drawable_unit.character:get_appearance()
     local skin = appearance.skin
-  pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
-  pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
-  pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
+    pal(COLOR_SKIN, sprite_data.SKIN_COLOR[skin].colors[1])
+    pal(COLOR_SKIN_SHADOW, sprite_data.SKIN_COLOR[skin].colors[2])
+    pal(COLOR_HAIR, sprite_data.COLOR_NAMES[appearance.hair_color].color)
     pal(COLOR_BEARD, sprite_data.COLOR_NAMES[appearance.hair_color].color)
 
     if draw_outline then
@@ -434,7 +436,7 @@ local function draw_health_bar(unit, draw_point, theme)
     local current_width = cell_width * hp_current + 1
     local height = 4
 
-    local x = draw_point.x - (width >> 1) -3
+    local x = draw_point.x - (width >> 1) - 3
     local y = draw_point.y - 2
     rrectfill(x, y, width, height, 1, theme.COLOR_HP_BORDER)
     rrectfill(x + 1, y + 1, width - 2, height - 2, 0, theme.COLOR_HP_SPENT)

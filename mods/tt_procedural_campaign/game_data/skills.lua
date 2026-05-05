@@ -7,7 +7,7 @@ return {
         hp_cost         = 1,
         cooldown        = nil,
         uses_per_battle = nil,
-        targeting = {
+        targeting       = {
             get_selection_tiles = function(origin, map)
                 local out = {}
                 for dx = -2, 2 do
@@ -50,7 +50,7 @@ return {
         hp_cost         = nil,
         cooldown        = nil,
         uses_per_battle = 1,
-        targeting = {
+        targeting       = {
             get_selection_tiles = function(origin, map)
                 local out = {}
                 for dx = -2, 2 do

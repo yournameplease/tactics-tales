@@ -49,10 +49,10 @@
 ---@type table<string, ArchetypeDefinition>
 local archetypes = {
     seize_run = {
-        name        = "Seize Run",
-        description = "Three seize battles in a row. Used to exercise the seize layout through the full campaign loop.",
+        name             = "Seize Run",
+        description      = "Three seize battles in a row. Used to exercise the seize layout through the full campaign loop.",
 
-        slots = {
+        slots            = {
             { type = "beat", beat_id = "abandoned_fortress_seize" },
             { type = "beat", beat_id = "abandoned_fortress_seize" },
             { type = "beat", beat_id = "abandoned_fortress_seize" },
@@ -66,11 +66,12 @@ local archetypes = {
     },
 
     warband = {
-        name        = "Warband",
-        description = "A balanced campaign: open with a scripted skirmish, close with a decisive siege, and fill the middle with varied encounters.",
+        name             = "Warband",
+        description      =
+        "A balanced campaign: open with a scripted skirmish, close with a decisive siege, and fill the middle with varied encounters.",
 
-        slots = {
-            { type = "beat",   beat_id = "opening_skirmish", forced_join = "bandit_goon" },
+        slots            = {
+            { type = "beat",   beat_id = "opening_skirmish",                forced_join = "bandit_goon" },
             { type = "filler" },
             { type = "filler", pool_override = { skirmish = 3, ambush = 1 } },
             { type = "filler" },
@@ -78,7 +79,7 @@ local archetypes = {
             { type = "beat",   beat_id = "final_siege" },
         },
 
-        filler_pool = {
+        filler_pool      = {
             skirmish      = 2,
             ambush        = 2,
             escort        = 1,

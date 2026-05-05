@@ -39,9 +39,9 @@ describe("node handlers #it", function()
                 starting_node = "start",
                 nodes = {
                     start = {
-                        { type = "chapter_header", text = "Ch 1", chapter_number = 1 },
-                        { type = "roster_add", template = "test_fighter" },
-                        { type = "roster_add", template = "test_fighter" },
+                        { type = "chapter_header", text = "Ch 1",            chapter_number = 1 },
+                        { type = "roster_add",     template = "test_fighter" },
+                        { type = "roster_add",     template = "test_fighter" },
                         { type = "game_results" },
                         { type = "exit_campaign" },
                     },
@@ -64,7 +64,7 @@ describe("node handlers #it", function()
                 starting_node = "start",
                 nodes = {
                     start = {
-                        { type = "roster_add", template = "test_fighter" },
+                        { type = "roster_add",   template = "test_fighter" },
                         { type = "game_results" },
                         { type = "exit_campaign" },
                     },
@@ -86,7 +86,7 @@ describe("node handlers #it", function()
                 starting_node = "start",
                 nodes = {
                     start = {
-                        { type = "roster_add", template = "test_fighter" },
+                        { type = "roster_add",   template = "test_fighter" },
                         { type = "game_results" },
                         { type = "exit_campaign" },
                     },
@@ -104,8 +104,8 @@ describe("node handlers #it", function()
                 starting_node = "start",
                 nodes = {
                     start = {
-                        { type = "chapter_header", text = "Ch 3", chapter_number = 3 },
-                        { type = "roster_add", template = "test_fighter" },
+                        { type = "chapter_header", text = "Ch 3",            chapter_number = 3 },
+                        { type = "roster_add",     template = "test_fighter" },
                         { type = "game_results" },
                         { type = "exit_campaign" },
                     },
@@ -169,8 +169,8 @@ describe("node handlers #it", function()
                 starting_node = "start",
                 nodes = {
                     start = {
-                        { type = "chapter_header", text = "Chapter 2", chapter_number = 2 },
-                        { type = "roster_add", template = "test_fighter" },
+                        { type = "chapter_header", text = "Chapter 2",       chapter_number = 2 },
+                        { type = "roster_add",     template = "test_fighter" },
                         { type = "exit_campaign" },
                     },
                 },

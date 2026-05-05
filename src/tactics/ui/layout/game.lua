@@ -12,7 +12,7 @@ local layouts = {}
 local left = book.flex_page()
 left:add(box.spacer(1))
 left:add(control_hints.new(
-    ---@param s UIContextManager
+---@param s UIContextManager
     function(s)
         return s.game_context.menu_manager.menu_step
     end,
@@ -20,12 +20,12 @@ left:add(control_hints.new(
 ))
 
 local content = box.builder("menu_content")
-    :direction"col"
-    :container"panel"
+    :direction "col"
+    :container "panel"
     :build()
 
 content:add(menu.generic_menu_box(
-    ---@param state UIContextManager
+---@param state UIContextManager
     function(state)
         return state.game_context.menu_manager.revision_count
     end,
@@ -40,20 +40,20 @@ content:add(menu.generic_menu_box(
 content:add(box.spacer(1))
 
 local description_container = content:add(box.builder("description_container")
-    :layout{
+    :layout {
         direction = "col",
         height = 80,
         width = "fill",
         padding = box.layout.padding(8),
     }
-    :style{
+    :style {
         decoration = "border",
         decoration_padding = 5,
     }
     :build())
 
 description_container:add(menu.generic_menu_description(
-    ---@param state UIContextManager
+---@param state UIContextManager
     function(state)
         return state.game_context.menu_manager.revision_count
     end,

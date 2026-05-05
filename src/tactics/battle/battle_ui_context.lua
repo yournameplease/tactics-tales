@@ -61,7 +61,8 @@ end
 ---@param battle_objective_service BattleObjectiveService
 ---@param input_service InputService
 ---@return BattleUIContext
-function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service, input_service)
+function battle_ui_context.new(map, battle_menu_manager, tactics_engine, turn_manager, battle_objective_service,
+                               input_service)
     ---@type BattleUIContext
     local self = setmetatable({ type = "battle" }, BattleUIContext)
 

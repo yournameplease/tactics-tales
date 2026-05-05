@@ -38,12 +38,12 @@ end
 ---@return UIElement
 function character.portrait_box(get_selected_unit, palette)
     return box.builder("portrait_box")
-        :layout{
+        :layout {
             width = 24,
             height = 28,
             padding = box.layout.padding(4),
         }
-        :style{
+        :style {
             decoration_padding = 3,
             decoration = 'border'
         }

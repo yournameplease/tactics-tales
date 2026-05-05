@@ -36,51 +36,51 @@ local SAVE_PATH = "/appdata/tactics_tales/saves/"
 ---@param name string Save slot name (used as filename without extension).
 ---@param data GameSaveData
 function save_system.save(name, data)
-	---@type SerializedGameSaveData
-	local serialized_data = {
-		character_id_count = data.character_id_generator.id_count,
-		campaign_id = data.campaign_id,
-		campaign_node_id = data.campaign_node_id,
-		campaign_config = data.campaign_config,
-		campaign_node_step = data.campaign_node_step,
-		campaign_state = data.campaign_state:serialize(),
-		roster = lists.map(function(c)
-			return c:serialize()
-		end)(data.roster),
-		stats = data.stats,
-		campaign_seed = data.campaign_seed,
-		campaign_rng_state = data.campaign_rng_state,
-	}
+    ---@type SerializedGameSaveData
+    local serialized_data = {
+        character_id_count = data.character_id_generator.id_count,
+        campaign_id = data.campaign_id,
+        campaign_node_id = data.campaign_node_id,
+        campaign_config = data.campaign_config,
+        campaign_node_step = data.campaign_node_step,
+        campaign_state = data.campaign_state:serialize(),
+        roster = lists.map(function(c)
+            return c:serialize()
+        end)(data.roster),
+        stats = data.stats,
+        campaign_seed = data.campaign_seed,
+        campaign_rng_state = data.campaign_rng_state,
+    }
 
-	local path = SAVE_PATH .. name .. ".pod"
-	log.debug("Saving data: ", name, path)
-	store(path, serialized_data, nil)
+    local path = SAVE_PATH .. name .. ".pod"
+    log.debug("Saving data: ", name, path)
+    store(path, serialized_data, nil)
 end
 
 --- Return a list of save slot names found on disk.
 ---@return string[]
 function save_system.list_saves()
-	local paths = ls(SAVE_PATH) or {}
-	return lists.map(function(p)
-		return split(p, '.')[1]
-	end)(paths)
+    local paths = ls(SAVE_PATH) or {}
+    return lists.map(function(p)
+        return split(p, '.')[1]
+    end)(paths)
 end
 
 --- Load and return a serialized save by slot name, or nil if not found.
 ---@param name string Save slot name (used as filename without extension).
 ---@return SerializedGameSaveData?
 function save_system.load(name)
-	local path = SAVE_PATH .. name .. ".pod"
-	log.debug("Loading data: ", name, path)
-	return fetch(path)
+    local path = SAVE_PATH .. name .. ".pod"
+    log.debug("Loading data: ", name, path)
+    return fetch(path)
 end
 
 --- Delete the save file for the given slot name.
 ---@param name string Save slot name.
 function save_system.delete(name)
-	local path = SAVE_PATH .. name .. ".pod"
-	log.debug("Deleting save: ", name, path)
-	rm(path)
+    local path = SAVE_PATH .. name .. ".pod"
+    log.debug("Deleting save: ", name, path)
+    rm(path)
 end
 
 return save_system

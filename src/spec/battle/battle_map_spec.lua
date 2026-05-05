@@ -28,9 +28,9 @@ end
 local function make_layers(w, h)
     return {
         terrain = {
-            ground    = userdata("u8", w, h),
-            back_wall = userdata("u8", w, h),
-            mid_wall  = userdata("u8", w, h),
+            ground     = userdata("u8", w, h),
+            back_wall  = userdata("u8", w, h),
+            mid_wall   = userdata("u8", w, h),
             front_wall = userdata("u8", w, h),
         }
     }
@@ -41,7 +41,6 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("battle.battle_map", function()
-
     -- -----------------------------------------------------------------------
     -- battle_map.new
     -- -----------------------------------------------------------------------
@@ -345,7 +344,7 @@ describe("battle.battle_map", function()
         it("should filter units by predicate", function()
             local map = make_map()
             map:spawn_unit(make_unit(1, point.of(0, 0), "player"), point.of(0, 0))
-            map:spawn_unit(make_unit(2, point.of(1, 0), "enemy"),  point.of(1, 0))
+            map:spawn_unit(make_unit(2, point.of(1, 0), "enemy"), point.of(1, 0))
             local enemies = map:get_units(function(u) return u.side == "enemy" end)
             luassert.are_equal(1, #enemies)
             luassert.are_equal(2, enemies[1].id)
@@ -453,5 +452,4 @@ describe("battle.battle_map", function()
             luassert.are_equal(5, result.movement_cost)
         end)
     end)
-
 end)

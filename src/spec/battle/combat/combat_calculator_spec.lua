@@ -66,7 +66,7 @@ after_each(function() _G.rnd = original_rnd end)
 local function rnd_returns(val)
     return function(_limit) return val end
 end
-local function always_hit()  _G.rnd = rnd_returns(0)  end
+local function always_hit() _G.rnd = rnd_returns(0) end
 local function always_miss() _G.rnd = rnd_returns(99) end
 
 -- ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ describe("combat_calculator.compute_combat", function()
         it("no counterattack when defender dies on first hit", function()
             always_hit()
             local att = make_unit({ hp = 10, weapons = { make_weapon(99, 100) } })
-            local def = make_unit({ hp = 1,  weapons = { make_weapon(3, 70) } })
+            local def = make_unit({ hp = 1, weapons = { make_weapon(3, 70) } })
             local result = combat_calculator.compute_combat(att, def, make_map())
             luassert.are_equal(1, #result.steps)
         end)
@@ -170,7 +170,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_defense", defense_type = "ARMOR", amount = 2 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(3, result.steps[1].dmg)  -- 5 - 2 = 3
+            luassert.are_equal(3, result.steps[1].dmg) -- 5 - 2 = 3
         end)
 
         it("damage is minimum 1 when weapon has positive damage and defense absorbs all", function()
@@ -196,7 +196,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_defense", defense_type = "ARMOR", amount = 4 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(5, result.steps[1].dmg)  -- armor bypassed
+            luassert.are_equal(5, result.steps[1].dmg) -- armor bypassed
         end)
 
         it("armorkiller does not ignore ARMOR defense penalties (negative amounts)", function()
@@ -210,7 +210,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_defense", defense_type = "ARMOR", amount = -2 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(7, result.steps[1].dmg)  -- penalty still applied: 5 - (-2) = 7
+            luassert.are_equal(7, result.steps[1].dmg) -- penalty still applied: 5 - (-2) = 7
         end)
 
         it("shieldkiller ignores SHIELD defense", function()
@@ -224,7 +224,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_defense", defense_type = "SHIELD", amount = 3 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(5, result.steps[1].dmg)  -- shield bypassed
+            luassert.are_equal(5, result.steps[1].dmg) -- shield bypassed
         end)
     end)
 
@@ -238,7 +238,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_avoid", avoid_type = "ARMOR", amount = 10 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map(5))
-            luassert.are_equal(65, result.steps[1].hit_chance)  -- 80 - 10 - 5
+            luassert.are_equal(65, result.steps[1].hit_chance) -- 80 - 10 - 5
         end)
 
         it("hit_chance clamped to 0 when accuracy is very low", function()
@@ -270,7 +270,7 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_avoid", avoid_type = "ARMOR", amount = 20 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(80, result.steps[1].hit_chance)  -- avoid bypassed
+            luassert.are_equal(80, result.steps[1].hit_chance) -- avoid bypassed
         end)
 
         it("avoid penalties are applied even when armorkiller is active", function()
@@ -284,14 +284,14 @@ describe("combat_calculator.compute_combat", function()
                 items = { { equipment_effects = { { type = "increase_avoid", avoid_type = "ARMOR", amount = -10 } } } },
             })
             local result = combat_calculator.compute_combat(att, def, make_map())
-            luassert.are_equal(90, result.steps[1].hit_chance)  -- penalty applied: 80 - (-10)
+            luassert.are_equal(90, result.steps[1].hit_chance) -- penalty applied: 80 - (-10)
         end)
 
         it("terrain dodge reduces hit_chance", function()
             local att = make_unit({ weapons = { make_weapon(5, 80) } })
             local def = make_unit({ hp = 20, weapons = { make_weapon(1, 70) } })
             local result = combat_calculator.compute_combat(att, def, make_map(15))
-            luassert.are_equal(65, result.steps[1].hit_chance)  -- 80 - 15
+            luassert.are_equal(65, result.steps[1].hit_chance) -- 80 - 15
         end)
     end)
 
@@ -333,7 +333,7 @@ describe("combat_calculator.preview_combat", function()
                 items = { { equipment_effects = { { type = "increase_defense", defense_type = "ARMOR", amount = 2 } } } },
             })
             local result = combat_calculator.preview_combat(att, def, attacker_tile, make_map())
-            luassert.are_equal(4, result.expected_damage)  -- 6 - 2
+            luassert.are_equal(4, result.expected_damage) -- 6 - 2
         end)
     end)
 

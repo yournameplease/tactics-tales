@@ -232,7 +232,7 @@ function UIBuilder:build()
     self.def.cacheable.dirty_layout = true
 
     assert(not (self.def.layout.flex_grow > 0
-        and (self.def.layout.width == "fit_content" and self.def.layout.height == "fit_content")),
+            and (self.def.layout.width == "fit_content" and self.def.layout.height == "fit_content")),
         "Cannot flex grow with auto_width and auto_height")
     assert(
         self.def.style.decoration_padding == 0
@@ -666,7 +666,7 @@ function Box:apply_layout(parent_x, parent_y, max_w, max_h, is_dirty)
 
         -- A child flexes if it fills along the main axis and has flex_grow > 0
         local child_should_flex = ((is_row and child.layout.width == "fill")
-            or (not is_row and child.layout.height == "fill"))
+                or (not is_row and child.layout.height == "fill"))
             and child.layout.flex_grow
 
         if child_should_flex then
@@ -692,7 +692,7 @@ function Box:apply_layout(parent_x, parent_y, max_w, max_h, is_dirty)
         local child_h = child.rect.h
 
         local child_should_flex = ((is_row and child.layout.width == "fill")
-            or (not is_row and child.layout.height == "fill"))
+                or (not is_row and child.layout.height == "fill"))
             and child.layout.flex_grow
 
         if child_should_flex and total_flex > 0 then
@@ -745,10 +745,10 @@ function Box:draw_shaded(color_ne, color_sw, color_interior)
     local h = self.rect.c_h
     local pad = self.style.decoration_padding
     if pad ~= 0 then
-        rectfill(x,           y + pad - 1, x + pad - 1,     y + h - 1,         color_sw)
-        rectfill(x,           y + h - 1,   x + w - 1,       y + h - 1,         color_sw)
-        rectfill(x,           y,           x + w - 1,       y + pad - 1,       color_ne)
-        rectfill(x + w - pad, y,           x + w - 1,       y + h - 1 - pad,   color_ne)
+        rectfill(x, y + pad - 1, x + pad - 1, y + h - 1, color_sw)
+        rectfill(x, y + h - 1, x + w - 1, y + h - 1, color_sw)
+        rectfill(x, y, x + w - 1, y + pad - 1, color_ne)
+        rectfill(x + w - pad, y, x + w - 1, y + h - 1 - pad, color_ne)
     end
     rectfill(x + pad, y + pad, x + w - 1 - pad, y + h - 1 - pad, color_interior)
 end
@@ -769,9 +769,9 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
                 local child = self.children[i]
                 local c_y = child.rect.c_y
                 local gap_h = self.layout.gap
-                rectfill(x, c_y - gap_h + pad,     x + w - 1, c_y - pad,             color_interior)
-                rectfill(x, c_y - gap_h,           x + w - 1, c_y - gap_h + pad - 1, color_sw)
-                rectfill(x, c_y - pad + 1,         x + w - 1, c_y,                   color_ne)
+                rectfill(x, c_y - gap_h + pad, x + w - 1, c_y - pad, color_interior)
+                rectfill(x, c_y - gap_h, x + w - 1, c_y - gap_h + pad - 1, color_sw)
+                rectfill(x, c_y - pad + 1, x + w - 1, c_y, color_ne)
             elseif self.layout.dir == "row" then
                 local prev_child = self.children[i]
                 local next_child = self.children[i]
@@ -781,9 +781,9 @@ function Box:draw_shaded_dividers(color_ne, color_sw, color_interior)
                 local h_prev = prev_child.rect.h
                 local y_next = next_child.rect.c_y
                 local h_next = next_child.rect.h
-                rectfill(c_x - gap_w + pad, y,      c_x - pad,             y + h - 1,          color_interior)
-                rectfill(c_x - gap_w,       y_prev, c_x - gap_w + pad - 1, h_prev + h_prev - 1, color_sw)
-                rectfill(c_x - pad + 1,     y_next, c_x,                   y_next + h_next - 1, color_ne)
+                rectfill(c_x - gap_w + pad, y, c_x - pad, y + h - 1, color_interior)
+                rectfill(c_x - gap_w, y_prev, c_x - gap_w + pad - 1, h_prev + h_prev - 1, color_sw)
+                rectfill(c_x - pad + 1, y_next, c_x, y_next + h_next - 1, color_ne)
             end
         end
     end
@@ -791,13 +791,15 @@ end
 
 ---@param ui_theme UITheme
 function Box:draw_embossed(ui_theme)
-    self:draw_shaded(ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_PRIMARY)
+    self:draw_shaded(ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_SHADOW,
+        ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
 ---@param ui_theme UITheme
 function Box:draw_recessed(ui_theme)
     self:draw_shaded(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_INTERIOR)
-    self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT, ui_theme.COLOR_DECORATION_PRIMARY)
+    self:draw_shaded_dividers(ui_theme.COLOR_DECORATION_SHADOW, ui_theme.COLOR_DECORATION_HIGHLIGHT,
+        ui_theme.COLOR_DECORATION_PRIMARY)
 end
 
 ---@param ui_theme UITheme
@@ -1153,7 +1155,7 @@ function Box:draw(state, draw_target_manager, ui_theme)
 
     if DYNAMIC_CONFIG.draw_flexbox_debug then
         local color = colors.rainbow(self.rect.depth - 1)
-        rrect(self.rect.x,   self.rect.y,   self.rect.w,   self.rect.h,   0, color[2])
+        rrect(self.rect.x, self.rect.y, self.rect.w, self.rect.h, 0, color[2])
         rrect(self.rect.c_x, self.rect.c_y, self.rect.c_w, self.rect.c_h, 0, color[1])
     end
 
@@ -1174,9 +1176,9 @@ function Box:draw_modal(state, draw_target_manager, ui_theme)
 end
 
 return {
-    layout    = layout,
-    anchor    = anchor,
-    text_info = text_info,
+    layout                 = layout,
+    anchor                 = anchor,
+    text_info              = text_info,
     builder                = box.builder,
     floating               = box.floating,
     spacer                 = box.spacer,

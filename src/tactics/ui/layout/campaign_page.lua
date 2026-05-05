@@ -9,7 +9,7 @@ local control_hints = require("src.tactics.ui.panels.control_hints")
 local left = book.flex_page()
 left:add(box.spacer(1))
 left:add(control_hints.new(
-    ---@param s UIContextManager
+---@param s UIContextManager
     function(s)
         return s.campaign_context.menu_manager.menu_step
     end,

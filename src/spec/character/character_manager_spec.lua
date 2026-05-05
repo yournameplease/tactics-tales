@@ -8,21 +8,21 @@ local function make_game_data()
     return {
         characters = {
             ["default"] = {
-                movement = 3,
-                hp_max = 4,
-                item_loadout = {},
-                head_options_m   = opt_list{"round"},
-                head_options_f   = opt_list{"round"},
-                eyewear_options  = opt_static("none"),
-                headwear_options = opt_static("none"),
-                body_options     = opt_static("default"),
-                gender_options   = opt_list{"male", "female"},
-                skin_color_options  = opt_static("a"),
-                hair_color_options  = opt_static("brown"),
-                hair_options_m   = opt_static("short"),
-                hair_options_f   = opt_static("bob_a"),
-                beard_options    = opt_static("none"),
-                eye_options      = opt_static("a"),
+                movement           = 3,
+                hp_max             = 4,
+                item_loadout       = {},
+                head_options_m     = opt_list { "round" },
+                head_options_f     = opt_list { "round" },
+                eyewear_options    = opt_static("none"),
+                headwear_options   = opt_static("none"),
+                body_options       = opt_static("default"),
+                gender_options     = opt_list { "male", "female" },
+                skin_color_options = opt_static("a"),
+                hair_color_options = opt_static("brown"),
+                hair_options_m     = opt_static("short"),
+                hair_options_f     = opt_static("bob_a"),
+                beard_options      = opt_static("none"),
+                eye_options        = opt_static("a"),
             }
         },
         items = {},
@@ -56,7 +56,7 @@ describe("tactics.character.character_manager", function()
             local game_data = make_game_data()
             local manager = character_manager.new(game_data)
 
-            local char = manager:generate_character(nil, {"enemy"})
+            local char = manager:generate_character(nil, { "enemy" })
 
             luassert.is_true(char.tags["enemy"])
         end)
@@ -89,10 +89,10 @@ describe("tactics.character.character_manager", function()
 
         it("should only include living characters when roster is mixed", function()
             local game_data = make_game_data()
-            local manager = character_manager.new(game_data)
-            local alive = manager:generate_character(nil, {})
-            local dead  = manager:generate_character(nil, {})
-            dead.dead = true
+            local manager   = character_manager.new(game_data)
+            local alive     = manager:generate_character(nil, {})
+            local dead      = manager:generate_character(nil, {})
+            dead.dead       = true
 
             manager:persist_player(alive)
             manager:persist_player(dead)
@@ -125,9 +125,9 @@ describe("tactics.character.character_manager", function()
 
         it("includes both living and dead characters", function()
             local manager = character_manager.new(make_game_data())
-            local alive = manager:generate_character(nil, {})
-            local dead  = manager:generate_character(nil, {})
-            dead.dead = true
+            local alive   = manager:generate_character(nil, {})
+            local dead    = manager:generate_character(nil, {})
+            dead.dead     = true
             manager:persist_player(alive)
             manager:persist_player(dead)
             local roster = manager:get_full_roster()
@@ -136,9 +136,9 @@ describe("tactics.character.character_manager", function()
 
         it("does not affect get_player_roster", function()
             local manager = character_manager.new(make_game_data())
-            local alive = manager:generate_character(nil, {})
-            local dead  = manager:generate_character(nil, {})
-            dead.dead = true
+            local alive   = manager:generate_character(nil, {})
+            local dead    = manager:generate_character(nil, {})
+            dead.dead     = true
             manager:persist_player(alive)
             manager:persist_player(dead)
             luassert.are_equal(1, #manager:get_player_roster())

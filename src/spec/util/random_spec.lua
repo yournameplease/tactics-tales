@@ -7,7 +7,7 @@ local random = require("src.tactics.util.random")
 local original_rnd = _G.rnd
 
 local function rnd_returns(...)
-    local vals = {...}
+    local vals = { ... }
     local idx = 0
     return function(_limit)
         idx = idx + 1
@@ -35,25 +35,25 @@ describe("tactics.util.random", function()
     describe("choose_random_from_list", function()
         it("should return the first element when rnd returns 0", function()
             _G.rnd = rnd_returns(0)
-            local result = random.choose_random_from_list({"a", "b", "c"})
+            local result = random.choose_random_from_list({ "a", "b", "c" })
             luassert.are_equal("a", result)
         end)
 
         it("should return the last element when rnd returns the last index", function()
             _G.rnd = rnd_returns(2)
-            local result = random.choose_random_from_list({"a", "b", "c"})
+            local result = random.choose_random_from_list({ "a", "b", "c" })
             luassert.are_equal("c", result)
         end)
 
         it("should return the middle element when rnd returns the middle index", function()
             _G.rnd = rnd_returns(1)
-            local result = random.choose_random_from_list({"a", "b", "c"})
+            local result = random.choose_random_from_list({ "a", "b", "c" })
             luassert.are_equal("b", result)
         end)
 
         it("should work for a single-element list", function()
             _G.rnd = rnd_returns(0)
-            local result = random.choose_random_from_list({"only"})
+            local result = random.choose_random_from_list({ "only" })
             luassert.are_equal("only", result)
         end)
     end)
@@ -99,12 +99,12 @@ describe("random.new", function()
     describe("choose_random_from_list", function()
         it("should always return the only element for a single-element list", function()
             local rng = random.new(42)
-            luassert.are_equal("only", rng:choose_random_from_list({"only"}))
+            luassert.are_equal("only", rng:choose_random_from_list({ "only" }))
         end)
 
         it("should return elements from the list", function()
             local rng = random.new(7)
-            local options = {"a", "b", "c"}
+            local options = { "a", "b", "c" }
             for _ = 1, 20 do
                 local v = rng:choose_random_from_list(options)
                 luassert.is_true(v == "a" or v == "b" or v == "c")

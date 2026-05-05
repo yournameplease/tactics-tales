@@ -6,12 +6,12 @@ local book = require("src.tactics.ui.decoration.book")
 local control_hints = require("src.tactics.ui.panels.control_hints")
 
 local root = box.builder("title_screen")
-    :layout{
+    :layout {
         dir = "col",
         width = 480,
         height = 270,
     }
-    :style{
+    :style {
         solid = true,
     }
     :build()
@@ -21,9 +21,9 @@ local root = box.builder("title_screen")
 root:add(box.spacer(1))
 local row = root:add(
     box.builder("title_screen_row")
-        :direction("row")
-        :container("strip")
-        :build()
+    :direction("row")
+    :container("strip")
+    :build()
 )
 root:add(box.spacer(1))
 
@@ -42,11 +42,11 @@ local title_row = box.builder("title_row")
     :build()
 title_row:add(box.spacer(1))
 title_row:add(box.builder("title_text")
-    :layout{
+    :layout {
         height = 32,
         width = 64,
     }
-    :sprite{
+    :sprite {
         s = 5,
     }
     :build())

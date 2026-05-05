@@ -9,44 +9,44 @@ describe("tactics.util.lists", function()
     describe("size", function()
         it("should return the correct size of a list", function()
             luassert.are_equal(0, lists.size({}))
-            luassert.are_equal(3, lists.size({1, 2, 3}))
+            luassert.are_equal(3, lists.size({ 1, 2, 3 }))
         end)
     end)
 
     describe("add_all", function()
         it("should add all elements from one list to another", function()
-            local list1 = {1, 2}
-            local list2 = {3, 4}
+            local list1 = { 1, 2 }
+            local list2 = { 3, 4 }
             lists.add_all(list1, list2)
-            luassert.are_same({1, 2, 3, 4}, list1)
+            luassert.are_same({ 1, 2, 3, 4 }, list1)
         end)
 
         it("should handle empty lists correctly", function()
-            local list1 = {1, 2}
+            local list1 = { 1, 2 }
             local list2 = {}
             lists.add_all(list1, list2)
-            luassert.are_same({1, 2}, list1)
+            luassert.are_same({ 1, 2 }, list1)
 
             local list3 = {}
-            local list4 = {3, 4}
+            local list4 = { 3, 4 }
             lists.add_all(list3, list4)
-            luassert.are_same({3, 4}, list3)
+            luassert.are_same({ 3, 4 }, list3)
         end)
     end)
 
     describe("merge", function()
         it("should merge multiple lists into a new one", function()
-            local list1 = {1, 2}
-            local list2 = {3, 4}
-            local list3 = {5}
+            local list1 = { 1, 2 }
+            local list2 = { 3, 4 }
+            local list3 = { 5 }
             local merged = lists.merge(list1, list2, list3)
-            luassert.are_same({1, 2, 3, 4, 5}, merged)
+            luassert.are_same({ 1, 2, 3, 4, 5 }, merged)
         end)
 
         it("should return a new list", function()
-            local list1 = {1, 2}
-            local list2 = {3, 4}
-            local list3 = {5}
+            local list1 = { 1, 2 }
+            local list2 = { 3, 4 }
+            local list3 = { 5 }
             local merged = lists.merge(list1, list2, list3)
             luassert.are_not_equal(merged, list1)
             luassert.are_not_equal(merged, list2)
@@ -54,25 +54,25 @@ describe("tactics.util.lists", function()
         end)
 
         it("should handle empty lists when merging", function()
-            local list1 = {1}
+            local list1 = { 1 }
             local list2 = {}
-            local list3 = {2}
+            local list3 = { 2 }
             local merged = lists.merge(list1, list2, list3)
-            luassert.are_same({1, 2}, merged)
+            luassert.are_same({ 1, 2 }, merged)
         end)
     end)
 
     describe("reverse and do_reverse", function()
         it("should reverse a list", function()
-            local original = {1, 2, 3}
+            local original = { 1, 2, 3 }
             local reversed = lists.reverse(original)
-            luassert.are_same({3, 2, 1}, reversed)
-            luassert.are_same({1, 2, 3}, original)
+            luassert.are_same({ 3, 2, 1 }, reversed)
+            luassert.are_same({ 1, 2, 3 }, original)
 
-            local original2 = {1, 2, 3}
+            local original2 = { 1, 2, 3 }
             local reversed2 = lists.do_reverse(original2)
-            luassert.are_same({3, 2, 1}, reversed2)
-            luassert.are_same({1, 2, 3}, original2)
+            luassert.are_same({ 3, 2, 1 }, reversed2)
+            luassert.are_same({ 1, 2, 3 }, original2)
         end)
 
         it("should handle empty lists", function()
@@ -81,26 +81,26 @@ describe("tactics.util.lists", function()
         end)
 
         it("should handle single element lists", function()
-            luassert.are_same({1}, lists.reverse({1}))
-            luassert.are_same({1}, lists.do_reverse({1}))
+            luassert.are_same({ 1 }, lists.reverse({ 1 }))
+            luassert.are_same({ 1 }, lists.do_reverse({ 1 }))
         end)
     end)
 
     describe("filter and do_filter", function()
         it("should filter elements based on a predicate", function()
-            local original = {1, 2, 3, 4, 5}
+            local original = { 1, 2, 3, 4, 5 }
             local is_even = function(n) return n % 2 == 0 end
             local filtered = lists.filter(is_even)(original)
-            luassert.are_same({2, 4}, filtered)
-            luassert.are_same({1, 2, 3, 4, 5}, original)
+            luassert.are_same({ 2, 4 }, filtered)
+            luassert.are_same({ 1, 2, 3, 4, 5 }, original)
 
             local filtered2 = lists.do_filter(original, is_even)
-            luassert.are_same({2, 4}, filtered2)
-            luassert.are_same({1, 2, 3, 4, 5}, original)
+            luassert.are_same({ 2, 4 }, filtered2)
+            luassert.are_same({ 1, 2, 3, 4, 5 }, original)
         end)
 
         it("should return an empty list if no elements match", function()
-            local original = {1, 3, 5}
+            local original = { 1, 3, 5 }
             local is_even = function(n) return n % 2 == 0 end
             luassert.are_same({}, lists.filter(is_even)(original))
             luassert.are_same({}, lists.do_filter(original, is_even))
@@ -115,15 +115,15 @@ describe("tactics.util.lists", function()
 
     describe("map and do_map", function()
         it("should transform each element based on a function", function()
-            local original = {1, 2, 3}
+            local original = { 1, 2, 3 }
             local double_fn = function(n) return n * 2 end
             local doubled = lists.map(double_fn)(original)
-            luassert.are_same({2, 4, 6}, doubled)
-            luassert.are_same({1, 2, 3}, original)
+            luassert.are_same({ 2, 4, 6 }, doubled)
+            luassert.are_same({ 1, 2, 3 }, original)
 
             local doubled2 = lists.do_map(original, double_fn)
-            luassert.are_same({2, 4, 6}, doubled2)
-            luassert.are_same({1, 2, 3}, original)
+            luassert.are_same({ 2, 4, 6 }, doubled2)
+            luassert.are_same({ 1, 2, 3 }, original)
         end)
 
         it("should handle empty input list", function()
@@ -135,19 +135,19 @@ describe("tactics.util.lists", function()
 
     describe("flat_map and do_flat_map", function()
         it("should transform each element to a list and flatten the result", function()
-            local original = {1, 2}
-            local duplicate_fn = function(n) return {n, n} end
+            local original = { 1, 2 }
+            local duplicate_fn = function(n) return { n, n } end
             local flattened = lists.flat_map(duplicate_fn)(original)
-            luassert.are_same({1, 1, 2, 2}, flattened)
-            luassert.are_same({1, 2}, original)
+            luassert.are_same({ 1, 1, 2, 2 }, flattened)
+            luassert.are_same({ 1, 2 }, original)
 
             local flattened2 = lists.do_flat_map(original, duplicate_fn)
-            luassert.are_same({1, 1, 2, 2}, flattened2)
-            luassert.are_same({1, 2}, original)
+            luassert.are_same({ 1, 1, 2, 2 }, flattened2)
+            luassert.are_same({ 1, 2 }, original)
         end)
 
         it("should handle empty input list", function()
-            local duplicate_fn = function(n) return {n, n} end
+            local duplicate_fn = function(n) return { n, n } end
             luassert.are_same({}, lists.flat_map(duplicate_fn)({}))
             luassert.are_same({}, lists.do_flat_map({}, duplicate_fn))
         end)
@@ -155,7 +155,7 @@ describe("tactics.util.lists", function()
 
     describe("reduce and do_reduce", function()
         it("should reduce a list to a single value", function()
-            local original = {1, 2, 3, 4}
+            local original = { 1, 2, 3, 4 }
             local sum_fn = function(acc, n) return acc + n end
             local sum_val = lists.reduce(0, sum_fn)(original)
             luassert.are_equal(10, sum_val)
@@ -173,7 +173,7 @@ describe("tactics.util.lists", function()
 
     describe("sum and do_sum", function()
         it("should sum elements of a list using a function", function()
-            local original = {{value = 1}, {value = 2}, {value = 3}}
+            local original = { { value = 1 }, { value = 2 }, { value = 3 } }
             local get_value = function(obj) return obj.value end
             local total = lists.sum(get_value)(original)
             luassert.are_equal(6, total)
@@ -191,7 +191,7 @@ describe("tactics.util.lists", function()
 
     describe("max", function()
         it("should find the maximum value based on a function", function()
-            local original = {{value = 1}, {value = 5}, {value = 2}}
+            local original = { { value = 1 }, { value = 5 }, { value = 2 } }
             local get_value = function(obj) return obj.value end
             local max_val = lists.max(get_value)(original)
             luassert.are_equal(5, max_val)
@@ -205,7 +205,7 @@ describe("tactics.util.lists", function()
 
     describe("collect_map and do_collect_map", function()
         it("should convert a list of MapEntry to a map", function()
-            local entries = { {"a", 1}, {"b", 2} }
+            local entries = { { "a", 1 }, { "b", 2 } }
             local collected2 = lists.do_collect_map(entries)
             luassert.are_equal(1, collected2["a"])
             luassert.are_equal(2, collected2["b"])
@@ -219,12 +219,12 @@ describe("tactics.util.lists", function()
 
     describe("contains", function()
         it("should return true if the list contains the value", function()
-            local list = {1, 2, 3}
+            local list = { 1, 2, 3 }
             luassert.is_true(lists.contains(list, 2))
         end)
 
         it("should return false if the list does not contain the value", function()
-            local list = {1, 2, 3}
+            local list = { 1, 2, 3 }
             luassert.is_false(lists.contains(list, 4))
         end)
 

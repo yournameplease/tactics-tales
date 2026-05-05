@@ -1,9 +1,9 @@
-local luassert = require("luassert")
+local luassert             = require("luassert")
 
-local auto_recruit       = require("tt_procedural_campaign.game_data.auto_recruit")
+local auto_recruit         = require("tt_procedural_campaign.game_data.auto_recruit")
 local auto_recruit_pending = auto_recruit.auto_recruit_pending
 
-local campaign_state = require("src.tactics.campaign.campaign_state")
+local campaign_state       = require("src.tactics.campaign.campaign_state")
 
 local function make_mem()
     return campaign_state.new({ get_character = function() return nil end })

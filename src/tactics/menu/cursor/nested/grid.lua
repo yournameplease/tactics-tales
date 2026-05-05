@@ -356,12 +356,14 @@ function NestedGridDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
         cursor.legal_tiles = nil
     end
 
-    setmetatable(cursor, { __index = function(_, k)
-        if NestedGridNode[k] then
-            return NestedGridNode[k]
+    setmetatable(cursor, {
+        __index = function(_, k)
+            if NestedGridNode[k] then
+                return NestedGridNode[k]
+            end
+            return self[k]
         end
-        return self[k]
-    end })
+    })
 
     if self.get_initial_point then
         local initial_point = self.get_initial_point(game_ctx, menu_ctx)

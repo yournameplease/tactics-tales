@@ -64,9 +64,9 @@ end
 function ItemInventory:get_items_by_slot()
     ---@diagnostic disable-next-line
     return maps.map(
-        ---@param _ integer
-        ---@param i InventoryItem
-        ---@return Item
+    ---@param _ integer
+    ---@param i InventoryItem
+    ---@return Item
         function(_, i)
             return i.item
         end
@@ -84,9 +84,9 @@ end
 function ItemInventory:get_equipped_items()
     ---@diagnostic disable-next-line
     return maps.map(
-        ---@param _ EquipSlot
-        ---@param i InventoryItem
-        ---@return Item
+    ---@param _ EquipSlot
+    ---@param i InventoryItem
+    ---@return Item
         function(_, i)
             return i.item
         end
@@ -151,7 +151,7 @@ end
 ---@param item Item
 function ItemInventory:add_item(item)
     assert(self:can_add_item(item))
-    table.insert(self.items, {item = item})
+    table.insert(self.items, { item = item })
     self:compute_current_slots()
 end
 
@@ -166,11 +166,11 @@ function ItemInventory:equip_item(index)
 
     local slots_to_unequip
     if slot_to_equip == "MAIN_HAND" then
-        slots_to_unequip = {"MAIN_HAND", "TWO_HANDS"}
+        slots_to_unequip = { "MAIN_HAND", "TWO_HANDS" }
     elseif slot_to_equip == "OFF_HAND" then
-        slots_to_unequip = {"OFF_HAND", "TWO_HANDS"}
+        slots_to_unequip = { "OFF_HAND", "TWO_HANDS" }
     elseif slot_to_equip == "TWO_HANDS" then
-        slots_to_unequip = {"MAIN_HAND", "OFF_HAND", "TWO_HANDS"}
+        slots_to_unequip = { "MAIN_HAND", "OFF_HAND", "TWO_HANDS" }
     elseif slot_to_equip == "BODY" then
         slots_to_unequip = {}
     else
@@ -240,8 +240,8 @@ function ItemInventory:get_item_descriptions()
         if item.weapon and item.weapon.effects then
             for _, eff in ipairs(item.weapon.effects) do
                 table.insert(description.effects, {
-                    name        = wpn.effect.effect_name[eff.type],
-                    description = wpn.effect.effect_description[eff.type],
+                    name                = wpn.effect.effect_name[eff.type],
+                    description         = wpn.effect.effect_description[eff.type],
                     should_display_name = wpn.effect.effect_should_display_name[eff.type],
                 })
             end

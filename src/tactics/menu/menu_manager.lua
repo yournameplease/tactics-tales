@@ -195,12 +195,14 @@ function MenuStepDefinition:build(game_ctx, menu_ctx, menu_state)
     }
     out.node:refresh_focus()
     ---@type ActiveMenuStep
-    local step = setmetatable(out, { __index = function(_, k)
-        if MenuStep[k] then
-            return MenuStep[k]
+    local step = setmetatable(out, {
+        __index = function(_, k)
+            if MenuStep[k] then
+                return MenuStep[k]
+            end
+            return self[k]
         end
-        return self[k]
-    end })
+    })
     return step
 end
 
@@ -228,10 +230,10 @@ BaseMenuManager.__index = BaseMenuManager
 
 local menu_manager = {
     MenuManager = BaseMenuManager,
-    MenuHandler = {},       -- type alias placeholder
+    MenuHandler = {},      -- type alias placeholder
     menu_handler = menu_handler,
-    SelectionHistory = {},  -- type alias placeholder
-    MenuDefinition = {},    -- type alias placeholder
+    SelectionHistory = {}, -- type alias placeholder
+    MenuDefinition = {},   -- type alias placeholder
     MenuStepDefinition = MenuStepDefinition,
     MenuStep = MenuStep,
 
@@ -389,13 +391,15 @@ function BaseMenuManager:update(input)
                 local focused = self.menu_step.node:get_focused_leaves(self.menu_ctx, self.game_ctx)
                 for _, leaf in ipairs(focused) do
                     if leaf.keyboard_handler then
-                        local leaf_handler = self.menu_definitions[self.menu_state.menu_id].handlers[leaf.keyboard_handler]
+                        local leaf_handler = self.menu_definitions[self.menu_state.menu_id].handlers
+                        [leaf.keyboard_handler]
                         if leaf_handler then
                             leaf_handler(self.game_ctx, self.menu_ctx, text)
                         end
                     end
                 end
-                local step_handler = self.menu_definitions[self.menu_state.menu_id].handlers[self.menu_step.keyboard_handler]
+                local step_handler = self.menu_definitions[self.menu_state.menu_id].handlers
+                [self.menu_step.keyboard_handler]
                 assert(step_handler ~= nil, "Bad handler for id " .. self.menu_step.keyboard_handler)
                 allow_joypad = step_handler(self.game_ctx, self.menu_ctx, text) == true
             else

@@ -28,14 +28,14 @@ do
     local left = book.flex_page()
     left:add(battle_summary)
     local unit_box = box.builder("unit_box")
-        :layout{
+        :layout {
             dir = "col",
             gap = 4,
             padding = box.layout.padding(4),
             height = "fit_content",
             width = "fill",
         }
-        :style{
+        :style {
             decoration = "border",
             decoration_padding = 3,
         }
@@ -45,7 +45,7 @@ do
     left:add(unit_box)
     left:add(box.spacer(1))
     left:add(control_hints.new(
-        ---@param s UIContextManager
+    ---@param s UIContextManager
         function(s)
             return s.battle_context.battle_menu_manager.menu_step
         end,
@@ -66,7 +66,7 @@ do
     left:add(battle.combat_preview())
     left:add(box.spacer(1))
     left:add(control_hints.new(
-        ---@param s UIContextManager
+    ---@param s UIContextManager
         function(s)
             return s.battle_context.battle_menu_manager.menu_step
         end,

@@ -1,4 +1,4 @@
-local luassert = require("luassert")
+local luassert     = require("luassert")
 
 local event_bus    = require("src.tactics.systems.event_bus")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")

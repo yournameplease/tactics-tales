@@ -43,7 +43,7 @@ local faction_sel        = include("mods/tt_procedural_campaign/game_data/factio
 local recruitment        = include("mods/tt_procedural_campaign/game_data/recruitment_quota.lua")
 local auto_rec           = include("mods/tt_procedural_campaign/game_data/auto_recruit.lua")
 local forced_join_mod    = include("mods/tt_procedural_campaign/game_data/forced_join.lua")
-local campaign_state_mod   = include("src/tactics/campaign/campaign_state.lua")
+local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 
 -- Build the option list for the archetype selection node from the archetype
 -- definitions table so that the story data stays in sync automatically.
@@ -84,28 +84,30 @@ end
 local stories = {
     data = {
         proc_campaign = {
-            name        = "Procedural Campaign",
-            description = "A procedurally generated run.",
+            name          = "Procedural Campaign",
+            description   = "A procedurally generated run.",
 
             battle_config = { permadeath = true },
 
             starting_node = "archetype_select",
 
-            nodes = {
+            nodes         = {
                 -- Player chooses an archetype; ID is stored in campaign memory.
                 -- battle_index is initialised to 1 before the loop starts.
                 archetype_select = {
-                    { type = "select_option",
-                      memory_key = "archetype_id",
-                      options    = archetype_options() },
-                    { type = "set_memory", key = "battle_index", value = "1" },
+                    {
+                        type       = "select_option",
+                        memory_key = "archetype_id",
+                        options    = archetype_options()
+                    },
+                    { type = "set_memory", key = "battle_index",              value = "1" },
                     { type = "roster_add", template = "militia_spear_captain" },
                     { type = "roster_add", template = "militia_spearman" },
                     { type = "roster_add", template = "militia_archer" },
                     { type = "roster_add", template = "militia_armor" },
                     { type = "roster_add", template = "priest" },
                     { type = "roster_add", template = "mage" },
-                    { type = "jump", next_node = "battle_loop" },
+                    { type = "jump",       next_node = "battle_loop" },
                 },
 
                 -- Per-battle setup: quota → faction → battle.
@@ -121,15 +123,15 @@ local stories = {
                         local slot      = archetype.slots[idx]
                         local template  = slot_template_id(archetype, slot, rng.campaign_rng)
                         sc.memory:set("current_battle_id", campaign_state_mod.text(template))
-                        local text      = recruitment.update_recruitment_quota(
+                        local text = recruitment.update_recruitment_quota(
                             archetype, sc.memory, rng.campaign_rng, template)
                         return { type = "text", text = text }
                     end,
 
                     -- Step 2: pick a faction and store it for the battle factory.
                     function(sc, rng)
-                        local archetype   = get_archetype(sc)
-                        local faction_id  = faction_sel.select_faction(archetype, sc.memory, rng.campaign_rng)
+                        local archetype  = get_archetype(sc)
+                        local faction_id = faction_sel.select_faction(archetype, sc.memory, rng.campaign_rng)
                         sc.memory:set("faction_id", campaign_state_mod.text(faction_id))
                         return { type = "text", text = "[faction] Selected: " .. faction_id }
                     end,
@@ -140,9 +142,12 @@ local stories = {
                     function(sc, _)
                         local entry = sc.memory and sc.memory:get("current_battle_id")
                         local battle_id = (entry and entry.text) or "skirmish"
-                        return { type = "battle", battle_id = battle_id,
-                                 next_node_victory = "post_battle",
-                                 next_node_failure = "post_battle" }
+                        return {
+                            type = "battle",
+                            battle_id = battle_id,
+                            next_node_victory = "post_battle",
+                            next_node_failure = "post_battle"
+                        }
                     end,
                 },
 

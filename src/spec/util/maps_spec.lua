@@ -5,7 +5,7 @@ local maps = require("src.tactics.util.maps")
 describe("tactics.util.maps", function()
     describe("set", function()
         it("should create a set from a list of values", function()
-            local values = {"a", "b", "c"}
+            local values = { "a", "b", "c" }
             local s = maps.set(values)
             luassert.is_true(s["a"])
             luassert.is_true(s["b"])
@@ -21,29 +21,29 @@ describe("tactics.util.maps", function()
 
     describe("map and do_map", function()
         it("should transform map values", function()
-            local m = {a = 1, b = 2}
+            local m = { a = 1, b = 2 }
             local transform = function(_k, v) return v * 2 end
             local mapped = maps.do_map(m, transform)
-            luassert.are_same({a = 2, b = 4}, mapped)
+            luassert.are_same({ a = 2, b = 4 }, mapped)
 
             local mapped2 = maps.map(transform)(m)
-            luassert.are_same({a = 2, b = 4}, mapped2)
+            luassert.are_same({ a = 2, b = 4 }, mapped2)
         end)
     end)
 
     describe("full_map", function()
         it("should transform both keys and values of a map", function()
-            local m = {a = 1, b = 2}
+            local m = { a = 1, b = 2 }
             local key_fn = function(k, v) return k .. v end
             local val_fn = function(k, v) return v .. k end
             local result = maps.full_map(key_fn, val_fn)(m)
-            luassert.are_same({a1 = "1a", b2 = "2b"}, result)
+            luassert.are_same({ a1 = "1a", b2 = "2b" }, result)
         end)
     end)
 
     describe("get_at and do_get_at", function()
         it("should get a value by key", function()
-            local m = {a = 1, b = 2}
+            local m = { a = 1, b = 2 }
             luassert.are_equal(2, maps.do_get_at(m, "b"))
             luassert.are_equal(2, maps.get_at(m)("b"))
             luassert.is_nil(maps.do_get_at(m, "c"))
@@ -53,10 +53,10 @@ describe("tactics.util.maps", function()
 
     describe("to_list", function()
         it("should convert map values to a list", function()
-            local m = {a = 1, b = 2, c = 3}
+            local m = { a = 1, b = 2, c = 3 }
             local list = maps.to_list(m)
             table.sort(list)
-            luassert.are_same({1, 2, 3}, list)
+            luassert.are_same({ 1, 2, 3 }, list)
         end)
     end)
 
@@ -66,21 +66,21 @@ describe("tactics.util.maps", function()
             ---@field k string
             ---@field v integer
 
-            local list = {{k = "a", v = 1}, {k = "b", v = 2}}
+            local list = { { k = "a", v = 1 }, { k = "b", v = 2 } }
             local key_fn = function(item) return item.k end
             local val_fn = function(item) return item.v end
             local result = maps.collect(list, key_fn, val_fn)
-            luassert.are_same({a = 1, b = 2}, result)
+            luassert.are_same({ a = 1, b = 2 }, result)
         end)
     end)
 
     describe("merge", function()
         it("should merge multiple maps, keeping first value for duplicates", function()
-            local m1 = {a = 1, b = 2}
-            local m2 = {b = 3, c = 4}
-            local m3 = {d = 5}
+            local m1 = { a = 1, b = 2 }
+            local m2 = { b = 3, c = 4 }
+            local m3 = { d = 5 }
             local merged = maps.merge(m1, m2, m3)
-            luassert.are_same({a = 1, b = 2, c = 4, d = 5}, merged)
+            luassert.are_same({ a = 1, b = 2, c = 4, d = 5 }, merged)
         end)
     end)
 

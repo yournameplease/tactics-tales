@@ -214,12 +214,14 @@ function SelectionMenuDefinition:to_cursor(parent, game_ctx, menu_ctx, _menu_sta
         options = self.get_options(game_ctx, menu_ctx),
         has_focus = false,
     }
-    return setmetatable(cursor, { __index = function(_, k)
-        if SelectionMenuNode[k] then
-            return SelectionMenuNode[k]
+    return setmetatable(cursor, {
+        __index = function(_, k)
+            if SelectionMenuNode[k] then
+                return SelectionMenuNode[k]
+            end
+            return self[k]
         end
-        return self[k]
-    end })
+    })
 end
 
 --- Create a horizontal selection definition builder.

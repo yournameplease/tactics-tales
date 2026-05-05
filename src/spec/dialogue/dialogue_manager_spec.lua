@@ -115,8 +115,8 @@ describe("tactics.dialogue.dialogue_manager", function()
         it("should advance to the next row when fully rendered and BUTTON_A is pressed", function()
             local d = dm:create_dialogue({ "hi", "bye" }, instant_props(), {})
 
-            dm:update(make_input(false))  -- renders "hi" fully (9999 chars, >= 2)
-            dm:update(make_input(true))   -- BUTTON_A pressed
+            dm:update(make_input(false)) -- renders "hi" fully (9999 chars, >= 2)
+            dm:update(make_input(true))  -- BUTTON_A pressed
 
             luassert.are_equal(2, d.current_row)
             luassert.are_equal(0, d.characters_rendered)
@@ -126,8 +126,8 @@ describe("tactics.dialogue.dialogue_manager", function()
         it("should set finished after advancing past the last row", function()
             local d = dm:create_dialogue({ "hi" }, instant_props(), {})
 
-            dm:update(make_input(false))  -- renders fully
-            dm:update(make_input(true))   -- BUTTON_A advances past last row
+            dm:update(make_input(false)) -- renders fully
+            dm:update(make_input(true))  -- BUTTON_A advances past last row
 
             luassert.is_true(d.finished)
         end)
@@ -139,7 +139,7 @@ describe("tactics.dialogue.dialogue_manager", function()
                 {}
             )
 
-            dm:update(make_input(false))  -- renders + auto-advances past last row
+            dm:update(make_input(false)) -- renders + auto-advances past last row
 
             luassert.is_true(d.finished)
         end)
@@ -162,8 +162,8 @@ describe("tactics.dialogue.dialogue_manager", function()
         it("should not advance row when BUTTON_A is not pressed and auto_advance is false", function()
             local d = dm:create_dialogue({ "hi", "bye" }, instant_props(), {})
 
-            dm:update(make_input(false))  -- renders fully
-            dm:update(make_input(false))  -- no button press
+            dm:update(make_input(false)) -- renders fully
+            dm:update(make_input(false)) -- no button press
 
             luassert.are_equal(1, d.current_row)
         end)

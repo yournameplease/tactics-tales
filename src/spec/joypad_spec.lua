@@ -1,21 +1,21 @@
-local luassert = require("luassert")
-local input_service = require("src.tactics.joypad")
+local luassert       = require("luassert")
+local input_service  = require("src.tactics.joypad")
 
 -- Helpers to override Picotron globals per-test.
-local original_btn      = _G.btn
-local original_btnp     = _G.btnp
+local original_btn   = _G.btn
+local original_btnp  = _G.btnp
 local original_mouse = _G.mouse
 
 after_each(function()
-    _G.btn       = original_btn
-    _G.btnp      = original_btnp
+    _G.btn   = original_btn
+    _G.btnp  = original_btnp
     _G.mouse = original_mouse
 end)
 
 --- Build a btn/btnp stub that returns true only for the listed button indices.
 local function btn_returns(...)
     local pressed = {}
-    for _, b in ipairs({...}) do pressed[b] = true end
+    for _, b in ipairs({ ... }) do pressed[b] = true end
     return function(b) return pressed[b] or false end
 end
 
@@ -27,14 +27,14 @@ end
 describe("tactics.joypad", function()
     describe("joypad pressed/released logic", function()
         it("should report pressed=true and held=true on the first frame a button is held", function()
-            _G.btn  = btn_returns(4)       -- A button held
-            _G.btnp = btn_returns(4)       -- A button pressed this frame
+            _G.btn            = btn_returns(4) -- A button held
+            _G.btnp           = btn_returns(4) -- A button pressed this frame
             -- Ensure no mouse activity so current_input stays "joypad"
-            _G.mouse = mouse_returns()
+            _G.mouse          = mouse_returns()
 
-            local svc = input_service.new()
+            local svc         = input_service.new()
             svc.current_input = "joypad"
-            local inp = svc:get_user_input()
+            local inp         = svc:get_user_input()
 
             luassert.is_true(inp.actions["BUTTON_A"].held)
             luassert.is_true(inp.actions["BUTTON_A"].pressed)
@@ -42,15 +42,15 @@ describe("tactics.joypad", function()
         end)
 
         it("should report pressed=false and held=true on the second frame a button is held", function()
-            _G.btn  = btn_returns(4)
-            _G.btnp = btn_returns(4)
-            _G.mouse = mouse_returns()
+            _G.btn            = btn_returns(4)
+            _G.btnp           = btn_returns(4)
+            _G.mouse          = mouse_returns()
 
-            local svc = input_service.new()
+            local svc         = input_service.new()
             svc.current_input = "joypad"
-            svc:get_user_input()           -- frame 1: pressed
+            svc:get_user_input()             -- frame 1: pressed
 
-            _G.btnp = btn_returns()        -- no longer newly pressed
+            _G.btnp = btn_returns()          -- no longer newly pressed
             local inp = svc:get_user_input() -- frame 2: still held
 
             luassert.is_true(inp.actions["BUTTON_A"].held)
@@ -59,19 +59,19 @@ describe("tactics.joypad", function()
         end)
 
         it("should report released=true and held=false on the frame a button is released", function()
-            _G.btn  = btn_returns(4)
-            _G.btnp = btn_returns(4)
-            _G.mouse = mouse_returns()
+            _G.btn            = btn_returns(4)
+            _G.btnp           = btn_returns(4)
+            _G.mouse          = mouse_returns()
 
-            local svc = input_service.new()
+            local svc         = input_service.new()
             svc.current_input = "joypad"
-            svc:get_user_input()           -- frame 1: pressed
+            svc:get_user_input() -- frame 1: pressed
 
             _G.btnp = btn_returns()
-            svc:get_user_input()           -- frame 2: held
+            svc:get_user_input()             -- frame 2: held
 
-            _G.btn  = btn_returns()        -- released
-            _G.btnp = btn_returns()
+            _G.btn    = btn_returns()        -- released
+            _G.btnp   = btn_returns()
             local inp = svc:get_user_input() -- frame 3: released
 
             luassert.is_false(inp.actions["BUTTON_A"].held)
@@ -80,26 +80,26 @@ describe("tactics.joypad", function()
         end)
 
         it("should map joypad shoulder buttons to SHOULDER_L and SHOULDER_R actions", function()
-            _G.btn  = btn_returns(14, 15)  -- L and R shoulders held
-            _G.btnp = btn_returns(14, 15)
-            _G.mouse = mouse_returns()
+            _G.btn            = btn_returns(14, 15) -- L and R shoulders held
+            _G.btnp           = btn_returns(14, 15)
+            _G.mouse          = mouse_returns()
 
-            local svc = input_service.new()
+            local svc         = input_service.new()
             svc.current_input = "joypad"
-            local inp = svc:get_user_input()
+            local inp         = svc:get_user_input()
 
             luassert.is_true(inp.actions["SHOULDER_L"].held)
             luassert.is_true(inp.actions["SHOULDER_R"].held)
         end)
 
         it("should report method_changed=true on the first call", function()
-            _G.btn  = btn_returns(4)
-            _G.btnp = btn_returns(4)
-            _G.mouse = mouse_returns()
+            _G.btn            = btn_returns(4)
+            _G.btnp           = btn_returns(4)
+            _G.mouse          = mouse_returns()
 
-            local svc = input_service.new()
+            local svc         = input_service.new()
             svc.current_input = "joypad"
-            local inp = svc:get_user_input()
+            local inp         = svc:get_user_input()
 
             -- previous_input was nil, so it changed
             luassert.is_true(inp.method_changed)
@@ -109,11 +109,11 @@ describe("tactics.joypad", function()
     describe("mouse pressed/released logic", function()
         it("should report held=true and pressed=true on the first frame left button is down", function()
             -- mouse_b = 1 → ml = true (bit 0)
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
-            local svc = input_service.new()   -- starts in "mouse" mode
+            local svc = input_service.new() -- starts in "mouse" mode
             local inp = svc:get_user_input()
 
             luassert.is_true(inp.actions["BUTTON_A"].held)
@@ -122,9 +122,9 @@ describe("tactics.joypad", function()
         end)
 
         it("should report pressed=false and held=true on the second consecutive frame", function()
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
             svc:get_user_input()             -- frame 1
@@ -137,13 +137,13 @@ describe("tactics.joypad", function()
         end)
 
         it("should report released=true and held=false on the frame the button is released", function()
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
-            svc:get_user_input()             -- frame 1: pressed
-            svc:get_user_input()             -- frame 2: held
+            svc:get_user_input() -- frame 1: pressed
+            svc:get_user_input() -- frame 2: held
 
             _G.mouse = mouse_returns(0, 0, 0)
             local inp = svc:get_user_input() -- frame 3: released
@@ -155,9 +155,9 @@ describe("tactics.joypad", function()
 
         it("should map right mouse button to BUTTON_B", function()
             -- mouse_b = 2 → mr = true (bit 1)
-            _G.mouse = mouse_returns(0, 0, 2)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 2)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
             local inp = svc:get_user_input()
@@ -168,9 +168,9 @@ describe("tactics.joypad", function()
         end)
 
         it("should derive mlp correctly on the first frame when mouse_prev is nil", function()
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
             local inp = svc:get_user_input()
@@ -181,9 +181,9 @@ describe("tactics.joypad", function()
         end)
 
         it("should derive mlp=false on the second frame when button was already held", function()
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
             svc:get_user_input()             -- frame 1
@@ -197,20 +197,20 @@ describe("tactics.joypad", function()
 
     describe("input method switching", function()
         it("should switch active_method to joypad when a joy button is pressed", function()
-            _G.mouse = mouse_returns()
-            _G.btn  = btn_returns(4)
-            _G.btnp = btn_returns(4)
+            _G.mouse  = mouse_returns()
+            _G.btn    = btn_returns(4)
+            _G.btnp   = btn_returns(4)
 
-            local svc = input_service.new()  -- starts "mouse"
+            local svc = input_service.new() -- starts "mouse"
             local inp = svc:get_user_input()
 
             luassert.are_equal("joypad", inp.active_method)
         end)
 
         it("should stay in mouse mode when no joypad input is present", function()
-            _G.mouse = mouse_returns(0, 0, 1)
-            _G.btn  = btn_returns()
-            _G.btnp = btn_returns()
+            _G.mouse  = mouse_returns(0, 0, 1)
+            _G.btn    = btn_returns()
+            _G.btnp   = btn_returns()
 
             local svc = input_service.new()
             local inp = svc:get_user_input()

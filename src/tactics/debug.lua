@@ -28,7 +28,7 @@ end
 ---@param ... any
 local function debug_print(level, ...)
     if should_print(level) then
-        local array = {...}
+        local array = { ... }
         local str = ""
         for i = 1, #array - 1 do
             local v = array[i]

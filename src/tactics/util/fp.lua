@@ -9,7 +9,7 @@ local fp = {}
 ---@param ... fun(a: Arg): boolean Predicates to combine with logical AND.
 ---@return fun(a: Arg): boolean Composite predicate that returns true only when all inputs return true.
 function fp.fn_and(...)
-    local fns = {...}
+    local fns = { ... }
     return function(a)
         for _, fn in ipairs(fns) do
             if not fn(a) then return false end
@@ -46,7 +46,7 @@ end
 ---@param ... fun(v: any): any
 ---@return any
 local function do_pipeline(val, ...)
-    local fns = {...}
+    local fns = { ... }
     local result = val
     for _, fn in ipairs(fns) do
         result = fn(result)

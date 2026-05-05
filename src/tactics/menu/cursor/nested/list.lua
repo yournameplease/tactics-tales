@@ -242,12 +242,14 @@ function NestedMenuDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
         i = 1,
         has_focus = false,
     }
-    setmetatable(cursor, { __index = function(_, k)
-        if NestedMenuNode[k] then
-            return NestedMenuNode[k]
+    setmetatable(cursor, {
+        __index = function(_, k)
+            if NestedMenuNode[k] then
+                return NestedMenuNode[k]
+            end
+            return self[k]
         end
-        return self[k]
-    end })
+    })
     cursor.children = lists.map(function(def)
         return def:to_cursor(cursor, game_ctx, menu_ctx, menu_state)
     end)(self.get_children(game_ctx, menu_ctx))

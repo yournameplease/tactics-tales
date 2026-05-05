@@ -9,9 +9,9 @@ describe("validator", function()
             ["string"] = "string-value",
             ["integer"] = 42,
             ["function"] = function(_) end,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, boolean = "boolean"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, boolean = "boolean" },
         }
 
         it("required boolean with boolean value is valid", function()
@@ -39,8 +39,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required boolean with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required boolean with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.boolean()
                 local data = v
@@ -79,8 +79,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional boolean with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional boolean with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.boolean())
                 local data = v
@@ -99,9 +99,9 @@ describe("validator", function()
             ["boolean"] = false,
             ["integer"] = 42,
             ["function"] = function(_) end,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, string = "string"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, string = "string" },
         }
 
         it("required string with string value is valid", function()
@@ -129,8 +129,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required string with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required string with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.string()
                 local data = v
@@ -169,8 +169,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional string with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional string with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.string())
                 local data = v
@@ -190,9 +190,9 @@ describe("validator", function()
             ["string"] = "string-value",
             ["float"] = 1.1,
             ["function"] = function(_) end,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, string = "string"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, string = "string" },
         }
 
         it("required integer with integer value is valid", function()
@@ -220,8 +220,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required integer with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required integer with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.integer()
                 local data = v
@@ -260,8 +260,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional integer with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional integer with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.integer())
                 local data = v
@@ -280,9 +280,9 @@ describe("validator", function()
             ["boolean"] = false,
             ["string"] = "string-value",
             ["integer"] = 42,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, string = "string"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, string = "string" },
         }
 
         it("required function with function value is valid", function()
@@ -310,8 +310,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required function with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required function with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.func()
                 local data = v
@@ -350,8 +350,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional function with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional function with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.func())
                 local data = v
@@ -371,8 +371,8 @@ describe("validator", function()
             ["string"] = "string-value",
             ["integer"] = 42,
             ["function"] = function(_) end,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
         }
 
         it("required record with record value is valid", function()
@@ -443,8 +443,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required record with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required record with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.record({
                     string_field = s.string(),
@@ -495,8 +495,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional record with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional record with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.record({
                     string_field = s.string(),
@@ -519,8 +519,8 @@ describe("validator", function()
             ["string"] = "string-value",
             ["integer"] = 42,
             ["function"] = function(_) end,
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, string = "string"},
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, string = "string" },
         }
 
         it("required dictionary with dictionary value is valid", function()
@@ -609,8 +609,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required dictionary with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required dictionary with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.dictionary(
                     s.string(),
@@ -661,8 +661,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional dictionary with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional dictionary with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.dictionary(
                     s.string(),
@@ -692,7 +692,7 @@ describe("validator", function()
             local schema = s.list(
                 s.string()
             )
-            local data = {"foo", "bar", "baz"}
+            local data = { "foo", "bar", "baz" }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -720,7 +720,7 @@ describe("validator", function()
             local schema = s.list(
                 s.string()
             )
-            local data = {"foo", "bar", 123}
+            local data = { "foo", "bar", 123 }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -734,7 +734,7 @@ describe("validator", function()
             local schema = s.list(
                 s.string()
             )
-            local data = {"foo", "bar", [100] = "baz"}
+            local data = { "foo", "bar", [100] = "baz" }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -748,7 +748,7 @@ describe("validator", function()
             local schema = s.list(
                 s.string()
             )
-            local data = { [0] = "foo", "bar", "baz"}
+            local data = { [0] = "foo", "bar", "baz" }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -762,7 +762,7 @@ describe("validator", function()
             local schema = s.list(
                 s.string()
             )
-            local data = { "foo", "bar", ["key"] = "baz"}
+            local data = { "foo", "bar", ["key"] = "baz" }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -772,8 +772,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required list with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required list with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.list(
                     s.string()
@@ -794,7 +794,7 @@ describe("validator", function()
             local schema = s.optional(s.list(
                 s.string()
             ))
-            local data = {"foo", "bar", "baz"}
+            local data = { "foo", "bar", "baz" }
 
             -- When
             local is_valid, errors = validator.validate(data, schema, {})
@@ -818,8 +818,8 @@ describe("validator", function()
             luassert.is.equal(0, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional list with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional list with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.list(
                     s.string()
@@ -841,9 +841,9 @@ describe("validator", function()
             ["string"] = "string-value",
             ["integer"] = 42,
             ["function"] = function(_) end,
-            ["dictionary"] = {["key"] = "value"},
-            ["list"] = {"foo", "bar", "baz"},
-            ["record"] = { int = 1, string = "string"},
+            ["dictionary"] = { ["key"] = "value" },
+            ["list"] = { "foo", "bar", "baz" },
+            ["record"] = { int = 1, string = "string" },
         }
 
         it("required reference key in memory is valid", function()
@@ -932,8 +932,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("required reference with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("required reference with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.reference("memory_table")
                 local data = v
@@ -1006,8 +1006,8 @@ describe("validator", function()
             luassert.is.equal(1, #errors)
         end)
 
-        for k,v in pairs(other_types) do
-            it("optional reference with "..k.." value is invalid", function()
+        for k, v in pairs(other_types) do
+            it("optional reference with " .. k .. " value is invalid", function()
                 -- Given
                 local schema = s.optional(s.reference("memory_table"))
                 local data = v

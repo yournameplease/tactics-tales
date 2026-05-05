@@ -7,25 +7,25 @@ local maps = require("src.tactics.util.maps")
 -- always resolves without needing to control randomisation.
 local function make_game_data(overrides)
     local function opt_list(opts) return { type = "list", options = opts } end
-    local function opt_static(v)  return { type = "static", option = v } end
+    local function opt_static(v) return { type = "static", option = v } end
 
     local default_template = {
-        movement = 3,
-        hp_max = 4,
-        item_loadout = {},
-        head_options_m   = opt_list{"round"},
-        head_options_f   = opt_list{"round"},
-        eyewear_options  = opt_static("none"),
-        headwear_options = opt_static("none"),
-        body_options     = opt_static("default"),
-        gender_options   = opt_list{"male", "female"},
-        skin_color_options  = opt_static("a"),
+        movement           = 3,
+        hp_max             = 4,
+        item_loadout       = {},
+        head_options_m     = opt_list { "round" },
+        head_options_f     = opt_list { "round" },
+        eyewear_options    = opt_static("none"),
+        headwear_options   = opt_static("none"),
+        body_options       = opt_static("default"),
+        gender_options     = opt_list { "male", "female" },
+        skin_color_options = opt_static("a"),
         -- brown and dark_grey differ from skin "a" (colors[1] = 15), so no loop
-        hair_color_options  = opt_static("brown"),
-        hair_options_m   = opt_static("short"),
-        hair_options_f   = opt_static("bob_a"),
-        beard_options    = opt_static("none"),
-        eye_options      = opt_static("a"),
+        hair_color_options = opt_static("brown"),
+        hair_options_m     = opt_static("short"),
+        hair_options_f     = opt_static("bob_a"),
+        beard_options      = opt_static("none"),
+        eye_options        = opt_static("a"),
     }
 
     if overrides then
@@ -90,7 +90,7 @@ describe("tactics.character.character_generator", function()
         it("should set tags from the tags argument", function()
             local game_data = make_game_data()
 
-            local char = character_generator.generate_from_template(1, nil, {"warrior", "enemy"}, game_data)
+            local char = character_generator.generate_from_template(1, nil, { "warrior", "enemy" }, game_data)
 
             luassert.is_true(char.tags["warrior"])
             luassert.is_true(char.tags["enemy"])
@@ -182,7 +182,7 @@ describe("tactics.character.character_generator", function()
                 },
                 stats = { hp_max = 6, movement = 4, def = 1 },
                 inventory = {},
-                tags = maps.set({"player"}),
+                tags = maps.set({ "player" }),
             }
 
             local char = character_generator.deserialize(serialized, game_data)
@@ -197,7 +197,8 @@ describe("tactics.character.character_generator", function()
         it("should produce an empty inventory when serialized inventory is empty", function()
             local game_data = make_game_data()
             local serialized = {
-                id = 1, name = "Test",
+                id = 1,
+                name = "Test",
                 appearance = {},
                 stats = { hp_max = 4, movement = 3, def = 0 },
                 inventory = {},
@@ -213,7 +214,8 @@ describe("tactics.character.character_generator", function()
             local game_data = make_game_data()
             game_data.items["dagger"] = make_dagger_item_data()
             local serialized = {
-                id = 1, name = "Test",
+                id = 1,
+                name = "Test",
                 appearance = {},
                 stats = { hp_max = 4, movement = 3, def = 0 },
                 inventory = { "dagger" },

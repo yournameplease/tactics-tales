@@ -60,15 +60,15 @@ function battle.battle_summary()
         :build()
 
     self:add(
-        book.title{
-            content = {"\014BATTLE"}
+        book.title {
+            content = { "\014BATTLE" }
         })
     self:add(
         box.builder("battle_conditions")
-        :layout{
+        :layout {
             height = "fit_content"
         }
-        :text{
+        :text {
             draw_properties = {
                 wrap = "wrap",
                 justify = "center",
@@ -86,27 +86,27 @@ end
 ---@return UIElement
 function battle.unit_info()
     local root = box.builder("unit_info")
-    :layout{
-        dir = "row",
-        gap = 4,
-        padding = box.layout.padding(0),
-        height = "fit_content",
-        width = "fill",
-    }
-    :build()
+        :layout {
+            dir = "row",
+            gap = 4,
+            padding = box.layout.padding(0),
+            height = "fit_content",
+            width = "fill",
+        }
+        :build()
 
     local left = root
-    :add(
-        box.builder("unit_info_left")
-        :direction("col")
-        :container("strip")
-        :build())
+        :add(
+            box.builder("unit_info_left")
+            :direction("col")
+            :container("strip")
+            :build())
     left:add(character_ui.portrait_box(function(state) return state.battle_context.last_hovered_unit end, "paper"))
     left:add(box.spacer(1))
 
     local info_col = root:add(
         box.builder("unit_info_right")
-        :layout{
+        :layout {
             dir = "col",
             height = "fit_content",
             flex_grow = 1,
@@ -117,7 +117,7 @@ function battle.unit_info()
     -- ROW 1: Name and Level
     info_col:add(
         box.builder("unit_name")
-        :text{
+        :text {
             rows = 1,
         }
         :on_update(function(self, state)
@@ -133,7 +133,7 @@ function battle.unit_info()
     -- ROW 2-4: HP, Weapon
     info_col:add(
         box.builder("unit_name")
-        :text{
+        :text {
             rows = 1,
         }
         :on_update(function(self, state)
@@ -156,13 +156,13 @@ end
 ---@return UIElement
 function battle.unit_inventory()
     local out = box.builder("unit_inventory")
-        :direction"col"
-        :container"block"
+        :direction "col"
+        :container "block"
         :padding(4)
-        :style{
+        :style {
             -- decoration = "border",
         }
-        :text{
+        :text {
             draw_properties = {
                 wrap = "wrap",
             },
@@ -191,13 +191,13 @@ function battle.unit_inventory()
 
             for _, d in ipairs(items) do
                 if d.name then
-                    table.insert(out, "\014"..d.name)
+                    table.insert(out, "\014" .. d.name)
                 end
                 if d.damage then
-                    table.insert(out, "> "..d.damage.." damage")
+                    table.insert(out, "> " .. d.damage .. " damage")
                 end
                 if d.targeting_description then
-                    table.insert(out, "> "..d.targeting_description)
+                    table.insert(out, "> " .. d.targeting_description)
                 end
                 if d.effects then
                     for _, e in ipairs(d.effects) do
@@ -249,12 +249,12 @@ function battle.combat_preview()
     bottom_right:add(box.spacer(1))
 
     local top_right_text = box.builder("combat_preview_center")
-        :layout{
+        :layout {
             dir = "col",
             height = "fit_content",
             flex_grow = 1,
         }
-        :text{
+        :text {
             draw_properties = {
                 justify = "center"
             }
@@ -263,12 +263,12 @@ function battle.combat_preview()
         :build()
 
     local bottom_left_text = box.builder("combat_preview_center")
-        :layout{
+        :layout {
             dir = "col",
             height = "fit_content",
             flex_grow = 1,
         }
-        :text{
+        :text {
             draw_properties = {
                 justify = "center"
             }

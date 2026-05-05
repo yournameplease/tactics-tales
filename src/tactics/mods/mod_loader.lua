@@ -35,7 +35,7 @@ end
 --- Register a mod from the given path (relative to mods/).
 ---@param path string Local path within the mods/ directory.
 function ModLoader:register_mod(path)
-    local full_path = "mods/"..path.."/mod.lua"
+    local full_path = "mods/" .. path .. "/mod.lua"
     ---@type ModSpec
     local mod_spec = include(full_path)
 
@@ -49,7 +49,7 @@ function ModLoader:register_mod(path)
     table.insert(self.registered, registered_mod)
     self.registered_map[mod_spec.id] = registered_mod
 
-    log.debug("Registered mod "..registered_mod.id.." at "..full_path)
+    log.debug("Registered mod " .. registered_mod.id .. " at " .. full_path)
 end
 
 --- Stub: validate a single mod by ID (not yet implemented).
@@ -103,14 +103,14 @@ function ModLoader:create_sandbox()
 
     log.info("Loading mod libraries")
     local libs = {}
-    for _,r in ipairs(self.registered) do
-        log.info("Loading libraries for "..r.id)
-        local base_lib_path = "mods/"..r.path.."/lib"
+    for _, r in ipairs(self.registered) do
+        log.info("Loading libraries for " .. r.id)
+        local base_lib_path = "mods/" .. r.path .. "/lib"
         local lib_paths = ls(base_lib_path) or {}
-        log.debug("Found "..#lib_paths.." libraries at "..base_lib_path)
-        for _,lib_path in ipairs(lib_paths) do
-            local full_path = base_lib_path.."/"..lib_path
-            log.debug("Loading "..full_path)
+        log.debug("Found " .. #lib_paths .. " libraries at " .. base_lib_path)
+        for _, lib_path in ipairs(lib_paths) do
+            local full_path = base_lib_path .. "/" .. lib_path
+            log.debug("Loading " .. full_path)
             local l = include(full_path)
             libs = maps.deep_merge(libs, l)
         end
@@ -147,12 +147,12 @@ function ModLoader:load_mod_gfx(game_data)
         local stem = entry.path:match("([^/]+)$")
         local src = "mods/" .. entry.mod.path .. "/" .. entry.path .. ".gfx"
         local dst = DATP .. "gfx/" .. slot .. "_" .. stem .. ".gfx"
-        log.debug("load_mod_gfx: cp '"..src.."' -> '"..dst.."' slot="..slot.." base="..(slot*256))
+        log.debug("load_mod_gfx: cp '" .. src .. "' -> '" .. dst .. "' slot=" .. slot .. " base=" .. (slot * 256))
         cp(src, dst)
         game_data.gfx_registry[stem] = slot * 256
-        log.debug("load_mod_gfx: registered '"..stem.."' = "..(slot*256))
+        log.debug("load_mod_gfx: registered '" .. stem .. "' = " .. (slot * 256))
     end
-    log.debug("load_mod_gfx: done, "..#all_gfx.." file(s) registered")
+    log.debug("load_mod_gfx: done, " .. #all_gfx .. " file(s) registered")
 end
 
 --- Load and merge all data from registered mods into a GameData table.

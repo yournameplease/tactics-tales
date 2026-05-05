@@ -9,28 +9,28 @@ local book = {}
 ---@return UIElement
 function book.page_divider(width)
     return box.builder("page_divider")
-    :layout{
-        height = "fill",
-        width = width,
-    }
-    :on_draw(function(self, _, _, ui_theme)
-        local l = self.rect.x
-        local r = self.rect.x + self.rect.w - 1
-        local t = self.rect.y
-        local b = self.rect.y + self.rect.h
+        :layout {
+            height = "fill",
+            width = width,
+        }
+        :on_draw(function(self, _, _, ui_theme)
+            local l = self.rect.x
+            local r = self.rect.x + self.rect.w - 1
+            local t = self.rect.y
+            local b = self.rect.y + self.rect.h
 
-        local w = ((self.rect.w + 1) >> 1) - 1
-        for i = 0, w do
-            local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
-            local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
+            local w = ((self.rect.w + 1) >> 1) - 1
+            for i = 0, w do
+                local c_l = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
+                local c_r = i & 1 == 0 and ui_theme.COLOR_DECORATION_PRIMARY or ui_theme.COLOR_DECORATION_HIGHLIGHT
 
-            line(l + i, t + i, l + i, b, c_l)
-            if i < w or w & 1 == 0 then
-                line(r - i, t + i, r - i, b, c_r)
+                line(l + i, t + i, l + i, b, c_l)
+                if i < w or w & 1 == 0 then
+                    line(r - i, t + i, r - i, b, c_r)
+                end
             end
-        end
-    end)
-    :build()
+        end)
+        :build()
 end
 
 --- Return a horizontal decorative divider between sections.
@@ -38,22 +38,22 @@ end
 ---@return UIElement
 function book.section_divider(height)
     return box.builder("section_divider")
-    :layout{
-        height = height,
-        width = "fill",
-    }
-    :on_draw(function(self, _, _, ui_theme)
-        local l = self.rect.x
-        local r = self.rect.x + self.rect.w - 1
-        local t = self.rect.y
-        local h = self.rect.h
-        local c = ui_theme.COLOR_PAGE_DECOR
+        :layout {
+            height = height,
+            width = "fill",
+        }
+        :on_draw(function(self, _, _, ui_theme)
+            local l = self.rect.x
+            local r = self.rect.x + self.rect.w - 1
+            local t = self.rect.y
+            local h = self.rect.h
+            local c = ui_theme.COLOR_PAGE_DECOR
 
-        for i = 0, h - 1 do
-            line(l + i, t + i, r - i, t + i, c)
-        end
-    end)
-    :build()
+            for i = 0, h - 1 do
+                line(l + i, t + i, r - i, t + i, c)
+            end
+        end)
+        :build()
 end
 
 --- Return a centered title element with a section divider beneath it.
@@ -68,7 +68,7 @@ function book.title(text_info)
     local self = box.builder("title_box")
         :direction("col")
         :container("block")
-        :padding{
+        :padding {
             t = 3,
             b = 2,
         }
@@ -98,7 +98,7 @@ function book.dynamic_title(text_function, text_info)
     local self = box.builder("title_box")
         :direction("col")
         :container("block")
-        :padding{
+        :padding {
             t = 3,
             b = 2,
         }
@@ -108,7 +108,7 @@ function book.dynamic_title(text_function, text_info)
         box.builder("text")
         :text(text_info)
         :on_update(function(elem, state)
-            elem.text.content = { "\014"..text_function(state) }
+            elem.text.content = { "\014" .. text_function(state) }
         end)
         :build()
     )
@@ -127,45 +127,45 @@ local TRIM_PADDING = 3
 ---@return UIElement
 function book.book_box(width, height, pages_height)
     return box.builder("section_divider")
-    :layout{
-        dir = "col",
-        width = width,
-        height = height,
-        padding = {
-            t = TRIM_PADDING,
-            b = TRIM_PADDING + pages_height + 1,
-            l = TRIM_PADDING + 1,
-            r = TRIM_PADDING,
-        },
-    }
-    :on_draw(function(self, state, draw_target_manager, ui_theme)
-        local l = self.rect.x
-        local r = self.rect.x + self.rect.w - 1
-        local t = self.rect.y
-        local b = self.rect.y + self.rect.h - 1
-        local p = pages_height
+        :layout {
+            dir = "col",
+            width = width,
+            height = height,
+            padding = {
+                t = TRIM_PADDING,
+                b = TRIM_PADDING + pages_height + 1,
+                l = TRIM_PADDING + 1,
+                r = TRIM_PADDING,
+            },
+        }
+        :on_draw(function(self, state, draw_target_manager, ui_theme)
+            local l = self.rect.x
+            local r = self.rect.x + self.rect.w - 1
+            local t = self.rect.y
+            local b = self.rect.y + self.rect.h - 1
+            local p = pages_height
 
-        line(l, t + 1, l, b - 1, ui_theme.COLOR_DECORATION_SHADOW)
-        rectfill(l + 1, t + p, r, b, ui_theme.COLOR_DECORATION_SHADOW)
+            line(l, t + 1, l, b - 1, ui_theme.COLOR_DECORATION_SHADOW)
+            rectfill(l + 1, t + p, r, b, ui_theme.COLOR_DECORATION_SHADOW)
 
-        local p_2 = ((p + 1) >> 1) - 1
-        for i = 0, p_2 do
-            local c = i & 1 == 0 and ui_theme.COLOR_DECORATION_HIGHLIGHT or ui_theme.COLOR_DECORATION_PRIMARY
+            local p_2 = ((p + 1) >> 1) - 1
+            for i = 0, p_2 do
+                local c = i & 1 == 0 and ui_theme.COLOR_DECORATION_HIGHLIGHT or ui_theme.COLOR_DECORATION_PRIMARY
 
-            line(l + 1 + i, b - 1 - i, r - 1, b - 1 - i, c)
-            if i < p_2 or p_2 & 1 == 0 then
-                line(l + 1 + i, b - p + i, r - 1, b - p + i, c)
+                line(l + 1 + i, b - 1 - i, r - 1, b - 1 - i, c)
+                if i < p_2 or p_2 & 1 == 0 then
+                    line(l + 1 + i, b - p + i, r - 1, b - p + i, c)
+                end
             end
-        end
 
-        rectfill(l + 1, t, r, b - p - 1, ui_theme.COLOR_DECORATION_PRIMARY)
-        rect(l + 1 + 2, t + 2, r - 2, b - p - 1 - 2, ui_theme.COLOR_TRIM)
+            rectfill(l + 1, t, r, b - p - 1, ui_theme.COLOR_DECORATION_PRIMARY)
+            rect(l + 1 + 2, t + 2, r - 2, b - p - 1 - 2, ui_theme.COLOR_TRIM)
 
-        for _, child in ipairs(self.children) do
-            child:draw(state, draw_target_manager, ui_theme)
-        end
-    end)
-    :build()
+            for _, child in ipairs(self.children) do
+                child:draw(state, draw_target_manager, ui_theme)
+            end
+        end)
+        :build()
 end
 
 --- Return a full-screen row layout containing left and right pages with a page divider between them.
@@ -174,15 +174,15 @@ end
 ---@return UIElement
 function book.split_pages(left, right)
     local root = box.builder("split_pages")
-    :layout{
-        dir = "row",
-        width = 480,
-        height = 270,
-        padding = {
-            t = 4,
-        },
-    }
-    :build()
+        :layout {
+            dir = "row",
+            width = 480,
+            height = 270,
+            padding = {
+                t = 4,
+            },
+        }
+        :build()
     root:add(left)
     root:add(book.page_divider(7))
     root:add(right)
@@ -196,13 +196,13 @@ function book.flex_page()
     return box.builder("book_flex_page")
         :direction("col")
         :container("panel")
-        :padding{
+        :padding {
             t = 4,
             l = 2,
             r = 2,
             b = 2,
         }
-        :style{
+        :style {
             solid = true,
         }
         :build()
@@ -223,7 +223,7 @@ function book.titled_page(content)
     local page_content = page:add(box.builder("title_" .. content.id)
         :direction("col")
         :container("panel")
-        :padding{
+        :padding {
             t = 2,
             l = 2,
             r = 2,
@@ -240,13 +240,13 @@ function book.fit_page()
     return box.builder("book_fit_page")
         :direction("col")
         :container("strip")
-        :padding{
+        :padding {
             t = 4,
             l = 2,
             r = 2,
             b = 2,
         }
-        :style{
+        :style {
             solid = true,
         }
         :build()

@@ -31,9 +31,9 @@ DialogueManager.__index = DialogueManager
 --- Negative mask: advance N characters per frame. Positive mask: advance 1 char every (mask+1) frames.
 ---@type table<DialogueSpeed, integer>
 local SPEED_MASK = {
-    very_slow =  0x07,
-    slow      =  0x03,
-    normal    =  0x01,
+    very_slow = 0x07,
+    slow      = 0x03,
+    normal    = 0x01,
     fast      = -2,
     very_fast = -8,
     instant   = -9999,
@@ -132,9 +132,9 @@ function DialogueManager:create_dialogue(text, props, replacement_vars, dynamic_
         current_row         = 1,
         characters_rendered = 0,
 
-        auto_advance = props.auto_advance,
-        speed        = props.speed,
-        can_skip     = props.can_skip,
+        auto_advance        = props.auto_advance,
+        speed               = props.speed,
+        can_skip            = props.can_skip,
     }
 
     local dialogue_mt = {

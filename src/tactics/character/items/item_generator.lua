@@ -13,7 +13,7 @@ local function generate_weapon(def)
         return nil
     end
     -- may need to copy data in the future
-    return setmetatable({}, {__index = def}) --[[@as Weapon]]
+    return setmetatable({}, { __index = def }) --[[@as Weapon]]
 end
 
 --- Create an Item instance from the items table using the given item ID.

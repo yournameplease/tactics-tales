@@ -54,123 +54,123 @@ local BASE_FRAMES = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 9, y = 8},
-                ["main_hand"] = { x = 1, y = 8},
-                ["off_hand"] = { x = 14, y = 12},
+                ["head"] = { x = 9, y = 8 },
+                ["main_hand"] = { x = 1, y = 8 },
+                ["off_hand"] = { x = 14, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                ["head"] = { x = 10, y = 8},
-                ["main_hand"] = { x = 1, y = 7},
-                ["off_hand"] = { x = 14, y = 12},
+                ["head"] = { x = 10, y = 8 },
+                ["main_hand"] = { x = 1, y = 7 },
+                ["off_hand"] = { x = 14, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 9, y = 8},
-                ["main_hand"] = { x = 1, y = 8},
-                ["off_hand"] = { x = 14, y = 12},
+                ["head"] = { x = 9, y = 8 },
+                ["main_hand"] = { x = 1, y = 8 },
+                ["off_hand"] = { x = 14, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 9, y = 8},
-                ["main_hand"] = { x = 1, y = 8},
-                ["off_hand"] = { x = 14, y = 12},
+                ["head"] = { x = 9, y = 8 },
+                ["main_hand"] = { x = 1, y = 8 },
+                ["off_hand"] = { x = 14, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["HORIZONTAL"] = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 7, y = 8},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 12, y = 12},
+                ["head"] = { x = 7, y = 8 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 12, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
-           sprite_offset = 1,
-           anchors = {
-               ["head"] = { x = 6, y = 8},
-               ["main_hand"] = { x = 4, y = 11},
-               ["off_hand"] = { x = 11, y = 12},
-           },
-           root = { x = 7, y = 15}
+            sprite_offset = 1,
+            anchors = {
+                ["head"] = { x = 6, y = 8 },
+                ["main_hand"] = { x = 4, y = 11 },
+                ["off_hand"] = { x = 11, y = 12 },
+            },
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 7, y = 8},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 12, y = 12},
+                ["head"] = { x = 7, y = 8 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 12, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 7, y = 8},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 12, y = 12},
+                ["head"] = { x = 7, y = 8 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 12, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["FRONT_HAND"] = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 8},
-                ["main_hand"] = { x = 13, y = 9},
-                ["off_hand"] = { x = 3, y = 11},
+                ["head"] = { x = 6, y = 8 },
+                ["main_hand"] = { x = 13, y = 9 },
+                ["off_hand"] = { x = 3, y = 11 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
-           sprite_offset = 1,
-           anchors = {
-               ["head"] = { x = 7, y = 8},
-               ["main_hand"] = { x = 14, y = 8},
-               ["off_hand"] = { x = 4, y = 11},
-           },
-           root = { x = 7, y = 15}
+            sprite_offset = 1,
+            anchors = {
+                ["head"] = { x = 7, y = 8 },
+                ["main_hand"] = { x = 14, y = 8 },
+                ["off_hand"] = { x = 4, y = 11 },
+            },
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 6, y = 8},
-                ["main_hand"] = { x = 13, y = 9},
-                ["off_hand"] = { x = 3, y = 11},
+                ["head"] = { x = 6, y = 8 },
+                ["main_hand"] = { x = 13, y = 9 },
+                ["off_hand"] = { x = 3, y = 11 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 6, y = 8},
-                ["main_hand"] = { x = 13, y = 9},
-                ["off_hand"] = { x = 3, y = 11},
+                ["head"] = { x = 6, y = 8 },
+                ["main_hand"] = { x = 13, y = 9 },
+                ["off_hand"] = { x = 3, y = 11 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["COMMON"] = {
         death_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 10},
+                ["head"] = { x = 6, y = 10 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     }
 }
@@ -181,123 +181,123 @@ local CHILD_BASE_FRAMES = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 9, y = 9},
-                ["main_hand"] = { x = 1, y = 10},
-                ["off_hand"] = { x = 14, y = 13},
+                ["head"] = { x = 9, y = 9 },
+                ["main_hand"] = { x = 1, y = 10 },
+                ["off_hand"] = { x = 14, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
             sprite_offset = 1,
             anchors = {
-                ["head"] = { x = 10, y = 9},
-                ["main_hand"] = { x = 1, y = 9},
-                ["off_hand"] = { x = 14, y = 13},
+                ["head"] = { x = 10, y = 9 },
+                ["main_hand"] = { x = 1, y = 9 },
+                ["off_hand"] = { x = 14, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 9, y = 9},
-                ["main_hand"] = { x = 1, y = 10},
-                ["off_hand"] = { x = 14, y = 13},
+                ["head"] = { x = 9, y = 9 },
+                ["main_hand"] = { x = 1, y = 10 },
+                ["off_hand"] = { x = 14, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 9, y = 9},
-                ["main_hand"] = { x = 1, y = 10},
-                ["off_hand"] = { x = 14, y = 13},
+                ["head"] = { x = 9, y = 9 },
+                ["main_hand"] = { x = 1, y = 10 },
+                ["off_hand"] = { x = 14, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["HORIZONTAL"] = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 9},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 11, y = 13},
+                ["head"] = { x = 6, y = 9 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 11, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
-           sprite_offset = 1,
-           anchors = {
-               ["head"] = { x = 5, y = 9},
-               ["main_hand"] = { x = 3, y = 11},
-               ["off_hand"] = { x = 10, y = 13},
-           },
-           root = { x = 7, y = 15}
+            sprite_offset = 1,
+            anchors = {
+                ["head"] = { x = 5, y = 9 },
+                ["main_hand"] = { x = 3, y = 11 },
+                ["off_hand"] = { x = 10, y = 13 },
+            },
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 6, y = 9},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 11, y = 13},
+                ["head"] = { x = 6, y = 9 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 11, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 6, y = 9},
-                ["main_hand"] = { x = 3, y = 12},
-                ["off_hand"] = { x = 11, y = 13},
+                ["head"] = { x = 6, y = 9 },
+                ["main_hand"] = { x = 3, y = 12 },
+                ["off_hand"] = { x = 11, y = 13 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["FRONT_HAND"] = {
         idle_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 5, y = 9},
-                ["main_hand"] = { x = 12, y = 10},
-                ["off_hand"] = { x = 3, y = 12},
+                ["head"] = { x = 5, y = 9 },
+                ["main_hand"] = { x = 12, y = 10 },
+                ["off_hand"] = { x = 3, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         idle_2 = {
-           sprite_offset = 1,
-           anchors = {
-               ["head"] = { x = 6, y = 9},
-               ["main_hand"] = { x = 13, y = 9},
-               ["off_hand"] = { x = 4, y = 12},
-           },
-           root = { x = 7, y = 15}
+            sprite_offset = 1,
+            anchors = {
+                ["head"] = { x = 6, y = 9 },
+                ["main_hand"] = { x = 13, y = 9 },
+                ["off_hand"] = { x = 4, y = 12 },
+            },
+            root = { x = 7, y = 15 }
         },
         walk_1 = {
             sprite_offset = 2,
             anchors = {
-                ["head"] = { x = 5, y = 9},
-                ["main_hand"] = { x = 12, y = 10},
-                ["off_hand"] = { x = 3, y = 12},
+                ["head"] = { x = 5, y = 9 },
+                ["main_hand"] = { x = 12, y = 10 },
+                ["off_hand"] = { x = 3, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
         walk_2 = {
             sprite_offset = 3,
             anchors = {
-                ["head"] = { x = 5, y = 9},
-                ["main_hand"] = { x = 12, y = 10},
-                ["off_hand"] = { x = 3, y = 12},
+                ["head"] = { x = 5, y = 9 },
+                ["main_hand"] = { x = 12, y = 10 },
+                ["off_hand"] = { x = 3, y = 12 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
     ["COMMON"] = {
         death_1 = {
             sprite_offset = 0,
             anchors = {
-                ["head"] = { x = 6, y = 9},
+                ["head"] = { x = 6, y = 9 },
             },
-            root = { x = 7, y = 15}
+            root = { x = 7, y = 15 }
         },
     },
 }
@@ -326,7 +326,7 @@ local function frames_from_base_frame_data(s, base_frame, base_frame_data)
     local base_animation = base_frame_data[base_frame]
 
     return maps.map(
-        function (_, f)
+        function(_, f)
             return frame_from_base_frame(s, f)
         end
     )(base_animation)

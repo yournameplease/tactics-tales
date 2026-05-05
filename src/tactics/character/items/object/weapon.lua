@@ -131,12 +131,12 @@ function effect.equipment_effect_description(eff)
 end
 
 local weapon = {
-    Weapon          = Weapon,
-    WeaponEffect    = WeaponEffect,
-    targeting = {
-        none     = none_targeting,
+    Weapon       = Weapon,
+    WeaponEffect = WeaponEffect,
+    targeting    = {
+        none = none_targeting,
     },
-    effect = effect,
+    effect       = effect,
 }
 
 return weapon

@@ -70,7 +70,7 @@ local text = {}
 ---@param h integer
 ---@return Text
 function text.new(lines, draw_properties, w, h)
-    local self = setmetatable({}, { __index = TextImpl })
+    local self     = setmetatable({}, { __index = TextImpl })
 
     self.justify   = draw_properties.justify or "left"
     self.direction = draw_properties.direction or "down"
@@ -100,14 +100,14 @@ end
 ---@param width integer Maximum pixel width for a single output line.
 ---@return string[] Lines that each fit within `width`.
 function TextImpl:apply_text_wrapping(row, width)
-    if row == '' then return {row} end
+    if row == '' then return { row } end
 
     if self.wrap == "no_wrap" then
-        return {row}
+        return { row }
     elseif self.wrap == "ellipsis" then
         if width == nil or width < 1 then
             log.warn("Can't wrap with non-positive width.")
-            return {row}
+            return { row }
         end
         local out
         local char_count = 0
@@ -118,14 +118,14 @@ function TextImpl:apply_text_wrapping(row, width)
             out_width = width_of(out)
         until out_width > width or char_count == #row
         if out_width > width then
-            return {string.sub(row, 1, char_count - 3) .. "..."}
+            return { string.sub(row, 1, char_count - 3) .. "..." }
         else
-            return {row}
+            return { row }
         end
     elseif self.wrap == "wrap" then
         if width == nil or width < 1 then
             log.warn("Can't wrap with non-positive width.")
-            return {row}
+            return { row }
         end
         local out = {}
         log.trace("Wrapping text", row)
@@ -282,11 +282,11 @@ function TextImpl:draw_text_row(text_row, x, y, color, row_number, line_count)
         if #subrows == 1 then
             self:draw_justified_text_row(subrows[1], x, y, self.justify, color, row_number, line_count)
         elseif #subrows == 2 then
-            self:draw_justified_text_row(subrows[1], x, y, "left",  color, row_number, line_count)
+            self:draw_justified_text_row(subrows[1], x, y, "left", color, row_number, line_count)
             self:draw_justified_text_row(subrows[2], x, y, "right", color, row_number, line_count)
         elseif #subrows == 3 then
-            self:draw_justified_text_row(subrows[1], x, y, "left",   color, row_number, line_count)
-            self:draw_justified_text_row(subrows[3], x, y, "right",  color, row_number, line_count)
+            self:draw_justified_text_row(subrows[1], x, y, "left", color, row_number, line_count)
+            self:draw_justified_text_row(subrows[3], x, y, "right", color, row_number, line_count)
             self:draw_justified_text_row(subrows[2], x, y, "center", color, row_number, line_count)
         else
             error("Tried to align with more than 3 segments: " .. text_row)
