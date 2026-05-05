@@ -1,2 +1,5 @@
 reporter = "html"
 reportfile = "luacov.report.html"
+exclude = {
+	"usr/local/share%/.+$"
+}
