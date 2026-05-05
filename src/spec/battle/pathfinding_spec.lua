@@ -321,3 +321,71 @@ describe("tactics.battle.pathfinding", function()
         end)
     end)
 end)
+
+describe("pathfinding.tiles_with_distance_from_tile", function()
+    local function collect_true(grid)
+        local result = {}
+        grid:foreach(function(x, y, v)
+            if v then
+                table.insert(result, { x = x, y = y })
+            end
+        end)
+        table.sort(result, function(a, b)
+            return a.x < b.x or (a.x == b.x and a.y < b.y)
+        end)
+        return result
+    end
+
+    it("min==max=1: ring of distance 1 around center (5x5 map)", function()
+        local result = pathfinding.tiles_with_distance_from_tile(2, 2, 1, 1, 5, 5)
+        local tiles = collect_true(result)
+        -- Manhattan distance 1: (1,2),(3,2),(2,1),(2,3)
+        luassert.are_equal(4, #tiles)
+        luassert.is_false(result:get(2, 2))
+        luassert.is_true(result:get(1, 2))
+        luassert.is_true(result:get(3, 2))
+        luassert.is_true(result:get(2, 1))
+        luassert.is_true(result:get(2, 3))
+    end)
+
+    it("min=0, max=1: filled diamond includes center and ring", function()
+        local result = pathfinding.tiles_with_distance_from_tile(2, 2, 0, 1, 5, 5)
+        luassert.is_true(result:get(2, 2))
+        luassert.is_true(result:get(1, 2))
+        luassert.is_true(result:get(3, 2))
+        luassert.is_true(result:get(2, 1))
+        luassert.is_true(result:get(2, 3))
+        local tiles = collect_true(result)
+        luassert.are_equal(5, #tiles)
+    end)
+
+    it("min=1, max=2: band between distance 1 and 2 (7x7 map)", function()
+        -- Center at (3,3); band [1,2] includes distances 1 and 2, excludes center.
+        -- Distance-1 ring: 4 tiles; distance-2 ring: 8 tiles; total: 12.
+        local result = pathfinding.tiles_with_distance_from_tile(3, 3, 1, 2, 7, 7)
+        luassert.is_false(result:get(3, 3))
+        -- distance-1 tiles included
+        luassert.is_true(result:get(2, 3))
+        luassert.is_true(result:get(4, 3))
+        luassert.is_true(result:get(3, 2))
+        luassert.is_true(result:get(3, 4))
+        -- distance-2 tiles included
+        luassert.is_true(result:get(1, 3))
+        luassert.is_true(result:get(5, 3))
+        luassert.is_true(result:get(3, 1))
+        luassert.is_true(result:get(3, 5))
+        luassert.is_true(result:get(2, 2))
+        luassert.is_true(result:get(4, 4))
+        local tiles = collect_true(result)
+        luassert.are_equal(12, #tiles)
+    end)
+
+    it("clips tiles at map edges (origin corner)", function()
+        -- Center at (0,0), distance 1 — only (1,0) and (0,1) are in-bounds
+        local result = pathfinding.tiles_with_distance_from_tile(0, 0, 1, 1, 5, 5)
+        luassert.is_true(result:get(1, 0))
+        luassert.is_true(result:get(0, 1))
+        local tiles = collect_true(result)
+        luassert.are_equal(2, #tiles)
+    end)
+end)

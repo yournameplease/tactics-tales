@@ -298,4 +298,43 @@ function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
     return path
 end
 
+--- Return a 2D boolean array of tiles within the Manhattan-distance band `[min_distance, max_distance]` from `(tile_x, tile_y)`.
+---@param tile_x integer
+---@param tile_y integer
+---@param min_distance integer
+---@param max_distance integer? Defaults to `min_distance`.
+---@param map_w integer
+---@param map_h integer
+---@return Array2D
+function pathfinding.tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance, map_w, map_h)
+    max_distance = max_distance or min_distance
+
+    local reachable = array_2d.new(map_w, map_h, false)
+    for x = -max_distance, max_distance do
+        local map_x = x + tile_x
+        if map_x >= 0 and map_x < map_w then
+            local abs_x = math.abs(x)
+            local min_y_abs = math.max(0, min_distance - abs_x)
+            local max_y_abs = max_distance - abs_x
+
+            if max_y_abs >= min_y_abs then
+                for y = -max_y_abs, -min_y_abs do
+                    local map_y = y + tile_y
+                    if map_y >= 0 and map_y < map_h then
+                        reachable:set(map_x, map_y, true)
+                    end
+                end
+                for y = min_y_abs, max_y_abs do
+                    local map_y = y + tile_y
+                    if map_y >= 0 and map_y < map_h then
+                        reachable:set(map_x, map_y, true)
+                    end
+                end
+            end
+        end
+    end
+
+    return reachable
+end
+
 return pathfinding
