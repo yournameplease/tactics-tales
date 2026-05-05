@@ -1,9 +1,10 @@
 ---
 id: TASK-77
 title: Add skill loading to mod system
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:27'
+updated_date: '2026-05-04 22:51'
 labels: []
 milestone: m-13
 dependencies:
