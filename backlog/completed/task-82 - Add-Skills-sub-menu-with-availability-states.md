@@ -1,9 +1,10 @@
 ---
 id: TASK-82
 title: Add Skills sub-menu with availability states
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:28'
+updated_date: '2026-05-05 00:34'
 labels: []
 milestone: m-13
 dependencies:
@@ -37,11 +38,11 @@ File to modify: `src/tactics/battle/battle_menu_manager.lua`
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 All five availability states (available, CD, uses, HP, no targets) render with correct label
-- [ ] #2 Only available skills can be selected to proceed
-- [ ] #3 Valid target check uses get_selection_tiles from the skill's targeting, evaluated from the destination tile
-- [ ] #4 Back from sub-menu returns to SELECT_ACTION
-- [ ] #5 make test passes
+- [x] #1 All four availability states (available, CD, uses, no targets) render with correct label — HP check dropped; self-kill is allowed
+- [x] #2 Only available skills can be selected to proceed
+- [x] #3 Valid target check uses get_selection_tiles from the skill's targeting, evaluated from the destination tile
+- [x] #4 Back from sub-menu returns to SELECT_ACTION
+- [x] #5 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

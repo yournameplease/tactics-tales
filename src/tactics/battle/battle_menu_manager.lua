@@ -381,6 +381,15 @@ function PLAYER_TURN_HANDLERS.cycle_attack_position(services, session_context, _
     return menu_manager.menu_handler.then_recompute()
 end
 
+---@param _services BattleMenuContext
+---@param session_context BattleMainMenuContext
+---@param value any
+---@return nil
+function PLAYER_TURN_HANDLERS.store_selected_skill(_services, session_context, value)
+    session_context.selected_skill_id = value
+    return nil
+end
+
 ---@param services BattleMenuContext
 ---@param session_context BattleMainMenuContext
 ---@param _value any
@@ -911,12 +920,61 @@ return {
             ["SELECT_SKILL"] = step_definition.of_node(
                 list.column(
                     "select_skill",
+                    function(msb, ctx)
+                        ---@cast msb BattleMenuContext
+                        ---@cast ctx BattleMainMenuContext
+                        local options = {}
+                        local unit = ctx.acting_unit.unit
+                        local skill_defs = msb.tactics_engine.skill_defs
+                        local destination = ctx.destination.point
+
+                        for _, skill_id in ipairs(unit.character.skill_loadout) do
+                            local def = skill_defs[skill_id]
+                            if def then
+                                local state = unit.skill_states[skill_id]
+                                local reason = nil
+
+                                local uses = state and state.uses_remaining
+                                if uses ~= nil and uses == 0 then
+                                    reason = "0/" .. def.uses_per_battle
+                                elseif state and state.cooldown_remaining > 0 then
+                                    reason = "CD:" .. state.cooldown_remaining
+                                else
+                                    local tiles = def.targeting.get_selection_tiles(destination, msb.battle_map)
+                                    if #tiles == 0 then
+                                        reason = "no targets"
+                                    end
+                                end
+
+                                if reason then
+                                    table.insert(options, button.builder(skill_id)
+                                        :with_text(def.name .. "  " .. reason))
+                                else
+                                    table.insert(options, button.builder(skill_id)
+                                        :with_text(def.name)
+                                        :with_value(skill_id)
+                                        :handle_action("select", "store_selected_skill")
+                                        :advance_to("SELECT_SKILL_TARGET"))
+                                end
+                            end
+                        end
+
+                        return options
+                    end
+                )
+            )
+            :with_previous_step("SELECT_ACTION")
+            :with_action("BUTTON_A", { command = "select", description = "Select" })
+            :with_action("BUTTON_B", { command = "back", description = "Back" }),
+            ["SELECT_SKILL_TARGET"] = step_definition.of_node(
+                list.column(
+                    "select_skill_target",
                     function(_msb, _ctx)
                         return {}
                     end
                 )
             )
-            :with_previous_step("SELECT_ACTION")
+            :with_previous_step("SELECT_SKILL")
             :with_action("BUTTON_A", { command = "select", description = "Select" })
             :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["CONFIRM_ATTACK"] = step_definition.of_node(
