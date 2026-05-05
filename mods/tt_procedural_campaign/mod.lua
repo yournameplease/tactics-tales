@@ -7,10 +7,12 @@ return {
     dependendcies = {"base", "tactics_puzzler", "tt_fantasy_demo_story"},
 
     content = {
-        maps     = "game_data/maps",
-        missions = "game_data/missions",
-        campaigns       = "game_data/campaigns",
-        -- items and characters inherited from tt_fantasy_demo_story
+        maps       = "game_data/maps",
+        missions   = "game_data/missions",
+        campaigns  = "game_data/campaigns",
+        skills     = "game_data/skills",
+        characters = "game_data/characters",
+        -- items inherited from tt_fantasy_demo_story
         default_campaign = "proc_campaign",
         campaign_select  = { "proc_campaign" },
         gfx = { "game_data/gfx/tiny_tileset" },
