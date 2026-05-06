@@ -3,12 +3,11 @@
 --- This service manages unit spawning, movement, combat, and interactions,
 --- coordinating tasks, animations, and events.
 
-local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local point = require("src.tactics.util.point")
 local random = require("src.tactics.util.random")
 local fp = require("src.tactics.util.fp")
-local pathfinding = require("src.tactics.battle.pathfinding")
 local combat_calculator = require("src.tactics.battle.combat.combat_calculator")
+local tile_reachability_cache = require("src.tactics.battle.tile_reachability_cache")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
 local lists = require("src.tactics.util.lists")
 local id_generator = require("src.tactics.util.id_generator")
@@ -53,9 +52,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@field dialogue_manager DialogueManager
 ---@field dialogue_queue QueuedBattleDialogue[] Pending dialogues not yet displayed.
 ---@field active_dialogue? ActiveBattleDialogue Currently displayed dialogue, or nil if none.
----@field valid_tiles_by_unit table<integer, userdata> Cached reachable tile maps keyed by unit ID.
----@field marked_unit_tiles userdata Bitfield map of tiles threatened by marked enemy units.
----@field marked_unit_revision integer Incremented whenever the marked-unit set changes.
+---@field tile_reachability_cache TileReachabilityCache Cache of reachable tile maps and marked-unit overlay.
 ---@field dialogue_revision integer Incremented whenever the active dialogue changes.
 ---@field phase_banner {text: string, frames_remaining: integer}? Active phase banner, or nil if none.
 local TacticsEngine = {}
@@ -106,10 +103,8 @@ function tactics_engine.new(
     self.event_writer = event_writer.new(bus)
     self.dialogue_manager = dialogue_manager.new()
     self.dialogue_queue = {}
-    self.valid_tiles_by_unit = {}
+    self.tile_reachability_cache = tile_reachability_cache.new(map)
 
-    self.marked_unit_revision = 0
-    self.marked_unit_tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
     self.dialogue_revision = 0
     self.phase_banner = nil
 
@@ -344,17 +339,6 @@ function TacticsEngine:finish_unit_action(unit)
     self.event_writer:emit("TACTICS_UNIT_END_ACTION", {})
 end
 
---- Recompute the `marked_unit_tiles` bitfield from all currently marked enemy units.
-function TacticsEngine:recompute_marked_unit_tiles()
-    local marked_units = self.battle_map:get_units(BattleUnit.is_marked)
-
-    self.marked_unit_tiles = self.marked_unit_tiles - self.marked_unit_tiles
-    for _, unit in ipairs(marked_units) do
-        self.marked_unit_tiles = self.marked_unit_tiles
-            | ((self:get_valid_tiles_for_unit(unit) & HIGHLIGHT.CAN_ATTACK) << 1)
-    end
-end
-
 --- Unmark all enemy units and clear the marked-unit tile overlay.
 function TacticsEngine:handle_unmark_all_units()
     local all_enemies = self.battle_map:get_units(BattleUnit.is_enemy)
@@ -362,7 +346,7 @@ function TacticsEngine:handle_unmark_all_units()
     for _, e in ipairs(all_enemies) do
         e.marked = false
     end
-    self.marked_unit_tiles = self.marked_unit_tiles & 0
+    self.tile_reachability_cache.marked_unit_tiles = self.tile_reachability_cache.marked_unit_tiles & 0
 end
 
 --- Mark all enemy units and recompute the tile overlay.
@@ -372,7 +356,7 @@ function TacticsEngine:handle_mark_all_units()
     for _, e in ipairs(all_enemies) do
         e.marked = true
     end
-    self:recompute_marked_unit_tiles()
+    self.tile_reachability_cache:recompute_marked_unit_tiles()
 end
 
 --- Toggle the marked state of the enemy unit at tile `p`.
@@ -382,14 +366,14 @@ function TacticsEngine:handle_mark_unit(p)
     if unit == nil then return end
 
     if unit:is_enemy() then
-        self.marked_unit_revision = self.marked_unit_revision + 1
+        local cache = self.tile_reachability_cache
+        cache.marked_unit_revision = cache.marked_unit_revision + 1
         if unit.marked then
             unit.marked = false
-            self:recompute_marked_unit_tiles()
+            cache:recompute_marked_unit_tiles()
         else
             unit.marked = true
-            self.marked_unit_tiles = self.marked_unit_tiles
-                | ((self:get_valid_tiles_for_unit(unit) & HIGHLIGHT.CAN_ATTACK) << 1)
+            cache:add_unit_to_marked_tiles(unit)
         end
     end
 end
@@ -790,135 +774,29 @@ function TacticsEngine:yield_while_in_script()
     end
 end
 
--- Legal tile getters
+-- Legal tile getters — implementations live in TileReachabilityCache
 
---- Return a u8 userdata with CAN_ATTACK|IS_VALID bits set for tiles reachable by `unit`'s weapon from `tile`.
 ---@param unit BattleUnit
 ---@param tile Point
 ---@return userdata
 function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
-    local targeting = unit.character:get_weapon_targeting()
-
-    local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
-
-    local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
-
-    for _, t in ipairs(tiles_in_distance) do
-        local tile_unit = self.battle_map:get_at_tile(t)
-        local current = tiles:get(t.x, t.y)
-        -- TODO: extract a "can_attack" function
-        if unit:is_player() then
-            if tile_unit ~= nil then
-                if tile_unit.side == "enemy" then
-                    tiles:set(t.x, t.y, current | HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
-                elseif tile_unit.side == "neutral" then
-                    local interactions = self.battle_map.interactions_by_unit_id[tile_unit.id]
-                    if interactions and next(interactions) then
-                        tiles:set(t.x, t.y, current | HIGHLIGHT.IS_VALID)
-                    end
-                end
-            end
-            -- neutral units: interaction destination is handled via get_nearby_interactions
-        else
-            tiles:set(t.x, t.y, current | HIGHLIGHT.CAN_ATTACK | HIGHLIGHT.IS_VALID)
-        end
-    end
-
-    return tiles
+    return self.tile_reachability_cache:_tiles_with_distance_from_unit_attacks(unit, tile)
 end
 
---- Return a 2D boolean array of tiles within the Manhattan-distance band `[min_distance, max_distance]` from `(tile_x, tile_y)`.
----@param tile_x integer
----@param tile_y integer
----@param min_distance integer
----@param max_distance integer? Defaults to `min_distance`.
----@return Array2D
-function TacticsEngine:find_tiles_with_distance_from_tile(tile_x, tile_y, min_distance, max_distance)
-    return pathfinding.tiles_with_distance_from_tile(
-        tile_x, tile_y, min_distance, max_distance,
-        self.battle_map.width, self.battle_map.height
-    )
-end
-
---- Return a u8 userdata whose bits signify reachable (0x1), valid selection (0x2), and attack range (0x4) for `unit`.
----@param unit BattleUnit
----@return userdata
-function TacticsEngine:tiles_in_movement_and_attack_range_for_unit(unit)
-    local movement = unit.character.stats.movement
-    if unit.unit_ai ~= nil and unit.unit_ai.move == "zero" then
-        movement = 0
-    end
-
-    local reachable_tiles = pathfinding.find_reachable_tiles(
-        self.battle_map,
-        unit.tile.x,
-        unit.tile.y,
-        unit.movement_side,
-        movement
-    )
-
-    local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
-
-    reachable_tiles:foreach(function(x, y, reachable)
-        if reachable then
-            local p = point.of(x, y)
-            local tile = tiles:get(x, y)
-            tile = tile | HIGHLIGHT.IS_VALID
-            tile = tile | HIGHLIGHT.IS_REACHABLE
-
-            local has_attack = #self.battle_map:get_targets_in_range(unit.id, p) > 0
-            local has_interaction = #self.battle_map:get_nearby_interactions(p) > 0
-            if has_attack or has_interaction then
-                tile = tile | HIGHLIGHT.IS_INTERACTION_DESTINATION
-            end
-
-            tiles:set(x, y, tile)
-
-            local tiles_in_attack_range = self:tiles_with_distance_from_unit_attacks(unit, p)
-            tiles = tiles | tiles_in_attack_range
-        end
-    end)
-
-    return tiles
-end
-
---- Return the cached valid-tile map for `unit`, computing it on first access.
 ---@param unit BattleUnit
 ---@return userdata
 function TacticsEngine:get_valid_tiles_for_unit(unit)
-    if self.valid_tiles_by_unit[unit.id] == nil then
-        self.valid_tiles_by_unit[unit.id] = self:tiles_in_movement_and_attack_range_for_unit(unit)
-    end
-    return self.valid_tiles_by_unit[unit.id]
+    return self.tile_reachability_cache:get_valid_tiles_for_unit(unit)
 end
 
---- Evict the cached tile map for `unit`.
 ---@param unit BattleUnit
 function TacticsEngine:invalidate_tiles_for_unit(unit)
-    if unit == nil or unit.id == nil then
-        log.warn("attempt to invalidate tiles for a nil unit.")
-        return
-    end
-
-    self.valid_tiles_by_unit[unit.id] = nil
-    if unit.is_marked then
-        self:recompute_marked_unit_tiles()
-    end
+    self.tile_reachability_cache:invalidate_tiles_for_unit(unit)
 end
 
---- Evict cached tile maps for all units whose movement range covers point `p`.
 ---@param p Point
 function TacticsEngine:invalidate_tiles_for_point(p)
-    for id, _ in pairs(self.valid_tiles_by_unit) do
-        local unit = self.battle_map:get_unit_by_id(id)
-        if unit == nil then
-            -- unit died
-            self.valid_tiles_by_unit[id] = nil
-            self:recompute_marked_unit_tiles()
-        elseif point.taxicab_distance(unit.tile, p) <= unit.character.stats.movement then
-            self:invalidate_tiles_for_unit(unit)
-        end
-    end
+    self.tile_reachability_cache:invalidate_tiles_for_point(p)
 end
 
 --- Show a phase banner with the given text for PHASE_BANNER_DURATION frames.
