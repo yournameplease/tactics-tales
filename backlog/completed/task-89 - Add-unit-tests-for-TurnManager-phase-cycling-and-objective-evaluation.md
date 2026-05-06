@@ -1,9 +1,10 @@
 ---
 id: TASK-89
 title: Add unit tests for TurnManager phase cycling and objective evaluation
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-05 13:19'
+updated_date: '2026-05-06 03:46'
 labels: []
 milestone: m-14
 dependencies: []
@@ -23,13 +24,13 @@ Write unit tests for `TurnManager` using a minimal battle state (small unit list
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Phase cycles correctly: player → neutral → enemy → player
-- [ ] #2 Turn counter increments after a full cycle
-- [ ] #3 Units are refreshed (actions reset) on turn boundary
-- [ ] #4 Victory condition met → battle result is victory
-- [ ] #5 Failure condition met → battle result is defeat
-- [ ] #6 Multiple active objectives: all must resolve before battle ends
-- [ ] #7 Existing passing tests remain green
+- [x] #1 Phase cycles correctly: player → neutral → enemy → player
+- [x] #2 Turn counter increments after a full cycle
+- [x] #3 Units are refreshed (actions reset) on turn boundary
+- [x] #4 Victory condition met → battle result is victory
+- [x] #5 Failure condition met → battle result is defeat
+- [x] #6 Multiple active objectives: all must resolve before battle ends
+- [x] #7 Existing passing tests remain green
 <!-- AC:END -->
 
 ## Definition of Done
