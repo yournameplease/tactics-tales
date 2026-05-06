@@ -151,9 +151,9 @@ function BattleUIContext:enrich()
 
         self.menu_revision = self.battle_menu_manager.revision_count
     end
-    if self.marked_units_revision ~= self.tactics_engine.marked_unit_revision then
+    if self.marked_units_revision ~= self.tactics_engine.tile_reachability_cache.marked_unit_revision then
         should_recalculate_highlights = true
-        self.marked_units_revision = self.tactics_engine.marked_unit_revision
+        self.marked_units_revision = self.tactics_engine.tile_reachability_cache.marked_unit_revision
     end
 
     self.hovered_unit = nil
@@ -293,7 +293,7 @@ function BattleUIContext:enrich()
         end
         menu_highlights = self.menu_tile_highlights
 
-        local marked_unit_highlights = self.tactics_engine.marked_unit_tiles
+        local marked_unit_highlights = self.tactics_engine.tile_reachability_cache.marked_unit_tiles
 
         local tile_interaction_highlights = self.battle_map:get_tile_highlights()
 
