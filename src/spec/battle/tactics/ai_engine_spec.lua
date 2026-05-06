@@ -1,5 +1,6 @@
 local luassert = require("luassert")
 local ai_engine = require("src.tactics.battle.tactics.ai_engine")
+local battle_map = require("src.tactics.battle.battle_map")
 local point = require("src.tactics.util.point")
 local tasks = require("src.tactics.systems.tasks")
 
@@ -85,51 +86,43 @@ local function make_unit(opts)
     return unit
 end
 
---- Build a minimal BattleMap mock backed by a flat unit list.
---- Satisfies both pathfinding.calculate_all_tile_costs and ai_engine's own calls.
----@param units_list table[] Array of unit-shaped tables (include both AI and enemy units).
----@param width? integer Map width in tiles (default 5).
----@param height? integer Map height in tiles (default 5).
----@return table
-local function make_map(units_list, width, height)
+--- Build a real BattleMap, spawn units onto it, and configure terrain layers.
+--- All tiles default to sprite 1 (walkable, movement_cost 1).
+--- terrain_overrides: list of {x, y, sprite} to override individual tiles.
+--- Sprite encoding (set globally in before_each):
+---   sprite 1 → fget returns 0  → terrain 0 → movement_cost 1  (normal)
+---   sprite 2 → fget returns 8  → terrain 4 → movement_cost 4  (mountain)
+---@param units_list table[]
+---@param width integer
+---@param height integer
+---@param terrain_overrides? {x:integer, y:integer, sprite:integer}[]
+---@return BattleMap
+local function make_battle_map(units_list, width, height, terrain_overrides)
     width = width or 5
     height = height or 5
-
-    local by_tile = {}
-    for _, u in ipairs(units_list) do
-        by_tile[u.tile.x .. "," .. u.tile.y] = u
-    end
-
-    local map = { width = width, height = height }
-
-    function map:get_terrain(_tile)
-        return { movement_cost = 1, solid = false, dodge = 0 }
-    end
-
-    function map:get_at_tile(tile)
-        return by_tile[tile.x .. "," .. tile.y]
-    end
-
-    function map:get_units(filter_fn)
-        local result = {}
-        for _, u in ipairs(units_list) do
-            if filter_fn(u) then
-                table.insert(result, u)
-            end
+    local map = battle_map.new(width, height, {})
+    local ground = userdata("u8", width, height)
+    for x = 0, width - 1 do
+        for y = 0, height - 1 do
+            ground:set(x, y, 1)
         end
-        return result
     end
-
-    function map:tile_is_in_map(tile)
-        return tile.x >= 0 and tile.x < width and tile.y >= 0 and tile.y < height
+    if terrain_overrides then
+        for _, t in ipairs(terrain_overrides) do
+            ground:set(t.x, t.y, t.sprite)
+        end
     end
-
-    function map:tile_is_legal_destination(unit, tile)
-        if not self:tile_is_in_map(tile) then return false end
-        local occupant = by_tile[tile.x .. "," .. tile.y]
-        return occupant == nil or occupant.id == unit.id
+    map.layers = {
+        terrain = {
+            ground     = ground,
+            back_wall  = userdata("u8", width, height),
+            mid_wall   = userdata("u8", width, height),
+            front_wall = userdata("u8", width, height),
+        },
+    }
+    for _, u in ipairs(units_list) do
+        map:spawn_unit(u, u.tile)
     end
-
     return map
 end
 
@@ -155,13 +148,18 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("ai_engine", function()
+    before_each(function()
+        -- sprite 2: fget returns 8 (bit 3 set) → (8 & 0xD) >> 1 = 4 → mountain, movement_cost 4
+        fset(2, 3, true)
+    end)
+
     describe("compute_unit_ai", function()
         it("attacks an adjacent enemy in one move", function()
             -- AI unit at (0,0); enemy at (0,1) — melee range from (0,0).
             local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
             local enemy   = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -175,7 +173,7 @@ describe("ai_engine", function()
             local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
             local enemy   = make_unit({ id = 2, tile = point.of(4, 0), side = "player", hp = 10 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 5, 5), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy }, 5, 5), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -187,7 +185,7 @@ describe("ai_engine", function()
         it("waits in place when no targets exist", function()
             local ai_unit = make_unit({ id = 1, tile = point.of(1, 1), side = "enemy", movement = 2 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -204,7 +202,7 @@ describe("ai_engine", function()
             local enemy_a = make_unit({ id = 2, tile = point.of(1, 0), side = "player", hp = 1, hp_max = 10, weapons = {} })
             local enemy_b = make_unit({ id = 3, tile = point.of(1, 2), side = "player", hp = 999, hp_max = 999, weapons = {} })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -234,7 +232,7 @@ describe("ai_engine", function()
                 weapons = {}
             })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -265,7 +263,7 @@ describe("ai_engine", function()
                 weapons = {}
             })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -298,7 +296,7 @@ describe("ai_engine", function()
                 items = { make_armor_item(999) }
             })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy_a, enemy_b }, 3, 3), spy, tasks.task_manager())
 
             engine:compute_unit_ai(ai_unit)
 
@@ -320,7 +318,51 @@ describe("ai_engine", function()
             })
             local enemy   = make_unit({ id = 2, tile = point.of(0, 2), side = "player", hp = 10 })
             local spy     = make_tactics_spy()
-            local engine  = ai_engine.new(make_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+            local engine  = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_wait", spy.method)
+            luassert.are_equal(0, spy.args.dest.x)
+            luassert.are_equal(0, spy.args.dest.y)
+        end)
+
+        it("takes a low-cost detour when the direct path has expensive terrain", function()
+            -- 5x2 map.  Tile (1,0) is mountain terrain (movement_cost 4, sprite 2).
+            -- With movement=2 the AI cannot afford the direct row-0 path; it must detour
+            -- via row 1.  Both candidate attack positions ((3,0) and (4,1)) have the same
+            -- total movement cost and both trace back through (1,1) after back-tracking
+            -- within the movement budget — so the AI stops at (1,1).
+            local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 2 })
+            local enemy   = make_unit({ id = 2, tile = point.of(4, 0), side = "player", hp = 10 })
+            local spy     = make_tactics_spy()
+            local engine  = ai_engine.new(
+                make_battle_map({ ai_unit, enemy }, 5, 2, { { x = 1, y = 0, sprite = 2 } }),
+                spy, tasks.task_manager()
+            )
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_wait", spy.method)
+            luassert.are_equal(1, spy.args.dest.x)
+            luassert.are_equal(1, spy.args.dest.y)
+        end)
+
+        it("waits in place when the preferred attack tile is occupied by an ally", function()
+            -- 3x2 map.  AI at (0,0), movement=1.  An ally occupies (1,0), which is the
+            -- only tile within movement range that is adjacent to the enemy at (2,0).
+            -- Pathfinding can still traverse through (1,0) (same movement_side), so the
+            -- deep-action search finds (1,0) as the cheapest attack position.  However,
+            -- tile_is_legal_destination returns false for (1,0), so the back-tracking
+            -- loop steps back to (0,0) and the AI waits in place.
+            local ai_unit = make_unit({ id = 1, tile = point.of(0, 0), side = "enemy", movement = 1 })
+            local ally    = make_unit({ id = 3, tile = point.of(1, 0), side = "enemy", movement = 1 })
+            local enemy   = make_unit({ id = 2, tile = point.of(2, 0), side = "player", hp = 10 })
+            local spy     = make_tactics_spy()
+            local engine  = ai_engine.new(
+                make_battle_map({ ai_unit, ally, enemy }, 3, 2),
+                spy, tasks.task_manager()
+            )
 
             engine:compute_unit_ai(ai_unit)
 
