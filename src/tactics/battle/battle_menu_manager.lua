@@ -631,6 +631,94 @@ function PLAYER_TURN_HANDLERS.handle_interaction(services, session_context, inte
     return nil
 end
 
+---@param point Point
+---@param msb BattleMenuContext
+---@param _ctx any
+---@return boolean
+local function filter_available_player(point, msb, _ctx)
+    return point_is_available_player(point, msb.battle_map)
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param _ctx any
+---@return boolean
+local function filter_any_unit(point, msb, _ctx)
+    return point_is_any_unit(point, msb.battle_map)
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param _ctx any
+---@return boolean
+local function filter_no_unit(point, msb, _ctx)
+    return not point_is_any_unit(point, msb.battle_map)
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param _ctx any
+---@return boolean
+local function filter_deployment_tile(point, msb, _ctx)
+    return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param ctx BattleMainMenuContext
+---@return boolean
+local function filter_move_destination(point, msb, ctx)
+    local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
+    return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
+        and valid_tiles:get(point.x, point.y) ~= nil
+        and valid_tiles:get(point.x, point.y) & 0x1 ~= 0
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param ctx BattleMainMenuContext
+---@return boolean
+local function filter_attack_destination(point, msb, ctx)
+    local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
+    return point_is_enemy_unit(point, msb.battle_map)
+        and valid_tiles:get(point.x, point.y) ~= nil
+        and valid_tiles:get(point.x, point.y) & 0x4 ~= 0
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param ctx BattleMainMenuContext
+---@return boolean
+local function filter_interaction_destination(point, msb, ctx)
+    local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
+    return get_single_unit_interaction(
+        point, valid_tiles, ctx.acting_unit.unit, msb.battle_map
+    ) ~= nil
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param ctx BattleMainMenuContext
+---@return boolean
+local function filter_attack_target(point, msb, ctx)
+    return validate_tile_is_in_unit_attack_range(
+        msb.battle_map,
+        ctx.acting_unit.unit,
+        ctx.acting_unit.unit.tile,
+        point
+    )
+end
+
+---@param point Point
+---@param msb BattleMenuContext
+---@param ctx BattleMainMenuContext
+---@return boolean
+local function filter_skill_target(point, msb, ctx)
+    local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
+    if not def then return false end
+    return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map)
+end
+
 local function make_menu_data(map_width, map_height)
     return {
         ["MENU_DEPLOYMENT"] = {
@@ -640,27 +728,18 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_SWAP_UNIT"] = step_definition.of_node(
                         grid.grid("select_swap_unit", map_width, map_height)
                         :with_child(
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return point_is_available_player(point, msb.battle_map)
-                            end,
+                            filter_available_player,
                             button.builder("select_swap_unit")
                             :handle_action("select", "select_swap_unit")
                             :advance_to("SELECT_SWAP_TARGET")
                         )
                         :with_child( -- marking for non-actable units
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return point_is_any_unit(point, msb.battle_map)
-                            end,
+                            filter_any_unit,
                             button.builder("non_available_unit")
                             :handle_action("menu", "mark_unit")
                         )
                         :with_child( -- marking for non-units
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return not point_is_any_unit(point, msb.battle_map)
-                            end,
+                            filter_no_unit,
                             button.builder("non_unit")
                             :handle_action("menu", "navigate_to_deployment_menu")
                         )
@@ -675,20 +754,14 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_SWAP_TARGET"] = step_definition.of_node(
                         grid.grid("select_swap_target", map_width, map_height)
                         :with_child(
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
-                            end,
+                            filter_deployment_tile,
                             button.builder("swap_units")
                             :handle_action("select", "swap_units")
                             :advance_to("SELECT_SWAP_UNIT")
                         -- :as_final_step()
                         )
                         :with_child( -- marking for non-actable units
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return point_is_any_unit(point, msb.battle_map)
-                            end,
+                            filter_any_unit,
                             button.builder("non_available_unit")
                             :handle_action("back", "mark_unit")
                         )
@@ -727,28 +800,19 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_UNIT"] = step_definition.of_node(
                         grid.grid("select_acting_unit", map_width, map_height)
                         :with_child(
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return point_is_available_player(point, msb.battle_map)
-                            end,
+                            filter_available_player,
                             button.builder("available_player")
                             :handle_action("select", "select_acting_unit")
                             :handle_action("menu", "mark_unit")
                             :advance_to("SELECT_DESTINATION")
                         )
                         :with_child( -- marking for non-actable units
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return point_is_any_unit(point, msb.battle_map)
-                            end,
+                            filter_any_unit,
                             button.builder("non_available_unit")
                             :handle_action("menu", "mark_unit")
                         )
                         :with_child( -- marking for non-units
-                            function(point, msb, _ctx)
-                                ---@cast msb BattleMenuContext
-                                return not point_is_any_unit(point, msb.battle_map)
-                            end,
+                            filter_no_unit,
                             button.builder("non_unit")
                             :handle_action("menu", "navigate_to_turn_menu")
                         )
@@ -770,40 +834,19 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_DESTINATION"] = step_definition.of_node(
                         grid.grid("select_destination", map_width, map_height)
                         :with_child(
-                            function(point, msb, ctx)
-                                ---@cast msb BattleMenuContext
-                                ---@cast ctx BattleMainMenuContext
-                                local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
-                                return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
-                                    and valid_tiles:get(point.x, point.y) ~= nil
-                                    and valid_tiles:get(point.x, point.y) & 0x1 ~= 0
-                            end,
+                            filter_move_destination,
                             button.builder("move_unit")
                             :handle_action("select", "move_acting_unit")
                             :advance_to("SELECT_ACTION")
                         )
                         :with_child(
-                            function(point, msb, ctx)
-                                ---@cast msb BattleMenuContext
-                                ---@cast ctx BattleMainMenuContext
-                                local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
-                                return point_is_enemy_unit(point, msb.battle_map)
-                                    and valid_tiles:get(point.x, point.y) ~= nil
-                                    and valid_tiles:get(point.x, point.y) & 0x4 ~= 0
-                            end,
+                            filter_attack_destination,
                             button.builder("attack_unit")
                             :handle_action("select", "move_and_store_attack_unit")
                             :advance_to("CONFIRM_ATTACK")
                         )
                         :with_child(
-                            function(point, msb, ctx)
-                                ---@cast msb BattleMenuContext
-                                ---@cast ctx BattleMainMenuContext
-                                local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
-                                return get_single_unit_interaction(
-                                    point, valid_tiles, ctx.acting_unit.unit, msb.battle_map
-                                ) ~= nil
-                            end,
+                            filter_interaction_destination,
                             button.builder("interaction_unit")
                             :handle_action("select", "move_and_store_interaction_unit")
                             :advance_to("CONFIRM_INTERACTION")
@@ -888,16 +931,7 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_TARGET"] = step_definition.of_node(
                         grid.grid("select_target", map_width, map_height)
                         :with_child(
-                            function(point, msb, ctx)
-                                ---@cast msb BattleMenuContext
-                                ---@cast ctx BattleMainMenuContext
-                                return validate_tile_is_in_unit_attack_range(
-                                    msb.battle_map,
-                                    ctx.acting_unit.unit,
-                                    ctx.acting_unit.unit.tile,
-                                    point
-                                )
-                            end,
+                            filter_attack_target,
                             button.builder("attack_unit")
                             :handle_action("select", "attack_unit_at_tile")
                             :as_final_step()
@@ -983,13 +1017,7 @@ local function make_menu_data(map_width, map_height)
                 ["SELECT_SKILL_TARGET"] = step_definition.of_node(
                         grid.grid("select_skill_target", map_width, map_height)
                         :with_child(
-                            function(point, msb, ctx)
-                                ---@cast msb BattleMenuContext
-                                ---@cast ctx BattleMainMenuContext
-                                local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
-                                if not def then return false end
-                                return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map)
-                            end,
+                            filter_skill_target,
                             button.builder("use_skill")
                             :handle_action("select", "use_skill_at_tile")
                             :as_final_step()
