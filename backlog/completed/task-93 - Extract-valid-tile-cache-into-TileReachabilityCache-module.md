@@ -1,9 +1,10 @@
 ---
 id: TASK-93
 title: Extract valid tile cache into TileReachabilityCache module
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-05 13:29'
+updated_date: '2026-05-06 01:28'
 labels: []
 milestone: m-14
 dependencies: []
@@ -26,10 +27,10 @@ The mark/unmark handlers (`handle_mark_unit`, `handle_mark_all_units`, `handle_u
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 New module exports `TileReachabilityCache.new(battle_map)` with get/invalidate-by-unit and invalidate-by-point on its interface
-- [ ] #2 TacticsEngine holds a TileReachabilityCache instance and removes the inlined implementations
-- [ ] #3 Unit tests use a real (small) BattleMap: cache miss computes tiles; second call returns cached value; invalidate-by-point evicts units within movement range; dead unit evicted on next invalidation pass
-- [ ] #4 make test passes
+- [x] #1 New module exports `TileReachabilityCache.new(battle_map)` with get/invalidate-by-unit and invalidate-by-point on its interface
+- [x] #2 TacticsEngine holds a TileReachabilityCache instance and removes the inlined implementations
+- [x] #3 Unit tests use a real (small) BattleMap: cache miss computes tiles; second call returns cached value; invalidate-by-point evicts units within movement range; dead unit evicted on next invalidation pass
+- [x] #4 make test passes
 <!-- AC:END -->
 
 ## Definition of Done

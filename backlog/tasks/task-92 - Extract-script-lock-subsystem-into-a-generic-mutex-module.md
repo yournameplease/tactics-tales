@@ -1,9 +1,10 @@
 ---
 id: TASK-92
 title: Extract script lock subsystem into a generic mutex module
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-05 13:29'
+updated_date: '2026-05-05 13:38'
 labels: []
 milestone: m-14
 dependencies: []
