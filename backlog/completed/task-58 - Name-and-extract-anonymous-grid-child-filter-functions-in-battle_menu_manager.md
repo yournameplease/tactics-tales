@@ -1,9 +1,10 @@
 ---
 id: TASK-58
 title: Name and extract anonymous grid child filter functions in battle_menu_manager
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-03 05:18'
+updated_date: '2026-05-06 13:01'
 labels:
   - cleanup
   - lua
