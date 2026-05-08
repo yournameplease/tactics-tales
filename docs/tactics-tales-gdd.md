@@ -239,7 +239,7 @@ Steam workshop integration could be added as an incentive for a Steam purchasers
 <!-- Q: Does the game really need to be >1 hour?  Can we not keep it at ~1 hour to appeal to  roguelike crowd while remaining interesting for tactics crowd? -->
 <!-- Q: Is the mad-lib actually valuable? I find it endearing, but it would need to be configurable / skippable for power players. Tomodachi Life is a new source that inspires me to continue with this concept. -->
 <!-- Q: Do I even have a compelling game here? I think... maybe? Should I be sharing the demo in relevant communities to gather feedback? -->
-<!-- Q: -->
+<!-- Q: Do I care about selling this game? Why do I care? -->
 <!-- Q: -->
 
 
