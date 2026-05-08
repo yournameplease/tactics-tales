@@ -63,7 +63,23 @@ function PageFlipAnimatorImpl:is_blocking_input()
     return self.state ~= "IDLE"
 end
 
-function PageFlipAnimatorImpl:draw(_ui_manager, _ui_context, _draw_target_manager)
+function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
+    local w = STATIC_CONFIG.SCREEN_WIDTH
+    local h = STATIC_CONFIG.SCREEN_HEIGHT
+    if self.state == "PENDING_BEFORE" then
+        draw_target_manager:push_target(w, h, 0, 0)
+        ui_manager:draw(ui_context)
+        self.sprite_a = draw_target_manager:pop_sprite()
+        self.callback()
+        self.state = "PENDING_AFTER"
+    elseif self.state == "PENDING_AFTER" then
+        ui_manager:calculate(ui_context)
+        draw_target_manager:push_target(w, h, 0, 0)
+        ui_manager:draw(ui_context)
+        self.sprite_b = draw_target_manager:pop_sprite()
+        self.frame = 0
+        self.state = "ANIMATING"
+    end
 end
 
 return page_flip_animator
