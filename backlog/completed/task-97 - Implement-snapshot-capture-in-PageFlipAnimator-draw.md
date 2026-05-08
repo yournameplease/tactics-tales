@@ -1,9 +1,10 @@
 ---
 id: TASK-97
 title: 'Implement snapshot capture in PageFlipAnimator:draw()'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-08 04:32'
+updated_date: '2026-05-08 04:41'
 labels: []
 milestone: m-15
 dependencies:
@@ -37,15 +38,15 @@ Files to modify: `src/tactics/animation/page_flip_animator.lua`
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 In PENDING_BEFORE: sprite_a is set and callback is called before transitioning
-- [ ] #2 In PENDING_AFTER: sprite_b is set and state transitions to ANIMATING
-- [ ] #3 Callback fires exactly once between the two snapshots
-- [ ] #4 draw_target_manager push/pop is balanced (no leaked targets)
-- [ ] #5 `make test` passes with mocked ui_manager and draw_target_manager
+- [x] #1 In PENDING_BEFORE: sprite_a is set and callback is called before transitioning
+- [x] #2 In PENDING_AFTER: sprite_b is set and state transitions to ANIMATING
+- [x] #3 Callback fires exactly once between the two snapshots
+- [x] #4 draw_target_manager push/pop is balanced (no leaked targets)
+- [x] #5 `make test` passes with mocked ui_manager and draw_target_manager
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->

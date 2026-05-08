@@ -1,9 +1,10 @@
 ---
 id: TASK-98
 title: Implement tline3d curl geometry
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-08 04:32'
+updated_date: '2026-05-08 04:47'
 labels: []
 milestone: m-15
 dependencies:
