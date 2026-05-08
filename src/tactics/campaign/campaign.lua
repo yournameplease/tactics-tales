@@ -371,12 +371,20 @@ function campaign.load(save_name, game_data, task_manager, animation_manager, ev
     return self
 end
 
+--- Return the campaign's PageFlipAnimator.
+---@return PageFlipAnimator
+function Campaign:get_page_flip_animator()
+    return self.page_flip_animator
+end
+
 --- Process one update tick of the campaign, handling input for the active node type.
 ---@param input InputContext
 function Campaign:update(input)
-    local h = HANDLERS[self.current_node.definition.type]
-    if h and h.update then
-        h.update(self, input)
+    if not self.page_flip_animator:is_blocking_input() then
+        local h = HANDLERS[self.current_node.definition.type]
+        if h and h.update then
+            h.update(self, input)
+        end
     end
 end
 
