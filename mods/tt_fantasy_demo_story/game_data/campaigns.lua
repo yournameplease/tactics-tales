@@ -429,7 +429,74 @@ local STORIES = {
                 c.exit_campaign(),
             }
         }
-    }
+    },
+    page_flip_test = {
+        starting_node = 'page_1',
+        name = 'Page Flip Test',
+        description = "A temporary test campaign: 10 pages of text with page-flip transitions.",
+        nodes = {
+            page_1 = {
+                c.new_page(),
+                c.text("Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
+                c.text("Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
+                c.jump('page_2'),
+            },
+            page_2 = {
+                c.new_page(),
+                c.text("Ut enim ad minim veniam, quis nostrud exercitation ullamco."),
+                c.text("Laboris nisi ut aliquip ex ea commodo consequat."),
+                c.jump('page_3'),
+            },
+            page_3 = {
+                c.new_page(),
+                c.text("Duis aute irure dolor in reprehenderit in voluptate velit."),
+                c.text("Esse cillum dolore eu fugiat nulla pariatur."),
+                c.jump('page_4'),
+            },
+            page_4 = {
+                c.new_page(),
+                c.text("Excepteur sint occaecat cupidatat non proident."),
+                c.text("Sunt in culpa qui officia deserunt mollit anim id est laborum."),
+                c.jump('page_5'),
+            },
+            page_5 = {
+                c.new_page(),
+                c.text("Curabitur pretium tincidunt lacus. Nulla gravida orci a odio."),
+                c.text("Nullam varius, turpis molestie dictum semper."),
+                c.jump('page_6'),
+            },
+            page_6 = {
+                c.new_page(),
+                c.text("Pellentesque habitant morbi tristique senectus et netus."),
+                c.text("Malesuada fames ac turpis egestas. Proin pharetra nonummy."),
+                c.jump('page_7'),
+            },
+            page_7 = {
+                c.new_page(),
+                c.text("Fusce fermentum. Nullam varius nulla a elit posuere."),
+                c.text("Vestibulum ante ipsum primis in faucibus orci luctus."),
+                c.jump('page_8'),
+            },
+            page_8 = {
+                c.new_page(),
+                c.text("Ultrices posuere cubilia curae; Phasellus lacinia tempus."),
+                c.text("Aenean condimentum purus id ligula venenatis condimentum."),
+                c.jump('page_9'),
+            },
+            page_9 = {
+                c.new_page(),
+                c.text("Donec at arcu. Praesent et diam eget libero egestas mattis."),
+                c.text("Sit amet condimentum nisl hac habitasse platea dictumst."),
+                c.jump('page_10'),
+            },
+            page_10 = {
+                c.new_page(),
+                c.text("Viverra accumsan in nisl nisi scelerisque eu ultrices."),
+                c.text("Vitae auctor eu augue ut lectus arcu bibendum at."),
+                c.exit_campaign(),
+            },
+        },
+    },
 }
 
 
