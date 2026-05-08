@@ -1,9 +1,10 @@
 ---
 id: TASK-96
 title: Create PageFlipAnimator module skeleton
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-08 04:31'
+updated_date: '2026-05-08 04:38'
 labels: []
 milestone: m-15
 dependencies:
@@ -29,11 +30,11 @@ Create `src/tactics/animation/page_flip_animator.lua` with the core state machin
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 begin_flip transitions state from IDLE to PENDING_BEFORE
-- [ ] #2 is_blocking_input returns true in all non-IDLE states
-- [ ] #3 tick advances frame counter and transitions ANIMATING→IDLE at frame 40
-- [ ] #4 begin_flip while already active is a no-op (does not reset state)
-- [ ] #5 `make test` passes
+- [x] #1 begin_flip transitions state from IDLE to PENDING_BEFORE
+- [x] #2 is_blocking_input returns true in all non-IDLE states
+- [x] #3 tick advances frame counter and transitions ANIMATING→IDLE at frame 40
+- [x] #4 begin_flip while already active is a no-op (does not reset state)
+- [x] #5 `make test` passes
 <!-- AC:END -->
 
 ## Definition of Done

@@ -13,8 +13,12 @@
 ---@field direction PageFlipDirection | nil
 ---@field callback (fun()) | nil
 ---@field frame integer
+---@field sprite_a userdata | nil
+---@field sprite_b userdata | nil
 local PageFlipAnimatorImpl = {}
 PageFlipAnimatorImpl.__index = PageFlipAnimatorImpl
+
+local math_util = require("src.tactics.math_util")
 
 local page_flip_animator = {}
 
@@ -79,6 +83,50 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
         self.sprite_b = draw_target_manager:pop_sprite()
         self.frame = 0
         self.state = "ANIMATING"
+    elseif self.state == "ANIMATING" then
+        local half_w = w / 2
+        local t = math_util.smoothstep(self.frame / 40)
+        local visible_w = half_w * math.abs(math.cos(t * math.pi))
+
+        sspr(self.sprite_a, 0, 0, half_w, h, 0, 0)
+        sspr(self.sprite_b, half_w, 0, half_w, h, half_w, 0)
+
+        if visible_w > 0 then
+            local amplitude = 8
+            local is_front = t < 0.5
+            local src = is_front and self.sprite_a or self.sprite_b
+            -- right_side: true when the turning page occupies half_w..half_w+visible_w
+            local right_side = (self.direction == "forward") == is_front
+
+            local x_start   = right_side and half_w or (half_w - visible_w)
+            local x_end     = right_side and (half_w + visible_w) or half_w
+            local leading_x = right_side and (half_w + visible_w) or (half_w - visible_w)
+
+            local sin_factor = amplitude * math.sin(t * math.pi)
+            for x = math.floor(x_start), math.ceil(x_end) - 1 do
+                local col_offset = math.abs(x - leading_x)
+                local disp = sin_factor * (col_offset / half_w)
+                local u
+                if right_side then
+                    if is_front then
+                        -- forward+front: sprite_a right half, compressed
+                        u = half_w + (x - half_w) * (half_w / visible_w)
+                    else
+                        -- backward+back: sprite_b left half, mirrored at spine
+                        u = half_w - (x - half_w) * (half_w / visible_w)
+                    end
+                else
+                    if is_front then
+                        -- backward+front: sprite_a left half, compressed
+                        u = half_w * (x - (half_w - visible_w)) / visible_w
+                    else
+                        -- forward+back: sprite_b right half, mirrored at spine
+                        u = w - (x - (half_w - visible_w)) * (half_w / visible_w)
+                    end
+                end
+                tline3d(src, x, disp, x, h + disp, u, 0, u, h, 1, 1)
+            end
+        end
     end
 end
 
