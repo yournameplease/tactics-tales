@@ -1,9 +1,10 @@
 ---
 id: TASK-102
 title: Wire PageFlipAnimator into main.lua draw loop and input gating
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-08 04:32'
+updated_date: '2026-05-08 05:02'
 labels: []
 milestone: m-15
 dependencies:
@@ -47,8 +48,14 @@ No unit tests — integration behaviour; verify manually in-game.
 - [ ] #2 No input is accepted during the 40-frame animation
 - [ ] #3 Animation completes and the next page is displayed correctly
 - [ ] #4 No frame drops or Lua errors during the animation
-- [ ] #5 Existing campaign tests still pass: `make test`
+- [x] #5 Existing campaign tests still pass: `make test`
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Added `Campaign:get_page_flip_animator()` accessor to avoid direct field access across module boundaries. Added `Game:page_flip_animator()` helper that delegates to the campaign accessor when a campaign is active. In `_draw()`, tick the animator each frame and conditionally route through `flip:draw()` when active. In `Campaign:update()`, wrapped handler dispatch in an `is_blocking_input()` guard.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

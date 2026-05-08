@@ -1,9 +1,10 @@
 ---
 id: TASK-101
 title: Wire PageFlipAnimator into Campaign
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-08 04:32'
+updated_date: '2026-05-08 04:53'
 labels: []
 milestone: m-15
 dependencies:
@@ -40,10 +41,10 @@ Instantiate and connect `PageFlipAnimator` within the campaign lifecycle.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 campaign.page_flip_animator is non-nil after campaign.new()
-- [ ] #2 new_page handler calls page_flip_animator:begin_flip (verified via spy/stub in unit test)
-- [ ] #3 Callback passed to begin_flip calls clear_page and advance_node
-- [ ] #4 `make test` passes
+- [x] #1 campaign.page_flip_animator is non-nil after campaign.new()
+- [x] #2 new_page handler calls page_flip_animator:begin_flip (verified via spy/stub in unit test)
+- [x] #3 Callback passed to begin_flip calls clear_page and advance_node
+- [x] #4 `make test` passes
 <!-- AC:END -->
 
 ## Definition of Done
