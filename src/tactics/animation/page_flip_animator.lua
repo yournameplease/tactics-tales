@@ -106,7 +106,7 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
             local x_end     = right_side and (half_w + visible_w) or half_w
             local leading_x = right_side and (half_w + visible_w) or (half_w - visible_w)
 
-            local sin_factor = amplitude * math.sin(t * math.pi)
+            local sin_factor = amplitude * math.sin(t)
             for x = math.floor(x_start), math.ceil(x_end) - 1 do
                 local col_offset = math.abs(x - leading_x)
                 local disp = sin_factor * (col_offset / half_w)
@@ -124,8 +124,8 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
                         -- backward+front: sprite_a left half, compressed
                         -- u = half_w * (x - (half_w - visible_w)) / visible_w
                     else
-                        -- forward+back: sprite_b right half, mirrored at spine
-                        u = w - ((half_w - visible_w) - x) * (half_w / visible_w)
+                        -- forward+back: sprite_b left half, mirrored at spine
+                        u = half_w - (half_w - x) * (half_w / visible_w)
                     end
                 end
                 tline3d(src, x, disp, x, h + disp, u, 0, u, h, 1, 1)
