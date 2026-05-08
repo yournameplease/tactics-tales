@@ -1,3 +1,5 @@
+local colors = require("src.tactics.colors")
+
 ---@alias PageFlipState "IDLE" | "PENDING_BEFORE" | "PENDING_AFTER" | "ANIMATING"
 ---@alias PageFlipDirection "forward" | "backward"
 
@@ -49,7 +51,7 @@ function PageFlipAnimatorImpl:tick()
         return
     end
     self.frame = self.frame + 1
-    if self.frame >= 40 then
+    if self.frame >= 400 then
         self.state = "IDLE"
         self.direction = nil
         self.callback = nil
@@ -71,28 +73,30 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
     local w = STATIC_CONFIG.SCREEN_WIDTH
     local h = STATIC_CONFIG.SCREEN_HEIGHT
     if self.state == "PENDING_BEFORE" then
-        draw_target_manager:push_target(w, h, 0, 0)
+        -- Draw target needs power of 2 to use tline3d
+        draw_target_manager:push_target(512, 512, 0, 0)
         ui_manager:draw(ui_context)
         self.sprite_a = draw_target_manager:pop_sprite()
         self.callback()
         self.state = "PENDING_AFTER"
     elseif self.state == "PENDING_AFTER" then
         ui_manager:calculate(ui_context)
-        draw_target_manager:push_target(w, h, 0, 0)
+        -- Draw target needs power of 2 to use tline3d
+        draw_target_manager:push_target(512, 512, 0, 0)
         ui_manager:draw(ui_context)
         self.sprite_b = draw_target_manager:pop_sprite()
         self.frame = 0
         self.state = "ANIMATING"
     elseif self.state == "ANIMATING" then
         local half_w = w / 2
-        local t = math_util.smoothstep(self.frame / 40)
+        local t = math_util.smoothstep(self.frame / 400)
         local visible_w = half_w * math.abs(math.cos(t * math.pi))
 
         sspr(self.sprite_a, 0, 0, half_w, h, 0, 0)
         sspr(self.sprite_b, half_w, 0, half_w, h, half_w, 0)
 
         if visible_w > 0 then
-            local amplitude = 8
+            local amplitude = 4
             local is_front = t < 0.5
             local src = is_front and self.sprite_a or self.sprite_b
             -- right_side: true when the turning page occupies half_w..half_w+visible_w
@@ -113,18 +117,19 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
                         u = half_w + (x - half_w) * (half_w / visible_w)
                     else
                         -- backward+back: sprite_b left half, mirrored at spine
-                        u = half_w - (x - half_w) * (half_w / visible_w)
+                        -- u = half_w - (x - half_w) * (half_w / visible_w)
                     end
                 else
                     if is_front then
                         -- backward+front: sprite_a left half, compressed
-                        u = half_w * (x - (half_w - visible_w)) / visible_w
+                        -- u = half_w * (x - (half_w - visible_w)) / visible_w
                     else
                         -- forward+back: sprite_b right half, mirrored at spine
-                        u = w - (x - (half_w - visible_w)) * (half_w / visible_w)
+                        u = w - ((half_w - visible_w) - x) * (half_w / visible_w)
                     end
                 end
                 tline3d(src, x, disp, x, h + disp, u, 0, u, h, 1, 1)
+                -- line(x, disp, x, h+disp, colors.rainbow(x)[1])
             end
         end
     end
