@@ -90,6 +90,15 @@ function Game:exit_campaign()
     self.campaign = nil
 end
 
+--- Return the active campaign's PageFlipAnimator, or nil if no campaign is running.
+---@return PageFlipAnimator?
+function Game:page_flip_animator()
+    if self.campaign ~= nil then
+        return self.campaign:get_page_flip_animator()
+    end
+    return nil
+end
+
 --- Update game state for the current frame.
 ---@param input InputContext
 function Game:update(input)
@@ -129,7 +138,7 @@ function game.new(
     mod_loader:register_mod("base")
     mod_loader:register_mod("tactics_puzzler")
     mod_loader:register_mod("tt_fantasy_demo_story")
-    mod_loader:register_mod("tt_procedural_campaign")
+    -- mod_loader:register_mod("tt_procedural_campaign")
     local game_data = mod_loader:load_mod_data()
 
     ---@type Game
