@@ -81,12 +81,27 @@ function battle_manager.new(
     self.character_manager = char_man
     self.music_player = music_player
 
-    local battle_def = game_data.missions[battle_id](campaign_config, rng_context)
+    local pre_map_def = game_data.maps[battle_id]
+    local rect_zones = pre_map_def and map_generator.extract_rect_zones(pre_map_def) or {}
+    local map_context = { rect_zones = rect_zones }
+
+    local battle_def = game_data.missions[battle_id](campaign_config, rng_context, map_context)
     local map_def = game_data.maps[battle_def.map_id]
     log.debug("Loading map '" ..
         tostring(battle_def.map_id) ..
         "' type='" .. tostring(map_def and map_def.type) .. "' file='" .. tostring(map_def and map_def.file) .. "'")
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels, game_data.gfx_registry)
+
+    if battle_def.point_labels then
+        for label, points in pairs(battle_def.point_labels) do
+            if self.battle_map.tile_labels[label] == nil then
+                self.battle_map.tile_labels[label] = {}
+            end
+            for _, p in ipairs(points) do
+                table.insert(self.battle_map.tile_labels[label], p)
+            end
+        end
+    end
     log.debug("Generated battle map with size " .. self.battle_map.width .. "x" .. self.battle_map.height .. ".")
 
     self.tactics_engine = tactics_engine.new(

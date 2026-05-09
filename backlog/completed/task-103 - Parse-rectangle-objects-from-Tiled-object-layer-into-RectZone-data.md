@@ -1,10 +1,10 @@
 ---
 id: TASK-103
 title: Parse rectangle objects from Tiled object layer into RectZone data
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-09 17:00'
-updated_date: '2026-05-09 17:09'
+updated_date: '2026-05-09 17:23'
 labels: []
 milestone: m-16
 dependencies: []
@@ -29,9 +29,9 @@ This is the foundation for the rect-zone-spawning feature; subsequent tasks depe
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A spec in map_generator_spec.lua covers a map with a named rectangle object; the parsed map.rect_zones entry has correct tile-coord x, y, w, h values.
-- [ ] #2 Existing point-object and spawn_group tests continue to pass.
-- [ ] #3 make test is green.
+- [x] #1 A spec in map_generator_spec.lua covers a map with a named rectangle object; the parsed map.rect_zones entry has correct tile-coord x, y, w, h values.
+- [x] #2 Existing point-object and spawn_group tests continue to pass.
+- [x] #3 make test is green.
 <!-- AC:END -->
 
 ## Definition of Done

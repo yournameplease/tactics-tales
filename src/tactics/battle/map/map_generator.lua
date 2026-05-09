@@ -342,6 +342,18 @@ local function load_static(definition, tile_labels)
     return map
 end
 
+--- Extract rect zones from a map definition without performing a full map load.
+--- Returns an empty table for non-tiled map types.
+---@param definition MapDefinition
+---@return table<string, RectZone>
+function map_generator.extract_rect_zones(definition)
+    if definition.type ~= "tiled" then return {} end
+    local tiled_def = definition --[[@as TiledMapDefinition]]
+    local tiled_data = include(tiled_def.file .. ".lua")
+    if tiled_data == nil then return {} end
+    return extract_rect_zones(tiled_data)
+end
+
 --- Load and return a BattleMap from the given map definition and label mapping.
 ---@param definition MapDefinition Map definition specifying type and source file.
 ---@param labels table<string, integer[]> Metatile indices grouped by label name.

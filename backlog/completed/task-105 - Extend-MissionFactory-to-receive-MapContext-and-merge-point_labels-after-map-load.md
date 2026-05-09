@@ -3,9 +3,10 @@ id: TASK-105
 title: >-
   Extend MissionFactory to receive MapContext and merge point_labels after map
   load
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-09 17:00'
+updated_date: '2026-05-09 17:55'
 labels: []
 milestone: m-16
 dependencies: []
@@ -38,10 +39,10 @@ All existing factories that accept two args remain valid (Lua ignores extra args
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 MissionFactory type annotation reflects three-arg signature.
-- [ ] #2 battle_manager passes a populated map_context to the factory.
-- [ ] #3 point_labels returned by the factory are merged into BattleMap.tile_labels before battle start.
-- [ ] #4 Existing missions (skirmish, abandoned_fortress_seize) work unchanged — make test green.
+- [x] #1 MissionFactory type annotation reflects three-arg signature.
+- [x] #2 battle_manager passes a populated map_context to the factory.
+- [x] #3 point_labels returned by the factory are merged into BattleMap.tile_labels before battle start.
+- [x] #4 Existing missions (skirmish, abandoned_fortress_seize) work unchanged — make test green.
 <!-- AC:END -->
 
 ## Definition of Done
