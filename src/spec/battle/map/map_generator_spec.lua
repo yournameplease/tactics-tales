@@ -536,6 +536,58 @@ describe("battle.map.map_generator", function()
     end)
 
     -- -----------------------------------------------------------------------
+    -- load_map — rect_zones
+    -- -----------------------------------------------------------------------
+
+    describe("load_map rect_zones (tiled)", function()
+        local function make_rect_obj(x, y, w, h)
+            return { shape = "rectangle", x = x, y = y, width = w, height = h }
+        end
+
+        it("should parse a rectangle object into tile-coord x, y, w, h", function()
+            -- tilewidth=16, tileheight=16; pixel rect (32,48,64,32) -> tile (2,3,4,2)
+            local tiled = make_tiled_map(8, 8, {
+                { type = "tilelayer",   name = "ground",    width = 8, height = 8, data = make_tile_data(8, 8, 1) },
+                { type = "objectgroup", name = "obj_zone",  objects = { make_rect_obj(32, 48, 64, 32) } },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+
+            luassert.is_not_nil(map.rect_zones["obj_zone"])
+            luassert.are_equal(2, map.rect_zones["obj_zone"].x)
+            luassert.are_equal(3, map.rect_zones["obj_zone"].y)
+            luassert.are_equal(4, map.rect_zones["obj_zone"].w)
+            luassert.are_equal(2, map.rect_zones["obj_zone"].h)
+        end)
+
+        it("should not include a layer in rect_zones when it has no rectangles", function()
+            local tiled = make_tiled_map(4, 4, {
+                { type = "tilelayer",   name = "ground",   width = 4, height = 4, data = make_tile_data(4, 4, 1) },
+                { type = "objectgroup", name = "pts_only", objects = {
+                    { shape = "point", x = 16, y = 16, properties = {} }
+                }},
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+
+            luassert.is_nil(map.rect_zones["pts_only"])
+        end)
+
+        it("should produce an empty rect_zones table when no object layers exist", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2, data = make_tile_data(2, 2, 1) },
+            })
+            local restore = stub_include(tiled)
+            local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
+            restore()
+
+            luassert.are_same({}, map.rect_zones)
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
     -- load_map — unknown type
     -- -----------------------------------------------------------------------
 

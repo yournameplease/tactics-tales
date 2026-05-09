@@ -30,6 +30,12 @@
 ---@field character_source CharacterSource
 ---@field ai? UnitAI AI behavior definition for units at this slot.
 
+---@class RectZone
+---@field x integer Left tile column (inclusive).
+---@field y integer Top tile row (inclusive).
+---@field w integer Width in tiles.
+---@field h integer Height in tiles.
+
 ---@class LayerSpawnData
 ---@field side Side Which team these units belong to.
 ---@field movement_side? string Movement team identifier; defaults to side.

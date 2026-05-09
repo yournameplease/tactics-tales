@@ -47,6 +47,7 @@ local lists = require("src.tactics.util.lists")
 ---@field interactions_by_x_y Array2D<table<TileDistance, table<ScriptId, TileInteractionHook>>>
 ---@field tile_labels table<string, Point[]> Points grouped by semantic tile label.
 ---@field spawn_groups table<string, SpawnGroup> Named spawn groups extracted from Tiled object layers.
+---@field rect_zones table<string, RectZone> Named rectangle zones extracted from Tiled object layers.
 ---@field layers MapLayers Sprite layers making up the map.
 ---@field metadata MapMetadata Spawn point and event metadata.
 local BattleMap = {}
