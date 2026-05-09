@@ -1,9 +1,10 @@
 ---
 id: TASK-104
 title: Add strength_cost to faction slot definitions
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-09 17:00'
+updated_date: '2026-05-09 17:47'
 labels: []
 milestone: m-16
 dependencies: []
@@ -24,9 +25,9 @@ The existing `resolve_slot()` function must not change signature or behaviour.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 resolve_slot_cost(faction, 'enemy_infantry') returns the correct integer for each defined faction.
-- [ ] #2 resolve_slot_cost falls back to 1 for an undefined slot tag rather than erroring.
-- [ ] #3 make test is green.
+- [x] #1 resolve_slot_cost(faction, 'enemy_infantry') returns the correct integer for each defined faction.
+- [x] #2 resolve_slot_cost falls back to 1 for an undefined slot tag rather than erroring.
+- [x] #3 make test is green.
 <!-- AC:END -->
 
 ## Definition of Done
