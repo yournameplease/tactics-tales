@@ -126,6 +126,7 @@ local HANDLERS = {
         end,
         exit = function(campaign)
             campaign.campaign_page:clear_chapter_header()
+            campaign.page_flip_animator:begin_flip("forward", function() end)
         end,
         update = dialogue_update,
     },
