@@ -178,11 +178,113 @@ function HANDLERS.apply_volume(services, _session_context, value)
     return nil
 end
 
----@param dest string
----@return table
-local function nav_back(dest)
+--- Navigate forward to NEW_FILE_SELECT with a page flip.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.to_new_file_select(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("NEW_FILE_SELECT") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Navigate forward to LOAD_FILE_SELECT with a page flip.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.to_load_file_select(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("LOAD_FILE_SELECT") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Navigate forward to CHAPTER_SELECT with a page flip.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.to_chapter_select(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("CHAPTER_SELECT") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Navigate forward to OPTIONS_MENU with a page flip.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.to_options(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("OPTIONS_MENU") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Navigate forward to CAMPAIGN_CONFIG with a page flip.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.flip_to_campaign_config(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("CAMPAIGN_CONFIG") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Store the selected file then flip forward to CONFIRM_FILE.
+---@param services GameMenuContext
+---@param ctx MainMenuContext
+---@param file CampaignId
+---@return MenuHandlerPostHandling
+function HANDLERS.store_and_flip_to_confirm(services, ctx, file)
+    ctx.selected_file = file
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("CONFIRM_FILE") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Store the selected file then flip forward to CAMPAIGN_CONFIG.
+---@param services GameMenuContext
+---@param ctx MainMenuContext
+---@param file CampaignId
+---@return MenuHandlerPostHandling
+function HANDLERS.store_and_flip_to_config(services, ctx, file)
+    ctx.selected_file = file
+    services.page_flip_animator:begin_flip("forward", function() services.navigate_to("CAMPAIGN_CONFIG") end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Flip backward to the current step's previous_step.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.flip_back(services, _ctx, _value)
+    services.page_flip_animator:begin_flip("backward", function() services.navigate_back() end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Save options then flip backward to MAIN_MENU.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param value DynamicConfig
+---@return MenuHandlerPostHandling
+function HANDLERS.save_and_back_to_main(services, _ctx, value)
+    services.config_manager:store_config(value)
+    services.page_flip_animator:begin_flip("backward", function() services.navigate_back() end)
+    return menu_handler.then_dont_navigate()
+end
+
+--- Reset options to defaults then flip backward to MAIN_MENU.
+---@param services GameMenuContext
+---@param _ctx MainMenuContext
+---@param _value any
+---@return MenuHandlerPostHandling
+function HANDLERS.reset_and_back_to_main(services, _ctx, _value)
+    services.config_manager:reset_config()
+    services.page_flip_animator:begin_flip("backward", function() services.navigate_back() end)
+    return menu_handler.then_dont_navigate()
+end
+
+local function nav_back_row()
     return list.row("options_navigation", function(_msb, _ctx)
-        return { button.builder("back"):with_text("Back"):advance_to(dest) }
+        return { button.builder("back"):with_text("Back"):handle_action("select", "flip_back") }
     end)
 end
 
@@ -207,22 +309,23 @@ local MENU_DATA = {
 
                             table.insert(options, button.builder("begin_campaign")
                                 :with_text("New Game")
-                                :advance_to("NEW_FILE_SELECT"))
+                                :handle_action("select", "to_new_file_select"))
                             table.insert(options, button.builder("load_campaign")
                                 :with_text("Load Game")
-                                :advance_to("LOAD_FILE_SELECT"))
+                                :handle_action("select", "to_load_file_select"))
                             table.insert(options, button.builder("to_chapter_select")
                                 :with_text("Chapter Select")
-                                :advance_to("CHAPTER_SELECT"))
+                                :handle_action("select", "to_chapter_select"))
                             table.insert(options, button.builder("to_options")
                                 :with_text("Options")
-                                :advance_to("OPTIONS_MENU"))
+                                :handle_action("select", "to_options"))
 
                             return options
                         end
                     )
                 )
                 :with_previous_step("TITLE_SCREEN")
+                :handle_action("back", "flip_back")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["NEW_FILE_SELECT"] = step_definition.of_node(
@@ -240,21 +343,20 @@ local MENU_DATA = {
                                     :with_value(file_name)
 
                                 if lists.contains(existing_files, file_name) then
-                                    b = b:handle_action("select", "store_selected_save")
-                                        :advance_to("CONFIRM_FILE")
+                                    b = b:handle_action("select", "store_and_flip_to_confirm")
                                 else
-                                    b = b:handle_action("select", "store_selected_save")
-                                        :advance_to("CAMPAIGN_CONFIG")
+                                    b = b:handle_action("select", "store_and_flip_to_config")
                                 end
                                 table.insert(options, b)
                             end
 
-                            table.insert(options, nav_back("MAIN_MENU"))
+                            table.insert(options, nav_back_row())
                             return options
                         end
                     )
                 )
                 :with_previous_step("MAIN_MENU")
+                :handle_action("back", "flip_back")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["CONFIRM_FILE"] = step_definition.of_node(
@@ -268,16 +370,17 @@ local MENU_DATA = {
                                 :with_text("Confirm overwrite " .. ctx.selected_file .. "?"))
                             table.insert(options, button.builder("confirm_overwrite")
                                 :with_text("Confirm")
-                                :advance_to("CAMPAIGN_CONFIG"))
+                                :handle_action("select", "flip_to_campaign_config"))
                             table.insert(options, button.builder("no_overwrite")
-                                :advance_to("NEW_FILE_SELECT")
-                                :with_text("Back"))
+                                :with_text("Back")
+                                :handle_action("select", "flip_back"))
 
                             return options
                         end
                     )
                 )
                 :with_previous_step("NEW_FILE_SELECT")
+                :handle_action("back", "flip_back")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["LOAD_FILE_SELECT"] = step_definition.of_node(
@@ -297,12 +400,13 @@ local MENU_DATA = {
                                 table.insert(options, b)
                             end
 
-                            table.insert(options, nav_back("MAIN_MENU"))
+                            table.insert(options, nav_back_row())
                             return options
                         end
                     )
                 )
                 :with_previous_step("MAIN_MENU")
+                :handle_action("back", "flip_back")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["CAMPAIGN_CONFIG"] = step_definition.of_node(
@@ -354,14 +458,15 @@ local MENU_DATA = {
                                 :handle_action("select", "begin_file_from_context")
                                 :as_final_step())
                             table.insert(options, button.builder("no_begin")
-                                :advance_to("NEW_FILE_SELECT")
-                                :with_text("Back"))
+                                :with_text("Back")
+                                :handle_action("select", "flip_back"))
 
                             return options
                         end
                     )
                 )
                 :with_previous_step("NEW_FILE_SELECT")
+                :handle_action("back", "flip_back")
                 :with_initial_data(function(msb, _ctx)
                     ---@cast msb GameMenuContext
                     local def = msb.campaigns[msb.default_campaign_id]
@@ -394,12 +499,13 @@ local MENU_DATA = {
                                     :handle_action("select", "begin_chapter"))
                             end
 
-                            table.insert(options, nav_back("MAIN_MENU"))
+                            table.insert(options, nav_back_row())
                             return options
                         end
                     )
                 )
                 :with_previous_step("MAIN_MENU")
+                :handle_action("back", "flip_back")
                 :with_action("BUTTON_A", { command = "select", description = "Select" })
                 :with_action("BUTTON_B", { command = "back", description = "Back" }),
             ["OPTIONS_MENU"] = step_definition.of_node(
@@ -495,22 +601,21 @@ local MENU_DATA = {
                                     local options = {}
                                     table.insert(options, button.builder("back")
                                         :with_text("Back")
-                                        :advance_to("MAIN_MENU"))
+                                        :handle_action("select", "flip_back"))
                                     table.insert(options, button.builder("reset")
                                         :with_text("Defaults")
-                                        :handle_action("select", "reset_options")
-                                        :advance_to("MAIN_MENU"))
+                                        :handle_action("select", "reset_and_back_to_main"))
                                     table.insert(options, button.builder("save")
                                         :with_text("Save")
-                                        :handle_action("select", "set_options")
-                                        :advance_to("MAIN_MENU"))
+                                        :handle_action("select", "save_and_back_to_main"))
                                     return options
                                 end))
 
                             return children
                         end
                     )
-                ):with_initial_data(function(_services, _session_data)
+                ):with_previous_step("MAIN_MENU")
+                :with_initial_data(function(_services, _session_data)
                     return DYNAMIC_CONFIG
                 end)
                 :with_action("BUTTON_A", { command = "select", description = "Select" }),
@@ -521,13 +626,14 @@ local MENU_DATA = {
 --- Create a new GameMenuManager for the main game menu.
 ---@param ctx GameMenuContext
 ---@param bus EventBus
+---@param animator PageFlipAnimator
 ---@return GameMenuManager
-function game_menu_manager.new(ctx, bus)
-    return menu_manager.new(
-        MENU_DATA,
-        ctx,
-        bus
-    ) --[[@as GameMenuManager]]
+function game_menu_manager.new(ctx, bus, animator)
+    local m = menu_manager.new(MENU_DATA, ctx, bus)
+    ctx.page_flip_animator = animator
+    ctx.navigate_to = function(step) m:handle_menu_advance(step) end
+    ctx.navigate_back = function(target) m:handle_menu_back(target) end
+    return m --[[@as GameMenuManager]]
 end
 
 return game_menu_manager
