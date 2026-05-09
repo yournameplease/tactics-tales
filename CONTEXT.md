@@ -20,6 +20,15 @@ _Avoid_: Character (use Character for the persistent entity), BattleUnit (intern
 The persistent group of player-owned Characters available across battles. Characters join the roster via recruitment and leave it permanently via permadeath.
 _Avoid_: Party, team, squad
 
+**Turn**:
+One full cycle of play consisting of up to three Phases (player → neutral → enemy). A Turn begins when the player phase starts and ends when all Phases have resolved, after which the turn counter increments and a new Turn begins.
+_Avoid_: Round (tabletop term that collides with Turn)
+
+**Phase**:
+One side's action window within a Turn — the period during which all units of that side act. A Phase only exists if the side has at least one unit on the map that turn; if a side has no units, no Phase occurs for it.
+_Avoid_: Step (collides with unit movement), Round
+_Note_: The phase banner displays "Ally Phase" for the neutral side — this is a presentation artifact. The canonical Side name is `neutral`.
+
 **Combat**:
 A full exchange between two units — an attack from the initiating unit followed by a counterattack from the defender (if eligible). Counterattacks can be prevented by weapon range mismatches (melee vs ranged) or certain weapon effects.
 
@@ -91,6 +100,7 @@ _Note_: The code uses `StoryDefinition` / `Story` — the player-facing term is 
 - **Recruitment** adds a Character to the Roster — either via a **Battle Script** during a Mission or via a story node in a Campaign
 - **Campaign State** is written and read by story nodes across a Campaign run
 - A **Battle Script** fires when its trigger is met (turn, unit death, interaction) and executes effects against the live battle state
+- A **Turn** consists of up to three **Phases** (player → neutral → enemy); a **Phase** only occurs if the acting **Side** has at least one **Unit** on the map
 - **Combat** is initiated by one **Unit** attacking another; the defender may **Counterattack** depending on weapon range and effects
 - **Deployment** optionally precedes a Mission; the player positions Roster Characters among predefined tiles before the battle begins
 - A **Chapter** (narrative) groups story nodes for the player; the **Battle Index** counts completed battles for stats — neither maps directly to the other

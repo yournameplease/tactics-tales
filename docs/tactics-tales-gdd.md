@@ -102,10 +102,10 @@ Choices will be given between battles.  These will have different options, each 
 
 For example:
 - Choose whether to side with one faction or another.
-- Choose whether to accept a party member with a past which haunts them (and may lead to a future combat encounter.)
-- Allow a unit to leave the party due to personal ties with an enemy. They may appear in a future encounter as a foe.
-- Adopt a pet animal who will fight with one of your units.
-- Allow two units to fall in love. Now the death of one would cause the other to be struck by grief and leave the party or otherwise suffer penalties.
+- Choose whether to accept a new character with a past which haunts them (and may lead to a future combat encounter.)
+- Allow a character to leave the roster due to personal ties with an enemy. They may appear in a future encounter as a foe.
+- Adopt a pet animal who will fight with one of your characters.
+- Allow two characters to fall in love. Now the death of one would cause the other to be struck by grief and leave the roster or otherwise suffer penalties.
 
 ### Gameplay Balance & Pacing
 
@@ -126,7 +126,7 @@ However, it is important that these feel meaningfully different than standard mi
 - Spells and abilities can be learned by units.
 
 The game does not feature "leveling up".
-Stronger enemies will appear later in the campaign, but these shall be overcome by a well prepared and positioned party, not from level grinding.
+Stronger enemies will appear later in the campaign, but these shall be overcome by a well prepared and positioned roster, not from level grinding.
 
 Easier difficulty settings are available for those who prefer a less stressful experience:
 
