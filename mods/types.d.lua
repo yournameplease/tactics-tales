@@ -48,9 +48,11 @@
 ---@class FactionDefinition
 ---@field name string
 ---@field tiers FactionTier[]
+---@field costs table<FactionSlotTag, integer>
 ---@field fallbacks table<FactionSlotTag, FactionSlotTag>
 ---@field recruitable string[] Slot tags (excluding enemy_commander) available for recruitment.
 
 ---@class FactionsModule
 ---@field factions table<string, FactionDefinition>
 ---@field resolve_slot fun(faction: FactionDefinition, tier_index: integer, slot_tag: FactionSlotTag): string?
+---@field resolve_slot_cost fun(faction: FactionDefinition, slot_tag: FactionSlotTag): integer

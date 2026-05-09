@@ -6,6 +6,7 @@ local factions = {
             { enemy_infantry = "bandit_goon", enemy_commander = "bandit_boss",      enemy_tank = "bandit_guard" },
             { enemy_infantry = "bandit_axe",  enemy_commander = "bandit_berzerker", enemy_tank = "bandit_guard" },
         },
+        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
     },
@@ -15,6 +16,7 @@ local factions = {
             { enemy_infantry = "cultist_goon",     enemy_commander = "cultist_boss", enemy_tank = "cultist_guard" },
             { enemy_infantry = "cultist_spearman", enemy_commander = "cultist_boss", enemy_tank = "cultist_guard" },
         },
+        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
     },
@@ -24,6 +26,7 @@ local factions = {
             { enemy_infantry = "militia_spearman", enemy_commander = "militia_spear_captain", enemy_tank = "militia_armor", enemy_ranged = "militia_archer" },
             { enemy_infantry = "militia_sword",    enemy_commander = "militia_sword_captain", enemy_tank = "militia_armor", enemy_ranged = "militia_archer" },
         },
+        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8, enemy_ranged = 3 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank", "enemy_ranged" },
     },
@@ -45,8 +48,20 @@ local function resolve_slot(faction, tier_index, slot_tag)
     return template
 end
 
+---@param faction FactionDefinition
+---@param slot_tag FactionSlotTag
+---@return integer
+local function resolve_slot_cost(faction, slot_tag)
+    if faction.costs then
+        local cost = faction.costs[slot_tag]
+        if cost then return cost end
+    end
+    return 1
+end
+
 ---@type FactionsModule
 return {
-    factions     = factions,
-    resolve_slot = resolve_slot,
+    factions          = factions,
+    resolve_slot      = resolve_slot,
+    resolve_slot_cost = resolve_slot_cost,
 }
