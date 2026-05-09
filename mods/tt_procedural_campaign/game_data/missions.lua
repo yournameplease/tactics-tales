@@ -1,7 +1,9 @@
-local factions_mod     = include("mods/tt_procedural_campaign/game_data/factions.lua")
-local factions_data    = factions_mod.factions
-local resolve_slot     = factions_mod.resolve_slot
-local script_lib       = include("mods/base/lib/script.lua")
+local factions_mod        = include("mods/tt_procedural_campaign/game_data/factions.lua")
+local factions_data       = factions_mod.factions
+local resolve_slot        = factions_mod.resolve_slot
+local resolve_slot_cost   = factions_mod.resolve_slot_cost
+local zones               = include("mods/base/lib/zones.lua")
+local script_lib          = include("mods/base/lib/script.lua")
 local script           = script_lib.script
 local battle_lib       = include("mods/base/lib/battle.lua")
 local battle           = battle_lib.battle
@@ -121,6 +123,65 @@ local battles = {
                     slots = {
                         default = { character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")), ai = ai.move_two },
                     }
+                },
+            },
+            scripts            = {},
+        }
+    end,
+    ["village_overrun"] = function(campaign_config, _rng_context, map_context)
+        local faction    = get_faction(campaign_config)
+        local tier       = get_tier(campaign_config)
+        local base_budget = 4
+        local scale       = 2
+        local budget      = base_budget + tier * scale
+
+        local inf_zone   = map_context.rect_zones["pod_sw"]
+        local inf_count  = zones.unit_count(budget, resolve_slot_cost(faction, "enemy_infantry"))
+        local inf_points = inf_zone and zones.expand(inf_zone, "grid", inf_count) or {}
+
+        local tank_zone   = map_context.rect_zones["pod_w"]
+        local tank_count  = zones.unit_count(budget, resolve_slot_cost(faction, "enemy_tank"))
+        local tank_points = tank_zone and zones.expand(tank_zone, "grid", tank_count) or {}
+
+        local deploy_zone   = map_context.rect_zones["deployment_w"]
+        local deploy_points = deploy_zone and zones.expand(deploy_zone, "grid", 16) or {}
+
+        return {
+            map_id             = "village_overrun",
+            music              = 0,
+            tile_labels        = {},
+            point_labels       = {
+                player_deploy     = deploy_points,
+                enemy_infantry_sw = inf_points,
+                enemy_tank_w      = tank_points,
+                boss_ne           = { { x = 15, y = 4 } },
+            },
+            victory_conditions = { objectives.rout() },
+            failure_conditions = { objectives.tagged_unit_dies("hero") },
+            units              = {
+                {
+                    side             = "player",
+                    character_source = character_source.player_roster(),
+                    tile             = "player_deploy",
+                },
+                {
+                    side             = "enemy",
+                    character_source = character_source.template(resolve_slot(faction, tier, "enemy_commander")),
+                    ai               = ai.stationary,
+                    tile             = "boss_ne",
+                    tags             = { "boss" },
+                },
+                {
+                    side             = "enemy",
+                    character_source = character_source.template(resolve_slot(faction, tier, "enemy_infantry")),
+                    ai               = ai.move_two,
+                    tile             = "enemy_infantry_sw",
+                },
+                {
+                    side             = "enemy",
+                    character_source = character_source.template(resolve_slot(faction, tier, "enemy_tank")),
+                    ai               = ai.stationary,
+                    tile             = "enemy_tank_w",
                 },
             },
             scripts            = {},

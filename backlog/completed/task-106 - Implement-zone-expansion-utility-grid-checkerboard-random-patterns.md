@@ -1,9 +1,10 @@
 ---
 id: TASK-106
 title: 'Implement zone expansion utility (grid, checkerboard, random patterns)'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-09 17:01'
+updated_date: '2026-05-09 18:00'
 labels: []
 milestone: m-16
 dependencies: []
