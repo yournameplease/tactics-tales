@@ -106,6 +106,35 @@ local function tiled_layer_to_userdata(layer_data, map_w, map_h, tile_to_sprite)
     return bmp
 end
 
+--- Extract rectangle objects from Tiled object layers into a rect_zones table.
+--- Only layers containing at least one rectangle object are included.
+---@param tiled_data table
+---@return table<string, RectZone>
+local function extract_rect_zones(tiled_data)
+    local tile_w = tiled_data.tilewidth
+    local tile_h = tiled_data.tileheight
+    local zones = {}
+    for _, layer in ipairs(tiled_data.layers) do
+        if layer.type == "objectgroup" then
+            local layer_zones = {}
+            for _, obj in ipairs(layer.objects or {}) do
+                if obj.shape == "rectangle" then
+                    table.insert(layer_zones, {
+                        x = math.floor(obj.x / tile_w),
+                        y = math.floor(obj.y / tile_h),
+                        w = math.floor(obj.width / tile_w),
+                        h = math.floor(obj.height / tile_h),
+                    })
+                end
+            end
+            if #layer_zones > 0 then
+                zones[layer.name] = layer_zones[1]
+            end
+        end
+    end
+    return zones
+end
+
 --- Extract object layers from a Tiled map into a spawn_groups table.
 --- Per-layer properties supply defaults; per-object properties override them.
 ---@param tiled_data table
@@ -257,6 +286,7 @@ local function load_tiled(definition, tile_labels, gfx_registry)
     local map = battle_map.new(map_w, map_h, labels)
     map.layers = layers
     map.spawn_groups = extract_spawn_groups(tiled_data)
+    map.rect_zones = extract_rect_zones(tiled_data)
     map.metadata = { player_spawners = {}, enemy_spawners = {} }
 
     return map
