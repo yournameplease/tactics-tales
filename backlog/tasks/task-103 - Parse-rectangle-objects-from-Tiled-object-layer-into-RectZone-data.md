@@ -1,0 +1,38 @@
+---
+id: TASK-103
+title: Parse rectangle objects from Tiled object layer into RectZone data
+status: To Do
+assignee: []
+created_date: '2026-05-09 17:00'
+labels: []
+milestone: m-16
+dependencies: []
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+Extend the map loading pipeline to recognise rectangle objects in Tiled object layers alongside the existing point-object handling.
+
+Context: `extract_spawn_groups()` in `src/tactics/battle/map/map_generator.lua` (line 113) currently skips non-point objects (line 127). Tiled rectangle objects have pixel `x, y, width, height`; convert to tile coords with `/ tile_w` and `/ tile_h` (same as SpawnPoints on lines 130-131).
+
+Changes needed:
+- Define type `RectZone { name: string, x: integer, y: integer, w: integer, h: integer }` in `src/tactics/battle/unit/spawn_data.lua`.
+- Add a rectangle pass inside `extract_spawn_groups` (or a sibling `extract_rect_zones`); use the object's `name` as the zone key.
+- Add field `rect_zones table<string, RectZone>` to `BattleMap` (`src/tactics/battle/battle_map.lua`) and populate it from the generator result.
+
+This is the foundation for the rect-zone-spawning feature; subsequent tasks depend on this data being present on BattleMap.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 A spec in map_generator_spec.lua covers a map with a named rectangle object; the parsed map.rect_zones entry has correct tile-coord x, y, w, h values.
+- [ ] #2 Existing point-object and spawn_group tests continue to pass.
+- [ ] #3 make test is green.
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 All acceptance criteria met
+- [ ] #2 make test passes
+<!-- DOD:END -->
