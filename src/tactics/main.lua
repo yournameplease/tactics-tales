@@ -128,10 +128,16 @@ function _draw()
     end
 
     animation_manager:generate_frame_data()
+    local flip = game_manager:page_flip_animator()
+    if flip then flip:tick() end
     ui_context:enrich()
     profile("draw")
-    ui_manager:calculate(ui_context)
-    ui_manager:draw(ui_context)
+    if flip and flip:is_active() then
+        flip:draw(ui_manager, ui_context, ui_manager.draw_target_manager)
+    else
+        ui_manager:calculate(ui_context)
+        ui_manager:draw(ui_context)
+    end
     profile("draw")
     profile.draw()
 end

@@ -68,8 +68,10 @@ local HANDLERS = {
 
     new_page = {
         enter = function(campaign)
-            campaign.campaign_page:clear_page()
-            campaign:advance_node()
+            campaign.page_flip_animator:begin_flip("forward", function()
+                campaign.campaign_page:clear_page()
+                campaign:advance_node()
+            end)
         end,
     },
 
@@ -124,6 +126,7 @@ local HANDLERS = {
         end,
         exit = function(campaign)
             campaign.campaign_page:clear_chapter_header()
+            campaign.page_flip_animator:begin_flip("forward", function() end)
         end,
         update = dialogue_update,
     },

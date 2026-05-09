@@ -504,26 +504,32 @@ function BaseMenuManager:update(input)
 
             if triggered_command then
                 local handler_id = self.menu_step.handlers and self.menu_step.handlers[triggered_command]
+                local consumed = false
                 if handler_id then
                     local handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
                     assert(handler ~= nil, "Bad handler for id " .. handler_id)
                     log.debug("Calling menu handler: " .. handler_id)
-                    handler(self.game_ctx, self.menu_ctx, nil)
+                    local res = handler(self.game_ctx, self.menu_ctx, nil)
+                    consumed = res ~= nil and res.type == "consume"
                 end
-                if triggered_command == "back" then
+                if triggered_command == "back" and not consumed then
                     self:handle_menu_back()
                 end
             end
         elseif signal.type == "back" then
             ---@cast signal MenuSignalBack
             local handler_id = self.menu_step.handlers and self.menu_step.handlers["back"]
+            local consumed = false
             if handler_id then
                 local handler = self.menu_definitions[self.menu_state.menu_id].handlers[handler_id]
                 assert(handler ~= nil, "Bad handler for id " .. handler_id)
                 log.debug("Calling menu handler: " .. handler_id)
-                handler(self.game_ctx, self.menu_ctx, nil)
+                local res = handler(self.game_ctx, self.menu_ctx, nil)
+                consumed = res ~= nil and res.type == "consume"
             end
-            self:handle_menu_back(signal.target)
+            if not consumed then
+                self:handle_menu_back(signal.target)
+            end
         elseif signal.type == "navigate" then
             ---@cast signal MenuSignalNavigate
             self:handle_menu_advance(signal.target)

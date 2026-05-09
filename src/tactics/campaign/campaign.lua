@@ -10,6 +10,7 @@ local character_manager = require("src.tactics.character.character_manager")
 local stats_service = require("src.tactics.campaign.statistics.stats_service")
 local campaign_ui_context = require("src.tactics.campaign.campaign_ui_context")
 local campaign_page = require("src.tactics.campaign.campaign_page")
+local page_flip_animator = require("src.tactics.animation.page_flip_animator")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
@@ -48,6 +49,7 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field package save_name? string
 ---@field package campaign_id string
 ---@field package campaign_page CampaignPage
+---@field package page_flip_animator PageFlipAnimator
 ---@field package campaign_state CampaignState
 ---@field package character_manager CharacterManager
 ---@field package campaign_menu_context CampaignMenuServices
@@ -289,6 +291,7 @@ function campaign.new(
     -- campaign_config fields (e.g. permadeath) are still accessible via __index.
     self.campaign_config = setmetatable({ memory = self.campaign_state }, { __index = campaign_config })
     self.campaign_page = campaign_page.new(self.campaign_state)
+    self.page_flip_animator = page_flip_animator.new()
     self.menu_manager = campaign_menu_manager.new(
         self.campaign_menu_context,
         event_bus
@@ -368,12 +371,20 @@ function campaign.load(save_name, game_data, task_manager, animation_manager, ev
     return self
 end
 
+--- Return the campaign's PageFlipAnimator.
+---@return PageFlipAnimator
+function Campaign:get_page_flip_animator()
+    return self.page_flip_animator
+end
+
 --- Process one update tick of the campaign, handling input for the active node type.
 ---@param input InputContext
 function Campaign:update(input)
-    local h = HANDLERS[self.current_node.definition.type]
-    if h and h.update then
-        h.update(self, input)
+    if not self.page_flip_animator:is_blocking_input() then
+        local h = HANDLERS[self.current_node.definition.type]
+        if h and h.update then
+            h.update(self, input)
+        end
     end
 end
 

@@ -4,6 +4,7 @@
 
 local campaign = require("src.tactics.campaign.campaign")
 local game_menu_manager = require("src.tactics.game.game_menu_manager")
+local page_flip_animator = require("src.tactics.animation.page_flip_animator")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 local event_listener = require("src.tactics.systems.event_bus.event_listener")
 local event_writer = require("src.tactics.systems.event_bus.event_writer")
@@ -22,9 +23,13 @@ local save_system = require("src.tactics.save.save_system")
 ---@field handle_load_campaign fun(save_id: string) Callback to load an existing campaign save.
 ---@field get_game_saves fun(): string[] Returns list of existing save IDs.
 ---@field config_manager ConfigManager
+---@field page_flip_animator PageFlipAnimator Animator for menu step transitions.
+---@field navigate_to fun(step: string) Navigate forward to a step (records history).
+---@field navigate_back fun(target_step?: string) Navigate back, optionally to a named step.
 
 ---@class Game
 ---@field menu_manager GameMenuManager
+---@field menu_page_flip_animator PageFlipAnimator
 ---@field mod_loader ModLoader
 ---@field config_manager ConfigManager
 ---@field default_campaign CampaignId
@@ -90,13 +95,24 @@ function Game:exit_campaign()
     self.campaign = nil
 end
 
+--- Return the active PageFlipAnimator: campaign's when in a campaign, menu's otherwise.
+---@return PageFlipAnimator
+function Game:page_flip_animator()
+    if self.campaign ~= nil then
+        return self.campaign:get_page_flip_animator()
+    end
+    return self.menu_page_flip_animator
+end
+
 --- Update game state for the current frame.
 ---@param input InputContext
 function Game:update(input)
     if self.campaign ~= nil then
         self.campaign:update(input)
     else
-        self.menu_manager:update(input)
+        if not self.menu_page_flip_animator:is_blocking_input() then
+            self.menu_manager:update(input)
+        end
     end
 end
 
@@ -129,7 +145,7 @@ function game.new(
     mod_loader:register_mod("base")
     mod_loader:register_mod("tactics_puzzler")
     mod_loader:register_mod("tt_fantasy_demo_story")
-    mod_loader:register_mod("tt_procedural_campaign")
+    -- mod_loader:register_mod("tt_procedural_campaign")
     local game_data = mod_loader:load_mod_data()
 
     ---@type Game
@@ -141,6 +157,8 @@ function game.new(
     self.event_writer = event_writer.new(event_bus)
     self.music_player = music_player
 
+    self.menu_page_flip_animator = page_flip_animator.new()
+
     ---@type GameMenuContext
     local game_menu_ctx = {
         default_campaign_id = game_data.campaigns.default_campaign,
@@ -150,8 +168,12 @@ function game.new(
         get_game_saves = save_system.list_saves,
         handle_begin_campaign = function(file, id, config) self:begin_campaign(file, id, config) end,
         handle_load_campaign = function(file) self:load_campaign(file) end,
+        -- filled in by game_menu_manager.new():
+        page_flip_animator = self.menu_page_flip_animator,
+        navigate_to = function(_) end,
+        navigate_back = function(_) end,
     }
-    self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus)
+    self.menu_manager = game_menu_manager.new(game_menu_ctx, event_bus, self.menu_page_flip_animator)
     self.menu_manager:set_menu("MENU_MAIN_MENU")
 
     self.campaign_services_bundle = {

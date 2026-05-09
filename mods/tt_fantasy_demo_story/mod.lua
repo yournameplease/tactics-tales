@@ -21,6 +21,7 @@ return {
             "fortress_town",
             "cliff_crossing",
             "castle_defense",
+            "page_flip_test",
             -- "demo_playground",
             -- "model_room",
         },
