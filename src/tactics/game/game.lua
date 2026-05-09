@@ -145,7 +145,7 @@ function game.new(
     mod_loader:register_mod("base")
     mod_loader:register_mod("tactics_puzzler")
     mod_loader:register_mod("tt_fantasy_demo_story")
-    -- mod_loader:register_mod("tt_procedural_campaign")
+    mod_loader:register_mod("tt_procedural_campaign")
     local game_data = mod_loader:load_mod_data()
 
     ---@type Game
