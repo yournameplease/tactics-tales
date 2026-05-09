@@ -10,7 +10,7 @@ providing a bite-sized version of inspirational games in the genre, such as Fire
 
 ### Design Pillars
 
-We give design pillars to ground our goals. The game is built to achieve these goals.
+We give design pillars to ground our goals.
 
 #### Surprise
 
@@ -56,7 +56,7 @@ Emergent narrative through a standard fantasy plot exists,
 but plot is kept intentionally light to maintain a small scale
 and to give space for player choices to feel impactful to the narrative.
 
-The game also intends to appeal to fans of "strategic" roguelikes, such as *FTL: Faster Than Light* and *Slay the Spire*.  The campaign layer is comparable to the map layer of these two games.  The battle layer is different, but will still appeal to this kind of player's tactical sensibilities.  A typical run in this game can exceed an hour, though, unlike the above games.  Configuration settings will be provided to shorten runs to a more manageable time-frame, for these kinds of players.
+The game also intends to appeal to fans of "strategic" roguelikes, such as *FTL: Faster Than Light* and *Slay the Spire*.  The campaign layer is comparable to the map layer of these two games.  The battle layer is different, but will still appeal to this kind of player's tactical sensibilities.  A typical run in this game can exceed an hour, though, unlike the above games.  Configuration settings may be provided to shorten runs to a more manageable time-frame for these players.
 
 ### Core Gameplay
 
@@ -72,7 +72,7 @@ An action consists of one movement followed by an optional attack or skill.
 
 Attack initiates a combat.
 
-In general, maps will be a single screen (tentatively 20x16 tiles).  This keeps the entire battle small and readable.
+In general, maps will be a single screen (16x16 tiles).  This keeps the entire battle small and readable.
 Certain story-defined missions may have a larger play area and support screen scrolling.
 
 Any player unit which dies in combat will be permanently removed from the player roster.
@@ -150,7 +150,7 @@ but must still be obvious enough that a player knows to look for detail text.
 Each side will have a color palette which is shared by most clothing of the character.
 (Blue/Red/Green for Player/Enemy/Neutral. Color blindness settings will be available to change the colors.)
 
-*CONTINGENT ON FINDING ASSETS OR COMMISSIONING SOMEBODY TO HELP:*
+> **CONTINGENT ON FINDING ASSETS OR COMMISSIONING SOMEBODY TO HELP:**
 I'm interested in making piecewise profile drawings to mirror the sprites for dialogue boxes, HUDs, etc.
 These would be one-color line art of the face at a 3/4 side-profile.
 
@@ -167,7 +167,7 @@ A child listening to fairytales is partly at the mercy of the truth, but will ha
 
 > **Storyteller:** (*thinking*) *Well, the story doesn't say, so...* Let's see how that plays out.
 
-Evoke the storybook opening to *Paper Mario: The Thousand Year Door*.  Tactics pieces are like pop-up book elements.
+Evoke the storybook opening to *Paper Mario: The Thousand Year Door*.  Characters and environment decorations are like pop-up book elements.
 
 <!-- insert Paper Mario Title screen screenshot. -->
 
@@ -240,15 +240,3 @@ Steam workshop integration could be added as an incentive for a Steam purchasers
 <!-- Q: Is the mad-lib actually valuable? I find it endearing, but it would need to be configurable / skippable for power players. Tomodachi Life is a new source that inspires me to continue with this concept. -->
 <!-- Q: Do I even have a compelling game here? I think... maybe? Should I be sharing the demo in relevant communities to gather feedback? -->
 <!-- Q: Do I care about selling this game? Why do I care? -->
-<!-- Q: -->
-
-
-<!-- Things I might want to do: -->
-
-<!-- Start posting now and gather feedback before deciding to continue. -->
-<!-- Polish current demo, mark as 1.0, and gather feedback before deciding to continue. -->
-
-<!-- Aim for a Steam release (Goal: year end or early 2027) -->
-<!-- Aim for a non-Steam free release (Goal: year end or early 2027) -->
-
-<!-- Quit now and build something else.  (prefered not) -->
