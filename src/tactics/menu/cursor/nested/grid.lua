@@ -31,6 +31,7 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field children NestedGridChild[]
 ---@field text_array? Array2D Per-tile text overlay computed by text_function.
 ---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
+---@field on_change? string Handler ID emitted when cursor moves to a new tile.
 local NestedGridNode = {}
 NestedGridNode.__index = NestedGridNode
 
@@ -230,14 +231,18 @@ end
 ---@param _child MenuNode
 function NestedGridNode:claim_focus(selection, _child)
     self.has_focus = true
+    local moved = false
     if selection ~= nil then
         if selection.type == "grid" then
             ---@cast selection GridMouseSelection
-            self:move_cursor(point.of(selection.x, selection.y))
+            moved = self:move_cursor(point.of(selection.x, selection.y))
         end
     end
     if self.parent then
         self.parent:claim_focus(nil, self)
+    end
+    if moved and self.on_change then
+        return menu_signal.on_change(self.on_change, self:get_nested_grid_value())
     end
 end
 
@@ -251,7 +256,6 @@ function NestedGridNode:handle_command(command, menu_ctx, game_ctx)
 
     for _, leaf in ipairs(focused_leaves) do
         if leaf ~= nil then
-            log.debug("Focused leaf: " .. leaf.id .. " at " .. tostring(self.point) .. " for " .. self.id)
             if leaf.type == "button" then
                 leaf.value = self:get_nested_grid_value()
             end
@@ -261,7 +265,6 @@ function NestedGridNode:handle_command(command, menu_ctx, game_ctx)
             end
         end
     end
-    log.debug("No focused leaf: " .. tostring(self.point) .. " for " .. self.id)
     return menu_signal.ignored()
 end
 
@@ -349,7 +352,6 @@ function NestedGridDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
         cursor.legal_tiles = self.get_tile_highlights(game_ctx, menu_ctx)
         if self.get_max_path_length ~= nil then
             cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
-            log.debug("Max Path Length: " .. cursor.max_path_length)
             if self.get_path_anchor then
                 cursor.path = { self.get_path_anchor(game_ctx, menu_ctx) }
             else
