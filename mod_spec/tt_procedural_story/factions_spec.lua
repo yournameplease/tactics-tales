@@ -1,8 +1,9 @@
-local luassert     = require("luassert")
+local luassert        = require("luassert")
 
-local factions_mod = require("tt_procedural_campaign.game_data.factions")
-local factions     = factions_mod.factions
-local resolve_slot = factions_mod.resolve_slot
+local factions_mod    = require("tt_procedural_campaign.game_data.factions")
+local factions        = factions_mod.factions
+local resolve_slot    = factions_mod.resolve_slot
+local resolve_slot_cost = factions_mod.resolve_slot_cost
 
 describe("tt_procedural_campaign.factions", function()
     describe("faction data", function()
@@ -89,6 +90,37 @@ describe("tt_procedural_campaign.factions", function()
                 fallbacks = {},
             }
             luassert.is_nil(resolve_slot(faction_no_fallback, 1, "enemy_ranged"))
+        end)
+    end)
+
+    describe("resolve_slot_cost", function()
+        it("returns the defined cost for enemy_infantry", function()
+            luassert.are_equal(2, resolve_slot_cost(factions.bandits, "enemy_infantry"))
+        end)
+
+        it("returns the defined cost for enemy_tank", function()
+            luassert.are_equal(5, resolve_slot_cost(factions.bandits, "enemy_tank"))
+        end)
+
+        it("returns the defined cost for enemy_commander", function()
+            luassert.are_equal(8, resolve_slot_cost(factions.bandits, "enemy_commander"))
+        end)
+
+        it("returns 1 for an undefined slot tag", function()
+            luassert.are_equal(1, resolve_slot_cost(factions.bandits, "enemy_ranged"))
+        end)
+
+        it("falls back to 1 when costs table is absent", function()
+            local faction_no_costs = {
+                name = "test",
+                tiers = { { enemy_infantry = "foo" } },
+                fallbacks = {},
+            }
+            luassert.are_equal(1, resolve_slot_cost(faction_no_costs, "enemy_infantry"))
+        end)
+
+        it("militia has a defined cost for enemy_ranged", function()
+            luassert.are_equal(3, resolve_slot_cost(factions.militia, "enemy_ranged"))
         end)
     end)
 end)
