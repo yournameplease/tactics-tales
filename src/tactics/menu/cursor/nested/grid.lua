@@ -50,6 +50,7 @@ NestedGridChildDefinition.__index = NestedGridChildDefinition
 ---@field get_path_anchor (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
 ---@field get_max_path_length (fun(game_ctx: GameContext, menu_ctx: MenuContext): integer)?
 ---@field get_initial_point (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
+---@field on_change? string Handler ID emitted when cursor moves to a new tile.
 local NestedGridDefinition = {}
 NestedGridDefinition.__index = NestedGridDefinition
 
@@ -178,6 +179,9 @@ function NestedGridNode:update_joy(joy, commands, menu_ctx, game_ctx)
     end
 
     if moved then
+        if self.on_change then
+            return menu_signal.on_change(self.on_change, self:get_nested_grid_value())
+        end
         return menu_signal.consumed()
     else
         return menu_signal.ignored()
@@ -302,6 +306,9 @@ function NestedGridNode:deserialize(state, data)
         self.point = state.point:copy()
         self.path = state.path
         self.legal_tiles = state.tile_highlights
+    end
+    if data["_grid_path"] ~= nil then
+        self.path = data["_grid_path"]
     end
     for _, child in ipairs(self.children) do
         child.child:deserialize(state and state.children and state.children[child.child.id] or nil, data)
@@ -464,6 +471,14 @@ end
 ---@return NestedGridDefinition
 function NestedGridDefinition:with_initial_point(get_initial_point)
     self.get_initial_point = get_initial_point
+    return self
+end
+
+--- Set a handler ID to be called whenever the cursor moves to a new tile.
+---@param handler_id string
+---@return NestedGridDefinition
+function NestedGridDefinition:with_on_change(handler_id)
+    self.on_change = handler_id
     return self
 end
 

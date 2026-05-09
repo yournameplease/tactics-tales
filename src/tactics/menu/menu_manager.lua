@@ -33,7 +33,7 @@ local menu_signal = menu_cursor.menu_signal
 ---@field type "navigate"
 ---@field next_step string Step to navigate to.
 
----@alias MenuHandler<TServices, TSession> fun(services: TServices, session_context: TSession, value: any): MenuHandlerPostHandling?
+---@alias MenuHandler<TServices, TSession> fun(services: TServices, session_context: TSession, value: any, signal_value: any): MenuHandlerPostHandling?
 
 local menu_handler = {}
 
@@ -540,7 +540,8 @@ function BaseMenuManager:update(input)
             local handler_res = handler(
                 self.game_ctx,
                 self.menu_ctx,
-                self:serialize().node.data
+                self:serialize().node.data,
+                signal.value
             )
             if handler_res and handler_res.type == "deserialize" then
                 ---@cast handler_res MenuHandlerDeserialize

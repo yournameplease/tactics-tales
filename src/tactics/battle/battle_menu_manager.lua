@@ -445,14 +445,74 @@ end
 
 ---@param services BattleMenuContext
 ---@param session_context BattleMainMenuContext
+---@param _data any
+---@param value NestedGridValue
+---@return MenuHandlerPostHandling?
+function PLAYER_TURN_HANDLERS.trim_attack_path(services, session_context, _data, value)
+    if not point_is_enemy_unit(value.point, services.battle_map) then return nil end
+    local acting_unit = session_context.acting_unit
+    if not acting_unit then return nil end
+    local unit = acting_unit.unit
+    local targeting = unit.character:get_weapon_targeting()
+    local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(unit)
+
+    for i = #value.path, 1, -1 do
+        if targeting.is_target_valid(value.path[i], value.point, services.battle_map)
+            and services.battle_map:get_at_tile(value.path[i]) == nil
+        then
+            local trimmed_path = {}
+            for j = 1, i do trimmed_path[j] = value.path[j] end
+            return menu_manager.menu_handler.then_deserialize({ _grid_path = trimmed_path })
+        end
+    end
+
+    local valid_attack_points = {}
+    for x = 0, services.battle_map.width - 1 do
+        for y = 0, services.battle_map.height - 1 do
+            local tile_data = valid_tiles:get(x, y)
+            if tile_data ~= nil and tile_data & 0x1 ~= 0 then
+                local p = point.of(x, y)
+                local occupant = services.battle_map:get_at_tile(p)
+                if (occupant == nil or occupant.id == unit.id)
+                    and targeting.is_target_valid(p, value.point, services.battle_map)
+                then
+                    table.insert(valid_attack_points, p)
+                end
+            end
+        end
+    end
+    if #valid_attack_points == 0 then return nil end
+
+    local cursor_point = value.path[#value.path]
+    local destination_point = valid_attack_points[1]
+    local best_dist = math.abs(destination_point.x - cursor_point.x) + math.abs(destination_point.y - cursor_point.y)
+    for i = 2, #valid_attack_points do
+        local p = valid_attack_points[i]
+        local d = math.abs(p.x - cursor_point.x) + math.abs(p.y - cursor_point.y)
+        if d < best_dist then
+            best_dist = d
+            destination_point = p
+        end
+    end
+    local trimmed_path = pathfinding.extend_path_to_point(
+        { acting_unit.point:copy() },
+        destination_point,
+        unit.character.stats.movement,
+        valid_tiles
+    )
+    return menu_manager.menu_handler.then_deserialize({ _grid_path = trimmed_path })
+end
+
+---@param services BattleMenuContext
+---@param session_context BattleMainMenuContext
 ---@param value any
 ---@return MenuHandlerPostHandling?
 function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, session_context, value)
     local target_point = value.point
     local acting_unit = session_context.acting_unit.unit
     local targeting = acting_unit.character:get_weapon_targeting()
-
     local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(acting_unit)
+
     local valid_attack_points = {}
     for x = 0, services.battle_map.width - 1 do
         for y = 0, services.battle_map.height - 1 do
@@ -470,60 +530,18 @@ function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, session_conte
     end
     session_context.valid_attack_points = valid_attack_points
 
-    local destination_point = value.path[#value.path]
-    local valid_destination = false
-    for i = #value.path, 1, -1 do
-        if targeting.is_target_valid(value.path[i], target_point, services.battle_map)
-            and services.battle_map:get_at_tile(value.path[i]) == nil
-        then
-            destination_point = value.path[i]
-            valid_destination = true
-            break
-        end
+    if #valid_attack_points == 0 then
+        return menu_manager.menu_handler.then_dont_navigate()
     end
 
-    local trimmed_path
-    if not valid_destination then
-        if #valid_attack_points == 0 then
-            return menu_manager.menu_handler.then_dont_navigate()
-        end
-        local cursor_point = value.path[#value.path]
-        destination_point = valid_attack_points[1]
-        local best_dist = math.abs(destination_point.x - cursor_point.x) + math.abs(destination_point.y - cursor_point.y)
-        for i = 2, #valid_attack_points do
-            local p = valid_attack_points[i]
-            local d = math.abs(p.x - cursor_point.x) + math.abs(p.y - cursor_point.y)
-            if d < best_dist then
-                best_dist = d
-                destination_point = p
-            end
-        end
-        trimmed_path = pathfinding.extend_path_to_point(
-            { session_context.acting_unit.point:copy() },
-            destination_point,
-            acting_unit.character.stats.movement,
-            valid_tiles
-        )
-    else
-        trimmed_path = {}
-        for i, p in ipairs(value.path) do
-            trimmed_path[i] = p
-            if p == destination_point then
-                break
-            end
-        end
-    end
-
+    local trimmed_path = value.path
+    local destination_point = trimmed_path[#trimmed_path]
     session_context.destination = {
         point = destination_point,
         path = trimmed_path,
     }
-    services.tactics_engine:handle_move_unit(
-        session_context.acting_unit.unit,
-        session_context.destination.point,
-        trimmed_path
-    )
-    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
+    services.tactics_engine:handle_move_unit(acting_unit, destination_point, trimmed_path)
+    session_context.target_unit = { unit = services.battle_map:get_at_tile(target_point) }
     services.tactics_engine.active_point = destination_point
     return nil
 end
@@ -864,6 +882,7 @@ local function make_menu_data(map_width, map_height)
                             ---@cast services BattleMenuContext
                             return services.tactics_engine.active_point
                         end)
+                        :with_on_change("trim_attack_path")
                     )
                     :with_previous_step("SELECT_UNIT")
                     :with_action("BUTTON_A", { command = "select", description = "Select Destination" })
