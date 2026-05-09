@@ -98,7 +98,6 @@ end
 ---@param _ctx BattleMainMenuContext
 ---@return userdata
 local function get_deployment_tiles(msb, _ctx)
-    log.debug("getting deployment tiles")
     return msb.battle_map:get_tiles_userdata_by(
         "u8",
         function(p)
@@ -449,9 +448,13 @@ end
 ---@param value NestedGridValue
 ---@return MenuHandlerPostHandling?
 function PLAYER_TURN_HANDLERS.trim_attack_path(services, session_context, _data, value)
-    if not point_is_enemy_unit(value.point, services.battle_map) then return nil end
+    if not point_is_enemy_unit(value.point, services.battle_map) then
+        return nil
+    end
     local acting_unit = session_context.acting_unit
-    if not acting_unit then return nil end
+    if not acting_unit then
+        return nil
+    end
     local unit = acting_unit.unit
     local targeting = unit.character:get_weapon_targeting()
     local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(unit)
@@ -481,7 +484,9 @@ function PLAYER_TURN_HANDLERS.trim_attack_path(services, session_context, _data,
             end
         end
     end
-    if #valid_attack_points == 0 then return nil end
+    if #valid_attack_points == 0 then
+        return nil
+    end
 
     local cursor_point = value.path[#value.path]
     local destination_point = valid_attack_points[1]

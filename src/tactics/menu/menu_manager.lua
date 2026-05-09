@@ -441,12 +441,15 @@ function BaseMenuManager:update(input)
             function(mouse, hovered)
                 if hovered == nil then hovered = {} end
 
+                local claim_sig = nil
                 if hovered.node then
-                    hovered.node:claim_focus(hovered, nil)
+                    claim_sig = hovered.node:claim_focus(hovered, nil)
                 end
 
                 local sig = menu_signal.ignored()
-                if hovered.node then
+                if claim_sig and claim_sig.type ~= "ignored" then
+                    sig = claim_sig
+                elseif hovered.node then
                     sig = hovered.node:update_mouse(mouse, hovered, self.menu_ctx, self.game_ctx)
                 end
 
