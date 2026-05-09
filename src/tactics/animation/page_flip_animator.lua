@@ -51,7 +51,7 @@ function PageFlipAnimatorImpl:tick()
         return
     end
     self.frame = self.frame + 1
-    if self.frame >= 400 then
+    if self.frame >= 40 then
         self.state = "IDLE"
         self.direction = nil
         self.callback = nil
@@ -89,7 +89,7 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
         self.state = "ANIMATING"
     elseif self.state == "ANIMATING" then
         local half_w = w / 2
-        local t = math_util.smoothstep(self.frame / 400)
+        local t = math_util.smoothstep(self.frame / 40)
         local visible_w = half_w * math.abs(math.cos(t * math.pi))
 
         sspr(self.sprite_a, 0, 0, half_w, h, 0, 0)
