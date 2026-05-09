@@ -117,12 +117,12 @@ function PageFlipAnimatorImpl:draw(ui_manager, ui_context, draw_target_manager)
                         u = half_w + (x - half_w) * (half_w / visible_w)
                     else
                         -- backward+back: sprite_b left half, mirrored at spine
-                        -- u = half_w - (x - half_w) * (half_w / visible_w)
+                        u = half_w + (x - half_w) * (half_w / visible_w)
                     end
                 else
                     if is_front then
                         -- backward+front: sprite_a left half, compressed
-                        -- u = half_w * (x - (half_w - visible_w)) / visible_w
+                        u = half_w * (x - (half_w - visible_w)) / visible_w
                     else
                         -- forward+back: sprite_b left half, mirrored at spine
                         u = half_w - (half_w - x) * (half_w / visible_w)
