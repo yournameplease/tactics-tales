@@ -83,7 +83,8 @@ function battle_manager.new(
 
     local pre_map_def = game_data.maps[battle_id]
     local rect_zones = pre_map_def and map_generator.extract_rect_zones(pre_map_def) or {}
-    local map_context = { rect_zones = rect_zones }
+    local point_zones = pre_map_def and map_generator.extract_point_zones(pre_map_def) or {}
+    local map_context = { rect_zones = rect_zones, point_zones = point_zones }
 
     local battle_def = game_data.missions[battle_id](campaign_config, rng_context, map_context)
     local map_def = game_data.maps[battle_def.map_id]

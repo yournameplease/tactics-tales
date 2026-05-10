@@ -29,6 +29,7 @@
 
 ---@class MapContext
 ---@field rect_zones table<string, RectZone> Named rectangle zones extracted from the map's object layers.
+---@field point_zones table<string, Point[]> Named point arrays extracted from the map's object layers.
 
 -- Returned by game_data/missions.lua
 ---@alias ModMissionsModule table<string, MissionFactory>
