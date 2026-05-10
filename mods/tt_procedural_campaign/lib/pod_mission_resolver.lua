@@ -47,13 +47,13 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
 
     local budget = BASE_BUDGET + tier * SCALE
 
+    -- TODO: sort active_pods and eligible_slots for RNG reproducibility.
     local active_pods = {}
     for name in pairs(map_context.rect_zones or {}) do
         if name:sub(1, 4) == "pod_" and not excluded[name] then
             active_pods[#active_pods + 1] = name
         end
     end
-    table.sort(active_pods)
 
     local eligible_slots = {}
     for slot in pairs(faction.costs) do
@@ -61,7 +61,6 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
             eligible_slots[#eligible_slots + 1] = slot
         end
     end
-    table.sort(eligible_slots)
 
     local point_labels = {}
     local units        = {}
@@ -100,7 +99,6 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
             guard_names[#guard_names + 1] = name
         end
     end
-    table.sort(guard_names)
     for _, name in ipairs(guard_names) do
         point_labels[name] = map_context.point_zones[name]
         units[#units + 1] = {
@@ -117,7 +115,6 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
             boss_names[#boss_names + 1] = name
         end
     end
-    table.sort(boss_names)
     for _, name in ipairs(boss_names) do
         point_labels[name] = map_context.point_zones[name]
         units[#units + 1] = {
