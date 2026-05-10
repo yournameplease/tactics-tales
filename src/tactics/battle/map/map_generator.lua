@@ -342,6 +342,32 @@ local function load_static(definition, tile_labels)
     return map
 end
 
+--- Extract point objects from Tiled object layers into a point_zones table.
+---@param tiled_data table
+---@return table<string, Point[]>
+local function extract_point_zones(tiled_data)
+    local tile_w = tiled_data.tilewidth
+    local tile_h = tiled_data.tileheight
+    local zones = {}
+    for _, layer in ipairs(tiled_data.layers) do
+        if layer.type == "objectgroup" then
+            local pts = {}
+            for _, obj in ipairs(layer.objects or {}) do
+                if obj.shape == "point" then
+                    table.insert(pts, {
+                        x = math.floor(obj.x / tile_w),
+                        y = math.floor(obj.y / tile_h),
+                    })
+                end
+            end
+            if #pts > 0 then
+                zones[layer.name] = pts
+            end
+        end
+    end
+    return zones
+end
+
 --- Extract rect zones from a map definition without performing a full map load.
 --- Returns an empty table for non-tiled map types.
 ---@param definition MapDefinition
@@ -352,6 +378,18 @@ function map_generator.extract_rect_zones(definition)
     local tiled_data = include(tiled_def.file .. ".lua")
     if tiled_data == nil then return {} end
     return extract_rect_zones(tiled_data)
+end
+
+--- Extract point zones from a map definition without performing a full map load.
+--- Returns an empty table for non-tiled map types.
+---@param definition MapDefinition
+---@return table<string, Point[]>
+function map_generator.extract_point_zones(definition)
+    if definition.type ~= "tiled" then return {} end
+    local tiled_def = definition --[[@as TiledMapDefinition]]
+    local tiled_data = include(tiled_def.file .. ".lua")
+    if tiled_data == nil then return {} end
+    return extract_point_zones(tiled_data)
 end
 
 --- Load and return a BattleMap from the given map definition and label mapping.

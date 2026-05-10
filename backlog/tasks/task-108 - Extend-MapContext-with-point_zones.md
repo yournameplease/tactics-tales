@@ -1,9 +1,10 @@
 ---
 id: TASK-108
 title: Extend MapContext with point_zones
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-10 14:04'
+updated_date: '2026-05-10 14:13'
 labels: []
 milestone: m-17
 dependencies: []
