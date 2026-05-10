@@ -2,6 +2,7 @@
 --- Resolves CharacterSource entries to BattleUnits and handles spawn-point
 --- selection, including blocked-tile policies.
 
+local point = require("src.tactics.util.point")
 local battle_unit = require("src.tactics.battle.tactics.battle_unit")
 local character = require("src.tactics.character.object.character")
 
@@ -72,7 +73,7 @@ function unit_spawner.try_spawn_at(engine, char_man, player_roster, roster_count
     local facing_r = spawn_point.x <= (engine.battle_map.width >> 1) - 2
     local unit = battle_unit.spawn_unit(
         unit_character,
-        spawn_point,
+        point.of_record(spawn_point),
         labels,
         side,
         movement_side,
