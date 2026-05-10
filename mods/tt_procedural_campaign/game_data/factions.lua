@@ -23,8 +23,8 @@ local factions = {
     militia = {
         name        = "Militia",
         tiers       = {
-            { enemy_infantry = "militia_spearman", enemy_commander = "militia_spear_captain", enemy_tank = "militia_armor", enemy_ranged = "militia_archer" },
-            { enemy_infantry = "militia_sword",    enemy_commander = "militia_sword_captain", enemy_tank = "militia_armor", enemy_ranged = "militia_archer" },
+            { enemy_infantry = "militia_spearman", enemy_commander = "militia_sword_captain", enemy_tank = "militia_spear_captain", enemy_ranged = "militia_archer" },
+            { enemy_infantry = "militia_sword",    enemy_commander = "militia_armor", enemy_tank = "militia_sword_captain", enemy_ranged = "militia_archer" },
         },
         costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8, enemy_ranged = 3 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
