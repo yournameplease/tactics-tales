@@ -6,13 +6,17 @@ local campaign_state = require("src.tactics.campaign.campaign_state")
 local DEPLOYMENT_W = { x = 0, y = 12, w = 4, h = 4 }
 local POD_SW       = { x = 3, y = 12, w = 2, h = 4 }
 local POD_W        = { x = 0, y = 8,  w = 2, h = 3 }
+local BOSS_NE      = { x = 15, y = 4 }
 
 local function make_map_context(overrides)
     local base = {
-        rect_zones = {
+        rect_zones  = {
             deployment_w = DEPLOYMENT_W,
             pod_sw       = POD_SW,
             pod_w        = POD_W,
+        },
+        point_zones = {
+            boss_ne = { BOSS_NE },
         },
     }
     if overrides then
@@ -28,6 +32,7 @@ local function make_mem(faction_id, tier)
     return mem
 end
 
+-- No rng → always picks variant_sets[1]: deployment_w, excludes pod_sw and boss_sw.
 local function village_overrun(campaign_config, map_ctx)
     return battles_mod["village_overrun"](campaign_config, nil, map_ctx or make_map_context())
 end
@@ -48,21 +53,18 @@ describe("tt_procedural_campaign.missions village_overrun", function()
         luassert.are_equal(1, #def.failure_conditions)
     end)
 
-    it("point_labels contains enemy infantry entries derived from pod_sw zone", function()
+    it("point_labels contains pod_w entry (active pod in variant 1)", function()
         local def = village_overrun({})
-        local pts = def.point_labels["enemy_infantry_sw"]
+        local pts = def.point_labels["pod_w"]
         luassert.is_not_nil(pts)
-        luassert.is_true(#pts > 0)
     end)
 
-    it("point_labels contains enemy tank entries derived from pod_w zone", function()
+    it("pod_sw is absent from point_labels (excluded by variant 1)", function()
         local def = village_overrun({})
-        local pts = def.point_labels["enemy_tank_w"]
-        luassert.is_not_nil(pts)
-        luassert.is_true(#pts > 0)
+        luassert.is_nil(def.point_labels["pod_sw"])
     end)
 
-    it("boss_ne is exactly one point", function()
+    it("boss_ne is in point_labels with exactly one point", function()
         local def = village_overrun({})
         local pts = def.point_labels["boss_ne"]
         luassert.is_not_nil(pts)
@@ -71,13 +73,13 @@ describe("tt_procedural_campaign.missions village_overrun", function()
         luassert.are_equal(4,  pts[1].y)
     end)
 
-    it("higher tier produces more infantry points (up to zone capacity)", function()
+    it("higher tier produces more pod_w points (up to zone capacity)", function()
         local mem1 = make_mem("bandits", 1)
-        local mem2 = make_mem("bandits", 2)
+        local mem2 = make_mem("bandits", 3)
         local def1 = village_overrun({ memory = mem1 })
         local def2 = village_overrun({ memory = mem2 })
-        local count1 = #def1.point_labels["enemy_infantry_sw"]
-        local count2 = #def2.point_labels["enemy_infantry_sw"]
+        local count1 = #def1.point_labels["pod_w"]
+        local count2 = #def2.point_labels["pod_w"]
         luassert.is_true(count2 >= count1)
     end)
 
@@ -95,8 +97,8 @@ describe("tt_procedural_campaign.missions village_overrun", function()
         luassert.is_true(has_boss)
     end)
 
-    it("works when map_context has no zones for a slot (graceful fallback)", function()
-        local ctx = make_map_context({ rect_zones = {} })
+    it("works when map_context has no zones (graceful fallback)", function()
+        local ctx = make_map_context({ rect_zones = {}, point_zones = {} })
         luassert.has_no_error(function()
             village_overrun({}, ctx)
         end)

@@ -1,4 +1,5 @@
 return {
+    map_id = "village_overrun",
     -- Each entry describes one playable variant of this map.
     -- `deployment` is the player spawn zone for that variant.
     -- `excludes` lists enemy zones that overlap the deployment area and must
