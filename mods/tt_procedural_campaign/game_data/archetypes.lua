@@ -71,19 +71,23 @@ local archetypes = {
         "A balanced campaign: open with a scripted skirmish, close with a decisive siege, and fill the middle with varied encounters.",
 
         slots            = {
-            { type = "beat",   beat_id = "opening_skirmish",                forced_join = "bandit_goon" },
+            -- { type = "beat",   beat_id = "opening_skirmish",                forced_join = "bandit_goon" },
             { type = "filler" },
             { type = "filler", pool_override = { skirmish = 3, ambush = 1 } },
             { type = "filler" },
             { type = "filler" },
-            { type = "beat",   beat_id = "final_siege" },
+            -- { type = "beat",   beat_id = "final_siege" },
         },
 
-        filler_pool      = {
-            skirmish      = 2,
-            ambush        = 2,
-            escort        = 1,
-            hold_the_line = 1,
+        -- filler_pool      = {
+        --     -- skirmish       = 2,
+        --     -- ambush         = 2,
+        --     -- escort         = 1,
+        --     -- hold_the_line  = 1,
+        --     village_overrun = 1,
+        -- },
+        filler_pool = {
+            "village_overrun",
         },
 
         recruitment_rate = 2,

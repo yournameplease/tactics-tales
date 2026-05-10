@@ -8,6 +8,7 @@ local MAP_DEFINITIONS = {
     playground         = lib.libs.map.static("map/playground.map"),
     model_room         = lib.libs.map.static("map/model_room.map"),
     abandoned_fortress = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/abandoned_fortress"),
+    village_overrun = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/village_overrun"),
 }
 
 return MAP_DEFINITIONS

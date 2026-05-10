@@ -125,7 +125,11 @@ local stories = {
                         sc.memory:set("current_battle_id", campaign_state_mod.text(template))
                         local text = recruitment.update_recruitment_quota(
                             archetype, sc.memory, rng.campaign_rng, template)
-                        return { type = "text", text = text }
+                        return { type = "text", text = 
+                            "Slot: "..slot.type .. " --- " ..
+                            "Selected ".. template .. " --- " ..
+                            text
+                        }
                     end,
 
                     -- Step 2: pick a faction and store it for the battle factory.
