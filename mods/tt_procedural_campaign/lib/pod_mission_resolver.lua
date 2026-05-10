@@ -8,8 +8,8 @@ local battle            = battle_lib.battle
 local character_source  = battle.character_source
 local ai <const>        = battle.ai
 
-local BASE_BUDGET <const> = 4
-local SCALE       <const> = 2
+local BASE_BUDGET <const> = 32
+local TIER_SCALE  <const> = 4
 local VARIANCE    <const> = 1
 
 local function mem_text(campaign_config, key)
@@ -45,7 +45,18 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         excluded[name] = true
     end
 
-    local budget = BASE_BUDGET + tier * SCALE
+    local budget = BASE_BUDGET + tier * TIER_SCALE
+
+    log.debug("[pod_mission] map=", meta.map_id,
+        " faction=", mem_text(campaign_config, "faction_id") or "bandits",
+        " tier=", tier,
+        " total_budget=", budget,
+        " variant=", variant.deployment or "<none>")
+    log.debug("[pod_mission] excluded zones: ", (function()
+        local t = {}
+        for k in pairs(excluded) do t[#t + 1] = k end
+        return #t > 0 and table.concat(t, ", ") or "<none>"
+    end)())
 
     -- TODO: sort active_pods and eligible_slots for RNG reproducibility.
     local active_pods = {}
@@ -62,12 +73,16 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         end
     end
 
+    log.debug("[pod_mission] active_pods (", #active_pods, "): ", table.concat(active_pods, ", "))
+    log.debug("[pod_mission] eligible_slots (", #eligible_slots, "): ", table.concat(eligible_slots, ", "))
+
     local point_labels = {}
     local units        = {}
 
     local deploy_zone   = map_context.rect_zones and map_context.rect_zones[variant.deployment]
     local deploy_points = deploy_zone and zones.expand(deploy_zone, "grid", 16) or {}
     point_labels["player_deploy"] = deploy_points
+    log.debug("[pod_mission] player_deploy zone=", variant.deployment, " points=", #deploy_points)
     units[#units + 1] = {
         side             = "player",
         character_source = character_source.player_roster(),
@@ -75,19 +90,28 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
     }
 
     local base_share = #active_pods > 0 and math.floor(budget / #active_pods) or 0
+    log.debug("[pod_mission] base_share_per_pod=", base_share, " variance=+-", VARIANCE)
     for _, pod_name in ipairs(active_pods) do
         local jitter     = rng and (rng:rndi(2 * VARIANCE + 1) - VARIANCE) or 0
         local pod_budget = math.max(0, base_share + jitter)
         local slot       = (rng and #eligible_slots > 0)
             and rng:choose_random_from_list(eligible_slots)
             or (eligible_slots[1] or "enemy_infantry")
-        local unit_count = zones.unit_count(pod_budget, resolve_slot_cost(faction, slot))
+        local slot_cost  = resolve_slot_cost(faction, slot)
+        local unit_count = zones.unit_count(pod_budget, slot_cost)
         local pod_zone   = map_context.rect_zones[pod_name]
         local pod_points = pod_zone and zones.expand(pod_zone, "grid", unit_count) or {}
+        local template   = resolve_slot(faction, tier, slot)
+        log.debug("[pod_mission] pod=", pod_name,
+            " budget=", pod_budget, "(base=", base_share, "+jitter=", jitter, ")",
+            " slot=", slot, " slot_cost=", slot_cost,
+            " unit_count=", unit_count,
+            " formation_points=", #pod_points,
+            " template=", template)
         point_labels[pod_name] = pod_points
         units[#units + 1] = {
             side             = "enemy",
-            character_source = character_source.template(resolve_slot(faction, tier, slot)),
+            character_source = character_source.template(template),
             ai               = ai.move_two,
             tile             = pod_name,
         }
@@ -100,10 +124,12 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         end
     end
     for _, name in ipairs(guard_names) do
+        local template = resolve_slot(faction, tier, "enemy_tank")
+        log.debug("[pod_mission] guard=", name, " template=", template, " ai=stationary")
         point_labels[name] = map_context.point_zones[name]
         units[#units + 1] = {
             side             = "enemy",
-            character_source = character_source.template(resolve_slot(faction, tier, "enemy_tank")),
+            character_source = character_source.template(template),
             ai               = ai.stationary,
             tile             = name,
         }
@@ -116,15 +142,25 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         end
     end
     for _, name in ipairs(boss_names) do
+        local template = resolve_slot(faction, tier, "enemy_commander")
+        log.debug("[pod_mission] boss=", name, " template=", template, " ai=stationary tags={boss}")
         point_labels[name] = map_context.point_zones[name]
         units[#units + 1] = {
             side             = "enemy",
-            character_source = character_source.template(resolve_slot(faction, tier, "enemy_commander")),
+            character_source = character_source.template(template),
             ai               = ai.stationary,
             tile             = name,
             tags             = { "boss" },
         }
     end
+
+    log.debug("[pod_mission] total units=", #units,
+        " (", (function()
+            local e = 0
+            for _, u in ipairs(units) do if u.side == "enemy" then e = e + 1 end end
+            return e
+        end)(), " enemy +"
+        , " 1 player group)")
 
     return {
         map_id             = meta.map_id,
