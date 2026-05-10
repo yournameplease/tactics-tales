@@ -7,11 +7,11 @@ return {
     variant_sets = {
         {
             deployment = "deployment_w",
-            excludes   = { "pod_sw", "boss_sw" },
+            excludes   = { "pod_sw", "boss_sw", "boss_se" },
         },
         {
             deployment = "deployment_e",
-            excludes   = { "pod_se", "boss_se" },
+            excludes   = { "pod_se", "pod_s_wall", "boss_sw", "boss_se" },
         },
         {
             deployment = "deployment_n",
