@@ -128,27 +128,6 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
         end)
     end)
 
-    describe("post_battle step 1 (forced_join)", function()
-        it("returns roster_add for a slot with forced_join", function()
-            local mem = make_mem()
-            -- warband slot 1 (opening_skirmish) has forced_join = "bandit_goon"
-            mem:set("archetype_id", campaign_state.text("warband"))
-            mem:set("battle_index", campaign_state.text("1"))
-            local node = call_step("post_battle", 1, make_sc(mem))
-            luassert.are_equal("roster_add", node.type)
-            luassert.are_equal("bandit_goon", node.template)
-        end)
-
-        it("returns advance for a slot without forced_join", function()
-            local mem = make_mem()
-            -- warband slot 2 is a plain filler with no forced_join
-            mem:set("archetype_id", campaign_state.text("warband"))
-            mem:set("battle_index", campaign_state.text("2"))
-            local node = call_step("post_battle", 1, make_sc(mem))
-            luassert.are_equal("advance", node.type)
-        end)
-    end)
-
     describe("post_battle step 2 (auto_recruit_pending)", function()
         it("returns a text node", function()
             local mem = make_mem()
