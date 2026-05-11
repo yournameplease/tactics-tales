@@ -4,28 +4,29 @@ title: Unit tests for pod_mission_resolver
 status: To Do
 assignee: []
 created_date: '2026-05-10 14:05'
-updated_date: '2026-05-10 14:05'
+updated_date: '2026-05-11 22:52'
 labels: []
 milestone: m-17
 dependencies:
-  - TASK-109
+  - TASK-114
 ---
 
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Write Busted specs for `mods/tt_procedural_campaign/lib/pod_mission_resolver.lua`. Depends on TASK-109.
+Unit tests for `pod_mission_resolver` covering the rewritten resolver (TASK-114).
 
-Test file: `build/spec/mods/tt_procedural_campaign/lib/pod_mission_resolver_spec.lua`
+Test file: `mod_spec/tt_procedural_campaign/pod_mission_resolver_spec.lua` (or update existing).
 
-Cases to cover:
-- Active variant is selected and excludes are applied (excluded zones produce no unit entries)
-- `pod_*` zones generate enemy units with a non-commander slot and budget-capped count
-- `guard_*` point zones generate stationary enemy_tank units, one per point
-- `boss_*` point zones generate enemy_commander units, one per point
-- Player deploy points are drawn from the active variant's deployment zone
-- A pod zone in the excludes list is skipped entirely
-- Zero active pods (budget division edge case) does not error
+Key scenarios to cover:
+- Variant is selected by RNG from `meta.variant_sets`
+- A `patrol` group spawns budget-sized unit count from its rect zone using the faction's `role_map` slot
+- A `guard` group spawns exactly one unit (stationary AI) from its point zone regardless of budget
+- A `boss` group spawns exactly one unit (stationary AI, tagged `"boss"`) from its point zone
+- `threat_mult` scales per-group budget independently (`base_pod_budget × threat_mult`)
+- Groups not listed in the selected variant do not spawn
+- Authored `facing` is present on the emitted `UnitSpawnData`
+- `ambush` role resolves to the correct slot via `role_map` (including fallback when slot absent)
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Definition of Done
