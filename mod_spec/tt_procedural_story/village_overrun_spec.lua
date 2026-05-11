@@ -59,9 +59,11 @@ describe("tt_procedural_campaign.missions village_overrun", function()
         luassert.is_not_nil(pts)
     end)
 
-    it("pod_sw is absent from point_labels (excluded by variant 1)", function()
+    it("no unit is spawned at pod_sw in variant 1 (not listed in spawn_groups)", function()
         local def = village_overrun({})
-        luassert.is_nil(def.point_labels["pod_sw"])
+        for _, u in ipairs(def.units) do
+            luassert.are_not_equal("pod_sw", u.tile)
+        end
     end)
 
     it("boss_ne is in point_labels with exactly one point", function()
