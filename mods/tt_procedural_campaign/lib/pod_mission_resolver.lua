@@ -10,7 +10,10 @@ local ai <const>        = battle.ai
 
 local BASE_BUDGET <const> = 32
 local TIER_SCALE  <const> = 4
-local VARIANCE    <const> = 1
+
+local FACING_MAP <const> = {
+    north = "up", south = "down", east = "right", west = "left",
+}
 
 local function mem_text(campaign_config, key)
     local mem = campaign_config.memory
@@ -45,36 +48,13 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         excluded[name] = true
     end
 
-    local budget = BASE_BUDGET + tier * TIER_SCALE
+    local base_budget = BASE_BUDGET + tier * TIER_SCALE
 
     log.debug("[pod_mission] map=", meta.map_id,
         " faction=", mem_text(campaign_config, "faction_id") or "bandits",
         " tier=", tier,
-        " total_budget=", budget,
+        " base_budget=", base_budget,
         " variant=", variant.deployment or "<none>")
-    log.debug("[pod_mission] excluded zones: ", (function()
-        local t = {}
-        for k in pairs(excluded) do t[#t + 1] = k end
-        return #t > 0 and table.concat(t, ", ") or "<none>"
-    end)())
-
-    -- TODO: sort active_pods and eligible_slots for RNG reproducibility.
-    local active_pods = {}
-    for name in pairs(map_context.rect_zones or {}) do
-        if name:sub(1, 4) == "pod_" and not excluded[name] then
-            active_pods[#active_pods + 1] = name
-        end
-    end
-
-    local eligible_slots = {}
-    for slot in pairs(faction.costs) do
-        if slot ~= "enemy_commander" then
-            eligible_slots[#eligible_slots + 1] = slot
-        end
-    end
-
-    log.debug("[pod_mission] active_pods (", #active_pods, "): ", table.concat(active_pods, ", "))
-    log.debug("[pod_mission] eligible_slots (", #eligible_slots, "): ", table.concat(eligible_slots, ", "))
 
     local point_labels = {}
     local units        = {}
@@ -89,69 +69,72 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         tile             = "player_deploy",
     }
 
-    local base_share = #active_pods > 0 and math.floor(budget / #active_pods) or 0
-    log.debug("[pod_mission] base_share_per_pod=", base_share, " variance=+-", VARIANCE)
-    for _, pod_name in ipairs(active_pods) do
-        local jitter     = rng and (rng:rndi(2 * VARIANCE + 1) - VARIANCE) or 0
-        local pod_budget = math.max(0, base_share + jitter)
-        local slot       = (rng and #eligible_slots > 0)
-            and rng:choose_random_from_list(eligible_slots)
-            or (eligible_slots[1] or "enemy_infantry")
-        local slot_cost  = resolve_slot_cost(faction, slot)
-        local unit_count = zones.unit_count(pod_budget, slot_cost)
-        local pod_zone   = map_context.rect_zones[pod_name]
-        local pod_points = pod_zone and zones.expand(pod_zone, "grid", unit_count) or {}
-        local template   = resolve_slot(faction, tier, slot)
-        log.debug("[pod_mission] pod=", pod_name,
-            " budget=", pod_budget, "(base=", base_share, "+jitter=", jitter, ")",
-            " slot=", slot, " slot_cost=", slot_cost,
-            " unit_count=", unit_count,
-            " formation_points=", #pod_points,
-            " template=", template)
-        point_labels[pod_name] = pod_points
-        units[#units + 1] = {
-            side             = "enemy",
-            character_source = character_source.template(template),
-            ai               = ai.move_two,
-            tile             = pod_name,
-        }
-    end
+    local spawn_zone_names = {}
 
-    local guard_names = {}
-    for name in pairs(map_context.point_zones or {}) do
-        if name:sub(1, 6) == "guard_" and not excluded[name] then
-            guard_names[#guard_names + 1] = name
+    for _, group in ipairs(variant.spawn_groups or {}) do
+        local role      = group.role
+        local zone_name = group.zone
+        local facing    = FACING_MAP[group.facing]
+
+        spawn_zone_names[zone_name] = true
+
+        local slot_tag     = (faction.role_map and faction.role_map[role]) or "enemy_infantry"
+        local template     = resolve_slot(faction, tier, slot_tag)
+        local group_budget = base_budget * (group.threat_mult or 1.0)
+
+        if role == "guard" then
+            local pts = map_context.point_zones and map_context.point_zones[zone_name]
+            point_labels[zone_name] = pts or {}
+            log.debug("[pod_mission] guard zone=", zone_name, " template=", template, " facing=", facing)
+            units[#units + 1] = {
+                side             = "enemy",
+                character_source = character_source.template(template),
+                ai               = ai.stationary,
+                tile             = zone_name,
+                facing           = facing,
+            }
+        elseif role == "boss" then
+            local pts = map_context.point_zones and map_context.point_zones[zone_name]
+            point_labels[zone_name] = pts or {}
+            log.debug("[pod_mission] boss zone=", zone_name, " template=", template, " facing=", facing)
+            units[#units + 1] = {
+                side             = "enemy",
+                character_source = character_source.template(template),
+                ai               = ai.stationary,
+                tile             = zone_name,
+                tags             = { "boss" },
+                facing           = facing,
+            }
+        else
+            -- patrol or ambush: rect zone, budget-based multi-unit, move_two AI
+            local rect       = map_context.rect_zones and map_context.rect_zones[zone_name]
+            local slot_cost  = resolve_slot_cost(faction, slot_tag)
+            local unit_count = zones.unit_count(group_budget, slot_cost)
+            local pod_points = rect and zones.expand(rect, "grid", unit_count) or {}
+            point_labels[zone_name] = pod_points
+            log.debug("[pod_mission] ", role, " zone=", zone_name,
+                " budget=", group_budget, " slot=", slot_tag, " slot_cost=", slot_cost,
+                " unit_count=", unit_count, " template=", template, " facing=", facing)
+            units[#units + 1] = {
+                side             = "enemy",
+                character_source = character_source.template(template),
+                ai               = ai.move_two,
+                tile             = zone_name,
+                facing           = facing,
+            }
         end
     end
-    for _, name in ipairs(guard_names) do
-        local template = resolve_slot(faction, tier, "enemy_tank")
-        log.debug("[pod_mission] guard=", name, " template=", template, " ai=stationary")
-        point_labels[name] = map_context.point_zones[name]
-        units[#units + 1] = {
-            side             = "enemy",
-            character_source = character_source.template(template),
-            ai               = ai.stationary,
-            tile             = name,
-        }
-    end
 
-    local boss_names = {}
-    for name in pairs(map_context.point_zones or {}) do
-        if name:sub(1, 5) == "boss_" and not excluded[name] then
-            boss_names[#boss_names + 1] = name
+    -- Explicitly include all non-excluded object layers not already registered as spawn zones.
+    for name, pts in pairs(map_context.point_zones or {}) do
+        if not excluded[name] and not spawn_zone_names[name] then
+            point_labels[name] = pts
         end
     end
-    for _, name in ipairs(boss_names) do
-        local template = resolve_slot(faction, tier, "enemy_commander")
-        log.debug("[pod_mission] boss=", name, " template=", template, " ai=stationary tags={boss}")
-        point_labels[name] = map_context.point_zones[name]
-        units[#units + 1] = {
-            side             = "enemy",
-            character_source = character_source.template(template),
-            ai               = ai.stationary,
-            tile             = name,
-            tags             = { "boss" },
-        }
+    for name, rect in pairs(map_context.rect_zones or {}) do
+        if not excluded[name] and not spawn_zone_names[name] then
+            point_labels[name] = zones.expand(rect, "grid", rect.w * rect.h)
+        end
     end
 
     log.debug("[pod_mission] total units=", #units,
@@ -159,8 +142,7 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
             local e = 0
             for _, u in ipairs(units) do if u.side == "enemy" then e = e + 1 end end
             return e
-        end)(), " enemy +"
-        , " 1 player group)")
+        end)(), " enemy + 1 player group)")
 
     return {
         map_id             = meta.map_id,
