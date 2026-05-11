@@ -1,10 +1,10 @@
 ---
 id: TASK-109
 title: Create pod_mission_resolver lib
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-10 14:04'
-updated_date: '2026-05-10 14:05'
+updated_date: '2026-05-10 14:23'
 labels: []
 milestone: m-17
 dependencies:
@@ -45,6 +45,6 @@ Uses existing utilities:
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
