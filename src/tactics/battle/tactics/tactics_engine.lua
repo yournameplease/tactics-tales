@@ -246,7 +246,7 @@ function TacticsEngine:spawn_units(units, blocked_behavior)
                     self, char_man, player_roster, roster_count,
                     spawn_point, spawn_data.character_source,
                     spawn_data.side, spawn_data.movement_side,
-                    spawn_data.ai, labels, blocked_behavior
+                    spawn_data.ai, labels, blocked_behavior, spawn_data.facing
                 )
                 if unit then table.insert(spawned_units, unit) end
             end

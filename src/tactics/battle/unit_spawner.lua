@@ -49,9 +49,10 @@ end
 ---@param ai? UnitAI
 ---@param labels string[]
 ---@param blocked_behavior UnitSpawnBlockedBehavior
+---@param facing? CardinalDirection Overrides position-derived default when present.
 ---@return BattleUnit?, integer
 function unit_spawner.try_spawn_at(engine, char_man, player_roster, roster_count, spawn_point, character_source, side,
-                                   movement_side, ai, labels, blocked_behavior)
+                                   movement_side, ai, labels, blocked_behavior, facing)
     local existing_unit = engine.battle_map:get_at_tile(spawn_point)
     if existing_unit ~= nil then
         if blocked_behavior == "prevent" then
@@ -70,14 +71,20 @@ function unit_spawner.try_spawn_at(engine, char_man, player_roster, roster_count
         return nil, roster_count
     end
 
-    local facing_r = spawn_point.x <= (engine.battle_map.width >> 1) - 2
+    local resolved_facing
+    if facing then
+        resolved_facing = character.facing.of(facing)
+    else
+        local facing_r = spawn_point.x <= (engine.battle_map.width >> 1) - 2
+        resolved_facing = character.facing.of(facing_r and "right" or "left")
+    end
     local unit = battle_unit.spawn_unit(
         unit_character,
         point.of_record(spawn_point),
         labels,
         side,
         movement_side,
-        character.facing.of(facing_r and "right" or "left"),
+        resolved_facing,
         ai,
         engine.skill_defs
     )
