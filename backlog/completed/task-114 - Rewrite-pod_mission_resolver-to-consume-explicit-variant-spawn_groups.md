@@ -1,9 +1,10 @@
 ---
 id: TASK-114
 title: Rewrite pod_mission_resolver to consume explicit variant spawn_groups
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-11 22:52'
+updated_date: '2026-05-11 23:39'
 labels: []
 milestone: m-17
 dependencies:
@@ -46,17 +47,17 @@ variant_sets = {
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 No prefix scanning remains in the resolver
-- [ ] #2 Each variant's spawn_groups drives all enemy spawns
-- [ ] #3 budget = base_pod_budget * threat_mult per group
-- [ ] #4 boss role spawns enemy_commander with boss tag and stationary AI
-- [ ] #5 guard role spawns enemy_tank with stationary AI
-- [ ] #6 patrol/ambush roles spawn budget-sized unit count from rect zone
-- [ ] #7 facing is written to UnitSpawnData
+- [x] #1 No prefix scanning remains in the resolver
+- [x] #2 Each variant's spawn_groups drives all enemy spawns
+- [x] #3 budget = base_pod_budget * threat_mult per group
+- [x] #4 boss role spawns enemy_commander with boss tag and stationary AI
+- [x] #5 guard role spawns enemy_tank with stationary AI
+- [x] #6 patrol/ambush roles spawn budget-sized unit count from rect zone
+- [x] #7 facing is written to UnitSpawnData
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
