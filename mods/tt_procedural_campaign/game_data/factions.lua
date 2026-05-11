@@ -9,6 +9,8 @@ local factions = {
         costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
+        role_map    = { patrol = "enemy_infantry", guard = "enemy_tank", ambush = "enemy_ranged", boss = "enemy_commander" },
+        formation   = "scattered",
     },
     cultists = {
         name        = "Cultists",
@@ -19,6 +21,8 @@ local factions = {
         costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
+        role_map    = { patrol = "enemy_infantry", guard = "enemy_tank", ambush = "enemy_ranged", boss = "enemy_commander" },
+        formation   = "scattered",
     },
     militia = {
         name        = "Militia",
@@ -29,6 +33,8 @@ local factions = {
         costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8, enemy_ranged = 3 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank", "enemy_ranged" },
+        role_map    = { patrol = "enemy_infantry", guard = "enemy_tank", ambush = "enemy_ranged", boss = "enemy_commander" },
+        formation   = "scattered",
     },
 }
 
