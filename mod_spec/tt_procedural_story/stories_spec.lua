@@ -51,6 +51,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
 
         it("archetype_select sets battle_index to 1", function()
             local nodes = proc_campaign.nodes.archetype_select
+            ---@cast nodes table[]
             local found = false
             for _, n in ipairs(nodes) do
                 if n.type == "set_memory" and n.key == "battle_index" and n.value == "1" then

@@ -8,7 +8,7 @@
 --- Return the campaign node that should be executed for forced joining.
 --- If the slot has a forced_join template, returns a roster_add node.
 --- Otherwise returns an advance node so the sequence step is a no-op.
----@param slot ArchetypeSlot
+---@param slot ArchetypeSlot?
 ---@return table
 local function forced_join_node(slot)
     if slot and slot.forced_join then
