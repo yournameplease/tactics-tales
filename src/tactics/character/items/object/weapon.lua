@@ -30,22 +30,21 @@ local ArmorkillerEffect = {}
 ---@field type "shieldkiller"
 local ShieldkillerEffect = {}
 
--- TODO: specify sides (opposite, same, or both)
 ---@class Targeting
 ---@field description? string Optional human-readable range description shown in the battle UI.
----@field get_selection_tiles fun(origin: Point, map: BattleMap): Point[] Returns tiles the player can select as attack targets.
----@field get_targets_for_selection fun(origin: Point, selection: Point, map: BattleMap): BattleUnit[] Returns units hit when a selection tile is chosen.
----@field is_target_valid fun(origin: Point, selection: Point, map: BattleMap): boolean Returns whether the selected tile is a valid attack target.
+---@field get_selection_tiles fun(origin: Point, map: BattleMap, source_side: Side): Point[] Returns tiles the player can select as attack targets.
+---@field get_targets_for_selection fun(origin: Point, selection: Point, map: BattleMap, source_side: Side): BattleUnit[] Returns units hit when a selection tile is chosen.
+---@field is_target_valid fun(origin: Point, selection: Point, map: BattleMap, source_side: Side): boolean Returns whether the selected tile is a valid attack target.
 
 ---@type Targeting
 local none_targeting = {
-    get_selection_tiles = function(_origin, _map)
+    get_selection_tiles = function(_origin, _map, _source_side)
         return {}
     end,
-    get_targets_for_selection = function(_origin, _selection, _map)
+    get_targets_for_selection = function(_origin, _selection, _map, _source_side)
         return {}
     end,
-    is_target_valid = function(_origin, _selection, _map)
+    is_target_valid = function(_origin, _selection, _map, _source_side)
         return false
     end,
 }

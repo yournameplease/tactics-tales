@@ -88,7 +88,7 @@ local function validate_tile_is_in_unit_attack_range(map, unit, unit_position, t
     local target_unit = map:get_at_tile(target_point)
     if target_unit == nil then return false end
     if target_unit.side ~= "enemy" then return false end
-    return targeting.is_target_valid(unit_position, target_point, map)
+    return targeting.is_target_valid(unit_position, target_point, map, unit.side)
 end
 
 ---@class BattlePreparationsContext : MenuContext
@@ -460,7 +460,7 @@ function PLAYER_TURN_HANDLERS.trim_attack_path(services, session_context, _data,
     local valid_tiles = services.tactics_engine:get_valid_tiles_for_unit(unit)
 
     for i = #value.path, 1, -1 do
-        if targeting.is_target_valid(value.path[i], value.point, services.battle_map)
+        if targeting.is_target_valid(value.path[i], value.point, services.battle_map, unit.side)
             and services.battle_map:get_at_tile(value.path[i]) == nil
         then
             local trimmed_path = {}
@@ -477,7 +477,7 @@ function PLAYER_TURN_HANDLERS.trim_attack_path(services, session_context, _data,
                 local p = point.of(x, y)
                 local occupant = services.battle_map:get_at_tile(p)
                 if (occupant == nil or occupant.id == unit.id)
-                    and targeting.is_target_valid(p, value.point, services.battle_map)
+                    and targeting.is_target_valid(p, value.point, services.battle_map, unit.side)
                 then
                     table.insert(valid_attack_points, p)
                 end
@@ -526,7 +526,7 @@ function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, session_conte
                 local p = point.of(x, y)
                 local occupant = services.battle_map:get_at_tile(p)
                 if (occupant == nil or occupant.id == acting_unit.id)
-                    and targeting.is_target_valid(p, target_point, services.battle_map)
+                    and targeting.is_target_valid(p, target_point, services.battle_map, acting_unit.side)
                 then
                     table.insert(valid_attack_points, p)
                 end
@@ -739,7 +739,7 @@ end
 local function filter_skill_target(point, msb, ctx)
     local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
     if not def then return false end
-    return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map)
+    return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map, ctx.acting_unit.unit.side)
 end
 
 local function make_menu_data(map_width, map_height)
@@ -1012,7 +1012,7 @@ local function make_menu_data(map_width, map_height)
                                         elseif state and state.cooldown_remaining > 0 then
                                             reason = "CD:" .. state.cooldown_remaining
                                         else
-                                            local tiles = def.targeting.get_selection_tiles(destination, msb.battle_map)
+                                            local tiles = def.targeting.get_selection_tiles(destination, msb.battle_map, unit.side)
                                             if #tiles == 0 then
                                                 reason = "no targets"
                                             end
@@ -1053,7 +1053,7 @@ local function make_menu_data(map_width, map_height)
                             if not def then
                                 return msb.battle_map:get_tiles_userdata_by("u8", function() return 0 end)
                             end
-                            local tiles = def.targeting.get_selection_tiles(ctx.destination.point, msb.battle_map)
+                            local tiles = def.targeting.get_selection_tiles(ctx.destination.point, msb.battle_map, ctx.acting_unit.unit.side)
                             local tile_set = {}
                             for _, t in ipairs(tiles) do
                                 tile_set[t.x .. "," .. t.y] = true

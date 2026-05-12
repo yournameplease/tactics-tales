@@ -169,7 +169,7 @@ end
 ---@param battle_map table BattleMap
 ---@return boolean
 local function can_attack(attacker, defender, attack, battle_map)
-    return attack.targeting.is_target_valid(attacker.tile, defender.tile, battle_map)
+    return attack.targeting.is_target_valid(attacker.tile, defender.tile, battle_map, attacker.unit.side)
         and attacker.hp_current > 0
         and defender.hp_current > 0
 end

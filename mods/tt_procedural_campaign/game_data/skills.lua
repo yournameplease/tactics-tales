@@ -1,6 +1,6 @@
 local function unit_in_range(min_dist, max_dist, predicate)
     return {
-        get_selection_tiles = function(origin, map)
+        get_selection_tiles = function(origin, map, source_side)
             local out = {}
             for dx = -max_dist, max_dist do
                 for dy = -max_dist, max_dist do
@@ -8,35 +8,35 @@ local function unit_in_range(min_dist, max_dist, predicate)
                     local distance = lib.point.taxicab_distance(origin, p)
                     if distance >= min_dist and distance <= max_dist and map:tile_is_in_map(p) then
                         local unit = map:get_at_tile(p)
-                        if unit and predicate(unit) then add(out, p) end
+                        if unit and predicate(unit, source_side) then add(out, p) end
                     end
                 end
             end
             return out
         end,
-        get_targets_for_selection = function(_origin, selection, map)
+        get_targets_for_selection = function(_origin, selection, map, _source_side)
             local unit = map:get_at_tile(selection)
             if unit then return { unit } end
             return {}
         end,
-        is_target_valid = function(origin, selection, map)
+        is_target_valid = function(origin, selection, map, source_side)
             local distance = lib.point.taxicab_distance(origin, selection)
             if distance < min_dist or distance > max_dist then return false end
             local unit = map:get_at_tile(selection)
-            return unit ~= nil and predicate(unit)
+            return unit ~= nil and predicate(unit, source_side)
         end,
     }
 end
 
 local function ally_in_range(min_dist, max_dist, filter)
-    return unit_in_range(min_dist, max_dist, function(unit)
-        return unit.side == "player" and (not filter or filter(unit))
+    return unit_in_range(min_dist, max_dist, function(unit, source_side)
+        return unit.side == source_side and (not filter or filter(unit))
     end)
 end
 
 local function enemy_in_range(min_dist, max_dist)
-    return unit_in_range(min_dist, max_dist, function(unit)
-        return unit.side == "enemy"
+    return unit_in_range(min_dist, max_dist, function(unit, source_side)
+        return unit.side ~= source_side
     end)
 end
 

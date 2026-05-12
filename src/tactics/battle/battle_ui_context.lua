@@ -188,7 +188,7 @@ function BattleUIContext:enrich()
             local targeting = self.acting_unit.character:get_weapon_targeting()
             if unit
                 and sides_can_fight(unit.side, acting_unit.side)
-                and targeting.is_target_valid(self.acting_unit.tile, self.hovered_unit.tile, self.battle_map) then
+                and targeting.is_target_valid(self.acting_unit.tile, self.hovered_unit.tile, self.battle_map, acting_unit.side) then
                 self.layout = "COMBAT_PREVIEW"
                 self.last_hovered_unit = unit
             end

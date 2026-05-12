@@ -38,7 +38,7 @@ end
 ---@return userdata
 function TileReachabilityCache:_tiles_with_distance_from_unit_attacks(unit, tile)
     local targeting = unit.character:get_weapon_targeting()
-    local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map)
+    local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map, unit.side)
     local tiles = userdata("u8", self.battle_map.width, self.battle_map.height)
 
     for _, t in ipairs(tiles_in_distance) do
