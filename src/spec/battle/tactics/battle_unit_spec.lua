@@ -111,6 +111,11 @@ describe("battle.tactics.battle_unit", function()
             local unit = make_unit({ character = char })
             luassert.are_same({}, unit.skill_states)
         end)
+
+        it("should initialise active_statuses to an empty table", function()
+            local unit = make_unit()
+            luassert.are_same({}, unit.active_statuses)
+        end)
     end)
 
     -- ---------------------------------------------------------------------------
@@ -279,6 +284,44 @@ describe("battle.tactics.battle_unit", function()
             unit.skill_states["heal"].cooldown_remaining = 1
             unit:tick_skill_cooldowns()
             luassert.are_equal(0, unit.skill_states["heal"].cooldown_remaining)
+        end)
+    end)
+
+    -- ---------------------------------------------------------------------------
+    -- tick_statuses
+    -- ---------------------------------------------------------------------------
+
+    describe("tick_statuses", function()
+        it("should decrement duration by 1 for each active status", function()
+            local unit = make_unit()
+            unit.active_statuses = { { kind = "damage_reduction", duration = 3 } }
+            unit:tick_statuses()
+            luassert.are_equal(2, unit.active_statuses[1].duration)
+        end)
+
+        it("should remove a status when its duration reaches 0", function()
+            local unit = make_unit()
+            unit.active_statuses = { { kind = "skip_turn", duration = 1 } }
+            unit:tick_statuses()
+            luassert.are_same({}, unit.active_statuses)
+        end)
+
+        it("should remove only expired statuses and keep active ones", function()
+            local unit = make_unit()
+            unit.active_statuses = {
+                { kind = "skip_turn", duration = 1 },
+                { kind = "mark", duration = 2 },
+            }
+            unit:tick_statuses()
+            luassert.are_equal(1, #unit.active_statuses)
+            luassert.are_equal("mark", unit.active_statuses[1].kind)
+            luassert.are_equal(1, unit.active_statuses[1].duration)
+        end)
+
+        it("should do nothing when active_statuses is empty", function()
+            local unit = make_unit()
+            unit:tick_statuses()
+            luassert.are_same({}, unit.active_statuses)
         end)
     end)
 

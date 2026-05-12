@@ -22,3 +22,7 @@
 ---@class SkillState
 ---@field cooldown_remaining integer Turns remaining before this skill is available again. 0 = available.
 ---@field uses_remaining? integer Uses left this battle. nil = unlimited.
+
+---@class SkillStatus
+---@field kind string Debuff/buff kind identifier.
+---@field duration integer Turns remaining before this status expires.

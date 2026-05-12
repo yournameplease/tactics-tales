@@ -439,6 +439,91 @@ describe("tactics_engine handle_skill #it", function()
         end)
     end)
 
+    describe("debuff effect", function()
+        it("stores the debuff on the target's active_statuses", function()
+            local skill_defs = {
+                wither = { effects = { { type = "debuff", kind = "damage_reduction", duration = 2 } }, cooldown = nil },
+            }
+            local caster = make_unit({
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
+                character = make_character({ id = 1, hp_max = 10, skill_loadout = { "wither" } }),
+                skill_defs = skill_defs,
+            })
+            local target = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
+                character = make_character({ id = 2, hp_max = 10 }),
+            })
+
+            local engine, tm = make_engine({ caster, target }, skill_defs)
+            engine:handle_skill(caster, "wither", target.tile)
+            tick_to_idle(tm)
+
+            luassert.are_equal(1, #target.active_statuses)
+            luassert.are_equal("damage_reduction", target.active_statuses[1].kind)
+            luassert.are_equal(2, target.active_statuses[1].duration)
+        end)
+
+        it("stores a self_target debuff on the caster, not the target", function()
+            local skill_defs = {
+                rampage = { effects = { { type = "debuff", kind = "skip_turn", duration = 1, self_target = true } }, cooldown = nil },
+            }
+            local caster = make_unit({
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
+                character = make_character({ id = 1, hp_max = 10, skill_loadout = { "rampage" } }),
+                skill_defs = skill_defs,
+            })
+            local target = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "enemy",
+                character = make_character({ id = 2, hp_max = 10 }),
+            })
+
+            local engine, tm = make_engine({ caster, target }, skill_defs)
+            engine:handle_skill(caster, "rampage", target.tile)
+            tick_to_idle(tm)
+
+            luassert.are_equal(1, #caster.active_statuses)
+            luassert.are_equal("skip_turn", caster.active_statuses[1].kind)
+            luassert.are_same({}, target.active_statuses)
+        end)
+    end)
+
+    describe("buff effect", function()
+        it("stores the buff on the target's active_statuses", function()
+            local skill_defs = {
+                rally = { effects = { { type = "buff", kind = "defense_bonus", duration = 3 } }, cooldown = nil },
+            }
+            local caster = make_unit({
+                id = 1,
+                tile = point.of(0, 0),
+                side = "player",
+                character = make_character({ id = 1, hp_max = 10, skill_loadout = { "rally" } }),
+                skill_defs = skill_defs,
+            })
+            local target = make_unit({
+                id = 2,
+                tile = point.of(1, 0),
+                side = "player",
+                character = make_character({ id = 2, hp_max = 10 }),
+            })
+
+            local engine, tm = make_engine({ caster, target }, skill_defs)
+            engine:handle_skill(caster, "rally", target.tile)
+            tick_to_idle(tm)
+
+            luassert.are_equal(1, #target.active_statuses)
+            luassert.are_equal("defense_bonus", target.active_statuses[1].kind)
+            luassert.are_equal(3, target.active_statuses[1].duration)
+        end)
+    end)
+
     describe("finish_unit_action", function()
         it("marks the caster as having acted", function()
             local skill_defs = {

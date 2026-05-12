@@ -17,6 +17,7 @@ local maps = require("src.tactics.util.maps")
 ---@field tags table<string, boolean> Set of string tags associated with this unit.
 ---@field marked boolean True when the unit is currently marked.
 ---@field skill_states table<string, SkillState> Per-skill battle state keyed by skill_id.
+---@field active_statuses SkillStatus[] Active debuff/buff statuses on this unit.
 local BattleUnit = {}
 BattleUnit.__index = BattleUnit
 
@@ -104,6 +105,7 @@ function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side,
         unit_ai = ai,
         sprites = {},
         skill_states = skill_states,
+        active_statuses = {},
     }
 
     setmetatable(instance, {
@@ -154,6 +156,20 @@ function BattleUnit:tick_skill_cooldowns()
     for _, state in pairs(self.skill_states) do
         if state.cooldown_remaining > 0 then
             state.cooldown_remaining = state.cooldown_remaining - 1
+        end
+    end
+end
+
+--- Decrement duration of all active statuses, removing any that have expired.
+function BattleUnit:tick_statuses()
+    local i = 1
+    while i <= #self.active_statuses do
+        local status = self.active_statuses[i]
+        status.duration = status.duration - 1
+        if status.duration <= 0 then
+            table.remove(self.active_statuses, i)
+        else
+            i = i + 1
         end
     end
 end
