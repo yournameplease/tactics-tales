@@ -504,19 +504,20 @@ end
 function TacticsEngine:skill_action(caster, skill_id, target)
     local skill = self.skill_defs[skill_id]
 
-    if skill.hp_cost then
-        caster:take_damage(skill.hp_cost)
-    end
-
-    local caster_dead = caster.hp_current <= 0
-
+    local caster_dead = false
     local target_dead = false
-    if skill.effect_type == "heal" then
-        target:restore_hp(skill.heal_amount)
-    elseif skill.effect_type == "damage" then
-        if random.rndi(100) < skill.accuracy then
-            target:take_damage(skill.damage)
-            target_dead = target.hp_current <= 0
+
+    for _, effect in ipairs(skill.effects) do
+        if effect.type == "hp_cost" then
+            caster:take_damage(effect.amount)
+            caster_dead = caster.hp_current <= 0
+        elseif effect.type == "heal" then
+            target:restore_hp(effect.amount)
+        elseif effect.type == "damage" then
+            if random.rndi(100) < effect.accuracy then
+                target:take_damage(effect.damage)
+                target_dead = target.hp_current <= 0
+            end
         end
     end
 

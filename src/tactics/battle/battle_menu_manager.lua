@@ -1012,6 +1012,14 @@ local function make_menu_data(map_width, map_height)
                                         elseif state and state.cooldown_remaining > 0 then
                                             reason = "CD:" .. state.cooldown_remaining
                                         else
+                                            for _, effect in ipairs(def.effects) do
+                                                if effect.type == "hp_cost" and effect.amount >= unit.hp_current then
+                                                    reason = "HP"
+                                                    break
+                                                end
+                                            end
+                                        end
+                                        if reason == nil then
                                             local tiles = def.targeting.get_selection_tiles(destination, msb.battle_map, unit.side)
                                             if #tiles == 0 then
                                                 reason = "no targets"
