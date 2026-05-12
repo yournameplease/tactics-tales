@@ -396,8 +396,6 @@ function TacticsEngine:handle_interaction(interaction_id, unit, target_unit, tar
 end
 
 --- Animate and then commit `unit`'s move to `destination` along `path`.
---- TODO: check "move_lock" debuff on unit to block movement
---- TODO: check "move_bonus" buff on unit for increased movement range
 ---@param unit BattleUnit
 ---@param destination Point
 ---@param path Point[]
@@ -518,9 +516,15 @@ function TacticsEngine:skill_action(caster, skill_id, target)
             target:restore_hp(effect.amount)
         elseif effect.type == "damage" then
             -- TODO: check "damage_reduction" debuff on target and "defense_bonus" buff on target
-            -- TODO: check "mark" debuff on target for bonus damage
+            local damage = effect.damage or 0
+            for _, status in ipairs(target.active_statuses) do
+                if status.kind == "mark" then
+                    damage = damage + (status.amount or 0)
+                    break
+                end
+            end
             if random.rndi(100) < effect.accuracy then
-                target:take_damage(effect.damage)
+                target:take_damage(damage)
                 target_dead = target.hp_current <= 0
             end
         elseif effect.type == "debuff" or effect.type == "buff" then

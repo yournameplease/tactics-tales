@@ -30,8 +30,9 @@ end
 ---@param tile Point
 ---@param movement integer
 ---@param side? string
+---@param active_statuses? table[]
 ---@return table
-local function make_unit(id, tile, movement, side)
+local function make_unit(id, tile, movement, side, active_statuses)
     local s = side or "player"
     return {
         id = id,
@@ -40,6 +41,7 @@ local function make_unit(id, tile, movement, side)
         movement_side = s,
         marked = false,
         unit_ai = nil,
+        active_statuses = active_statuses or {},
         is_marked = function(self) return self.marked end,
         is_player = function(self) return self.side == "player" end,
         character = {
@@ -182,6 +184,76 @@ describe("battle.tile_reachability_cache", function()
             local map = make_open_map(5, 5)
             local cache = tile_reachability_cache.new(map)
             luassert.are_equal(0, cache.marked_unit_tiles:get(0, 0))
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
+    -- move_lock debuff (TASK-124)
+    -- -----------------------------------------------------------------------
+
+    describe("move_lock debuff", function()
+        it("prevents unit from reaching any tile beyond its current tile", function()
+            -- Arrange
+            local map = make_open_map(5, 5)
+            local unit = make_unit(1, point.of(2, 2), 3, "player", {
+                { kind = "move_lock", duration = 1 },
+            })
+            place_unit(map, unit)
+
+            -- Act
+            local cache = tile_reachability_cache.new(map)
+            local tiles = cache:get_valid_tiles_for_unit(unit)
+
+            -- Assert: the tile one step away must not be reachable
+            local adjacent = tiles:get(2, 3)
+            luassert.is_false((adjacent & HIGHLIGHT.IS_REACHABLE) ~= 0, "adjacent tile must not be reachable when move_lock is active")
+        end)
+
+        it("does not restrict movement when move_lock is absent", function()
+            local map = make_open_map(5, 5)
+            local unit = make_unit(1, point.of(2, 2), 3)
+            place_unit(map, unit)
+
+            local cache = tile_reachability_cache.new(map)
+            local tiles = cache:get_valid_tiles_for_unit(unit)
+
+            local adjacent = tiles:get(2, 3)
+            luassert.is_true((adjacent & HIGHLIGHT.IS_REACHABLE) ~= 0, "adjacent tile should be reachable without move_lock")
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
+    -- move_bonus buff (TASK-125)
+    -- -----------------------------------------------------------------------
+
+    describe("move_bonus buff", function()
+        it("extends movement range by the status amount", function()
+            -- Arrange: movement 1 normally can't reach (2,4) from (2,2); with +2 bonus it can
+            local map = make_open_map(7, 7)
+            local unit = make_unit(1, point.of(2, 2), 1, "player", {
+                { kind = "move_bonus", amount = 2, duration = 1 },
+            })
+            place_unit(map, unit)
+
+            -- Act
+            local cache = tile_reachability_cache.new(map)
+            local tiles = cache:get_valid_tiles_for_unit(unit)
+
+            -- Assert: (2,4) is distance 2 from (2,2), reachable with movement 1+2=3
+            local far_tile = tiles:get(2, 4)
+            luassert.is_true((far_tile & HIGHLIGHT.IS_REACHABLE) ~= 0, "far tile should be reachable with move_bonus")
+        end)
+
+        it("does not extend movement when move_bonus is absent", function()
+            local map = make_open_map(7, 7)
+            local unit = make_unit(1, point.of(2, 2), 1)
+            place_unit(map, unit)
+
+            local cache = tile_reachability_cache.new(map)
+            local tiles = cache:get_valid_tiles_for_unit(unit)
+
+            local far_tile = tiles:get(2, 4)
+            luassert.is_false((far_tile & HIGHLIGHT.IS_REACHABLE) ~= 0, "far tile should not be reachable without move_bonus")
         end)
     end)
 end)

@@ -75,6 +75,19 @@ function TileReachabilityCache:_tiles_in_movement_and_attack_range_for_unit(unit
         movement = 0
     end
 
+    for _, status in ipairs(unit.active_statuses or {}) do
+        if status.kind == "move_bonus" then
+            movement = movement + (status.amount or 0)
+        end
+    end
+
+    for _, status in ipairs(unit.active_statuses or {}) do
+        if status.kind == "move_lock" then
+            movement = 0
+            break
+        end
+    end
+
     local reachable_tiles = pathfinding.find_reachable_tiles(
         self.battle_map,
         unit.tile.x,
