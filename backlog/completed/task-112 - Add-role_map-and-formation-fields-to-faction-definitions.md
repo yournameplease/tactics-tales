@@ -1,9 +1,10 @@
 ---
 id: TASK-112
 title: Add role_map and formation fields to faction definitions
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-11 22:52'
+updated_date: '2026-05-11 22:59'
 labels: []
 milestone: m-17
 dependencies: []
