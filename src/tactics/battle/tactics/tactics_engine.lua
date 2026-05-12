@@ -329,6 +329,7 @@ function TacticsEngine:set_unit_idle(unit)
 end
 
 --- Mark `unit` as having acted and unblock battle input.
+--- TODO: check "extra_action" buff on unit to grant an additional action instead of marking acted
 ---@param unit BattleUnit
 function TacticsEngine:finish_unit_action(unit)
     unit.has_acted = true
@@ -395,6 +396,8 @@ function TacticsEngine:handle_interaction(interaction_id, unit, target_unit, tar
 end
 
 --- Animate and then commit `unit`'s move to `destination` along `path`.
+--- TODO: check "move_lock" debuff on unit to block movement
+--- TODO: check "move_bonus" buff on unit for increased movement range
 ---@param unit BattleUnit
 ---@param destination Point
 ---@param path Point[]
@@ -514,10 +517,15 @@ function TacticsEngine:skill_action(caster, skill_id, target)
         elseif effect.type == "heal" then
             target:restore_hp(effect.amount)
         elseif effect.type == "damage" then
+            -- TODO: check "damage_reduction" debuff on target and "defense_bonus" buff on target
+            -- TODO: check "mark" debuff on target for bonus damage
             if random.rndi(100) < effect.accuracy then
                 target:take_damage(effect.damage)
                 target_dead = target.hp_current <= 0
             end
+        elseif effect.type == "debuff" or effect.type == "buff" then
+            local status_target = effect.self_target and caster or target
+            table.insert(status_target.active_statuses, { kind = effect.kind, duration = effect.duration })
         end
     end
 
@@ -695,6 +703,7 @@ function TacticsEngine:do_combat(attacker, defender)
     defender.facing:face_point(delta, true)
     attacker.facing:face_point(-delta, true)
 
+    -- TODO: check "double_attack" buff on attacker for extra attack step
     local combat_result = combat_calculator.compute_combat(attacker, defender, self.battle_map)
 
     self.event_writer:emit("UNIT_COMBAT", {
@@ -730,6 +739,7 @@ function TacticsEngine:tick_skill_cooldowns_for_side(side)
     local units = self.battle_map:get_units(function(u) return u.side == side end)
     for _, unit in ipairs(units) do
         unit:tick_skill_cooldowns()
+        unit:tick_statuses()
     end
 end
 
