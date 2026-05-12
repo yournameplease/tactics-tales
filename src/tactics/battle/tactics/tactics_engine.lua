@@ -529,7 +529,10 @@ function TacticsEngine:skill_action(caster, skill_id, target)
             end
         elseif effect.type == "debuff" or effect.type == "buff" then
             local status_target = effect.self_target and caster or target
-            table.insert(status_target.active_statuses, { kind = effect.kind, duration = effect.duration })
+            table.insert(status_target.active_statuses, { kind = effect.kind, duration = effect.duration, amount = effect.amount })
+            if effect.kind == "move_bonus" or effect.kind == "move_lock" then
+                self:invalidate_tiles_for_unit(status_target)
+            end
         end
     end
 
