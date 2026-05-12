@@ -10,7 +10,7 @@ return {
         parent_template = "civilian",
         hp_max          = 3,
         item_loadout    = { "dagger" },
-        skill_loadout   = { "fireball" },
+        skill_loadout   = { "missile" },
     },
 
 }

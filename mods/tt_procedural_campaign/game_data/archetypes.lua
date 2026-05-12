@@ -48,22 +48,22 @@
 
 ---@type table<string, ArchetypeDefinition>
 local archetypes = {
-    seize_run = {
-        name             = "Seize Run",
-        description      = "Three seize battles in a row. Used to exercise the seize layout through the full campaign loop.",
+    -- seize_run = {
+    --     name             = "Seize Run",
+    --     description      = "Three seize battles in a row. Used to exercise the seize layout through the full campaign loop.",
 
-        slots            = {
-            { type = "beat", beat_id = "abandoned_fortress_seize" },
-            { type = "beat", beat_id = "abandoned_fortress_seize" },
-            { type = "beat", beat_id = "abandoned_fortress_seize" },
-        },
+    --     slots            = {
+    --         { type = "beat", beat_id = "abandoned_fortress_seize" },
+    --         { type = "beat", beat_id = "abandoned_fortress_seize" },
+    --         { type = "beat", beat_id = "abandoned_fortress_seize" },
+    --     },
 
-        filler_pool      = { abandoned_fortress_seize = 1 },
-        recruitment_rate = 1,
-        faction_pool     = { bandits = 1 },
-        bias             = "prefer_novel",
-        wanderer_pool    = { "bandit_goon" },
-    },
+    --     filler_pool      = { abandoned_fortress_seize = 1 },
+    --     recruitment_rate = 1,
+    --     faction_pool     = { bandits = 1 },
+    --     bias             = "prefer_novel",
+    --     wanderer_pool    = { "bandit_goon" },
+    -- },
 
     warband = {
         name             = "Warband",
