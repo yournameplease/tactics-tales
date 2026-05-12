@@ -27,6 +27,9 @@ local function make_campaign_with_spy()
     return campaign, spy
 end
 
+---@type CampaignNode
+local dummy_node = { type = "new_page" }
+
 -- ---------------------------------------------------------------------------
 -- new_page handler
 -- ---------------------------------------------------------------------------
@@ -35,28 +38,28 @@ describe("new_page handler", function()
     describe("enter", function()
         it("calls begin_flip with direction 'forward'", function()
             local campaign, spy = make_campaign_with_spy()
-            HANDLERS.new_page.enter(campaign)
+            HANDLERS.new_page.enter(campaign, dummy_node)
             luassert.is_true(spy.called)
             luassert.are_equal("forward", spy.direction)
         end)
 
         it("does not immediately clear the page or advance the node", function()
             local campaign, _ = make_campaign_with_spy()
-            HANDLERS.new_page.enter(campaign)
+            HANDLERS.new_page.enter(campaign, dummy_node)
             luassert.is_false(campaign.campaign_page.cleared)
             luassert.is_false(campaign.advanced)
         end)
 
         it("callback clears the page", function()
             local campaign, spy = make_campaign_with_spy()
-            HANDLERS.new_page.enter(campaign)
+            HANDLERS.new_page.enter(campaign, dummy_node)
             spy.callback()
             luassert.is_true(campaign.campaign_page.cleared)
         end)
 
         it("callback advances the node", function()
             local campaign, spy = make_campaign_with_spy()
-            HANDLERS.new_page.enter(campaign)
+            HANDLERS.new_page.enter(campaign, dummy_node)
             spy.callback()
             luassert.is_true(campaign.advanced)
         end)

@@ -129,7 +129,7 @@ end
 ---@param node_if_false CampaignNode
 ---@return CampaignNodeFactory
 function campaign.config_branch(predicate, node_if_true, node_if_false)
-    return function(config)
+    return function(config, _rng, _state)
         if predicate(config) then
             return node_if_true
         else

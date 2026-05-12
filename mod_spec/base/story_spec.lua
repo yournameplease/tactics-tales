@@ -1,6 +1,10 @@
 local luassert = require("luassert")
+local random = require("src.tactics.util.random")
 
 local campaign = require("base.lib.campaign").campaign
+
+---@type CampaignRngContext
+local dummy_rng = { campaign_rng = random.new(1) }
 
 describe("base.lib.campaign", function()
     describe("new_page", function()
@@ -191,14 +195,14 @@ describe("base.lib.campaign", function()
             local node_true = { type = "text", text = "yes" }
             local node_false = { type = "text", text = "no" }
             local factory = campaign.config_branch(function(_) return true end, node_true, node_false)
-            luassert.are_equal(node_true, factory({}))
+            luassert.are_equal(node_true, factory({}, dummy_rng, {}))
         end)
 
         it("returns node_if_false when predicate is false", function()
             local node_true = { type = "text", text = "yes" }
             local node_false = { type = "text", text = "no" }
             local factory = campaign.config_branch(function(_) return false end, node_true, node_false)
-            luassert.are_equal(node_false, factory({}))
+            luassert.are_equal(node_false, factory({}, dummy_rng, {}))
         end)
 
         it("passes the full config table to the predicate", function()
@@ -211,7 +215,7 @@ describe("base.lib.campaign", function()
                 { type = "advance" },
                 { type = "advance" }
             )
-            factory(config)
+            factory(config, dummy_rng, {})
             luassert.are_equal(config, received_config)
         end)
     end)
