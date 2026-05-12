@@ -63,11 +63,11 @@ end
 describe("tactics.battle.tactics.tactics_engine", function()
 
     -- -----------------------------------------------------------------------
-    -- skill_action: mark debuff bonus damage (TASK-122)
+    -- skill_action: damage effect
     -- -----------------------------------------------------------------------
 
-    describe("skill_action mark debuff bonus", function()
-        it("applies base damage when target has no mark status", function()
+    describe("skill_action damage effect", function()
+        it("applies base damage to target on hit", function()
             local skill_id = "test_dmg"
             local engine = make_stub_engine({ [skill_id] = make_damage_skill(3, 100) })
             local caster = make_caster(skill_id)
@@ -76,32 +76,6 @@ describe("tactics.battle.tactics.tactics_engine", function()
             TacticsEngine.skill_action(engine, caster, skill_id, target)
 
             luassert.are_equal(7, target.hp_current)
-        end)
-
-        it("adds mark amount to damage when target has mark debuff", function()
-            local skill_id = "test_dmg"
-            local engine = make_stub_engine({ [skill_id] = make_damage_skill(3, 100) })
-            local caster = make_caster(skill_id)
-            local target = make_target(10, { { kind = "mark", amount = 2, duration = 1 } })
-
-            TacticsEngine.skill_action(engine, caster, skill_id, target)
-
-            luassert.are_equal(5, target.hp_current)
-        end)
-
-        it("uses only the first mark status amount", function()
-            local skill_id = "test_dmg"
-            local engine = make_stub_engine({ [skill_id] = make_damage_skill(1, 100) })
-            local caster = make_caster(skill_id)
-            local target = make_target(10, {
-                { kind = "mark", amount = 3, duration = 1 },
-                { kind = "mark", amount = 5, duration = 1 },
-            })
-
-            TacticsEngine.skill_action(engine, caster, skill_id, target)
-
-            -- Only first mark is consumed (loop breaks after first match)
-            luassert.are_equal(6, target.hp_current)
         end)
     end)
 end)

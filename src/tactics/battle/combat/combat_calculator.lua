@@ -44,6 +44,7 @@ local random = require("src.tactics.util.random")
 ---@field hp_max integer
 ---@field defense table<string, integer> Defense bonus per DefenseType key.
 ---@field avoid table<string, integer> Avoid bonus per AvoidType key.
+---@field mark_bonus integer Extra damage dealt to this unit due to mark debuff.
 ---@field attacks AttackDouble[]
 ---@field unit BattleUnit The source unit.
 
@@ -84,6 +85,13 @@ end
 ---@param unit BattleUnit
 ---@return CombatDouble
 local function build_combat_double(unit)
+    local mark_bonus = 0
+    for _, status in ipairs(unit.active_statuses or {}) do
+        if status.kind == "mark" then
+            mark_bonus = mark_bonus + (status.amount or 0)
+        end
+    end
+
     local double = {
         id = unit.id,
         tile = unit.tile,
@@ -91,6 +99,7 @@ local function build_combat_double(unit)
         hp_max = unit.character.stats.hp_max,
         defense = {},
         avoid = {},
+        mark_bonus = mark_bonus,
         -- TODO: multi-weapon combat not yet implemented; only attacks[1] is used
         attacks = lists.do_map(
             unit.character.inventory:get_equipped_weapons(),
@@ -146,7 +155,7 @@ end
 ---@param weapon AttackDouble
 ---@return integer Damage dealt, minimum 1 when weapon has positive damage.
 local function get_damage(_attacker, defender, weapon)
-    local atk = weapon.damage
+    local atk = weapon.damage + defender.mark_bonus
     local def = 0
 
     for avoid_type, amount in pairs(defender.defense) do

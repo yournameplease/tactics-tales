@@ -516,15 +516,8 @@ function TacticsEngine:skill_action(caster, skill_id, target)
             target:restore_hp(effect.amount)
         elseif effect.type == "damage" then
             -- TODO: check "damage_reduction" debuff on target and "defense_bonus" buff on target
-            local damage = effect.damage or 0
-            for _, status in ipairs(target.active_statuses) do
-                if status.kind == "mark" then
-                    damage = damage + (status.amount or 0)
-                    break
-                end
-            end
             if random.rndi(100) < effect.accuracy then
-                target:take_damage(damage)
+                target:take_damage(effect.damage or 0)
                 target_dead = target.hp_current <= 0
             end
         elseif effect.type == "debuff" or effect.type == "buff" then
