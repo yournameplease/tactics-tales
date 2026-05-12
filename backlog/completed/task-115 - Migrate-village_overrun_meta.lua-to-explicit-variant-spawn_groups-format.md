@@ -1,9 +1,10 @@
 ---
 id: TASK-115
 title: Migrate village_overrun_meta.lua to explicit variant spawn_groups format
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-11 22:52'
+updated_date: '2026-05-11 23:46'
 labels: []
 milestone: m-17
 dependencies:
@@ -30,10 +31,10 @@ Remove the `excludes` field entirely — it is superseded by the explicit listin
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 variant_sets entries have spawn_groups, not excludes
-- [ ] #2 All three variants (deployment_w, deployment_e, deployment_n) are covered
-- [ ] #3 house guards included as guard-role groups with facing
-- [ ] #4 No zone appears in a variant where it would overlap the deployment area
+- [x] #1 variant_sets entries have spawn_groups, not excludes
+- [x] #2 All three variants (deployment_w, deployment_e, deployment_n) are covered
+- [x] #3 house guards included as guard-role groups with facing
+- [x] #4 No zone appears in a variant where it would overlap the deployment area
 <!-- AC:END -->
 
 ## Definition of Done
