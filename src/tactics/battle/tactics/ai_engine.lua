@@ -123,7 +123,7 @@ function AIEngine:compute_unit_ai(unit)
         then
             local ally_score = nil
             local targets = self.battle_map:get_units(function(u)
-                return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
+                return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map, unit.side)
             end)
             for _, t in ipairs(targets) do
                 if not ally_score then
@@ -170,7 +170,7 @@ function AIEngine:compute_unit_ai(unit)
         all_tile_costs:foreachpoint(function(p, cost)
             if cost ~= nil then
                 local targets = self.battle_map:get_units(function(u)
-                    return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map)
+                    return should_target(u) and targeting.is_target_valid(p, u.tile, self.battle_map, unit.side)
                 end)
                 for _, t in ipairs(targets) do
                     table.insert(deep_actions, {

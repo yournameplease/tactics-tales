@@ -117,7 +117,7 @@ local ITEM_DATA = {
             damage = 1,
             accuracy = 100,
             targeting = {
-                get_selection_tiles = function(origin, map)
+                get_selection_tiles = function(origin, map, _source_side)
                     local out = {}
                     local height = map.height
                     for y = origin.y + 1, height - 1 do
@@ -126,12 +126,12 @@ local ITEM_DATA = {
 
                     return out
                 end,
-                get_targets_for_selection = function(origin, selection, map)
+                get_targets_for_selection = function(origin, selection, map, _source_side)
                     return map:get_units(function(u)
                         return u.tile.x == origin.x and u.tile.y > origin.y
                     end)
                 end,
-                is_target_valid = function(origin, selection, map)
+                is_target_valid = function(origin, selection, _map, _source_side)
                     return selection.x == origin.x and selection.y > origin.y
                 end,
             },

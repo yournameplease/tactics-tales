@@ -330,7 +330,8 @@ function BattleMap:get_targets_in_range(unit_id, tile)
                 and targeting.is_target_valid(
                     tile,
                     target.tile,
-                    battle_map
+                    battle_map,
+                    attacker.side
                 )
             then
                 table.insert(targets, target)

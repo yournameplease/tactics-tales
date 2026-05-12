@@ -17,7 +17,7 @@ return {
             targeting = {
                 range_min = 1,
                 range_max = 1,
-                get_selection_tiles = function(origin, map)
+                get_selection_tiles = function(origin, map, _source_side)
                     local out = {}
                     for dx = -1, 1 do
                         for dy = -1, 1 do
@@ -31,10 +31,10 @@ return {
                     end
                     return out
                 end,
-                get_targets_for_selection = function(_origin, selection, map)
+                get_targets_for_selection = function(_origin, selection, map, _source_side)
                     return { map:get_at_tile(selection) }
                 end,
-                is_target_valid = function(origin, selection, _map)
+                is_target_valid = function(origin, selection, _map, _source_side)
                     return lib.point.taxicab_distance(origin, selection) == 1
                 end,
             },
