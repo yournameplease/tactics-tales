@@ -71,10 +71,13 @@ return {
         effects   = { { type = "buff", kind = "defense_bonus", amount = 1, duration = 1 } },
     },
 
-    rally = builders.make_buff("Rally", "extra_action", 1, builders.ally_in_range(1, 1), {
+    rally = {
+        name            = "Rally",
         cooldown        = 2,
         uses_per_battle = 1,
-    }),
+        targeting       = builders.ally_in_range(1, 1),
+        effects         = { { type = "refresh_action" } },
+    },
 
     advance_formation = {
         name      = "Advance Formation",
