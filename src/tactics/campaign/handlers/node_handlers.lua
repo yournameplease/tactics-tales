@@ -67,7 +67,7 @@ local HANDLERS = {
     },
 
     new_page = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             campaign.page_flip_animator:begin_flip("forward", function()
                 campaign.campaign_page:clear_page()
                 campaign:advance_node()
@@ -89,13 +89,13 @@ local HANDLERS = {
     },
 
     advance = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             campaign:advance_node()
         end,
     },
 
     delete_file = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             if campaign.save_name == nil then
                 log.debug("No save file configured, skipping delete_file")
             else
@@ -107,7 +107,7 @@ local HANDLERS = {
     },
 
     exit_campaign = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             campaign.event_writer:emit("GAME_EXIT_CAMPAIGN", {})
         end,
     },
@@ -150,7 +150,7 @@ local HANDLERS = {
     },
 
     save_game = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             if campaign.save_name == nil then
                 log.debug("No save file configured, skipping save_game")
                 campaign:advance_node()
@@ -318,7 +318,7 @@ local HANDLERS = {
     -- ── Game results (advance-style with custom rendering) ───────────────
 
     game_results = {
-        enter = function(campaign)
+        enter = function(campaign, _node)
             local results = campaign.stats_service.campaign_results
 
             -- Build chapter display pages

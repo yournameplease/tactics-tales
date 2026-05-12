@@ -13,6 +13,7 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("is a no-op when already active", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator:begin_flip("forward", function() end)
             animator:begin_flip("backward", function() end)
             -- state should still reflect the first flip (forward)
@@ -34,12 +35,14 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("returns true in PENDING_AFTER", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator.state = "PENDING_AFTER"
             luassert.is_true(animator:is_blocking_input())
         end)
 
         it("returns true in ANIMATING", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator.state = "ANIMATING"
             luassert.is_true(animator:is_blocking_input())
         end)
@@ -48,6 +51,7 @@ describe("tactics.animation.page_flip_animator", function()
     describe("tick", function()
         it("advances frame counter during ANIMATING", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator.state = "ANIMATING"
             animator:tick()
             luassert.are_equal(1, animator.frame)
@@ -55,6 +59,7 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("transitions ANIMATING to IDLE at frame 40", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator.state = "ANIMATING"
             animator.frame = 39
             animator:tick()
@@ -63,6 +68,7 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("does not advance frame outside ANIMATING", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             animator:begin_flip("forward", function() end)
             animator:tick()
             luassert.are_equal(0, animator.frame)
@@ -100,6 +106,7 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("captures sprite_a and transitions to PENDING_AFTER in PENDING_BEFORE", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             local dtm = make_draw_target_manager()
             local ui = make_ui_manager()
             animator:begin_flip("forward", function() end)
@@ -122,6 +129,7 @@ describe("tactics.animation.page_flip_animator", function()
 
         it("captures sprite_b and transitions to ANIMATING in PENDING_AFTER", function()
             local animator = page_flip_animator.new()
+            ---@cast animator PageFlipAnimatorImpl
             local dtm = make_draw_target_manager()
             local ui = make_ui_manager()
             animator:begin_flip("forward", function() end)

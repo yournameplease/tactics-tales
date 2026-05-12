@@ -10,14 +10,16 @@ local luassert = {}
 
 ---Assert that `value == true`.
 ---@param value any The value to confirm is `true`.
-function internal.True(value) end
+---@param message? string Optional failure message.
+function internal.True(value, message) end
 
 internal.is_true = internal.True
 internal.is_not_true = internal.True
 
 ---Assert that `value == false`.
 ---@param value any The value to confirm is `false`.
-function internal.False(value) end
+---@param message? string Optional failure message.
+function internal.False(value, message) end
 
 internal.is_false = internal.False
 internal.is_not_false = internal.False
@@ -56,7 +58,8 @@ internal.is_not_table = internal.Table
 
 ---Assert that `type(value) == "nil"`.
 ---@param value any The value to confirm is of type `nil`.
-function internal.Nil(value) end
+---@param message? string Optional failure message.
+function internal.Nil(value, message) end
 
 internal.is_nil = internal.Nil
 internal.is_not_nil = internal.Nil
