@@ -6,8 +6,11 @@
 ---@alias Path string
 ---@alias CardinalDirection "up"|"down"|"left"|"right"
 
+---@class PointRecord
+---@field x integer
+---@field y integer
 
----@class Point
+---@class Point: PointRecord
 ---@field x integer
 ---@field y integer
 ---@operator add(Point): Point
@@ -16,10 +19,6 @@
 ---@operator unm: Point
 local Point = {}
 Point.__index = Point
-
----@class PointRecord
----@field x integer
----@field y integer
 
 local point = {}
 
