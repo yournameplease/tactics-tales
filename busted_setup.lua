@@ -1,2 +1,2 @@
 require("spec.require_trimmer")
-require("spec.picotron_shim")
+require("src.spec.picotron_shim")

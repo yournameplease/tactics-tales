@@ -325,6 +325,7 @@ end
 local function frames_from_base_frame_data(s, base_frame, base_frame_data)
     local base_animation = base_frame_data[base_frame]
 
+    ---@type AnimationBodyByFrame
     return maps.map(
         function(_, f)
             return frame_from_base_frame(s, f)

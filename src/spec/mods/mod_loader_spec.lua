@@ -19,7 +19,7 @@ function mock_filesystem.new()
         files = {},
     }, MockFilesystem)
 
-    _G.include = function(path)
+    _G.include = function(path) --[[@diagnostic disable-line: duplicate-set-field]]
         local dir = self.files
         for word in string.gmatch(path, "[%a%.]+/") do
             local next_dir = dir[word]

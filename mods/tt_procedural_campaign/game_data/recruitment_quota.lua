@@ -8,7 +8,7 @@ local battles_meta       = include("mods/tt_procedural_campaign/game_data/battle
 --- over multiple battles. Spent credits are deducted (only the remainder is saved).
 ---
 ---@param archetype ArchetypeDefinition
----@param mem CampaignMemory
+---@param mem CampaignState
 ---@param rng RngInstance
 ---@param template_id string Encounter template for this battle; used to look up eligible recruit types.
 ---@return string debug_text
