@@ -151,7 +151,7 @@ describe("tactics_engine handle_skill #it", function()
     describe("heal effect", function()
         it("restores heal_amount HP to the target", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
+                heal = { effects = { { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -177,7 +177,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("clamps restored HP to hp_max", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 10, hp_cost = nil, cooldown = nil },
+                heal = { effects = { { type = "heal", amount = 10 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -205,7 +205,7 @@ describe("tactics_engine handle_skill #it", function()
     describe("damage effect", function()
         it("applies flat damage to the target with no defense reduction", function()
             local skill_defs = {
-                blast = { effect_type = "damage", damage = 5, accuracy = 100, hp_cost = nil, cooldown = nil },
+                blast = { effects = { { type = "damage", damage = 5, accuracy = 100 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -230,7 +230,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("misses and deals no damage when accuracy is 0", function()
             local skill_defs = {
-                blast = { effect_type = "damage", damage = 5, accuracy = 0, hp_cost = nil, cooldown = nil },
+                blast = { effects = { { type = "damage", damage = 5, accuracy = 0 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -257,7 +257,7 @@ describe("tactics_engine handle_skill #it", function()
     describe("HP cost", function()
         it("deducts hp_cost from the caster before the effect", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = 2, cooldown = nil },
+                heal = { effects = { { type = "hp_cost", amount = 2 }, { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -283,7 +283,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("fires the effect even if the HP cost kills the caster", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = 10, cooldown = nil },
+                heal = { effects = { { type = "hp_cost", amount = 10 }, { type = "heal", amount = 3 } }, cooldown = nil },
             }
             -- Use enemy side to skip the player-death dialogue path.
             local caster = make_unit({
@@ -310,7 +310,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("emits TACTICS_UNIT_DEATH when the HP cost kills the caster", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = 10, cooldown = nil },
+                heal = { effects = { { type = "hp_cost", amount = 10 }, { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -338,7 +338,7 @@ describe("tactics_engine handle_skill #it", function()
     describe("resource consumption", function()
         it("sets cooldown_remaining to skill.cooldown after use", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = 2 },
+                heal = { effects = { { type = "heal", amount = 3 } }, cooldown = 2 },
             }
             local caster = make_unit({
                 id = 1,
@@ -364,7 +364,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("sets cooldown_remaining to 0 when the skill has no cooldown", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
+                heal = { effects = { { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -390,7 +390,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("decrements uses_remaining after use", function()
             local skill_defs = {
-                blast = { effect_type = "damage", damage = 1, accuracy = 100, hp_cost = nil, cooldown = nil, uses_per_battle = 3 },
+                blast = { effects = { { type = "damage", damage = 1, accuracy = 100 } }, cooldown = nil, uses_per_battle = 3 },
             }
             local caster = make_unit({
                 id = 1,
@@ -415,7 +415,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("leaves uses_remaining nil when the skill has no use cap", function()
             local skill_defs = {
-                slash = { effect_type = "damage", damage = 1, accuracy = 100, hp_cost = nil, cooldown = nil },
+                slash = { effects = { { type = "damage", damage = 1, accuracy = 100 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -442,7 +442,7 @@ describe("tactics_engine handle_skill #it", function()
     describe("finish_unit_action", function()
         it("marks the caster as having acted", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
+                heal = { effects = { { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,
@@ -468,7 +468,7 @@ describe("tactics_engine handle_skill #it", function()
 
         it("emits TACTICS_UNIT_END_ACTION", function()
             local skill_defs = {
-                heal = { effect_type = "heal", heal_amount = 3, hp_cost = nil, cooldown = nil },
+                heal = { effects = { { type = "heal", amount = 3 } }, cooldown = nil },
             }
             local caster = make_unit({
                 id = 1,

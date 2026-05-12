@@ -44,24 +44,24 @@ end
 return {
     heal = {
         name            = "Heal",
-        effect_type     = "heal",
-        heal_amount     = 5,
-        hp_cost         = 1,
         cooldown        = nil,
         uses_per_battle = nil,
         targeting       = ally_in_range(1, 2, function(u)
             return u.hp_current < u.character.stats.hp_max
         end),
+        effects = {
+            { type = "hp_cost", amount = 1 },
+            { type = "heal",    amount = 5 },
+        },
     },
 
     missile = {
         name            = "Missile",
-        effect_type     = "damage",
-        damage          = 3,
-        accuracy        = 100,
-        hp_cost         = nil,
         cooldown        = nil,
         uses_per_battle = 1,
         targeting       = enemy_in_range(1, 2),
+        effects = {
+            { type = "damage", damage = 3, accuracy = 100 },
+        },
     },
 }

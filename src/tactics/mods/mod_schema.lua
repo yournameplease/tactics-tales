@@ -69,6 +69,11 @@ local item_spec_record = s.record({
 local items_spec = s.dictionary(s.string(), item_spec_record)
 
 -- Schemas for `skills`
+local valid_effect_types = {
+    heal=true, damage=true, hp_cost=true, debuff=true, buff=true,
+    spawn=true, transfer_hp=true, drain_heal=true, siphon=true,
+}
+
 local skill_entry_spec = s.custom(function(skill)
     if type(skill) ~= "table" then
         return false, { "expected table, got " .. type(skill) }
@@ -77,22 +82,19 @@ local skill_entry_spec = s.custom(function(skill)
     if type(skill.name) ~= "string" then
         table.insert(errors, "name: required string")
     end
-    if skill.effect_type ~= "heal" and skill.effect_type ~= "damage" then
-        table.insert(errors, "effect_type: must be 'heal' or 'damage', got " .. tostring(skill.effect_type))
-    end
-    if skill.effect_type == "heal" and skill.heal_amount == nil then
-        table.insert(errors, "heal_amount: required when effect_type is 'heal'")
-    end
-    if skill.effect_type == "damage" then
-        if skill.damage == nil then
-            table.insert(errors, "damage: required when effect_type is 'damage'")
-        end
-        if skill.accuracy == nil then
-            table.insert(errors, "accuracy: required when effect_type is 'damage'")
-        end
-    end
     if skill.targeting == nil then
         table.insert(errors, "targeting: required")
+    end
+    if type(skill.effects) ~= "table" or #skill.effects == 0 then
+        table.insert(errors, "effects: required non-empty array")
+    else
+        for i, effect in ipairs(skill.effects) do
+            if type(effect) ~= "table" then
+                table.insert(errors, "effects[" .. i .. "]: expected table")
+            elseif not valid_effect_types[effect.type] then
+                table.insert(errors, "effects[" .. i .. "].type: unknown type " .. tostring(effect.type))
+            end
+        end
     end
     return #errors == 0, errors
 end)

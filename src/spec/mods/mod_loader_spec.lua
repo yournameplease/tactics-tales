@@ -334,9 +334,10 @@ describe("mod_loader", function()
             make_fs_with_skills({
                 heal = {
                     name = "Heal",
-                    effect_type = "heal",
-                    heal_amount = 3,
                     targeting = base_targeting(),
+                    effects = {
+                        { type = "heal", amount = 3 },
+                    },
                 },
             })
             local loader = mod_loader.new()

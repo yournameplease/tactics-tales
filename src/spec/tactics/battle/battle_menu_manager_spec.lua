@@ -134,6 +134,7 @@ local function make_skill_def(overrides)
         name = overrides.name or "Test Skill",
         uses_per_battle = overrides.uses_per_battle,
         cooldown = overrides.cooldown,
+        effects = overrides.effects or {},
         targeting = {
             get_selection_tiles = overrides.get_selection_tiles or function() return { {} } end,
         },
