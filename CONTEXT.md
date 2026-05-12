@@ -102,6 +102,8 @@ _Note_: The code uses `StoryDefinition` / `Story` — the player-facing term is 
 - A **Battle Script** fires when its trigger is met (turn, unit death, interaction) and executes effects against the live battle state
 - A **Turn** consists of up to three **Phases** (player → neutral → enemy); a **Phase** only occurs if the acting **Side** has at least one **Unit** on the map
 - **Combat** is initiated by one **Unit** attacking another; the defender may **Counterattack** depending on weapon range and effects
+- A **Skill** resolves as an ordered list of **Skill Effects**; Skill Effects of type buff or debuff apply a **Status** to the target or caster
+- A **Status** is carried by a **Unit** for a limited duration, ticking at the start of that Unit's turn; it expires when duration reaches zero
 - **Deployment** optionally precedes a Mission; the player positions Roster Characters among predefined tiles before the battle begins
 - A **Chapter** (narrative) groups story nodes for the player; the **Battle Index** counts completed battles for stats — neither maps directly to the other
 
@@ -114,8 +116,16 @@ _Note_: The code uses `StoryDefinition` / `Story` — the player-facing term is 
 > **Designer:** "Separate — trigger on the captain surviving to end of battle, not dying. And make sure the **campaign state** records that she joined, so a later **campaign** node can reference her name."
 
 **Skill**:
-A learnable active ability a Character can use in battle, defined entirely in mod data (no hardcoded skills in the engine). Skills are stored on the Character (persistent across battles); cooldown and uses-remaining state are tracked on the Unit (battle-instance only). A Skill may have a turn-based cooldown (unavailable for N turns after use), a per-battle use limit, or both. Some Skills have an HP cost (self-damage on cast; self-kill is allowed). The engine provides a general Skill framework; specific skills (e.g., healing, damaging magic) are sample content authored in mods and subject to change.
+A learnable active ability a Character can use in battle, defined entirely in mod data (no hardcoded skills in the engine). Skills are stored on the Character (persistent across battles); cooldown and uses-remaining state are tracked on the Unit (battle-instance only). A Skill may have a turn-based cooldown (unavailable for N turns after use), a per-battle use limit, or both. Some Skills have an HP cost (self-damage on cast; self-kill is allowed). A Skill resolves by applying an ordered list of **Skill Effects** in sequence. The engine provides a general Skill framework; specific skills (e.g., healing, damaging magic) are sample content authored in mods and subject to change.
 _Avoid_: Spell (magic-only connotation), Ability (used colloquially — prefer Skill in design discussion)
+
+**Skill Effect**:
+One step in a Skill's execution — has a type (such as heal, damage, hp_cost, buff, or debuff) and type-specific parameters (e.g. amount, accuracy, duration). A Skill carries an ordered list of Skill Effects that are applied in sequence when the Skill resolves. A Skill Effect may target the caster rather than the selected target.
+_Avoid_: SkillEffect (code type name), effect_type (old flat-field term)
+
+**Status**:
+A timed condition — beneficial (buff) or harmful (debuff) — applied to a Unit by a Skill Effect. A Status has a kind (an identifier for what it does, e.g. "mark", "move_lock", "double_attack"), a duration that ticks down at the start of the affected Unit's own turn, and an optional magnitude. A Unit may carry multiple active Statuses simultaneously.
+_Avoid_: SkillStatus (code type name); "buff" and "debuff" alone are acceptable shorthand in conversation but "Status" is the canonical term in design discussion
 
 ## Flagged ambiguities
 
