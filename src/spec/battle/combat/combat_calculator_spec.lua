@@ -26,7 +26,7 @@ local function make_weapon(damage, accuracy, effects, targeting)
 end
 
 --- Build a minimal mock BattleUnit.
----@param opts table Fields: id, tile, hp, hp_max, weapons, items
+---@param opts table Fields: id, tile, hp, hp_max, weapons, items, active_statuses
 ---@return table
 local function make_unit(opts)
     local weapons = opts.weapons or { make_weapon(5, 80) }
@@ -35,6 +35,7 @@ local function make_unit(opts)
         id = opts.id or 1,
         tile = opts.tile or { x = 0, y = 0 },
         hp_current = opts.hp or 10,
+        active_statuses = opts.active_statuses or {},
         character = {
             stats = { hp_max = opts.hp_max or opts.hp or 10 },
             inventory = {
@@ -422,6 +423,62 @@ describe("combat_calculator.preview_combat", function()
             local def = make_unit({ hp = 20, weapons = { make_weapon(3, 70) } })
             local result = combat_calculator.preview_combat(att, def, attacker_tile, make_map())
             luassert.is_false(result.possible_self_kill)
+        end)
+    end)
+
+    describe("mark debuff bonus damage", function()
+        it("increases step dmg by the defender mark amount", function()
+            always_hit()
+            local att = make_unit({ weapons = { make_weapon(3, 100) } })
+            local def = make_unit({
+                hp = 20,
+                weapons = { make_weapon(1, 0) },
+                active_statuses = { { kind = "mark", amount = 2, duration = 1 } },
+            })
+
+            local result = combat_calculator.compute_combat(att, def, make_map())
+
+            luassert.are_equal(5, result.steps[1].dmg)
+        end)
+
+        it("sums multiple mark statuses on the defender", function()
+            always_hit()
+            local att = make_unit({ weapons = { make_weapon(1, 100) } })
+            local def = make_unit({
+                hp = 20,
+                weapons = { make_weapon(1, 0) },
+                active_statuses = {
+                    { kind = "mark", amount = 1, duration = 1 },
+                    { kind = "mark", amount = 2, duration = 1 },
+                },
+            })
+
+            local result = combat_calculator.compute_combat(att, def, make_map())
+
+            luassert.are_equal(4, result.steps[1].dmg)
+        end)
+
+        it("applies mark bonus in preview_combat for AI visibility", function()
+            local att = make_unit({ weapons = { make_weapon(3, 100) } })
+            local def = make_unit({
+                hp = 20,
+                weapons = { make_weapon(1, 0) },
+                active_statuses = { { kind = "mark", amount = 2, duration = 1 } },
+            })
+
+            local result = combat_calculator.preview_combat(att, def, att.tile, make_map())
+
+            luassert.are_equal(5, result.expected_damage)
+        end)
+
+        it("does not affect damage when defender has no mark", function()
+            always_hit()
+            local att = make_unit({ weapons = { make_weapon(3, 100) } })
+            local def = make_unit({ hp = 20, weapons = { make_weapon(1, 0) } })
+
+            local result = combat_calculator.compute_combat(att, def, make_map())
+
+            luassert.are_equal(3, result.steps[1].dmg)
         end)
     end)
 
