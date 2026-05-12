@@ -1,7 +1,7 @@
 ---@brief
 --- Defines data structures for skill definitions and per-battle skill state.
 
----@alias SkillEffectType "heal"|"damage"|"hp_cost"|"debuff"|"buff"|"spawn"|"transfer_hp"|"drain_heal"|"siphon"
+---@alias SkillEffectType "heal"|"damage"|"hp_cost"|"debuff"|"buff"|"spawn"|"transfer_hp"|"drain_heal"|"siphon"|"refresh_action"
 
 ---@class SkillEffect
 ---@field type SkillEffectType

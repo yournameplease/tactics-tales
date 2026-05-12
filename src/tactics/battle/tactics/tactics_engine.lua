@@ -329,7 +329,6 @@ function TacticsEngine:set_unit_idle(unit)
 end
 
 --- Mark `unit` as having acted and unblock battle input.
---- TODO: check "extra_action" buff on unit to grant an additional action instead of marking acted
 ---@param unit BattleUnit
 function TacticsEngine:finish_unit_action(unit)
     unit.has_acted = true
@@ -526,6 +525,8 @@ function TacticsEngine:skill_action(caster, skill_id, target)
             if effect.kind == "move_bonus" or effect.kind == "move_lock" then
                 self:invalidate_tiles_for_unit(status_target)
             end
+        elseif effect.type == "refresh_action" then
+            target.has_acted = false
         end
     end
 

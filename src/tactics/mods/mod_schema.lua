@@ -71,7 +71,7 @@ local items_spec = s.dictionary(s.string(), item_spec_record)
 -- Schemas for `skills`
 local valid_effect_types = {
     heal=true, damage=true, hp_cost=true, debuff=true, buff=true,
-    spawn=true, transfer_hp=true, drain_heal=true, siphon=true,
+    spawn=true, transfer_hp=true, drain_heal=true, siphon=true, refresh_action=true,
 }
 
 local skill_entry_spec = s.custom(function(skill)
