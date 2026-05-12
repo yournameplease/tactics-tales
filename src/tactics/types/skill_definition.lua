@@ -26,3 +26,4 @@
 ---@class SkillStatus
 ---@field kind string Debuff/buff kind identifier.
 ---@field duration integer Turns remaining before this status expires.
+---@field amount? integer Magnitude of the status effect (e.g. bonus damage, movement bonus).
