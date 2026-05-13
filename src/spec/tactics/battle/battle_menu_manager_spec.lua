@@ -53,11 +53,13 @@ local function make_mock_ctx(opts)
     }
 end
 
+---@return ButtonDefinition[]
 local function get_select_action_options(services, ctx)
     local bus = event_bus.new()
     local manager = battle_menu_manager.new(services, bus)
     local step_def = manager.menu_definitions["MENU_PLAYER_TURN"].steps["SELECT_ACTION"]
-    return step_def.node.get_children(services, ctx)
+    local node = step_def.node --[[@as NestedMenuDefinition]]
+    return node.get_children(services, ctx) --[[@as ButtonDefinition[] ]]
 end
 
 local function has_option(options, id)
@@ -143,11 +145,13 @@ local function make_skill_def(overrides)
     return def
 end
 
+---@return ButtonDefinition[]
 local function get_select_skill_options(services, ctx)
     local bus = event_bus.new()
     local manager = battle_menu_manager.new(services, bus)
     local step_def = manager.menu_definitions["MENU_PLAYER_TURN"].steps["SELECT_SKILL"]
-    return step_def.node.get_children(services, ctx)
+    local node = step_def.node --[[@as NestedMenuDefinition]]
+    return node.get_children(services, ctx) --[[@as ButtonDefinition[] ]]
 end
 
 local function get_select_skill_step(services)
@@ -343,9 +347,10 @@ describe("battle.battle_menu_manager SELECT_SKILL_TARGET", function()
         local services = make_mock_services({ battle_map = map, skill_defs = { [skill_id] = def } })
         local ctx = make_skill_target_ctx(skill_id)
         local step = get_select_skill_target_step(services)
+        local step_node = step.node --[[@as NestedGridDefinition]]
         local valid_point = { x = 1, y = 0 }
         local matched = false
-        for _, child_def in ipairs(step.node.children) do
+        for _, child_def in ipairs(step_node.children) do
             if child_def.filter(valid_point, services, ctx) then
                 matched = true
             end
@@ -363,9 +368,10 @@ describe("battle.battle_menu_manager SELECT_SKILL_TARGET", function()
         local services = make_mock_services({ battle_map = map, skill_defs = { [skill_id] = def } })
         local ctx = make_skill_target_ctx(skill_id)
         local step = get_select_skill_target_step(services)
+        local step_node = step.node --[[@as NestedGridDefinition]]
         local invalid_point = { x = 1, y = 0 }
         local matched = false
-        for _, child_def in ipairs(step.node.children) do
+        for _, child_def in ipairs(step_node.children) do
             if child_def.filter(invalid_point, services, ctx) then
                 matched = true
             end
@@ -401,7 +407,8 @@ describe("battle.battle_menu_manager SELECT_SKILL_TARGET", function()
         local services = make_mock_services({ battle_map = map, skill_defs = { [skill_id] = def } })
         local ctx = make_skill_target_ctx(skill_id)
         local step = get_select_skill_target_step(services)
-        step.node.get_tile_highlights(services, ctx)
+        local step_node = step.node --[[@as NestedGridDefinition]]
+        step_node.get_tile_highlights(services, ctx)
         luassert.are_equal(1, #highlighted)
         luassert.are_equal(3, highlighted[1].x)
         luassert.are_equal(4, highlighted[1].y)
