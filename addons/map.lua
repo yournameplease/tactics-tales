@@ -13,7 +13,7 @@
 function map(tile_x, tile_y, sx, sy, tiles_x, tiles_y, p8layers, tile_w, tile_h) end
 
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#map)
---- @param src userdata
+--- @param src userdata_2d
 --- @param tile_x any
 --- @param tile_y any
 --- @param sx? any
