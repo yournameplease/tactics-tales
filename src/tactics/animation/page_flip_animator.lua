@@ -15,8 +15,8 @@ local colors = require("src.tactics.colors")
 ---@field direction PageFlipDirection | nil
 ---@field callback (fun()) | nil
 ---@field frame integer
----@field sprite_a userdata | nil
----@field sprite_b userdata | nil
+---@field sprite_a userdata_2d | nil
+---@field sprite_b userdata_2d | nil
 local PageFlipAnimatorImpl = {}
 PageFlipAnimatorImpl.__index = PageFlipAnimatorImpl
 

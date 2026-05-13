@@ -6,7 +6,7 @@ require("profiler")
 local colors = require("src.tactics.colors")
 
 ---@class DrawTargetEntry
----@field ud userdata
+---@field ud userdata_2d
 ---@field w integer
 ---@field h integer
 ---@field camera_x integer
@@ -84,7 +84,7 @@ function DrawTargetManager:draw(x, y)
 end
 
 --- Pop the current draw target, restore the previous one, and return the userdata.
----@return userdata
+---@return userdata_2d
 function DrawTargetManager:pop_sprite()
     assert(self.current_target ~= nil)
     local prev_target = self.current_target

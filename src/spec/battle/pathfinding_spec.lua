@@ -45,7 +45,7 @@ end
 --- legal_positions is a list of {x, y} pairs that are considered legal (value=1).
 --- Uses the picotron_shim userdata so width()/height() are available.
 ---@param legal_positions table[]
----@return userdata
+---@return userdata_2d
 local function make_legal_tiles(legal_positions)
     local ud = userdata("u8", 32, 32)
     local legal_set = {}

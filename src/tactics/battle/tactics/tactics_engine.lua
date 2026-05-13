@@ -790,13 +790,13 @@ end
 
 ---@param unit BattleUnit
 ---@param tile Point
----@return userdata
+---@return userdata_2d
 function TacticsEngine:tiles_with_distance_from_unit_attacks(unit, tile)
     return self.tile_reachability_cache:_tiles_with_distance_from_unit_attacks(unit, tile)
 end
 
 ---@param unit BattleUnit
----@return userdata
+---@return userdata_2d
 function TacticsEngine:get_valid_tiles_for_unit(unit)
     return self.tile_reachability_cache:get_valid_tiles_for_unit(unit)
 end

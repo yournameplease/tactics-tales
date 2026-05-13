@@ -30,7 +30,7 @@ local ARENA_TILE_POSITIONS  = {
 --- Set a value at a specific (x, y) position in a MockUserdata.
 --- The shim's set(self, x, ...) writes varargs into data[0][x], data[1][x], ...
 --- so to write data[target_y][x] = val we pad with zeros for rows 0..(target_y-1).
----@param ud userdata
+---@param ud userdata_2d
 ---@param x integer  0-based column
 ---@param y integer  0-based row
 ---@param val number

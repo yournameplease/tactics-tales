@@ -9,8 +9,8 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 
 ---@class TileReachabilityCache
 ---@field battle_map BattleMap
----@field valid_tiles_by_unit table<integer, userdata> Cached tile maps keyed by unit ID.
----@field marked_unit_tiles userdata Bitfield map of tiles threatened by marked enemy units.
+---@field valid_tiles_by_unit table<integer, userdata_2d> Cached tile maps keyed by unit ID.
+---@field marked_unit_tiles userdata_2d Bitfield map of tiles threatened by marked enemy units.
 ---@field marked_unit_revision integer Incremented whenever the marked-unit set changes.
 local TileReachabilityCache = {}
 TileReachabilityCache.__index = TileReachabilityCache
@@ -35,7 +35,7 @@ end
 --- by `unit`'s weapon from `tile`.
 ---@param unit BattleUnit
 ---@param tile Point
----@return userdata
+---@return userdata_2d
 function TileReachabilityCache:_tiles_with_distance_from_unit_attacks(unit, tile)
     local targeting = unit.character:get_weapon_targeting()
     local tiles_in_distance = targeting.get_selection_tiles(tile, self.battle_map, unit.side)
@@ -68,7 +68,7 @@ end
 --- Return a u8 userdata whose bits signify reachable (0x1), valid selection
 --- (0x2), and attack range (0x4) for `unit`.
 ---@param unit BattleUnit
----@return userdata
+---@return userdata_2d
 function TileReachabilityCache:_tiles_in_movement_and_attack_range_for_unit(unit)
     local movement = unit.character.stats.movement
     if unit.unit_ai ~= nil and unit.unit_ai.move == "zero" then
@@ -123,7 +123,7 @@ end
 
 --- Return the cached valid-tile map for `unit`, computing it on first access.
 ---@param unit BattleUnit
----@return userdata
+---@return userdata_2d
 function TileReachabilityCache:get_valid_tiles_for_unit(unit)
     if self.valid_tiles_by_unit[unit.id] == nil then
         self.valid_tiles_by_unit[unit.id] = self:_tiles_in_movement_and_attack_range_for_unit(unit)

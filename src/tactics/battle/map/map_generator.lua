@@ -24,7 +24,7 @@ local BASE_METATILE = 0x400
 
 ---@class MapFetchResultEntry
 ---@field name string Layer name (e.g. "floor", "metatiles").
----@field bmp userdata Sprite data for this layer.
+---@field bmp userdata_2d Sprite data for this layer.
 
 --- Convert a raw fetch result into a MapLayers table.
 ---@param map_fetch MapFetchResultEntry[] Raw fetch result array.
@@ -94,7 +94,7 @@ end
 ---@param map_w integer Map width in tiles.
 ---@param map_h integer Map height in tiles.
 ---@param tile_to_sprite fun(id: integer): integer
----@return userdata
+---@return userdata_2d
 local function tiled_layer_to_userdata(layer_data, map_w, map_h, tile_to_sprite)
     local bmp = userdata("i16", map_w, map_h)
     for row = 0, map_h - 1 do
