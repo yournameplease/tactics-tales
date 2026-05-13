@@ -1,0 +1,478 @@
+return {
+  version = "1.10",
+  luaversion = "5.1",
+  tiledversion = "1.12.1",
+  class = "",
+  orientation = "orthogonal",
+  renderorder = "right-down",
+  width = 16,
+  height = 16,
+  tilewidth = 20,
+  tileheight = 16,
+  nextlayerid = 15,
+  nextobjectid = 27,
+  properties = {},
+  tilesets = {
+    {
+      name = "paper_tileset",
+      firstgid = 1,
+      filename = "paper_tileset.tsx"
+    }
+  },
+  layers = {
+    {
+      type = "tilelayer",
+      x = 0,
+      y = 0,
+      width = 16,
+      height = 16,
+      id = 1,
+      name = "ground",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      encoding = "lua",
+      data = {
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
+        3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
+        3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
+        3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
+        3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
+        3, 3, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 2, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 3,
+      name = "pod_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 7,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 120,
+          y = 112,
+          width = 40,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 4,
+      name = "wall_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 10,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 200,
+          y = 160,
+          width = 60,
+          height = 16,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 5,
+      name = "pod_2",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 13,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 60,
+          y = 176,
+          width = 60,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 6,
+      name = "pod_n_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 22,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 160,
+          y = 48,
+          width = 60,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 7,
+      name = "pod_n_2",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 24,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 240,
+          y = 48,
+          width = 60,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 13,
+      name = "ally_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 25,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 180,
+          y = 32,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 14,
+      name = "ally_2",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 26,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 260,
+          y = 32,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 8,
+      name = "reinforce_ne",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 16,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 300,
+          y = 112,
+          width = 20,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 9,
+      name = "reinforce_se",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 17,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 300,
+          y = 176,
+          width = 20,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 10,
+      name = "reinforce_nw",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 18,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 0,
+          y = 112,
+          width = 20,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 11,
+      name = "reinforce_se",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 19,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 0,
+          y = 176,
+          width = 20,
+          height = 48,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 12,
+      name = "escape",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 20,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 40,
+          y = 240,
+          width = 100,
+          height = 16,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 2,
+      name = "deployment",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 60,
+          y = 16,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 2,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 40,
+          y = 48,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 3,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 80,
+          y = 48,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    }
+  }
+}
