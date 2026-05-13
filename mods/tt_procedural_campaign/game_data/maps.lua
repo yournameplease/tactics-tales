@@ -10,6 +10,7 @@ local MAP_DEFINITIONS = {
     abandoned_fortress = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/abandoned_fortress"),
     village_overrun = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/village_overrun"),
     cavern_fortress = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/cavern_fortress"),
+    castle_escape   = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/castle_escape"),
 }
 
 return MAP_DEFINITIONS

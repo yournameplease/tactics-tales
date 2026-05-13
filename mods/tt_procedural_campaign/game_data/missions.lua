@@ -137,6 +137,10 @@ local battles = {
         local meta = include("mods/tt_procedural_campaign/game_data/maps/cavern_fortress_meta.lua")
         return build_pod_mission(campaign_config, rng_context, map_context, meta)
     end,
+    ["castle_escape"] = function(campaign_config, rng_context, map_context)
+        local meta = include("mods/tt_procedural_campaign/game_data/maps/castle_escape_meta.lua")
+        return build_pod_mission(campaign_config, rng_context, map_context, meta)
+    end,
     ["skirmish"] = function(campaign_config, rng_context)
         local faction      = get_faction(campaign_config)
         local tier         = get_tier(campaign_config)
