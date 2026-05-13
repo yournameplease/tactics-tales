@@ -7,6 +7,7 @@ local random         = require("src.tactics.util.random")
 local proc_campaign  = stories_mod.data.proc_campaign
 
 local function make_mem()
+    ---@diagnostic disable-next-line: missing-fields
     return campaign_state.new({ get_character = function() return nil end })
 end
 

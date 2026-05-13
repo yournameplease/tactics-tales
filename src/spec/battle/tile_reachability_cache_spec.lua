@@ -21,6 +21,7 @@ local function make_open_map(w, h)
             ground:set(x, y, 1)
         end
     end
+    ---@diagnostic disable-next-line: missing-fields
     map.layers = { terrain = { ground = ground } }
     return map
 end

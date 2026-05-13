@@ -39,6 +39,7 @@ local SIMPLE_META = {
 ---@param faction_id? string
 ---@param tier? integer
 local function make_mem(faction_id, tier)
+    ---@diagnostic disable-next-line: missing-fields
     local mem = campaign_state.new({ get_character = function() return nil end })
     if faction_id then mem:set("faction_id", campaign_state.text(faction_id)) end
     if tier then mem:set("base_difficulty", campaign_state.text(tostring(tier))) end

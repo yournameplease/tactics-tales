@@ -6,6 +6,7 @@ local auto_recruit_pending = auto_recruit.auto_recruit_pending
 local campaign_state       = require("src.tactics.campaign.campaign_state")
 
 local function make_mem()
+    ---@diagnostic disable-next-line: missing-fields
     return campaign_state.new({ get_character = function() return nil end })
 end
 
