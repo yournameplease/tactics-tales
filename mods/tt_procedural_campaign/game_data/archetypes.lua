@@ -88,6 +88,7 @@ local archetypes = {
         -- },
         filler_pool = {
             "village_overrun",
+            "cavern_fortress"
         },
 
         recruitment_rate = 2,
