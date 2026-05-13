@@ -237,7 +237,7 @@ function palt(c) end
 
 --- Draws a sprite on the screen
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#spr)
---- @param s integer | userdata
+--- @param s integer | userdata_2d
 --- @param x? integer
 --- @param y? integer
 --- @param flip_x? boolean
@@ -246,7 +246,7 @@ function spr(s, x, y, flip_x, flip_y) end
 
 --- Crops a sprite to a source rectangle and draws it stretched to fit a destination rectangle on the current draw target.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#sspr)
---- @param s integer | userdata The sprite to draw. This can be a sprite index or a u8 userdata object.
+--- @param s integer | userdata_2d The sprite to draw. This can be a sprite index or a u8 userdata object.
 --- @param sx? integer The x coordinate of the top left corner of the source rectangle. Defaults to 0.
 --- @param sy? integer The y coordinate of the top left corner of the source rectangle. Defaults to 0.
 --- @param sw? integer The width of the source rectangle. Defaults to the width of the sprite.
@@ -268,13 +268,13 @@ function fillp(p, ...) end
 --- Get the sprite for a given index
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_spr)
 --- @param index integer
---- @return userdata
+--- @return userdata_2d
 function get_spr(index) end
 
 --- Set the sprite for a given index
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_spr)
 --- @param index integer
---- @param ud userdata
+--- @param ud userdata_2d
 function set_spr(index, ud) end
 
 --- Copies the graphics buffer to the screen, then syncronizes to the next frame

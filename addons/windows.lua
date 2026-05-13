@@ -3,7 +3,7 @@
 --- Window Attributes
 --- @class __WindowAttribs
 --- @field autoclose? boolean
---- @field cursor? 0 | 1 | string | userdata
+--- @field cursor? 0 | 1 | string | userdata_2d
 --- @field fullscreen? boolean
 --- @field has_frame? boolean
 --- @field height? integer
@@ -25,18 +25,18 @@ local __WindowAttribs = {}
 
 --- Get the current display as a u8, 2d userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_display)
---- @return userdata
+--- @return userdata_2d
 function get_display() end
 
 --- Set the draw target to a u8, 2d userdata
 --- If ud is not provided, set the draw target to the current display
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#set_draw_target)
---- @param ud? userdata
+--- @param ud? userdata_2d
 function set_draw_target(ud) end
 
 --- Gets the current draw target as a u8, 2d userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#get_draw_target)
---- @return userdata
+--- @return userdata_2d
 function get_draw_target() end
 
 --- Create a window or set its attributes
