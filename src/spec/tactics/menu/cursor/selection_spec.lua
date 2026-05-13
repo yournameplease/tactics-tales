@@ -287,6 +287,7 @@ describe("tactics.menu.cursor.selection", function()
         local node = manager.menu_step.node
         ---@cast node SelectionMenuNode
         local sig = node:handle_command("increment_selection", { metadata = {} }, ctx)
+        ---@cast sig MenuSignalOnChange
         luassert.are_equal("on_change", sig.type)
         luassert.are_equal("my_handler", sig.handler)
         luassert.are_equal("B", sig.value)

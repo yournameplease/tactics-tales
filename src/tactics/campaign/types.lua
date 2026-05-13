@@ -110,6 +110,7 @@
 
 ---@class CampaignConfigOption
 ---@field name string
+---@field description? string
 ---@field value string
 
 ---@class CampaignRngContext Runtime RNG instances threaded alongside CampaignConfig into factories.

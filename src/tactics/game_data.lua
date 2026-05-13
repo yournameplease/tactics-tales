@@ -15,6 +15,7 @@
 ---@field characters table<string, CharacterTemplate>
 ---@field items table<string, ItemDefinition>
 ---@field skills table<string, SkillDefinition>
+---@field gfx_registry table<string, integer> Maps gfx stem to base sprite index.
 
 local game_data = {}
 
