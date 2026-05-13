@@ -115,7 +115,10 @@ function CampaignHarness:start_campaign(campaign_id, config)
         self._event_bus,
         self._music_player,
         self._ui_context,
-        { current_input = "joypad" }
+        {
+            current_input = "joypad",
+            actions = {},
+        }
     )
     self:tick_to_idle()
 end
