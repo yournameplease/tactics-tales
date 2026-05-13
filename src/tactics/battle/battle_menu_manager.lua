@@ -571,7 +571,7 @@ function PLAYER_TURN_HANDLERS.move_and_store_interaction_unit(services, session_
     local dest_point = nil
     local interaction = nil
     local target_unit = services.battle_map:get_at_tile(target_point)
-    assert(attack_target_unit, "move_and_store_interaction_unit: no unit at tile")
+    assert(target_unit, "move_and_store_interaction_unit: no unit at tile")
     for _, p in ipairs(neighbors) do
         local tile_data = valid_tiles:get(p.x, p.y)
         if tile_data ~= nil and tile_data & 0x1 ~= 0 then
