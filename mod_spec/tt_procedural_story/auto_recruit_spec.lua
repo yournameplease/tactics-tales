@@ -26,6 +26,7 @@ describe("tt_procedural_campaign.auto_recruit", function()
             auto_recruit_pending(mem)
             local entry = mem:get("pending_recruits")
             luassert.is_not_nil(entry)
+            assert(entry)
             luassert.are_equal("list", entry.type)
         end)
 
