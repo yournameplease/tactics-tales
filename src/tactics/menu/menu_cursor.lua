@@ -61,7 +61,7 @@
 ---@field update_joy fun(self: MenuNode, joy: Joypad, commands: string[], menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
 ---@field update_mouse fun(self: MenuNode, mouse: Mouse, selection: MenuMouseSelection, menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
 ---@field handle_command fun(self: MenuNode, command: string, menu_ctx: MenuContext, game_ctx: GameContext): MenuSignal
----@field get_focused_leaves fun(self: MenuNode, menu_ctx: MenuContext, game_ctx: GameContext): MenuNode[]
+---@field get_focused_leaves fun(self: MenuNode, menu_ctx: MenuContext, game_ctx: GameContext): MenuLeaf[]
 ---@field lose_focus fun(self: MenuNode)
 ---@field refresh_focus fun(self: MenuNode)
 ---@field claim_focus fun(self: MenuNode, selection: MenuMouseSelection?, child: MenuNode?)
@@ -71,6 +71,7 @@
 
 ---@class MenuLeaf : MenuNode Abstract base for leaf nodes (button, selection).
 ---@field type MenuLeafType
+---@field keyboard_handler? string MenuHandlerId called with typed text when this leaf is focused.
 
 ---@class MenuContainer : MenuNode Abstract base for container nodes (list, grid).
 ---@field type MenuContainerType
