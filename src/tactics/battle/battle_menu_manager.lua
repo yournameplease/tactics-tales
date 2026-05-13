@@ -19,12 +19,12 @@ BattleMenuManager.__index = BattleMenuManager
 
 
 
----@param point Point
+---@param p Point
 ---@param map BattleMap
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function point_is_empty_or_acting_unit(point, map, ctx)
-    local destination_unit = map:get_at_tile(point)
+local function point_is_empty_or_acting_unit(p, map, ctx)
+    local destination_unit = map:get_at_tile(p)
     if destination_unit == nil then
         return true
     end
@@ -40,31 +40,31 @@ local function unit_is_available_player(unit)
     return true
 end
 
----@param point Point
+---@param p Point
 ---@param map BattleMap
 ---@return boolean
-local function point_is_available_player(point, map)
-    local unit = map:get_at_tile(point)
+local function point_is_available_player(p, map)
+    local unit = map:get_at_tile(p)
     if unit == nil then return false end
     if not unit:is_player() then return false end
     if unit.has_acted then return false end
     return true
 end
 
----@param point Point
+---@param p Point
 ---@param map BattleMap
 ---@return boolean
-local function point_is_enemy_unit(point, map)
-    local unit = map:get_at_tile(point)
+local function point_is_enemy_unit(p, map)
+    local unit = map:get_at_tile(p)
     if unit == nil then return false end
     return unit:is_enemy()
 end
 
----@param point Point
+---@param p Point
 ---@param map BattleMap
 ---@return boolean
-local function point_is_any_unit(point, map)
-    local unit = map:get_at_tile(point)
+local function point_is_any_unit(p, map)
+    local unit = map:get_at_tile(p)
     return unit ~= nil
 end
 
@@ -162,21 +162,21 @@ local function get_single_unit_interaction(target_point, valid_tiles, acting_uni
     return found
 end
 
---- Return a predicate matching available player units whose tile is after point.
----@param point Point
+--- Return a predicate matching available player units whose tile is after p.
+---@param p Point
 ---@return fun(unit: BattleUnit): boolean
-local function is_acting_unit_after(point)
+local function is_acting_unit_after(p)
     return function(unit)
-        return unit_is_available_player(unit) and unit.tile > point
+        return unit_is_available_player(unit) and unit.tile > p
     end
 end
 
---- Return a predicate matching available player units whose tile is before point.
----@param point Point
+--- Return a predicate matching available player units whose tile is before p.
+---@param p Point
 ---@return fun(unit: BattleUnit): boolean
-local function is_acting_unit_before(point)
+local function is_acting_unit_before(p)
     return function(unit)
-        return unit_is_available_player(unit) and unit.tile < point
+        return unit_is_available_player(unit) and unit.tile < p
     end
 end
 
@@ -661,92 +661,92 @@ function PLAYER_TURN_HANDLERS.handle_interaction(services, session_context, inte
     return nil
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param _ctx any
 ---@return boolean
-local function filter_available_player(point, msb, _ctx)
-    return point_is_available_player(point, msb.battle_map)
+local function filter_available_player(p, msb, _ctx)
+    return point_is_available_player(p, msb.battle_map)
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param _ctx any
 ---@return boolean
-local function filter_any_unit(point, msb, _ctx)
-    return point_is_any_unit(point, msb.battle_map)
+local function filter_any_unit(p, msb, _ctx)
+    return point_is_any_unit(p, msb.battle_map)
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param _ctx any
 ---@return boolean
-local function filter_no_unit(point, msb, _ctx)
-    return not point_is_any_unit(point, msb.battle_map)
+local function filter_no_unit(p, msb, _ctx)
+    return not point_is_any_unit(p, msb.battle_map)
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param _ctx any
 ---@return boolean
-local function filter_deployment_tile(point, msb, _ctx)
-    return msb.battle_map:tile_has_label(point, msb.deployment_tiles_tag)
+local function filter_deployment_tile(p, msb, _ctx)
+    return msb.battle_map:tile_has_label(p, msb.deployment_tiles_tag)
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function filter_move_destination(point, msb, ctx)
+local function filter_move_destination(p, msb, ctx)
     local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
-    return point_is_empty_or_acting_unit(point, msb.battle_map, ctx)
-        and valid_tiles:get(point.x, point.y) ~= nil
-        and valid_tiles:get(point.x, point.y) & 0x1 ~= 0
+    return point_is_empty_or_acting_unit(p, msb.battle_map, ctx)
+        and valid_tiles:get(p.x, p.y) ~= nil
+        and valid_tiles:get(p.x, p.y) & 0x1 ~= 0
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function filter_attack_destination(point, msb, ctx)
+local function filter_attack_destination(p, msb, ctx)
     local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
-    return point_is_enemy_unit(point, msb.battle_map)
-        and valid_tiles:get(point.x, point.y) ~= nil
-        and valid_tiles:get(point.x, point.y) & 0x4 ~= 0
+    return point_is_enemy_unit(p, msb.battle_map)
+        and valid_tiles:get(p.x, p.y) ~= nil
+        and valid_tiles:get(p.x, p.y) & 0x4 ~= 0
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function filter_interaction_destination(point, msb, ctx)
+local function filter_interaction_destination(p, msb, ctx)
     local valid_tiles = msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
     return get_single_unit_interaction(
-        point, valid_tiles, ctx.acting_unit.unit, msb.battle_map
+        p, valid_tiles, ctx.acting_unit.unit, msb.battle_map
     ) ~= nil
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function filter_attack_target(point, msb, ctx)
+local function filter_attack_target(p, msb, ctx)
     return validate_tile_is_in_unit_attack_range(
         msb.battle_map,
         ctx.acting_unit.unit,
         ctx.acting_unit.unit.tile,
-        point
+        p
     )
 end
 
----@param point Point
+---@param p Point
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
 ---@return boolean
-local function filter_skill_target(point, msb, ctx)
+local function filter_skill_target(p, msb, ctx)
     local def = msb.tactics_engine.skill_defs[ctx.selected_skill_id]
     if not def then return false end
-    return def.targeting.is_target_valid(ctx.destination.point, point, msb.battle_map, ctx.acting_unit.unit.side)
+    return def.targeting.is_target_valid(ctx.destination.point, p, msb.battle_map, ctx.acting_unit.unit.side)
 end
 
 local function make_menu_data(map_width, map_height)
