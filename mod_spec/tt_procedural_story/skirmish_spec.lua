@@ -85,7 +85,9 @@ describe("tt_procedural_campaign.missions skirmish", function()
         local s = def.scripts[1]
         luassert.is_not_nil(s)
         luassert.are_equal("unit_interaction", s.trigger.type)
-        luassert.are_equal("turncoat", s.trigger.unit_specifier.tag)
+        local trigger = s.trigger --[[@as UnitInteraction]]
+        local specifier = trigger.unit_specifier --[[@as TagLookupUnitSelector]]
+        luassert.are_equal("turncoat", specifier.tag)
     end)
 
     it("turncoat script includes recruit_unit effect", function()

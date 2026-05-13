@@ -52,8 +52,9 @@ local campaigns = {
             battle_config = battle_config {},
             nodes = {
                 main = {
+                    ---@type CampaignNodeFactory
                     function(config)
-                        if config.show_text then
+                        if config["show_text"] then
                             return { type = "text", text = "Config text." }
                         else
                             return { type = "advance" }

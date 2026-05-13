@@ -88,9 +88,11 @@ function battle_manager.new(
 
     local battle_def = game_data.missions[battle_id](campaign_config, rng_context, map_context)
     local map_def = game_data.maps[battle_def.map_id]
+    local map_def_any = map_def --[[@as any]]
     log.debug("Loading map '" ..
         tostring(battle_def.map_id) ..
-        "' type='" .. tostring(map_def and map_def.type) .. "' file='" .. tostring(map_def and map_def.file) .. "'")
+        "' type='" .. tostring(map_def and map_def.type) ..
+        "' file='" .. tostring(map_def_any and (map_def_any.file or "nil")) .. "'")
     self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels, game_data.gfx_registry)
 
     if battle_def.point_labels then
