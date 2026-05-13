@@ -34,7 +34,8 @@ local dialogue_manager = require("src.tactics.dialogue.dialogue_manager")
 ---@field definition CampaignNode
 ---@field rendered_node? RenderedCampaignNode
 
----@alias CampaignConfig table<string, string>
+---@class CampaignConfig : table<string, string>
+---@field memory? CampaignState
 
 ---@class Campaign
 ---@field package battle_count integer

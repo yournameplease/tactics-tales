@@ -18,13 +18,14 @@ local function make_rng_ctx(seed)
     return { campaign_rng = random.new(seed or 1) }
 end
 
--- Call a step factory at the given index within the named node.
+---@return CampaignNode
 local function call_step(node_name, step_index, sc, rng_ctx)
     local node_steps = proc_campaign.nodes[node_name]
     local step = node_steps[step_index]
     if type(step) == "function" then
-        return step(sc, rng_ctx or make_rng_ctx())
+        return step(sc, rng_ctx or make_rng_ctx(), {})
     end
+    ---@cast step CampaignNode
     return step
 end
 
@@ -45,6 +46,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
         it("archetype_select jumps to battle_loop", function()
             local nodes = proc_campaign.nodes.archetype_select
             local jump = nodes[#nodes]
+            ---@cast jump JumpNode
             luassert.are_equal("jump", jump.type)
             luassert.are_equal("battle_loop", jump.next_node)
         end)
@@ -65,6 +67,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             local mem = make_mem()
             mem:set("current_battle_id", campaign_state.text("skirmish"))
             local node = call_step("battle_loop", 3, make_sc(mem))
+            ---@cast node BattleNode
             luassert.are_equal("battle", node.type)
             luassert.are_equal("skirmish", node.battle_id)
         end)
@@ -73,6 +76,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             local mem = make_mem()
             mem:set("current_battle_id", campaign_state.text("abandoned_fortress_seize"))
             local node = call_step("battle_loop", 3, make_sc(mem))
+            ---@cast node BattleNode
             luassert.are_equal("battle", node.type)
             luassert.are_equal("abandoned_fortress_seize", node.battle_id)
         end)
@@ -81,6 +85,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             local mem = make_mem()
             mem:set("current_battle_id", campaign_state.text("skirmish"))
             local node = call_step("battle_loop", 3, make_sc(mem))
+            ---@cast node BattleNode
             luassert.are_equal("post_battle", node.next_node_victory)
         end)
     end)
@@ -99,6 +104,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             mem:set("archetype_id", campaign_state.text("warband"))
             mem:set("battle_index", campaign_state.text("1"))
             local node = call_step("battle_loop", 1, make_sc(mem))
+            ---@cast node CampaignTextNode
             luassert.is_truthy(node.text:find("%[quota%]"))
         end)
 
@@ -139,6 +145,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
         it("text contains [auto_recruit] prefix", function()
             local mem = make_mem()
             local node = call_step("post_battle", 2, make_sc(mem))
+            ---@cast node CampaignTextNode
             luassert.is_truthy(node.text:find("%[auto_recruit%]"))
         end)
     end)
@@ -159,6 +166,7 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             mem:set("archetype_id", campaign_state.text("warband"))
             mem:set("battle_index", campaign_state.text("1"))
             local node = call_step("post_battle", 3, make_sc(mem))
+            ---@cast node JumpNode
             luassert.are_equal("jump", node.type)
             luassert.are_equal("battle_loop", node.next_node)
         end)
