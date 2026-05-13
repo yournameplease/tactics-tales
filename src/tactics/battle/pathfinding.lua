@@ -216,7 +216,7 @@ end
 ---@param path Point[] Current path as a list of points.
 ---@param target Point Destination tile to extend towards.
 ---@param max_length integer Maximum number of steps from the start tile.
----@param legal_tiles userdata Bitfield where value 1 marks traversable tiles.
+---@param legal_tiles userdata_2d Bitfield where value 1 marks traversable tiles.
 ---@return Point[]
 function pathfinding.extend_path_to_point(path, target, max_length, legal_tiles)
     if legal_tiles:get(target.x, target.y) == 0 then

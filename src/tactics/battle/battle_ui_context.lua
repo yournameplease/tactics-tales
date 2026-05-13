@@ -14,7 +14,7 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field hovered_point Point
 ---@field hovered_path Point[]
 ---@field hovered_unit BattleUnit?
----@field menu_tile_highlights userdata
+---@field menu_tile_highlights userdata_2d
 ---@field last_hovered_unit BattleUnit
 ---@field acting_unit BattleUnit
 ---@field destination Point
@@ -24,7 +24,7 @@ local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 ---@field menu_revision integer
 ---@field marked_units_revision integer
 ---@field tile_highlighted_unit BattleUnit?
----@field highlighted_tiles userdata
+---@field highlighted_tiles userdata_2d
 ---@field camera_x integer Camera left edge in world pixels
 ---@field camera_y integer Camera top edge in world pixels
 ---@field input_service InputService

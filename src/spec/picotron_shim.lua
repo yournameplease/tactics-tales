@@ -33,7 +33,7 @@ local internal_data = setmetatable({}, { __mode = "k" })
 
 ---@param width integer
 ---@param height integer
----@return userdata
+---@return userdata_2d
 local function create_mock_userdata(width, height)
     local data = {}
     for y = 0, height - 1 do
@@ -47,10 +47,10 @@ local function create_mock_userdata(width, height)
     return ud --[[@as userdata]]
 end
 
----@param a userdata
----@param b userdata|number
+---@param a userdata_2d
+---@param b userdata_2d|number
 ---@param op fun(x: number, y: number): number
----@return userdata
+---@return userdata_2d
 local function elementwise_op(a, b, op)
     local state_a = internal_data[a]
     local w = state_a.width

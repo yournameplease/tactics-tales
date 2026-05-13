@@ -26,7 +26,7 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field x_max integer Grid width in tiles.
 ---@field y_max integer Grid height in tiles.
 ---@field path Point[]? Pathfinding path from the anchor to the cursor position.
----@field legal_tiles? userdata Userdata bitmask of valid and reachable tiles.
+---@field legal_tiles? userdata_2d Userdata bitmask of valid and reachable tiles.
 ---@field max_path_length? integer Maximum allowed path length.
 ---@field children NestedGridChild[]
 ---@field text_array? Array2D Per-tile text overlay computed by text_function.
@@ -47,7 +47,7 @@ NestedGridChildDefinition.__index = NestedGridChildDefinition
 ---@field y_max integer
 ---@field children NestedGridChildDefinition[]
 ---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
----@field get_tile_highlights (fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata)?
+---@field get_tile_highlights (fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata_2d)?
 ---@field get_path_anchor (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
 ---@field get_max_path_length (fun(game_ctx: GameContext, menu_ctx: MenuContext): integer)?
 ---@field get_initial_point (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
@@ -59,7 +59,7 @@ NestedGridDefinition.__index = NestedGridDefinition
 ---@field type "grid"
 ---@field point Point Cursor position at serialization time.
 ---@field path Point[]? Pathfinding path at serialization time.
----@field tile_highlights? userdata Legal-tile bitmask at serialization time.
+---@field tile_highlights? userdata_2d Legal-tile bitmask at serialization time.
 
 local nested_grid = {
     NestedGridNode = NestedGridNode,
@@ -461,7 +461,7 @@ function NestedGridDefinition:with_path_anchor(get_path_anchor)
 end
 
 --- Set a function that returns the tile-highlight bitmask userdata.
----@param get_tile_highlights fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata
+---@param get_tile_highlights fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata_2d
 ---@return NestedGridDefinition
 function NestedGridDefinition:with_tile_highlights(get_tile_highlights)
     self.get_tile_highlights = get_tile_highlights

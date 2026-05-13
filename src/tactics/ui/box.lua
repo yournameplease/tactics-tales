@@ -75,7 +75,7 @@ local TEXT_ROW_HEIGHT = TEXT_HEIGHT + 2
 ---@field text_object Text Cached text layout object.
 
 ---@class CacheInfo
----@field draw_target? userdata
+---@field draw_target? userdata_2d
 ---@field static_layout boolean
 ---@field last_key any
 ---@field current_key fun(ctx: UIContextManager): any

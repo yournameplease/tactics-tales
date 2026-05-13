@@ -96,7 +96,7 @@ end
 
 ---@param msb BattleMenuContext
 ---@param _ctx BattleMainMenuContext
----@return userdata
+---@return userdata_2d
 local function get_deployment_tiles(msb, _ctx)
     return msb.battle_map:get_tiles_userdata_by(
         "u8",
@@ -109,7 +109,7 @@ end
 
 ---@param msb BattleMenuContext
 ---@param _ctx BattleMainMenuContext
----@return userdata
+---@return userdata_2d
 local function get_players_to_act_tiles(msb, _ctx)
     return msb.battle_map:get_tiles_userdata_by(
         "u8",
@@ -123,13 +123,13 @@ end
 
 ---@param msb BattleMenuContext
 ---@param ctx BattleMainMenuContext
----@return userdata
+---@return userdata_2d
 local function get_tile_highlights_in_move_and_attack_range(msb, ctx)
     return msb.tactics_engine:get_valid_tiles_for_unit(ctx.acting_unit.unit)
 end
 
 ---@param target_point Point
----@param valid_tiles userdata
+---@param valid_tiles userdata_2d
 ---@param acting_unit BattleUnit
 ---@param map BattleMap
 ---@return InteractionHook|nil

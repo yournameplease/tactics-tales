@@ -167,7 +167,7 @@ end
 ---@field facing Facing Current facing direction.
 ---@field has_acted boolean True when the character has already acted this turn; affects outline colour.
 ---@field animation_data AnimatedSpriteData Active animation state.
----@field sprites table<AnimationFrameName, table<FacingVertical, userdata>> Pre-rendered sprites keyed by frame and vertical facing.
+---@field sprites table<AnimationFrameName, table<FacingVertical, userdata_2d>> Pre-rendered sprites keyed by frame and vertical facing.
 ---@field character Character The underlying persistent character.
 
 ---@class DrawableCharacter : DrawableCharacterInstance

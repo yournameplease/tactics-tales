@@ -78,7 +78,7 @@ local function draw_unit(
     end
 end
 
----@param ud userdata
+---@param ud userdata_2d
 ---@param t Point
 ---@param s integer
 local function set_ud_tile(ud, t, s)
@@ -87,7 +87,7 @@ end
 
 --- return a userdata containing a map of the active menu's path, if present
 ---@param state UIContextManager
----@return userdata
+---@return userdata_2d
 local function get_path_layer(state)
     local path_layer = userdata("i16", state.battle_context.battle_map.width, state.battle_context.battle_map.height)
     local path = state.battle_context.hovered_path
