@@ -117,7 +117,7 @@
 ---@field battle_rng RngInstance? Battle-level RNG, set fresh before each battle.
 
 ---@alias CampaignNodeFactory fun(config: CampaignConfig, rng: CampaignRngContext, state: table<string, string>): CampaignNode
----@alias CampaignNodeSource CampaignNode | CampaignNode[] | (fun(config: CampaignConfig, rng: CampaignRngContext, state: table<string, string>): CampaignNodeSource)
+---@alias CampaignNodeSource (CampaignNode | CampaignNodeFactory)[]
 
 ---@class CampaignDefinition
 ---@field config? CampaignConfigDefinition
