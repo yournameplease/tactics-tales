@@ -324,6 +324,7 @@ end
 ---@return nil
 function PLAYER_TURN_HANDLERS.select_acting_unit(services, session_context, value)
     local unit = services.battle_map:get_at_tile(value.point)
+    assert(unit, "select_acting_unit: no unit at tile")
     session_context.acting_unit = {
         unit = unit,
         point = unit.tile:copy(),
@@ -546,7 +547,9 @@ function PLAYER_TURN_HANDLERS.move_and_store_attack_unit(services, session_conte
         path = trimmed_path,
     }
     services.tactics_engine:handle_move_unit(acting_unit, destination_point, trimmed_path)
-    session_context.target_unit = { unit = services.battle_map:get_at_tile(target_point) }
+    local move_target_unit = services.battle_map:get_at_tile(target_point)
+    assert(move_target_unit, "move_and_store_attack_unit: no unit at target tile")
+    session_context.target_unit = { unit = move_target_unit, point = target_point }
     services.tactics_engine.active_point = destination_point
     return nil
 end
@@ -605,7 +608,9 @@ end
 ---@param value any
 ---@return nil
 function PLAYER_TURN_HANDLERS.store_attack_unit(services, session_context, value)
-    session_context.target_unit = { unit = services.battle_map:get_at_tile(value.point) }
+    local attack_target_unit = services.battle_map:get_at_tile(value.point)
+    assert(attack_target_unit, "store_attack_unit: no unit at tile")
+    session_context.target_unit = { unit = attack_target_unit, point = value.point }
     services.tactics_engine.active_point = value.point
     return nil
 end
@@ -628,6 +633,7 @@ end
 ---@return nil
 function PLAYER_TURN_HANDLERS.attack_unit_at_tile(services, session_context, value)
     local target_unit = services.battle_map:get_at_tile(value.point)
+    assert(target_unit, "attack_unit_at_tile: no unit at tile")
     services.tactics_engine:handle_attack_unit(
         session_context.acting_unit.unit,
         target_unit
