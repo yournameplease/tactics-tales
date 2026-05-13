@@ -35,6 +35,8 @@ function userdata(data_type, width, height, data) end
 --- @param ... number
 function vec(...) end
 
+-- === Base shared methods ===
+
 --- @class userdata
 --- @return integer width
 --- @return integer height
@@ -50,118 +52,6 @@ function userdata:attribs() end
 --- Gets the width of the userdata
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_width)
 function userdata:width() end
-
---- @class userdata_1d
---- @return nil
---- Gets the height of the userdata (always nil for 1d)
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_height)
-function userdata_1d:height() end
-
---- @class userdata_2d
---- @return integer
---- Gets the height of the userdata
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_height)
-function userdata_2d:height() end
-
--- === 1D / Vector methods ===
-
---- @class userdata_1d
---- @return number
---- Get the magnitude of the vector
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
-function userdata_1d:magnitude() end
-
---- @class userdata_1d
---- @param v userdata_1d
---- @return number
---- Get the distance to another vector
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
-function userdata_1d:distance(v) end
-
---- @class userdata_1d
---- @param v userdata_1d
---- @return number
---- Get the dot product of another vector
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
-function userdata_1d:dot(v) end
-
---- @class userdata_1d
---- @param v userdata_1d
---- @param v_out userdata_1d | boolean | nil
---- @return userdata_1d
---- Get the cross product of another vector
---- If v_out is provided, the output will be stored in v_out, or in self if true
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
-function userdata_1d:cross(v, v_out) end
-
--- === 2D / Matrix methods ===
-
---- @class userdata_2d
---- @param i integer
---- @return userdata_2d | nil
---- Get a row of a 2d userdata
---- Rows are 0-indexed
---- Returns nil if out of range
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
-function userdata_2d:row(i) end
-
---- @class userdata_2d
---- @param i integer
---- @return userdata_2d | nil
---- Get a column of a 2d userdata
---- Columns are 0-indexed
---- Returns nil if out of range
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
-function userdata_2d:column(i) end
-
---- @class userdata_2d
---- @param m userdata_2d
---- @param m_out? userdata_2d | boolean
---- @return userdata_2d | nil
---- Multiply two matrices together
---- If m_out is provided, the output will be stored in m_out, or in self if true
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul)
-function userdata_2d:matmul(m, m_out) end
-
---- @class userdata_2d
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
-function userdata_2d:matmul2d(m, m_out) end
-
---- @class userdata_2d
---- Multiply 3d 4x4 transformation matrices
---- If m_out is provided, the output will be stored in m_out, or in self if true
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul3d)
---- @param m userdata_2d
---- @param m_out? userdata_2d | boolean
-function userdata_2d:matmul3d(m, m_out) end
-
---- @class userdata_2d
---- @param m_out? userdata_2d | boolean
---- @return userdata_2d
---- Transpose the matrix
---- If m_out is provided, the output will be stored in m_out, or in self if true
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
-function userdata_2d:transpose(m_out) end
-
--- === Shared methods (base userdata) ===
-
---- Gets values from a userdata as a multiple value return. If no index and no count are specified,
---- it will return all values in flat-indexed order.
---- If only an index is specified, it will return the value at that index. If the starting index
---- is out of range, it will return a single 0. If not, any additional values that are not in range will each be returned as 0.
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
---- @param u userdata
---- @param x integer The x index to start from
---- @param y integer The y index to start from
---- @param n integer The number of flat-indexed values to get
---- @return number ... Each value from the starting index in flat-indexed order
---- @overload fun(u: userdata, x: integer, n: integer): number ...
---- @overload fun(u: userdata, x: integer, y: integer): number
---- @overload fun(u: userdata, x: integer): number
---- @overload fun(u: userdata): number ...
-function get(u, x, y, n) end
-
-userdata.get = get
 
 --- @class userdata
 --- @param x integer
@@ -179,50 +69,6 @@ function userdata:set(x, ...) end
 --- Out of range values have no effect
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
 function userdata:set(x, y, ...) end
-
---- Set one or more values starting at x
---- Out of range values have no effect
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
---- @param u userdata
---- @param x integer
---- @param ... number
-function set(u, x, ...) end
-
---- Set one or more values starting at x, y
---- Out of range values have no effect
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
---- @param u userdata
---- @param x integer
---- @param y integer
---- @param ... number
-function set(u, x, y, ...) end
-
---- Copy a region of one userdata to another
---- Both src and dest must be the same type.
---- src and dest default to the current draw target.
---- width and height default to the src width and height.
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#blit)
---- @param src? userdata
---- @param dest? userdata
---- @param src_x? integer
---- @param src_y? integer
---- @param dest_x? integer
---- @param dest_y? integer
---- @param width? integer
---- @param height? integer
-function blit(src, dest, src_x, src_y, dest_x, dest_y, width, height) end
-
---- Map the contents of an integer-type userdata to RAM
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#memmap)
---- @param ud userdata
---- @param addr integer
-function memmap(ud, addr) end
-
---- Unmap userdata from RAM
---- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#unmap)
---- @param ud userdata
---- @param addr? integer
-function unmap(ud, addr) end
 
 --- @class userdata
 --- @param addr integer Address to read from
@@ -295,17 +141,167 @@ function userdata:convert(data_type, dest) end
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_sort)
 function userdata:sort(index, descending) end
 
-function userdata:pow() end
+-- === Global functions ===
 
-function userdata:sgn() end
+--- Gets values from a userdata as a multiple value return. If no index and no count are specified,
+--- it will return all values in flat-indexed order.
+--- If only an index is specified, it will return the value at that index. If the starting index
+--- is out of range, it will return a single 0. If not, any additional values that are not in range will each be returned as 0.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer The x index to start from
+--- @param y integer The y index to start from
+--- @param n integer The number of flat-indexed values to get
+--- @return number ... Each value from the starting index in flat-indexed order
+--- @overload fun(u: userdata, x: integer, n: integer): number ...
+--- @overload fun(u: userdata, x: integer, y: integer): number
+--- @overload fun(u: userdata, x: integer): number
+--- @overload fun(u: userdata): number ...
+function get(u, x, y, n) end
 
-function userdata:sgn0() end
+userdata.get = get
 
-function userdata:abs() end
+--- Set one or more values starting at x
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer
+--- @param ... number
+function set(u, x, ...) end
 
--- === Userdata Operations ===
+--- Set one or more values starting at x, y
+--- Out of range values have no effect
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_get)
+--- @param u userdata
+--- @param x integer
+--- @param y integer
+--- @param ... number
+function set(u, x, y, ...) end
+
+--- Copy a region of one userdata to another
+--- Both src and dest must be the same type.
+--- src and dest default to the current draw target.
+--- width and height default to the src width and height.
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#blit)
+--- @param src? userdata
+--- @param dest? userdata
+--- @param src_x? integer
+--- @param src_y? integer
+--- @param dest_x? integer
+--- @param dest_y? integer
+--- @param width? integer
+--- @param height? integer
+function blit(src, dest, src_x, src_y, dest_x, dest_y, width, height) end
+
+--- Map the contents of an integer-type userdata to RAM
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#memmap)
+--- @param ud userdata
+--- @param addr integer
+function memmap(ud, addr) end
+
+--- Unmap userdata from RAM
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#unmap)
+--- @param ud userdata
+--- @param addr? integer
+function unmap(ud, addr) end
+
+-- === 1D / Vector methods ===
+
+--- @class userdata_1d
+--- @return nil
+--- Gets the height of the userdata (always nil for 1d)
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_height)
+function userdata_1d:height() end
+
+--- @class userdata_1d
+--- @return number
+--- Get the magnitude of the vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+function userdata_1d:magnitude() end
+
+--- @class userdata_1d
+--- @param v userdata_1d
+--- @return number
+--- Get the distance to another vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+function userdata_1d:distance(v) end
+
+--- @class userdata_1d
+--- @param v userdata_1d
+--- @return number
+--- Get the dot product of another vector
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+function userdata_1d:dot(v) end
+
+--- @class userdata_1d
+--- @param v userdata_1d
+--- @param v_out userdata_1d | boolean | nil
+--- @return userdata_1d
+--- Get the cross product of another vector
+--- If v_out is provided, the output will be stored in v_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Vector_methods)
+function userdata_1d:cross(v, v_out) end
+
+-- === 2D / Matrix methods ===
+
+--- @class userdata_2d
+--- @return integer
+--- Gets the height of the userdata
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_height)
+function userdata_2d:height() end
+
+--- @class userdata_2d
+--- @param i integer
+--- @return userdata_2d | nil
+--- Get a row of a 2d userdata
+--- Rows are 0-indexed
+--- Returns nil if out of range
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
+function userdata_2d:row(i) end
+
+--- @class userdata_2d
+--- @param i integer
+--- @return userdata_2d | nil
+--- Get a column of a 2d userdata
+--- Columns are 0-indexed
+--- Returns nil if out of range
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_row)
+function userdata_2d:column(i) end
+
+--- @class userdata_2d
+--- @param m userdata_2d
+--- @param m_out? userdata_2d | boolean
+--- @return userdata_2d | nil
+--- Multiply two matrices together
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul)
+function userdata_2d:matmul(m, m_out) end
+
+--- @class userdata_2d
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
+function userdata_2d:matmul2d(m, m_out) end
+
+--- @class userdata_2d
+--- Multiply 3d 4x4 transformation matrices
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#matmul3d)
+--- @param m userdata_2d
+--- @param m_out? userdata_2d | boolean
+function userdata_2d:matmul3d(m, m_out) end
+
+--- @class userdata_2d
+--- @param m_out? userdata_2d | boolean
+--- @return userdata_2d
+--- Transpose the matrix
+--- If m_out is provided, the output will be stored in m_out, or in self if true
+--- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#Matrix_methods)
+function userdata_2d:transpose(m_out) end
+
+-- === Userdata Operations (generic: return same type as self) ===
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -314,13 +310,15 @@ function userdata:abs() end
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies add to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:add(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -329,13 +327,15 @@ function userdata:add(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies sub to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:sub(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -344,13 +344,15 @@ function userdata:sub(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies mul to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:mul(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -359,13 +361,15 @@ function userdata:mul(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies div to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:div(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -374,13 +378,15 @@ function userdata:div(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies integer division to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:idiv(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -389,13 +395,15 @@ function userdata:idiv(src, dest, src_offset, dest_offset, len, src_stride, dest
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies mod to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:mod(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -404,13 +412,15 @@ function userdata:mod(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies band to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:band(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -419,13 +429,15 @@ function userdata:band(src, dest, src_offset, dest_offset, len, src_stride, dest
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies bor to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:bor(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -434,13 +446,15 @@ function userdata:bor(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Applies bxor to each element and written to a new userdata
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:bxor(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -449,13 +463,15 @@ function userdata:bxor(src, dest, src_offset, dest_offset, len, src_stride, dest
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Shifts the bits of each element to the left by n bits
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:shl(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -464,13 +480,15 @@ function userdata:shl(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Shifts the bits of each element to the right by n bits
 --- If dest is userdata, result will be written to dest. If dest is true, result will be written to self
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_op)
 function userdata:shr(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -479,7 +497,7 @@ function userdata:shr(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Copy the userdata
 --- When :copy is given a table as the first argument (after self), it is taken to be a
 --- lookup table into that userdata for the start of each span.
@@ -488,6 +506,8 @@ function userdata:shr(src, dest, src_offset, dest_offset, len, src_stride, dest_
 function userdata:copy(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param idx userdata
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -496,12 +516,14 @@ function userdata:copy(src, dest, src_offset, dest_offset, len, src_stride, dest
 --- @param idx_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Take values from the userdata at locations specified by idx.
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#userdata_take)
 function userdata:take(idx, dest, src_offset, dest_offset, len, idx_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -510,12 +532,14 @@ function userdata:take(idx, dest, src_offset, dest_offset, len, idx_stride, dest
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Returns the largest of each element or scalar
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#UserData_Operations)
 function userdata:max(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
 
 --- @class userdata
+--- @generic T: userdata
+--- @param self T
 --- @param src? userdata | number
 --- @param dest? userdata | boolean
 --- @param src_offset? integer
@@ -524,7 +548,31 @@ function userdata:max(src, dest, src_offset, dest_offset, len, src_stride, dest_
 --- @param src_stride? integer
 --- @param dest_stride? integer
 --- @param spans? integer
---- @return userdata
+--- @return T
 --- Returns the smallest of each element or scalar
 --- [View Online](https://www.lexaloffle.com/dl/docs/picotron_manual.html#UserData_Operations)
 function userdata:min(src, dest, src_offset, dest_offset, len, src_stride, dest_stride, spans) end
+
+--- @class userdata
+--- @generic T: userdata
+--- @param self T
+--- @return T
+function userdata:pow() end
+
+--- @class userdata
+--- @generic T: userdata
+--- @param self T
+--- @return T
+function userdata:sgn() end
+
+--- @class userdata
+--- @generic T: userdata
+--- @param self T
+--- @return T
+function userdata:sgn0() end
+
+--- @class userdata
+--- @generic T: userdata
+--- @param self T
+--- @return T
+function userdata:abs() end
