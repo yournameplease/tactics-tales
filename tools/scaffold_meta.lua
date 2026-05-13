@@ -66,7 +66,7 @@ local candidates  = {}
 for _, layer in ipairs(map.layers) do
     if layer.type == "objectgroup" and type(layer.name) == "string" then
         local name = layer.name
-        if name:match("^deployment_") then
+        if name == "deployment" or name:match("^deployment_") then
             deployments[#deployments + 1] = name
         elseif name:match("^reinforce_") then
             -- ignore; resolver picks these up as zones automatically
