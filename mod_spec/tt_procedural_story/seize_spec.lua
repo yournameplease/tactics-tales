@@ -4,6 +4,7 @@ local battles_mod    = require("tt_procedural_campaign.game_data.missions")
 local campaign_state = require("src.tactics.campaign.campaign_state")
 
 local function make_mem()
+    ---@diagnostic disable-next-line: missing-fields
     return campaign_state.new({ get_character = function() return nil end })
 end
 

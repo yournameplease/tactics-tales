@@ -231,6 +231,7 @@ describe("base.lib.campaign", function()
             local node_true = { type = "text", text = "yes" }
             local node_false = { type = "text", text = "no" }
             local factory = campaign.state_branch(function(_, _) return true end, node_true, node_false)
+            ---@diagnostic disable-next-line: missing-fields
             luassert.are_equal(node_true, factory({}, {}, {}))
         end)
 
@@ -238,6 +239,7 @@ describe("base.lib.campaign", function()
             local node_true = { type = "text", text = "yes" }
             local node_false = { type = "text", text = "no" }
             local factory = campaign.state_branch(function(_, _) return false end, node_true, node_false)
+            ---@diagnostic disable-next-line: missing-fields
             luassert.are_equal(node_false, factory({}, {}, {}))
         end)
 
@@ -252,6 +254,7 @@ describe("base.lib.campaign", function()
                 { type = "advance" },
                 { type = "advance" }
             )
+            ---@diagnostic disable-next-line: missing-fields
             factory(config, {}, state)
             luassert.are_equal(config, received_config)
             luassert.are_equal(state, received_state)
@@ -265,7 +268,9 @@ describe("base.lib.campaign", function()
                 node_true,
                 node_false
             )
+            ---@diagnostic disable-next-line: missing-fields
             luassert.are_equal(node_true, factory({}, {}, { flag = "true" }))
+            ---@diagnostic disable-next-line: missing-fields
             luassert.are_equal(node_false, factory({}, {}, { flag = "false" }))
         end)
     end)

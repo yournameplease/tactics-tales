@@ -63,6 +63,7 @@ local function pump(tm, max_iters)
 end
 
 local function make_sm(script, bus, engine, tm)
+    ---@diagnostic disable-next-line: missing-fields
     return script_manager.new({ script }, bus, {}, make_map(), engine, tm)
 end
 
@@ -225,7 +226,9 @@ describe("script_manager before_combat trigger", function()
             received_source = unit
         end
 
+        ---@diagnostic disable-next-line: missing-fields
         script_manager.new({
+            ---@diagnostic disable-next-line: missing-fields
             {
                 tags = {},
                 one_shot = false,
@@ -234,6 +237,7 @@ describe("script_manager before_combat trigger", function()
                     { type = "dialogue", unit = { type = "trigger_source" }, text = { "hello" } },
                 },
             }
+            ---@diagnostic disable-next-line: missing-fields
         }, bus2, {}, make_map(), engine2, tm2)
 
         bus2:emit("BEFORE_COMBAT", { attacker = attacker, defender = defender })

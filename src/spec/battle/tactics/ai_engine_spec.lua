@@ -112,6 +112,7 @@ local function make_battle_map(units_list, width, height, terrain_overrides)
             ground:set(t.x, t.y, t.sprite)
         end
     end
+    ---@diagnostic disable-next-line: missing-fields
     map.layers = {
         terrain = {
             ground     = ground,
