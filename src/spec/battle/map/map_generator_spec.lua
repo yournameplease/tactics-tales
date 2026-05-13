@@ -509,7 +509,7 @@ describe("battle.map.map_generator", function()
             local map = map_generator.load_map({ type = "tiled", file = "x" }, {}, {})
             restore()
             luassert.are_equal("west", map.spawn_groups["reinforce"].from)
-            luassert.is_nil(map.spawn_groups["reinforce"].points[1].from)
+            luassert.is_nil((map.spawn_groups["reinforce"].points[1] --[[@as any]]).from)
         end)
 
         it("should leave 'from' nil on groups that have no from property", function()
