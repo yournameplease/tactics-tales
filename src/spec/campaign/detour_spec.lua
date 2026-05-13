@@ -24,9 +24,12 @@ local function make_campaign(nodes)
     }, { __index = Campaign })
 
     self.handle_new_node = function(camp)
+        ---@diagnostic disable-next-line: invisible
         local node = camp.current_node.definition
         table.insert(visited, {
+            ---@diagnostic disable-next-line: invisible
             node_id   = camp.current_node.node_id,
+            ---@diagnostic disable-next-line: invisible
             node_step = camp.current_node.node_step,
             type      = node.type,
         })
