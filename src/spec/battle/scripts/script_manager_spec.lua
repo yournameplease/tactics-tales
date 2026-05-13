@@ -239,6 +239,7 @@ describe("script_manager before_combat trigger", function()
         bus2:emit("BEFORE_COMBAT", { attacker = attacker, defender = defender })
         pump(tm2)
 
+        assert(received_source)
         luassert.are_equal(attacker.id, received_source.id)
     end)
 end)
