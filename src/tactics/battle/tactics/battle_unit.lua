@@ -16,6 +16,7 @@ local maps = require("src.tactics.util.maps")
 ---@field unit_ai UnitAI AI behaviour descriptor for this unit.
 ---@field tags table<string, boolean> Set of string tags associated with this unit.
 ---@field marked boolean True when the unit is currently marked.
+---@field disabled boolean True when the unit is disabled and cannot act.
 ---@field skill_states table<string, SkillState> Per-skill battle state keyed by skill_id.
 ---@field active_statuses SkillStatus[] Active debuff/buff statuses on this unit.
 local BattleUnit = {}
@@ -102,6 +103,7 @@ function battle_unit.spawn_unit(permanent_unit, tile, tags, side, movement_side,
         movement_side = movement_side or side,
         facing = facing,
         marked = false,
+        disabled = false,
         unit_ai = ai,
         sprites = {},
         skill_states = skill_states,
