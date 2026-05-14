@@ -1,6 +1,7 @@
 local luassert = require("luassert")
 local te_module = require("src.tactics.battle.tactics.tactics_engine")
 local TacticsEngine = te_module.TacticsEngine
+local unit_spawner = require("src.tactics.battle.unit_spawner")
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -61,6 +62,73 @@ end
 -- ---------------------------------------------------------------------------
 
 describe("tactics.battle.tactics.tactics_engine", function()
+
+    -- -----------------------------------------------------------------------
+    -- skill_action: damage effect
+    -- -----------------------------------------------------------------------
+
+    -- -----------------------------------------------------------------------
+    -- spawn_units: disabled field
+    -- -----------------------------------------------------------------------
+
+    describe("spawn_units disabled field", function()
+        local orig_try_spawn_at
+        local stub_unit
+
+        ---@return table
+        local function make_spawn_engine()
+            return {
+                character_manager = {
+                    get_player_roster = function() return {} end,
+                },
+                battle_map = {
+                    get_tiles_by_label = function(_, _) return { { x = 1, y = 1 } } end,
+                },
+            }
+        end
+
+        ---@param disabled? boolean
+        ---@return table
+        local function make_unit_spawn_data(disabled)
+            return {
+                tile = "start",
+                character_source = { type = "template", template = "warrior" },
+                side = "enemy",
+                disabled = disabled,
+            }
+        end
+
+        before_each(function()
+            orig_try_spawn_at = unit_spawner.try_spawn_at
+            stub_unit = { id = 1 }
+            ---@diagnostic disable-next-line: duplicate-set-field
+            unit_spawner.try_spawn_at = function(_, _, _, roster_count)
+                return stub_unit, roster_count
+            end
+        end)
+
+        after_each(function()
+            unit_spawner.try_spawn_at = orig_try_spawn_at
+        end)
+
+        it("disabled=true sets unit.disabled to true", function()
+            local engine = make_spawn_engine()
+            local spawned = TacticsEngine.spawn_units(engine, { make_unit_spawn_data(true) }, "prevent")
+            luassert.is_true(spawned[1].disabled)
+        end)
+
+        it("disabled=false leaves unit.disabled false", function()
+            local engine = make_spawn_engine()
+            local spawned = TacticsEngine.spawn_units(engine, { make_unit_spawn_data(false) }, "prevent")
+            luassert.is_false(spawned[1].disabled)
+        end)
+
+        it("absent disabled field leaves unit.disabled false", function()
+            local engine = make_spawn_engine()
+            local spawned = TacticsEngine.spawn_units(engine, { make_unit_spawn_data(nil) }, "prevent")
+            luassert.is_false(spawned[1].disabled)
+        end)
+    end)
 
     -- -----------------------------------------------------------------------
     -- skill_action: damage effect

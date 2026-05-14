@@ -26,6 +26,7 @@
 ---@field tile TileLabel Tile label identifying the spawn location.
 ---@field tags? string[] Tags for this unit; spawn tile tag is added automatically.
 ---@field facing? CardinalDirection Overrides position-derived default when present.
+---@field disabled? boolean When true, unit spawns in a disabled state.
 
 ---@class SlotSpawnData
 ---@field character_source CharacterSource
