@@ -325,7 +325,7 @@ function BattleMap:get_targets_in_range(unit_id, tile)
     local attacker = self.units_by_id[unit_id]
     local targeting = attacker.character:get_weapon_targeting()
     for _, target in pairs(self.units_by_id) do
-        if target.id ~= attacker.id then
+        if target.id ~= attacker.id and not target.disabled then
             if sides_can_fight(attacker.side, target.side)
                 and targeting.is_target_valid(
                     tile,
@@ -341,10 +341,23 @@ function BattleMap:get_targets_in_range(unit_id, tile)
     return targets
 end
 
---- Return all active units matching `filter`.
+--- Return all active, non-disabled units matching `filter`.
 ---@param filter fun(unit: BattleUnit): boolean
 ---@return BattleUnit[]
 function BattleMap:get_units(filter)
+    local units = {}
+    for _, unit in pairs(self.units_by_id) do
+        if not unit.disabled and filter(unit) then
+            table.insert(units, unit)
+        end
+    end
+    return units
+end
+
+--- Return all active units matching `filter`, including disabled ones.
+---@param filter fun(unit: BattleUnit): boolean
+---@return BattleUnit[]
+function BattleMap:get_units_including_disabled(filter)
     local units = {}
     for _, unit in pairs(self.units_by_id) do
         if filter(unit) then

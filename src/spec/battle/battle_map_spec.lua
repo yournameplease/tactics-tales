@@ -10,15 +10,28 @@ local point = require("src.tactics.util.point")
 ---@param id integer
 ---@param tile Point
 ---@param side? string
+---@param disabled? boolean
 ---@return table
-local function make_unit(id, tile, side)
-    return { id = id, tile = tile, side = side or "player" }
+local function make_unit(id, tile, side, disabled)
+    return { id = id, tile = tile, side = side or "player", disabled = disabled or false }
 end
 
 --- Build a 5x5 BattleMap with no labels.
 ---@return BattleMap
 local function make_map()
     return battle_map.new(5, 5, {})
+end
+
+--- Build a unit with a character stub whose weapon always validates any target.
+---@param id integer
+---@param tile Point
+---@param side? string
+---@param disabled? boolean
+---@return table
+local function make_unit_with_character(id, tile, side, disabled)
+    local targeting = { is_target_valid = function(_, _, _, _) return true end }
+    local character = { get_weapon_targeting = function(_) return targeting end }
+    return { id = id, tile = tile, side = side or "player", disabled = disabled or false, character = character }
 end
 
 --- Build a minimal MapLayers table backed by real MockUserdata.
@@ -349,6 +362,40 @@ describe("battle.battle_map", function()
             luassert.are_equal(1, #enemies)
             luassert.are_equal(2, enemies[1].id)
         end)
+
+        it("should exclude disabled units", function()
+            local map = make_map()
+            map:spawn_unit(make_unit(1, point.of(0, 0), "player", false), point.of(0, 0))
+            map:spawn_unit(make_unit(2, point.of(1, 0), "player", true), point.of(1, 0))
+            local units = map:get_units(function(_) return true end)
+            luassert.are_equal(1, #units)
+            luassert.are_equal(1, units[1].id)
+        end)
+
+        it("should return empty when all units are disabled", function()
+            local map = make_map()
+            map:spawn_unit(make_unit(1, point.of(0, 0), "player", true), point.of(0, 0))
+            luassert.are_equal(0, #map:get_units(function(_) return true end))
+        end)
+    end)
+
+    describe("get_units_including_disabled", function()
+        it("should return all units including disabled ones", function()
+            local map = make_map()
+            map:spawn_unit(make_unit(1, point.of(0, 0), "player", false), point.of(0, 0))
+            map:spawn_unit(make_unit(2, point.of(1, 0), "player", true), point.of(1, 0))
+            local units = map:get_units_including_disabled(function(_) return true end)
+            luassert.are_equal(2, #units)
+        end)
+
+        it("should still apply the predicate filter", function()
+            local map = make_map()
+            map:spawn_unit(make_unit(1, point.of(0, 0), "player", true), point.of(0, 0))
+            map:spawn_unit(make_unit(2, point.of(1, 0), "enemy", true), point.of(1, 0))
+            local units = map:get_units_including_disabled(function(u) return u.side == "enemy" end)
+            luassert.are_equal(1, #units)
+            luassert.are_equal(2, units[1].id)
+        end)
     end)
 
     describe("get_dead_units", function()
@@ -370,6 +417,33 @@ describe("battle.battle_map", function()
             map:kill_unit(unit)
             local dead_enemies = map:get_dead_units(function(u) return u.side == "enemy" end)
             luassert.are_equal(0, #dead_enemies)
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
+    -- get_targets_in_range
+    -- -----------------------------------------------------------------------
+
+    describe("get_targets_in_range", function()
+        it("should return an enemy unit in range", function()
+            local map = make_map()
+            local attacker = make_unit_with_character(1, point.of(0, 0), "player")
+            local target = make_unit_with_character(2, point.of(1, 0), "enemy")
+            map:spawn_unit(attacker, point.of(0, 0))
+            map:spawn_unit(target, point.of(1, 0))
+            local results = map:get_targets_in_range(1, point.of(0, 0))
+            luassert.are_equal(1, #results)
+            luassert.are_equal(2, results[1].id)
+        end)
+
+        it("should exclude disabled targets", function()
+            local map = make_map()
+            local attacker = make_unit_with_character(1, point.of(0, 0), "player", false)
+            local target = make_unit_with_character(2, point.of(1, 0), "enemy", true)
+            map:spawn_unit(attacker, point.of(0, 0))
+            map:spawn_unit(target, point.of(1, 0))
+            local results = map:get_targets_in_range(1, point.of(0, 0))
+            luassert.are_equal(0, #results)
         end)
     end)
 
