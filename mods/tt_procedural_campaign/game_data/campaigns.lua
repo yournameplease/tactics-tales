@@ -101,12 +101,7 @@ local stories = {
                         options    = archetype_options()
                     },
                     { type = "set_memory", key = "battle_index",              value = "1" },
-                    { type = "roster_add", template = "militia_spear_captain" },
-                    { type = "roster_add", template = "militia_spearman" },
-                    { type = "roster_add", template = "militia_archer" },
-                    { type = "roster_add", template = "militia_armor" },
-                    { type = "roster_add", template = "priest" },
-                    { type = "roster_add", template = "mage" },
+                    { type = "roster_add", template = "village_hero" },
                     { type = "jump",       next_node = "battle_loop" },
                 },
 

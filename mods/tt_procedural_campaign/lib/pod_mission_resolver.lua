@@ -32,11 +32,11 @@ local function get_tier(campaign_config)
     return tonumber(mem_text(campaign_config, "base_difficulty")) or 1
 end
 
----@param campaign_config table
----@param rng_context table?
+---@param campaign_config CampaignConfig
+---@param rng_context CampaignRngContext
 ---@param map_context MapContext
 ---@param meta table
----@return table
+---@return MissionDefinition
 local function build_pod_mission(campaign_config, rng_context, map_context, meta)
     local faction = get_faction(campaign_config)
     local tier    = get_tier(campaign_config)

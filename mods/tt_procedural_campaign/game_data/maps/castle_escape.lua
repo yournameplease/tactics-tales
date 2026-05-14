@@ -9,8 +9,8 @@ return {
   height = 16,
   tilewidth = 20,
   tileheight = 16,
-  nextlayerid = 15,
-  nextobjectid = 27,
+  nextlayerid = 17,
+  nextobjectid = 29,
   properties = {},
   tilesets = {
     {
@@ -443,9 +443,25 @@ return {
           opacity = 1,
           visible = true,
           properties = {}
-        },
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 15,
+      name = "deployment_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
         {
-          id = 2,
+          id = 27,
           name = "",
           type = "",
           shape = "point",
@@ -457,9 +473,25 @@ return {
           opacity = 1,
           visible = true,
           properties = {}
-        },
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 16,
+      name = "deployment_2",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
         {
-          id = 3,
+          id = 28,
           name = "",
           type = "",
           shape = "point",
