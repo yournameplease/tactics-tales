@@ -61,7 +61,7 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
     local units        = {}
 
     local deploy_zone   = map_context.rect_zones and map_context.rect_zones[variant.deployment]
-    local deploy_points = deploy_zone and zones.expand(deploy_zone, "grid", 16) or {}
+    local deploy_points = deploy_zone and zones.expand(deploy_zone, "checkerboard", 16) or {}
     point_labels["player_deploy"] = deploy_points
     log.debug("[pod_mission] player_deploy zone=", variant.deployment, " points=", #deploy_points)
     units[#units + 1] = {

@@ -66,14 +66,12 @@ local archetypes = {
     -- },
 
     warband = {
-        name             = "Warband",
-        description      =
-        "A balanced campaign: open with a scripted skirmish, close with a decisive siege, and fill the middle with varied encounters.",
+        name             = "Royal Reclaimer",
+        description      = "A classic fantasy tactics story.",
 
         slots            = {
-            -- { type = "beat",   beat_id = "opening_skirmish",                forced_join = "bandit_goon" },
+            { type = "beat",   beat_id = "castle_escape" },
             { type = "filler" },
-            { type = "filler", pool_override = { skirmish = 3, ambush = 1 } },
             { type = "filler" },
             { type = "filler" },
             -- { type = "beat",   beat_id = "final_siege" },
