@@ -114,6 +114,7 @@
 ---@field unit_selector UnitSelector Which units to modify.
 ---@field new_side Side New team to assign to the selected units.
 ---@field new_ai UnitAI New AI behavior to assign to the selected units.
+---@field enabled? boolean When set, enables (true) or disables (false) matched units.
 
 ---@class RecruitUnits : ScriptEffect
 ---@field type "recruit_units"

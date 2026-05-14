@@ -25,6 +25,7 @@ local TILE_SIZE = point.of(TILE_WIDTH, TILE_HEIGHT)
 ---@class NewUnitProperties
 ---@field new_side Side
 ---@field new_ai UnitAI
+---@field enabled? boolean
 
 ---@class QueuedBattleDialogue
 ---@field speaking_unit BattleUnit
@@ -625,6 +626,9 @@ function TacticsEngine:modify_units(units, new_unit_properties)
         if new_unit_properties.new_side ~= nil then
             u.side = new_unit_properties.new_side
             self:invalidate_tiles_for_point(u.tile)
+        end
+        if new_unit_properties.enabled ~= nil then
+            u.disabled = not new_unit_properties.enabled
         end
     end
 end

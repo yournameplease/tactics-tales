@@ -72,6 +72,26 @@ function ScriptManager:resolve_unit_selector(selector, ctx)
     end
 end
 
+--- Like resolve_unit_selector but includes disabled units in tag_lookup results.
+---@param selector table UnitSelector
+---@param ctx ScriptContext
+---@return BattleUnit[]
+function ScriptManager:resolve_unit_selector_including_disabled(selector, ctx)
+    if selector.type == "tag_lookup" then
+        local battle_unit = require("src.tactics.battle.tactics.battle_unit")
+        return self.battle_map:get_units_including_disabled(battle_unit.has_tag(selector.tag))
+    elseif selector.type == "trigger_source" then
+        assert(ctx.source_unit ~= nil)
+        return { ctx.source_unit }
+    elseif selector.type == "trigger_target" then
+        assert(ctx.target_unit ~= nil)
+        return { ctx.target_unit }
+    else
+        unexpected(selector.type)
+        return {}
+    end
+end
+
 --- Return tiles matching the given specifier (no context required).
 ---@param selector table TileSpecifier
 ---@return Point[]
@@ -235,11 +255,18 @@ function ScriptManager:register_script(script)
             ---@cast effect ModifyUnits
             fn = function(ctx)
                 log.debug("Handling ModifyUnits effect.")
+                local units
+                if effect.enabled ~= nil then
+                    units = self:resolve_unit_selector_including_disabled(effect.unit_selector, ctx)
+                else
+                    units = self:resolve_unit_selector(effect.unit_selector, ctx)
+                end
                 self.tactics_engine:modify_units(
-                    self:resolve_unit_selector(effect.unit_selector, ctx),
+                    units,
                     {
                         new_side = effect.new_side,
                         new_ai = effect.new_ai,
+                        enabled = effect.enabled,
                     }
                 )
             end
