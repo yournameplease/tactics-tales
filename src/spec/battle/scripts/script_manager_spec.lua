@@ -3,6 +3,9 @@ local event_bus = require("src.tactics.systems.event_bus")
 local script_manager = require("src.tactics.battle.scripts.script_manager")
 local tasks = require("src.tactics.systems.tasks")
 local id_generator = require("src.tactics.util.id_generator")
+local battle_map_mod = require("src.tactics.battle.battle_map")
+local fp = require("src.tactics.util.fp")
+local point = require("src.tactics.util.point")
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -18,6 +21,47 @@ local function make_map()
         register_tile_interaction = function() end,
         unregister_interaction = function() end,
     }
+end
+
+local function make_real_map()
+    return battle_map_mod.new(5, 5, {})
+end
+
+local function make_tagged_unit(id, tag, tile, disabled)
+    local u = {
+        id = id,
+        tile = tile,
+        side = "enemy",
+        disabled = disabled or false,
+        tags = tag and { [tag] = true } or {},
+    }
+    function u:has_tag(t) return self.tags[t] == true end
+    return u
+end
+
+local function make_engine_with_modify()
+    local id_gen = id_generator.new()
+    local engine = { tactics_locks = {}, lock_count = 0 }
+    function engine:acquire_lock()
+        local id = id_gen:get_id()
+        engine.tactics_locks[id] = true
+        engine.lock_count = engine.lock_count + 1
+        return id
+    end
+    function engine:remove_lock(id) engine.tactics_locks[id] = nil end
+    function engine:is_blocked() return false end
+    function engine:is_locked()
+        for _ in pairs(engine.tactics_locks) do return true end
+        return false
+    end
+    function engine:modify_units(units, props)
+        for _, u in ipairs(units) do
+            if props.enabled ~= nil then
+                u.disabled = not props.enabled
+            end
+        end
+    end
+    return engine
 end
 
 local function make_engine()
@@ -307,5 +351,61 @@ describe("script_manager before_counterattack trigger", function()
         pump(tm)
 
         luassert.are_equal(0, engine.lock_count)
+    end)
+end)
+
+describe("script_manager modify_units effect with disabled flag", function()
+    it("disables a live unit so it no longer appears in get_units", function()
+        local bus = event_bus.new()
+        local tm = tasks.task_manager()
+        local engine = make_engine_with_modify()
+        local map = make_real_map()
+        local tile = point.of(0, 0)
+        map:spawn_unit(make_tagged_unit(1, "target", tile, false), tile)
+
+        ---@diagnostic disable-next-line: missing-fields
+        script_manager.new({
+            ---@diagnostic disable-next-line: missing-fields
+            {
+                tags = {},
+                one_shot = false,
+                trigger = { type = "before_combat" },
+                effects = {
+                    { type = "modify_units", unit_selector = { type = "tag_lookup", tag = "target" }, enabled = false },
+                },
+            }
+        }, bus, {}, map, engine, tm)
+
+        bus:emit("BEFORE_COMBAT", { attacker = make_unit(99, nil), defender = make_unit(100, nil) })
+        pump(tm)
+
+        luassert.are_equal(0, #map:get_units(fp.fn_true))
+    end)
+
+    it("re-enables a disabled unit so it reappears in get_units", function()
+        local bus = event_bus.new()
+        local tm = tasks.task_manager()
+        local engine = make_engine_with_modify()
+        local map = make_real_map()
+        local tile = point.of(0, 0)
+        map:spawn_unit(make_tagged_unit(1, "target", tile, true), tile)
+
+        ---@diagnostic disable-next-line: missing-fields
+        script_manager.new({
+            ---@diagnostic disable-next-line: missing-fields
+            {
+                tags = {},
+                one_shot = false,
+                trigger = { type = "before_combat" },
+                effects = {
+                    { type = "modify_units", unit_selector = { type = "tag_lookup", tag = "target" }, enabled = true },
+                },
+            }
+        }, bus, {}, map, engine, tm)
+
+        bus:emit("BEFORE_COMBAT", { attacker = make_unit(99, nil), defender = make_unit(100, nil) })
+        pump(tm)
+
+        luassert.are_equal(1, #map:get_units(fp.fn_true))
     end)
 end)
