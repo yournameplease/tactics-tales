@@ -1,9 +1,10 @@
 ---
 id: TASK-127
 title: Filter disabled units from BattleMap queries
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-14 14:03'
+updated_date: '2026-05-14 22:22'
 labels: []
 milestone: m-19
 dependencies:
@@ -25,14 +26,14 @@ Depends on TASK-126 (disabled field must exist).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 `get_units(fp.fn_true)` does not return units with `disabled = true`
-- [ ] #2 `get_units_including_disabled(fp.fn_true)` returns all units including disabled ones
-- [ ] #3 `get_targets_in_range` does not return disabled units
-- [ ] #4 `make test` passes
+- [x] #1 `get_units(fp.fn_true)` does not return units with `disabled = true`
+- [x] #2 `get_units_including_disabled(fp.fn_true)` returns all units including disabled ones
+- [x] #3 `get_targets_in_range` does not return disabled units
+- [x] #4 `make test` passes
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria met
-- [ ] #2 make test passes
+- [x] #1 All acceptance criteria met
+- [x] #2 make test passes
 <!-- DOD:END -->
