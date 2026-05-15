@@ -1,9 +1,10 @@
 ---
 id: TASK-131
 title: Write tests for disabled unit behavior
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-14 14:04'
+updated_date: '2026-05-15 02:17'
 labels: []
 milestone: m-19
 dependencies:
@@ -31,11 +32,11 @@ Depends on TASK-127 (filtering) and TASK-128 (modify_units effect).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Test: disabled unit is excluded from `get_units`
-- [ ] #2 Test: disabled unit is excluded from `get_targets_in_range`
-- [ ] #3 Test: `modify_units { enabled = false }` disables a live unit
-- [ ] #4 Test: `modify_units { enabled = true }` re-enables a disabled unit
-- [ ] #5 All new tests pass under `make test`
+- [x] #1 Test: disabled unit is excluded from `get_units`
+- [x] #2 Test: disabled unit is excluded from `get_targets_in_range`
+- [x] #3 Test: `modify_units { enabled = false }` disables a live unit
+- [x] #4 Test: `modify_units { enabled = true }` re-enables a disabled unit
+- [x] #5 All new tests pass under `make test`
 <!-- AC:END -->
 
 ## Definition of Done
