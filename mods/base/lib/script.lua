@@ -111,6 +111,17 @@ end
 
 ---@param unit_selector UnitSelector
 ---@return ScriptBuilder
+function ScriptBuilder:then_enable_units(unit_selector)
+    add(self.effects, {
+        type          = "modify_units",
+        unit_selector = unit_selector,
+        enabled       = true,
+    })
+    return self
+end
+
+---@param unit_selector UnitSelector
+---@return ScriptBuilder
 function ScriptBuilder:then_recruit_unit(
     unit_selector
 )

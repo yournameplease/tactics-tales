@@ -196,6 +196,41 @@ describe("tt_procedural_campaign.lib.pod_mission_resolver", function()
             luassert.are_equal("two", patrol_unit.ai.move)
         end)
 
+        it("patrol/ambush units are tagged with their zone name", function()
+            local def = build_pod({}, nil, make_map_context(), SIMPLE_META)
+            local patrol_unit
+            for _, u in ipairs(def.units) do
+                if u.tile == "pod_a" then patrol_unit = u; break end
+            end
+            luassert.is_not_nil(patrol_unit)
+            local has_zone_tag = false
+            for _, t in ipairs(patrol_unit.tags or {}) do
+                if t == "pod_a" then has_zone_tag = true end
+            end
+            luassert.is_true(has_zone_tag)
+        end)
+
+        it("disabled spawn group produces a disabled unit", function()
+            local meta = {
+                map_id       = "test_map",
+                variant_sets = {
+                    {
+                        deployment   = "deployment_w",
+                        spawn_groups = {
+                            { zone = "pod_a", role = "ambush", facing = "east", disabled = true },
+                        },
+                    },
+                },
+            }
+            local def = build_pod({}, nil, make_map_context(), meta)
+            local unit
+            for _, u in ipairs(def.units) do
+                if u.tile == "pod_a" then unit = u; break end
+            end
+            luassert.is_not_nil(unit)
+            luassert.is_true(unit.disabled)
+        end)
+
         -- budget / threat_mult -----------------------------------------------------------
 
         it("budget = base_budget * threat_mult per group", function()
