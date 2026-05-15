@@ -125,6 +125,8 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
                 ai               = ai.move_two,
                 tile             = zone_name,
                 facing           = facing,
+                tags             = { zone_name },
+                disabled         = group.disabled,
             }
         end
     end

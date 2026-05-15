@@ -9,14 +9,19 @@ return {
   height = 16,
   tilewidth = 20,
   tileheight = 16,
-  nextlayerid = 21,
-  nextobjectid = 32,
+  nextlayerid = 23,
+  nextobjectid = 37,
   properties = {},
   tilesets = {
     {
       name = "paper_tileset",
       firstgid = 1,
       filename = "paper_tileset.tsx"
+    },
+    {
+      name = "tiny_tileset",
+      firstgid = 257,
+      filename = "tiny_tileset.tsx"
     }
   },
   layers = {
@@ -44,7 +49,7 @@ return {
         3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
         3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
         3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3,
-        3, 3, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 2, 3, 3,
+        3, 3, 2, 2, 2, 3, 3, 3, 3, 267, 3, 3, 3, 267, 3, 3,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -80,7 +85,7 @@ return {
         0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -107,14 +112,14 @@ return {
       properties = {},
       objects = {
         {
-          id = 29,
+          id = 33,
           name = "",
           type = "",
           shape = "rectangle",
           x = 160,
           y = 16,
           width = 60,
-          height = 96,
+          height = 80,
           rotation = 0,
           opacity = 1,
           visible = true,
@@ -137,14 +142,74 @@ return {
       properties = {},
       objects = {
         {
-          id = 31,
+          id = 34,
           name = "",
           type = "",
           shape = "rectangle",
           x = 240,
           y = 16,
           width = 60,
-          height = 96,
+          height = 80,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 21,
+      name = "door_1",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 35,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 180,
+          y = 96,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 22,
+      name = "door_2",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 36,
+          name = "",
+          type = "",
+          shape = "point",
+          x = 260,
+          y = 96,
+          width = 0,
+          height = 0,
           rotation = 0,
           opacity = 1,
           visible = true,

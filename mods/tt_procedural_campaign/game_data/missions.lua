@@ -73,7 +73,8 @@ local battles = {
             character_source = character_source.template("mage"),
             ai               = ai.stationary_allied,
             tile             = "ally_1",
-            tags             = { "ally_mage" },
+            tags             = { "ally_mage", "ally_1" },
+            disabled         = true,
         })
         table.insert(mission.units, {
             side             = "neutral",
@@ -81,7 +82,8 @@ local battles = {
             character_source = character_source.template("priest"),
             ai               = ai.stationary_allied,
             tile             = "ally_2",
-            tags             = { "ally_priest" },
+            tags             = { "ally_priest", "ally_2" },
+            disabled         = true,
         })
 
         table.insert(mission.scripts,
@@ -94,6 +96,23 @@ local battles = {
             script.on_talk("ally_priest")
                 :then_dialogue(script_unit.tagged("ally_priest"), { "[recruiting priest unit]" })
                 :then_recruit_unit(script_unit.tagged("ally_priest"))
+                :as_one_shot()
+        )
+
+        table.insert(mission.scripts,
+            script.on_adjacent_tile_interaction("door_1", "Open")
+                :then_modify_terrain("ceiling_1", { ["ceiling"] = 0 })
+                :then_enable_units(script_unit.tagged("ambush_n_1"))
+                :then_enable_units(script_unit.tagged("ally_1"))
+                :then_modify_terrain("door_1", { ["ground"] = 1 })
+                :as_one_shot()
+        )
+        table.insert(mission.scripts,
+            script.on_adjacent_tile_interaction("door_2", "Open")
+                :then_modify_terrain("ceiling_2", { ["ceiling"] = 0 })
+                :then_enable_units(script_unit.tagged("ambush_n_2"))
+                :then_enable_units(script_unit.tagged("ally_2"))
+                :then_modify_terrain("door_2", { ["ground"] = 1 })
                 :as_one_shot()
         )
 
