@@ -1,9 +1,10 @@
 ---
 id: TASK-133
 title: Add force_battle_result to TacticsEngine
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-16 19:52'
+updated_date: '2026-05-16 20:03'
 labels: []
 milestone: m-20
 dependencies: []

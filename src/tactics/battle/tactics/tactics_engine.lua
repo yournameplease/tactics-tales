@@ -825,6 +825,16 @@ function TacticsEngine:show_phase_banner(text)
     self.battle_is_blocked = true
 end
 
+--- Immediately end the battle with the given result, bypassing the objective loop.
+---@param result BattleEndResult
+function TacticsEngine:force_battle_result(result)
+    self.event_writer:emit("BATTLE_END", {
+        chapter = self.chapter,
+        turn_number = self.turn,
+        result = result,
+    })
+end
+
 --- Advance dialogue state each frame.
 ---@param input InputContext
 function TacticsEngine:update(input)
