@@ -1,0 +1,14 @@
+Contents of spritesheet 3 include icons from https://nikoichu.itch.io/pixel-icons
+
+### License
+
+1-bit Pixel Icons by Nikoichu is marked CC0 1.0
+
+All of these icons are licensed under CC0, which means you have absolutely no restrictions on how you can use them. I would still appreciate it if you gave me attribution for my work, but it's not strictly required.
+
+### Changelog
+
+v1.0 [13 July 2025] - Initial release (1300 total icons)
+v1.0.1 [13 July 2025] - Added Bluesky platform icon.
+v1.1 [28 August 2025] - Update 1 with 110 new icons! (1411 total icons)
+v1.2 [28 November 2025] - Update 2 with 65 new icons! (1476 total icons)
