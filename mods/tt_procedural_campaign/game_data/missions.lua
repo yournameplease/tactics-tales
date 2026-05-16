@@ -15,6 +15,7 @@ local ai <const>       = battle.ai
 local objectives       = {
     rout             = battle.victory.rout,
     tagged_unit_dies = battle.failure.tagged_unit_dies,
+    escape           = battle.victory.escape,
 }
 
 local function mem_text(campaign_config, key)
@@ -55,6 +56,7 @@ local battles = {
     ["castle_escape"] = function(campaign_config, rng_context, map_context)
         local meta = include("mods/tt_procedural_campaign/game_data/maps/castle_escape_meta.lua")
         local mission = resolver.build_pod_mission(campaign_config, rng_context, map_context, meta)
+        mission.victory_conditions = { objectives.escape() }
 
         table.insert(mission.units, {
             side             = "player",
@@ -65,6 +67,11 @@ local battles = {
             side             = "player",
             character_source = character_source.template("militia_archer"),
             tile             = "deployment_2",
+        })
+        table.insert(mission.units, {
+            side             = "player",
+            character_source = character_source.template("village_axe"),
+            tile             = "deployment_3",
         })
 
         table.insert(mission.units, {
@@ -87,24 +94,13 @@ local battles = {
         })
 
         table.insert(mission.scripts,
-            script.on_talk("ally_mage")
-                :then_dialogue(script_unit.tagged("ally_mage"), { "[recruiting mage unit]" })
-                :then_recruit_unit(script_unit.tagged("ally_mage"))
-                :as_one_shot()
-        )
-        table.insert(mission.scripts,
-            script.on_talk("ally_priest")
-                :then_dialogue(script_unit.tagged("ally_priest"), { "[recruiting priest unit]" })
-                :then_recruit_unit(script_unit.tagged("ally_priest"))
-                :as_one_shot()
-        )
-
-        table.insert(mission.scripts,
             script.on_adjacent_tile_interaction("door_1", "Open")
                 :then_modify_terrain("ceiling_1", { ["ceiling"] = 0 })
                 :then_enable_units(script_unit.tagged("ambush_n_1"))
                 :then_enable_units(script_unit.tagged("ally_1"))
                 :then_modify_terrain("door_1", { ["ground"] = 1 })
+                :then_dialogue(script_unit.tagged("ally_mage"), { "[recruiting mage unit]" })
+                :then_recruit_unit(script_unit.tagged("ally_mage"))
                 :as_one_shot()
         )
         table.insert(mission.scripts,
@@ -113,7 +109,13 @@ local battles = {
                 :then_enable_units(script_unit.tagged("ambush_n_2"))
                 :then_enable_units(script_unit.tagged("ally_2"))
                 :then_modify_terrain("door_2", { ["ground"] = 1 })
+                :then_dialogue(script_unit.tagged("ally_priest"), { "[recruiting priest unit]" })
+                :then_recruit_unit(script_unit.tagged("ally_priest"))
                 :as_one_shot()
+        )
+        table.insert(mission.scripts,
+            script.on_tile_interaction("escape", "Escape")
+                :then_despawn_units(script_unit.source())
         )
 
         return mission
