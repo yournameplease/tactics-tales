@@ -8,9 +8,9 @@ local battle            = battle_lib.battle
 local character_source  = battle.character_source
 local ai <const>        = battle.ai
 
-local BASE_BUDGET <const> = 3
+local BASE_BUDGET <const> = 2
 local TIER_SCALE  <const> = 3
-local JITTER      <const> = 1
+local JITTER      <const> = 0
 
 local FACING_MAP <const> = {
     north = "up", south = "down", east = "right", west = "left",
@@ -87,8 +87,9 @@ local function build_pod_mission(campaign_config, rng_context, map_context, meta
         if rng then group_budget = group_budget + rng:rndi(2*JITTER+1)-JITTER end
 
         if role == "guard" then
-            local pts = map_context.point_zones and map_context.point_zones[zone_name]
-            point_labels[zone_name] = pts or {}
+            local pts  = map_context.point_zones and map_context.point_zones[zone_name]
+            local rect = not pts and map_context.rect_zones and map_context.rect_zones[zone_name]
+            point_labels[zone_name] = pts or (rect and zones.expand(rect, "grid", rect.w * rect.h)) or {}
             log.debug("[pod_mission] guard zone=", zone_name, " template=", template, " facing=", facing)
             units[#units + 1] = {
                 side             = "enemy",
