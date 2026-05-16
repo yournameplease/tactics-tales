@@ -18,6 +18,7 @@ require("profiler")
 ---@field glyph_family? GlyphFamily
 ---@field input_group? InputGroup
 ---@field demo_mode? boolean
+---@field debug_mode? boolean
 ---@field master_volume? integer 0-10
 ---@field music_volume? integer 0-10
 ---@field sfx_volume? integer 0-10
@@ -38,6 +39,7 @@ local DEFAULT_CONFIG = {
     glyph_family = "keyboard",
     input_group = "mouse_and_keyboard",
     demo_mode = false,
+    debug_mode = false,
     master_volume = 10,
     music_volume = 5,
     sfx_volume = 10,

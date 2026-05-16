@@ -1,9 +1,10 @@
 ---
 id: TASK-132
 title: Add debug_mode config field and Options menu entry
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-16 19:52'
+updated_date: '2026-05-16 20:02'
 labels: []
 milestone: m-20
 dependencies: []
