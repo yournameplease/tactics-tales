@@ -1,10 +1,10 @@
 ---
 id: TASK-134
 title: Add debug battle menu with Win/Lose Battle options
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-16 19:52'
-updated_date: '2026-05-16 19:52'
+updated_date: '2026-05-16 20:03'
 labels: []
 milestone: m-20
 dependencies:
