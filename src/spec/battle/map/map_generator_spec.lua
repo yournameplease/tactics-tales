@@ -108,6 +108,13 @@ describe("battle.map.map_generator", function()
             luassert.are_same({}, map.metadata.enemy_spawners)
         end)
 
+        it("should default base_tile_id to 0", function()
+            local restore = stub_fetch(make_fetch_result(3, 3))
+            local map = map_generator.load_map({ type = "static", file = "test.lua" }, {})
+            restore()
+            luassert.are_equal(0, map.base_tile_id)
+        end)
+
         it("should attach the loaded layers to the map", function()
             local restore = stub_fetch(make_fetch_result(3, 3))
 
@@ -342,6 +349,19 @@ describe("battle.map.map_generator", function()
 
             luassert.are_same({}, map.metadata.player_spawners)
             luassert.are_same({}, map.metadata.enemy_spawners)
+        end)
+
+        it("should set base_tile_id from the first tileset's gfx_registry base", function()
+            local tiled = make_tiled_map(2, 2, {
+                { type = "tilelayer", name = "ground", width = 2, height = 2, data = make_tile_data(2, 2, 1) }
+            })
+            local restore = stub_include(tiled)
+
+            local def = { type = "tiled", file = "maps/test_map" }
+            local map = map_generator.load_map(def, {}, { my_tileset = 256 })
+            restore()
+
+            luassert.are_equal(256, map.base_tile_id)
         end)
     end)
 
