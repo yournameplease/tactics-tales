@@ -661,6 +661,24 @@ function PLAYER_TURN_HANDLERS.handle_interaction(services, session_context, inte
     return nil
 end
 
+---@param services BattleMenuContext
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+function PLAYER_TURN_HANDLERS.debug_win(services, _session_context, _value)
+    services.tactics_engine:force_battle_result("VICTORY")
+    return nil
+end
+
+---@param services BattleMenuContext
+---@param _session_context BattleMainMenuContext
+---@param _value any
+---@return nil
+function PLAYER_TURN_HANDLERS.debug_lose(services, _session_context, _value)
+    services.tactics_engine:force_battle_result("DEFEAT")
+    return nil
+end
+
 ---@param p Point
 ---@param msb BattleMenuContext
 ---@param _ctx any
@@ -1145,6 +1163,11 @@ local function make_menu_data(map_width, map_height)
                                     :with_text("Unmark All Enemies")
                                     :handle_action("select", "unmark_all_units")
                                     :then_go_back())
+                                if DYNAMIC_CONFIG.debug_mode then
+                                    table.insert(options, button.builder("debug_menu")
+                                        :with_text("Debug Menu")
+                                        :advance_to("DEBUG_MENU"))
+                                end
                                 table.insert(options, button.builder("turn_menu_back")
                                     :with_text("Back")
                                     :then_go_back())
@@ -1153,6 +1176,29 @@ local function make_menu_data(map_width, map_height)
                         )
                     )
                     :with_previous_step("SELECT_UNIT")
+                    :with_action("BUTTON_A", { command = "select", description = "Select" })
+                    :with_action("BUTTON_B", { command = "back", description = "Back" }),
+                ["DEBUG_MENU"] = step_definition.of_node(
+                        list.column(
+                            "debug_menu",
+                            function(_msb, _ctx)
+                                local options = {}
+                                table.insert(options, button.builder("debug_win")
+                                    :with_text("Win Battle")
+                                    :handle_action("select", "debug_win")
+                                    :as_final_step())
+                                table.insert(options, button.builder("debug_lose")
+                                    :with_text("Lose Battle")
+                                    :handle_action("select", "debug_lose")
+                                    :as_final_step())
+                                table.insert(options, button.builder("debug_back")
+                                    :with_text("Back")
+                                    :then_go_back())
+                                return options
+                            end
+                        )
+                    )
+                    :with_previous_step("TURN_MENU")
                     :with_action("BUTTON_A", { command = "select", description = "Select" })
                     :with_action("BUTTON_B", { command = "back", description = "Back" }),
             }
