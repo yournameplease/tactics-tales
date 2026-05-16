@@ -40,6 +40,7 @@ local lists = require("src.tactics.util.lists")
 ---@class BattleMap
 ---@field width integer
 ---@field height integer
+---@field base_tile_id integer Sprite index offset added to all modify_terrain tile values.
 ---@field units_by_id table<UnitId, BattleUnit> Active units keyed by ID.
 ---@field units_by_x_y Array2D<BattleUnit> Active units keyed by tile position.
 ---@field dead_units BattleUnit[] Units that have been killed this battle.
@@ -85,6 +86,7 @@ function battle_map.new(width, height, labels)
     self.tile_labels = labels
     self.width = width
     self.height = height
+    self.base_tile_id = 0
     return self
 end
 
@@ -195,7 +197,7 @@ function BattleMap:update_terrain(label, new_terrain)
     local tiles = self:get_tiles_by_label(label)
     for _, t in ipairs(tiles) do
         for terrain, new_tile in pairs(new_terrain) do
-            self.layers.terrain[terrain]:set(t.x, t.y, new_tile)
+            self.layers.terrain[terrain]:set(t.x, t.y, new_tile + self.base_tile_id)
         end
     end
 end

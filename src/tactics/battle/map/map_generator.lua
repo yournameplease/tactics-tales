@@ -289,6 +289,11 @@ local function load_tiled(definition, tile_labels, gfx_registry)
     map.rect_zones = extract_rect_zones(tiled_data)
     map.metadata = { player_spawners = {}, enemy_spawners = {} }
 
+    local first_ts = tiled_data.tilesets[1]
+    if first_ts then
+        map.base_tile_id = gfx_registry[file_stem(first_ts.filename)] or 0
+    end
+
     return map
 end
 

@@ -477,6 +477,36 @@ describe("battle.battle_map", function()
     -- get_terrain
     -- -----------------------------------------------------------------------
 
+    -- -----------------------------------------------------------------------
+    -- base_tile_id / update_terrain
+    -- -----------------------------------------------------------------------
+
+    describe("new", function()
+        it("should default base_tile_id to 0", function()
+            local map = battle_map.new(3, 3, {})
+            luassert.are_equal(0, map.base_tile_id)
+        end)
+    end)
+
+    describe("update_terrain", function()
+        it("should add base_tile_id to the tile index written to the layer", function()
+            local map = battle_map.new(3, 3, { door = { point.of(1, 1) } })
+            map.base_tile_id = 100
+            local layers = make_layers(3, 3)
+            map.layers = layers
+            map:update_terrain("door", { ground = 5 })
+            luassert.are_equal(105, map.layers.terrain.ground:get(1, 1))
+        end)
+
+        it("should write the raw index when base_tile_id is 0", function()
+            local map = battle_map.new(3, 3, { door = { point.of(0, 0) } })
+            local layers = make_layers(3, 3)
+            map.layers = layers
+            map:update_terrain("door", { ground = 7 })
+            luassert.are_equal(7, map.layers.terrain.ground:get(0, 0))
+        end)
+    end)
+
     describe("get_terrain", function()
         it("should return nil when the ground sprite is 0", function()
             local map = make_map()
