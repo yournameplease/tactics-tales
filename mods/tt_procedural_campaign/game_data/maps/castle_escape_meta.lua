@@ -9,7 +9,7 @@ return {
                 { zone = "pod_2",   role = "patrol", facing = "east" },
                 { zone = "ambush_n_1", role = "ambush", facing = "west", disabled = true },
                 { zone = "ambush_n_2", role = "ambush", facing = "west", disabled = true },
-                { zone = "wall_1",  role = "patrol", facing = "west" },
+                { zone = "wall_1",  role = "guard", facing = "west" },
             },
         }
     }
