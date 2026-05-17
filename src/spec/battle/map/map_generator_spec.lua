@@ -613,10 +613,86 @@ describe("battle.map.map_generator", function()
 
     describe("load_map (unknown type)", function()
         it("should error for an unrecognised map definition type", function()
-            local def = { type = "procgen", file = "test.lua" }
             luassert.has_error(function()
-                map_generator.load_map(def, {})
+                map_generator.load_map({ type = "unknown" --[[@as MapGenerationType]] }, {})
             end)
+        end)
+    end)
+
+    -- -----------------------------------------------------------------------
+    -- load_map — procgen type (AC#1, AC#2, AC#4)
+    -- -----------------------------------------------------------------------
+
+    describe("load_map (procgen type)", function()
+        -- Fixture chunk pool covering all cell sizes used by the castle theme
+        -- (both 3×3 and 2×2 grid shapes), each with deployment and open variants.
+        local FIXTURE_CHUNKS = table.concat({
+            "[deploy_3x3]", "deployment", "5 5",
+            "#^^^#", "<ddd>", "<ddd>", "<ddd>", "#vvv#", "",
+            "[open_3x3]", "5 5",
+            "#^^^#", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[deploy_4x3]", "deployment", "6 5",
+            "#^^^^#", "<dddd>", "<dddd>", "<dddd>", "#vvvv#", "",
+            "[open_4x3]", "6 5",
+            "#^^^^#", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[deploy_3x4]", "deployment", "5 6",
+            "#^^^#", "<ddd>", "<ddd>", "<ddd>", "<ddd>", "#vvv#", "",
+            "[open_3x4]", "5 6",
+            "#^^^#", "<...>", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[deploy_4x4]", "deployment", "6 6",
+            "#^^^^#", "<dddd>", "<dddd>", "<dddd>", "<dddd>", "#vvvv#", "",
+            "[open_4x4]", "6 6",
+            "#^^^^#", "<....>", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[deploy_6x6]", "deployment", "8 8",
+            "#^^^^^^#", "<dddddd>", "<dddddd>", "<dddddd>",
+            "<dddddd>", "<dddddd>", "<dddddd>", "#vvvvvv#", "",
+            "[open_6x6]", "8 8",
+            "#^^^^^^#", "<......>", "<......>", "<......>",
+            "<......>", "<......>", "<......>", "#vvvvvv#",
+        }, "\n")
+
+        local function stub_fetch_chunks()
+            local original = _G.fetch
+            _G.fetch = function(_) return FIXTURE_CHUNKS end
+            return function() _G.fetch = original end
+        end
+
+        local function ground_snapshot(map)
+            local g = map.layers.terrain.ground
+            local t = {}
+            for y = 0, 15 do
+                for x = 0, 15 do
+                    table.insert(t, g:get(x, y))
+                end
+            end
+            return t
+        end
+
+        local DEF = { type = "procgen", theme = "castle", chunks = "fixture.chunks" }
+
+        it("returns a BattleMap with 16×16 dimensions (AC#1)", function()
+            local restore = stub_fetch_chunks()
+            local map = map_generator.load_map(DEF, {}, {}, 1)
+            restore()
+            luassert.are_equal(16, map.width)
+            luassert.are_equal(16, map.height)
+        end)
+
+        it("returned map has a ground terrain layer (AC#1)", function()
+            local restore = stub_fetch_chunks()
+            local map = map_generator.load_map(DEF, {}, {}, 1)
+            restore()
+            luassert.is_not_nil(map.layers)
+            luassert.is_not_nil(map.layers.terrain)
+            luassert.is_not_nil(map.layers.terrain.ground)
+        end)
+
+        it("same seed produces a byte-identical ground layer (AC#2)", function()
+            local restore = stub_fetch_chunks()
+            local map1 = map_generator.load_map(DEF, {}, {}, 42)
+            local map2 = map_generator.load_map(DEF, {}, {}, 42)
+            restore()
+            luassert.are_same(ground_snapshot(map1), ground_snapshot(map2))
         end)
     end)
 end)

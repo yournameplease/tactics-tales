@@ -15,8 +15,20 @@
 ---@field type "tiled"
 ---@field file string Path to Tiled .lua export (no extension), relative to mod root.
 
-local point = require("src.tactics.util.point")
-local battle_map = require("src.tactics.battle.battle_map")
+---@class ProcgenMapDefinition : MapDefinition
+---@field type "procgen"
+---@field theme string Theme name (key in the themes table, e.g. "castle").
+---@field chunks string Path to the .chunks file (passed to chunk_parser.load_theme).
+
+local point           = require("src.tactics.util.point")
+local battle_map      = require("src.tactics.battle.battle_map")
+local random          = require("src.tactics.util.random")
+local themes_mod      = require("src.tactics.battle.map.procgen.themes")
+local chunk_parser    = require("src.tactics.battle.map.procgen.chunk_parser")
+local chunk_variants  = require("src.tactics.battle.map.procgen.chunk_variants")
+local chunk_selector  = require("src.tactics.battle.map.procgen.chunk_selector")
+local glyph_grid_mod  = require("src.tactics.battle.map.procgen.glyph_grid")
+local autotiler       = require("src.tactics.battle.map.procgen.autotiler")
 
 local map_generator = {}
 
@@ -297,6 +309,22 @@ local function load_tiled(definition, tile_labels, gfx_registry)
     return map
 end
 
+--- Run the full procgen pipeline and return a BattleMap.
+---@param definition ProcgenMapDefinition
+---@param seed integer? RNG seed (defaults to 1).
+---@return BattleMap
+local function load_procgen(definition, seed)
+    local theme = themes_mod[definition.theme]
+    assert(theme, "load_procgen: unknown theme '" .. tostring(definition.theme) .. "'")
+    local chunks_raw = chunk_parser.load_theme(definition.chunks)
+    local chunks = chunk_variants.expand(chunks_raw)
+    local rng = random.new(seed or 1)
+    local grid = themes_mod.roll_grid(theme, rng)
+    local gen_result = chunk_selector.generate(theme, grid, chunks, rng)
+    local rows = glyph_grid_mod.assemble(theme, grid, gen_result, rng)
+    return autotiler.build(rows)
+end
+
 --- Load a static map from disk, apply post-processing, and build the BattleMap.
 ---@param definition StaticMapDefinition
 ---@param tile_labels table<string, integer[]> Metatile indices grouped by label name.
@@ -401,12 +429,15 @@ end
 ---@param definition MapDefinition Map definition specifying type and source file.
 ---@param labels table<string, integer[]> Metatile indices grouped by label name.
 ---@param gfx_registry table<string, integer>|nil Required for type="tiled"; maps gfx stem to base sprite index.
+---@param seed integer? RNG seed for type="procgen"; ignored for other types.
 ---@return BattleMap
-function map_generator.load_map(definition, labels, gfx_registry)
+function map_generator.load_map(definition, labels, gfx_registry, seed)
     if definition.type == "static" then
         return load_static(definition --[[@as StaticMapDefinition]], labels)
     elseif definition.type == "tiled" then
         return load_tiled(definition --[[@as TiledMapDefinition]], labels, gfx_registry or {})
+    elseif definition.type == "procgen" then
+        return load_procgen(definition --[[@as ProcgenMapDefinition]], seed)
     else
         error("unknown map type")
     end

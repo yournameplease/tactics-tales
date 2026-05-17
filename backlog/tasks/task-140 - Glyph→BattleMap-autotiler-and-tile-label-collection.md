@@ -1,9 +1,10 @@
 ---
 id: TASK-140
 title: Glyph→BattleMap autotiler and tile-label collection
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-17 00:41'
+updated_date: '2026-05-17 02:22'
 labels: []
 milestone: m-21
 dependencies: []
