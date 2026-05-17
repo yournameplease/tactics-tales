@@ -1,9 +1,10 @@
 ---
 id: TASK-145
 title: Chunk variant expansion (rotations and reflections)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-17 01:27'
+updated_date: '2026-05-17 01:38'
 labels: []
 milestone: m-21
 dependencies: []
