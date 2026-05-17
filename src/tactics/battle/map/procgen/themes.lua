@@ -3,8 +3,8 @@
 --- docs/specs/procgen-map-spec.md §6.
 
 ---@class ProcgenTheme
----@field wall_thickness integer Tiles between adjacent cell interiors. Minimum 1.
----@field border_margin integer Tiles around the map edge. Minimum 0.
+---@field wall_thickness integer Minimum tiles between adjacent cell interiors. Minimum 1.
+---@field wall_grow_probability number Per-wall-gap probability of adding 1 extra tile. Range [0, 1].
 ---@field grid_shapes integer[][] Valid {cols, rows} macro-grid shapes.
 ---@field distributions table<integer, integer[][]> Per-axis-length list of valid cell-size distributions.
 ---@field exit_width_weights table<integer, integer> Map of connection width -> weight.
@@ -31,9 +31,9 @@ local function check_distribution(theme, distribution, n)
     end
     local sum = 0
     for _, w in ipairs(distribution) do sum = sum + w end
-    local total = sum + (n - 1) * theme.wall_thickness + 2 * theme.border_margin
-    if total ~= MAP_SIZE then
-        return false, "budget " .. total .. " ≠ " .. MAP_SIZE .. " for distribution"
+    local total = sum + (n - 1) * theme.wall_thickness
+    if total > MAP_SIZE then
+        return false, "budget " .. total .. " > " .. MAP_SIZE .. " for distribution"
     end
     return true
 end
@@ -43,7 +43,10 @@ end
 ---@param theme ProcgenTheme
 function themes.validate(theme)
     assert(theme.wall_thickness >= 1, "wall_thickness must be ≥ 1")
-    assert(theme.border_margin >= 0, "border_margin must be ≥ 0")
+    assert(
+        theme.wall_grow_probability >= 0 and theme.wall_grow_probability <= 1,
+        "wall_grow_probability must be in [0, 1]"
+    )
     for n, dists in pairs(theme.distributions) do
         for i, dist in ipairs(dists) do
             local ok, err = check_distribution(theme, dist, n)
@@ -62,8 +65,39 @@ end
 ---@class ProcgenGrid
 ---@field col_widths integer[]
 ---@field row_heights integer[]
+---@field col_walls integer[] Wall thickness after each column (length = #col_widths - 1).
+---@field row_walls integer[] Wall thickness after each row (length = #row_heights - 1).
+---@field border_left integer
+---@field border_right integer
+---@field border_top integer
+---@field border_bottom integer
 
---- Roll a macro-grid shape and per-axis cell-size distributions.
+--- Roll wall thicknesses for one axis and derive the two border values from surplus.
+---@param cell_sizes integer[]
+---@param wall_thickness integer
+---@param wall_grow_probability number
+---@param rng RngInstance
+---@return integer[] walls, integer border_lo, integer border_hi
+local function roll_walls_and_border(cell_sizes, wall_thickness, wall_grow_probability, rng)
+    local n = #cell_sizes
+    local cell_sum = 0
+    for _, v in ipairs(cell_sizes) do cell_sum = cell_sum + v end
+    local surplus = MAP_SIZE - cell_sum - (n - 1) * wall_thickness
+    local walls = {}
+    for i = 1, n - 1 do
+        walls[i] = wall_thickness
+        if surplus > 0 and rng:rndf() < wall_grow_probability then
+            walls[i] = walls[i] + 1
+            surplus = surplus - 1
+        end
+    end
+    local border_lo = math.floor(surplus / 2)
+    local border_hi = surplus - border_lo
+    return walls, border_lo, border_hi
+end
+
+--- Roll a macro-grid shape, per-axis cell-size distributions, wall thicknesses,
+--- and derive border margins from remaining surplus.
 ---@param theme ProcgenTheme
 ---@param rng RngInstance
 ---@return ProcgenGrid
@@ -72,12 +106,25 @@ function themes.roll_grid(theme, rng)
     local w, h = shape[1], shape[2]
     local col_widths = rng:choose_random_from_list(theme.distributions[w])
     local row_heights = rng:choose_random_from_list(theme.distributions[h])
-    return { col_widths = col_widths, row_heights = row_heights }
+    local col_walls, border_left, border_right =
+        roll_walls_and_border(col_widths, theme.wall_thickness, theme.wall_grow_probability, rng)
+    local row_walls, border_top, border_bottom =
+        roll_walls_and_border(row_heights, theme.wall_thickness, theme.wall_grow_probability, rng)
+    return {
+        col_widths   = col_widths,
+        row_heights  = row_heights,
+        col_walls    = col_walls,
+        row_walls    = row_walls,
+        border_left  = border_left,
+        border_right = border_right,
+        border_top   = border_top,
+        border_bottom = border_bottom,
+    }
 end
 
 themes.castle = {
     wall_thickness = 2,
-    border_margin = 1,
+    wall_grow_probability = 0.3,
     -- grid_shapes = { { 3, 3 }, { 2, 2 } },  -- 2x2 commented out until chunks authored
     grid_shapes = { { 3, 3 } },
     distributions = {
@@ -90,7 +137,7 @@ themes.castle = {
 
 themes.cave = {
     wall_thickness = 2,
-    border_margin = 1,
+    wall_grow_probability = 0.5,
     grid_shapes = { { 3, 3 }, { 2, 2 } },
     distributions = {
         [3] = { { 4, 3, 3 }, { 3, 4, 3 }, { 3, 3, 4 } },

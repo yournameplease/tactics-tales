@@ -12,26 +12,24 @@ local glyph_grid = {}
 -- Position helpers (mirrors chunk_selector.lua)
 -- ---------------------------------------------------------------------------
 
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param col integer
 ---@return integer
-local function cell_x_start(theme, grid, col)
-    local x = theme.border_margin + 1
+local function cell_x_start(grid, col)
+    local x = grid.border_left + 1
     for c = 1, col - 1 do
-        x = x + grid.col_widths[c] + theme.wall_thickness
+        x = x + grid.col_widths[c] + grid.col_walls[c]
     end
     return x
 end
 
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param row integer
 ---@return integer
-local function cell_y_start(theme, grid, row)
-    local y = theme.border_margin + 1
+local function cell_y_start(grid, row)
+    local y = grid.border_top + 1
     for r = 1, row - 1 do
-        y = y + grid.row_heights[r] + theme.wall_thickness
+        y = y + grid.row_heights[r] + grid.row_walls[r]
     end
     return y
 end
@@ -111,8 +109,8 @@ function glyph_grid.assemble(theme, grid, gen_result, rng)
         local col   = ((idx - 1) % grid_w) + 1
         local row   = math.floor((idx - 1) / grid_w) + 1
         local chunk = assignment[idx]
-        local x0    = cell_x_start(theme, grid, col)
-        local y0    = cell_y_start(theme, grid, row)
+        local x0    = cell_x_start(grid, col)
+        local y0    = cell_y_start(grid, row)
         -- chunk.rows includes border ring; interior occupies rows [2..h+1], cols [2..w+1].
         for cy = 2, chunk.height + 1 do
             local row_str = chunk.rows[cy]
@@ -142,27 +140,27 @@ function glyph_grid.assemble(theme, grid, gen_result, rng)
         if b - a == grid_w then
             -- Vertical edge: A north of B.  Exit zones are x-coords; gap is in y.
             is_vert = true
-            local x0 = cell_x_start(theme, grid, col_a)
+            local x0 = cell_x_start(grid, col_a)
             local za  = zone_to_map(assignment[a].exits.south, x0)
             local zb  = zone_to_map(assignment[b].exits.north, x0)
             ---@cast za ExitZone
             ---@cast zb ExitZone
             ov_min  = math.max(za.min, zb.min)
             ov_max  = math.min(za.max, zb.max)
-            gap_lo  = cell_y_start(theme, grid, row_a) + grid.row_heights[row_a]
-            gap_hi  = cell_y_start(theme, grid, row_a + 1) - 1
+            gap_lo  = cell_y_start(grid, row_a) + grid.row_heights[row_a]
+            gap_hi  = cell_y_start(grid, row_a + 1) - 1
         else
             -- Horizontal edge: A west of B.  Exit zones are y-coords; gap is in x.
             is_vert = false
-            local y0 = cell_y_start(theme, grid, row_a)
+            local y0 = cell_y_start(grid, row_a)
             local za  = zone_to_map(assignment[a].exits.east, y0)
             local zb  = zone_to_map(assignment[b].exits.west, y0)
             ---@cast za ExitZone
             ---@cast zb ExitZone
             ov_min  = math.max(za.min, zb.min)
             ov_max  = math.min(za.max, zb.max)
-            gap_lo  = cell_x_start(theme, grid, col_a) + grid.col_widths[col_a]
-            gap_hi  = cell_x_start(theme, grid, col_a + 1) - 1
+            gap_lo  = cell_x_start(grid, col_a) + grid.col_widths[col_a]
+            gap_hi  = cell_x_start(grid, col_a + 1) - 1
         end
 
         local ov_w = ov_max - ov_min + 1

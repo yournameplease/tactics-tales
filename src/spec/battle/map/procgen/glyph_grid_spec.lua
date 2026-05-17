@@ -11,19 +11,23 @@ local random        = require("src.tactics.util.random")
 -- Helpers
 -- ---------------------------------------------------------------------------
 
--- Theme: wall=2, border=0, 2×2 grid with widths [7,7].
--- Budget check: 7 + 2 + 7 = 16. ✓
+-- Theme: wall=2, no grow, 2×2 grid with widths [7,7].
+-- Budget check: 7 + 2 + 7 = 16. ✓ (zero surplus → zero border)
 local function make_theme()
     return {
         wall_thickness       = 2,
-        border_margin        = 0,
+        wall_grow_probability = 0,
         exit_width_weights   = { [1] = 1 },
         extra_edge_probability = 0,
     }
 end
 
 local function make_grid()
-    return { col_widths = { 7, 7 }, row_heights = { 7, 7 } }
+    return {
+        col_widths = { 7, 7 }, row_heights = { 7, 7 },
+        col_walls = { 2 }, row_walls = { 2 },
+        border_left = 0, border_right = 0, border_top = 0, border_bottom = 0,
+    }
 end
 
 --- All-exit 7×7 interior chunk (9×9 full grid).
@@ -126,7 +130,7 @@ local function generate(seed)
     local pool  = make_pool()
     local rng   = random.new(seed)
     local g     = graph_mod.generate(theme, 2, 2, rng)
-    local sel, err = chunk_selector.select(theme, grid, g, pool, rng)
+    local sel, err = chunk_selector.select(grid, g, pool, rng)
     assert(sel, "generate helper: chunk_selector.select failed: " .. tostring(err))
     return {
         assignment       = sel.assignment,
@@ -174,13 +178,13 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local grid_w = #grid.col_widths
 
             local function x_start(col)
-                local x = theme.border_margin + 1
-                for c = 1, col - 1 do x = x + grid.col_widths[c] + theme.wall_thickness end
+                local x = grid.border_left + 1
+                for c = 1, col - 1 do x = x + grid.col_widths[c] + grid.col_walls[c] end
                 return x
             end
             local function y_start(row)
-                local y = theme.border_margin + 1
-                for r = 1, row - 1 do y = y + grid.row_heights[r] + theme.wall_thickness end
+                local y = grid.border_top + 1
+                for r = 1, row - 1 do y = y + grid.row_heights[r] + grid.row_walls[r] end
                 return y
             end
 
@@ -231,13 +235,13 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local grid_w = #grid.col_widths
 
             local function x_start(col)
-                local x = theme.border_margin + 1
-                for c = 1, col - 1 do x = x + grid.col_widths[c] + theme.wall_thickness end
+                local x = grid.border_left + 1
+                for c = 1, col - 1 do x = x + grid.col_widths[c] + grid.col_walls[c] end
                 return x
             end
             local function y_start(row)
-                local y = theme.border_margin + 1
-                for r = 1, row - 1 do y = y + grid.row_heights[r] + theme.wall_thickness end
+                local y = grid.border_top + 1
+                for r = 1, row - 1 do y = y + grid.row_heights[r] + grid.row_walls[r] end
                 return y
             end
 
@@ -305,10 +309,10 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local dep    = gen_result.deployment_cell
             local dep_col = ((dep - 1) % grid_w) + 1
             local dep_row = math.floor((dep - 1) / grid_w) + 1
-            local sx = theme.border_margin + 1
-            for c = 1, dep_col - 1 do sx = sx + grid.col_widths[c] + theme.wall_thickness end
-            local sy = theme.border_margin + 1
-            for r = 1, dep_row - 1 do sy = sy + grid.row_heights[r] + theme.wall_thickness end
+            local sx = grid.border_left + 1
+            for c = 1, dep_col - 1 do sx = sx + grid.col_widths[c] + grid.col_walls[c] end
+            local sy = grid.border_top + 1
+            for r = 1, dep_row - 1 do sy = sy + grid.row_heights[r] + grid.row_walls[r] end
 
             local reachable = flood_fill(rows, sx, sy)
             local total     = count_passable(rows)

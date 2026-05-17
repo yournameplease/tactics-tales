@@ -65,6 +65,12 @@ function RngInstance:rndi(i)
     return advance(self) % i
 end
 
+--- Return a random float in [0, 1).
+---@return number
+function RngInstance:rndf()
+    return (advance(self) & 0x7FFFFFFF) / 0x80000000
+end
+
 --- Return a random element from `list`.
 ---@generic A
 ---@param list A[] List to choose from; must be non-empty.

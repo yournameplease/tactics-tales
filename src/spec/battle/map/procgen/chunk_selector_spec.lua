@@ -10,27 +10,35 @@ local random = require("src.tactics.util.random")
 -- Helpers
 -- ---------------------------------------------------------------------------
 
---- Minimal theme for tests: no wall gap, no border margin.
+--- Minimal theme for tests: no wall gap.
 ---@return ProcgenTheme
 local function make_theme()
     return {
         wall_thickness = 0,
-        border_margin = 0,
+        wall_grow_probability = 0,
         extra_edge_probability = 0,
         exit_width_weights = { [1] = 1 },
     }
 end
 
---- 2×2-cell grid, each cell 3×3 interior.
+--- 2×2-cell grid, each cell 3×3 interior. Zero walls and borders.
 ---@return ProcgenGrid
 local function make_2x2_grid()
-    return { col_widths = { 3, 3 }, row_heights = { 3, 3 } }
+    return {
+        col_widths = { 3, 3 }, row_heights = { 3, 3 },
+        col_walls = { 0 }, row_walls = { 0 },
+        border_left = 0, border_right = 0, border_top = 0, border_bottom = 0,
+    }
 end
 
---- 1×2-cell grid (single column, two rows), each cell 3×3 interior.
+--- 1×2-cell grid (single column, two rows), each cell 3×3 interior. Zero walls and borders.
 ---@return ProcgenGrid
 local function make_1x2_grid()
-    return { col_widths = { 3 }, row_heights = { 3, 3 } }
+    return {
+        col_widths = { 3 }, row_heights = { 3, 3 },
+        col_walls = {}, row_walls = { 0 },
+        border_left = 0, border_right = 0, border_top = 0, border_bottom = 0,
+    }
 end
 
 --- 3×3 interior (5×5 full) chunk with exits on all four faces.
@@ -114,7 +122,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy_1", true),
             }
             local rng = random.new(42)
-            local result = chunk_selector.select(make_theme(), make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
 
             luassert.is_not_nil(result)
             luassert.is_not_nil(result.assignment)
@@ -127,7 +135,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(10)
-            local result = chunk_selector.select(make_theme(), make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
 
             luassert.is_not_nil(result)
             for _, chunk in ipairs(result.assignment) do
@@ -143,7 +151,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(7)
-            local result = chunk_selector.select(make_theme(), make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
 
             luassert.is_not_nil(result)
             local deploy_count = 0
@@ -161,7 +169,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(3)
-            local result = chunk_selector.select(make_theme(), make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
 
             luassert.is_not_nil(result)
             local dep_cell = result.deployment_cell
@@ -180,9 +188,8 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             }
             local rng = random.new(99)
             local g = make_2x2_graph(99)
-            local theme = make_theme()
             local grid = make_2x2_grid()
-            local result = chunk_selector.select(theme, grid, g, pool, rng)
+            local result = chunk_selector.select(grid, g, pool, rng)
 
             luassert.is_not_nil(result)
             -- For each edge, verify exit zones overlap in map coordinates.
@@ -194,8 +201,8 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 if b - a == w then
                     -- Vertical edge: check south/north exits in x-coords.
                     local col = ((a - 1) % w) + 1
-                    local x_start = theme.border_margin + 1
-                    for c = 1, col - 1 do x_start = x_start + grid.col_widths[c] + theme.wall_thickness end
+                    local x_start = grid.border_left + 1
+                    for c = 1, col - 1 do x_start = x_start + grid.col_widths[c] + grid.col_walls[c] end
                     local sa = ca.exits.south
                     local nb = cb.exits.north
                     luassert.is_not_nil(sa)
@@ -206,8 +213,8 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 else
                     -- Horizontal edge: check east/west exits in y-coords.
                     local row = math.floor((a - 1) / w) + 1
-                    local y_start = theme.border_margin + 1
-                    for r = 1, row - 1 do y_start = y_start + grid.row_heights[r] + theme.wall_thickness end
+                    local y_start = grid.border_top + 1
+                    for r = 1, row - 1 do y_start = y_start + grid.row_heights[r] + grid.row_walls[r] end
                     local ea = ca.exits.east
                     local wb = cb.exits.west
                     luassert.is_not_nil(ea)
@@ -226,7 +233,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 north_last_chunk("bot"),
             }
             local rng = random.new(1)
-            local result, err = chunk_selector.select(make_theme(), make_1x2_grid(), make_1x2_graph(), pool, rng)
+            local result, err = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng)
 
             luassert.is_nil(result)
             luassert.is_not_nil(err)
@@ -248,7 +255,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             -- Only the all_exits chunks satisfy the 1×2 grid's exit overlap requirement.
             -- The retry loop should find them.
             local rng = random.new(5)
-            local result = chunk_selector.select(make_theme(), make_1x2_grid(), make_1x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng)
 
             luassert.is_not_nil(result)
         end)
