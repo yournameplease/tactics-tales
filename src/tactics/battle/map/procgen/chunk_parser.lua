@@ -73,7 +73,7 @@ local function validate(name, rows, w, h)
     local VALID_INTERIOR = {
         ["#"] = true, ["."] = true,
         ["i"] = true, ["r"] = true, ["t"] = true, ["c"] = true,
-        ["d"] = true, ["p"] = true, ["a"] = true,
+        ["d"] = true, ["p"] = true, ["a"] = true, ["g"] = true,
     }
 
     for y = 1, h do

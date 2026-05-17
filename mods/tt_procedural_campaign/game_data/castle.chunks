@@ -1,0 +1,55 @@
+[entry_fork]
+deployment rotate_90
+5 5
+#^^^#
+#ddd>
+#d.d>
+#ddd>
+#vvv#
+
+[dead_end_trap]
+rotate_90
+5 5
+#####
+#.r.#
+#i.i#
+#.g.#
+##v##
+
+[pillar_connector]
+5 5
+#^^^#
+<...>
+<.#.>
+<...>
+#vvv#
+
+[infantry_hall]
+rotate_90 flip_v
+5 6
+#^^^#
+#...#
+#i.i#
+#.i.#
+#...#
+#vvv#
+
+[archer_hall]
+rotate_90 flip_v flip_h
+5 6
+#^###
+#.#r#
+#.#.#
+#.#.#
+#.#r#
+#v###
+
+[throne_room]
+6 5
+######
+#r.cr#
+#....#
+#.ii.#
+##vv##
+
+
