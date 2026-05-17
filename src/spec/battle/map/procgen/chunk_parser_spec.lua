@@ -46,8 +46,8 @@ describe("tactics.battle.map.procgen.chunk_parser", function()
 
             luassert.are_equal(1, #chunks)
             luassert.are_equal("room", chunks[1].name)
-            luassert.are_equal(5, chunks[1].width)
-            luassert.are_equal(5, chunks[1].height)
+            luassert.are_equal(3, chunks[1].width)
+            luassert.are_equal(3, chunks[1].height)
             luassert.are_same({
                 "#####",
                 "#...#",

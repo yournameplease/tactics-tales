@@ -124,15 +124,11 @@ Row and column offsets to reduce grid regularity are planned as a future extensi
 
 ### 4.1 Chunk Dimensions
 
-A chunk is a rectangular tile grid of width `W_chunk` and height `H_chunk`. These dimensions include the 1-tile border ring, so the cell interior is `(W_chunk - 2) × (H_chunk - 2)`.
+A chunk's **logical dimensions** are its interior: width × height of the playable area, not including the border ring. The border ring exists only to derive connectivity (exit zones) and is not placed into the map.
 
-A chunk is valid for a cell if:
-```
-W_chunk - 2 == cell_col_width
-H_chunk - 2 == cell_row_height
-```
+In the chunk file format (§7.2) the dimension line declares the **outer grid** (`W H`, including the border ring) because the rows beneath it physically need to be that wide. The parser converts to interior dimensions when building the in-memory record: `width = W - 2`, `height = H - 2`.
 
-Chunks are selected from the theme's chunk pool filtered to those matching the target cell dimensions.
+A chunk is valid for a cell if `chunk.width == cell_col_width` and `chunk.height == cell_row_height`. Chunks are selected from the theme's chunk pool filtered to those matching the target cell dimensions.
 
 ### 4.2 Border Ring
 
