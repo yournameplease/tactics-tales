@@ -1,9 +1,10 @@
 ---
 id: TASK-138
 title: Chunk selection with exit-overlap retry
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-17 00:40'
+updated_date: '2026-05-17 01:57'
 labels: []
 milestone: m-21
 dependencies: []
