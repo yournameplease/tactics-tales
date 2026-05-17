@@ -4,9 +4,9 @@
 
 ---@class ChunkRecord
 ---@field name string
----@field width integer
----@field height integer
----@field rows string[]
+---@field width integer Interior width (excludes the 1-tile border ring).
+---@field height integer Interior height (excludes the 1-tile border ring).
+---@field rows string[] Full glyph rows including the border ring.
 ---@field tags string[]
 ---@field exits ChunkExits
 
@@ -237,8 +237,8 @@ function chunk_parser.parse(text)
             warn_unknown_tags(name, tags)
             table.insert(chunks, {
                 name = name,
-                width = w,
-                height = h,
+                width = w - 2,
+                height = h - 2,
                 rows = rows,
                 tags = tags,
                 exits = derive_exits(rows, w, h),
