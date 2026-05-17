@@ -1,9 +1,10 @@
 ---
 id: TASK-144
 title: procgen_mission_resolver in tt_procedural_campaign
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-17 00:41'
+updated_date: '2026-05-17 13:23'
 labels: []
 milestone: m-21
 dependencies: []

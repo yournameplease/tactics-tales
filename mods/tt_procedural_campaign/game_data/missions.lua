@@ -1,4 +1,5 @@
 local resolver            = include("mods/tt_procedural_campaign/lib/pod_mission_resolver.lua")
+local procgen_resolver    = include("mods/tt_procedural_campaign/lib/procgen_mission_resolver.lua")
 local factions_mod        = include("mods/tt_procedural_campaign/game_data/factions.lua")
 local factions_data       = factions_mod.factions
 local resolve_slot        = factions_mod.resolve_slot
@@ -52,6 +53,13 @@ local battles = {
     ["cavern_fortress"] = function(campaign_config, rng_context, map_context)
         local meta = include("mods/tt_procedural_campaign/game_data/maps/cavern_fortress_meta.lua")
         return resolver.build_pod_mission(campaign_config, rng_context, map_context, meta)
+    end,
+    ["procedural_castle"] = function(campaign_config, _rng_context, _map_context)
+        return procgen_resolver.build_procgen_mission(
+            campaign_config,
+            "procedural_castle",
+            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
+        )
     end,
     ["castle_escape"] = function(campaign_config, rng_context, map_context)
         local meta = include("mods/tt_procedural_campaign/game_data/maps/castle_escape_meta.lua")
