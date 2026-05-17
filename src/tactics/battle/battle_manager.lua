@@ -93,7 +93,7 @@ function battle_manager.new(
         tostring(battle_def.map_id) ..
         "' type='" .. tostring(map_def and map_def.type) ..
         "' file='" .. tostring(map_def_any and (map_def_any.file or "nil")) .. "'")
-    self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels, game_data.gfx_registry)
+    self.battle_map = map_generator.load_map(map_def, battle_def.tile_labels, game_data.gfx_registry, battle_def.seed)
 
     if battle_def.point_labels then
         for label, points in pairs(battle_def.point_labels) do

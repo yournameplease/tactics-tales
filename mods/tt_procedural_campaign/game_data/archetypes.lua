@@ -65,6 +65,23 @@ local archetypes = {
     --     wanderer_pool    = { "bandit_goon" },
     -- },
 
+    procedural_castle = {
+        name             = "Procedural Castle",
+        description      = "A single procedurally generated castle battle.",
+
+        slots            = {
+            { type = "beat", beat_id = "procedural_castle" },
+        },
+
+        filler_pool      = { "procedural_castle" },
+        recruitment_rate = 0,
+
+        faction_pool     = { bandits = 1, cultists = 1, militia = 1 },
+        bias             = "prefer_novel",
+
+        wanderer_pool    = { "bandit_goon" },
+    },
+
     warband = {
         name             = "Royal Reclaimer",
         description      = "A classic fantasy tactics story.",

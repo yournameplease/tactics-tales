@@ -17,6 +17,7 @@
 ---@field deployment MissionDeploymentDefinition Defines where player units are placed at battle start.
 ---@field units UnitSpawnData[] Units that are spawned when the battle begins.
 ---@field scripts BattleScript[] Scripts that define event-driven behaviour for this mission.
+---@field seed? integer RNG seed for procgen map loading; passed to map_generator.load_map.
 
 local battle_definition = {
 }
