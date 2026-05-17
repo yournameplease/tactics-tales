@@ -325,6 +325,15 @@ local function load_procgen(definition, gfx_registry, seed)
     local gen_result = chunk_selector.generate(theme, grid, chunks, rng)
     local rows = glyph_grid_mod.assemble(theme, grid, gen_result, rng)
     local base_tile_id = (gfx_registry or {})[definition.tileset_name or ""] or 0
+    log.debug("load_procgen: base_tile_id=" .. tostring(base_tile_id) ..
+        " (tileset_name='" .. tostring(definition.tileset_name) .. "')")
+    do
+        local lines = {}
+        for _, row in ipairs(rows) do
+            table.insert(lines, row)
+        end
+        log.debug("load_procgen: glyph grid (" .. #rows .. " rows):\n" .. table.concat(lines, "\n"))
+    end
     return autotiler.build(rows, base_tile_id)
 end
 
