@@ -94,6 +94,42 @@ rotate_90 flip_h flip_v
 <......>
 #vvvvvv#
 
+[cave_6x6_dead_end]
+rotate_90 flip_h flip_v
+8 8
+########
+##....##
+#......#
+#......#
+#......#
+#......#
+##....##
+##vvvv##
+
+[cave_6x6_turn]
+rotate_90 flip_h flip_v
+8 8
+########
+########
+###....>
+##.....>
+##.....>
+##.....>
+##....##
+##vvvv##
+
+[cave_6x6_bend]
+rotate_90 flip_h flip_v
+8 8
+##^^^###
+##...###
+#...####
+#..###.>
+#...#..>
+#......>
+##....##
+########
+
 [cave_6x6_entry]
 deployment rotate_90 flip_h flip_v
 8 8
