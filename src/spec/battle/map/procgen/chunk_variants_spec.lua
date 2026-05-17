@@ -62,9 +62,9 @@ local function chunk_with_east_exit()
     return make_chunk({
         rows = {
             "#####",
-            "#..>#",
-            "#..>#",
-            "#..>#",
+            "#...>",
+            "#...>",
+            "#...>",
             "#####",
         },
         exits = { north = nil, south = nil, east = { min = 2, max = 4 }, west = nil },
@@ -174,6 +174,26 @@ describe("tactics.battle.map.procgen.chunk_variants", function()
             -- east face had rows 2-4 (H=5). south gets cols 5+1-4 to 5+1-2 = [2,4] (still same for symmetric range)
             luassert.is_nil(rot90.exits.east)
             luassert.are_same({ min = 2, max = 4 }, rot90.exits.south)
+        end)
+
+        -- Row-content check: east-border glyphs must land on the south border row after rot90.
+        -- This would fail if the east exit markers were placed in the interior (wrong column).
+        it("places east-border glyphs on the south row after rot90", function()
+            local chunk = chunk_with_east_exit()
+            chunk.tags = { "rotate_90" }
+            local result = chunk_variants.expand({ chunk })
+            local by_name = {}
+            for _, v in ipairs(result) do by_name[v.name] = v end
+
+            local rot90 = by_name["test|rot90"]
+            -- South border is the last row. Exit glyphs from east border (rows 2-4) should
+            -- appear at columns 2-4 of the south row (range-reversed from [2,4] on H=5: [2,4]).
+            local south_row = rot90.rows[#rot90.rows]
+            luassert.are_equal(">", south_row:sub(2, 2))
+            luassert.are_equal(">", south_row:sub(3, 3))
+            luassert.are_equal(">", south_row:sub(4, 4))
+            luassert.are_equal("#", south_row:sub(1, 1))
+            luassert.are_equal("#", south_row:sub(5, 5))
         end)
 
         -- AC #4: flip_h reverses north range and swaps east↔west --
