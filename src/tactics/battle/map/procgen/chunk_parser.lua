@@ -155,7 +155,13 @@ local function validate_deployment_tag(name, rows, w, h, tags)
     end
 end
 
-local KNOWN_TAGS = { deployment = true }
+local KNOWN_TAGS = {
+    deployment = true,
+    rotate_90 = true,
+    rotate_180 = true,
+    flip_v = true,
+    flip_h = true,
+}
 
 --- Emit warnings for unknown tags.
 ---@param name string
