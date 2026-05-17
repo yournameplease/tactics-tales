@@ -82,6 +82,56 @@ describe("tactics.battle.map.procgen.graph", function()
         end)
     end)
 
+    describe("node_depths", function()
+        -- Helper: build a ConnectionGraph directly from an adjacency list.
+        -- `adj` is a table: node_index -> {neighbor, ...}
+        local function make_graph(adj)
+            local edges = {}
+            for a, neighbors in ipairs(adj) do
+                for _, b in ipairs(neighbors) do
+                    if a < b then table.insert(edges, { a, b }) end
+                end
+            end
+            return { edges = edges, adjacency = adj }
+        end
+
+        it("returns depth 0 for all nodes in a single-node graph", function()
+            local g = make_graph({ {} })
+            local depths = graph.node_depths(g, 1)
+            luassert.are_equal(0, depths[1])
+        end)
+
+        it("assigns depth 0 to the node furthest from start on a linear chain", function()
+            -- Chain: 1-2-3-4. Start=1, furthest=4 (depth 0), then depths from 4.
+            local g = make_graph({ { 2 }, { 1, 3 }, { 2, 4 }, { 3 } })
+            local depths = graph.node_depths(g, 1)
+            luassert.are_equal(3, depths[1])
+            luassert.are_equal(2, depths[2])
+            luassert.are_equal(1, depths[3])
+            luassert.are_equal(0, depths[4])
+        end)
+
+        it("gives depth 2 to the middle of a 5-node chain regardless of which end is chosen", function()
+            -- Chain: 1-2-3-4-5. Start=3. Both ends are equidistant from 3.
+            -- BFS from whichever end is chosen, node 3 is always 2 hops away.
+            local g = make_graph({ { 2 }, { 1, 3 }, { 2, 4 }, { 3, 5 }, { 4 } })
+            local depths = graph.node_depths(g, 3)
+            luassert.are_equal(2, depths[3])
+        end)
+
+        it("counts steps correctly on a star graph (hub with 3 spokes)", function()
+            -- Star: hub=1 connected to 2,3,4. Start=2.
+            -- Furthest from 2 is 3 or 4 (both distance 2). BFS from that spoke gives:
+            -- spoke: 0, hub: 1, other spokes: 2, start-spoke: 2.
+            local g = make_graph({ { 2, 3, 4 }, { 1 }, { 1 }, { 1 } })
+            local depths = graph.node_depths(g, 2)
+            -- depth[2] (start) should be 2 (two hops from the chosen far spoke).
+            luassert.are_equal(2, depths[2])
+            -- hub (node 1) is one hop from any spoke.
+            luassert.are_equal(1, depths[1])
+        end)
+    end)
+
     describe("bridges", function()
         it("returns every edge of a tree as a bridge", function()
             local rng = random.new(2)

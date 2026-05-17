@@ -110,6 +110,40 @@ function graph.generate(theme, w, h, rng)
     }
 end
 
+--- BFS distances from `start` to all reachable nodes.
+---@param g ConnectionGraph
+---@param start integer
+---@return integer[] distances keyed by node index (unreachable nodes absent)
+local function bfs_distances(g, start)
+    local dist = { [start] = 0 }
+    local queue = { start }
+    local head = 1
+    while head <= #queue do
+        local cur = queue[head]; head = head + 1
+        for _, neighbor in ipairs(g.adjacency[cur] or {}) do
+            if dist[neighbor] == nil then
+                dist[neighbor] = dist[cur] + 1
+                table.insert(queue, neighbor)
+            end
+        end
+    end
+    return dist
+end
+
+--- Compute per-node depths as distance from the node farthest from `start`.
+--- Runs BFS twice: once to find the farthest node, then from that node.
+---@param g ConnectionGraph
+---@param start integer Starting node (e.g. deployment cell).
+---@return integer[] depths keyed by 1-based cell index
+function graph.node_depths(g, start)
+    local d1 = bfs_distances(g, start)
+    local far = start
+    for node, dist in pairs(d1) do
+        if dist > d1[far] then far = node end
+    end
+    return bfs_distances(g, far)
+end
+
 --- Return the subset of `g.edges` whose removal disconnects the graph.
 ---@param g ConnectionGraph
 ---@return integer[][]
