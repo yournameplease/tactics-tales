@@ -4,21 +4,26 @@ local resolver_mod   = require("tt_procedural_campaign.lib.procgen_mission_resol
 local compute_seed   = resolver_mod._compute_seed
 local build_units    = resolver_mod._build_units
 local campaign_state = require("src.tactics.campaign.campaign_state")
+local random         = require("src.tactics.util.random")
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
 
----@param opts? {faction_id?: string, tier?: integer, story_seed?: integer, battle_index?: integer}
+---@param opts? {faction_id?: string, tier?: integer}
 local function make_config(opts)
     opts = opts or {}
     ---@diagnostic disable-next-line: missing-fields
     local mem = campaign_state.new({ get_character = function() return nil end })
-    if opts.faction_id   then mem:set("faction_id",      campaign_state.text(opts.faction_id)) end
-    if opts.tier         then mem:set("base_difficulty",  campaign_state.text(tostring(opts.tier))) end
-    if opts.story_seed   then mem:set("story_seed",       campaign_state.text(tostring(opts.story_seed))) end
-    if opts.battle_index then mem:set("battle_index",     campaign_state.text(tostring(opts.battle_index))) end
+    if opts.faction_id then mem:set("faction_id",     campaign_state.text(opts.faction_id)) end
+    if opts.tier       then mem:set("base_difficulty", campaign_state.text(tostring(opts.tier))) end
     return { memory = mem }
+end
+
+---@param seed? integer
+---@return CampaignRngContext
+local function make_rng_context(seed)
+    return { battle_rng = random.new(seed or 1) }
 end
 
 -- ---------------------------------------------------------------------------
@@ -27,26 +32,19 @@ end
 
 describe("tt_procedural_campaign.lib.procgen_mission_resolver", function()
     describe("_compute_seed", function()
-        it("is deterministic for the same story_seed and battle_index", function()
-            local cfg = make_config({ story_seed = 42, battle_index = 3 })
-            luassert.are_equal(compute_seed(cfg), compute_seed(cfg))
-        end)
-
-        it("differs when battle_index changes", function()
-            local cfg1 = make_config({ story_seed = 42, battle_index = 1 })
-            local cfg2 = make_config({ story_seed = 42, battle_index = 2 })
-            luassert.are_not_equal(compute_seed(cfg1), compute_seed(cfg2))
-        end)
-
-        it("differs when story_seed changes", function()
-            local cfg1 = make_config({ story_seed = 1,  battle_index = 1 })
-            local cfg2 = make_config({ story_seed = 99, battle_index = 1 })
-            luassert.are_not_equal(compute_seed(cfg1), compute_seed(cfg2))
-        end)
-
         it("returns a numeric value", function()
-            local cfg = make_config({ story_seed = 7, battle_index = 2 })
-            luassert.are_equal("number", type(compute_seed(cfg)))
+            luassert.are_equal("number", type(compute_seed(make_rng_context(7))))
+        end)
+
+        it("returns 0 when rng_context is nil", function()
+            luassert.are_equal(0, compute_seed(nil))
+        end)
+
+        it("produces different values for different rng states", function()
+            local ctx1 = make_rng_context(1)
+            local ctx2 = make_rng_context(9999)
+            -- Extremely unlikely to collide with distinct seeds
+            luassert.are_not_equal(compute_seed(ctx1), compute_seed(ctx2))
         end)
     end)
 

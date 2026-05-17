@@ -54,9 +54,10 @@ local battles = {
         local meta = include("mods/tt_procedural_campaign/game_data/maps/cavern_fortress_meta.lua")
         return resolver.build_pod_mission(campaign_config, rng_context, map_context, meta)
     end,
-    ["procedural_castle"] = function(campaign_config, _rng_context, _map_context)
+    ["procedural_castle"] = function(campaign_config, rng_context, _map_context)
         return procgen_resolver.build_procgen_mission(
             campaign_config,
+            rng_context,
             "procedural_castle",
             "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
         )

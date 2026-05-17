@@ -31,11 +31,12 @@ local function get_tier(campaign_config)
     return tonumber(mem_text(campaign_config, "base_difficulty")) or 1
 end
 
---- Derive a deterministic integer seed from campaign run seed and battle index.
-local function compute_seed(campaign_config)
-    local story_seed   = tonumber(mem_text(campaign_config, "story_seed")) or 0
-    local battle_index = tonumber(mem_text(campaign_config, "battle_index")) or 1
-    return story_seed * 1000 + battle_index
+--- Roll a fresh map seed from the campaign's battle RNG.
+---@param rng_context CampaignRngContext
+---@return integer
+local function compute_seed(rng_context)
+    local rng = rng_context and rng_context.battle_rng
+    return rng and rng:rndi(2147483647) or 0
 end
 
 --- Build the unit list from a BattleMap's tile_labels and the active faction/tier.
@@ -76,11 +77,12 @@ local function build_units(campaign_config, tile_labels)
 end
 
 ---@param campaign_config CampaignConfig
+---@param rng_context CampaignRngContext
 ---@param map_id string
 ---@param chunks_path string Path to the .chunks file for the castle theme.
 ---@return MissionDefinition
-local function build_procgen_mission(campaign_config, map_id, chunks_path)
-    local seed       = compute_seed(campaign_config)
+local function build_procgen_mission(campaign_config, rng_context, map_id, chunks_path)
+    local seed       = compute_seed(rng_context)
     local definition = { type = "procgen", theme = "castle", chunks = chunks_path, tileset_name = "paper_tileset" }
     local battle_map = map_generator.load_map(definition, {}, nil, seed)
 
