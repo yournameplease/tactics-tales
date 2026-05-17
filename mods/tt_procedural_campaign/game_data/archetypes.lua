@@ -67,17 +67,26 @@ local archetype_list = {
     -- },
 
     {
-        id               = "procedural_castle",
-        name             = "Procedural Castle",
-        description      = "A single procedurally generated castle battle.",
+        id               = "procedural_maps",
+        name             = "Procedural Maps",
+        description      = "Ten procedurally generated battles — each one a castle or a cave, chosen at random.",
 
         starting_roster  = { "militia_spearman", "militia_archer", "village_axe", "mage", "priest" },
 
         slots            = {
-            { type = "beat", beat_id = "procedural_castle" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
+            { type = "filler" },
         },
 
-        filler_pool      = { "procedural_castle" },
+        filler_pool      = { "procedural_castle", "procedural_cave" },
         recruitment_rate = 0,
 
         faction_pool     = { bandits = 1, cultists = 1, militia = 1 },

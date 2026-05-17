@@ -1,0 +1,107 @@
+-- cave.chunks
+-- Cave theme chunk definitions.
+-- See docs/specs/procgen-map-spec.md §6.2 for theme parameters.
+--
+-- Cell interior sizes by grid shape:
+--   3x3 grid: cols/rows drawn from [3, 4, 3] -> interiors 3x3, 4x3, 3x4, 4x4
+--   2x2 grid: cols/rows drawn from [6, 6]    -> interior  6x6
+--
+-- Outer grid dimensions listed as W H (interior + 2 for border ring).
+-- rotate_90 on non-square chunks covers the transposed cell size.
+
+-- ---------------------------------------------------------------------------
+-- 3x3 interior  (outer 5x5)
+-- ---------------------------------------------------------------------------
+
+[cave_3x3]
+rotate_90 flip_h flip_v
+5 5
+#^^^#
+<...>
+<...>
+<...>
+#vvv#
+
+[cave_3x3_entry]
+deployment rotate_90 flip_h flip_v
+5 5
+#^^^#
+<ddd>
+<ddd>
+<ddd>
+#vvv#
+
+-- ---------------------------------------------------------------------------
+-- 4x3 interior  (outer 6x5)
+-- rotate_90 produces variants that also fill 3x4 cells
+-- ---------------------------------------------------------------------------
+
+[cave_4x3]
+rotate_90 flip_h flip_v
+6 5
+#^^^^#
+<....>
+<....>
+<....>
+#vvvv#
+
+[cave_4x3_entry]
+deployment rotate_90 flip_h flip_v
+6 5
+#^^^^#
+<dddd>
+<dddd>
+<dddd>
+#vvvv#
+
+-- ---------------------------------------------------------------------------
+-- 4x4 interior  (outer 6x6)
+-- ---------------------------------------------------------------------------
+
+[cave_4x4]
+rotate_90 flip_h flip_v
+6 6
+#^^^^#
+<....>
+<....>
+<....>
+<....>
+#vvvv#
+
+[cave_4x4_entry]
+deployment rotate_90 flip_h flip_v
+6 6
+#^^^^#
+<dddd>
+<dddd>
+<dddd>
+<dddd>
+#vvvv#
+
+-- ---------------------------------------------------------------------------
+-- 6x6 interior  (outer 8x8) -- 2x2 grid only
+-- ---------------------------------------------------------------------------
+
+[cave_6x6]
+rotate_90 flip_h flip_v
+8 8
+#^^^^^^#
+<......>
+<......>
+<......>
+<......>
+<......>
+<......>
+#vvvvvv#
+
+[cave_6x6_entry]
+deployment rotate_90 flip_h flip_v
+8 8
+#^^^^^^#
+<dddddd>
+<dddddd>
+<dddddd>
+<dddddd>
+<dddddd>
+<dddddd>
+#vvvvvv#
