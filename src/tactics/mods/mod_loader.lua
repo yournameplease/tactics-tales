@@ -7,6 +7,7 @@ local maps = require("src.tactics.util.maps")
 local point = require("src.tactics.util.point")
 local mod_schema = require("src.tactics.mods.mod_schema")
 local schema_validator = require("src.tactics.validator.schema_validator")
+local chunk_parser = require("src.tactics.battle.map.procgen.chunk_parser")
 
 ---@class RegisteredMod
 ---@field id string Mod identifier.
@@ -118,6 +119,54 @@ function ModLoader:create_sandbox()
     log.info("Loaded mod libraries")
 
     lib.libs = libs
+end
+
+--- Scan all registered mods for *.chunks files and build a theme registry.
+---@param registered RegisteredMod[]
+---@return {get_theme: fun(name: string): {chunks: ChunkRecord[]}?}
+local function load_chunk_themes(registered)
+    -- theme_name → chunk_name → ChunkRecord (last-writer wins on collision)
+    local theme_map = {}
+
+    for _, mod in ipairs(registered) do
+        local chunks_dir = mod.spec.content.chunks --[[@diagnostic disable-line: undefined-field]]
+        if chunks_dir ~= nil then
+            local dir_path = "mods/" .. mod.path .. "/" .. chunks_dir
+            local files = ls(dir_path) or {}
+            for _, fname in ipairs(files) do
+                local stem = fname:match("^(.+)%.chunks$")
+                if stem then
+                    local path = dir_path .. "/" .. fname
+                    local records = chunk_parser.load_theme(path)
+                    if theme_map[stem] == nil then
+                        theme_map[stem] = {}
+                    end
+                    for _, record in ipairs(records) do
+                        if theme_map[stem][record.name] ~= nil then
+                            log.warn("chunk name collision: '" .. record.name ..
+                                "' in theme '" .. stem .. "' (mod '" .. mod.id .. "' overrides)")
+                        end
+                        theme_map[stem][record.name] = record
+                    end
+                end
+            end
+        end
+    end
+
+    local themes = {}
+    for theme_name, chunk_map in pairs(theme_map) do
+        local chunks = {}
+        for _, record in pairs(chunk_map) do
+            table.insert(chunks, record)
+        end
+        themes[theme_name] = { chunks = chunks }
+    end
+
+    return {
+        get_theme = function(name)
+            return themes[name]
+        end
+    }
 end
 
 --- Copy mod .gfx files into the cartridge gfx/ directory and build gfx_registry.
@@ -235,6 +284,8 @@ function ModLoader:load_mod_data()
         function(mod) return mod.spec.content.skills end,
         nil
     )
+    log.debug("Loading chunk themes...")
+    game_data.chunk_themes = load_chunk_themes(self.registered)
     log.debug("Finished loading mods.")
 
     return game_data
