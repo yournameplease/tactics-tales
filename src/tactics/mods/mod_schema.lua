@@ -16,6 +16,7 @@ local mod_content_spec = s.record({
     characters = s.optional(s.string()),
     items = s.optional(s.string()),
     skills = s.optional(s.string()),
+    chunks = s.optional(s.string()),
     gfx = s.optional(s.list(s.string())),
     campaign_select = s.optional(s.list(s.string())),
     default_campaign = s.optional(s.string()),

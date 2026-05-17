@@ -8,6 +8,7 @@ return {
 
     content = {
         maps             = "game_data/maps",
+        chunks           = "game_data/chunks",
         missions         = "game_data/missions",
         campaigns        = "game_data/campaigns",
         skills           = "game_data/skills",

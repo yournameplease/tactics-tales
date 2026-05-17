@@ -314,6 +314,174 @@ describe("mod_loader", function()
         end)
     end)
 
+    describe("load_mod_data (chunk_themes)", function()
+        local MINIMAL_CHUNK = "[room]\n5 5\n#^^^#\n<...>\n<...>\n<...>\n#vvv#\n"
+
+        local function setup_fetch(files)
+            _G.fetch = function(path) return files[path] end --[[@diagnostic disable-line: duplicate-set-field]]
+        end
+
+        it("returns a chunk_themes registry with get_theme", function()
+            local fs = mock_filesystem.new()
+            setup_fetch({ ["mods/test_mod/game_data/chunks/castle.chunks"] = MINIMAL_CHUNK })
+            fs:put_listing_entry("mods/test_mod/game_data/chunks", "castle.chunks")
+            fs:put_file("mods/test_mod/mod.lua", {
+                id = "test_mod", name = "Test Mod", version = "1.0.0", dependencies = {},
+                content = {
+                    maps = "game_data/maps", missions = "game_data/missions",
+                    campaigns = "game_data/campaigns", characters = "game_data/characters",
+                    items = "game_data/items", skills = "game_data/skills",
+                    chunks = "game_data/chunks",
+                    default_campaign = "test_campaign", campaign_select = { "test_campaign" },
+                },
+            })
+            fs:put_file("mods/test_mod/game_data/maps.lua", {})
+            fs:put_file("mods/test_mod/game_data/missions.lua", {})
+            fs:put_file("mods/test_mod/game_data/campaigns.lua", {
+                data = { test_campaign = { starting_node = "n", nodes = { n = { { type = "exit_campaign" } } } } }
+            })
+            fs:put_file("mods/test_mod/game_data/characters.lua", {})
+            fs:put_file("mods/test_mod/game_data/items.lua", {})
+            fs:put_file("mods/test_mod/game_data/skills.lua", {})
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            local game_data = loader:load_mod_data()
+
+            luassert.are_equal("table", type(game_data.chunk_themes))
+            luassert.are_equal("function", type(game_data.chunk_themes.get_theme))
+            local theme = game_data.chunk_themes.get_theme("castle")
+            luassert.are_equal("table", type(theme))
+            luassert.are_equal(1, #theme.chunks)
+            luassert.are_equal("room", theme.chunks[1].name)
+        end)
+
+        it("returns nil from get_theme for an unknown theme", function()
+            make_fs_with_mod()
+            setup_fetch({})
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            local game_data = loader:load_mod_data()
+
+            luassert.is_nil(game_data.chunk_themes.get_theme("nonexistent"))
+        end)
+
+        it("merges chunks from two mods contributing to the same theme", function()
+            local chunk_a = "[chunk_a]\n5 5\n#^^^#\n<...>\n<...>\n<...>\n#vvv#\n"
+            local chunk_b = "[chunk_b]\n5 5\n#^^^#\n<...>\n<...>\n<...>\n#vvv#\n"
+            local fs = mock_filesystem.new()
+            setup_fetch({
+                ["mods/mod_a/game_data/chunks/forest.chunks"] = chunk_a,
+                ["mods/mod_b/game_data/chunks/forest.chunks"] = chunk_b,
+            })
+
+            local function make_mod(id, content_extra)
+                local content = {
+                    maps             = "game_data/maps",
+                    missions         = "game_data/missions",
+                    campaigns        = "game_data/campaigns",
+                    characters       = "game_data/characters",
+                    items            = "game_data/items",
+                    skills           = "game_data/skills",
+                    default_campaign = "test_campaign",
+                    campaign_select  = { "test_campaign" },
+                }
+                for k, v in pairs(content_extra) do content[k] = v end
+                fs:put_file("mods/" .. id .. "/mod.lua", {
+                    id = id, name = id, version = "1.0.0", dependencies = {}, content = content,
+                })
+                fs:put_file("mods/" .. id .. "/game_data/maps.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/missions.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/campaigns.lua", {
+                    data = { test_campaign = { starting_node = "n", nodes = { n = { { type = "exit_campaign" } } } } }
+                })
+                fs:put_file("mods/" .. id .. "/game_data/characters.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/items.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/skills.lua", {})
+            end
+
+            make_mod("mod_a", { chunks = "game_data/chunks" })
+            make_mod("mod_b", { chunks = "game_data/chunks" })
+            fs:put_listing_entry("mods/mod_a/game_data/chunks", "forest.chunks")
+            fs:put_listing_entry("mods/mod_b/game_data/chunks", "forest.chunks")
+
+            local loader = mod_loader.new()
+            loader:register_mod("mod_a")
+            loader:register_mod("mod_b")
+
+            local game_data = loader:load_mod_data()
+            local theme = game_data.chunk_themes.get_theme("forest")
+
+            luassert.are_equal(2, #theme.chunks)
+        end)
+
+        it("later mod wins on chunk name collision and warns", function()
+            local chunk_v1 = "[shared_room]\n5 5\n#^^^#\n<...>\n<...>\n<...>\n#vvv#\n"
+            local chunk_v2 = "[shared_room]\n6 5\n#^^^^#\n<....>\n<....>\n<....>\n#vvvv#\n"
+            local fs = mock_filesystem.new()
+            local warned = false
+            _G.log = { warn = function() warned = true end, info = function() end, debug = function() end }
+            setup_fetch({
+                ["mods/mod_a/game_data/chunks/dungeon.chunks"] = chunk_v1,
+                ["mods/mod_b/game_data/chunks/dungeon.chunks"] = chunk_v2,
+            })
+
+            local function make_mod2(id, content_extra)
+                local content = {
+                    maps             = "game_data/maps",
+                    missions         = "game_data/missions",
+                    campaigns        = "game_data/campaigns",
+                    characters       = "game_data/characters",
+                    items            = "game_data/items",
+                    skills           = "game_data/skills",
+                    default_campaign = "test_campaign",
+                    campaign_select  = { "test_campaign" },
+                }
+                for k, v in pairs(content_extra) do content[k] = v end
+                fs:put_file("mods/" .. id .. "/mod.lua", {
+                    id = id, name = id, version = "1.0.0", dependencies = {}, content = content,
+                })
+                fs:put_file("mods/" .. id .. "/game_data/maps.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/missions.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/campaigns.lua", {
+                    data = { test_campaign = { starting_node = "n", nodes = { n = { { type = "exit_campaign" } } } } }
+                })
+                fs:put_file("mods/" .. id .. "/game_data/characters.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/items.lua", {})
+                fs:put_file("mods/" .. id .. "/game_data/skills.lua", {})
+            end
+
+            make_mod2("mod_a", { chunks = "game_data/chunks" })
+            make_mod2("mod_b", { chunks = "game_data/chunks" })
+            fs:put_listing_entry("mods/mod_a/game_data/chunks", "dungeon.chunks")
+            fs:put_listing_entry("mods/mod_b/game_data/chunks", "dungeon.chunks")
+
+            local loader = mod_loader.new()
+            loader:register_mod("mod_a")
+            loader:register_mod("mod_b")
+
+            local game_data = loader:load_mod_data()
+            local theme = game_data.chunk_themes.get_theme("dungeon")
+
+            luassert.is_true(warned, "expected a collision warning")
+            luassert.are_equal(1, #theme.chunks)
+            luassert.are_equal(4, theme.chunks[1].width) -- chunk_v2 is 6 wide (4 interior)
+        end)
+
+        it("mods without a chunks entry still load successfully", function()
+            make_fs_with_mod()
+            setup_fetch({})
+            local loader = mod_loader.new()
+            loader:register_mod("test_mod")
+
+            local game_data = loader:load_mod_data()
+
+            luassert.are_equal("table", type(game_data.chunk_themes))
+            luassert.are_equal("function", type(game_data.chunk_themes.get_theme))
+        end)
+    end)
+
     describe("validate_mods (skills)", function()
         local function make_fs_with_skills(skills_data)
             local fs = make_fs_with_mod()
