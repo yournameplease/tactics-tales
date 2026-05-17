@@ -19,6 +19,7 @@
 ---@field type "procgen"
 ---@field theme string Theme name (key in the themes table, e.g. "castle").
 ---@field chunks string Path to the .chunks file (passed to chunk_parser.load_theme).
+---@field tileset_name string? Tileset stem for gfx_registry lookup (e.g. "paper_tileset").
 
 local point           = require("src.tactics.util.point")
 local battle_map      = require("src.tactics.battle.battle_map")
@@ -311,9 +312,10 @@ end
 
 --- Run the full procgen pipeline and return a BattleMap.
 ---@param definition ProcgenMapDefinition
+---@param gfx_registry table<string, integer>|nil Maps tileset stem to base sprite index.
 ---@param seed integer? RNG seed (defaults to 1).
 ---@return BattleMap
-local function load_procgen(definition, seed)
+local function load_procgen(definition, gfx_registry, seed)
     local theme = themes_mod[definition.theme]
     assert(theme, "load_procgen: unknown theme '" .. tostring(definition.theme) .. "'")
     local chunks_raw = chunk_parser.load_theme(definition.chunks)
@@ -322,7 +324,8 @@ local function load_procgen(definition, seed)
     local grid = themes_mod.roll_grid(theme, rng)
     local gen_result = chunk_selector.generate(theme, grid, chunks, rng)
     local rows = glyph_grid_mod.assemble(theme, grid, gen_result, rng)
-    return autotiler.build(rows)
+    local base_tile_id = (gfx_registry or {})[definition.tileset_name or ""] or 0
+    return autotiler.build(rows, base_tile_id)
 end
 
 --- Load a static map from disk, apply post-processing, and build the BattleMap.
@@ -437,7 +440,7 @@ function map_generator.load_map(definition, labels, gfx_registry, seed)
     elseif definition.type == "tiled" then
         return load_tiled(definition --[[@as TiledMapDefinition]], labels, gfx_registry or {})
     elseif definition.type == "procgen" then
-        return load_procgen(definition --[[@as ProcgenMapDefinition]], seed)
+        return load_procgen(definition --[[@as ProcgenMapDefinition]], gfx_registry, seed)
     else
         error("unknown map type")
     end

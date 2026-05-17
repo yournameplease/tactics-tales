@@ -11,7 +11,7 @@ local MAP_DEFINITIONS = {
     village_overrun = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/village_overrun"),
     cavern_fortress = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/cavern_fortress"),
     castle_escape       = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/castle_escape"),
-    procedural_castle   = lib.libs.map.procgen("castle", "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"),
+    procedural_castle   = lib.libs.map.procgen("castle", "mods/tt_procedural_campaign/game_data/chunks/castle.chunks", "paper_tileset"),
 }
 
 return MAP_DEFINITIONS
