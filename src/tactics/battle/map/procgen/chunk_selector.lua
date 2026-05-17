@@ -21,27 +21,25 @@ local chunk_selector = {}
 -- ---------------------------------------------------------------------------
 
 --- Map x-coordinate where cell column `col` interior starts (1-based).
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param col integer
 ---@return integer
-local function cell_x_start(theme, grid, col)
-    local x = theme.border_margin + 1
+local function cell_x_start(grid, col)
+    local x = grid.border_left + 1
     for c = 1, col - 1 do
-        x = x + grid.col_widths[c] + theme.wall_thickness
+        x = x + grid.col_widths[c] + grid.col_walls[c]
     end
     return x
 end
 
 --- Map y-coordinate where cell row `row` interior starts (1-based).
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param row integer
 ---@return integer
-local function cell_y_start(theme, grid, row)
-    local y = theme.border_margin + 1
+local function cell_y_start(grid, row)
+    local y = grid.border_top + 1
     for r = 1, row - 1 do
-        y = y + grid.row_heights[r] + theme.wall_thickness
+        y = y + grid.row_heights[r] + grid.row_walls[r]
     end
     return y
 end
@@ -137,11 +135,10 @@ end
 --- Return the set of cell indices that participate in at least one failing edge.
 ---@param g ConnectionGraph
 ---@param assignment ChunkRecord[]
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param grid_w integer
 ---@return integer[]
-local function find_bad_cells(g, assignment, theme, grid, grid_w)
+local function find_bad_cells(g, assignment, grid, grid_w)
     local bad, marked = {}, {}
     for _, e in ipairs(g.edges) do
         local a, b = e[1], e[2]
@@ -149,7 +146,7 @@ local function find_bad_cells(g, assignment, theme, grid, grid_w)
         if b - a == grid_w then
             -- Vertical edge (north-south): check south/north exits in x-coords.
             local col = ((a - 1) % grid_w) + 1
-            local x = cell_x_start(theme, grid, col)
+            local x = cell_x_start(grid, col)
             ov = overlap_width(
                 zone_to_map(assignment[a].exits.south, x),
                 zone_to_map(assignment[b].exits.north, x)
@@ -157,7 +154,7 @@ local function find_bad_cells(g, assignment, theme, grid, grid_w)
         else
             -- Horizontal edge (east-west): check east/west exits in y-coords.
             local row = math.floor((a - 1) / grid_w) + 1
-            local y = cell_y_start(theme, grid, row)
+            local y = cell_y_start(grid, row)
             ov = overlap_width(
                 zone_to_map(assignment[a].exits.east, y),
                 zone_to_map(assignment[b].exits.west, y)
@@ -246,14 +243,13 @@ end
 
 --- Attempt to select a chunk for every cell in `grid` given a fixed connection graph `g`.
 --- Retries cells with failing exit overlaps up to MAX_CELL_RETRIES times.
----@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param g ConnectionGraph
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
 ---@return ChunkSelection?
 ---@return string?
-function chunk_selector.select(theme, grid, g, chunks, rng)
+function chunk_selector.select(grid, g, chunks, rng)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     local n = grid_w * grid_h
@@ -281,7 +277,7 @@ function chunk_selector.select(theme, grid, g, chunks, rng)
     end
 
     -- Retry loop: reselect cells with failing exit overlaps.
-    local bad = find_bad_cells(g, assignment, theme, grid, grid_w)
+    local bad = find_bad_cells(g, assignment, grid, grid_w)
     if #bad > 0 then
         for _ = 1, MAX_CELL_RETRIES do
             for _, idx in ipairs(bad) do
@@ -299,7 +295,7 @@ function chunk_selector.select(theme, grid, g, chunks, rng)
                     assignment[idx] = rng:choose_random_from_list(candidates)
                 end
             end
-            bad = find_bad_cells(g, assignment, theme, grid, grid_w)
+            bad = find_bad_cells(g, assignment, grid, grid_w)
             if #bad == 0 then break end
         end
     end
@@ -324,7 +320,7 @@ function chunk_selector.generate(theme, grid, chunks, rng)
     local grid_h = #grid.row_heights
     for attempt = 1, MAX_GRAPH_RETRIES do
         local g = graph_mod.generate(theme, grid_w, grid_h, rng)
-        local result = chunk_selector.select(theme, grid, g, chunks, rng)
+        local result = chunk_selector.select(grid, g, chunks, rng)
         if result then
             return {
                 assignment = result.assignment,
