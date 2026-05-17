@@ -62,11 +62,11 @@ describe("tactics.battle.map.procgen.themes", function()
         end)
     end)
 
-    describe("cave theme", function()
-        it("validates", function()
-            luassert.has_no.errors(function() themes.validate(themes.cave) end)
-        end)
-    end)
+    -- describe("cave theme", function()  -- cave commented out until chunks authored
+    --     it("validates", function()
+    --         luassert.has_no.errors(function() themes.validate(themes.cave) end)
+    --     end)
+    -- end)
 
     describe("roll_grid", function()
         it("returns col_widths and row_heights drawn from the theme's distributions", function()

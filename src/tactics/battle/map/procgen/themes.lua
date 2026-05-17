@@ -78,28 +78,29 @@ end
 themes.castle = {
     wall_thickness = 2,
     border_margin = 1,
-    grid_shapes = { { 3, 3 }, { 2, 2 } },
+    -- grid_shapes = { { 3, 3 }, { 2, 2 } },  -- 2x2 commented out until chunks authored
+    grid_shapes = { { 3, 3 } },
     distributions = {
         [3] = { { 3, 4, 3 } },
-        [2] = { { 6, 6 } },
+        -- [2] = { { 6, 6 } },  -- 2x2 commented out until chunks authored
     },
     exit_width_weights = { [1] = 3, [2] = 1 },
     extra_edge_probability = 0.2,
 }
 
-themes.cave = {
-    wall_thickness = 2,
-    border_margin = 1,
-    grid_shapes = { { 3, 3 }, { 2, 2 } },
-    distributions = {
-        [3] = { { 3, 4, 3 } },
-        [2] = { { 6, 6 } },
-    },
-    exit_width_weights = { [1] = 1, [2] = 3, [3] = 3, [4] = 1 },
-    extra_edge_probability = 0.35,
-}
+-- themes.cave = {  -- cave theme commented out until chunks authored
+--     wall_thickness = 2,
+--     border_margin = 1,
+--     grid_shapes = { { 3, 3 }, { 2, 2 } },
+--     distributions = {
+--         [3] = { { 3, 4, 3 } },
+--         [2] = { { 6, 6 } },
+--     },
+--     exit_width_weights = { [1] = 1, [2] = 3, [3] = 3, [4] = 1 },
+--     extra_edge_probability = 0.35,
+-- }
 
 themes.validate(themes.castle)
-themes.validate(themes.cave)
+-- themes.validate(themes.cave)
 
 return themes
