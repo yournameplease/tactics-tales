@@ -172,6 +172,75 @@ local function find_bad_cells(g, assignment, theme, grid, grid_w)
 end
 
 -- ---------------------------------------------------------------------------
+-- Failure diagnostics
+-- ---------------------------------------------------------------------------
+
+--- Build a multi-line ASCII diagram of the meta-grid and return it as a string.
+---@param grid ProcgenGrid
+---@param g ConnectionGraph
+---@return string
+local function ascii_grid(grid, g)
+    local grid_w = #grid.col_widths
+    local grid_h = #grid.row_heights
+
+    -- Build a set of edges for O(1) lookup.
+    local edge_set = {}
+    for _, e in ipairs(g.edges) do
+        edge_set[e[1] .. "," .. e[2]] = true
+    end
+    local function has_edge(a, b)
+        local lo, hi = math.min(a, b), math.max(a, b)
+        return edge_set[lo .. "," .. hi] == true
+    end
+
+    local lines = {}
+    for row = 1, grid_h do
+        -- Room row.
+        local parts = {}
+        for col = 1, grid_w do
+            local idx = (row - 1) * grid_w + col
+            table.insert(parts, "O")
+            if col < grid_w then
+                local right = idx + 1
+                table.insert(parts, has_edge(idx, right) and "-" or " ")
+            end
+        end
+        table.insert(lines, table.concat(parts))
+
+        -- Vertical connector row (omit after the last room row).
+        if row < grid_h then
+            local vparts = {}
+            for col = 1, grid_w do
+                local idx = (row - 1) * grid_w + col
+                local below = idx + grid_w
+                table.insert(vparts, has_edge(idx, below) and "|" or " ")
+                if col < grid_w then table.insert(vparts, " ") end
+            end
+            table.insert(lines, table.concat(vparts))
+        end
+    end
+    return table.concat(lines, "\n")
+end
+
+--- Log diagnostic information for a failed generation attempt.
+---@param grid ProcgenGrid
+---@param g ConnectionGraph
+---@param attempt integer
+local function log_failure(grid, g, attempt)
+    local grid_w = #grid.col_widths
+    local grid_h = #grid.row_heights
+    local col_str = "{" .. table.concat(grid.col_widths, ", ") .. "}"
+    local row_str = "{" .. table.concat(grid.row_heights, ", ") .. "}"
+    log.warn(
+        "chunk_selector attempt " .. attempt .. " failed"
+        .. "  grid=" .. grid_w .. "x" .. grid_h
+        .. "  col_widths=" .. col_str
+        .. "  row_heights=" .. row_str
+        .. "\n" .. ascii_grid(grid, g)
+    )
+end
+
+-- ---------------------------------------------------------------------------
 -- Public API
 -- ---------------------------------------------------------------------------
 
@@ -263,7 +332,7 @@ function chunk_selector.generate(theme, grid, chunks, rng)
                 graph = g,
             }
         end
-        _ = attempt
+        log_failure(grid, g, attempt)
     end
     error("chunk_selector: cannot satisfy connection graph after "
         .. MAX_GRAPH_RETRIES .. " regeneration attempts")
