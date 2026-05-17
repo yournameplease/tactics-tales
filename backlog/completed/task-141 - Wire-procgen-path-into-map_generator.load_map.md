@@ -1,9 +1,10 @@
 ---
 id: TASK-141
 title: Wire procgen path into map_generator.load_map
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-17 00:41'
+updated_date: '2026-05-17 02:35'
 labels: []
 milestone: m-21
 dependencies: []
