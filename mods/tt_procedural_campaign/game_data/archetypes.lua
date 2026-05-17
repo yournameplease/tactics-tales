@@ -29,6 +29,7 @@
 ---@field forced_join? string Character template ID to force-add after the battle (no prompt, no quota cost).
 
 ---@class ArchetypeDefinition
+---@field id string Unique identifier used for memory storage and lookup.
 ---@field name string Display name for the archetype selection screen.
 ---@field description string Description shown on the archetype selection screen.
 ---@field slots ArchetypeSlot[] Ordered sequence of battle slots for the run.
@@ -46,18 +47,17 @@
 -- heavily favours the "skirmish" template.
 -- ---------------------------------------------------------------------------
 
----@type table<string, ArchetypeDefinition>
-local archetypes = {
-    -- seize_run = {
+---@type ArchetypeDefinition[]
+local archetype_list = {
+    -- {
+    --     id               = "seize_run",
     --     name             = "Seize Run",
     --     description      = "Three seize battles in a row. Used to exercise the seize layout through the full campaign loop.",
-
     --     slots            = {
     --         { type = "beat", beat_id = "abandoned_fortress_seize" },
     --         { type = "beat", beat_id = "abandoned_fortress_seize" },
     --         { type = "beat", beat_id = "abandoned_fortress_seize" },
     --     },
-
     --     filler_pool      = { abandoned_fortress_seize = 1 },
     --     recruitment_rate = 1,
     --     faction_pool     = { bandits = 1 },
@@ -65,7 +65,8 @@ local archetypes = {
     --     wanderer_pool    = { "bandit_goon" },
     -- },
 
-    procedural_castle = {
+    {
+        id               = "procedural_castle",
         name             = "Procedural Castle",
         description      = "A single procedurally generated castle battle.",
 
@@ -82,7 +83,8 @@ local archetypes = {
         wanderer_pool    = { "bandit_goon" },
     },
 
-    warband = {
+    {
+        id               = "warband",
         name             = "Royal Reclaimer",
         description      = "A classic fantasy tactics story.",
 
@@ -115,4 +117,10 @@ local archetypes = {
     },
 }
 
-return archetypes
+---@type table<string, ArchetypeDefinition>
+local archetypes_by_id = {}
+for _, def in ipairs(archetype_list) do
+    archetypes_by_id[def.id] = def
+end
+
+return { list = archetype_list, by_id = archetypes_by_id }

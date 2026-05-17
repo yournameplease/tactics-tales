@@ -49,8 +49,8 @@ local campaign_state_mod = include("src/tactics/campaign/campaign_state.lua")
 -- definitions table so that the story data stays in sync automatically.
 local function archetype_options()
     local opts = {}
-    for id, def in pairs(archetypes_data) do
-        table.insert(opts, { id = id, name = def.name, description = def.description })
+    for _, def in ipairs(archetypes_data.list) do
+        table.insert(opts, { id = def.id, name = def.name, description = def.description })
     end
     return opts
 end
@@ -59,7 +59,7 @@ end
 local function get_archetype(sc)
     local entry = sc.memory and sc.memory:get("archetype_id")
     local id = entry and entry.text
-    return archetypes_data[id] or archetypes_data["warband"]
+    return archetypes_data.by_id[id] or archetypes_data.by_id["warband"]
 end
 
 -- Read the 1-based battle index from memory; defaults to 1.
