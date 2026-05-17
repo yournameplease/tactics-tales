@@ -32,7 +32,7 @@ local FLOOR_GLYPHS = {
 ---@return BattleMap
 function autotiler.build(rows, base_tile_id)
     base_tile_id = base_tile_id or 0
-    local ground = userdata("u8", 16, 16)
+    local ground = userdata("i16", 16, 16)
     local tile_labels = {}
 
     for gy = 1, 16 do
