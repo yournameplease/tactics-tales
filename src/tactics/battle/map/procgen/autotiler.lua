@@ -28,8 +28,10 @@ local FLOOR_GLYPHS = {
 --- The grid is a 1-indexed array of 16 strings each of length 16.
 --- x and y in the returned BattleMap are 0-indexed.
 ---@param rows string[]  16-element array of 16-character strings
+---@param base_tile_id integer?  Sprite base offset added to all tile writes (default 0).
 ---@return BattleMap
-function autotiler.build(rows)
+function autotiler.build(rows, base_tile_id)
+    base_tile_id = base_tile_id or 0
     local ground = userdata("u8", 16, 16)
     local tile_labels = {}
 
@@ -40,7 +42,7 @@ function autotiler.build(rows)
             local bx  = gx - 1  -- 0-indexed map coordinate
             local by  = gy - 1
 
-            ground:set(bx, by, FLOOR_GLYPHS[ch] and 1 or 2)
+            ground:set(bx, by, (FLOOR_GLYPHS[ch] and 1 or 2) + base_tile_id)
 
             local label = SPAWN_LABELS[ch]
             if label then
@@ -54,6 +56,7 @@ function autotiler.build(rows)
 
     local map = battle_map.new(16, 16, tile_labels)
     map.layers = { terrain = { ground = ground } }
+    map.base_tile_id = base_tile_id
     map.spawn_groups = {}
     map.rect_zones   = {}
     return map

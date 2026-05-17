@@ -81,7 +81,7 @@ end
 ---@return MissionDefinition
 local function build_procgen_mission(campaign_config, map_id, chunks_path)
     local seed       = compute_seed(campaign_config)
-    local definition = { type = "procgen", theme = "castle", chunks = chunks_path }
+    local definition = { type = "procgen", theme = "castle", chunks = chunks_path, tileset_name = "paper_tileset" }
     local battle_map = map_generator.load_map(definition, {}, nil, seed)
 
     log.debug("[procgen_mission] map=", map_id, " faction=", mem_text(campaign_config, "faction_id") or "bandits",
