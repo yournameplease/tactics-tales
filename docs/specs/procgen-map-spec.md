@@ -55,7 +55,10 @@ The set of connections between cells, generated from theme parameters. Determine
 A tile within a chunk interior marked with a spawn glyph (see §4.3). Each spawn glyph maps to a tile label (e.g. `enemy_infantry`, `player_deployment`) on the resulting BattleMap.
 
 **Chunk Tag**
-A keyword on a chunk's optional tags line that signals selection intent. v1 defines one tag: `deployment` (the chunk hosts player deployment). Future tags: `boss`, `no_enemy`, etc.
+A keyword on a chunk's optional tags line that signals selection intent or permits transformations. v1 defines: `deployment` (the chunk hosts player deployment); `rotate_90`, `rotate_180`, `flip_h`, `flip_v` (transformation permissions — see §4.6). Future tags: `boss`, `no_enemy`, etc.
+
+**Variant**
+A transformed copy of an authored chunk produced by applying a rotation or reflection permitted by its tags. Variants are first-class members of the chunk pool — chunk selection treats them identically to authored chunks.
 
 **Theme**
 A named parameter bundle controlling grid dimensions, wall thickness, border margin, exit width distribution, and connection graph topology. Defined in code, not in chunk files.
@@ -179,10 +182,32 @@ A zone is the contiguous run of directional markers. Example: `#^^^#` on a 5-wid
 A chunk may declare zero or more tags on an optional tags line (§7.2). v1 defines:
 
 - `deployment` — this chunk hosts the player deployment cell. Its `d` glyphs produce `player_deployment` tile labels.
+- `rotate_90`, `rotate_180`, `flip_h`, `flip_v` — permit the corresponding transformation when expanding the chunk into variants. See §4.6.
 
-Generation requires **exactly one** cell on the map to be filled with a `deployment`-tagged chunk. The deployment cell does not need to be a graph leaf. If no chunk in the theme's pool with `deployment` and the right dimensions exists for any cell, generation fails.
+Generation requires **exactly one** cell on the map to be filled with a `deployment`-tagged chunk (or any of its variants, if transformation tags are also present). The deployment cell does not need to be a graph leaf. If no chunk in the theme's pool with `deployment` and the right dimensions exists for any cell, generation fails.
 
 Future tags (placeholders, parser accepts unknown tags as a warning rather than error): `boss`, `no_enemy`.
+
+### 4.6 Variants (Rotations and Reflections)
+
+By default a chunk appears in the pool exactly as authored. Transformation tags expand a chunk into additional **variants** — rotated or reflected copies — that join the same pool. Variants are indistinguishable from authored chunks during selection.
+
+Tags:
+
+- `rotate_90` — permits 0°, 90°, 180°, and 270° rotations (4 orientations).
+- `rotate_180` — permits 0° and 180° rotation (2 orientations). Subsumed by `rotate_90`.
+- `flip_h` — permits a horizontal reflection (mirror across the vertical axis).
+- `flip_v` — permits a vertical reflection (mirror across the horizontal axis).
+
+Tags compose. A chunk with `rotate_90 flip_h` produces up to 8 variants (the dihedral group D₄). Variants that are tile-identical to another variant after transformation should be deduplicated (e.g. a fully symmetric chunk under `rotate_90` collapses to one variant).
+
+**Dimensions.** A 90°/270° rotation swaps the chunk's interior width and height. Other transforms preserve dimensions. Chunk selection therefore treats a `rotate_90`-tagged chunk authored as `W×H` as fitting cells of either `(W, H)` or `(H, W)` dimensions.
+
+**Exit zones transform with their face.** Under a 90° CW rotation, `north → east`, `east → south`, `south → west`, `west → north`, and the zone's range maps to the new face's coordinate. Under `flip_h`, `east ↔ west` swap; `north` and `south` zones reverse their range (`[a, b]` on a face of width `W` becomes `[W - b + 1, W - a + 1]`). `flip_v` is symmetric.
+
+**Spawn glyphs and `d` markers** are repositioned by the same transform that produces the variant. Deployment intent is preserved (the `deployment` tag carries over to every variant).
+
+**Variant identity.** A variant has a derived name `<base>|<op1>|<op2>|...` (e.g. `gatehouse|rot90`, `corridor_ns|flip_h`) used in logs and rejection messages. Variants share the base chunk's tags except for the transformation tags themselves (a variant is not re-expanded).
 
 ---
 
