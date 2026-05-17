@@ -30,6 +30,7 @@
 
 ---@class ArchetypeDefinition
 ---@field id string Unique identifier used for memory storage and lookup.
+---@field starting_roster? string[] Template IDs added to the roster before the first battle, in order.
 ---@field name string Display name for the archetype selection screen.
 ---@field description string Description shown on the archetype selection screen.
 ---@field slots ArchetypeSlot[] Ordered sequence of battle slots for the run.
@@ -69,6 +70,8 @@ local archetype_list = {
         id               = "procedural_castle",
         name             = "Procedural Castle",
         description      = "A single procedurally generated castle battle.",
+
+        starting_roster  = { "militia_spearman", "militia_archer", "village_axe", "mage", "priest" },
 
         slots            = {
             { type = "beat", beat_id = "procedural_castle" },

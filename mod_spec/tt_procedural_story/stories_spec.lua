@@ -44,12 +44,16 @@ describe("tt_procedural_campaign.stories proc_campaign", function()
             luassert.is_not_nil(proc_campaign.nodes.post_battle)
         end)
 
-        it("archetype_select jumps to battle_loop", function()
+        it("archetype_select jumps to roster_init", function()
             local nodes = proc_campaign.nodes.archetype_select
             local jump = nodes[#nodes]
             ---@cast jump JumpNode
             luassert.are_equal("jump", jump.type)
-            luassert.are_equal("battle_loop", jump.next_node)
+            luassert.are_equal("roster_init", jump.next_node)
+        end)
+
+        it("has roster_init node", function()
+            luassert.is_not_nil(proc_campaign.nodes.roster_init)
         end)
 
         it("archetype_select sets battle_index to 1", function()

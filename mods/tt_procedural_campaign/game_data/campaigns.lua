@@ -102,8 +102,20 @@ local stories = {
                     },
                     { type = "set_memory", key = "battle_index",              value = "1" },
                     { type = "roster_add", template = "village_hero" },
-                    { type = "jump",       next_node = "battle_loop" },
+                    { type = "jump",       next_node = "roster_init" },
                 },
+
+                -- Archetype-specific pre-battle roster additions.
+                -- Returns roster_add nodes for each starting_roster member, then jumps to battle_loop.
+                roster_init = function(sc, _)
+                    local archetype = get_archetype(sc)
+                    local nodes = {}
+                    for _, template in ipairs(archetype.starting_roster or {}) do
+                        table.insert(nodes, { type = "roster_add", template = template })
+                    end
+                    table.insert(nodes, { type = "jump", next_node = "battle_loop" })
+                    return nodes
+                end,
 
                 -- Per-battle setup: quota → faction → battle.
                 -- Each step is a factory so it executes with the live memory
