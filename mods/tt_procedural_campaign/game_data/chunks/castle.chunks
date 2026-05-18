@@ -57,29 +57,40 @@ rotate_90 flip_v flip_h
 rotate_90 flip_v flip_h
 5 6
 #^^^#
-<...#
-<...#
-<...#
-<...#
+<...>
+<...>
+<...>
+<...>
 #vvv#
 
 [fork_hall_infantry]
 rotate_90 flip_v flip_h
 5 6
 #^^^#
-<...#
-<.i.#
-<.i.#
-<...#
+<...>
+<.i.>
+<.i.>
+<...>
 #vvv#
 
 [throne_room]
+boss_room flip_h
 6 5
 ######
 #r.cr#
 #....#
 #.ii.#
 ##vv##
+
+[throne_room_h]
+boss_room flip_h
+5 6
+#####
+#rcr#
+#...#
+<...#
+<i.i#
+#####
 
 [center_fork]
 6 6
