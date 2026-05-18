@@ -9,6 +9,7 @@
 ---@field distributions table<integer, integer[][]> Per-axis-length list of valid cell-size distributions.
 ---@field exit_width_weights table<integer, integer> Map of connection width -> weight.
 ---@field extra_edge_probability number Per-pair probability of adding an edge beyond the spanning tree.
+---@field off_screen_edge_probability number Per-border-face probability of adding an off-screen exit. Range [0, 1].
 
 local MAP_SIZE = 16
 
@@ -46,6 +47,10 @@ function themes.validate(theme)
     assert(
         theme.wall_grow_probability >= 0 and theme.wall_grow_probability <= 1,
         "wall_grow_probability must be in [0, 1]"
+    )
+    assert(
+        theme.off_screen_edge_probability >= 0 and theme.off_screen_edge_probability <= 1,
+        "off_screen_edge_probability must be in [0, 1]"
     )
     for n, dists in pairs(theme.distributions) do
         for i, dist in ipairs(dists) do
@@ -124,7 +129,8 @@ end
 
 themes.castle = {
     wall_thickness = 2,
-    wall_grow_probability = 0.3,
+    -- wall_grow_probability = 0.3,
+    wall_grow_probability = 0,
     -- grid_shapes = { { 3, 3 }, { 2, 2 } },  -- 2x2 commented out until chunks authored
     grid_shapes = { { 3, 3 } },
     distributions = {
@@ -133,11 +139,13 @@ themes.castle = {
     },
     exit_width_weights = { [1] = 3, [2] = 1 },
     extra_edge_probability = 0.2,
+    off_screen_edge_probability = 0.15,
 }
 
 themes.cave = {
     wall_thickness = 2,
-    wall_grow_probability = 0.5,
+    -- wall_grow_probability = 0.5,
+    wall_grow_probability = 0,
     grid_shapes = { { 3, 3 }, { 2, 2 } },
     distributions = {
         [3] = { { 4, 3, 3 }, { 3, 4, 3 }, { 3, 3, 4 } },
@@ -145,6 +153,7 @@ themes.cave = {
     },
     exit_width_weights = { [1] = 1, [2] = 3, [3] = 3, [4] = 1 },
     extra_edge_probability = 0.35,
+    off_screen_edge_probability = 0.25,
 }
 
 themes.validate(themes.castle)

@@ -51,6 +51,7 @@ local lists = require("src.tactics.util.lists")
 ---@field rect_zones table<string, RectZone> Named rectangle zones extracted from Tiled object layers.
 ---@field layers MapLayers Sprite layers making up the map.
 ---@field metadata MapMetadata Spawn point and event metadata.
+---@field offscreen_exits {face: string, min: integer, max: integer}[]? Off-screen exit passages for enemy reinforcements.
 local BattleMap = {}
 BattleMap.__index = BattleMap
 

@@ -110,6 +110,29 @@ function graph.generate(theme, w, h, rng)
     }
 end
 
+--- Roll which border-cell faces get off-screen edges.
+--- Each border face of the W×H grid is rolled independently against
+--- `theme.off_screen_edge_probability`.
+---@param theme { off_screen_edge_probability: number }
+---@param w integer  real grid width
+---@param h integer  real grid height
+---@param rng RngInstance
+---@return {cell_index: integer, face: string}[]
+function graph.roll_offscreen_edges(theme, w, h, rng)
+    local threshold = math.floor(theme.off_screen_edge_probability * 1000)
+    local result = {}
+    local function try(col, row, face)
+        if rng:rndi(1000) < threshold then
+            result[#result + 1] = { cell_index = cell_index(col, row, w), face = face }
+        end
+    end
+    for col = 1, w do try(col, 1, "north") end
+    for col = 1, w do try(col, h, "south") end
+    for row = 1, h do try(1,   row, "west")  end
+    for row = 1, h do try(w,   row, "east")  end
+    return result
+end
+
 --- BFS distances from `start` to all reachable nodes.
 ---@param g ConnectionGraph
 ---@param start integer

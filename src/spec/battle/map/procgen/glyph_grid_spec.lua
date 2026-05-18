@@ -140,6 +140,65 @@ local function generate(seed)
 end
 
 -- ---------------------------------------------------------------------------
+-- Helpers for off-screen exit tests
+-- ---------------------------------------------------------------------------
+
+-- 2×2 grid with 1-tile borders on all sides.
+-- Budget per axis: 1 (border) + 6 (cell) + 2 (wall) + 6 (cell) + 1 (border) = 16 ✓
+local function make_bordered_grid()
+    return {
+        col_widths = { 6, 6 }, row_heights = { 6, 6 },
+        col_walls = { 2 }, row_walls = { 2 },
+        border_left = 1, border_right = 1,
+        border_top = 1, border_bottom = 1,
+    }
+end
+
+-- All-exit 6×6 interior chunk (8×8 full grid).
+local function make_6x6_chunk(name, deployment)
+    local interior = deployment and "d" or "."
+    local rows = {}
+    rows[1] = "#^^^^^^#"
+    for i = 2, 7 do
+        rows[i] = "<" .. string.rep(interior, 6) .. ">"
+    end
+    rows[8] = "#vvvvvv#"
+    return {
+        name   = name,
+        width  = 6,
+        height = 6,
+        tags   = deployment and { "deployment" } or {},
+        rows   = rows,
+        exits  = {
+            north = { min = 2, max = 7 },
+            south = { min = 2, max = 7 },
+            east  = { min = 2, max = 7 },
+            west  = { min = 2, max = 7 },
+        },
+    }
+end
+
+--- Build gen_result for the bordered 2×2 grid.
+---@param seed integer
+---@param offscreen_edges table
+---@return ChunkGenerationResult
+---@return RngInstance
+local function generate_bordered(seed, offscreen_edges)
+    local theme = make_theme()
+    local grid  = make_bordered_grid()
+    local pool  = { make_6x6_chunk("normal"), make_6x6_chunk("deploy", true) }
+    local rng   = random.new(seed)
+    local g     = graph_mod.generate(theme, 2, 2, rng)
+    local sel, err = chunk_selector.select(grid, g, pool, rng, offscreen_edges or {})
+    assert(sel, "generate_bordered: chunk_selector.select failed: " .. tostring(err))
+    return {
+        assignment      = sel.assignment,
+        deployment_cell = sel.deployment_cell,
+        graph           = g,
+    }, rng
+end
+
+-- ---------------------------------------------------------------------------
 -- Tests
 -- ---------------------------------------------------------------------------
 
@@ -147,7 +206,8 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
     describe("assemble", function()
         it("returns exactly 16 rows each of length 16 (AC#1)", function()
             local gen_result, rng = generate(1)
-            local rows = glyph_grid.assemble(make_theme(), make_grid(), gen_result, rng)
+            local assembled = glyph_grid.assemble(make_theme(), make_grid(), gen_result, {}, rng)
+            local rows = assembled.rows
 
             luassert.are_equal(16, #rows)
             for y = 1, 16 do
@@ -158,7 +218,8 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
 
         it("every character is in the valid vocabulary (AC#1)", function()
             local gen_result, rng = generate(2)
-            local rows = glyph_grid.assemble(make_theme(), make_grid(), gen_result, rng)
+            local assembled = glyph_grid.assemble(make_theme(), make_grid(), gen_result, {}, rng)
+            local rows = assembled.rows
 
             for y = 1, 16 do
                 for x = 1, 16 do
@@ -173,7 +234,8 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local theme = make_theme()
             local grid  = make_grid()
             local gen_result, rng = generate(3)
-            local rows = glyph_grid.assemble(theme, grid, gen_result, rng)
+            local assembled = glyph_grid.assemble(theme, grid, gen_result, {}, rng)
+            local rows = assembled.rows
 
             local grid_w = #grid.col_widths
 
@@ -225,7 +287,8 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local theme       = make_theme()   -- extra_edge_prob=0, weights=[1]:1
             local grid        = make_grid()
             local gen_result, rng = generate(5)
-            local rows        = glyph_grid.assemble(theme, grid, gen_result, rng)
+            local assembled   = glyph_grid.assemble(theme, grid, gen_result, {}, rng)
+            local rows        = assembled.rows
 
             local bridges     = graph_mod.bridges(gen_result.graph)
             luassert.is_true(#bridges > 0, "expected at least one bridge in spanning tree")
@@ -286,11 +349,11 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
 
             local rng_a = random.new(1)
             rng_a:set_state(state)
-            local rows_a = glyph_grid.assemble(theme, grid, gen_result, rng_a)
+            local rows_a = glyph_grid.assemble(theme, grid, gen_result, {}, rng_a).rows
 
             local rng_b = random.new(1)
             rng_b:set_state(state)
-            local rows_b = glyph_grid.assemble(theme, grid, gen_result, rng_b)
+            local rows_b = glyph_grid.assemble(theme, grid, gen_result, {}, rng_b).rows
 
             for y = 1, 16 do
                 luassert.are_equal(rows_a[y], rows_b[y],
@@ -302,7 +365,7 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             local theme = make_theme()
             local grid  = make_grid()
             local gen_result, rng = generate(11)
-            local rows = glyph_grid.assemble(theme, grid, gen_result, rng)
+            local rows = glyph_grid.assemble(theme, grid, gen_result, {}, rng).rows
 
             -- Find deployment cell's top-left interior tile as flood-fill seed.
             local grid_w = #grid.col_widths
@@ -319,6 +382,68 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
 
             luassert.are_equal(total, reachable,
                 "flood-fill reached " .. reachable .. " of " .. total .. " passable tiles")
+        end)
+
+        -- -----------------------------------------------------------------------
+        -- Off-screen exit tests (bordered grid with 1-tile border margins)
+        -- -----------------------------------------------------------------------
+
+        it("returns offscreen_exits as empty table when offscreen_edges is empty", function()
+            local gen_result, rng = generate(1)
+            local assembled = glyph_grid.assemble(make_theme(), make_grid(), gen_result, {}, rng)
+            luassert.is_table(assembled.offscreen_exits)
+            luassert.are_equal(0, #assembled.offscreen_exits)
+        end)
+
+        it("carves a floor tile at the west border for a west off-screen edge on cell 1", function()
+            -- Cell 1 is col=1, row=1.  Its west border is x=1 (border_left=1).
+            -- The 6×6 chunk's west exit zone maps to y=[2..7] in map coords
+            -- (cell_y_start=2, zone.min=2, zone.max=7 → map [2..7]).
+            -- Expect at least one '.' at x=1 within y=[2..7].
+            local offscreen_edges = { { cell_index = 1, face = "west" } }
+            local gen_result, rng = generate_bordered(1, offscreen_edges)
+            local assembled = glyph_grid.assemble(
+                make_theme(), make_bordered_grid(), gen_result, offscreen_edges, rng)
+            local rows = assembled.rows
+
+            local found_floor = false
+            for y = 2, 7 do
+                if rows[y]:sub(1, 1) == "." then found_floor = true; break end
+            end
+            luassert.is_true(found_floor, "expected '.' at x=1 in y=[2..7] for west off-screen exit")
+        end)
+
+        it("records one offscreen_exits entry with correct face and in-range min/max", function()
+            local offscreen_edges = { { cell_index = 1, face = "west" } }
+            local gen_result, rng = generate_bordered(2, offscreen_edges)
+            local assembled = glyph_grid.assemble(
+                make_theme(), make_bordered_grid(), gen_result, offscreen_edges, rng)
+
+            luassert.are_equal(1, #assembled.offscreen_exits)
+            local exit = assembled.offscreen_exits[1]
+            luassert.are_equal("west", exit.face)
+            luassert.is_not_nil(exit.min)
+            luassert.is_not_nil(exit.max)
+            -- The exit zone y-coords for cell 1 west: [2..7]
+            luassert.is_true(exit.min >= 2 and exit.max <= 7,
+                "exit min=" .. tostring(exit.min) .. " max=" .. tostring(exit.max)
+                .. " not in [2..7]")
+        end)
+
+        it("carves the north border for a north off-screen edge on cell 1", function()
+            -- Cell 1 (col=1, row=1). North border is y=1 (border_top=1).
+            -- North exit zone maps to x=[2..7] in map coords.
+            local offscreen_edges = { { cell_index = 1, face = "north" } }
+            local gen_result, rng = generate_bordered(3, offscreen_edges)
+            local assembled = glyph_grid.assemble(
+                make_theme(), make_bordered_grid(), gen_result, offscreen_edges, rng)
+            local rows = assembled.rows
+
+            local found_floor = false
+            for x = 2, 7 do
+                if rows[1]:sub(x, x) == "." then found_floor = true; break end
+            end
+            luassert.is_true(found_floor, "expected '.' at y=1 in x=[2..7] for north off-screen exit")
         end)
     end)
 end)

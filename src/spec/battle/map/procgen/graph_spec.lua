@@ -132,6 +132,72 @@ describe("tactics.battle.map.procgen.graph", function()
         end)
     end)
 
+    describe("roll_offscreen_edges", function()
+        local function make_offscreen_theme(prob)
+            return { off_screen_edge_probability = prob }
+        end
+
+        it("returns empty list with probability 0", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(0), 3, 3, rng)
+            luassert.are_equal(0, #result)
+        end)
+
+        it("returns all border faces with probability 1 on a 2x2 grid (8 entries)", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 2, 2, rng)
+            -- 2 north + 2 south + 2 west + 2 east = 8
+            luassert.are_equal(8, #result)
+        end)
+
+        it("returns all border faces with probability 1 on a 3x3 grid (12 entries)", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 3, 3, rng)
+            -- 3 north + 3 south + 3 west + 3 east = 12
+            luassert.are_equal(12, #result)
+        end)
+
+        it("each result has cell_index and face fields", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 2, 2, rng)
+            for _, oe in ipairs(result) do
+                luassert.is_not_nil(oe.cell_index)
+                luassert.is_not_nil(oe.face)
+            end
+        end)
+
+        it("only produces valid faces (north/south/east/west)", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 3, 3, rng)
+            local valid = { north = true, south = true, east = true, west = true }
+            for _, oe in ipairs(result) do
+                luassert.is_true(valid[oe.face] ~= nil,
+                    "unexpected face '" .. tostring(oe.face) .. "'")
+            end
+        end)
+
+        it("cell_index values are in range [1, W*H]", function()
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 3, 3, rng)
+            for _, oe in ipairs(result) do
+                luassert.is_true(oe.cell_index >= 1 and oe.cell_index <= 9,
+                    "cell_index " .. oe.cell_index .. " out of [1,9]")
+            end
+        end)
+
+        it("corner cells do not appear twice for the same face", function()
+            -- Cell 1 (col=1, row=1) should appear as 'north' and 'west' but not north twice.
+            local rng = random.new(1)
+            local result = graph.roll_offscreen_edges(make_offscreen_theme(1), 3, 3, rng)
+            local seen = {}
+            for _, oe in ipairs(result) do
+                local key = oe.cell_index .. ":" .. oe.face
+                luassert.is_nil(seen[key], "duplicate entry " .. key)
+                seen[key] = true
+            end
+        end)
+    end)
+
     describe("bridges", function()
         it("returns every edge of a tree as a bridge", function()
             local rng = random.new(2)

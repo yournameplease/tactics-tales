@@ -23,6 +23,7 @@ local function make_theme(opts)
         },
         exit_width_weights = { [1] = 1 },
         extra_edge_probability = 0,
+        off_screen_edge_probability = 0,
     }
     for k, v in pairs(opts or {}) do t[k] = v end
     return t
