@@ -42,6 +42,30 @@ local function roll_exit_pos(ov_min, ov_max, w, rng)
     return ov_min + rng:rndi(max_start - ov_min + 1)
 end
 
+--- Carve a passage through `cells` and return its position and width.
+--- Rolls width from `weights` and a start position within the overlap zone,
+--- then erases wall tiles across [gap_lo, gap_hi] on the perpendicular axis.
+---@param cells string[][]
+---@param is_vert boolean True when the passage runs north-south (gap moves in y).
+---@param gap_lo integer First wall tile index on the gap axis.
+---@param gap_hi integer Last wall tile index on the gap axis.
+---@param ov_min integer Overlap zone start on the passage axis.
+---@param ov_max integer Overlap zone end on the passage axis.
+---@param weights table<integer, integer>
+---@param rng RngInstance
+---@return integer pos, integer w
+local function carve_passage(cells, is_vert, gap_lo, gap_hi, ov_min, ov_max, weights, rng)
+    local w   = roll_exit_width(weights, ov_max - ov_min + 1, rng)
+    local pos = roll_exit_pos(ov_min, ov_max, w, rng)
+    for gap = gap_lo, gap_hi do
+        for tile = pos, pos + w - 1 do
+            if is_vert then cells[gap][tile] = "."
+            else            cells[tile][gap] = "." end
+        end
+    end
+    return pos, w
+end
+
 -- ---------------------------------------------------------------------------
 -- Public API
 -- ---------------------------------------------------------------------------
@@ -135,20 +159,8 @@ function glyph_grid.assemble(theme, grid, gen_result, offscreen_edges, rng)
             gap_hi  = grid_layout.cell_x_start(grid, col_a + 1) - 1
         end
 
-        local ov_w = ov_max - ov_min + 1
-        local w    = roll_exit_width(theme.exit_width_weights, ov_w, rng)
-        local pos  = roll_exit_pos(ov_min, ov_max, w, rng)
-
-        -- Carve: erase wall tiles through the full gap depth.
-        for gap = gap_lo, gap_hi do
-            for tile = pos, pos + w - 1 do
-                if is_vert then
-                    cells[gap][tile] = "."
-                else
-                    cells[tile][gap] = "."
-                end
-            end
-        end
+        local pos, w = carve_passage(cells, is_vert, gap_lo, gap_hi, ov_min, ov_max,
+            theme.exit_width_weights, rng)
 
         -- Record guard centre for width-1 bridges.
         if bridge_key[a .. "," .. b] and w == 1 then
@@ -222,20 +234,8 @@ function glyph_grid.assemble(theme, grid, gen_result, offscreen_edges, rng)
             goto continue
         end
 
-        local ov_w = ov_max - ov_min + 1
-        local w    = roll_exit_width(theme.exit_width_weights, ov_w, rng)
-        local pos  = roll_exit_pos(ov_min, ov_max, w, rng)
-
-        for gap = gap_lo, gap_hi do
-            for tile = pos, pos + w - 1 do
-                if is_vert then
-                    cells[gap][tile] = "."
-                else
-                    cells[tile][gap] = "."
-                end
-            end
-        end
-
+        local pos, w = carve_passage(cells, is_vert, gap_lo, gap_hi, ov_min, ov_max,
+            theme.exit_width_weights, rng)
         offscreen_exits[#offscreen_exits + 1] = { face = face, min = pos, max = pos + w - 1 }
 
         ::continue::
