@@ -2,7 +2,8 @@
 --- Chunk selection with deployment cell choice and exit-overlap retry.
 --- See docs/specs/procgen-map-spec.md §8 steps 5–7.
 
-local graph_mod = require("src.tactics.battle.map.procgen.graph")
+local graph_mod    = require("src.tactics.battle.map.procgen.graph")
+local grid_layout  = require("src.tactics.battle.map.procgen.grid_layout")
 
 local MAX_CELL_RETRIES = 10
 local MAX_GRAPH_RETRIES = 10
@@ -17,47 +18,8 @@ local chunk_selector = {}
 ---@field graph ConnectionGraph
 
 -- ---------------------------------------------------------------------------
--- Position helpers
--- ---------------------------------------------------------------------------
-
---- Map x-coordinate where cell column `col` interior starts (1-based).
----@param grid ProcgenGrid
----@param col integer
----@return integer
-local function cell_x_start(grid, col)
-    local x = grid.border_left + 1
-    for c = 1, col - 1 do
-        x = x + grid.col_widths[c] + grid.col_walls[c]
-    end
-    return x
-end
-
---- Map y-coordinate where cell row `row` interior starts (1-based).
----@param grid ProcgenGrid
----@param row integer
----@return integer
-local function cell_y_start(grid, row)
-    local y = grid.border_top + 1
-    for r = 1, row - 1 do
-        y = y + grid.row_heights[r] + grid.row_walls[r]
-    end
-    return y
-end
-
--- ---------------------------------------------------------------------------
 -- Exit-zone helpers
 -- ---------------------------------------------------------------------------
-
---- Convert an ExitZone from chunk border coordinates to map coordinates.
---- `cell_start` is the map coordinate of the cell interior start on the relevant axis.
----@param zone ExitZone?
----@param cell_start integer
----@return ExitZone?
-local function zone_to_map(zone, cell_start)
-    if not zone then return nil end
-    -- Border position 1 is a corner; position 2 maps to interior position 1 = cell_start.
-    return { min = cell_start + zone.min - 2, max = cell_start + zone.max - 2 }
-end
 
 --- Compute the overlap width of two map-coordinate ExitZones.
 ---@param z1 ExitZone?
@@ -146,18 +108,18 @@ local function find_bad_cells(g, assignment, grid, grid_w)
         if b - a == grid_w then
             -- Vertical edge (north-south): check south/north exits in x-coords.
             local col = ((a - 1) % grid_w) + 1
-            local x = cell_x_start(grid, col)
+            local x = grid_layout.cell_x_start(grid, col)
             ov = overlap_width(
-                zone_to_map(assignment[a].exits.south, x),
-                zone_to_map(assignment[b].exits.north, x)
+                grid_layout.zone_to_map(assignment[a].exits.south, x),
+                grid_layout.zone_to_map(assignment[b].exits.north, x)
             )
         else
             -- Horizontal edge (east-west): check east/west exits in y-coords.
             local row = math.floor((a - 1) / grid_w) + 1
-            local y = cell_y_start(grid, row)
+            local y = grid_layout.cell_y_start(grid, row)
             ov = overlap_width(
-                zone_to_map(assignment[a].exits.east, y),
-                zone_to_map(assignment[b].exits.west, y)
+                grid_layout.zone_to_map(assignment[a].exits.east, y),
+                grid_layout.zone_to_map(assignment[b].exits.west, y)
             )
         end
         if ov < 1 then
@@ -247,27 +209,44 @@ end
 ---@param g ConnectionGraph
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
+---@param offscreen_edges {cell_index: integer, face: string}[]?
 ---@return ChunkSelection?
 ---@return string?
-function chunk_selector.select(grid, g, chunks, rng)
+function chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     local n = grid_w * grid_h
 
     local deployment_cell = rng:rndi(n) + 1
 
+    -- Pre-compute additional faces required by off-screen edges.
+    local offscreen_required = {}
+    for _, oe in ipairs(offscreen_edges or {}) do
+        if not offscreen_required[oe.cell_index] then
+            offscreen_required[oe.cell_index] = {}
+        end
+        offscreen_required[oe.cell_index][oe.face] = true
+    end
+
+    local function all_faces(idx)
+        local faces = required_faces(idx, g.adjacency[idx] or {}, grid_w)
+        for face in pairs(offscreen_required[idx] or {}) do
+            faces[face] = true
+        end
+        return faces
+    end
+
     -- Initial chunk selection.
     local assignment = {}
     for idx = 1, n do
         local col = ((idx - 1) % grid_w) + 1
         local row = math.floor((idx - 1) / grid_w) + 1
-        local faces = required_faces(idx, g.adjacency[idx] or {}, grid_w)
         local candidates = filter_candidates(
             chunks,
             grid.col_widths[col],
             grid.row_heights[row],
             idx == deployment_cell,
-            faces
+            all_faces(idx)
         )
         if #candidates == 0 then
             return nil, "no valid chunk for cell " .. idx
@@ -283,13 +262,12 @@ function chunk_selector.select(grid, g, chunks, rng)
             for _, idx in ipairs(bad) do
                 local col = ((idx - 1) % grid_w) + 1
                 local row = math.floor((idx - 1) / grid_w) + 1
-                local faces = required_faces(idx, g.adjacency[idx] or {}, grid_w)
                 local candidates = filter_candidates(
                     chunks,
                     grid.col_widths[col],
                     grid.row_heights[row],
                     idx == deployment_cell,
-                    faces
+                    all_faces(idx)
                 )
                 if #candidates > 0 then
                     assignment[idx] = rng:choose_random_from_list(candidates)
@@ -314,13 +292,14 @@ end
 ---@param grid ProcgenGrid
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
+---@param offscreen_edges {cell_index: integer, face: string}[]?
 ---@return ChunkGenerationResult
-function chunk_selector.generate(theme, grid, chunks, rng)
+function chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     for attempt = 1, MAX_GRAPH_RETRIES do
         local g = graph_mod.generate(theme, grid_w, grid_h, rng)
-        local result = chunk_selector.select(grid, g, chunks, rng)
+        local result = chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
         if result then
             return {
                 assignment = result.assignment,

@@ -2,46 +2,12 @@
 --- Glyph grid assembly: place cell interiors, carve connections, place guards.
 --- Implements spec §8 steps 8–11.
 
-local graph_mod = require("src.tactics.battle.map.procgen.graph")
+local graph_mod   = require("src.tactics.battle.map.procgen.graph")
+local grid_layout = require("src.tactics.battle.map.procgen.grid_layout")
 
 local MAP_SIZE = 16
 
 local glyph_grid = {}
-
--- ---------------------------------------------------------------------------
--- Position helpers (mirrors chunk_selector.lua)
--- ---------------------------------------------------------------------------
-
----@param grid ProcgenGrid
----@param col integer
----@return integer
-local function cell_x_start(grid, col)
-    local x = grid.border_left + 1
-    for c = 1, col - 1 do
-        x = x + grid.col_widths[c] + grid.col_walls[c]
-    end
-    return x
-end
-
----@param grid ProcgenGrid
----@param row integer
----@return integer
-local function cell_y_start(grid, row)
-    local y = grid.border_top + 1
-    for r = 1, row - 1 do
-        y = y + grid.row_heights[r] + grid.row_walls[r]
-    end
-    return y
-end
-
---- Convert an ExitZone from chunk border coordinates to map coordinates.
----@param zone ExitZone?
----@param cell_start integer Interior start on the relevant axis.
----@return ExitZone?
-local function zone_to_map(zone, cell_start)
-    if not zone then return nil end
-    return { min = cell_start + zone.min - 2, max = cell_start + zone.max - 2 }
-end
 
 -- ---------------------------------------------------------------------------
 -- RNG helpers
@@ -80,15 +46,21 @@ end
 -- Public API
 -- ---------------------------------------------------------------------------
 
+---@class GlyphGridResult
+---@field rows string[]  16-element array of 16-character glyph strings
+---@field offscreen_exits {face: string, min: integer, max: integer}[]
+
 --- Assemble a 16×16 glyph grid from the given chunk generation result.
 --- Steps 8–11 of the spec: roll exit widths/positions, place cell interiors,
 --- fill walls, carve connections, and mark width-1 bridge passages with 'g'.
+--- Also carves off-screen border passages for each entry in `offscreen_edges`.
 ---@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param gen_result ChunkGenerationResult
+---@param offscreen_edges {cell_index: integer, face: string}[]
 ---@param rng RngInstance
----@return string[]  16-element array of 16-character strings
-function glyph_grid.assemble(theme, grid, gen_result, rng)
+---@return GlyphGridResult
+function glyph_grid.assemble(theme, grid, gen_result, offscreen_edges, rng)
     local g          = gen_result.graph
     local assignment = gen_result.assignment
     local grid_w     = #grid.col_widths
@@ -109,8 +81,8 @@ function glyph_grid.assemble(theme, grid, gen_result, rng)
         local col   = ((idx - 1) % grid_w) + 1
         local row   = math.floor((idx - 1) / grid_w) + 1
         local chunk = assignment[idx]
-        local x0    = cell_x_start(grid, col)
-        local y0    = cell_y_start(grid, row)
+        local x0    = grid_layout.cell_x_start(grid, col)
+        local y0    = grid_layout.cell_y_start(grid, row)
         -- chunk.rows includes border ring; interior occupies rows [2..h+1], cols [2..w+1].
         for cy = 2, chunk.height + 1 do
             local row_str = chunk.rows[cy]
@@ -140,27 +112,27 @@ function glyph_grid.assemble(theme, grid, gen_result, rng)
         if b - a == grid_w then
             -- Vertical edge: A north of B.  Exit zones are x-coords; gap is in y.
             is_vert = true
-            local x0 = cell_x_start(grid, col_a)
-            local za  = zone_to_map(assignment[a].exits.south, x0)
-            local zb  = zone_to_map(assignment[b].exits.north, x0)
+            local x0 = grid_layout.cell_x_start(grid, col_a)
+            local za  = grid_layout.zone_to_map(assignment[a].exits.south, x0)
+            local zb  = grid_layout.zone_to_map(assignment[b].exits.north, x0)
             ---@cast za ExitZone
             ---@cast zb ExitZone
             ov_min  = math.max(za.min, zb.min)
             ov_max  = math.min(za.max, zb.max)
-            gap_lo  = cell_y_start(grid, row_a) + grid.row_heights[row_a]
-            gap_hi  = cell_y_start(grid, row_a + 1) - 1
+            gap_lo  = grid_layout.cell_y_start(grid, row_a) + grid.row_heights[row_a]
+            gap_hi  = grid_layout.cell_y_start(grid, row_a + 1) - 1
         else
             -- Horizontal edge: A west of B.  Exit zones are y-coords; gap is in x.
             is_vert = false
-            local y0 = cell_y_start(grid, row_a)
-            local za  = zone_to_map(assignment[a].exits.east, y0)
-            local zb  = zone_to_map(assignment[b].exits.west, y0)
+            local y0 = grid_layout.cell_y_start(grid, row_a)
+            local za  = grid_layout.zone_to_map(assignment[a].exits.east, y0)
+            local zb  = grid_layout.zone_to_map(assignment[b].exits.west, y0)
             ---@cast za ExitZone
             ---@cast zb ExitZone
             ov_min  = math.max(za.min, zb.min)
             ov_max  = math.min(za.max, zb.max)
-            gap_lo  = cell_x_start(grid, col_a) + grid.col_widths[col_a]
-            gap_hi  = cell_x_start(grid, col_a + 1) - 1
+            gap_lo  = grid_layout.cell_x_start(grid, col_a) + grid.col_widths[col_a]
+            gap_hi  = grid_layout.cell_x_start(grid, col_a + 1) - 1
         end
 
         local ov_w = ov_max - ov_min + 1
@@ -198,13 +170,84 @@ function glyph_grid.assemble(theme, grid, gen_result, rng)
         cells[guard.cy][guard.cx] = "g"
     end
 
-    -- 6. Convert to string rows.
+    -- 6. Carve off-screen border passages and collect exit metadata.
+    local offscreen_exits = {}
+    local offscreen_grid_w = #grid.col_widths
+    for _, oe in ipairs(offscreen_edges or {}) do
+        local idx  = oe.cell_index
+        local face = oe.face
+        local col  = ((idx - 1) % offscreen_grid_w) + 1
+        local row  = math.floor((idx - 1) / offscreen_grid_w) + 1
+        local chunk = assignment[idx]
+
+        -- Determine gap extents and exit-zone axis based on face direction.
+        local gap_lo, gap_hi, ov_min, ov_max, is_vert
+        if face == "west" then
+            gap_lo  = 1
+            gap_hi  = grid.border_left
+            local y0 = grid_layout.cell_y_start(grid, row)
+            local z  = grid_layout.zone_to_map(chunk.exits.west, y0)
+            if not z or gap_hi < gap_lo then goto continue end
+            ov_min  = z.min
+            ov_max  = z.max
+            is_vert = false
+        elseif face == "east" then
+            gap_lo  = grid_layout.cell_x_start(grid, col) + grid.col_widths[col]
+            gap_hi  = MAP_SIZE
+            local y0 = grid_layout.cell_y_start(grid, row)
+            local z  = grid_layout.zone_to_map(chunk.exits.east, y0)
+            if not z or gap_hi < gap_lo then goto continue end
+            ov_min  = z.min
+            ov_max  = z.max
+            is_vert = false
+        elseif face == "north" then
+            gap_lo  = 1
+            gap_hi  = grid.border_top
+            local x0 = grid_layout.cell_x_start(grid, col)
+            local z  = grid_layout.zone_to_map(chunk.exits.north, x0)
+            if not z or gap_hi < gap_lo then goto continue end
+            ov_min  = z.min
+            ov_max  = z.max
+            is_vert = true
+        elseif face == "south" then
+            gap_lo  = grid_layout.cell_y_start(grid, row) + grid.row_heights[row]
+            gap_hi  = MAP_SIZE
+            local x0 = grid_layout.cell_x_start(grid, col)
+            local z  = grid_layout.zone_to_map(chunk.exits.south, x0)
+            if not z or gap_hi < gap_lo then goto continue end
+            ov_min  = z.min
+            ov_max  = z.max
+            is_vert = true
+        else
+            goto continue
+        end
+
+        local ov_w = ov_max - ov_min + 1
+        local w    = roll_exit_width(theme.exit_width_weights, ov_w, rng)
+        local pos  = roll_exit_pos(ov_min, ov_max, w, rng)
+
+        for gap = gap_lo, gap_hi do
+            for tile = pos, pos + w - 1 do
+                if is_vert then
+                    cells[gap][tile] = "."
+                else
+                    cells[tile][gap] = "."
+                end
+            end
+        end
+
+        offscreen_exits[#offscreen_exits + 1] = { face = face, min = pos, max = pos + w - 1 }
+
+        ::continue::
+    end
+
+    -- 7. Convert to string rows.
     local rows = {}
     for y = 1, MAP_SIZE do
         rows[y] = table.concat(cells[y])
     end
 
-    return rows
+    return { rows = rows, offscreen_exits = offscreen_exits }
 end
 
 return glyph_grid
