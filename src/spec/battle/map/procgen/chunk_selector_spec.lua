@@ -261,6 +261,70 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
         end)
     end)
 
+    describe("select with off-screen edges", function()
+        -- 1×1 grid: a single cell whose all four faces are border faces.
+        -- Budget: col_width=6, no walls, borders derived externally (zero here for simplicity).
+        local function make_1x1_grid()
+            return {
+                col_widths = { 3 }, row_heights = { 3 },
+                col_walls = {}, row_walls = {},
+                border_left = 0, border_right = 0, border_top = 0, border_bottom = 0,
+            }
+        end
+
+        local function make_1x1_graph()
+            return graph.generate(make_theme(), 1, 1, random.new(1))
+        end
+
+        -- Chunk with exits on all faces (including west).
+        local function all_exit_deploy()
+            return all_exits_chunk("deploy", true)
+        end
+
+        -- Chunk with NO exits on any face (and deployment tag).
+        local function no_exit_deploy()
+            return {
+                name = "no_exit_deploy",
+                width = 3, height = 3,
+                tags = { "deployment" },
+                rows = { "#####", "#...#", "#...#", "#...#", "#####" },
+                exits = {},
+            }
+        end
+
+        it("succeeds when chunks have exits on the required off-screen face", function()
+            local pool = { all_exit_deploy() }
+            local offscreen_edges = { { cell_index = 1, face = "west" } }
+            local rng = random.new(1)
+            local result = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges)
+            luassert.is_not_nil(result)
+            luassert.is_not_nil(result.assignment[1].exits.west)
+        end)
+
+        it("returns nil when no chunk has the required off-screen face exit", function()
+            local pool = { no_exit_deploy() }
+            local offscreen_edges = { { cell_index = 1, face = "west" } }
+            local rng = random.new(1)
+            local result, err = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges)
+            luassert.is_nil(result)
+            luassert.is_not_nil(err)
+        end)
+
+        it("ignores off-screen edges for cells that are not border cells (face not in pool)", function()
+            -- Off-screen edge targets cell 1 (interior cell not on west border in a 2×2 grid).
+            -- But cell_index=1 in a 2×2 grid IS a border cell. Use a 2×2 grid and target cell 2.
+            -- Cell 2 (col=2, row=1) needs east exit for off-screen (east border). all_exits has it.
+            local pool = {
+                all_exits_chunk("normal"),
+                all_exits_chunk("deploy", true),
+            }
+            local offscreen_edges = { { cell_index = 2, face = "east" } }
+            local rng = random.new(42)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, offscreen_edges)
+            luassert.is_not_nil(result)
+        end)
+    end)
+
     describe("generate", function()
         it("returns assignment, deployment_cell, and graph on success", function()
             local pool = {
