@@ -18,6 +18,7 @@ local chunk_selector = {}
 ---@class ChunkGenerationResult : ChunkSelection
 ---@field graph ConnectionGraph
 ---@field placement ProcgenPlacement
+---@field offscreen_edges {cell_index: integer, face: string}[]
 
 -- ---------------------------------------------------------------------------
 -- Exit-zone helpers
@@ -301,20 +302,25 @@ end
 
 --- Generate chunks for all cells, regenerating the connection graph up to MAX_GRAPH_RETRIES
 --- times if exit overlap cannot be satisfied.
+--- Off-screen edges are rolled internally after placement so per-cell exit counts can be
+--- enforced: boss_cell=0, escape_cell=1, deployment_cell=1.
 ---@param theme ProcgenTheme
 ---@param grid ProcgenGrid
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
----@param offscreen_edges {cell_index: integer, face: string}[]?
----@param objective string  Battle objective type passed to placement_mod.select
+---@param objective string?  Battle objective type passed to placement_mod.select
 ---@return ChunkGenerationResult
-function chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges, objective)
+function chunk_selector.generate(theme, grid, chunks, rng, objective)
     objective = objective or "rout"
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     for attempt = 1, MAX_GRAPH_RETRIES do
         local g = graph_mod.generate(theme, grid_w, grid_h, rng)
         local p = placement_mod.select(g, objective, rng)
+        local cell_requirements = { [p.deployment_cell] = 1 }
+        if p.boss_cell   then cell_requirements[p.boss_cell]   = 0 end
+        if p.escape_cell then cell_requirements[p.escape_cell] = 1 end
+        local offscreen_edges = graph_mod.roll_offscreen_edges(theme, grid_w, grid_h, rng, cell_requirements)
         local result = chunk_selector.select(grid, g, chunks, rng, offscreen_edges, p)
         if result then
             return {
@@ -322,6 +328,7 @@ function chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges, obje
                 deployment_cell = p.deployment_cell,
                 placement       = p,
                 graph           = g,
+                offscreen_edges = offscreen_edges,
             }
         end
         log_failure(grid, g, attempt)

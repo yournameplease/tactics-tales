@@ -16,6 +16,10 @@ Tests use the [Busted](https://lunarmodules.github.io/busted/) test runner. Run 
 busted build/spec/path/to/file_spec.lua
 ```
 
+## Picotron constraints
+
+`table.sort` is not supported by Picotron. Use inline sorting (e.g. bubble sort or insertion sort) in game/engine code. `table.sort` is only acceptable in test code (`src/spec/`).
+
 ## Agent skills
 
 ### Issue tracker

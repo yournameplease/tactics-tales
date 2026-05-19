@@ -6,6 +6,8 @@
 ---@field edges integer[][] List of `{a, b}` edges with a < b. Endpoints are 1-based cell indices.
 ---@field adjacency integer[][] Map of cell index -> list of neighbor cell indices.
 
+local sort  = require("src.tactics.util.sort")
+
 local graph = {}
 
 --- Convert a (col, row) pair (1-based) to a flat cell index.
@@ -112,24 +114,55 @@ end
 
 --- Roll which border-cell faces get off-screen edges.
 --- Each border face of the W×H grid is rolled independently against
---- `theme.off_screen_edge_probability`.
+--- `theme.off_screen_edge_probability`, unless the cell appears in
+--- `cell_requirements`, in which case exactly that many faces are chosen at
+--- random from the cell's available border faces (0 = none, 1 = one random face).
 ---@param theme { off_screen_edge_probability: number }
 ---@param w integer  real grid width
 ---@param h integer  real grid height
 ---@param rng RngInstance
+---@param cell_requirements table<integer, integer>?  cell_index -> exact exit count
 ---@return {cell_index: integer, face: string}[]
-function graph.roll_offscreen_edges(theme, w, h, rng)
-    local threshold = math.floor(theme.off_screen_edge_probability * 1000)
+function graph.roll_offscreen_edges(theme, w, h, rng, cell_requirements)
+    local reqs = cell_requirements or {}
+    local threshold = math.floor((theme.off_screen_edge_probability or 0) * 1000)
     local result = {}
+    local constrained_faces = {}
+
     local function try(col, row, face)
-        if rng:rndi(1000) < threshold then
-            result[#result + 1] = { cell_index = cell_index(col, row, w), face = face }
+        local ci = cell_index(col, row, w)
+        if reqs[ci] ~= nil then
+            if not constrained_faces[ci] then constrained_faces[ci] = {} end
+            constrained_faces[ci][#constrained_faces[ci] + 1] = face
+        elseif rng:rndi(1000) < threshold then
+            result[#result + 1] = { cell_index = ci, face = face }
         end
     end
+
     for col = 1, w do try(col, 1, "north") end
     for col = 1, w do try(col, h, "south") end
     for row = 1, h do try(1,   row, "west")  end
     for row = 1, h do try(w,   row, "east")  end
+
+    -- Process constrained cells in index order for deterministic RNG consumption.
+    local constrained_cells = {}
+    for ci in pairs(constrained_faces) do
+        constrained_cells[#constrained_cells + 1] = ci
+    end
+    sort.by(constrained_cells)
+    for _, ci in ipairs(constrained_cells) do
+        local faces = constrained_faces[ci]
+        local required = reqs[ci]
+        -- Fisher-Yates shuffle, then take the first `required` faces.
+        for i = #faces, 2, -1 do
+            local j = rng:rndi(i) + 1
+            faces[i], faces[j] = faces[j], faces[i]
+        end
+        for i = 1, math.min(required, #faces) do
+            result[#result + 1] = { cell_index = ci, face = faces[i] }
+        end
+    end
+
     return result
 end
 
