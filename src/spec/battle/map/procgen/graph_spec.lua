@@ -240,6 +240,66 @@ describe("tactics.battle.map.procgen.graph", function()
                 seen[key] = true
             end
         end)
+
+        describe("cell_requirements", function()
+            it("suppresses all faces for required=0, even at probability 1", function()
+                -- Cell 1 (corner: north+west) is suppressed; unconstrained cells still roll.
+                local rng = random.new(1)
+                local result = graph.roll_offscreen_edges(
+                    make_offscreen_theme(1), 2, 2, rng, { [1] = 0 })
+                for _, oe in ipairs(result) do
+                    luassert.are_not_equal(1, oe.cell_index,
+                        "cell 1 should have 0 off-screen exits")
+                end
+            end)
+
+            it("forces exactly 1 face for required=1, even at probability 0", function()
+                -- Cell 4 (col=2, row=2 in 2×2) has south and east border faces.
+                local rng = random.new(1)
+                local result = graph.roll_offscreen_edges(
+                    make_offscreen_theme(0), 2, 2, rng, { [4] = 1 })
+                local count = 0
+                local valid = { south = true, east = true }
+                for _, oe in ipairs(result) do
+                    if oe.cell_index == 4 then
+                        count = count + 1
+                        luassert.is_true(valid[oe.face] ~= nil,
+                            "face '" .. oe.face .. "' not a border face for cell 4")
+                    end
+                end
+                luassert.are_equal(1, count)
+            end)
+
+            it("unconstrained cells still roll normally alongside constrained ones", function()
+                -- p=1: all unconstrained faces roll. Cell 1 suppressed (2 faces skipped).
+                -- 2×2 has 8 border faces total; cell 1 has 2, so 6 remain.
+                local rng = random.new(1)
+                local result = graph.roll_offscreen_edges(
+                    make_offscreen_theme(1), 2, 2, rng, { [1] = 0 })
+                local count = 0
+                for _, oe in ipairs(result) do
+                    if oe.cell_index ~= 1 then count = count + 1 end
+                end
+                luassert.are_equal(6, count)
+            end)
+
+            it("corner cell with required=1 gets exactly 1 of its 2 available faces", function()
+                -- Cell 1 (corner) has north and west available. Exactly one should be chosen.
+                local rng = random.new(5)
+                local result = graph.roll_offscreen_edges(
+                    make_offscreen_theme(0), 2, 2, rng, { [1] = 1 })
+                local count = 0
+                local valid = { north = true, west = true }
+                for _, oe in ipairs(result) do
+                    if oe.cell_index == 1 then
+                        count = count + 1
+                        luassert.is_true(valid[oe.face] ~= nil,
+                            "face '" .. oe.face .. "' not a border face for cell 1")
+                    end
+                end
+                luassert.are_equal(1, count)
+            end)
+        end)
     end)
 
     describe("bridges", function()

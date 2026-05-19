@@ -10,13 +10,14 @@ local random = require("src.tactics.util.random")
 -- Helpers
 -- ---------------------------------------------------------------------------
 
---- Minimal theme for tests: no wall gap.
+--- Minimal theme for tests: no wall gap, no off-screen edges.
 ---@return ProcgenTheme
 local function make_theme()
     return {
         wall_thickness = 0,
         wall_grow_probability = 0,
         extra_edge_probability = 0,
+        off_screen_edge_probability = 0,
         exit_width_weights = { [1] = 1 },
     }
 end
@@ -412,7 +413,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
     end)
 
     describe("generate", function()
-        it("returns assignment, deployment_cell, and graph on success", function()
+        it("returns assignment, deployment_cell, graph, and offscreen_edges on success", function()
             local pool = {
                 all_exits_chunk("normal"),
                 all_exits_chunk("deploy", true),
@@ -424,6 +425,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             luassert.is_not_nil(result.assignment)
             luassert.is_not_nil(result.deployment_cell)
             luassert.is_not_nil(result.graph)
+            luassert.is_not_nil(result.offscreen_edges)
             luassert.are_equal(4, #result.assignment)
         end)
 

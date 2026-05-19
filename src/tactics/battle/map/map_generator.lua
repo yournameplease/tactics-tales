@@ -30,7 +30,6 @@ local chunk_parser    = require("src.tactics.battle.map.procgen.chunk_parser")
 local chunk_variants  = require("src.tactics.battle.map.procgen.chunk_variants")
 local chunk_selector  = require("src.tactics.battle.map.procgen.chunk_selector")
 local glyph_grid_mod  = require("src.tactics.battle.map.procgen.glyph_grid")
-local graph_mod       = require("src.tactics.battle.map.procgen.graph")
 local autotiler       = require("src.tactics.battle.map.procgen.autotiler")
 
 local map_generator = {}
@@ -324,11 +323,8 @@ local function load_procgen(definition, gfx_registry, seed)
     local chunks = chunk_variants.expand(chunks_raw)
     local rng = random.new(seed or 1)
     local grid = themes_mod.roll_grid(theme, rng)
-    local W = #grid.col_widths
-    local H = #grid.row_heights
-    local offscreen_edges = graph_mod.roll_offscreen_edges(theme, W, H, rng)
-    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges, definition.objective)
-    local assembled = glyph_grid_mod.assemble(theme, grid, gen_result, offscreen_edges, rng)
+    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, definition.objective)
+    local assembled = glyph_grid_mod.assemble(theme, grid, gen_result, gen_result.offscreen_edges, rng)
     local rows = assembled.rows
     local base_tile_id = (gfx_registry or {})[definition.tileset_name or ""] or 0
     log.debug("load_procgen: base_tile_id=" .. tostring(base_tile_id) ..

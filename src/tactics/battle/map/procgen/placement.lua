@@ -3,6 +3,7 @@
 --- See docs/superpowers/specs/2026-05-18-procgen-objective-placement-design.md
 
 local graph_mod = require("src.tactics.battle.map.procgen.graph")
+local sort      = require("src.tactics.util.sort")
 
 ---@class ProcgenPlacement
 ---@field deployment_cell integer  1-based macro-grid cell index
@@ -29,13 +30,7 @@ function placement.select(g, objective, rng)
         for node, d in pairs(depths) do
             if d == max_d then table.insert(candidates, node) end
         end
-        for i = 1, #candidates - 1 do
-            for j = i + 1, #candidates do
-                if candidates[j] < candidates[i] then
-                    candidates[i], candidates[j] = candidates[j], candidates[i]
-                end
-            end
-        end
+        sort.by(candidates)
         local deployment_cell = candidates[rng:rndi(#candidates) + 1]
         if objective == "kill_boss" then
             return { deployment_cell = deployment_cell, boss_cell = far_cell }
@@ -70,11 +65,7 @@ function placement.select(g, objective, rng)
                 table.insert(top, c.node)
             end
         end
-        for i = 1, #top - 1 do
-            for j = i + 1, #top do
-                if top[j] < top[i] then top[i], top[j] = top[j], top[i] end
-            end
-        end
+        sort.by(top)
         local deployment_cell = top[rng:rndi(#top) + 1]
         return { deployment_cell = deployment_cell }
 
