@@ -149,14 +149,18 @@ end
 -- ---------------------------------------------------------------------------
 
 --- Build a multi-line ASCII diagram of the meta-grid and return it as a string.
+--- Rooms are shown as hollow squares [ ]; special cells (deployment, boss_room,
+--- escape_zone) are labelled A, B, C... with a legend below the grid.
+--- Off-screen exits are shown as ^/v/</>/< arrows adjacent to the room.
 ---@param grid ProcgenGrid
 ---@param g ConnectionGraph
+---@param offscreen_edges {cell_index: integer, face: string}[]?
+---@param placement ProcgenPlacement?
 ---@return string
-local function ascii_grid(grid, g)
+local function ascii_grid(grid, g, offscreen_edges, placement)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
 
-    -- Build a set of edges for O(1) lookup.
     local edge_set = {}
     for _, e in ipairs(g.edges) do
         edge_set[e[1] .. "," .. e[2]] = true
@@ -166,40 +170,123 @@ local function ascii_grid(grid, g)
         return edge_set[lo .. "," .. hi] == true
     end
 
+    -- off[idx][face] = true
+    local off = {}
+    for _, oe in ipairs(offscreen_edges or {}) do
+        off[oe.cell_index] = off[oe.cell_index] or {}
+        off[oe.cell_index][oe.face] = true
+    end
+
+    -- Assign A/B/C labels to special cells and build legend lines.
+    local cell_label = {}
+    local legend = {}
+    local next_lbl = string.byte("A")
+    local function assign(idx, tag)
+        if not idx or cell_label[idx] then return end
+        local lbl = string.char(next_lbl)
+        next_lbl = next_lbl + 1
+        cell_label[idx] = lbl
+        local n = 0
+        for _ in pairs(off[idx] or {}) do n = n + 1 end
+        table.insert(legend, lbl .. ": " .. tag .. ", " .. n .. (n == 1 and " exit" or " exits"))
+    end
+    if placement then
+        assign(placement.deployment_cell, "deployment")
+        assign(placement.boss_cell,       "boss_room")
+        assign(placement.escape_cell,     "escape_zone")
+    end
+
+    -- Each room occupies 3 chars "[ ]"; horizontal connectors are "---"/"   ".
+    -- Vertical connector row uses " | "/" v "/" ^ "/"   " centered under each room.
+    local function room_str(idx)
+        return "[" .. (cell_label[idx] or " ") .. "]"
+    end
+
+    local function any_north_off(row)
+        for col = 1, grid_w do
+            local idx = (row - 1) * grid_w + col
+            if off[idx] and off[idx].north then return true end
+        end
+        return false
+    end
+
+    local function any_south_off(row)
+        for col = 1, grid_w do
+            local idx = (row - 1) * grid_w + col
+            if off[idx] and off[idx].south then return true end
+        end
+        return false
+    end
+
     local lines = {}
     for row = 1, grid_h do
+        -- North off-screen row (only when needed).
+        if any_north_off(row) then
+            local parts = {}
+            for col = 1, grid_w do
+                local idx = (row - 1) * grid_w + col
+                table.insert(parts, (off[idx] and off[idx].north) and " ^ " or "   ")
+                if col < grid_w then table.insert(parts, "   ") end
+            end
+            table.insert(lines, table.concat(parts))
+        end
+
         -- Room row.
         local parts = {}
         for col = 1, grid_w do
             local idx = (row - 1) * grid_w + col
-            table.insert(parts, "O")
+            -- West off-screen arrow (first column only to avoid connector conflict).
+            if col == 1 and off[idx] and off[idx].west then
+                table.insert(parts, "<")
+            end
+            table.insert(parts, room_str(idx))
             if col < grid_w then
                 local right = idx + 1
-                table.insert(parts, has_edge(idx, right) and "-" or " ")
+                table.insert(parts, has_edge(idx, right) and "---" or "   ")
+            else
+                -- East off-screen arrow on the last column.
+                if off[idx] and off[idx].east then
+                    table.insert(parts, ">")
+                end
             end
         end
         table.insert(lines, table.concat(parts))
 
-        -- Vertical connector row (omit after the last room row).
-        if row < grid_h then
+        -- South connector / off-screen row.
+        if row < grid_h or any_south_off(row) then
             local vparts = {}
             for col = 1, grid_w do
                 local idx = (row - 1) * grid_w + col
                 local below = idx + grid_w
-                table.insert(vparts, has_edge(idx, below) and "|" or " ")
-                if col < grid_w then table.insert(vparts, " ") end
+                local s_off  = off[idx] and off[idx].south
+                local s_edge = row < grid_h and has_edge(idx, below)
+                if s_off then
+                    table.insert(vparts, " v ")
+                elseif s_edge then
+                    table.insert(vparts, " | ")
+                else
+                    table.insert(vparts, "   ")
+                end
+                if col < grid_w then table.insert(vparts, "   ") end
             end
             table.insert(lines, table.concat(vparts))
         end
     end
-    return table.concat(lines, "\n")
+
+    local result = table.concat(lines, "\n")
+    if #legend > 0 then
+        result = result .. "\n" .. table.concat(legend, "\n")
+    end
+    return result
 end
 
 --- Log diagnostic information for a failed generation attempt.
 ---@param grid ProcgenGrid
 ---@param g ConnectionGraph
 ---@param attempt integer
-local function log_failure(grid, g, attempt)
+---@param offscreen_edges {cell_index: integer, face: string}[]?
+---@param placement ProcgenPlacement?
+local function log_failure(grid, g, attempt, offscreen_edges, placement)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     local col_str = "{" .. table.concat(grid.col_widths, ", ") .. "}"
@@ -209,7 +296,7 @@ local function log_failure(grid, g, attempt)
         .. "  grid=" .. grid_w .. "x" .. grid_h
         .. "  col_widths=" .. col_str
         .. "  row_heights=" .. row_str
-        .. "\n" .. ascii_grid(grid, g)
+        .. "\n" .. ascii_grid(grid, g, offscreen_edges, placement)
     )
 end
 
@@ -331,7 +418,7 @@ function chunk_selector.generate(theme, grid, chunks, rng, objective)
                 offscreen_edges = offscreen_edges,
             }
         end
-        log_failure(grid, g, attempt)
+        log_failure(grid, g, attempt, offscreen_edges, p)
     end
     error("chunk_selector: cannot satisfy connection graph after "
         .. MAX_GRAPH_RETRIES .. " regeneration attempts")
