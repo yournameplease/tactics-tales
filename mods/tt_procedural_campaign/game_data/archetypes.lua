@@ -86,7 +86,11 @@ local archetype_list = {
             { type = "filler" },
         },
 
-        filler_pool      = { "procedural_castle", "procedural_cave" },
+        filler_pool      = {
+            "procedural_castle_kill_boss",
+            "procedural_cave_escape",
+            "procedural_cave_rout",
+        },
         recruitment_rate = 0,
 
         faction_pool     = { bandits = 1, cultists = 1, militia = 1 },

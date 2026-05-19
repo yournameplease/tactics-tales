@@ -62,11 +62,35 @@ local battles = {
             "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
         )
     end,
+    ["procedural_castle_kill_boss"] = function(campaign_config, rng_context, _map_context)
+        return procgen_resolver.build_procgen_mission(
+            campaign_config,
+            rng_context,
+            "procedural_castle_kill_boss",
+            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
+        )
+    end,
     ["procedural_cave"] = function(campaign_config, rng_context, _map_context)
         return procgen_resolver.build_procgen_mission(
             campaign_config,
             rng_context,
             "procedural_cave",
+            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
+        )
+    end,
+    ["procedural_cave_escape"] = function(campaign_config, rng_context, _map_context)
+        return procgen_resolver.build_procgen_mission(
+            campaign_config,
+            rng_context,
+            "procedural_cave_escape",
+            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
+        )
+    end,
+    ["procedural_cave_rout"] = function(campaign_config, rng_context, _map_context)
+        return procgen_resolver.build_procgen_mission(
+            campaign_config,
+            rng_context,
+            "procedural_cave_rout",
             "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
         )
     end,
