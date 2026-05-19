@@ -132,6 +132,50 @@ describe("tactics.battle.map.procgen.graph", function()
         end)
     end)
 
+    describe("node_eccentricities", function()
+        local function make_graph(adj)
+            local edges = {}
+            for a, neighbors in ipairs(adj) do
+                for _, b in ipairs(neighbors) do
+                    if a < b then table.insert(edges, { a, b }) end
+                end
+            end
+            return { edges = edges, adjacency = adj }
+        end
+
+        it("single-node graph has eccentricity 0", function()
+            local g = make_graph({ {} })
+            local ecc = graph.node_eccentricities(g)
+            luassert.are_equal(0, ecc[1])
+        end)
+
+        it("2-node graph: both nodes have eccentricity 1", function()
+            local g = make_graph({ { 2 }, { 1 } })
+            local ecc = graph.node_eccentricities(g)
+            luassert.are_equal(1, ecc[1])
+            luassert.are_equal(1, ecc[2])
+        end)
+
+        it("3-node chain: center has lower eccentricity than ends", function()
+            -- Chain: 1-2-3. Eccentricities: 1→2, 2→1, 3→2.
+            local g = make_graph({ { 2 }, { 1, 3 }, { 2 } })
+            local ecc = graph.node_eccentricities(g)
+            luassert.are_equal(2, ecc[1])
+            luassert.are_equal(1, ecc[2])
+            luassert.are_equal(2, ecc[3])
+        end)
+
+        it("star graph: hub has lower eccentricity than spokes", function()
+            -- Star: hub=1 connected to 2,3,4. Hub ecc=1, spoke ecc=2.
+            local g = make_graph({ { 2, 3, 4 }, { 1 }, { 1 }, { 1 } })
+            local ecc = graph.node_eccentricities(g)
+            luassert.are_equal(1, ecc[1])
+            luassert.are_equal(2, ecc[2])
+            luassert.are_equal(2, ecc[3])
+            luassert.are_equal(2, ecc[4])
+        end)
+    end)
+
     describe("roll_offscreen_edges", function()
         local function make_offscreen_theme(prob)
             return { off_screen_edge_probability = prob }
