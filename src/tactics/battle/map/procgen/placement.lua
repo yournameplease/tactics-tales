@@ -29,7 +29,13 @@ function placement.select(g, objective, rng)
         for node, d in pairs(depths) do
             if d == max_d then table.insert(candidates, node) end
         end
-        table.sort(candidates)
+        for i = 1, #candidates - 1 do
+            for j = i + 1, #candidates do
+                if candidates[j] < candidates[i] then
+                    candidates[i], candidates[j] = candidates[j], candidates[i]
+                end
+            end
+        end
         local deployment_cell = candidates[rng:rndi(#candidates) + 1]
         if objective == "kill_boss" then
             return { deployment_cell = deployment_cell, boss_cell = far_cell }
@@ -50,17 +56,23 @@ function placement.select(g, objective, rng)
                 table.insert(candidates, { node = node, ecc = e, degree = #(g.adjacency[node] or {}) })
             end
         end
-        table.sort(candidates, function(a, b)
-            if a.ecc ~= b.ecc then return a.ecc < b.ecc end
-            if a.degree ~= b.degree then return a.degree > b.degree end
-            return a.node < b.node
-        end)
-        local min_ecc = candidates[1].ecc
-        local max_deg = candidates[1].degree
+        local min_ecc = math.huge
+        for _, c in ipairs(candidates) do
+            if c.ecc < min_ecc then min_ecc = c.ecc end
+        end
+        local max_deg = -1
+        for _, c in ipairs(candidates) do
+            if c.ecc == min_ecc and c.degree > max_deg then max_deg = c.degree end
+        end
         local top = {}
         for _, c in ipairs(candidates) do
             if c.ecc == min_ecc and c.degree == max_deg then
                 table.insert(top, c.node)
+            end
+        end
+        for i = 1, #top - 1 do
+            for j = i + 1, #top do
+                if top[j] < top[i] then top[i], top[j] = top[j], top[i] end
             end
         end
         local deployment_cell = top[rng:rndi(#top) + 1]
