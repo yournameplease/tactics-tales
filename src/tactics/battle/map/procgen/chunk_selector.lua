@@ -2,8 +2,9 @@
 --- Chunk selection with deployment cell choice and exit-overlap retry.
 --- See docs/specs/procgen-map-spec.md §8 steps 5–7.
 
-local graph_mod    = require("src.tactics.battle.map.procgen.graph")
-local grid_layout  = require("src.tactics.battle.map.procgen.grid_layout")
+local graph_mod     = require("src.tactics.battle.map.procgen.graph")
+local grid_layout   = require("src.tactics.battle.map.procgen.grid_layout")
+local placement_mod = require("src.tactics.battle.map.procgen.placement")
 
 local MAX_CELL_RETRIES = 10
 local MAX_GRAPH_RETRIES = 10
@@ -16,6 +17,7 @@ local chunk_selector = {}
 
 ---@class ChunkGenerationResult : ChunkSelection
 ---@field graph ConnectionGraph
+---@field placement ProcgenPlacement
 
 -- ---------------------------------------------------------------------------
 -- Exit-zone helpers
@@ -55,30 +57,41 @@ local function required_faces(idx, adj, grid_w)
     return faces
 end
 
+local SPECIAL_TAGS = { deployment = true, boss_room = true, escape_zone = true }
+
 ---@param chunk ChunkRecord
----@return boolean
-local function has_deployment_tag(chunk)
+---@return string? first special tag found, or nil
+local function get_special_tag(chunk)
     for _, t in ipairs(chunk.tags) do
-        if t == "deployment" then return true end
+        if SPECIAL_TAGS[t] then return t end
     end
-    return false
+    return nil
+end
+
+---@param idx integer
+---@param p ProcgenPlacement
+---@return string?
+local function cell_required_tag(idx, p)
+    if idx == p.deployment_cell then return "deployment" end
+    if idx == p.boss_cell        then return "boss_room"  end
+    if idx == p.escape_cell      then return "escape_zone" end
+    return nil
 end
 
 --- Filter `chunks` to those valid for a cell with interior dims `cw`×`ch`.
---- `need_deployment` gates whether the deployment tag is required or excluded.
+--- `required_tag` is the special tag required for this cell (nil for regular cells).
 --- Only chunks with exit zones on all `faces` are included.
 ---@param chunks ChunkRecord[]
 ---@param cw integer
 ---@param ch integer
----@param need_deployment boolean
+---@param required_tag string?
 ---@param faces table<string, true>
 ---@return ChunkRecord[]
-local function filter_candidates(chunks, cw, ch, need_deployment, faces)
+local function filter_candidates(chunks, cw, ch, required_tag, faces)
     local result = {}
     for _, chunk in ipairs(chunks) do
         if chunk.width == cw and chunk.height == ch then
-            local is_dep = has_deployment_tag(chunk)
-            if is_dep == need_deployment then
+            if get_special_tag(chunk) == required_tag then
                 local ok = true
                 for face in pairs(faces) do
                     if not chunk.exits[face] then ok = false; break end
@@ -210,14 +223,13 @@ end
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
 ---@param offscreen_edges {cell_index: integer, face: string}[]?
+---@param placement ProcgenPlacement
 ---@return ChunkSelection?
 ---@return string?
-function chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
+function chunk_selector.select(grid, g, chunks, rng, offscreen_edges, placement)
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     local n = grid_w * grid_h
-
-    local deployment_cell = rng:rndi(n) + 1
 
     -- Pre-compute additional faces required by off-screen edges.
     local offscreen_required = {}
@@ -241,16 +253,17 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
     for idx = 1, n do
         local col = ((idx - 1) % grid_w) + 1
         local row = math.floor((idx - 1) / grid_w) + 1
+        local required_tag = cell_required_tag(idx, placement)
         local candidates = filter_candidates(
             chunks,
             grid.col_widths[col],
             grid.row_heights[row],
-            idx == deployment_cell,
+            required_tag,
             all_faces(idx)
         )
         if #candidates == 0 then
             return nil, "no valid chunk for cell " .. idx
-                .. " (deployment=" .. tostring(idx == deployment_cell) .. ")"
+                .. " (required_tag=" .. tostring(required_tag) .. ")"
         end
         assignment[idx] = rng:choose_random_from_list(candidates)
     end
@@ -266,7 +279,7 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
                     chunks,
                     grid.col_widths[col],
                     grid.row_heights[row],
-                    idx == deployment_cell,
+                    cell_required_tag(idx, placement),
                     all_faces(idx)
                 )
                 if #candidates > 0 then
@@ -283,7 +296,7 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
             .. #bad .. " cell(s) still failing after " .. MAX_CELL_RETRIES .. " retries"
     end
 
-    return { assignment = assignment, deployment_cell = deployment_cell }
+    return { assignment = assignment, deployment_cell = placement.deployment_cell }
 end
 
 --- Generate chunks for all cells, regenerating the connection graph up to MAX_GRAPH_RETRIES
@@ -293,18 +306,22 @@ end
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
 ---@param offscreen_edges {cell_index: integer, face: string}[]?
+---@param objective string  Battle objective type passed to placement_mod.select
 ---@return ChunkGenerationResult
-function chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges)
+function chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges, objective)
+    objective = objective or "rout"
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     for attempt = 1, MAX_GRAPH_RETRIES do
         local g = graph_mod.generate(theme, grid_w, grid_h, rng)
-        local result = chunk_selector.select(grid, g, chunks, rng, offscreen_edges)
+        local p = placement_mod.select(g, objective, rng)
+        local result = chunk_selector.select(grid, g, chunks, rng, offscreen_edges, p)
         if result then
             return {
-                assignment = result.assignment,
-                deployment_cell = result.deployment_cell,
-                graph = g,
+                assignment      = result.assignment,
+                deployment_cell = p.deployment_cell,
+                placement       = p,
+                graph           = g,
             }
         end
         log_failure(grid, g, attempt)
