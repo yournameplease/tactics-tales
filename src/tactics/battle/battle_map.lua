@@ -52,6 +52,7 @@ local lists = require("src.tactics.util.lists")
 ---@field layers MapLayers Sprite layers making up the map.
 ---@field metadata MapMetadata Spawn point and event metadata.
 ---@field offscreen_exits {face: string, min: integer, max: integer}[]? Off-screen exit passages for enemy reinforcements.
+---@field procgen_placement ProcgenPlacement? Objective-aware cell placement for procgen maps.
 local BattleMap = {}
 BattleMap.__index = BattleMap
 
