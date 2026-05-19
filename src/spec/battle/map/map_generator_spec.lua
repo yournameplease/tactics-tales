@@ -625,28 +625,51 @@ describe("battle.map.map_generator", function()
 
     describe("load_map (procgen type)", function()
         -- Fixture chunk pool covering all cell sizes used by the castle theme
-        -- (both 3×3 and 2×2 grid shapes), each with deployment and open variants.
+        -- (both 3×3 and 2×2 grid shapes), each with deployment, open, boss_room,
+        -- and escape_zone variants.
         local FIXTURE_CHUNKS = table.concat({
             "[deploy_3x3]", "deployment", "5 5",
             "#^^^#", "<ddd>", "<ddd>", "<ddd>", "#vvv#", "",
             "[open_3x3]", "5 5",
             "#^^^#", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[boss_3x3]", "boss_room", "5 5",
+            "#^^^#", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[escape_3x3]", "escape_zone", "5 5",
+            "#^^^#", "<...>", "<...>", "<...>", "#vvv#", "",
             "[deploy_4x3]", "deployment", "6 5",
             "#^^^^#", "<dddd>", "<dddd>", "<dddd>", "#vvvv#", "",
             "[open_4x3]", "6 5",
+            "#^^^^#", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[boss_4x3]", "boss_room", "6 5",
+            "#^^^^#", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[escape_4x3]", "escape_zone", "6 5",
             "#^^^^#", "<....>", "<....>", "<....>", "#vvvv#", "",
             "[deploy_3x4]", "deployment", "5 6",
             "#^^^#", "<ddd>", "<ddd>", "<ddd>", "<ddd>", "#vvv#", "",
             "[open_3x4]", "5 6",
             "#^^^#", "<...>", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[boss_3x4]", "boss_room", "5 6",
+            "#^^^#", "<...>", "<...>", "<...>", "<...>", "#vvv#", "",
+            "[escape_3x4]", "escape_zone", "5 6",
+            "#^^^#", "<...>", "<...>", "<...>", "<...>", "#vvv#", "",
             "[deploy_4x4]", "deployment", "6 6",
             "#^^^^#", "<dddd>", "<dddd>", "<dddd>", "<dddd>", "#vvvv#", "",
             "[open_4x4]", "6 6",
+            "#^^^^#", "<....>", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[boss_4x4]", "boss_room", "6 6",
+            "#^^^^#", "<....>", "<....>", "<....>", "<....>", "#vvvv#", "",
+            "[escape_4x4]", "escape_zone", "6 6",
             "#^^^^#", "<....>", "<....>", "<....>", "<....>", "#vvvv#", "",
             "[deploy_6x6]", "deployment", "8 8",
             "#^^^^^^#", "<dddddd>", "<dddddd>", "<dddddd>",
             "<dddddd>", "<dddddd>", "<dddddd>", "#vvvvvv#", "",
             "[open_6x6]", "8 8",
+            "#^^^^^^#", "<......>", "<......>", "<......>",
+            "<......>", "<......>", "<......>", "#vvvvvv#", "",
+            "[boss_6x6]", "boss_room", "8 8",
+            "#^^^^^^#", "<......>", "<......>", "<......>",
+            "<......>", "<......>", "<......>", "#vvvvvv#", "",
+            "[escape_6x6]", "escape_zone", "8 8",
             "#^^^^^^#", "<......>", "<......>", "<......>",
             "<......>", "<......>", "<......>", "#vvvvvv#",
         }, "\n")
@@ -693,6 +716,44 @@ describe("battle.map.map_generator", function()
             local map2 = map_generator.load_map(DEF, {}, {}, 42)
             restore()
             luassert.are_same(ground_snapshot(map1), ground_snapshot(map2))
+        end)
+
+        -- AC#4: kill_boss placement
+        it("kill_boss map has deployment_cell != boss_cell and no escape_cell", function()
+            local restore = stub_fetch_chunks()
+            local def = { type = "procgen", theme = "castle", chunks = "fixture.chunks", objective = "kill_boss" }
+            local map = map_generator.load_map(def, {}, {}, 1)
+            restore()
+            luassert.is_not_nil(map.procgen_placement)
+            luassert.is_not_nil(map.procgen_placement.deployment_cell)
+            luassert.is_not_nil(map.procgen_placement.boss_cell)
+            luassert.are_not_equal(map.procgen_placement.deployment_cell, map.procgen_placement.boss_cell)
+            luassert.is_nil(map.procgen_placement.escape_cell)
+        end)
+
+        -- AC#5: escape placement
+        it("escape map has deployment_cell != escape_cell and no boss_cell", function()
+            local restore = stub_fetch_chunks()
+            local def = { type = "procgen", theme = "castle", chunks = "fixture.chunks", objective = "escape" }
+            local map = map_generator.load_map(def, {}, {}, 1)
+            restore()
+            luassert.is_not_nil(map.procgen_placement)
+            luassert.is_not_nil(map.procgen_placement.deployment_cell)
+            luassert.is_not_nil(map.procgen_placement.escape_cell)
+            luassert.are_not_equal(map.procgen_placement.deployment_cell, map.procgen_placement.escape_cell)
+            luassert.is_nil(map.procgen_placement.boss_cell)
+        end)
+
+        -- AC#6: rout placement
+        it("rout map has deployment_cell and no boss_cell or escape_cell", function()
+            local restore = stub_fetch_chunks()
+            local def = { type = "procgen", theme = "castle", chunks = "fixture.chunks", objective = "rout" }
+            local map = map_generator.load_map(def, {}, {}, 1)
+            restore()
+            luassert.is_not_nil(map.procgen_placement)
+            luassert.is_not_nil(map.procgen_placement.deployment_cell)
+            luassert.is_nil(map.procgen_placement.boss_cell)
+            luassert.is_nil(map.procgen_placement.escape_cell)
         end)
     end)
 end)

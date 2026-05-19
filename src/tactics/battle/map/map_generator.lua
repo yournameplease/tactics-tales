@@ -20,6 +20,7 @@
 ---@field theme string Theme name (key in the themes table, e.g. "castle").
 ---@field chunks string Path to the .chunks file (passed to chunk_parser.load_theme).
 ---@field tileset_name string? Tileset stem for gfx_registry lookup (e.g. "paper_tileset").
+---@field objective string? Battle objective type ("kill_boss", "escape", "rout"). Defaults to "rout".
 
 local point           = require("src.tactics.util.point")
 local battle_map      = require("src.tactics.battle.battle_map")
@@ -326,7 +327,7 @@ local function load_procgen(definition, gfx_registry, seed)
     local W = #grid.col_widths
     local H = #grid.row_heights
     local offscreen_edges = graph_mod.roll_offscreen_edges(theme, W, H, rng)
-    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges)
+    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, offscreen_edges, definition.objective)
     local assembled = glyph_grid_mod.assemble(theme, grid, gen_result, offscreen_edges, rng)
     local rows = assembled.rows
     local base_tile_id = (gfx_registry or {})[definition.tileset_name or ""] or 0
@@ -341,6 +342,7 @@ local function load_procgen(definition, gfx_registry, seed)
     end
     local map = autotiler.build(rows, base_tile_id)
     map.offscreen_exits = assembled.offscreen_exits
+    map.procgen_placement = gen_result.placement
     return map
 end
 
