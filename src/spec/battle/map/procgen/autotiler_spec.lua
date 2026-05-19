@@ -133,11 +133,12 @@ describe("tactics.battle.map.procgen.autotiler", function()
             luassert.are_same(point.of(4, 0), labels.player_deployment[1])
         end)
 
-        it("'g' glyph maps to enemy_commander label (AC#2)", function()
+        it("'g' glyph maps to enemy_tank label (AC#2)", function()
             local row1 = "g" .. string.rep("#", 15)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
-            luassert.are_equal(1, #map.tile_labels.enemy_commander)
-            luassert.are_same(point.of(0, 0), map.tile_labels.enemy_commander[1])
+            luassert.are_equal(1, #map.tile_labels.enemy_tank)
+            luassert.are_same(point.of(0, 0), map.tile_labels.enemy_tank[1])
+            luassert.is_nil(map.tile_labels.enemy_commander)
         end)
 
         -- AC#3 — 'p' and 'a' produce no tile labels
@@ -164,6 +165,71 @@ describe("tactics.battle.map.procgen.autotiler", function()
             local row1 = string.rep(".", 8) .. string.rep("#", 8)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.are_same({}, map.tile_labels)
+        end)
+
+        -- Boss glyph tests
+        it("uppercase 'G' maps to enemy_tank_boss tile label and renders as floor", function()
+            local row1 = "G" .. string.rep("#", 15)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            luassert.are_equal(1, #map.tile_labels.enemy_tank_boss)
+            luassert.are_same(point.of(0, 0), map.tile_labels.enemy_tank_boss[1])
+            luassert.are_equal(1, map.layers.terrain.ground:get(0, 0), "G should be floor (1)")
+        end)
+
+        it("uppercase boss glyphs all map to correct labels and render as floor", function()
+            -- T and G both map to enemy_tank_boss; use only T to get exactly 1
+            local row1 = "IRTC" .. string.rep("#", 12)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            luassert.are_equal(1, #map.tile_labels.enemy_infantry_boss)
+            luassert.are_equal(1, #map.tile_labels.enemy_ranged_boss)
+            luassert.are_equal(1, #map.tile_labels.enemy_tank_boss)
+            luassert.are_equal(1, #map.tile_labels.enemy_commander_boss)
+            for x = 0, 3 do
+                luassert.are_equal(1, map.layers.terrain.ground:get(x, 0),
+                    "boss glyph at x=" .. x .. " should be floor (1)")
+            end
+        end)
+
+        it("uppercase 'T' maps to enemy_tank_boss separately from 'G'", function()
+            local row1 = "TG" .. string.rep("#", 14)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            luassert.are_equal(2, #map.tile_labels.enemy_tank_boss)
+        end)
+
+        -- spawn_label_meta tests
+        it("spawn_label_meta is populated for labels with tile positions", function()
+            local row1 = "G" .. string.rep("#", 15)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            luassert.is_not_nil(map.spawn_label_meta)
+            local meta = map.spawn_label_meta["enemy_tank_boss"]
+            luassert.is_not_nil(meta)
+            luassert.are_equal("enemy_tank", meta.role)
+            luassert.are_same({ "boss" }, meta.tags)
+        end)
+
+        it("spawn_label_meta for normal glyphs has role and no tags", function()
+            local row1 = "i" .. string.rep("#", 15)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            local meta = map.spawn_label_meta["enemy_infantry"]
+            luassert.is_not_nil(meta)
+            luassert.are_equal("enemy_infantry", meta.role)
+            luassert.is_nil(meta.tags)
+        end)
+
+        it("spawn_label_meta only contains labels with at least one tile", function()
+            local row1 = "i" .. string.rep("#", 15)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            luassert.is_nil(map.spawn_label_meta["enemy_tank_boss"])
+            luassert.is_nil(map.spawn_label_meta["enemy_ranged"])
+        end)
+
+        it("spawn_label_meta player_deployment has role 'player'", function()
+            local row1 = "d" .. string.rep("#", 15)
+            local map  = autotiler.build(make_grid({ [1] = row1 }))
+            local meta = map.spawn_label_meta["player_deployment"]
+            luassert.is_not_nil(meta)
+            luassert.are_equal("player", meta.role)
+            luassert.is_nil(meta.tags)
         end)
     end)
 end)
