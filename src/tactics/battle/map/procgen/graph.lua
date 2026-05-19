@@ -167,6 +167,23 @@ function graph.node_depths(g, start)
     return bfs_distances(g, far)
 end
 
+--- Compute the eccentricity of every node: the maximum BFS distance from that
+--- node to any other reachable node.
+---@param g ConnectionGraph
+---@return integer[] eccentricities keyed by node index
+function graph.node_eccentricities(g)
+    local result = {}
+    for node in pairs(g.adjacency) do
+        local dist = bfs_distances(g, node)
+        local max_dist = 0
+        for _, d in pairs(dist) do
+            if d > max_dist then max_dist = d end
+        end
+        result[node] = max_dist
+    end
+    return result
+end
+
 --- Return the subset of `g.edges` whose removal disconnects the graph.
 ---@param g ConnectionGraph
 ---@return integer[][]
