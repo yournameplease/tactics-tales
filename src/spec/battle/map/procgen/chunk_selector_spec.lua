@@ -82,6 +82,36 @@ local function south_first_chunk(name)
     }
 end
 
+--- Chunk tagged "boss_room" with exits on all four faces.
+---@param name string
+---@return ChunkRecord
+local function boss_chunk(name)
+    return {
+        name = name, width = 3, height = 3,
+        tags = { "boss_room" },
+        rows = { "#^^^#", "<...>", "<...>", "<...>", "#vvv#" },
+        exits = {
+            north = { min = 2, max = 4 }, south = { min = 2, max = 4 },
+            east  = { min = 2, max = 4 }, west  = { min = 2, max = 4 },
+        },
+    }
+end
+
+--- Chunk tagged "escape_zone" with exits on all four faces.
+---@param name string
+---@return ChunkRecord
+local function escape_chunk(name)
+    return {
+        name = name, width = 3, height = 3,
+        tags = { "escape_zone" },
+        rows = { "#^^^#", "<...>", "<...>", "<...>", "#vvv#" },
+        exits = {
+            north = { min = 2, max = 4 }, south = { min = 2, max = 4 },
+            east  = { min = 2, max = 4 }, west  = { min = 2, max = 4 },
+        },
+    }
+end
+
 --- Chunk with north exit at position 4 only (rightmost).
 --- Incompatible with `south_first_chunk` — exit zones never overlap.
 ---@param name string
@@ -122,7 +152,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy_1", true),
             }
             local rng = random.new(42)
-            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
             luassert.is_not_nil(result.assignment)
@@ -135,7 +165,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(10)
-            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
             for _, chunk in ipairs(result.assignment) do
@@ -151,7 +181,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(7)
-            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
             local deploy_count = 0
@@ -169,7 +199,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 all_exits_chunk("deploy", true),
             }
             local rng = random.new(3)
-            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
             local dep_cell = result.deployment_cell
@@ -189,7 +219,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             local rng = random.new(99)
             local g = make_2x2_graph(99)
             local grid = make_2x2_grid()
-            local result = chunk_selector.select(grid, g, pool, rng)
+            local result = chunk_selector.select(grid, g, pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
             -- For each edge, verify exit zones overlap in map coordinates.
@@ -233,7 +263,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 north_last_chunk("bot"),
             }
             local rng = random.new(1)
-            local result, err = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng)
+            local result, err = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_nil(result)
             luassert.is_not_nil(err)
@@ -255,7 +285,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             -- Only the all_exits chunks satisfy the 1×2 grid's exit overlap requirement.
             -- The retry loop should find them.
             local rng = random.new(5)
-            local result = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng)
+            local result = chunk_selector.select(make_1x2_grid(), make_1x2_graph(), pool, rng, nil, { deployment_cell = 1 })
 
             luassert.is_not_nil(result)
         end)
@@ -296,7 +326,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             local pool = { all_exit_deploy() }
             local offscreen_edges = { { cell_index = 1, face = "west" } }
             local rng = random.new(1)
-            local result = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges)
+            local result = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges, { deployment_cell = 1 })
             luassert.is_not_nil(result)
             luassert.is_not_nil(result.assignment[1].exits.west)
         end)
@@ -305,7 +335,7 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             local pool = { no_exit_deploy() }
             local offscreen_edges = { { cell_index = 1, face = "west" } }
             local rng = random.new(1)
-            local result, err = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges)
+            local result, err = chunk_selector.select(make_1x1_grid(), make_1x1_graph(), pool, rng, offscreen_edges, { deployment_cell = 1 })
             luassert.is_nil(result)
             luassert.is_not_nil(err)
         end)
@@ -320,8 +350,64 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             }
             local offscreen_edges = { { cell_index = 2, face = "east" } }
             local rng = random.new(42)
-            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, offscreen_edges)
+            local result = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, offscreen_edges, { deployment_cell = 1 })
             luassert.is_not_nil(result)
+        end)
+    end)
+
+    describe("select with placement constraints", function()
+        it("places boss_room chunk at the boss_cell from placement", function()
+            local pool = {
+                all_exits_chunk("deploy", true),
+                all_exits_chunk("normal"),
+                boss_chunk("boss"),
+            }
+            local g = make_2x2_graph()
+            local rng = random.new(1)
+            local p = { deployment_cell = 1, boss_cell = 2 }
+            local result = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, p)
+
+            luassert.is_not_nil(result)
+            local boss_assigned = result.assignment[2]
+            local has_boss = false
+            for _, t in ipairs(boss_assigned.tags) do
+                if t == "boss_room" then has_boss = true end
+            end
+            luassert.is_true(has_boss)
+        end)
+
+        it("places escape_zone chunk at the escape_cell from placement", function()
+            local pool = {
+                all_exits_chunk("deploy", true),
+                all_exits_chunk("normal"),
+                escape_chunk("escape"),
+            }
+            local g = make_2x2_graph()
+            local rng = random.new(1)
+            local p = { deployment_cell = 1, escape_cell = 3 }
+            local result = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, p)
+
+            luassert.is_not_nil(result)
+            local esc_assigned = result.assignment[3]
+            local has_escape = false
+            for _, t in ipairs(esc_assigned.tags) do
+                if t == "escape_zone" then has_escape = true end
+            end
+            luassert.is_true(has_escape)
+        end)
+
+        it("returns nil when no boss_room chunk exists for a boss_cell constraint", function()
+            local pool = {
+                all_exits_chunk("deploy", true),
+                all_exits_chunk("normal_1"),
+                all_exits_chunk("normal_2"),
+            }
+            local g = make_2x2_graph()
+            local rng = random.new(1)
+            local p = { deployment_cell = 1, boss_cell = 2 }
+            local result, err = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, p)
+            luassert.is_nil(result)
+            luassert.is_not_nil(err)
         end)
     end)
 

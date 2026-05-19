@@ -130,7 +130,7 @@ local function generate(seed)
     local pool  = make_pool()
     local rng   = random.new(seed)
     local g     = graph_mod.generate(theme, 2, 2, rng)
-    local sel, err = chunk_selector.select(grid, g, pool, rng)
+    local sel, err = chunk_selector.select(grid, g, pool, rng, nil, { deployment_cell = 1 })
     assert(sel, "generate helper: chunk_selector.select failed: " .. tostring(err))
     return {
         assignment       = sel.assignment,
@@ -189,7 +189,7 @@ local function generate_bordered(seed, offscreen_edges)
     local pool  = { make_6x6_chunk("normal"), make_6x6_chunk("deploy", true) }
     local rng   = random.new(seed)
     local g     = graph_mod.generate(theme, 2, 2, rng)
-    local sel, err = chunk_selector.select(grid, g, pool, rng, offscreen_edges or {})
+    local sel, err = chunk_selector.select(grid, g, pool, rng, offscreen_edges or {}, { deployment_cell = 1 })
     assert(sel, "generate_bordered: chunk_selector.select failed: " .. tostring(err))
     return {
         assignment      = sel.assignment,
