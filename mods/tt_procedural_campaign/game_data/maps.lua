@@ -11,8 +11,11 @@ local MAP_DEFINITIONS = {
     village_overrun = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/village_overrun"),
     cavern_fortress = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/cavern_fortress"),
     castle_escape       = lib.libs.map.tiled("mods/tt_procedural_campaign/game_data/maps/castle_escape"),
-    procedural_castle   = lib.libs.map.procgen("castle", "mods/tt_procedural_campaign/game_data/chunks/castle.chunks", "paper_tileset"),
-    procedural_cave   = lib.libs.map.procgen("cave", "mods/tt_procedural_campaign/game_data/chunks/cave.chunks", "paper_tileset"),
+    procedural_castle        = lib.libs.map.procgen("castle", "mods/tt_procedural_campaign/game_data/chunks/castle.chunks", "paper_tileset"),
+    procedural_castle_kill_boss = lib.libs.map.procgen("castle", "mods/tt_procedural_campaign/game_data/chunks/castle.chunks", "paper_tileset", "kill_boss"),
+    procedural_cave          = lib.libs.map.procgen("cave", "mods/tt_procedural_campaign/game_data/chunks/cave.chunks", "paper_tileset"),
+    procedural_cave_escape   = lib.libs.map.procgen("cave", "mods/tt_procedural_campaign/game_data/chunks/cave.chunks", "paper_tileset", "escape"),
+    procedural_cave_rout     = lib.libs.map.procgen("cave", "mods/tt_procedural_campaign/game_data/chunks/cave.chunks", "paper_tileset", "rout"),
 }
 
 return MAP_DEFINITIONS

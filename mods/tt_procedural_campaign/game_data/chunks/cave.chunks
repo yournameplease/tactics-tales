@@ -22,6 +22,15 @@ rotate_90 flip_h flip_v
 <...>
 #vvv#
 
+[cave_3x3_dummy_escape]
+escape_zone rotate_90 flip_h flip_v
+5 5
+#^^^#
+<...>
+<...>
+<...>
+#vvv#
+
 [cave_3x3_entry]
 deployment rotate_90 flip_h flip_v
 5 5
@@ -38,6 +47,15 @@ deployment rotate_90 flip_h flip_v
 
 [cave_4x3]
 rotate_90 flip_h flip_v
+6 5
+#^^^^#
+<....>
+<....>
+<....>
+#vvvv#
+
+[cave_4x3_dummy_escape]
+escape_zone rotate_90 flip_h flip_v
 6 5
 #^^^^#
 <....>
@@ -68,6 +86,16 @@ rotate_90 flip_h flip_v
 <....>
 #vvvv#
 
+[cave_4x4_dummy_escape]
+escape_zone rotate_90 flip_h flip_v
+6 6
+#^^^^#
+<....>
+<....>
+<....>
+<....>
+#vvvv#
+
 [cave_4x4_entry]
 deployment rotate_90 flip_h flip_v
 6 6
@@ -84,6 +112,18 @@ deployment rotate_90 flip_h flip_v
 
 [cave_6x6]
 rotate_90 flip_h flip_v
+8 8
+#^^^^^^#
+<......>
+<......>
+<......>
+<......>
+<......>
+<......>
+#vvvvvv#
+
+[cave_6x6_dummy_escape]
+escape_zone rotate_90 flip_h flip_v
 8 8
 #^^^^^^#
 <......>
