@@ -1,9 +1,10 @@
 ---
 id: TASK-85
 title: Add enemy AI skill support
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-04 22:29'
+updated_date: '2026-05-20 13:45'
 labels: []
 milestone: m-13
 dependencies:

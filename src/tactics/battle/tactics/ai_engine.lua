@@ -34,6 +34,29 @@ local ai_engine = {
 ---@field destination Point Tile from which the target could eventually be attacked.
 ---@field target? BattleUnit The unit being approached.
 
+---@class SkillMovementOption
+---@field destination Point Tile the AI unit would move to before casting.
+---@field skill_id string Skill to cast.
+---@field target_tile Point Tile to target with the skill.
+
+--- Return true if `skill_id` is currently usable by `unit` given its `skill_def`.
+---@param unit BattleUnit
+---@param skill_id string
+---@param skill_def SkillDefinition
+---@return boolean
+local function skill_is_available(unit, skill_id, skill_def)
+    local state = unit.skill_states and unit.skill_states[skill_id]
+    if not state then return false end
+    if state.cooldown_remaining > 0 then return false end
+    if state.uses_remaining ~= nil and state.uses_remaining == 0 then return false end
+    for _, effect in ipairs(skill_def.effects) do
+        if effect.type == "hp_cost" and unit.hp_current < effect.amount then
+            return false
+        end
+    end
+    return true
+end
+
 --- Return true if shallow movement option `a` is strictly better than `b`.
 --- Priority: kill > no self-kill > no counterattack > damage > low self-damage > ally score.
 ---@param a? ShallowMovementOption
@@ -113,6 +136,8 @@ function AIEngine:compute_unit_ai(unit)
     local best_shallow_action = nil
     ---@type DeepMovementOption[]
     local deep_actions = {}
+    ---@type SkillMovementOption?
+    local best_skill_option = nil
 
     local targeting = unit.character:get_weapon_targeting()
 
@@ -182,7 +207,50 @@ function AIEngine:compute_unit_ai(unit)
         end)
     end
 
-    if best_shallow_action then
+    if ai.skill_priority then
+        local skill_defs = self.tactics_engine.skill_defs
+        all_tile_costs:foreachpoint(function(p, cost)
+            if best_skill_option then return end
+            if cost ~= nil
+                and cost.cost <= shallow_move_limit
+                and self.battle_map:tile_is_legal_destination(unit, p)
+            then
+                for _, skill_id in ipairs(unit.character.skill_loadout or {}) do
+                    if best_skill_option then break end
+                    local def = skill_defs[skill_id]
+                    if def and skill_is_available(unit, skill_id, def) then
+                        local tiles = def.targeting.get_selection_tiles(p, self.battle_map, unit.side)
+                        if #tiles > 0 then
+                            best_skill_option = {
+                                destination = p,
+                                skill_id = skill_id,
+                                target_tile = tiles[1],
+                            }
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    local use_skill = nil
+    if ai.skill_priority == "prefer" then
+        use_skill = best_skill_option
+    elseif ai.skill_priority == "fallback" and best_shallow_action == nil then
+        use_skill = best_skill_option
+    end
+
+    if use_skill then
+        local path = pathfinding.get_path_to_tile(all_tile_costs, use_skill.destination)
+        log.info(unit.id .. " will use skill " .. use_skill.skill_id)
+        self.tactics_engine:handle_move_and_skill(
+            unit,
+            use_skill.destination,
+            path,
+            use_skill.skill_id,
+            use_skill.target_tile
+        )
+    elseif best_shallow_action then
         local choice = best_shallow_action
 
         local destination = choice.destination
