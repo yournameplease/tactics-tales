@@ -1,8 +1,10 @@
 local luassert       = require("luassert")
 
-local resolver_mod   = require("tt_procedural_campaign.lib.procgen_mission_resolver")
-local compute_seed   = resolver_mod._compute_seed
-local build_units    = resolver_mod._build_units
+local resolver_mod          = require("tt_procedural_campaign.lib.procgen_mission_resolver")
+local compute_seed          = resolver_mod._compute_seed
+local build_units           = resolver_mod._build_units
+local victory_conditions_for = resolver_mod._victory_conditions_for
+local failure_conditions_for = resolver_mod._failure_conditions_for
 local campaign_state = require("src.tactics.campaign.campaign_state")
 local random         = require("src.tactics.util.random")
 
@@ -179,6 +181,55 @@ describe("tt_procedural_campaign.lib.procgen_mission_resolver", function()
                 if u.tile == "enemy_infantry" then enemy = u; break end
             end
             luassert.is_nil(enemy.tags)
+        end)
+    end)
+
+    -- ---------------------------------------------------------------------------
+    -- victory_conditions_for
+    -- ---------------------------------------------------------------------------
+
+    describe("_victory_conditions_for", function()
+        it("rout objective returns a single rout condition", function()
+            local conditions = victory_conditions_for("rout", {})
+            luassert.are_equal(1, #conditions)
+            luassert.are_equal("rout", conditions[1].type)
+        end)
+
+        it("kill_boss objective returns a single defeat_tagged condition", function()
+            local conditions = victory_conditions_for("kill_boss", {})
+            luassert.are_equal(1, #conditions)
+            luassert.are_equal("defeat_tagged", conditions[1].type)
+        end)
+
+        it("kill_boss condition targets the 'boss' tag", function()
+            local conditions = victory_conditions_for("kill_boss", {})
+            luassert.are_equal("boss", conditions[1].tag)
+        end)
+
+        it("unknown objective falls back to rout", function()
+            local conditions = victory_conditions_for("unknown", {})
+            luassert.are_equal(1, #conditions)
+            luassert.are_equal("rout", conditions[1].type)
+        end)
+    end)
+
+    -- ---------------------------------------------------------------------------
+    -- failure_conditions_for
+    -- ---------------------------------------------------------------------------
+
+    describe("_failure_conditions_for", function()
+        it("rout objective returns tagged_unit_dies for hero", function()
+            local conditions = failure_conditions_for("rout")
+            luassert.are_equal(1, #conditions)
+            luassert.are_equal("tagged_unit_dies", conditions[1].type)
+            luassert.are_equal("hero", conditions[1].tag)
+        end)
+
+        it("kill_boss objective returns tagged_unit_dies for hero", function()
+            local conditions = failure_conditions_for("kill_boss")
+            luassert.are_equal(1, #conditions)
+            luassert.are_equal("tagged_unit_dies", conditions[1].type)
+            luassert.are_equal("hero", conditions[1].tag)
         end)
     end)
 end)
