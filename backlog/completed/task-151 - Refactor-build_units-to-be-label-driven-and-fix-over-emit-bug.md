@@ -1,10 +1,10 @@
 ---
 id: TASK-151
 title: Refactor build_units to be label-driven and fix over-emit bug
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-19 22:50'
-updated_date: '2026-05-19 22:50'
+updated_date: '2026-05-20 00:04'
 labels: []
 milestone: m-23
 dependencies:
