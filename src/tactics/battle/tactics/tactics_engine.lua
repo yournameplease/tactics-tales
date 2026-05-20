@@ -617,6 +617,21 @@ function TacticsEngine:handle_move_and_attack(unit, destination, path, target)
     end)
 end
 
+--- Start a coroutine that moves `unit` to `destination`, executes `skill_id` on `target_tile`, then ends the action.
+---@param unit BattleUnit
+---@param destination Point
+---@param path Point[]
+---@param skill_id string
+---@param target_tile Point
+function TacticsEngine:handle_move_and_skill(unit, destination, path, skill_id, target_tile)
+    self.task_manager:start_routine(function()
+        self:move_unit(unit, destination, path)
+        local target = self.battle_map:get_at_tile(target_tile)
+        ---@cast target BattleUnit
+        self:skill_action(unit, skill_id, target)
+    end)
+end
+
 --- Apply `new_unit_properties` to each unit in `units`.
 ---@param units BattleUnit[]
 ---@param new_unit_properties NewUnitProperties

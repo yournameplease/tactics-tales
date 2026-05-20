@@ -128,9 +128,10 @@ local function make_battle_map(units_list, width, height, terrain_overrides)
 end
 
 --- Build a TacticsEngine spy that records the last dispatched method and its arguments.
+---@param skill_defs? table<string, table>
 ---@return table
-local function make_tactics_spy()
-    local spy = { method = nil, args = {} }
+local function make_tactics_spy(skill_defs)
+    local spy = { method = nil, args = {}, skill_defs = skill_defs or {} }
     function spy:handle_move_and_attack(unit, dest, path, target)
         self.method = "handle_move_and_attack"
         self.args = { unit = unit, dest = dest, path = path, target = target }
@@ -141,7 +142,60 @@ local function make_tactics_spy()
         self.args = { unit = unit, dest = dest, path = path }
     end
 
+    function spy:handle_move_and_skill(unit, dest, path, skill_id, target_tile)
+        self.method = "handle_move_and_skill"
+        self.args = { unit = unit, dest = dest, path = path, skill_id = skill_id, target_tile = target_tile }
+    end
+
     return spy
+end
+
+--- Build a skill definition that targets adjacent enemy units.
+---@param opts? {cooldown?: integer, uses?: integer, hp_cost?: integer}
+---@return table
+local function make_skill_def(opts)
+    opts = opts or {}
+    local effects = {}
+    if opts.hp_cost then
+        table.insert(effects, { type = "hp_cost", amount = opts.hp_cost })
+    end
+    table.insert(effects, { type = "damage", damage = 5, accuracy = 100 })
+    return {
+        name = "test_skill",
+        cooldown = opts.cooldown,
+        uses_per_battle = opts.uses,
+        effects = effects,
+        targeting = {
+            get_selection_tiles = function(origin, map, _side)
+                local out = {}
+                local deltas = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+                for _, d in ipairs(deltas) do
+                    local p = point.of(origin.x + d[1], origin.y + d[2])
+                    if map:tile_is_in_map(p) and map:get_at_tile(p) then
+                        table.insert(out, p)
+                    end
+                end
+                return out
+            end,
+        },
+    }
+end
+
+--- Build a unit with a skill loadout.
+---@param opts table
+---@param skill_ids string[]
+---@param skill_states? table<string, table>
+---@return table
+local function make_unit_with_skills(opts, skill_ids, skill_states)
+    local unit = make_unit(opts)
+    unit.character.skill_loadout = skill_ids
+    unit.skill_states = skill_states or {}
+    for _, sid in ipairs(skill_ids) do
+        if not unit.skill_states[sid] then
+            unit.skill_states[sid] = { cooldown_remaining = 0, uses_remaining = nil }
+        end
+    end
+    return unit
 end
 
 -- ---------------------------------------------------------------------------
@@ -347,6 +401,142 @@ describe("ai_engine", function()
             luassert.are_equal("handle_move_and_wait", spy.method)
             luassert.are_equal(1, spy.args.dest.x)
             luassert.are_equal(1, spy.args.dest.y)
+        end)
+
+        -- skill_priority tests
+        it("skill_priority=nil: uses attack when skill would also be valid (no regression)", function()
+            local skill_def = make_skill_def()
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil } },
+                { "fireball" }
+            )
+            local enemy = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy = make_tactics_spy({ fireball = skill_def })
+            local engine = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_attack", spy.method)
+        end)
+
+        it("skill_priority=prefer: uses skill when a valid target is adjacent", function()
+            local skill_def = make_skill_def()
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "prefer" } },
+                { "fireball" }
+            )
+            local enemy = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy = make_tactics_spy({ fireball = skill_def })
+            local engine = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_skill", spy.method)
+            luassert.are_equal("fireball", spy.args.skill_id)
+        end)
+
+        it("skill_priority=prefer: attacks when no skill target is reachable", function()
+            -- Skill never returns targets; enemy present so attack is possible.
+            local skill_no_target = {
+                name = "ally_heal",
+                effects = { { type = "heal", amount = 5 } },
+                targeting = {
+                    get_selection_tiles = function(_origin, _map, _side)
+                        return {}
+                    end,
+                },
+            }
+            local ai_unit2 = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "prefer" } },
+                { "heal" }
+            )
+            local enemy2 = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy2 = make_tactics_spy({ heal = skill_no_target })
+            local engine2 = ai_engine.new(make_battle_map({ ai_unit2, enemy2 }, 3, 3), spy2, tasks.task_manager())
+
+            engine2:compute_unit_ai(ai_unit2)
+
+            luassert.are_equal("handle_move_and_attack", spy2.method)
+        end)
+
+        it("skill_priority=fallback: attacks when an attack target is reachable", function()
+            local skill_def = make_skill_def()
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "fallback" } },
+                { "fireball" }
+            )
+            local enemy = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy = make_tactics_spy({ fireball = skill_def })
+            local engine = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_attack", spy.method)
+        end)
+
+        it("skill_priority=fallback: uses skill when no attack target exists but a skill target does", function()
+            -- skill_def targets units on the "enemy" side (self/allies); no "player" targets for attack
+            local self_buff = {
+                name = "self_buff",
+                effects = { { type = "buff", kind = "some_buff", duration = 1, amount = 5 } },
+                targeting = {
+                    get_selection_tiles = function(origin, map, _side)
+                        if map:get_at_tile(origin) then return { origin } end
+                        return {}
+                    end,
+                },
+            }
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "fallback" } },
+                { "self_buff" }
+            )
+            -- no player unit on map, so no attack target
+            local spy = make_tactics_spy({ self_buff = self_buff })
+            local engine = ai_engine.new(make_battle_map({ ai_unit }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_skill", spy.method)
+            luassert.are_equal("self_buff", spy.args.skill_id)
+        end)
+
+        it("skill on cooldown is not used", function()
+            local skill_def = make_skill_def()
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "prefer" } },
+                { "fireball" },
+                { fireball = { cooldown_remaining = 2, uses_remaining = nil } }
+            )
+            local enemy = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy = make_tactics_spy({ fireball = skill_def })
+            local engine = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_attack", spy.method)
+        end)
+
+        it("skill with no uses remaining is not used", function()
+            local skill_def = make_skill_def({ uses = 2 })
+            local ai_unit = make_unit_with_skills(
+                { id = 1, tile = point.of(0, 0), side = "enemy", movement = 1,
+                  unit_ai = { move = "infinity", target_sides = { "player" }, exclude_tags = nil, skill_priority = "prefer" } },
+                { "fireball" },
+                { fireball = { cooldown_remaining = 0, uses_remaining = 0 } }
+            )
+            local enemy = make_unit({ id = 2, tile = point.of(0, 1), side = "player", hp = 10 })
+            local spy = make_tactics_spy({ fireball = skill_def })
+            local engine = ai_engine.new(make_battle_map({ ai_unit, enemy }, 3, 3), spy, tasks.task_manager())
+
+            engine:compute_unit_ai(ai_unit)
+
+            luassert.are_equal("handle_move_and_attack", spy.method)
         end)
 
         it("waits in place when the preferred attack tile is occupied by an ally", function()
