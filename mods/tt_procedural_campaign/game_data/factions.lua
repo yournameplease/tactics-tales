@@ -3,10 +3,10 @@ local factions = {
     bandits = {
         name        = "Bandits",
         tiers       = {
-            { enemy_infantry = "bandit_goon", enemy_commander = "bandit_boss",      enemy_tank = "bandit_guard" },
-            { enemy_infantry = "bandit_axe",  enemy_commander = "bandit_berzerker", enemy_tank = "bandit_guard" },
+            { enemy_infantry = "bandit_goon", enemy_commander = "bandit_boss",      enemy_ranged = "bandit_bow", enemy_tank = "bandit_guard" },
+            { enemy_infantry = "bandit_axe",  enemy_commander = "bandit_berzerker", enemy_ranged = "bandit_bow", enemy_tank = "bandit_guard" },
         },
-        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
+        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8, enemy_ranged = 3 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
         role_map    = { patrol = "enemy_infantry", guard = "enemy_tank", ambush = "enemy_ranged", boss = "enemy_commander" },
