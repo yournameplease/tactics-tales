@@ -76,18 +76,36 @@ local function build_units(campaign_config, battle_map)
     return units
 end
 
+---@param objective string
+---@param battle_map BattleMap
+---@return VictoryCondition[]
+local function victory_conditions_for(objective, battle_map)
+    if objective == "kill_boss" then
+        return { battle.victory.defeat_tagged("boss", "Defeat the boss") }
+    end
+    return { battle.victory.rout() }
+end
+
+---@param objective string
+---@return FailureCondition[]
+local function failure_conditions_for(objective)
+    return { battle.failure.tagged_unit_dies("hero") }
+end
+
 ---@param campaign_config CampaignConfig
 ---@param rng_context CampaignRngContext
 ---@param map_id string
 ---@param chunks_path string Path to the .chunks file for the castle theme.
+---@param objective? string Default "rout". Pass "kill_boss" to require defeating the boss.
 ---@return MissionDefinition
-local function build_procgen_mission(campaign_config, rng_context, map_id, chunks_path)
+local function build_procgen_mission(campaign_config, rng_context, map_id, chunks_path, objective)
+    objective = objective or "rout"
     local seed       = compute_seed(rng_context)
-    local definition = { type = "procgen", theme = "castle", chunks = chunks_path, tileset_name = "paper_tileset" }
+    local definition = { type = "procgen", theme = "castle", chunks = chunks_path, tileset_name = "paper_tileset", objective = objective }
     local battle_map = map_generator.load_map(definition, {}, nil, seed)
 
     log.debug("[procgen_mission] map=", map_id, " faction=", mem_text(campaign_config, "faction_id") or "bandits",
-        " tier=", get_tier(campaign_config), " seed=", seed)
+        " tier=", get_tier(campaign_config), " seed=", seed, " objective=", objective)
 
     local units = build_units(campaign_config, battle_map)
 
@@ -97,8 +115,8 @@ local function build_procgen_mission(campaign_config, rng_context, map_id, chunk
         map_id             = map_id,
         music              = 0,
         tile_labels        = {},
-        victory_conditions = { battle.victory.rout() },
-        failure_conditions = { battle.failure.tagged_unit_dies("hero") },
+        victory_conditions = victory_conditions_for(objective, battle_map),
+        failure_conditions = failure_conditions_for(objective),
         units              = units,
         scripts            = {},
         seed               = seed,
@@ -106,7 +124,9 @@ local function build_procgen_mission(campaign_config, rng_context, map_id, chunk
 end
 
 return {
-    build_procgen_mission = build_procgen_mission,
-    _compute_seed         = compute_seed,
-    _build_units          = build_units,
+    build_procgen_mission    = build_procgen_mission,
+    _compute_seed            = compute_seed,
+    _build_units             = build_units,
+    _victory_conditions_for  = victory_conditions_for,
+    _failure_conditions_for  = failure_conditions_for,
 }
