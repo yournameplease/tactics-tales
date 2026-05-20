@@ -7,12 +7,11 @@ local battle         = battle_lib.battle
 local character_source = battle.character_source
 local ai <const>     = battle.ai
 
--- Roles for which enemy UnitSpawnData are created.
-local ENEMY_ROLES = {
-    { label = "enemy_infantry",  ai_mode = ai.move_two  },
-    { label = "enemy_ranged",    ai_mode = ai.move_two  },
-    { label = "enemy_tank",      ai_mode = ai.move_two  },
-    { label = "enemy_commander", ai_mode = ai.stationary },
+local AI_MODE = {
+    enemy_infantry  = ai.move_two,
+    enemy_ranged    = ai.move_two,
+    enemy_tank      = ai.move_two,
+    enemy_commander = ai.stationary,
 }
 
 local function mem_text(campaign_config, key)
@@ -39,12 +38,12 @@ local function compute_seed(rng_context)
     return rng and rng:rndi(2147483647) or 0
 end
 
---- Build the unit list from a BattleMap's tile_labels and the active faction/tier.
---- One UnitSpawnData is emitted per point in each enemy spawn tile label.
+--- Build the unit list from a BattleMap's spawn_label_meta and the active faction/tier.
+--- One UnitSpawnData is emitted per label; spawn_units iterates the points itself.
 ---@param campaign_config CampaignConfig
----@param tile_labels table<string, any[]>
+---@param battle_map BattleMap
 ---@return UnitSpawnData[]
-local function build_units(campaign_config, tile_labels)
+local function build_units(campaign_config, battle_map)
     local faction = get_faction(campaign_config)
     local tier    = get_tier(campaign_config)
 
@@ -56,19 +55,20 @@ local function build_units(campaign_config, tile_labels)
         tile             = "player_deployment",
     }
 
-    for _, role_def in ipairs(ENEMY_ROLES) do
-        local label    = role_def.label
-        local points   = tile_labels[label] or {}
-        local template = resolve_slot(faction, tier, label)
-        if template and #points > 0 then
-            log.debug("[procgen_mission] role=", label, " template=", template, " count=", #points)
-            for _ = 1, #points do
-                units[#units + 1] = {
+    for label in pairs(battle_map.tile_labels) do
+        local meta = battle_map.spawn_label_meta[label]
+        if meta and meta.role ~= "player" then
+            local template = resolve_slot(faction, tier, meta.role)
+            if template then
+                log.debug("[procgen_mission] role=", meta.role, " label=", label, " template=", template)
+                local entry = {
                     side             = "enemy",
                     character_source = character_source.template(template),
-                    ai               = role_def.ai_mode,
+                    ai               = AI_MODE[meta.role],
                     tile             = label,
                 }
+                if meta.tags then entry.tags = meta.tags end
+                units[#units + 1] = entry
             end
         end
     end
@@ -89,7 +89,7 @@ local function build_procgen_mission(campaign_config, rng_context, map_id, chunk
     log.debug("[procgen_mission] map=", map_id, " faction=", mem_text(campaign_config, "faction_id") or "bandits",
         " tier=", get_tier(campaign_config), " seed=", seed)
 
-    local units = build_units(campaign_config, battle_map.tile_labels)
+    local units = build_units(campaign_config, battle_map)
 
     log.debug("[procgen_mission] total units=", #units)
 
