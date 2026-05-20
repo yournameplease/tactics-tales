@@ -22,7 +22,7 @@ rotate_90
 #####
 #.r.#
 #i.i#
-#.g.#
+#.t.#
 ##v##
 
 [pillar_connector]
@@ -94,8 +94,8 @@ rotate_90 flip_v flip_h
 6 6
 #^^^^#
 #....#
-#r##g#
-#g##r#
+#r##t#
+#t##r#
 #....#
 #vvvv#
 

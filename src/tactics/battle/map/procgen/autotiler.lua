@@ -15,19 +15,17 @@ local SPAWN_LABELS = {
     r = "enemy_ranged",
     t = "enemy_tank",
     c = "enemy_commander",
-    g = "enemy_tank",
     I = "enemy_infantry_boss",
     R = "enemy_ranged_boss",
     T = "enemy_tank_boss",
-    G = "enemy_tank_boss",
     C = "enemy_commander_boss",
 }
 
 -- All glyphs that map to floor (tile id 1).
 local FLOOR_GLYPHS = {
     ["."] = true, d = true, i = true, r = true,
-    t = true, c = true, p = true, a = true, g = true,
-    I = true, R = true, T = true, G = true, C = true,
+    t = true, c = true, p = true, a = true,
+    I = true, R = true, T = true, C = true,
 }
 
 -- Metadata for each spawn label: base role and optional tags.
@@ -78,6 +76,8 @@ function autotiler.build(rows, base_tile_id)
         if SPAWN_LABEL_META[label] then
             spawn_label_meta[label] = SPAWN_LABEL_META[label]
         end
+        log.debug("[autotiler] label=", label, " points=", #tile_labels[label],
+            " meta=", SPAWN_LABEL_META[label] and "yes" or "MISSING")
     end
 
     local map = battle_map.new(16, 16, tile_labels)

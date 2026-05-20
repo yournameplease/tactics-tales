@@ -74,6 +74,7 @@ local function validate(name, rows, w, h)
         ["#"] = true, ["."] = true,
         ["i"] = true, ["r"] = true, ["t"] = true, ["c"] = true,
         ["d"] = true, ["p"] = true, ["a"] = true, ["g"] = true,
+        ["I"] = true, ["R"] = true, ["G"] = true, ["C"] = true,
     }
 
     for y = 1, h do

@@ -1,9 +1,10 @@
 ---
 id: TASK-150
 title: Fix autotiler glyph mapping and add spawn_label_meta
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-19 22:49'
+updated_date: '2026-05-19 23:51'
 labels: []
 milestone: m-23
 dependencies: []
