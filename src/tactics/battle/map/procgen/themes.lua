@@ -137,7 +137,7 @@ themes.castle = {
         [3] = { { 4, 3, 3 }, { 3, 4, 3 }, { 3, 3, 4 } },
         -- [2] = { { 6, 6 } },  -- 2x2 commented out until chunks authored
     },
-    exit_width_weights = { [1] = 3, [2] = 1 },
+    exit_width_weights = { [1] = 1, [2] = 3, [3] = 1 },
     extra_edge_probability = 0.2,
     off_screen_edge_probability = 0.15,
 }

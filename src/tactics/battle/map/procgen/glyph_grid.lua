@@ -178,9 +178,10 @@ function glyph_grid.assemble(theme, grid, gen_result, offscreen_edges, rng)
     end
 
     -- 5. Place 'g' (enemy_guard) at each recorded guard centre.
-    for _, guard in ipairs(guards) do
-        cells[guard.cy][guard.cx] = "t"
-    end
+    -- Disabled for balancing.  Consider adding with a percentage chance, or a total limit?
+    -- for _, guard in ipairs(guards) do
+    --     cells[guard.cy][guard.cx] = "t"
+    -- end
 
     -- 6. Carve off-screen border passages and collect exit metadata.
     local offscreen_exits = {}
