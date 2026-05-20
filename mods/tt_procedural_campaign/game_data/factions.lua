@@ -15,10 +15,10 @@ local factions = {
     cultists = {
         name        = "Cultists",
         tiers       = {
-            { enemy_infantry = "cultist_goon",     enemy_commander = "cultist_boss", enemy_tank = "cultist_guard" },
-            { enemy_infantry = "cultist_spearman", enemy_commander = "cultist_boss", enemy_tank = "cultist_guard" },
+            { enemy_infantry = "cultist_goon",     enemy_commander = "cultist_boss", enemy_ranged = "cultist_mage", enemy_tank = "cultist_guard" },
+            { enemy_infantry = "cultist_spearman", enemy_commander = "cultist_boss", enemy_ranged = "cultist_mage", enemy_tank = "cultist_guard" },
         },
-        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8 },
+        costs       = { enemy_infantry = 2, enemy_tank = 5, enemy_commander = 8, enemy_ranged = 3 },
         fallbacks   = { enemy_ranged = "enemy_infantry" },
         recruitable = { "enemy_infantry", "enemy_tank" },
         role_map    = { patrol = "enemy_infantry", guard = "enemy_tank", ambush = "enemy_ranged", boss = "enemy_commander" },

@@ -57,15 +57,62 @@ end
 
 ---@type table<string, UnitAI>
 battle.ai = {
-    default            = { move = "two", target_sides = { "player", "neutral" }, exclude_tags = { "neutral_enemy" } },
-    move_one           = { move = "one", target_sides = { "player", "neutral" }, exclude_tags = { "neutral_enemy" } },
-    move_two           = { move = "two", target_sides = { "player", "neutral" }, exclude_tags = { "neutral_enemy" } },
-    move_inf           = { move = "infinity", target_sides = { "player", "neutral" }, exclude_tags = { "neutral_enemy" } },
-    stationary         = { move = "zero", target_sides = { "player", "neutral" }, exclude_tags = { "neutral_enemy" } },
-    stationary_allied  = { move = "zero", target_sides = { "enemy" }, exclude_tags = {} },
-    move_one_allied    = { move = "one", target_sides = { "enemy" }, exclude_tags = {} },
-    move_inf_allied    = { move = "infinity", target_sides = { "enemy" }, exclude_tags = {} },
-    stationary_neutral = { move = "zero", target_sides = {}, exclude_tags = {} },
+    default            = {
+        move = "two",
+        target_sides = { "player", "neutral" },
+        exclude_tags = { "neutral_enemy" },
+        skill_priority = "prefer"
+    },
+    move_one           = {
+        move = "one",
+        target_sides = { "player",
+        "neutral" },
+        exclude_tags = { "neutral_enemy" },
+        skill_priority = "prefer"
+    },
+    move_two           = {
+        move = "two",
+        target_sides = { "player", "neutral" },
+        exclude_tags = { "neutral_enemy" },
+        skill_priority = "prefer"
+    },
+    move_inf           = {
+        move = "infinity",
+        target_sides = { "player",
+        "neutral" },
+        exclude_tags = { "neutral_enemy" },
+        skill_priority = "prefer"
+    },
+    stationary         = {
+        move = "zero",
+        target_sides = { "player", "neutral" },
+        exclude_tags = { "neutral_enemy" },
+        skill_priority = "prefer"
+    },
+    stationary_allied  = {
+        move = "zero",
+        target_sides = { "enemy" },
+        exclude_tags = {},
+        skill_priority = "prefer"
+    },
+    move_one_allied    = {
+        move = "one",
+        target_sides = { "enemy" },
+        exclude_tags = {},
+        skill_priority = "prefer"
+    },
+    move_inf_allied    = {
+        move = "infinity",
+        target_sides = { "enemy" },
+        exclude_tags = {},
+        skill_priority = "prefer"
+    },
+    stationary_neutral = {
+        move = "zero",
+        target_sides = {},
+        exclude_tags = {},
+        skill_priority = "prefer"
+    },
 }
 
 return { battle = battle }
