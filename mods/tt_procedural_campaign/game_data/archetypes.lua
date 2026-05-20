@@ -88,8 +88,8 @@ local archetype_list = {
 
         filler_pool      = {
             "procedural_castle_kill_boss",
-            "procedural_cave_escape",
-            "procedural_cave_rout",
+            -- "procedural_cave_escape",
+            -- "procedural_cave_rout",
         },
         recruitment_rate = 0,
 

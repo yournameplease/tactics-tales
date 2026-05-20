@@ -22,16 +22,16 @@ rotate_90
 #####
 #.r.#
 #i.i#
-#.g.#
+#.t.#
 ##v##
 
 [dead_end_boss]
 boss_room rotate_90
 5 5
 #####
-#.r.#
+#.C.#
 #i.i#
-#.g.#
+#.t.#
 ##v##
 
 [pillar_connector]
@@ -86,7 +86,7 @@ rotate_90 flip_v flip_h
 boss_room flip_h flip_v
 6 5
 ######
-#r.cr#
+#r.Cr#
 #....#
 #.ii.#
 ##vv##
@@ -95,7 +95,7 @@ boss_room flip_h flip_v
 boss_room flip_h
 5 6
 #####
-#rcr#
+#rCr#
 #...#
 <...#
 <i.i#
@@ -115,17 +115,17 @@ boss_room rotate_90
 6 6
 ##^^##
 ##..##
-<.gi.#
+<.ti.#
 <.ir.#
-##..c#
+##..C#
 ######
 
 [center_split]
 6 6
 #^^^^#
 #....#
-#r##g#
-#g##r#
+#r##t#
+#t##r#
 #....#
 #vvvv#
 

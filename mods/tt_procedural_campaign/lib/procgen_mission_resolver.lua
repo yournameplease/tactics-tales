@@ -57,10 +57,15 @@ local function build_units(campaign_config, battle_map)
 
     for label in pairs(battle_map.tile_labels) do
         local meta = battle_map.spawn_label_meta[label]
-        if meta and meta.role ~= "player" then
+        if not meta then
+            log.debug("[procgen_mission] SKIP label=", label, " (no meta)")
+        elseif meta.role == "player" then
+            log.debug("[procgen_mission] SKIP label=", label, " (player role)")
+        else
             local template = resolve_slot(faction, tier, meta.role)
             if template then
-                log.debug("[procgen_mission] role=", meta.role, " label=", label, " template=", template)
+                log.debug("[procgen_mission] SPAWN label=", label, " role=", meta.role,
+                    " template=", template, " tags=", meta.tags and table.concat(meta.tags, ",") or "none")
                 local entry = {
                     side             = "enemy",
                     character_source = character_source.template(template),
@@ -69,6 +74,9 @@ local function build_units(campaign_config, battle_map)
                 }
                 if meta.tags then entry.tags = meta.tags end
                 units[#units + 1] = entry
+            else
+                log.debug("[procgen_mission] NO TEMPLATE label=", label, " role=", meta.role,
+                    " faction=", faction and faction.id or "?", " tier=", tier)
             end
         end
     end
@@ -96,7 +104,7 @@ end
 ---@param rng_context CampaignRngContext
 ---@param map_id string
 ---@param chunks_path string Path to the .chunks file for the castle theme.
----@param objective? string Default "rout". Pass "kill_boss" to require defeating the boss.
+---@param objective string Default "rout". Pass "kill_boss" to require defeating the boss.
 ---@return MissionDefinition
 local function build_procgen_mission(campaign_config, rng_context, map_id, chunks_path, objective)
     objective = objective or "rout"

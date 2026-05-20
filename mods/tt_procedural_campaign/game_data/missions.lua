@@ -59,7 +59,8 @@ local battles = {
             campaign_config,
             rng_context,
             "procedural_castle",
-            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
+            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks",
+            "kill_boss"
         )
     end,
     ["procedural_castle_kill_boss"] = function(campaign_config, rng_context, _map_context)
@@ -67,7 +68,8 @@ local battles = {
             campaign_config,
             rng_context,
             "procedural_castle_kill_boss",
-            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks"
+            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks",
+            "kill_boss"
         )
     end,
     ["procedural_cave"] = function(campaign_config, rng_context, _map_context)
@@ -83,7 +85,8 @@ local battles = {
             campaign_config,
             rng_context,
             "procedural_cave_escape",
-            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
+            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks",
+            "escape"
         )
     end,
     ["procedural_cave_rout"] = function(campaign_config, rng_context, _map_context)
@@ -91,7 +94,8 @@ local battles = {
             campaign_config,
             rng_context,
             "procedural_cave_rout",
-            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
+            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks",
+            "rout"
         )
     end,
     ["castle_escape"] = function(campaign_config, rng_context, map_context)
