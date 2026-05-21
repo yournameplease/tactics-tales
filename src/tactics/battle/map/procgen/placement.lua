@@ -19,23 +19,30 @@ local placement = {}
 ---@return ProcgenPlacement
 function placement.select(g, objective, rng)
     if objective == "kill_boss" or objective == "escape" then
-        local depths = graph_mod.node_depths(g, 1)
-        local far_cell = nil
+        -- Step 1: pick end cell as the far pole.
+        local d_from_start = graph_mod.bfs_distances(g, 1)
+        local end_cell = 1
+        for node, d in pairs(d_from_start) do
+            if d > d_from_start[end_cell] then end_cell = node end
+        end
+
+        -- Step 2: pick deployment as farthest from end cell.
+        local d_from_end = graph_mod.bfs_distances(g, end_cell)
         local max_d = -1
-        for node, d in pairs(depths) do
-            if d == 0 then far_cell = node end
+        for _, d in pairs(d_from_end) do
             if d > max_d then max_d = d end
         end
         local candidates = {}
-        for node, d in pairs(depths) do
+        for node, d in pairs(d_from_end) do
             if d == max_d then table.insert(candidates, node) end
         end
         sort.by(candidates)
         local deployment_cell = candidates[rng:rndi(#candidates) + 1]
+
         if objective == "kill_boss" then
-            return { deployment_cell = deployment_cell, boss_cell = far_cell }
+            return { deployment_cell = deployment_cell, boss_cell = end_cell }
         else
-            return { deployment_cell = deployment_cell, escape_cell = far_cell }
+            return { deployment_cell = deployment_cell, escape_cell = end_cell }
         end
 
     elseif objective == "rout" or objective == "defend" then

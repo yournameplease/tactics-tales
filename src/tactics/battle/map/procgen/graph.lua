@@ -170,7 +170,7 @@ end
 ---@param g ConnectionGraph
 ---@param start integer
 ---@return integer[] distances keyed by node index (unreachable nodes absent)
-local function bfs_distances(g, start)
+function graph.bfs_distances(g, start)
     local dist = { [start] = 0 }
     local queue = { start }
     local head = 1
@@ -192,12 +192,12 @@ end
 ---@param start integer Starting node (e.g. deployment cell).
 ---@return integer[] depths keyed by 1-based cell index
 function graph.node_depths(g, start)
-    local d1 = bfs_distances(g, start)
+    local d1 = graph.bfs_distances(g, start)
     local far = start
     for node, dist in pairs(d1) do
         if dist > d1[far] then far = node end
     end
-    return bfs_distances(g, far)
+    return graph.bfs_distances(g, far)
 end
 
 --- Compute the eccentricity of every node: the maximum BFS distance from that
@@ -207,7 +207,7 @@ end
 function graph.node_eccentricities(g)
     local result = {}
     for node in pairs(g.adjacency) do
-        local dist = bfs_distances(g, node)
+        local dist = graph.bfs_distances(g, node)
         local max_dist = 0
         for _, d in pairs(dist) do
             if d > max_dist then max_dist = d end
