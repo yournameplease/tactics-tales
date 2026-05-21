@@ -328,5 +328,53 @@ describe("tactics.battle.map.procgen.chunk_parser", function()
             luassert.are_equal(1, #chunks)
             luassert.are_equal("room", chunks[1].name)
         end)
+
+        describe("has_enemies derived tag", function()
+            local ENEMY_GLYPHS = { "i", "r", "t", "c", "I", "R", "G", "C" }
+
+            it("adds has_enemies when the interior contains an enemy glyph", function()
+                for _, g in ipairs(ENEMY_GLYPHS) do
+                    local lines = { "[room_" .. g .. "]", "5 5" }
+                    for _, r in ipairs(minimal_rows(g)) do table.insert(lines, r) end
+
+                    local chunks = chunk_parser.parse(chunks_text(lines))
+
+                    local found = false
+                    for _, tag in ipairs(chunks[1].tags) do
+                        if tag == "has_enemies" then found = true end
+                    end
+                    luassert.is_true(found, "expected has_enemies for glyph '" .. g .. "'")
+                end
+            end)
+
+            it("does not add has_enemies when the interior has no enemy glyphs", function()
+                local lines = { "[empty]", "5 5" }
+                for _, r in ipairs(minimal_rows(".")) do table.insert(lines, r) end
+
+                local chunks = chunk_parser.parse(chunks_text(lines))
+
+                for _, tag in ipairs(chunks[1].tags) do
+                    luassert.are_not_equal("has_enemies", tag)
+                end
+            end)
+
+            it("adds has_enemies exactly once even with multiple enemy glyphs", function()
+                local lines = { "[multi]", "5 5",
+                    "#####",
+                    "#i.r#",
+                    "#...#",
+                    "#t.c#",
+                    "#####",
+                }
+
+                local chunks = chunk_parser.parse(chunks_text(lines))
+
+                local count = 0
+                for _, tag in ipairs(chunks[1].tags) do
+                    if tag == "has_enemies" then count = count + 1 end
+                end
+                luassert.are_equal(1, count)
+            end)
+        end)
     end)
 end)

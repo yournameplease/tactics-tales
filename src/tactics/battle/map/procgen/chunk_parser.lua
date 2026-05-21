@@ -160,11 +160,33 @@ local KNOWN_TAGS = {
     deployment  = true,
     boss_room   = true,
     escape_zone = true,
+    has_enemies = true,
     rotate_90   = true,
     rotate_180  = true,
     flip_v      = true,
     flip_h      = true,
 }
+
+local ENEMY_GLYPHS = {
+    ["i"] = true, ["r"] = true, ["t"] = true, ["c"] = true,
+    ["I"] = true, ["R"] = true, ["G"] = true, ["C"] = true,
+}
+
+--- Derive tags from a chunk's glyph content and append them to `tags`.
+---@param rows string[]
+---@param w integer
+---@param h integer
+---@param tags string[]
+local function derive_content_tags(rows, w, h, tags)
+    for y = 2, h - 1 do
+        for x = 2, w - 1 do
+            if ENEMY_GLYPHS[rows[y]:sub(x, x)] then
+                table.insert(tags, "has_enemies")
+                return
+            end
+        end
+    end
+end
 
 --- Emit warnings for unknown tags.
 ---@param name string
@@ -243,6 +265,7 @@ function chunk_parser.parse(text)
             seen_names[name] = true
             validate(name, rows, w, h)
             validate_deployment_tag(name, rows, w, h, tags)
+            derive_content_tags(rows, w, h, tags)
             warn_unknown_tags(name, tags)
             table.insert(chunks, {
                 name = name,
