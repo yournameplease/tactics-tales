@@ -98,8 +98,8 @@ describe("tactics.battle.map.procgen.autotiler", function()
             local passable_glyphs = ". d i r t c p a"
             local chars = {}
             for c in passable_glyphs:gmatch("%S") do table.insert(chars, c) end
-            -- Build a row: 9 passable chars + 7 walls = 16
-            local row1 = table.concat(chars) .. string.rep("#", 7)
+            -- Build a row: 8 passable chars + 8 walls = 16
+            local row1 = table.concat(chars) .. string.rep("#", 8)
             luassert.are_equal(16, #row1)
 
             local rows = make_grid({ [1] = row1 })
@@ -168,16 +168,16 @@ describe("tactics.battle.map.procgen.autotiler", function()
         end)
 
         -- Boss glyph tests
-        it("uppercase 'G' maps to enemy_tank_boss tile label and renders as floor", function()
-            local row1 = "G" .. string.rep("#", 15)
+        it("uppercase 'T' maps to enemy_tank_boss tile label and renders as floor", function()
+            local row1 = "T" .. string.rep("#", 15)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.are_equal(1, #map.tile_labels.enemy_tank_boss)
             luassert.are_same(point.of(0, 0), map.tile_labels.enemy_tank_boss[1])
-            luassert.are_equal(1, map.layers.terrain.ground:get(0, 0), "G should be floor (1)")
+            luassert.are_equal(1, map.layers.terrain.ground:get(0, 0), "T should be floor (1)")
         end)
 
         it("uppercase boss glyphs all map to correct labels and render as floor", function()
-            local row1 = "IRGC" .. string.rep("#", 12)
+            local row1 = "IRTC" .. string.rep("#", 12)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.are_equal(1, #map.tile_labels.enemy_infantry_boss)
             luassert.are_equal(1, #map.tile_labels.enemy_ranged_boss)
