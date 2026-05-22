@@ -9,8 +9,25 @@ local sort      = require("src.tactics.util.sort")
 ---@field deployment_cell integer  1-based macro-grid cell index
 ---@field boss_cell integer?       present for kill_boss only
 ---@field escape_cell integer?     present for escape only
+---@field enemy_cells table<integer, true>  non-special cells designated as enemy rooms
 
 local placement = {}
+
+--- Roll enemy_cells for all nodes in g that are not in `specials`.
+---@param g ConnectionGraph
+---@param specials table<integer, true>
+---@param prob number
+---@param rng RngInstance
+---@return table<integer, true>
+local function roll_enemy_cells(g, specials, prob, rng)
+    local enemy_cells = {}
+    for node in pairs(g.adjacency) do
+        if not specials[node] and rng:rndf() < prob then
+            enemy_cells[node] = true
+        end
+    end
+    return enemy_cells
+end
 
 --- Select deployment and objective cells based on the given objective.
 ---@param g ConnectionGraph
@@ -19,6 +36,8 @@ local placement = {}
 ---@param theme ProcgenTheme?  Optional theme; provides target_deployment_distance when present.
 ---@return ProcgenPlacement
 function placement.select(g, objective, rng, theme)
+    local prob = theme and theme.enemy_room_probability or 0
+
     if objective == "kill_boss" or objective == "escape" then
         -- Step 1: pick end cell as the far pole.
         local d_from_start = graph_mod.bfs_distances(g, 1)
@@ -43,9 +62,13 @@ function placement.select(g, objective, rng, theme)
         local deployment_cell = candidates[rng:rndi(#candidates) + 1]
 
         if objective == "kill_boss" then
-            return { deployment_cell = deployment_cell, boss_cell = end_cell }
+            local specials = { [deployment_cell] = true, [end_cell] = true }
+            local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+            return { deployment_cell = deployment_cell, boss_cell = end_cell, enemy_cells = enemy_cells }
         else
-            return { deployment_cell = deployment_cell, escape_cell = end_cell }
+            local specials = { [deployment_cell] = true, [end_cell] = true }
+            local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+            return { deployment_cell = deployment_cell, escape_cell = end_cell, enemy_cells = enemy_cells }
         end
 
     elseif objective == "rout" or objective == "defend" then
@@ -77,7 +100,9 @@ function placement.select(g, objective, rng, theme)
         end
         sort.by(top)
         local deployment_cell = top[rng:rndi(#top) + 1]
-        return { deployment_cell = deployment_cell }
+        local specials = { [deployment_cell] = true }
+        local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+        return { deployment_cell = deployment_cell, enemy_cells = enemy_cells }
 
     else
         error("placement.select: unknown objective '" .. tostring(objective) .. "'")

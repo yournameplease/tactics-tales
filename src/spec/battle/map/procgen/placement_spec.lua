@@ -88,4 +88,53 @@ describe("tactics.battle.map.procgen.placement", function()
             placement.select(chain4(), "unknown", random.new(1))
         end)
     end)
+
+    describe("enemy_cells", function()
+        it("marks all non-special cells as enemy when probability = 1.0", function()
+            -- chain4: kill_boss places deployment at one pole, boss at the other.
+            -- The two middle cells (2 and 3) are non-special.
+            local g = chain4()
+            local theme = { target_deployment_distance = nil, enemy_room_probability = 1.0 }
+            local result = placement.select(g, "kill_boss", random.new(1), theme)
+            local specials = { [result.deployment_cell] = true, [result.boss_cell] = true }
+            for node in pairs(g.adjacency) do
+                if not specials[node] then
+                    luassert.is_true(result.enemy_cells[node] == true,
+                        "expected node " .. node .. " to be in enemy_cells")
+                end
+            end
+        end)
+
+        it("marks no cells as enemy when probability = 0.0", function()
+            local g = chain4()
+            local theme = { target_deployment_distance = nil, enemy_room_probability = 0.0 }
+            local result = placement.select(g, "kill_boss", random.new(1), theme)
+            local count = 0
+            for _ in pairs(result.enemy_cells) do count = count + 1 end
+            luassert.are_equal(0, count)
+        end)
+
+        it("never marks special cells as enemy", function()
+            local g = chain4()
+            local theme = { target_deployment_distance = nil, enemy_room_probability = 1.0 }
+            local result = placement.select(g, "kill_boss", random.new(1), theme)
+            luassert.is_nil(result.enemy_cells[result.deployment_cell])
+            luassert.is_nil(result.enemy_cells[result.boss_cell])
+        end)
+
+        it("returns empty enemy_cells when theme is nil", function()
+            local result = placement.select(chain4(), "kill_boss", random.new(1), nil)
+            local count = 0
+            for _ in pairs(result.enemy_cells) do count = count + 1 end
+            luassert.are_equal(0, count)
+        end)
+
+        it("returns empty enemy_cells when theme has no enemy_room_probability", function()
+            local theme = { target_deployment_distance = nil }
+            local result = placement.select(chain4(), "kill_boss", random.new(1), theme)
+            local count = 0
+            for _ in pairs(result.enemy_cells) do count = count + 1 end
+            luassert.are_equal(0, count)
+        end)
+    end)
 end)
