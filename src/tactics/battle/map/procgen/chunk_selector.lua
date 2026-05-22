@@ -110,7 +110,7 @@ local function filter_candidates(chunks, cw, ch, required_tag, faces, has_enemie
                     if not chunk.exits[face] then ok = false; break end
                 end
                 -- Apply has_enemies constraint for regular cells only (required_tag == nil).
-                if ok and required_tag == nil then
+                if ok and has_enemies ~= nil then
                     if chunk_has_enemies(chunk) ~= has_enemies then ok = false end
                 end
                 if ok then table.insert(result, chunk) end
