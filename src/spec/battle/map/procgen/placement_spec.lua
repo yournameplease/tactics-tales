@@ -153,5 +153,33 @@ describe("tactics.battle.map.procgen.placement", function()
             luassert.is_not_nil(result.enemy_cells)
             luassert.is_nil(result.enemy_cells[result.deployment_cell])
         end)
+
+        describe("scatter mode", function()
+            it("returns enemy_cells = nil for kill_boss", function()
+                local g = chain4()
+                local theme = { enemy_room_probability = 1.0 }
+                local result = placement.select(g, "kill_boss", random.new(1), theme, "scatter")
+                luassert.is_nil(result.enemy_cells)
+            end)
+
+            it("returns enemy_cells = nil for escape", function()
+                local g = chain4()
+                local theme = { enemy_room_probability = 1.0 }
+                local result = placement.select(g, "escape", random.new(1), theme, "scatter")
+                luassert.is_nil(result.enemy_cells)
+            end)
+
+            it("returns enemy_cells = nil for rout", function()
+                local theme = { enemy_room_probability = 1.0 }
+                local result = placement.select(star4(), "rout", random.new(1), theme, "scatter")
+                luassert.is_nil(result.enemy_cells)
+            end)
+
+            it("returns enemy_cells = nil for defend", function()
+                local theme = { enemy_room_probability = 1.0 }
+                local result = placement.select(star4(), "defend", random.new(1), theme, "scatter")
+                luassert.is_nil(result.enemy_cells)
+            end)
+        end)
     end)
 end)

@@ -34,9 +34,11 @@ end
 ---@param objective string  One of "kill_boss", "escape", "rout", "defend"
 ---@param rng RngInstance
 ---@param theme ProcgenTheme?  Optional theme; provides target_deployment_distance when present.
+---@param enemy_distribution string?  Distribution strategy; "scatter" skips enemy_cells, nil uses theme probability.
 ---@return ProcgenPlacement
-function placement.select(g, objective, rng, theme)
-    local prob = theme and theme.enemy_room_probability or 0
+function placement.select(g, objective, rng, theme, enemy_distribution)
+    local is_scatter = enemy_distribution == "scatter"
+    local prob = is_scatter and 0 or (theme and theme.enemy_room_probability or 0)
 
     if objective == "kill_boss" or objective == "escape" then
         -- Step 1: pick end cell as the far pole.
@@ -63,11 +65,11 @@ function placement.select(g, objective, rng, theme)
 
         if objective == "kill_boss" then
             local specials = { [deployment_cell] = true, [end_cell] = true }
-            local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+            local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
             return { deployment_cell = deployment_cell, boss_cell = end_cell, enemy_cells = enemy_cells }
         else
             local specials = { [deployment_cell] = true, [end_cell] = true }
-            local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+            local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
             return { deployment_cell = deployment_cell, escape_cell = end_cell, enemy_cells = enemy_cells }
         end
 
@@ -101,7 +103,7 @@ function placement.select(g, objective, rng, theme)
         sort.by(top)
         local deployment_cell = top[rng:rndi(#top) + 1]
         local specials = { [deployment_cell] = true }
-        local enemy_cells = roll_enemy_cells(g, specials, prob, rng)
+        local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
         return { deployment_cell = deployment_cell, enemy_cells = enemy_cells }
 
     else
