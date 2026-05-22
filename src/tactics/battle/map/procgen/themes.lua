@@ -10,6 +10,7 @@
 ---@field exit_width_weights table<integer, integer> Map of connection width -> weight.
 ---@field extra_edge_probability number Per-pair probability of adding an edge beyond the spanning tree.
 ---@field off_screen_edge_probability number Per-border-face probability of adding an off-screen exit. Range [0, 1].
+---@field target_deployment_distance integer? BFS distance from objective cell to target for player spawn; falls back to max if unreachable.
 
 local MAP_SIZE = 16
 
@@ -140,6 +141,7 @@ themes.castle = {
     exit_width_weights = { [1] = 1, [2] = 3, [3] = 1 },
     extra_edge_probability = 0.2,
     off_screen_edge_probability = 0.15,
+    target_deployment_distance = 5,
 }
 
 themes.cave = {
@@ -154,6 +156,7 @@ themes.cave = {
     exit_width_weights = { [1] = 1, [2] = 3, [3] = 3, [4] = 1 },
     extra_edge_probability = 0.35,
     off_screen_edge_probability = 0.25,
+    target_deployment_distance = 5,
 }
 
 themes.validate(themes.castle)
