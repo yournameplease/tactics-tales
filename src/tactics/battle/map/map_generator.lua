@@ -21,6 +21,8 @@
 ---@field chunks string Path to the .chunks file (passed to chunk_parser.load_theme).
 ---@field tileset_name string? Tileset stem for gfx_registry lookup (e.g. "paper_tileset").
 ---@field objective string? Battle objective type ("kill_boss", "escape", "rout"). Defaults to "rout".
+---@field enemy_distribution "room_based"|"scatter"? Defaults to "room_based".
+---@field scatter_probability number? Per-tile infantry spawn probability for scatter mode. Defaults to 0.02.
 
 local point           = require("src.tactics.util.point")
 local battle_map      = require("src.tactics.battle.battle_map")
@@ -323,8 +325,12 @@ local function load_procgen(definition, gfx_registry, seed)
     local chunks = chunk_variants.expand(chunks_raw)
     local rng = random.new(seed or 1)
     local grid = themes_mod.roll_grid(theme, rng)
-    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, definition.objective)
+    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, definition.objective, definition.enemy_distribution)
     local assembled = glyph_grid_mod.assemble(theme, grid, gen_result, gen_result.offscreen_edges, rng)
+    if definition.enemy_distribution == "scatter" then
+        local prob = definition.scatter_probability or 0.02
+        glyph_grid_mod.scatter_enemies(assembled.rows, gen_result, grid, prob, rng)
+    end
     local rows = assembled.rows
     local base_tile_id = (gfx_registry or {})[definition.tileset_name or ""] or 0
     log.debug("load_procgen: base_tile_id=" .. tostring(base_tile_id) ..

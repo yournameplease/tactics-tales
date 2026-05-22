@@ -766,5 +766,24 @@ describe("battle.map.map_generator", function()
             luassert.is_nil(map.procgen_placement.boss_cell)
             luassert.is_nil(map.procgen_placement.escape_cell)
         end)
+
+        it("scatter mode with prob=1.0 produces enemy_infantry tile labels", function()
+            local restore = stub_fetch_chunks()
+            local def = {
+                type = "procgen",
+                theme = "castle",
+                chunks = "fixture.chunks",
+                objective = "rout",
+                enemy_distribution = "scatter",
+                scatter_probability = 1.0,
+            }
+            local map = map_generator.load_map(def, {}, {}, 1)
+            restore()
+            luassert.is_not_nil(map.tile_labels, "expected tile_labels on map")
+            luassert.is_not_nil(map.tile_labels.enemy_infantry,
+                "expected enemy_infantry labels from scatter with prob=1.0")
+            luassert.is_true(#map.tile_labels.enemy_infantry > 0,
+                "expected at least one enemy_infantry spawn point")
+        end)
     end)
 end)
