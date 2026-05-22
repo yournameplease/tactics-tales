@@ -24,7 +24,7 @@ describe("tt_procedural_campaign.factions", function()
             luassert.are_equal("bandit_goon", t.enemy_infantry)
             luassert.are_equal("bandit_boss", t.enemy_commander)
             luassert.are_equal("bandit_guard", t.enemy_tank)
-            luassert.is_nil(t.enemy_ranged)
+            luassert.are_equal("bandit_bow", t.enemy_ranged)
         end)
 
         it("bandits tier 2 has correct templates", function()
@@ -32,7 +32,7 @@ describe("tt_procedural_campaign.factions", function()
             luassert.are_equal("bandit_axe", t.enemy_infantry)
             luassert.are_equal("bandit_berzerker", t.enemy_commander)
             luassert.are_equal("bandit_guard", t.enemy_tank)
-            luassert.is_nil(t.enemy_ranged)
+            luassert.are_equal("bandit_bow", t.enemy_ranged)
         end)
 
         it("cultists tier 1 has correct templates", function()
@@ -40,7 +40,7 @@ describe("tt_procedural_campaign.factions", function()
             luassert.are_equal("cultist_goon", t.enemy_infantry)
             luassert.are_equal("cultist_boss", t.enemy_commander)
             luassert.are_equal("cultist_guard", t.enemy_tank)
-            luassert.is_nil(t.enemy_ranged)
+            luassert.are_equal("cultist_mage", t.enemy_ranged)
         end)
 
         it("militia tier 1 has ranged", function()
@@ -75,12 +75,21 @@ describe("tt_procedural_campaign.factions", function()
         end)
 
         it("falls back via fallbacks when slot is absent", function()
-            -- bandits have no enemy_ranged; fallback is enemy_infantry → tier 1 infantry
-            luassert.are_equal("bandit_goon", resolve_slot(factions.bandits, 1, "enemy_ranged"))
+            local faction_no_ranged = {
+                name = "test",
+                tiers = { { enemy_infantry = "foo_grunt" }, { enemy_infantry = "foo_veteran" } },
+                fallbacks = { enemy_ranged = "enemy_infantry" },
+            }
+            luassert.are_equal("foo_grunt", resolve_slot(faction_no_ranged, 1, "enemy_ranged"))
         end)
 
         it("falls back to tier 2 infantry when requesting ranged at tier 2", function()
-            luassert.are_equal("bandit_axe", resolve_slot(factions.bandits, 2, "enemy_ranged"))
+            local faction_no_ranged = {
+                name = "test",
+                tiers = { { enemy_infantry = "foo_grunt" }, { enemy_infantry = "foo_veteran" } },
+                fallbacks = { enemy_ranged = "enemy_infantry" },
+            }
+            luassert.are_equal("foo_veteran", resolve_slot(faction_no_ranged, 2, "enemy_ranged"))
         end)
 
         it("returns nil for a slot with no mapping and no fallback", function()
@@ -107,7 +116,13 @@ describe("tt_procedural_campaign.factions", function()
         end)
 
         it("returns 1 for an undefined slot tag", function()
-            luassert.are_equal(1, resolve_slot_cost(factions.bandits, "enemy_ranged"))
+            local faction_no_ranged_cost = {
+                name = "test",
+                tiers = {},
+                fallbacks = {},
+                costs = { enemy_infantry = 2 },
+            }
+            luassert.are_equal(1, resolve_slot_cost(faction_no_ranged_cost, "enemy_ranged"))
         end)
 
         it("falls back to 1 when costs table is absent", function()
