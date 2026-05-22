@@ -16,8 +16,9 @@ local placement = {}
 ---@param g ConnectionGraph
 ---@param objective string  One of "kill_boss", "escape", "rout", "defend"
 ---@param rng RngInstance
+---@param theme ProcgenTheme?  Optional theme; provides target_deployment_distance when present.
 ---@return ProcgenPlacement
-function placement.select(g, objective, rng)
+function placement.select(g, objective, rng, theme)
     if objective == "kill_boss" or objective == "escape" then
         -- Step 1: pick end cell as the far pole.
         local d_from_start = graph_mod.bfs_distances(g, 1)
@@ -26,15 +27,17 @@ function placement.select(g, objective, rng)
             if d > d_from_start[end_cell] then end_cell = node end
         end
 
-        -- Step 2: pick deployment as farthest from end cell.
+        -- Step 2: pick deployment at target distance from end cell, or farthest if unreachable.
         local d_from_end = graph_mod.bfs_distances(g, end_cell)
         local max_d = -1
         for _, d in pairs(d_from_end) do
             if d > max_d then max_d = d end
         end
+        local target_d = (theme and theme.target_deployment_distance) or max_d
+        local pick_d = target_d <= max_d and target_d or max_d
         local candidates = {}
         for node, d in pairs(d_from_end) do
-            if d == max_d then table.insert(candidates, node) end
+            if d == pick_d then table.insert(candidates, node) end
         end
         sort.by(candidates)
         local deployment_cell = candidates[rng:rndi(#candidates) + 1]
