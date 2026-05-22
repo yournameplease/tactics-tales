@@ -9,7 +9,7 @@ local sort      = require("src.tactics.util.sort")
 ---@field deployment_cell integer  1-based macro-grid cell index
 ---@field boss_cell integer?       present for kill_boss only
 ---@field escape_cell integer?     present for escape only
----@field enemy_cells table<integer, true>  non-special cells designated as enemy rooms
+---@field enemy_cells table<integer, true>?  non-special cells designated as enemy rooms
 
 local placement = {}
 
