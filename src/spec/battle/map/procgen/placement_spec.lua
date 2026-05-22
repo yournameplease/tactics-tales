@@ -136,5 +136,22 @@ describe("tactics.battle.map.procgen.placement", function()
             for _ in pairs(result.enemy_cells) do count = count + 1 end
             luassert.are_equal(0, count)
         end)
+
+        it("returns enemy_cells for escape objective", function()
+            local g = chain4()
+            local theme = { target_deployment_distance = nil, enemy_room_probability = 1.0 }
+            local result = placement.select(g, "escape", random.new(1), theme)
+            luassert.is_not_nil(result.enemy_cells)
+            luassert.is_nil(result.enemy_cells[result.deployment_cell])
+            luassert.is_nil(result.enemy_cells[result.escape_cell])
+        end)
+
+        it("returns enemy_cells for rout objective", function()
+            local g = star4()
+            local theme = { enemy_room_probability = 1.0 }
+            local result = placement.select(g, "rout", random.new(1), theme)
+            luassert.is_not_nil(result.enemy_cells)
+            luassert.is_nil(result.enemy_cells[result.deployment_cell])
+        end)
     end)
 end)
