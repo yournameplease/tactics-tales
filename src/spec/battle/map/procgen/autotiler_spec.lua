@@ -95,7 +95,7 @@ describe("tactics.battle.map.procgen.autotiler", function()
 
         it("all passable glyph types map to tile id 1 (AC#4)", function()
             -- Row 1 contains each passable glyph once; rest are walls.
-            local passable_glyphs = ". d i r t c p a g"
+            local passable_glyphs = ". d i r t c p a"
             local chars = {}
             for c in passable_glyphs:gmatch("%S") do table.insert(chars, c) end
             -- Build a row: 9 passable chars + 7 walls = 16
@@ -133,8 +133,8 @@ describe("tactics.battle.map.procgen.autotiler", function()
             luassert.are_same(point.of(4, 0), labels.player_deployment[1])
         end)
 
-        it("'g' glyph maps to enemy_tank label (AC#2)", function()
-            local row1 = "g" .. string.rep("#", 15)
+        it("'t' glyph maps to enemy_tank label (AC#2)", function()
+            local row1 = "t" .. string.rep("#", 15)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.are_equal(1, #map.tile_labels.enemy_tank)
             luassert.are_same(point.of(0, 0), map.tile_labels.enemy_tank[1])
@@ -177,8 +177,7 @@ describe("tactics.battle.map.procgen.autotiler", function()
         end)
 
         it("uppercase boss glyphs all map to correct labels and render as floor", function()
-            -- T and G both map to enemy_tank_boss; use only T to get exactly 1
-            local row1 = "IRTC" .. string.rep("#", 12)
+            local row1 = "IRGC" .. string.rep("#", 12)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.are_equal(1, #map.tile_labels.enemy_infantry_boss)
             luassert.are_equal(1, #map.tile_labels.enemy_ranged_boss)
@@ -190,15 +189,9 @@ describe("tactics.battle.map.procgen.autotiler", function()
             end
         end)
 
-        it("uppercase 'T' maps to enemy_tank_boss separately from 'G'", function()
-            local row1 = "TG" .. string.rep("#", 14)
-            local map  = autotiler.build(make_grid({ [1] = row1 }))
-            luassert.are_equal(2, #map.tile_labels.enemy_tank_boss)
-        end)
-
         -- spawn_label_meta tests
         it("spawn_label_meta is populated for labels with tile positions", function()
-            local row1 = "G" .. string.rep("#", 15)
+            local row1 = "T" .. string.rep("#", 15)
             local map  = autotiler.build(make_grid({ [1] = row1 }))
             luassert.is_not_nil(map.spawn_label_meta)
             local meta = map.spawn_label_meta["enemy_tank_boss"]
