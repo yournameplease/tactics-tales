@@ -55,8 +55,10 @@ function themes.validate(theme)
         "off_screen_edge_probability must be in [0, 1]"
     )
     assert(
-        theme.enemy_room_probability >= 0 and theme.enemy_room_probability <= 1,
-        "enemy_room_probability must be in [0, 1]"
+        type(theme.enemy_room_probability) == "number"
+        and theme.enemy_room_probability >= 0
+        and theme.enemy_room_probability <= 1,
+        "enemy_room_probability must be a number in [0, 1]"
     )
     for n, dists in pairs(theme.distributions) do
         for i, dist in ipairs(dists) do
