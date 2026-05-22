@@ -488,9 +488,10 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             }
             local g = make_2x2_graph()
             -- All non-special cells are enemy cells.
-            local n = #g.adjacency
             local enemy_cells = {}
-            for i = 2, n do enemy_cells[i] = true end
+            for node in pairs(g.adjacency) do
+                if node ~= 1 then enemy_cells[node] = true end
+            end
             local placement = { deployment_cell = 1, enemy_cells = enemy_cells }
             local rng = random.new(1)
             local result = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, placement)
@@ -502,6 +503,14 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
                 if t == "deployment" then has_deploy = true end
             end
             luassert.is_true(has_deploy)
+            -- At least one non-deployment cell should have an enemy chunk.
+            local found_enemy = false
+            for idx = 2, #result.assignment do
+                for _, t in ipairs(result.assignment[idx].tags) do
+                    if t == "has_enemies" then found_enemy = true end
+                end
+            end
+            luassert.is_true(found_enemy, "expected at least one non-special cell to have has_enemies tag")
         end)
     end)
 
