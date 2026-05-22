@@ -251,4 +251,49 @@ function glyph_grid.assemble(theme, grid, gen_result, offscreen_edges, rng)
     return { rows = rows, offscreen_exits = offscreen_exits }
 end
 
+--- Scatter enemy-infantry glyphs over floor tiles in non-special cells.
+--- Replaces '.' glyphs with 'i' in non-special cell interiors.
+--- Skips deployment_cell, boss_cell, and escape_cell.
+---@param rows string[]  16-element array (entries replaced in-place)
+---@param gen_result ChunkGenerationResult
+---@param grid ProcgenGrid
+---@param prob number  Per-tile probability of placing 'i' on a '.' tile.
+---@param rng RngInstance
+function glyph_grid.scatter_enemies(rows, gen_result, grid, prob, rng)
+    local p = gen_result.placement
+    local specials = { [p.deployment_cell] = true }
+    if p.boss_cell   then specials[p.boss_cell]   = true end
+    if p.escape_cell then specials[p.escape_cell] = true end
+
+    local grid_w = #grid.col_widths
+    local grid_h = #grid.row_heights
+    local n = grid_w * grid_h
+
+    for idx = 1, n do
+        if not specials[idx] then
+            local col = ((idx - 1) % grid_w) + 1
+            local row = math.floor((idx - 1) / grid_w) + 1
+            local x0 = grid_layout.cell_x_start(grid, col)
+            local y0 = grid_layout.cell_y_start(grid, row)
+            local w  = grid.col_widths[col]
+            local h  = grid.row_heights[row]
+            for cy = y0, y0 + h - 1 do
+                local row_str = rows[cy]
+                local chars = {}
+                for i = 1, #row_str do chars[i] = row_str:sub(i, i) end
+                local changed = false
+                for cx = x0, x0 + w - 1 do
+                    if chars[cx] == "." and rng:rndf() < prob then
+                        chars[cx] = "i"
+                        changed = true
+                    end
+                end
+                if changed then
+                    rows[cy] = table.concat(chars)
+                end
+            end
+        end
+    end
+end
+
 return glyph_grid
