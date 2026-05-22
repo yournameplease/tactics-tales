@@ -426,14 +426,15 @@ end
 ---@param chunks ChunkRecord[]
 ---@param rng RngInstance
 ---@param objective string?  Battle objective type passed to placement_mod.select
+---@param enemy_distribution string?  "room_based" or "scatter"; nil defaults to "room_based"
 ---@return ChunkGenerationResult
-function chunk_selector.generate(theme, grid, chunks, rng, objective)
+function chunk_selector.generate(theme, grid, chunks, rng, objective, enemy_distribution)
     objective = objective or "rout"
     local grid_w = #grid.col_widths
     local grid_h = #grid.row_heights
     for attempt = 1, MAX_GRAPH_RETRIES do
         local g = graph_mod.generate(theme, grid_w, grid_h, rng)
-        local p = placement_mod.select(g, objective, rng, theme)
+        local p = placement_mod.select(g, objective, rng, theme, enemy_distribution)
         local cell_requirements = { [p.deployment_cell] = 1 }
         if p.boss_cell   then cell_requirements[p.boss_cell]   = 0 end
         if p.escape_cell then cell_requirements[p.escape_cell] = 1 end

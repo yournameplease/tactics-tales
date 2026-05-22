@@ -543,4 +543,41 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             end)
         end)
     end)
+
+    describe("generate with scatter distribution", function()
+        it("regular cells use non-enemy chunks when enemy_distribution = 'scatter'", function()
+            -- Pool: deployment chunk + non-enemy chunk only.
+            -- In scatter mode, regular cells must use non-enemy chunks (enemy_cells=nil
+            -- → cell_has_enemies_flag returns false → filter excludes has_enemies chunks).
+            local pool = {
+                all_exits_chunk("deploy", true),
+                all_exits_chunk("plain"),
+            }
+            local rng = random.new(42)
+            local result = chunk_selector.generate(make_theme(), make_2x2_grid(), pool, rng, "rout", "scatter")
+            luassert.is_not_nil(result, "generate should succeed with non-enemy chunks in scatter mode")
+            -- Verify no regular cell has has_enemies tag.
+            for idx, chunk in ipairs(result.assignment) do
+                if idx ~= result.deployment_cell then
+                    for _, t in ipairs(chunk.tags) do
+                        luassert.are_not_equal("has_enemies", t,
+                            "cell " .. idx .. " should not have has_enemies tag in scatter mode")
+                    end
+                end
+            end
+        end)
+
+        it("errors when pool only has enemy chunks for regular cells", function()
+            -- enemy-only regular pool: no non-enemy chunk available for scatter mode
+            local pool = {
+                all_exits_chunk("deploy", true),
+                enemy_chunk("enemy_1"),
+                enemy_chunk("enemy_2"),
+            }
+            local rng = random.new(1)
+            luassert.has_error(function()
+                chunk_selector.generate(make_theme(), make_2x2_grid(), pool, rng, "rout", "scatter")
+            end)
+        end)
+    end)
 end)
