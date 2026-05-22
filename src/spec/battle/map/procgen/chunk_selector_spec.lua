@@ -127,6 +127,21 @@ local function north_last_chunk(name)
     }
 end
 
+--- Chunk with exits on all four faces and the "has_enemies" tag.
+---@param name string
+---@return ChunkRecord
+local function enemy_chunk(name)
+    return {
+        name = name, width = 3, height = 3,
+        tags = { "has_enemies" },
+        rows = { "#^^^#", "<...>", "<...>", "<...>", "#vvv#" },
+        exits = {
+            north = { min = 2, max = 4 }, south = { min = 2, max = 4 },
+            east  = { min = 2, max = 4 }, west  = { min = 2, max = 4 },
+        },
+    }
+end
+
 --- Generate a spanning-tree graph for a 2×2 grid.
 ---@param seed integer?
 ---@return ConnectionGraph
@@ -409,6 +424,84 @@ describe("tactics.battle.map.procgen.chunk_selector", function()
             local result, err = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, p)
             luassert.is_nil(result)
             luassert.is_not_nil(err)
+        end)
+    end)
+
+    describe("select with enemy_cells", function()
+        it("assigns enemy chunks to enemy cells and non-enemy chunks to non-enemy cells", function()
+            -- 2x2 grid. Cell 1 = deployment (special, unconstrained). Cells 2,3,4 = regular.
+            -- Cell 2 marked enemy; cells 3,4 non-enemy.
+            -- Pool: one deployment chunk, one enemy chunk, one non-enemy chunk.
+            local pool = {
+                all_exits_chunk("deploy", true),
+                enemy_chunk("enemy"),
+                all_exits_chunk("plain"),
+            }
+            local g = make_2x2_graph()
+            local placement = {
+                deployment_cell = 1,
+                enemy_cells     = { [2] = true },
+            }
+            local rng = random.new(1)
+            local result = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, placement)
+
+            luassert.is_not_nil(result)
+            -- Cell 2 must be the enemy_chunk.
+            local has_enemies_tag = false
+            for _, t in ipairs(result.assignment[2].tags) do
+                if t == "has_enemies" then has_enemies_tag = true end
+            end
+            luassert.is_true(has_enemies_tag, "cell 2 (enemy) should have has_enemies tag")
+            -- Cells 3 and 4 must NOT be the enemy_chunk.
+            for _, idx in ipairs({ 3, 4 }) do
+                for _, t in ipairs(result.assignment[idx].tags) do
+                    luassert.are_not_equal("has_enemies", t,
+                        "cell " .. idx .. " (non-enemy) should not have has_enemies tag")
+                end
+            end
+        end)
+
+        it("returns nil when no non-enemy chunk is available for a non-enemy cell", function()
+            -- Pool only has enemy chunks (and the deployment chunk).
+            -- Non-enemy cells cannot be satisfied.
+            local pool = {
+                all_exits_chunk("deploy", true),
+                enemy_chunk("enemy_1"),
+                enemy_chunk("enemy_2"),
+            }
+            local placement = {
+                deployment_cell = 1,
+                enemy_cells     = {},  -- no enemy cells — all regular cells are non-enemy
+            }
+            local rng = random.new(1)
+            local result, err = chunk_selector.select(make_2x2_grid(), make_2x2_graph(), pool, rng, nil, placement)
+
+            luassert.is_nil(result)
+            luassert.is_not_nil(err)
+        end)
+
+        it("does not constrain special cells on has_enemies", function()
+            -- Deployment cell can use a non-enemy chunk even if enemy_cells is all non-specials.
+            local pool = {
+                all_exits_chunk("deploy", true),
+                enemy_chunk("enemy"),
+            }
+            local g = make_2x2_graph()
+            -- All non-special cells are enemy cells.
+            local n = #g.adjacency
+            local enemy_cells = {}
+            for i = 2, n do enemy_cells[i] = true end
+            local placement = { deployment_cell = 1, enemy_cells = enemy_cells }
+            local rng = random.new(1)
+            local result = chunk_selector.select(make_2x2_grid(), g, pool, rng, nil, placement)
+
+            luassert.is_not_nil(result)
+            -- Deployment cell has deployment tag, not has_enemies.
+            local has_deploy = false
+            for _, t in ipairs(result.assignment[1].tags) do
+                if t == "deployment" then has_deploy = true end
+            end
+            luassert.is_true(has_deploy)
         end)
     end)
 

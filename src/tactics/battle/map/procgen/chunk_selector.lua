@@ -69,6 +69,15 @@ local function get_special_tag(chunk)
     return nil
 end
 
+---@param chunk ChunkRecord
+---@return boolean
+local function chunk_has_enemies(chunk)
+    for _, t in ipairs(chunk.tags) do
+        if t == "has_enemies" then return true end
+    end
+    return false
+end
+
 ---@param idx integer
 ---@param p ProcgenPlacement
 ---@return string?
@@ -82,13 +91,16 @@ end
 --- Filter `chunks` to those valid for a cell with interior dims `cw`×`ch`.
 --- `required_tag` is the special tag required for this cell (nil for regular cells).
 --- Only chunks with exit zones on all `faces` are included.
+--- `has_enemies` applies only to regular cells: nil=no constraint, true=must have has_enemies tag,
+--- false=must not have has_enemies tag.
 ---@param chunks ChunkRecord[]
 ---@param cw integer
 ---@param ch integer
 ---@param required_tag string?
 ---@param faces table<string, true>
+---@param has_enemies boolean?
 ---@return ChunkRecord[]
-local function filter_candidates(chunks, cw, ch, required_tag, faces)
+local function filter_candidates(chunks, cw, ch, required_tag, faces, has_enemies)
     local result = {}
     for _, chunk in ipairs(chunks) do
         if chunk.width == cw and chunk.height == ch then
@@ -96,6 +108,10 @@ local function filter_candidates(chunks, cw, ch, required_tag, faces)
                 local ok = true
                 for face in pairs(faces) do
                     if not chunk.exits[face] then ok = false; break end
+                end
+                -- Apply has_enemies constraint for regular cells only (required_tag == nil).
+                if ok and required_tag == nil then
+                    if chunk_has_enemies(chunk) ~= has_enemies then ok = false end
                 end
                 if ok then table.insert(result, chunk) end
             end
@@ -342,12 +358,24 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges, placement)
         local col = ((idx - 1) % grid_w) + 1
         local row = math.floor((idx - 1) / grid_w) + 1
         local required_tag = cell_required_tag(idx, placement)
+        local has_enemies_flag
+        if required_tag == nil then
+            -- For regular cells, determine if this cell should have enemies.
+            -- If enemy_cells is set, true for cells in the set, false otherwise.
+            -- If enemy_cells is nil, false for all regular cells (backward compatibility).
+            if placement.enemy_cells ~= nil then
+                has_enemies_flag = placement.enemy_cells[idx] == true
+            else
+                has_enemies_flag = false
+            end
+        end
         local candidates = filter_candidates(
             chunks,
             grid.col_widths[col],
             grid.row_heights[row],
             required_tag,
-            all_faces(idx)
+            all_faces(idx),
+            has_enemies_flag
         )
         if #candidates == 0 then
             return nil, "no valid chunk for cell " .. idx
@@ -363,12 +391,22 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges, placement)
             for _, idx in ipairs(bad) do
                 local col = ((idx - 1) % grid_w) + 1
                 local row = math.floor((idx - 1) / grid_w) + 1
+                local rt = cell_required_tag(idx, placement)
+                local hef
+                if rt == nil then
+                    if placement.enemy_cells ~= nil then
+                        hef = placement.enemy_cells[idx] == true
+                    else
+                        hef = false
+                    end
+                end
                 local candidates = filter_candidates(
                     chunks,
                     grid.col_widths[col],
                     grid.row_heights[row],
-                    cell_required_tag(idx, placement),
-                    all_faces(idx)
+                    rt,
+                    all_faces(idx),
+                    hef
                 )
                 if #candidates > 0 then
                     assignment[idx] = rng:choose_random_from_list(candidates)
