@@ -92,6 +92,12 @@ describe("tactics.battle.map.procgen.themes", function()
                 themes.validate(make_theme({ enemy_room_probability = 1 }))
             end)
         end)
+
+        it("rejects a theme missing enemy_room_probability", function()
+            local theme = make_theme()
+            theme.enemy_room_probability = nil
+            luassert.has_error(function() themes.validate(theme) end)
+        end)
     end)
 
     describe("castle theme", function()

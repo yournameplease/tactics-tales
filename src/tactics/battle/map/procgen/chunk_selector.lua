@@ -88,6 +88,15 @@ local function cell_required_tag(idx, p)
     return nil
 end
 
+---@param idx integer
+---@param placement ProcgenPlacement
+---@return boolean?
+local function cell_has_enemies_flag(idx, placement)
+    if cell_required_tag(idx, placement) ~= nil then return nil end
+    if placement.enemy_cells == nil then return false end
+    return placement.enemy_cells[idx] == true
+end
+
 --- Filter `chunks` to those valid for a cell with interior dims `cw`×`ch`.
 --- `required_tag` is the special tag required for this cell (nil for regular cells).
 --- Only chunks with exit zones on all `faces` are included.
@@ -358,17 +367,7 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges, placement)
         local col = ((idx - 1) % grid_w) + 1
         local row = math.floor((idx - 1) / grid_w) + 1
         local required_tag = cell_required_tag(idx, placement)
-        local has_enemies_flag
-        if required_tag == nil then
-            -- For regular cells, determine if this cell should have enemies.
-            -- If enemy_cells is set, true for cells in the set, false otherwise.
-            -- If enemy_cells is nil, false for all regular cells (backward compatibility).
-            if placement.enemy_cells ~= nil then
-                has_enemies_flag = placement.enemy_cells[idx] == true
-            else
-                has_enemies_flag = false
-            end
-        end
+        local has_enemies_flag = cell_has_enemies_flag(idx, placement)
         local candidates = filter_candidates(
             chunks,
             grid.col_widths[col],
@@ -392,14 +391,7 @@ function chunk_selector.select(grid, g, chunks, rng, offscreen_edges, placement)
                 local col = ((idx - 1) % grid_w) + 1
                 local row = math.floor((idx - 1) / grid_w) + 1
                 local rt = cell_required_tag(idx, placement)
-                local hef
-                if rt == nil then
-                    if placement.enemy_cells ~= nil then
-                        hef = placement.enemy_cells[idx] == true
-                    else
-                        hef = false
-                    end
-                end
+                local hef = cell_has_enemies_flag(idx, placement)
                 local candidates = filter_candidates(
                     chunks,
                     grid.col_widths[col],
