@@ -22,6 +22,15 @@ rotate_90 flip_h flip_v
 <...>
 #vvv#
 
+[cave_3x3_enemies]
+rotate_90 flip_h flip_v
+5 5
+#^^^#
+<...>
+<.t.>
+<...>
+#vvv#
+
 [cave_3x3_dummy_escape]
 escape_zone rotate_90 flip_h flip_v
 5 5
@@ -54,6 +63,15 @@ rotate_90 flip_h flip_v
 <....>
 #vvvv#
 
+[cave_4x3_enemies]
+rotate_90 flip_h flip_v
+6 5
+#^^^^#
+<....>
+<.ii.>
+<....>
+#vvvv#
+
 [cave_4x3_dummy_escape]
 escape_zone rotate_90 flip_h flip_v
 6 5
@@ -83,6 +101,16 @@ rotate_90 flip_h flip_v
 <....>
 <....>
 <....>
+<....>
+#vvvv#
+
+[cave_4x4_enemies]
+rotate_90 flip_h flip_v
+6 6
+#^^^^#
+<....>
+<.ir.>
+<.ri.>
 <....>
 #vvvv#
 

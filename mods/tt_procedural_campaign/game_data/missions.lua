@@ -54,15 +54,6 @@ local battles = {
         local meta = include("mods/tt_procedural_campaign/game_data/maps/cavern_fortress_meta.lua")
         return resolver.build_pod_mission(campaign_config, rng_context, map_context, meta)
     end,
-    ["procedural_castle"] = function(campaign_config, rng_context, _map_context)
-        return procgen_resolver.build_procgen_mission(
-            campaign_config,
-            rng_context,
-            "procedural_castle",
-            "mods/tt_procedural_campaign/game_data/chunks/castle.chunks",
-            "kill_boss"
-        )
-    end,
     ["procedural_castle_kill_boss"] = function(campaign_config, rng_context, _map_context)
         return procgen_resolver.build_procgen_mission(
             campaign_config,
@@ -70,14 +61,6 @@ local battles = {
             "procedural_castle_kill_boss",
             "mods/tt_procedural_campaign/game_data/chunks/castle.chunks",
             "kill_boss"
-        )
-    end,
-    ["procedural_cave"] = function(campaign_config, rng_context, _map_context)
-        return procgen_resolver.build_procgen_mission(
-            campaign_config,
-            rng_context,
-            "procedural_cave",
-            "mods/tt_procedural_campaign/game_data/chunks/cave.chunks"
         )
     end,
     ["procedural_cave_escape"] = function(campaign_config, rng_context, _map_context)
