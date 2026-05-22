@@ -65,11 +65,11 @@ function placement.select(g, objective, rng, theme, enemy_distribution)
 
         if objective == "kill_boss" then
             local specials = { [deployment_cell] = true, [end_cell] = true }
-            local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
+            local enemy_cells = not is_scatter and roll_enemy_cells(g, specials, prob, rng) or nil
             return { deployment_cell = deployment_cell, boss_cell = end_cell, enemy_cells = enemy_cells }
         else
             local specials = { [deployment_cell] = true, [end_cell] = true }
-            local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
+            local enemy_cells = not is_scatter and roll_enemy_cells(g, specials, prob, rng) or nil
             return { deployment_cell = deployment_cell, escape_cell = end_cell, enemy_cells = enemy_cells }
         end
 
@@ -103,7 +103,7 @@ function placement.select(g, objective, rng, theme, enemy_distribution)
         sort.by(top)
         local deployment_cell = top[rng:rndi(#top) + 1]
         local specials = { [deployment_cell] = true }
-        local enemy_cells; if is_scatter then enemy_cells = nil else enemy_cells = roll_enemy_cells(g, specials, prob, rng) end
+        local enemy_cells = not is_scatter and roll_enemy_cells(g, specials, prob, rng) or nil
         return { deployment_cell = deployment_cell, enemy_cells = enemy_cells }
 
     else
