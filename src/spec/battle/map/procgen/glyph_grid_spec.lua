@@ -446,4 +446,97 @@ describe("tactics.battle.map.procgen.glyph_grid", function()
             luassert.is_true(found_floor, "expected '.' at y=1 in x=[2..7] for north off-screen exit")
         end)
     end)
+
+    describe("scatter_enemies", function()
+        --- 16×16 rows of all-floor glyphs.
+        local function floor_rows()
+            local rows = {}
+            for i = 1, 16 do rows[i] = string.rep(".", 16) end
+            return rows
+        end
+
+        --- RNG stub that always returns 0 from rndf() (every roll succeeds when prob > 0).
+        local function always_hit_rng()
+            return { rndf = function() return 0 end }
+        end
+
+        --- RNG stub that always returns 1 from rndf() (every roll fails).
+        local function always_miss_rng()
+            return { rndf = function() return 1 end }
+        end
+
+        it("replaces '.' with 'i' in non-special cell interiors at prob=1.0", function()
+            local rows = floor_rows()
+            local gen_result = { placement = { deployment_cell = 1 } }
+            glyph_grid.scatter_enemies(rows, gen_result, make_grid(), 1.0, always_hit_rng())
+
+            -- Cell 1 (special — deployment): interior must remain '.'.
+            luassert.are_equal(".", rows[1]:sub(1, 1), "cell 1 interior x=1,y=1 should stay '.'")
+            luassert.are_equal(".", rows[7]:sub(7, 7), "cell 1 interior x=7,y=7 should stay '.'")
+
+            -- Cell 2 (non-special): interior must be 'i'.
+            luassert.are_equal("i", rows[1]:sub(10, 10), "cell 2 interior x=10,y=1 should be 'i'")
+            luassert.are_equal("i", rows[7]:sub(16, 16), "cell 2 interior x=16,y=7 should be 'i'")
+
+            -- Cell 3 (non-special): interior must be 'i'.
+            luassert.are_equal("i", rows[10]:sub(1, 1), "cell 3 interior x=1,y=10 should be 'i'")
+
+            -- Cell 4 (non-special): interior must be 'i'.
+            luassert.are_equal("i", rows[10]:sub(10, 10), "cell 4 interior x=10,y=10 should be 'i'")
+
+            -- Wall gap tiles (not in any cell interior): must remain '.'.
+            luassert.are_equal(".", rows[1]:sub(8, 8),  "wall gap x=8,y=1 should stay '.'")
+            luassert.are_equal(".", rows[8]:sub(1, 1),  "wall gap x=1,y=8 should stay '.'")
+        end)
+
+        it("makes no changes at prob=0.0", function()
+            local rows = floor_rows()
+            local gen_result = { placement = { deployment_cell = 1 } }
+            glyph_grid.scatter_enemies(rows, gen_result, make_grid(), 0.0, always_hit_rng())
+
+            for y = 1, 16 do
+                luassert.are_equal(string.rep(".", 16), rows[y], "row " .. y .. " should be unchanged")
+            end
+        end)
+
+        it("makes no changes when rng always misses", function()
+            local rows = floor_rows()
+            local gen_result = { placement = { deployment_cell = 1 } }
+            glyph_grid.scatter_enemies(rows, gen_result, make_grid(), 1.0, always_miss_rng())
+
+            for y = 1, 16 do
+                luassert.are_equal(string.rep(".", 16), rows[y], "row " .. y .. " should be unchanged")
+            end
+        end)
+
+        it("does not replace non-'.' glyphs", function()
+            local rows = floor_rows()
+            -- Place a '#' and a 'd' inside cell 2's interior (x=10, x=11, y=2).
+            local r2 = rows[2]
+            rows[2] = r2:sub(1, 9) .. "#d" .. r2:sub(12)
+            local gen_result = { placement = { deployment_cell = 1 } }
+            glyph_grid.scatter_enemies(rows, gen_result, make_grid(), 1.0, always_hit_rng())
+
+            luassert.are_equal("#", rows[2]:sub(10, 10), "# at x=10,y=2 must stay '#'")
+            luassert.are_equal("d", rows[2]:sub(11, 11), "d at x=11,y=2 must stay 'd'")
+        end)
+
+        it("skips boss_cell and escape_cell as special cells", function()
+            local rows = floor_rows()
+            local gen_result = {
+                placement = {
+                    deployment_cell = 1,
+                    boss_cell       = 2,
+                    escape_cell     = 3,
+                }
+            }
+            glyph_grid.scatter_enemies(rows, gen_result, make_grid(), 1.0, always_hit_rng())
+
+            -- Cells 1, 2, 3 are special: interior must remain '.'.
+            luassert.are_equal(".", rows[1]:sub(10, 10), "boss cell 2 interior should stay '.'")
+            luassert.are_equal(".", rows[10]:sub(1, 1),  "escape cell 3 interior should stay '.'")
+            -- Cell 4 is non-special: must be 'i'.
+            luassert.are_equal("i", rows[10]:sub(10, 10), "cell 4 interior should be 'i'")
+        end)
+    end)
 end)
