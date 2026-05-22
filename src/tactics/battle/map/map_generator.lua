@@ -321,14 +321,19 @@ end
 local function load_procgen(definition, gfx_registry, seed)
     local theme = themes_mod[definition.theme]
     assert(theme, "load_procgen: unknown theme '" .. tostring(definition.theme) .. "'")
+    local dist = definition.enemy_distribution
+    assert(dist == nil or dist == "room_based" or dist == "scatter",
+        "load_procgen: unknown enemy_distribution '" .. tostring(dist) .. "'")
     local chunks_raw = chunk_parser.load_theme(definition.chunks)
     local chunks = chunk_variants.expand(chunks_raw)
     local rng = random.new(seed or 1)
     local grid = themes_mod.roll_grid(theme, rng)
-    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, definition.objective, definition.enemy_distribution)
+    local gen_result = chunk_selector.generate(theme, grid, chunks, rng, definition.objective, dist)
     local assembled = glyph_grid_mod.assemble(theme, grid, gen_result, gen_result.offscreen_edges, rng)
-    if definition.enemy_distribution == "scatter" then
+    if dist == "scatter" then
         local prob = definition.scatter_probability or 0.02
+        assert(prob >= 0 and prob <= 1,
+            "load_procgen: scatter_probability must be in [0, 1], got " .. tostring(prob))
         glyph_grid_mod.scatter_enemies(assembled.rows, gen_result, grid, prob, rng)
     end
     local rows = assembled.rows
