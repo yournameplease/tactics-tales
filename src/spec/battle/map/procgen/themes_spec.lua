@@ -24,6 +24,7 @@ local function make_theme(opts)
         exit_width_weights = { [1] = 1 },
         extra_edge_probability = 0,
         off_screen_edge_probability = 0,
+        enemy_room_probability = 0.4,
     }
     for k, v in pairs(opts or {}) do t[k] = v end
     return t
@@ -72,6 +73,24 @@ describe("tactics.battle.map.procgen.themes", function()
                 distributions = { [3] = { { 3, 4, 3, 0 } }, [2] = { { 6, 6 } } },
             })
             luassert.has_error(function() themes.validate(theme) end)
+        end)
+
+        it("rejects enemy_room_probability outside [0, 1]", function()
+            luassert.has_error(function()
+                themes.validate(make_theme({ enemy_room_probability = 1.5 }))
+            end)
+            luassert.has_error(function()
+                themes.validate(make_theme({ enemy_room_probability = -0.1 }))
+            end)
+        end)
+
+        it("accepts enemy_room_probability of 0 and 1", function()
+            luassert.has_no.errors(function()
+                themes.validate(make_theme({ enemy_room_probability = 0 }))
+            end)
+            luassert.has_no.errors(function()
+                themes.validate(make_theme({ enemy_room_probability = 1 }))
+            end)
         end)
     end)
 
