@@ -11,6 +11,7 @@
 ---@field extra_edge_probability number Per-pair probability of adding an edge beyond the spanning tree.
 ---@field off_screen_edge_probability number Per-border-face probability of adding an off-screen exit. Range [0, 1].
 ---@field target_deployment_distance integer? BFS distance from objective cell to target for player spawn; falls back to max if unreachable.
+---@field enemy_room_probability number  Per-cell probability a non-special room gets enemies. Range [0, 1].
 
 local MAP_SIZE = 16
 
@@ -52,6 +53,10 @@ function themes.validate(theme)
     assert(
         theme.off_screen_edge_probability >= 0 and theme.off_screen_edge_probability <= 1,
         "off_screen_edge_probability must be in [0, 1]"
+    )
+    assert(
+        theme.enemy_room_probability >= 0 and theme.enemy_room_probability <= 1,
+        "enemy_room_probability must be in [0, 1]"
     )
     for n, dists in pairs(theme.distributions) do
         for i, dist in ipairs(dists) do
@@ -142,6 +147,7 @@ themes.castle = {
     extra_edge_probability = 0.2,
     off_screen_edge_probability = 0.15,
     target_deployment_distance = 5,
+    enemy_room_probability = 0.4,
 }
 
 themes.cave = {
@@ -157,6 +163,7 @@ themes.cave = {
     extra_edge_probability = 0.35,
     off_screen_edge_probability = 0.25,
     target_deployment_distance = 5,
+    enemy_room_probability = 0.4,
 }
 
 themes.validate(themes.castle)
