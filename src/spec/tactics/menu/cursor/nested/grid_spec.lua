@@ -137,6 +137,7 @@ describe("tactics.menu.cursor.nested.grid", function()
 
     it("should extend path when moving in grid with pathfinding configured", function()
         local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
+        local pathfinding = require("src.tactics.battle.pathfinding")
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
@@ -144,11 +145,15 @@ describe("tactics.menu.cursor.nested.grid", function()
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 16, 16)
                         :with_common_child(button.builder("common_btn"))
-                        :with_path_anchor(function(_gc, _mc)
-                            return point.of(0, 0)
-                        end)
-                        :with_path_length(function(_gc, _mc)
-                            return 5
+                        :with_on_move(function(g, _gc, _mc)
+                            g.path = { point.of(0, 0) }
+                            return function(grid_node)
+                                if grid_node.legal_tiles
+                                    and grid_node.legal_tiles:get(grid_node.point.x, grid_node.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
+                                    local tiles = grid_node.legal_tiles & HIGHLIGHT.IS_VALID >> 1
+                                    grid_node.path = pathfinding.extend_path_to_point(grid_node.path, grid_node.point, 5, tiles)
+                                end
+                            end
                         end)
                         :with_tile_highlights(function(_gc, _mc)
                             local tiles = userdata("u8", 16, 16)
@@ -181,6 +186,8 @@ describe("tactics.menu.cursor.nested.grid", function()
     end)
 
     it("should serialize and deserialize point and path", function()
+        local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
+        local pathfinding = require("src.tactics.battle.pathfinding")
         local menu_defs = {
             ["TEST_MENU"] = {
                 initial_step = "STEP_1",
@@ -188,11 +195,15 @@ describe("tactics.menu.cursor.nested.grid", function()
                     ["STEP_1"] = menu_manager.definition.step.of_node(
                         grid.grid("test_grid", 16, 16)
                         :with_common_child(button.builder("common_btn"))
-                        :with_path_anchor(function(_gc, _mc)
-                            return point.of(0, 0)
-                        end)
-                        :with_path_length(function(_gc, _mc)
-                            return 5
+                        :with_on_move(function(g, _gc, _mc)
+                            g.path = { point.of(0, 0) }
+                            return function(grid_node)
+                                if grid_node.legal_tiles
+                                    and grid_node.legal_tiles:get(grid_node.point.x, grid_node.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
+                                    local tiles = grid_node.legal_tiles & HIGHLIGHT.IS_VALID >> 1
+                                    grid_node.path = pathfinding.extend_path_to_point(grid_node.path, grid_node.point, 5, tiles)
+                                end
+                            end
                         end)
                         :with_tile_highlights(function(_gc, _mc)
                             local tiles = userdata("u8", 16, 16)

@@ -900,13 +900,17 @@ local function make_menu_data(map_width, map_height)
                             :advance_to("CONFIRM_INTERACTION")
                         )
                         :with_tile_highlights(get_tile_highlights_in_move_and_attack_range)
-                        :with_path_length(function(_msb, ctx)
+                        :with_on_move(function(g, _msb, ctx)
                             ---@cast ctx BattleMainMenuContext
-                            return ctx.acting_unit.unit.character.stats.movement
-                        end)
-                        :with_path_anchor(function(_msb, ctx)
-                            ---@cast ctx BattleMainMenuContext
-                            return ctx.acting_unit.point:copy()
+                            g.path = { ctx.acting_unit.point:copy() }
+                            local max_length = ctx.acting_unit.unit.character.stats.movement
+                            return function(grid_node)
+                                if grid_node.legal_tiles
+                                    and grid_node.legal_tiles:get(grid_node.point.x, grid_node.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
+                                    local tiles = grid_node.legal_tiles & HIGHLIGHT.IS_VALID >> 1
+                                    grid_node.path = pathfinding.extend_path_to_point(grid_node.path, grid_node.point, max_length, tiles)
+                                end
+                            end
                         end)
                         :with_initial_point(function(services, _ctx)
                             ---@cast services BattleMenuContext
@@ -996,13 +1000,17 @@ local function make_menu_data(map_width, map_height)
                             return msb.tactics_engine:tiles_with_distance_from_unit_attacks(ctx.acting_unit.unit,
                                 ctx.destination.point)
                         end)
-                        :with_path_length(function(_msb, ctx)
+                        :with_on_move(function(g, _msb, ctx)
                             ---@cast ctx BattleMainMenuContext
-                            return ctx.acting_unit.unit.character.stats.movement
-                        end)
-                        :with_path_anchor(function(_msb, ctx)
-                            ---@cast ctx BattleMainMenuContext
-                            return ctx.acting_unit.point:copy()
+                            g.path = { ctx.acting_unit.point:copy() }
+                            local max_length = ctx.acting_unit.unit.character.stats.movement
+                            return function(grid_node)
+                                if grid_node.legal_tiles
+                                    and grid_node.legal_tiles:get(grid_node.point.x, grid_node.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
+                                    local tiles = grid_node.legal_tiles & HIGHLIGHT.IS_VALID >> 1
+                                    grid_node.path = pathfinding.extend_path_to_point(grid_node.path, grid_node.point, max_length, tiles)
+                                end
+                            end
                         end)
                         :with_initial_point(function(services, _ctx)
                             ---@cast services BattleMenuContext
