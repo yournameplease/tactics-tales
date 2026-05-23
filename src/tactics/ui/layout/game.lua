@@ -5,8 +5,9 @@ local book = require("src.tactics.ui.decoration.book")
 local menu = require("src.tactics.ui.components.menu")
 local box = require("src.tactics.ui.box")
 local control_hints = require("src.tactics.ui.panels.control_hints")
+require("src.tactics.ui.layout.types")
 
----@type table<UILayoutId, UILayout>
+---@type table<TacticsLayoutId, UILayout>
 local layouts = {}
 
 local left = book.flex_page()

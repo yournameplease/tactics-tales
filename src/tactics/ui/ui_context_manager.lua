@@ -7,12 +7,13 @@ local battle_ui_context = require("src.tactics.battle.battle_ui_context")
 local campaign_ui_context = require("src.tactics.campaign.campaign_ui_context")
 local game_ui_context = require("src.tactics.game.game_ui_context")
 require("src.tactics.ui.types")
+require("src.tactics.ui.layout.types")
 
 ---@class UIContextManager
 ---@field battle_context? BattleUIContext
 ---@field campaign_context? CampaignUIContext
 ---@field game_context? GameUIContext
----@field layout UILayoutId
+---@field layout TacticsLayoutId
 local UIContextManager = {}
 UIContextManager.__index = UIContextManager
 

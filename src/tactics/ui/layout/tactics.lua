@@ -7,8 +7,9 @@ local control_hints = require("src.tactics.ui.panels.control_hints")
 
 local book = require("src.tactics.ui.decoration.book")
 local tactics_modal = require("src.tactics.ui.modal.tactics")
+require("src.tactics.ui.layout.types")
 
----@type table<UILayoutId, UILayout>
+---@type table<TacticsLayoutId, UILayout>
 local layouts = {}
 
 local battle_summary = battle.battle_summary()
