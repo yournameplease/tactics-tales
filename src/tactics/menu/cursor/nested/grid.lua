@@ -2,7 +2,6 @@
 --- Implements a menu cursor for navigating a 2D grid, used for
 --- selecting tiles on the battle map.
 
-local HIGHLIGHT = require("src.tactics.constants").HIGHLIGHT
 local fp = require("src.tactics.util.fp")
 local lists = require("src.tactics.util.lists")
 local maps = require("src.tactics.util.maps")
@@ -10,7 +9,6 @@ local menu_cursor = require("src.tactics.menu.menu_cursor")
 local menu_signal = menu_cursor.menu_signal
 local point = require("src.tactics.util.point")
 local array_2d = require("src.tactics.util.array_2d")
-local pathfinding = require("src.tactics.battle.pathfinding")
 
 ---@class NestedGridValue
 ---@field point Point
@@ -25,13 +23,13 @@ local pathfinding = require("src.tactics.battle.pathfinding")
 ---@field point Point Current cursor position (0-indexed).
 ---@field x_max integer Grid width in tiles.
 ---@field y_max integer Grid height in tiles.
----@field path Point[]? Pathfinding path from the anchor to the cursor position.
+---@field path Point[]? Opaque path field, managed by the on_move hook if any.
 ---@field legal_tiles? userdata_2d Userdata bitmask of valid and reachable tiles.
----@field max_path_length? integer Maximum allowed path length.
 ---@field children NestedGridChild[]
 ---@field text_array? Array2D Per-tile text overlay computed by text_function.
 ---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
 ---@field on_change? string Handler ID emitted when cursor moves to a new tile.
+---@field on_move? fun(grid: NestedGridNode) Called from move_cursor after the cursor moves.
 local NestedGridNode = {}
 NestedGridNode.__index = NestedGridNode
 
@@ -48,9 +46,8 @@ NestedGridChildDefinition.__index = NestedGridChildDefinition
 ---@field children NestedGridChildDefinition[]
 ---@field text_function (fun(p: Point, game_ctx: GameContext, menu_ctx: MenuContext): string)?
 ---@field get_tile_highlights (fun(game_ctx: GameContext, menu_ctx: MenuContext): userdata_2d)?
----@field get_path_anchor (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
----@field get_max_path_length (fun(game_ctx: GameContext, menu_ctx: MenuContext): integer)?
 ---@field get_initial_point (fun(game_ctx: GameContext, menu_ctx: MenuContext): Point)?
+---@field make_on_move (fun(grid: NestedGridNode, game_ctx: GameContext, menu_ctx: MenuContext): fun(grid: NestedGridNode))?
 ---@field on_change? string Handler ID emitted when cursor moves to a new tile.
 local NestedGridDefinition = {}
 NestedGridDefinition.__index = NestedGridDefinition
@@ -131,7 +128,7 @@ function NestedGridNode:get_nested_grid_value()
     }
 end
 
---- Move the cursor to p (clamped to bounds) and update the path if pathfinding is active.
+--- Move the cursor to p (clamped to bounds), invoking on_move if the position changed.
 ---@param p Point Desired destination.
 ---@return boolean moved True when the cursor position actually changed.
 function NestedGridNode:move_cursor(p)
@@ -139,11 +136,8 @@ function NestedGridNode:move_cursor(p)
     self.point.x = math.max(0, math.min(p.x, self.x_max - 1))
     self.point.y = math.max(0, math.min(p.y, self.y_max - 1))
 
-    if self.legal_tiles and self.path and self.point ~= prev_point then
-        if self.legal_tiles:get(self.point.x, self.point.y) & HIGHLIGHT.IS_VALID ~= 0 then
-            local tiles = self.legal_tiles & HIGHLIGHT.IS_VALID >> 1
-            self.path = pathfinding.extend_path_to_point(self.path, self.point, self.max_path_length, tiles)
-        end
+    if self.on_move and self.point ~= prev_point then
+        self.on_move(self)
     end
 
     return self.point ~= prev_point
@@ -350,17 +344,6 @@ function NestedGridDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
 
     if self.get_tile_highlights ~= nil then
         cursor.legal_tiles = self.get_tile_highlights(game_ctx, menu_ctx)
-        if self.get_max_path_length ~= nil then
-            cursor.max_path_length = self.get_max_path_length(game_ctx, menu_ctx)
-            if self.get_path_anchor then
-                cursor.path = { self.get_path_anchor(game_ctx, menu_ctx) }
-            else
-                error("need path anchor!")
-            end
-        else
-            cursor.path = nil
-            cursor.max_path_length = nil
-        end
     else
         cursor.legal_tiles = nil
     end
@@ -373,6 +356,10 @@ function NestedGridDefinition:to_cursor(parent, game_ctx, menu_ctx, menu_state)
             return self[k]
         end
     })
+
+    if self.make_on_move then
+        cursor.on_move = self.make_on_move(cursor, game_ctx, menu_ctx)
+    end
 
     if self.get_initial_point then
         local initial_point = self.get_initial_point(game_ctx, menu_ctx)
@@ -444,19 +431,13 @@ function NestedGridDefinition:with_text_function(text_function)
     return self
 end
 
---- Set a function that returns the maximum allowed path length.
----@param get_max_path_length fun(game_ctx: GameContext, menu_ctx: MenuContext): integer
+--- Install an on_move hook that runs whenever the cursor moves to a new tile.
+--- The factory is called once at cursor construction with the cursor and contexts,
+--- letting it initialize cursor state (e.g. an opaque path) and return the per-move callback.
+---@param make_on_move fun(grid: NestedGridNode, game_ctx: GameContext, menu_ctx: MenuContext): fun(grid: NestedGridNode)
 ---@return NestedGridDefinition
-function NestedGridDefinition:with_path_length(get_max_path_length)
-    self.get_max_path_length = get_max_path_length
-    return self
-end
-
---- Set a function that returns the path anchor (starting tile for pathfinding).
----@param get_path_anchor fun(game_ctx: GameContext, menu_ctx: MenuContext): Point
----@return NestedGridDefinition
-function NestedGridDefinition:with_path_anchor(get_path_anchor)
-    self.get_path_anchor = get_path_anchor
+function NestedGridDefinition:with_on_move(make_on_move)
+    self.make_on_move = make_on_move
     return self
 end
 
