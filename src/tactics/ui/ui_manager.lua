@@ -2,14 +2,9 @@
 --- The main UI manager, responsible for calculating layouts and drawing
 --- the current UI based on the active layout and context.
 
-local maps = require("src.tactics.util.maps")
 local draw_target_manager = require("src.tactics.draw.draw_target_manager")
 local box = require("src.tactics.ui.box")
 local menu_validator = require("src.tactics.ui.validator")
-local tactics_layouts = require("src.tactics.ui.layout.tactics")
-local game_layouts = require("src.tactics.ui.layout.game")
-local campaign_page = require("src.tactics.ui.layout.campaign_page")
-local title_screen = require("src.tactics.ui.layout.title_screen")
 
 ---@class UIManager
 ---@field layouts table<UILayoutId, UILayout> Map of layout ID to layout definition.
@@ -24,25 +19,23 @@ local ui_manager = {
     UIManager = UIManager
 }
 
---- Construct a new UIManager, registering all layouts and initialising the theme.
+--- Construct a new UIManager from a game-supplied layout registry.
+---@param layouts table<UILayoutId, UILayout> Map of layout ID to layout definition.
+---@param initial_layout_id? UILayoutId Layout to activate at startup.
 ---@return UIManager
-function ui_manager.new()
+function ui_manager.new(layouts, initial_layout_id)
     ---@type UIManager
     local self = setmetatable({}, UIManager)
 
-    self.layouts = {}
+    self.layouts = layouts
 
-    maps.add_all(self.layouts, tactics_layouts)
-    maps.add_all(self.layouts, game_layouts)
-    self.layouts["CAMPAIGN_PAGE"] = campaign_page
-    self.layouts["TITLE_SCREEN"] = title_screen
-
-    -- Validate layouts
     for id, v in pairs(self.layouts) do
         menu_validator.validate(v.root, id)
     end
 
-    self.current_layout = self.layouts.TACTICS
+    if initial_layout_id then
+        self.current_layout = self.layouts[initial_layout_id]
+    end
 
     self.theme = {
         COLOR_DECORATION_PRIMARY = 4,
