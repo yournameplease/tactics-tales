@@ -1,6 +1,8 @@
 ---@brief
 --- Provides the UI context for the main game menus.
 
+require("src.tactics.ui.layout.types")
+
 ---@class GameUIContext : UIContext
 ---@field type UIContextType
 ---@field input_service InputService
@@ -8,7 +10,7 @@
 ---@field event_bus EventBus
 ---@field menu_title string
 ---@field input_method InputMethod
----@field layout UILayoutId
+---@field layout TacticsLayoutId
 local GameUIContext = {}
 GameUIContext.__index = GameUIContext
 
