@@ -26,3 +26,7 @@ make test       # build and run all tests (unit + integration)
 make ut         # build and run unit tests only (excludes --tags='it')
 make it         # build and run integration tests only (--tags='it')
 ```
+
+## AI Usage Notice
+
+This project was made using AI assisted coding.  In accordance with BBS policy, do not post derivatives of this to the Lexaloffle BBS.
