@@ -283,15 +283,15 @@ local function draw_tactics_map(
     -- clip(0, self.rect.c_y, clip_w, clip_h)
     map(layer_ground, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
-    local checkerboard_layer = userdata("i16", state.battle_context.battle_map.width,
-        state.battle_context.battle_map.height)
-    for x = 0, battle_map.width do
-        for y = x % 2, battle_map.height, 2 do
-            checkerboard_layer:set(x, y, 192)
-        end
-    end
-    colors.apply_colortable_row("dark")
-    map(checkerboard_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
+    -- local checkerboard_layer = userdata("i16", state.battle_context.battle_map.width,
+    --     state.battle_context.battle_map.height)
+    -- for x = 0, battle_map.width do
+    --     for y = x % 2, battle_map.height, 2 do
+    --         checkerboard_layer:set(x, y, 192)
+    --     end
+    -- end
+    -- colors.apply_colortable_row("dark")
+    -- map(checkerboard_layer, tile_ox, tile_oy, px, py, draw_w, draw_h, nil, TILE_SIZE.x, TILE_SIZE.y)
 
 
     for _, decoration_layer in ipairs(layers.decorations or {}) do
