@@ -6,7 +6,12 @@ Picotron Tactics game.  Written in Lua.
 
 The game is designed to be moddable.  `mods/` contains mods as Lua files.  `mods/base/` is the base game data, which includes helpful utilities for mods to build off of.
 
-## Compilation
+## Installation
+
+The game assumes it will be placed in `/desktop/projects/tactics`.
+If you install elsewhere, update the three `cp` lines in `tactics.p64/main.lua` to point to your chosen path.
+
+## Testing (Optional)
 
 Install necessary dependencies:
 
@@ -17,9 +22,7 @@ Install necessary dependencies:
 Use the makefile to test:
 
 ```bash
-make all        # clean, build, and test
 make test       # build and run all tests (unit + integration)
 make ut         # build and run unit tests only (excludes --tags='it')
 make it         # build and run integration tests only (--tags='it')
-make clean      # remove build/ artifacts
 ```

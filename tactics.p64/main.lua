@@ -16,13 +16,9 @@ function require(name)
 end
 
 DATP = ""
-	--DATP = "tactics.p64/"
---if not fetch "build/main.lua" then
-	cp("/desktop/projects/tactics/src/tactics", "src/tactics")
-	cp("/desktop/projects/tactics/lib", "lib")
- 	cp("/desktop/projects/tactics/mods", "mods")
-	--DATP = "tactics.p64/"
---end
+cp("/desktop/projects/tactics/src/tactics", "src/tactics")
+cp("/desktop/projects/tactics/lib", "lib")
+cp("/desktop/projects/tactics/mods", "mods")
 
 include "lib/profiler.lua"
 
